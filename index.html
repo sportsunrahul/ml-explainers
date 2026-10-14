@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ML Explainers</title>
+<meta name="description" content="Intuition-first, interactive explainers of machine learning ideas, from CLIP and transformers to diffusion, state-space models and anomaly detection.">
+<style>
+:root{--bg:#16181d;--fg:#e8e6e3;--muted:#9aa0a6;--rule:#2a2d34;--panel:#1d2026;--hl:#58c4dd;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme: light){:root{--bg:#fbfaf7;--fg:#1d1f24;--muted:#5f6670;--rule:#e2dfd8;--panel:#f2f0eb;--hl:#1f7a99}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.5}
+main{max-width:960px;margin:0 auto;padding:56px 16px 72px}
+h1{font-size:clamp(28px,5vw,40px);margin:0 0 8px;letter-spacing:-.01em}
+.lede{color:var(--muted);margin:0 0 40px;max-width:60ch}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:40px 0 14px;font-weight:600}
+ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+li{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+li a.main{color:var(--fg);font-weight:600;font-size:17px;text-decoration:none}
+li a.main:hover{color:var(--hl)}
+li p{margin:0;color:var(--muted);font-size:14px}
+li .extra{font-size:14px;margin-top:auto;padding-top:4px}
+li .extra a{color:var(--hl);text-decoration:none}
+li .extra a:hover{text-decoration:underline}
+a:focus-visible{outline:3px solid var(--hl);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+<main>
+<h1>ML Explainers</h1>
+<p class="lede">Intuition-first, interactive explainers of machine learning ideas. Each survey has a long-form explainer, and some also have an atlas: a short guided tour with no narration.</p>
+
+<h2>Surveys</h2>
+<ul>
+<li><a class="main" href="vlm-survey/explainer.html">Vision-Language Models, Intuition First</a><p>From ViT and CLIP through Flamingo, BLIP-2, LLaVA and Qwen2-VL.</p></li>
+<li><a class="main" href="contrastive-survey/explainer.html">Learning by comparing</a><p>Contrastive learning for vision: InfoNCE, MoCo, SimCLR, alignment and uniformity.</p></li>
+<li><a class="main" href="jepa-survey/explainer.html">JEPA, intuition first</a><p>Joint-embedding predictive architectures, from the energy-based framing onward.</p><span class="extra"><a href="jepa-survey/jepa-atlas.html">Atlas</a></span></li>
+<li><a class="main" href="diffusion-survey/explainer.html">Diffusion Models, Intuition First</a><p>From DDPM through score SDEs, DDIM, EDM and guidance.</p></li>
+<li><a class="main" href="ssm-survey/explainer.html">State-space models, intuition first</a><p>Linear recurrences, continuous time and HiPPO, as an alternative to attention.</p><span class="extra"><a href="ssm-survey/ssm-atlas.html">Atlas</a></span></li>
+<li><a class="main" href="detr-family/explainer.html">The DETR Family</a><p>DETR, Deformable DETR, DAB-DETR, DN-DETR, DINO, RT-DETR and RF-DETR.</p></li>
+<li><a class="main" href="ovd-survey/explainer.html">Detectors that read</a><p>Open-vocabulary and grounded object detection: what a text encoder adds.</p><span class="extra"><a href="ovd-survey/ovd-atlas.html">Atlas</a></span></li>
+<li><a class="main" href="sam-survey/explainer.html">Segment Anything, the journey</a><p>Promptable segmentation, from FCN and Mask2Former to SAM.</p><span class="extra"><a href="sam-survey/sam-atlas.html">Atlas</a></span></li>
+<li><a class="main" href="anomaly-survey/explainer.html">Defects you have never seen</a><p>Industrial visual anomaly detection with almost no defect images.</p><span class="extra"><a href="anomaly-survey/anomaly-atlas.html">Atlas</a></span></li>
+<li><a class="main" href="compression-survey/explainer.html">Compressing vision models</a><p>Distillation, integer quantization, calibration and QAT for GPU inference.</p><span class="extra"><a href="compression-survey/atlas.html">Atlas</a></span></li>
+<li><a class="main" href="hitl-data-survey/explainer.html">Labels in the loop</a><p>Human-in-the-loop data work: which images to label, and how to train on noisy labels.</p><span class="extra"><a href="hitl-data-survey/hitl-atlas.html">Atlas</a></span></li>
+</ul>
+
+<h2>Explained in 3D</h2>
+<ul>
+<li><a class="main" href="transformers/Transformers%20and%20LLMs%2C%20explained%20in%203D.html">Transformers and LLMs</a></li>
+<li><a class="main" href="clip/How%20CLIP%20works%2C%20explained%20in%203D.html">How CLIP works</a></li>
+<li><a class="main" href="dino/dino-explained.html">DINO, DINOv2 and DINOv3</a></li>
+<li><a class="main" href="seeing-tokens/Seeing%20in%20tokens_%20visual%20tokenizers%20and%20VLMs.html">Seeing in tokens: visual tokenizers and VLMs</a></li>
+<li><a class="main" href="post-training/Post-training%20and%20alignment%2C%20explained%20in%203D.html">Post-training and alignment</a></li>
+<li><a class="main" href="world-models/World%20models%20and%20video%20generation%2C%20explained%20in%203D.html">World models and video generation</a></li>
+</ul>
+</main>
+</body>
+</html>
