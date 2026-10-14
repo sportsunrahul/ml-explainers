@@ -1,0 +1,86 @@
+<section id="ch-map" class="chapter">
+<h2>The field in numbers</h2>
+<p>Both questions are active research areas, and both grew quickly after deep networks made labels the bottleneck.</p>
+
+<figure class="viz" id="viz-map" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="map-canvas" role="img" aria-label="Two lines of arXiv papers per month from 2015 to October 2026, one for active learning and one for noisy labels, both rising from a few per month to about thirty. Beside them, bars of how many titles mention each of five topic keywords."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-map-both" aria-pressed="true">Both</button>
+    <button type="button" id="btn-map-al" aria-pressed="false">Active learning</button>
+    <button type="button" id="btn-map-noise" aria-pressed="false">Noisy labels</button>
+    <button type="button" id="btn-map-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="map-readout" aria-live="polite"></p>
+  <figcaption>Computed from two arXiv API queries run on 9 October 2026 over cs.LG, cs.CV, cs.AI and stat.ML: titles or abstracts containing "active learning", and titles or abstracts containing "noisy label(s)", "label noise", "label errors" or "mislabeled". The keyword bars are a heuristic over titles only. Papers that use these ideas without the words are missing.</figcaption>
+</figure>
+
+<p>The active-learning query returns <span data-claim="scan-active-learning-n">3,179</span> records, from <span data-claim="scan-active-learning-2020">287</span> in 2020 to <span data-claim="scan-active-learning-2025">397</span> in 2025. The noisy-label query returns <span data-claim="scan-label-noise-n">2,729</span>, from <span data-claim="scan-label-noise-2020">269</span> in 2020 to <span data-claim="scan-label-noise-2025">391</span> in 2025. Only <span data-claim="scan-overlap">66</span> papers fall in both, although the two questions meet in every real labeling loop; chapter 12's active label cleaning is one of the few that joins them on purpose.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>When you read a new paper in either area, check three things before you adopt it: the strength of its random or plain-training baseline, whether its noise is synthetic or human, and whether it picked its reported epoch on the test set.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('map-readout');
+  const f = FIG.map(document.getElementById('map-canvas'), { say: t => out.textContent = t });
+  const bs = ['both', 'al', 'noise'].map(k => document.getElementById('btn-map-' + k));
+  bs.forEach(b => b.addEventListener('click', () => { KIT.press(bs, b); f.query(b.id.replace('btn-map-', '')); }));
+  document.getElementById('btn-map-reset').addEventListener('click', () => { KIT.press(bs, bs[0]); f.reset(); });
+})();
+</script>
+</section>
+
+<section id="ch-family" class="chapter">
+<h2>Family tree</h2>
+<p>Each line is one paper and the change it made to its predecessor. Dates are first arXiv submissions, except Settles (2009 technical report).</p>
+<h3>Choosing what to label</h3>
+<ul>
+<li><b>1994, Lewis and Gale</b>: label the examples whose probability is closest to 0.5 (uncertainty sampling).</li>
+<li><b>2009, Settles</b>: the survey that names least confidence, margin and entropy, and warns that actively chosen sets are biased.</li>
+<li><b>2011, Houlsby et al.</b>: BALD, information gain about the model, written in label space.</li>
+<li><b>2015, Gal and Ghahramani</b>: dropout at test time samples from an approximate posterior.</li>
+<li><b>2017, Gal, Islam and Ghahramani</b>: BALD and friends on image CNNs through MC dropout.</li>
+<li><b>2017, Sener and Savarese</b>: core-sets; fill a batch to cover feature space (k-Center).</li>
+<li><b>2019, Kirsch et al. (BatchBALD)</b>: score the batch jointly. <b>Ash et al. (BADGE)</b>: gradient embeddings plus k-means++ seeding, uncertainty and diversity in one. <b>Sinha et al. (VAAL)</b> and <b>Yoo and Kweon (learning loss)</b>: task-agnostic selectors.</li>
+<li><b>2019 to 2023, Mittal et al., Munjal et al., Beck et al., Lüth et al.</b>: fair re-runs; strong baselines shrink the gains.</li>
+<li><b>2021, Kirsch et al.</b>: sample the batch from the scores instead of taking the top-k.</li>
+<li><b>2022, Hacohen, Dekel and Weinshall (TypiClust)</b> and <b>Yehuda et al. (ProbCover)</b>: at tiny budgets, label typical images.</li>
+</ul>
+<h3>Training when labels are wrong</h3>
+<ul>
+<li><b>2016, Zhang et al.</b>: networks fit random labels.</li>
+<li><b>2016, Patrini et al.</b>: correct the loss with an estimated noise transition matrix.</li>
+<li><b>2017, Arpit et al.</b>: clean patterns are learned before noise is memorized.</li>
+<li><b>2017, Jiang et al. (MentorNet)</b>: a learned curriculum picks the samples to train on. <b>2018, Han et al. (Co-teaching)</b>: two networks pick small-loss samples for each other. <b>2018, Zhang and Sabuncu</b>: a robust loss (generalized cross-entropy).</li>
+<li><b>2019, Yu et al. (Co-teaching+)</b>: keep only the samples where the two networks disagree, then exchange small-loss picks among them. <b>Berthelot et al. (MixMatch)</b>: the semi-supervised recipe DivideMix builds on.</li>
+<li><b>2019, Northcutt, Jiang and Chuang (confident learning)</b>: count, rank and prune with per-class thresholds.</li>
+<li><b>2020, Li, Socher and Hoi (DivideMix)</b>: a two-bump fit on the loss, then semi-supervised learning on the doubted part. <b>Liu et al. (ELR)</b>: regularize toward early predictions; report with a validation set.</li>
+<li><b>2020 to 2021, Beyer et al., Yun et al.</b>: ImageNet relabeled with multi-label and localized labels. <b>Northcutt, Athalye and Mueller</b>: label errors in ten test sets. <b>Wei et al. (CIFAR-N)</b>: real human noise on CIFAR.</li>
+<li><b>2021, Bernhardt et al.</b>: active label cleaning; order re-annotation by noisiness minus ambiguity. <b>2022, Goh, Tkachenko and Mueller (CROWDLAB)</b>: combine several annotators with a model.</li>
+</ul>
+</section>
+
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>A label is the scarce input of a vision loop, and two decisions decide what it buys. To choose what to label, ask about the images the model is unsure of, but only after it has seen a few labels per class (before that, label typical images); skip images that are ambiguous to everyone (BALD tells them apart); spread each batch instead of taking near-copies; and keep a random, carefully checked slice to measure accuracy, because random sampling with a well-tuned model is a hard baseline and a selected set is a biased one. To train when labels are wrong, use the fact that networks learn the consistent pattern before the exceptions: out-of-sample probabilities find suspect labels (confident learning), small-loss selection with two networks trains through the noise (Co-teaching), and a two-bump split keeps the doubted images as unlabeled data (DivideMix). Real datasets, test sets included, carry errors, so check the evaluation labels first and order the review queue by how wrong a label looks.</p>
+</section>
+
+<section id="ch-deeper" class="chapter deeper">
+<h2>Where to go deeper</h2>
+<ul>
+<li>Uncertainty scores: Settles (2009), Sec. 3.1; the caveats in Sec. 4.1 and 6.</li>
+<li>BALD: Gal, Islam and Ghahramani (2017), Sec. 4 and Table 1; Houlsby et al. (2011), Eq. 2; MC dropout in Gal and Ghahramani (2016), Eq. 6.</li>
+<li>Core-sets: Sener and Savarese (2018), Eq. 5, Theorem 1 and Algorithm 1; BADGE (Ash et al. 2020), Fig. 4.</li>
+<li>Fair baselines: Munjal et al. (2022), Tables 3 and 4 and Sec. 6; TypiClust (Hacohen et al. 2022), Sec. 2 (Eq. 2, Theorem 1) and Eq. 4.</li>
+<li>Memorization: Zhang et al. (2017), Sec. 2 and Table 1; Arpit et al. (2017), Sec. 4 and 5.</li>
+<li>Test-set errors: Northcutt, Athalye and Mueller (2021), Table 1, Sec. 5 and Table S1.</li>
+<li>Confident learning: Northcutt, Jiang and Chuang (2021), Sec. 3 (Eqs. 1 to 3), Tables 2 and 4.</li>
+<li>Co-teaching: Han et al. (2018), Algorithm 1 and Table 5.</li>
+<li>DivideMix: Li, Socher and Hoi (2020), Sec. 3 (Eqs. 1 to 12), Tables 1 and 2.</li>
+<li>Active label cleaning: Bernhardt et al. (2022), Eq. 2, Fig. 3 and Table 3.</li>
+<li>Our runs: <code>job/run_noise.py</code> (training), <code>build/prep_runA.py</code> and <code>build/prep_runBC.py</code> (figures and numbers).</li>
+</ul>
+</section>

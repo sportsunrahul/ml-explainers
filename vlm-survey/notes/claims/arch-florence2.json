@@ -1,0 +1,263 @@
+[
+ {
+  "id": "florence2-arch-davit",
+  "claim": "Vision encoder",
+  "value": "DaViT",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Vision encoder",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-vtokens",
+  "claim": "Vision encoder output",
+  "value": "flattened visual token embeddings",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Vision encoder",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-proj",
+  "claim": "Dimensionality alignment of visual tokens",
+  "value": "a linear projection and LayerNorm layer",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Multi-modality encoder decoder",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-concat",
+  "claim": "Encoder input",
+  "value": "X = [V', T_prompt]",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Multi-modality encoder decoder (typeset with bold X, V', T_prompt)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-wordemb",
+  "claim": "Prompt embeddings",
+  "value": "extended language tokenizer and word embedding layer",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Multi-modality encoder decoder",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-encdec",
+  "claim": "Multimodal model",
+  "value": "standard encoder-decoder transformer",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Multi-modality encoder decoder",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-dims-b",
+  "claim": "Florence-2-B DaViT stage dimensions",
+  "value": "[128, 256, 512, 1024]",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-dims-l",
+  "claim": "Florence-2-L DaViT stage dimensions",
+  "value": "[256, 512, 1024, 2048]",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-blocks",
+  "claim": "DaViT blocks per stage (both sizes)",
+  "value": "[1, 1, 9, 1]",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-vparams-b",
+  "claim": "Florence-2-B image encoder parameters",
+  "value": "90M",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-vparams-l",
+  "claim": "Florence-2-L image encoder parameters",
+  "value": "360M",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-ed-b",
+  "claim": "Florence-2-B encoder-decoder",
+  "value": "6 encoder and 6 decoder layers of width 768, 140M",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-ed-l",
+  "claim": "Florence-2-L encoder-decoder",
+  "value": "12 encoder and 12 decoder layers of width 1024, 410M",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix C, Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-params",
+  "claim": "Total parameters",
+  "value": "232 million parameters and 771 million parameters",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-init",
+  "claim": "Initialisation",
+  "value": "from UniCL and BART, respectively",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-loss-all",
+  "claim": "One loss for every task",
+  "value": "standard language modeling with cross-entropy loss for all the tasks",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Optimization objective",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-theta",
+  "claim": "Loss parameters",
+  "value": "the network parameters",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Optimization objective (Eq. 1 gloss)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-unfreeze",
+  "claim": "Training setting chosen",
+  "value": "it is important to unfreeze the vision backbone",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.5 Ablation Studies, Training settings",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-freeze-ap",
+  "claim": "Freezing the vision encoder, zero-shot COCO detection AP",
+  "value": "from 19.7 to 6.9",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.5 Training settings; Table 12",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-optim",
+  "claim": "Optimizer",
+  "value": "AdamW",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-cosine",
+  "claim": "Schedule",
+  "value": "cosine learning rate decay",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-lr",
+  "claim": "Peak learning rate",
+  "value": "1e-4 for the base model and 1e-5 for the large model",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-warmup",
+  "claim": "Linear warm-up steps",
+  "value": "5,000",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-batch",
+  "claim": "Mini-batch size (base/large)",
+  "value": "2048/3072",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-res",
+  "claim": "Main training resolution",
+  "value": "384",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup (384x384)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-samples",
+  "claim": "Main training length",
+  "value": "3 billion effective training samples",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-hires",
+  "claim": "High-resolution tuning resolution",
+  "value": "768",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup (768x768)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-hires-samples",
+  "claim": "High-resolution tuning length",
+  "value": "0.5 billion samples for the base model and 0.1 billion samples for the large model",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-arch-ds",
+  "claim": "Efficiency",
+  "value": "Deepspeed and mixed precision",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ }
+]

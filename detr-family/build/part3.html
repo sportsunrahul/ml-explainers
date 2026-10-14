@@ -1,0 +1,400 @@
+
+<section id="ch-denoising" class="chapter">
+<h2>DN-DETR and DINO: teach with noisy answers</h2>
+<p>Even with better queries, DETR-style training has a quieter problem. Early on, the Hungarian matching is unstable: for the same image, a slot matched to the dog this epoch may be matched to the car the next. Its training target keeps flipping, so it keeps unlearning. DN-DETR measures this directly, counting how many slots change their assigned object between consecutive epochs.</p>
+<p>The fix is a piece of teaching folklore: give the student problems whose answer is known. Alongside the normal queries, DN-DETR feeds the decoder <b class="c-green">noised copies of the ground-truth boxes</b>, shifted and rescaled a little, sometimes with a wrong label, and trains them to recover the original. These queries skip matching entirely; their target is fixed by construction. The model learns to refine a nearby box, a skill the matching queries then share, and the whole denoising part is dropped at test time, so inference costs nothing extra.</p>
+
+<figure class="viz" id="viz-noise-box">
+  <span class="badge computed">Computed</span>
+  <canvas id="noise-canvas" aria-label="A ground-truth box with noised denoising queries; positives in green, negatives in red" role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-noise-dn">DN-DETR noise</button>
+    <button type="button" id="btn-noise-cdn">DINO contrastive noise</button>
+    <button type="button" id="btn-noise-sample">Sample again</button>
+    <button type="button" id="btn-noise-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="noise-readout" aria-live="polite"></p>
+  <figcaption>Computed from the papers' noise rules on a toy box. DN-DETR: the center moves by less than 0.4 x half the width (and height), and the width and height are scaled within plus or minus 40%; every noised box must be reconstructed. DINO: each corner moves by up to 0.2 of the box size for a positive (reconstruct it), and between 0.2 and 0.4 for a negative (predict "no object"). The DINO corner rule is how the official code implements the paper's thresholds; the paper states <span class="tex">\lambda_1 = 1.0</span> and <span class="tex">\lambda_2 = 2.0</span> as noise scales and lists <code>dn_box_noise_scale = 0.4</code> among its hyperparameters (Appendix D.4).</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('noise-canvas'), out = document.getElementById('noise-readout');
+  const G = PE.fromC(.5, .55, .34, .56), S = { mode: 'dn', seed: 1, u: 1 };
+  const toward = (b, u) => ({ x1: PE.lerp(G.x1, b.x1, u), y1: PE.lerp(G.y1, b.y1, u), x2: PE.lerp(G.x2, b.x2, u), y2: PE.lerp(G.y2, b.y2, u) });
+  function dn(r) { const [cx, cy, w, h] = PE.cxcywh(G), l = .4, u = () => r() * 2 - 1;
+    return PE.fromC(cx + u() * l * w / 2, cy + u() * l * h / 2, w * (1 + u() * l), h * (1 + u() * l)); }
+  function cdn(r, neg) { const [, , w, h] = PE.cxcywh(G), s = () => (r() < .5 ? -1 : 1), u = () => (neg ? 1 : 0) + r();
+    return { x1: G.x1 + s() * u() * w / 2 * .4, y1: G.y1 + s() * u() * h / 2 * .4, x2: G.x2 + s() * u() * w / 2 * .4, y2: G.y2 + s() * u() * h / 2 * .4 }; }
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); PE.thing(ctx, G, W, H, PE.css('--yellow'));
+    const r = PE.rng(S.seed * 97 + (S.mode === 'dn' ? 0 : 5)), [, , w, h] = PE.cxcywh(G);
+    // Shell guides: each corner moves up to 0.2 w (h) for positives and 0.2-0.4 w (h) for negatives.
+    if (S.mode === 'cdn') [.2, .4].forEach(f => [1, -1].forEach(sgn => PE.strokeBox(ctx,
+      { x1: G.x1 - sgn * f * w, y1: G.y1 - sgn * f * h, x2: G.x2 + sgn * f * w, y2: G.y2 + sgn * f * h }, W, H, PE.css('--muted'), 1, [2, 5], .6 * S.u)));
+    const Q = [];
+    if (S.mode === 'dn') for (let k = 0; k < 5; k++) Q.push({ b: dn(r), pos: true });
+    else for (let k = 0; k < 5; k++) { Q.push({ b: cdn(r, false), pos: true }); Q.push({ b: cdn(r, true), pos: false }); }
+    Q.forEach((q, i) => { const e = PE.clamp(S.u * 1.5 - i * .05, 0, 1); if (e > 0) PE.strokeBox(ctx, toward(q.b, e), W, H, q.pos ? PE.css('--green') : PE.css('--red'), 1.8, q.pos ? null : [5, 3], .9 * Math.min(1, e * 3)); });
+    PE.strokeBox(ctx, G, W, H, PE.css('--yellow'), 2.6);
+    PE.tag(ctx, 'ground truth', G.x1 * W + 4, G.y1 * H - 6, PE.css('--yellow'), 12);
+    const txt = S.mode === 'dn' ? '5 noised copies (one per denoising group). Each one is trained to move back onto the yellow box.'
+      : '5 positives (green, trained to recover the box) and 5 negatives (red, trained to say "no object"). The negatives teach the model to reject a box that is close but not right.';
+    if (out.textContent !== txt) out.textContent = txt;
+    document.getElementById('btn-noise-dn').setAttribute('aria-pressed', String(S.mode === 'dn'));
+    document.getElementById('btn-noise-cdn').setAttribute('aria-pressed', String(S.mode === 'cdn'));
+  });
+  let stop = () => {};
+  const fly = () => { stop(); S.u = 0; stop = PE.tween(S, { u: 1 }, 900, cv.redraw); };
+  document.getElementById('btn-noise-dn').onclick = () => { S.mode = 'dn'; fly(); };
+  document.getElementById('btn-noise-cdn').onclick = () => { S.mode = 'cdn'; fly(); };
+  document.getElementById('btn-noise-sample').onclick = () => { S.seed++; fly(); };
+  document.getElementById('btn-noise-reset').onclick = () => { S.mode = 'dn'; S.seed = 1; fly(); };
+})();
+</script>
+
+<p>In DN-DETR's words, a box is shifted so its center moves by <span class="tex">|\Delta x| < \lambda_1 w/2</span> and <span class="tex">|\Delta y| < \lambda_1 h/2</span>, and rescaled so its width lies in <span class="tex">[(1-\lambda_2)w, (1+\lambda_2)w]</span> (height likewise), with <span data-claim="pg-dn-lambda">0.4</span> for both scales. Labels are flipped to a random class at rate <span data-claim="pg-dn-gamma">0.2</span>, which forces the model to use the box to recover the class. There are <span data-claim="pg-dn-groups">5</span> noised groups by default.</p>
+<p>One detail is load-bearing: an <b>attention mask</b>. The matching queries must not see the denoising queries (they would just copy near-perfect boxes), and one noised group must not see another (another noisy copy of the same object leaks the answer). Denoising without the mask does not just fail to help; it collapses to <span data-claim="pg-dn-nomask">24.0</span> AP against <span data-claim="pg-dn-mask">43.4</span> with it.</p>
+
+<figure class="viz" id="viz-dn-mask">
+  <span class="badge computed">Diagram</span>
+  <svg class="chart" id="mask-svg" viewBox="0 0 420 222" role="img" aria-label="Attention mask: rows are queries, columns are what they may attend to; blocked cells are red"></svg>
+  <div class="controls">
+    <button type="button" id="btn-mask-g1">A group 1 query</button>
+    <button type="button" id="btn-mask-g2">A group 2 query</button>
+    <button type="button" id="btn-mask-match">A matching query</button>
+    <button type="button" id="btn-mask-all" data-cue-reset>All rows</button>
+  </div>
+  <p class="readout" id="mask-readout" aria-live="polite"></p>
+  <figcaption>The mask of DN-DETR Eq. 7 for 2 noised groups of 3 objects and 4 matching queries. Row = the query doing the looking; column = what it looks at. Red = blocked. Denoising queries may look at matching queries (those hold no ground-truth information), but not across groups; matching queries may not look at any denoising query.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('mask-svg'), out = document.getElementById('mask-readout'), NS = 'http://www.w3.org/2000/svg', P = 2, M = 3, N = 4, W = P * M + N;
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const blocked = (i, j) => j < P * M && (Math.floor(i / M) !== Math.floor(j / M) || i >= P * M);
+  const group = i => i < P * M ? Math.floor(i / M) : 2;
+  const SAY = ['Click a kind of query, or hover a row: green is what that query may look at, red is blocked.',
+    'A query in denoising group 1 may look at its own group and at the matching queries, but not at group 2.',
+    'A query in denoising group 2 may look at its own group and at the matching queries, but not at group 1.',
+    'A matching query may look only at matching queries, itself included: every denoising query is hidden from it, so it cannot copy a noised answer.'];
+  // V.d dims the rows outside the focused group; V.f<i> lights row i.
+  const V = { d: 0 }; for (let i = 0; i < W; i++) V['f' + i] = 0;
+  let focus = -1, stop = () => {};
+  function draw() { svg.replaceChildren(); const c = 18, x0 = 150, y0 = 30, R = PE.css('--red'), G = PE.css('--green'), P2 = PE.css('--panel2');
+    for (let i = 0; i < W; i++) for (let j = 0; j < W; j++) {
+      const bl = blocked(i, j), f = V['f' + i];
+      const r = mk('rect', { x: x0 + j * c, y: y0 + i * c, width: c - 2, height: c - 2, rx: 2, fill: bl ? R : PE.mix(P2, G, f), opacity: (1 - .7 * V.d * (1 - f)).toFixed(3) });
+      r.addEventListener('mouseenter', () => setFocus(group(i))); svg.append(r); }
+    [[0, 'group 1'], [3, 'group 2'], [6, 'matching']].forEach(([i, t]) => {
+      svg.append(mk('text', { x: x0 - 8, y: y0 + i * c + 12, 'text-anchor': 'end', fill: PE.css('--muted'), 'font-size': 11, 'font-family': 'system-ui' }, t));
+      svg.append(mk('text', { x: x0 + i * c, y: y0 - 8, fill: PE.css('--muted'), 'font-size': 11, 'font-family': 'system-ui' }, t)); });
+  }
+  function setFocus(g) {
+    if (g === focus) return; focus = g; out.textContent = SAY[g + 1];
+    ['btn-mask-g1', 'btn-mask-g2', 'btn-mask-match'].forEach((id, k) => document.getElementById(id).setAttribute('aria-pressed', String(k === g)));
+    const to = { d: g < 0 ? 0 : 1 }; for (let i = 0; i < W; i++) to['f' + i] = group(i) === g ? 1 : 0;
+    stop(); stop = PE.tween(V, to, 450, draw);
+  }
+  document.getElementById('btn-mask-g1').onclick = () => setFocus(0);
+  document.getElementById('btn-mask-g2').onclick = () => setFocus(1);
+  document.getElementById('btn-mask-match').onclick = () => setFocus(2);
+  document.getElementById('btn-mask-all').onclick = () => setFocus(-1);
+  svg.addEventListener('mouseleave', () => setFocus(-1));
+  PE.onTheme(draw); draw(); out.textContent = SAY[0];
+})();
+</script>
+
+<p>DINO then stacks the best ideas so far, DAB-style box queries, DN-style denoising and Deformable attention, and adds three of its own:</p>
+<ul>
+  <li><b>Contrastive denoising.</b> Plain denoising only teaches "fix a nearby box". DINO adds <b class="c-red">hard negatives</b>: noised boxes a bit further out that must be answered with "no object". That teaches the model to reject a near-miss, which cuts duplicates. Toggle DINO's noise above to see the two shells.</li>
+  <li><b>Mixed query selection.</b> The decoder's anchor boxes start from the encoder's top-scoring locations for this image, while the content part of each query stays a learned vector. The encoder's rough features are good at <em>where</em>, not yet at <em>what</em>.</li>
+  <li><b>Look forward twice.</b> In box refinement, layer i's correction is normally trained only by layer i's loss. DINO lets the refined box of the next layer also send gradient back, so a layer is judged partly by how much it helps its successor.</li>
+</ul>
+<p>In DINO's ablation (ResNet-50), engineering improvements and query selection borrowed from Deformable DETR first lift DN-DETR from <span data-claim="pg-dino-abl-start">43.4</span> to a strong baseline of <span data-claim="pg-dino-abl-base">46.5</span> AP; DINO's own three additions then take it to <span data-claim="pg-dino-abl-end">47.9</span>. DINO-4scale reaches <span data-claim="pg-dino-12ep">49.0</span> AP in only <span data-claim="pg-dino-12">12 epochs</span> (4 feature scales, no extra data). The famous 63.3 AP on COCO test-dev needs a Swin-L backbone, pre-training on Objects365 and test-time augmentation, so it is a different kind of number.</p>
+</section>
+
+<!-- ============================ ACT III ============================ -->
+<p class="kicker"><span class="act-n">Act III</span>Making DETR run fast</p>
+<section id="ch-rt-detr" class="chapter">
+<h2>RT-DETR: DETRs beat YOLOs once you count NMS</h2>
+<p>By 2023 DETRs trained fast enough, but they were still too slow at inference for real-time use, where YOLO dominated. RT-DETR starts by pointing out something odd about the comparison: YOLO speed numbers usually leave out NMS. And NMS time is not a constant. It depends on how many boxes survive the confidence threshold, and on the IoU threshold. Step through the thresholds the paper measured.</p>
+
+<figure class="viz" id="viz-nms-threshold">
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="thr-svg" viewBox="0 0 640 280" role="img" aria-label="Boxes left after each confidence threshold for YOLOv5 and YOLOv8, with measured NMS times"></svg>
+  <div class="controls" id="thr-controls"></div>
+  <p class="readout" id="thr-readout" aria-live="polite"></p>
+  <figcaption>Box counts are read off RT-DETR Figure 2 (the paper prints no values, so they are approximate, and it says only that they were counted "on the same input"). NMS time and AP are RT-DETR Table 1: YOLOv8 on COCO val2017, IoU threshold 0.7, TensorRT EfficientNMS kernel only, T4 GPU with TensorRT FP16; the paper measured time at three of these thresholds only. RT-DETR has no NMS: its only post-processing is a score threshold, which the paper reports does not change inference speed.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('thr-svg'), out = document.getElementById('thr-readout'), ctl = document.getElementById('thr-controls'), NS = 'http://www.w3.org/2000/svg';
+  const T = [.001, .005, .01, .05, .1, .25], V5 = [9281, 5877, 4690, 2142, 1304, 581], V8 = [3570, 2523, 2057, 1124, 764, 381];
+  const MEAS = { 0: [2.36, 52.9], 2: [1.73, 52.4], 3: [1.06, 51.2] };
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const text = (x, y, fill, size, t, extra = {}) => mk('text', { x, y, fill, 'font-size': size, 'font-family': 'system-ui', ...extra }, t);
+  const kb = v => '~' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v);
+  let S = 0, stop = () => {};
+  const hl = T.map((_, i) => i === 0 ? 1 : 0);
+  T.forEach((t, i) => { const b = document.createElement('button'); b.type = 'button'; b.id = `btn-thr-${i}`; b.textContent = `conf ${t}`;
+    b.onclick = () => pick(i); ctl.append(b); });
+  // On a phone the figure badge sits over the first line, so the narrow layout starts one line lower.
+  function clearBadge(narrow, vw, vh) { if (!narrow) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0,24)');
+    while (svg.firstChild) g.append(svg.firstChild); svg.append(g); svg.setAttribute('viewBox', `0 0 ${vw} ${vh + 24}`); }
+  // Wide: every bar labelled. Narrow (under 520 px): the legend moves under the title and only the chosen threshold carries values.
+  function draw() {
+    const narrow = svg.clientWidth && svg.clientWidth < 520;
+    const L = narrow ? { vw: 360, vh: 300, gx: 12, gap: 58, bw: 22, step: 25, base: 250, hmax: 150, ty: 268, my: 284, fs: 10 }
+      : { vw: 640, vh: 280, gx: 40, gap: 100, bw: 30, step: 34, base: 230, hmax: 190, ty: 250, my: 268, fs: 12 };
+    svg.setAttribute('viewBox', `0 0 ${L.vw} ${L.vh}`);
+    svg.replaceChildren(); const mu = PE.css('--muted'), fg = PE.css('--fg'), red = PE.css('--red');
+    svg.append(text(narrow ? 6 : 10, narrow ? 16 : 20, mu, narrow ? 11 : 13, 'boxes left after the confidence threshold (approximate)'));
+    T.forEach((t, i) => { const x = L.gx + i * L.gap, k = hl[i];
+      const br = PE.css('--brown'), bars = [[V5[i], br, 'none'], [V8[i], PE.mix(PE.css('--bg'), br, .35), br]];
+      bars.forEach(([v, c, st], j) => { const h = L.hmax * v / 10000;
+        svg.append(mk('rect', { x: x + j * L.step, y: L.base - h, width: L.bw, height: h, rx: 3, fill: c, stroke: st, 'stroke-width': 1.5, opacity: (.45 + .55 * k).toFixed(3) }));
+        if (!narrow) svg.append(text(x + j * L.step + L.bw / 2, L.base - 6 - h, PE.mix(mu, fg, k), 10, kb(v), { 'text-anchor': 'middle', 'data-approx': '' })); });
+      if (narrow && k > .01) { const top = L.base - L.hmax * V5[i] / 10000;
+        svg.append(text(x + (L.step + L.bw) / 2, top - 6, fg, 10, `${kb(V5[i])} / ${kb(V8[i])}`, { 'text-anchor': 'middle', 'data-approx': '', opacity: k.toFixed(3) })); }
+      svg.append(text(x + (L.step + L.bw) / 2, L.ty, PE.mix(mu, fg, k), L.fs, String(t), { 'text-anchor': 'middle' }));
+      if (MEAS[i]) svg.append(text(x + (L.step + L.bw) / 2, L.my, red, L.fs - 1, MEAS[i][0] + ' ms', { 'text-anchor': 'middle' }));
+    });
+    const lx = narrow ? 8 : 420, ly = narrow ? 30 : 32, dy = narrow ? 14 : 16;
+    const br = PE.css('--brown');
+    [[br, 'none', 'YOLOv5 (anchor-based)'], [PE.mix(PE.css('--bg'), br, .35), br, 'YOLOv8 (anchor-free)']].forEach(([c, st, t], k) => {
+      svg.append(mk('rect', { x: lx, y: ly + k * dy, width: 10, height: 10, fill: c, stroke: st, 'stroke-width': 1.5 })); svg.append(text(lx + 14, ly + 9 + k * dy, mu, 11, t)); });
+    svg.append(text(lx + 14, ly + 25 + dy, red, 11, 'red: YOLOv8 NMS time (measured)'));
+    clearBadge(narrow, L.vw, L.vh);
+  }
+  function readout() {
+    const m = MEAS[S], k = v => v >= 1000 ? '~' + (v / 1000).toFixed(1) + 'k' : '~' + (Math.round(v / 10) * 10);
+    out.textContent = `Confidence ${T[S]}: ${k(V5[S])} YOLOv5 boxes and ${k(V8[S])} YOLOv8 boxes (read off the figure). `
+      + (m ? `Table 1 (val2017 average): YOLOv8 NMS kernel time ${m[0]} ms, AP ${m[1]}.` : 'The paper did not time NMS at this threshold.');
+    ctl.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === S)));
+  }
+  function pick(i) { stop(); S = i; readout(); const v = { ...hl }, to = {}; T.forEach((_, j) => { to[j] = j === i ? 1 : 0; });
+    stop = PE.tween(v, to, 500, () => { T.forEach((_, j) => { hl[j] = v[j]; }); draw(); }); }
+  new ResizeObserver(draw).observe(svg);
+  PE.onTheme(draw); draw(); readout();
+})();
+</script>
+
+<p>Lower thresholds keep more boxes and slightly more AP, and they cost more NMS time: at the paper's best-accuracy setting YOLOv8's NMS kernel alone takes <span data-claim="pg-rt-nms-0001">2.36 ms</span>. A set predictor has no such knob to trade.</p>
+<p>RT-DETR's own changes attack the remaining cost, the encoder. It runs self-attention only on the coarsest feature map, where each cell already stands for a whole object part (the paper calls this AIFI), and fuses the finer scales with a cheap convolutional path (CCFF). Its queries are chosen from the encoder's best features, with a training loss that makes a high class score also mean a well-placed box; in the ablation that is worth <span data-claim="pg-rt-qs">48.7</span> versus <span data-claim="pg-rt-qs-vanilla">47.9</span> AP. And because every decoder layer is supervised, you can drop layers at inference to trade accuracy for speed without retraining: stopping one layer early costs <span data-claim="pg-rt-dec">0.1 AP</span> and saves half a millisecond.</p>
+<p>The result, measured end to end with NMS included for the YOLOs, on a T4 GPU with TensorRT FP16 at <span data-claim="pg-rt-640">640 x 640</span>: RT-DETR-R50 reaches <span data-claim="pg-rt-ap">53.1</span> AP at <span data-claim="pg-rt-fps">108</span> FPS, against YOLOv8-L at <span data-claim="pg-yolov8l-ap">52.9</span> AP and <span data-claim="pg-yolov8l-fps">71</span> FPS. Barely more accurate, about half again as fast.</p>
+</section>
+
+<section id="ch-rf-detr" class="chapter">
+<h2>RF-DETR: train once, pick your latency</h2>
+<p>Real-time detectors usually come as a hand-designed ladder of sizes, N, S, M, L, X, each trained separately and tuned on COCO. RF-DETR asks why. It takes a DETR with a pretrained DINOv2 vision-transformer backbone and trains <b>one weight-sharing network</b> per backbone size: at every training step it samples a random patch size, input resolution and number of attention windows, so the same weights learn to work under all of them. The number of decoder layers and queries is cut only at inference.</p>
+<p>After training, a grid search over thousands of configurations measures accuracy and latency for each, and keeps the best trade-offs. Picking a model is then picking a latency budget. Slide the budget.</p>
+
+<figure class="viz" id="viz-latency-budget">
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="lat-svg" viewBox="0 0 640 320" role="img" aria-label="COCO AP versus T4 latency for RF-DETR sizes and baselines, with the latency budget marked"></svg>
+  <div class="controls">
+    <label>Latency budget <input type="range" id="lat-budget" min="0" max="100" step="1" value="30"><span id="lat-budget-val" data-computed></span></label>
+    <button type="button" id="btn-budget-3">3 ms</button>
+    <button type="button" id="btn-budget-7">7 ms</button>
+    <button type="button" id="btn-budget-18">18 ms</button>
+    <button type="button" id="btn-budget-100">100 ms</button>
+    <button type="button" id="btn-base-on">Show baselines</button>
+    <button type="button" id="btn-base-off">Hide baselines</button>
+    <button type="button" id="btn-budget-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="lat-readout" aria-live="polite"></p>
+  <figcaption>Sourced from RF-DETR Tables 2, 7 and 12: COCO val2017 AP against latency on a T4 GPU (TensorRT 10.4, 200 ms pause between runs; YOLO latency includes NMS). RF-DETR points are the paper's named sizes N to Max; tokens per side is resolution divided by patch size, computed here. The RT-DETR rows in these tables appear to be RT-DETR's Objects365-pretrained variants, so they are left out.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('lat-svg'), out = document.getElementById('lat-readout'), bIn = document.getElementById('lat-budget'), bVal = document.getElementById('lat-budget-val'), NS = 'http://www.w3.org/2000/svg';
+  const RF = [ // size, ms, AP, backbone, res, patch, windows, decoder layers, queries (Tables 2, 7, 12)
+    ['N', 2.3, 48.0, 'DINOv2-S', 384, 16, 2, 2, 300], ['S', 3.5, 52.9, 'DINOv2-S', 512, 16, 2, 3, 300], ['M', 4.4, 54.7, 'DINOv2-S', 576, 16, 2, 4, 300],
+    ['L', 6.8, 56.5, 'DINOv2-S', 704, 16, 2, 4, 300], ['XL', 11.5, 58.6, 'DINOv2-B', 700, 20, 1, 5, 300], ['2XL', 17.2, 60.1, 'DINOv2-B', 880, 20, 2, 5, 300],
+    ['Max', 98.0, 61.8, 'DINOv2-B', 828, 12, 1, 6, 300]];
+  const DF = [['N', 2.1, 42.7], ['S', 3.5, 50.6], ['M', 5.4, 55.0], ['L', 7.5, 57.2], ['XL', 11.5, 59.3]];
+  const YO = [['N', 2.2, 37.1], ['S', 3.2, 44.1], ['M', 5.1, 48.3], ['L', 6.5, 49.9], ['XL', 10.5, 50.9]];
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const text = (x, y, fill, size, t, extra = {}) => mk('text', { x, y, fill, 'font-size': size, 'font-family': 'system-ui', ...extra }, t);
+  // The slider position runs 0..100 on a log scale from 1.5 ms to 120 ms.
+  const msAt = pos => 1.5 * Math.pow(120 / 1.5, pos / 100), posAt = ms => 100 * Math.log(ms / 1.5) / Math.log(120 / 1.5);
+  const S = { pos: posAt(3), baseA: 1 };
+  let base = true, stop = () => {}, stopB = () => {};
+  // On a phone the figure badge sits over the first line, so the narrow layout starts one line lower.
+  function clearBadge(narrow, vw, vh) { if (!narrow) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0,24)');
+    while (svg.firstChild) g.append(svg.firstChild); svg.append(g); svg.setAttribute('viewBox', `0 0 ${vw} ${vh + 24}`); }
+  function draw() {
+    const narrow = svg.clientWidth && svg.clientWidth < 520;
+    const L = narrow ? { vw: 360, vh: 320, x0: 44, xw: 304, y0: 270, yh: 230, top: 28, fs: 9, leg: [258, 252] }
+      : { vw: 640, vh: 320, x0: 60, xw: 540, y0: 280, yh: 250, top: 30, fs: 11, leg: [470, 250] };
+    svg.setAttribute('viewBox', `0 0 ${L.vw} ${L.vh}`);
+    const X = ms => L.x0 + L.xw * Math.log(ms / 1.5) / Math.log(120 / 1.5), Y = ap => L.y0 - L.yh * (ap - 35) / 28;
+    svg.replaceChildren(); const mu = PE.css('--muted'), B = msAt(S.pos);
+    [2, 5, 10, 20, 50, 100].forEach(t => { svg.append(mk('line', { x1: X(t), y1: L.top, x2: X(t), y2: L.y0, stroke: PE.css('--rule') }));
+      svg.append(text(X(t), L.y0 + 18, mu, L.fs, t + ' ms', { 'text-anchor': 'middle' })); });
+    [40, 50, 60].forEach(a => { svg.append(mk('line', { x1: L.x0, y1: Y(a), x2: L.x0 + L.xw, y2: Y(a), stroke: PE.css('--rule') }));
+      svg.append(text(L.x0 - 8, Y(a) + 4, mu, L.fs, a + ' AP', { 'text-anchor': 'end' })); });
+    svg.append(mk('rect', { x: L.x0, y: L.top, width: Math.max(0, X(B) - L.x0), height: L.y0 - L.top, fill: PE.css('--green'), opacity: .08 }));
+    svg.append(mk('line', { x1: X(B), y1: L.top, x2: X(B), y2: L.y0, stroke: PE.css('--green'), 'stroke-width': 2 }));
+    const series = (d, color, dash, op) => { const g = mk('g', { opacity: op.toFixed(3) });
+      g.append(mk('polyline', { points: d.map(r => `${X(r[1])},${Y(r[2])}`).join(' '), fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-dasharray': dash || '' }));
+      d.forEach(r => g.append(mk('circle', { cx: X(r[1]), cy: Y(r[2]), r: 4, fill: color }))); svg.append(g); };
+    const br = PE.css('--brown'), light = PE.mix(br, PE.css('--fg'), .4);
+    if (S.baseA > .01) { series(YO, light, '2 3', S.baseA); series(DF, br, '5 3', S.baseA); }
+    series(RF.slice(0, 4), PE.css('--blue'), null, 1); series(RF.slice(4), PE.css('--blue'), null, 1);
+    const pick = RF.filter(r => r[1] <= B).pop();
+    if (pick) svg.append(mk('circle', { cx: X(pick[1]), cy: Y(pick[2]), r: 9, fill: 'none', stroke: PE.css('--green'), 'stroke-width': 3 }));
+    // The small sizes climb steeply, so their labels go up and to the left; the flatter large sizes get labels above.
+    RF.forEach((r, i) => svg.append(i < 4 ? text(X(r[1]) - 7, Y(r[2]) - 3, PE.css('--blue'), L.fs, r[0], { 'text-anchor': 'end' }) : text(X(r[1]), Y(r[2]) - 11, PE.css('--blue'), L.fs, r[0], { 'text-anchor': 'middle' })));
+    [['RF-DETR', PE.css('--blue'), 1], ['D-FINE', br, S.baseA], ['YOLOv11', light, S.baseA]].forEach(([n, c, op], i) => { if (op <= .01) return;
+      const g = mk('g', { opacity: op.toFixed(3) });
+      g.append(mk('rect', { x: L.leg[0], y: L.leg[1] - i * 16, width: 10, height: 10, fill: c }));
+      g.append(text(L.leg[0] + 14, L.leg[1] + 9 - i * 16, mu, 11, n)); svg.append(g); });
+    bIn.value = String(S.pos); bVal.textContent = B.toFixed(1) + ' ms';
+    clearBadge(narrow, L.vw, L.vh);
+  }
+  // The readout describes where a click is heading, set once, so a screen reader is not flooded mid-glide.
+  function readout(pos) {
+    const B = msAt(pos), pick = RF.filter(r => r[1] <= B).pop();
+    if (!pick) { out.textContent = `No RF-DETR size fits in ${B.toFixed(1)} ms; the smallest (N) needs 2.3 ms.`; }
+    else { const df = DF.filter(r => r[1] <= B).pop();
+      out.textContent = `Budget ${B.toFixed(1)} ms: RF-DETR ${pick[0]} (${pick[3]}, ${pick[4]} px, patch ${pick[5]} = ${Math.round(pick[4] / pick[5])} tokens per side, ${pick[6]} window${pick[6] > 1 ? 's' : ''}, ${pick[7]} decoder layers, ${pick[8]} queries): ${pick[2].toFixed(1)} AP at ${pick[1]} ms.`
+        + (base && df ? ` Best D-FINE in budget: ${df[0]}, ${df[2].toFixed(1)} AP at ${df[1]} ms.` : ''); }
+    [['btn-base-on', base], ['btn-base-off', !base]].forEach(([id, v]) => document.getElementById(id).setAttribute('aria-pressed', String(v)));
+  }
+  const markB = ms => [3, 7, 18, 100].forEach(m => document.getElementById('btn-budget-' + m).setAttribute('aria-pressed', String(m === ms)));
+  const setB = ms => { stop(); markB(ms); const to = Math.round(posAt(ms)); readout(to); stop = PE.tween(S, { pos: to }, 700, draw); };
+  const setBase = v => { stopB(); base = v; readout(Math.round(S.pos)); stopB = PE.tween(S, { baseA: v ? 1 : 0 }, 500, draw); };
+  bIn.oninput = () => { stop(); markB(null); S.pos = +bIn.value; draw(); readout(S.pos); };
+  [3, 7, 18, 100].forEach(ms => document.getElementById('btn-budget-' + ms).onclick = () => setB(ms));
+  document.getElementById('btn-base-on').onclick = () => setBase(true);
+  document.getElementById('btn-base-off').onclick = () => setBase(false);
+  document.getElementById('btn-budget-reset').onclick = () => { setBase(true); setB(3); };
+  new ResizeObserver(draw).observe(svg);
+  PE.onTheme(draw); S.pos = Math.round(posAt(3)); draw(); readout(S.pos); markB(3);
+})();
+</script>
+
+<p>Two numbers stand out. The nano model reaches <span data-claim="pg-rf-n-ap">48.0</span> AP at <span data-claim="pg-rf-n-ms">2.3</span> ms, <span data-claim="pg-rf-n-gain">5.3 AP</span> above D-FINE's nano at a similar latency. And the 2XL model is the first real-time detector above 60: <span data-claim="pg-rf-2xl">60.1 AP at 17.2 ms</span>. It does not win everywhere; turn on the baselines and you can see D-FINE ahead at the M, L and XL sizes on COCO.</p>
+<p>There are really two base networks here, one on a small DINOv2 backbone (N to L) and one on a larger one (XL to Max), each trained once. Watch the readout as you raise the budget: on the small backbone the patch size stays at 16 while resolution and decoder depth grow; the large backbone switches to patch 20, and Max changes again to patch 12. The paper notes that accuracy tracks the number of spatial locations, resolution divided by patch size, more closely than either alone. The search itself is paid for once: about <span data-claim="pg-rf-search">10,000 GPU hours</span> on T4s to evaluate the configurations. On the 100-dataset RF100-VL benchmark, the paper finds that COCO-tuned architectures already transfer remarkably well, and a per-dataset search adds a further 0.1 to 0.7 AP at most sizes.</p>
+<p>Notice what never changed from 2020 to here: a fixed set of queries, one-to-one matching, and no NMS. Everything else, the attention, the queries, the training signal, the backbone and the search, was rebuilt around that idea.</p>
+</section>
+
+<!-- ============================ CLOSING ============================ -->
+<section id="ch-timeline" class="chapter">
+<h2>Family tree</h2>
+<p>Each paper rebuilt part of DETR's recipe and kept the rest. Hover or focus a paper to light up what it took from which ancestor; click it to open its chapter.</p>
+<figure class="viz" id="viz-tree">
+  <span class="badge computed">Diagram</span>
+  <svg class="chart" id="tree-svg" role="img" aria-label="Family tree of the seven papers. DETR leads to Deformable DETR. Deformable DETR leads to DAB-DETR, to DINO, and through LW-DETR to RF-DETR. DAB-DETR leads to DN-DETR and DINO. DN-DETR leads to DINO. DINO leads to RT-DETR, and RT-DETR leads to RF-DETR."></svg>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Dates are each paper's arXiv v1 submission date. The arrows follow the inheritance noted under each paper below; the dashed arrow passes through LW-DETR, which this page does not cover.</figcaption>
+</figure>
+<ol class="timeline">
+  <li data-node="detr"><div class="when"><span data-claim="pg-date-detr">2020-05-26</span></div><b>DETR</b>: set prediction with Hungarian matching; 100 learned object queries; no anchors, no NMS.</li>
+  <li data-node="ddetr"><div class="when"><span data-claim="pg-date-ddetr">2020-10-08</span></div><b>Deformable DETR</b>: sparse multi-scale deformable attention; reference points; iterative box refinement; two-stage queries.<div class="inh">inherits DETR's set loss</div></li>
+  <li data-node="dab"><div class="when"><span data-claim="pg-date-dab">2022-01-28</span></div><b>DAB-DETR</b>: queries become explicit 4D anchor boxes, refined layer by layer, with size-modulated attention.<div class="inh">inherits Deformable DETR's layer-by-layer box refinement, in standard attention</div></li>
+  <li data-node="dn"><div class="when"><span data-claim="pg-date-dn">2022-03-02</span></div><b>DN-DETR</b>: denoising queries with fixed targets and an attention mask stabilize matching.<div class="inh">built on DAB-DETR</div></li>
+  <li data-node="dino"><div class="when"><span data-claim="pg-date-dino">2022-03-07</span></div><b>DINO</b>: contrastive denoising, mixed query selection, look forward twice.<div class="inh">DAB anchors + DN denoising + Deformable attention and two-stage selection</div></li>
+  <li data-node="rt"><div class="when"><span data-claim="pg-date-rt">2023-04-17</span></div><b>RT-DETR</b>: efficient hybrid encoder, uncertainty-minimal query selection, end-to-end speed with NMS counted.<div class="inh">decoder training follows DINO</div></li>
+  <li data-node="rf"><div class="when"><span data-claim="pg-date-rf">2025-11-12</span></div><b>RF-DETR</b>: DINOv2 backbone, weight-sharing architecture search, one training for many latencies.<div class="inh">via LW-DETR; Deformable-style decoder, prunable decoder layers as in RT-DETR</div></li>
+</ol>
+<script>
+(() => {
+  const svg = document.getElementById('tree-svg'), out = document.getElementById('tree-readout'), NS = 'http://www.w3.org/2000/svg';
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const NODES = {
+    detr: { n: 'DETR', d: '2020-05-26', c: 'pg-date-detr', ch: 'ch-set-problem' }, ddetr: { n: 'Deformable DETR', d: '2020-10-08', c: 'pg-date-ddetr', ch: 'ch-deformable' },
+    dab: { n: 'DAB-DETR', d: '2022-01-28', c: 'pg-date-dab', ch: 'ch-anchor-queries' }, dn: { n: 'DN-DETR', d: '2022-03-02', c: 'pg-date-dn', ch: 'ch-denoising' },
+    dino: { n: 'DINO', d: '2022-03-07', c: 'pg-date-dino', ch: 'ch-denoising' }, rt: { n: 'RT-DETR', d: '2023-04-17', c: 'pg-date-rt', ch: 'ch-rt-detr' },
+    rf: { n: 'RF-DETR', d: '2025-11-12', c: 'pg-date-rf', ch: 'ch-rf-detr' } };
+  // Edges as the list below states them; the dashed one runs through LW-DETR.
+  const EDGES = [['detr', 'ddetr'], ['ddetr', 'dab'], ['dab', 'dn'], ['dab', 'dino'], ['dn', 'dino'], ['ddetr', 'dino'], ['dino', 'rt'], ['rt', 'rf'], ['ddetr', 'rf', 'dash']];
+  const SAY = { detr: 'DETR is the root: set prediction with Hungarian matching, no anchors, no NMS.',
+    ddetr: "Deformable DETR inherits DETR's set loss.", dab: "DAB-DETR inherits Deformable DETR's layer-by-layer box refinement, in standard attention.",
+    dn: 'DN-DETR is built on DAB-DETR.', dino: 'DINO combines DAB anchors, DN denoising, and Deformable attention and two-stage selection.',
+    rt: "RT-DETR's decoder training follows DINO.", rf: 'RF-DETR comes via LW-DETR (not covered here): a Deformable-style decoder, and decoder layers that can be dropped at inference, as in RT-DETR.' };
+  const IDLE = 'Hover or focus a paper to see what it took from which ancestor; click it to open its chapter.';
+  // What each arrow carries, in the list's words; shown while its paper is highlighted.
+  const TOOK = { 'detr>ddetr': 'set loss', 'ddetr>dab': 'box refinement', 'dab>dn': 'built on DAB-DETR', 'dab>dino': 'anchors', 'dn>dino': 'denoising',
+    'ddetr>dino': 'attention, two-stage', 'dino>rt': 'decoder training', 'rt>rf': 'prunable decoder layers', 'ddetr>rf': 'via LW-DETR: Deformable-style decoder' };
+  // Each layout: node centers, box size, and per edge the start point, end point and path. Wide: three lanes left to right. Narrow: top to bottom.
+  const WIDE = { vw: 960, vh: 300, bw: 124, bh: 34, labelAt: { 'rt>rf': [826, 140, 'end'], 'dn>dino': [566, 222, 'start'], 'dab>dino': [470, 182, 'middle'] }, P: { detr: [75, 170], ddetr: [215, 90], dab: [355, 250], dn: [500, 250], dino: [640, 170], rt: [775, 90], rf: [893, 170] },
+    path: (e, p, q, B) => {
+      const [f, t] = e, h = B.bw / 2, v = B.bh / 2;
+      if (e[2]) return { d: `M${p[0]} ${p[1] - v} V36 H${q[0] + 32} V${q[1] - v - 8}`, tip: [q[0] + 32, q[1] - v], dir: Math.PI / 2 };
+      if (f === 'dn' && t === 'dino') return { d: `M${p[0] + 30} ${p[1] - v} C${p[0] + 30} ${q[1] + 9} ${q[0] - h - 30} ${q[1] + 9} ${q[0] - h - 8} ${q[1] + 9}`, tip: [q[0] - h, q[1] + 9], dir: 0 };
+      const io = { 'ddetr>dino': [[p[0] + h, p[1]], [q[0], q[1] - v], 'top'], 'rt>rf': [[p[0] + h, p[1]], [q[0], q[1] - v], 'top'] }[f + '>' + t];
+      const a = io ? io[0] : [p[0] + h, p[1]], z = io ? io[1] : [q[0] - h, q[1] + (f === 'dab' && t === 'dino' ? -8 : 0)], end = io ? io[2] : 'left';
+      if (end === 'left') { const m = (a[0] + z[0]) / 2, c1 = f === 'dab' && t === 'dino' ? [a[0] + 55, a[1] - 50] : [m, a[1]];
+        return { d: `M${a[0]} ${a[1]} C${c1[0]} ${c1[1]} ${m} ${z[1]} ${z[0] - 8} ${z[1]}`, tip: z, dir: 0 }; }
+      const sy = end === 'top' ? -1 : 1;
+      return { d: `M${a[0]} ${a[1]} C${(a[0] + z[0]) / 2} ${a[1]} ${z[0]} ${z[1] + sy * 40} ${z[0]} ${z[1] + sy * 8}`, tip: z, dir: end === 'top' ? Math.PI / 2 : -Math.PI / 2 }; } };
+  const NARROW = { vw: 360, vh: 580, bw: 128, bh: 42, inside: true, P: { detr: [180, 30], ddetr: [96, 112], dab: [264, 194], dn: [264, 276], dino: [180, 358], rt: [96, 440], rf: [180, 522] },
+    path: (e, p, q, B) => {
+      const [f, t] = e, h = B.bw / 2, v = B.bh / 2;
+      if (e[2]) return { d: `M${p[0] - h} ${p[1]} H12 V${q[1]} H${q[0] - h - 8}`, tip: [q[0] - h, q[1]], dir: 0 };
+      if (f === 'ddetr' && t === 'dino') return { d: `M${p[0] - 30} ${p[1] + v} C${p[0] - 30} ${q[1] - 60} ${q[0] - h - 40} ${q[1]} ${q[0] - h - 8} ${q[1]}`, tip: [q[0] - h, q[1]], dir: 0 };
+      if (f === 'dab' && t === 'dino') return { d: `M${p[0] - h} ${p[1]} C${p[0] - h - 40} ${p[1] + 40} ${q[0]} ${q[1] - 70} ${q[0]} ${q[1] - v - 8}`, tip: [q[0], q[1] - v], dir: Math.PI / 2 };
+      if (f === 'dn' && t === 'dino') return { d: `M${p[0]} ${p[1] + v} C${p[0]} ${q[1]} ${q[0] + h + 30} ${q[1]} ${q[0] + h + 8} ${q[1]}`, tip: [q[0] + h, q[1]], dir: Math.PI };
+      const a = [p[0], p[1] + v], z = [q[0], q[1] - v];
+      return { d: `M${a[0]} ${a[1]} C${a[0]} ${a[1] + 34} ${z[0]} ${z[1] - 34} ${z[0]} ${z[1] - 8}`, tip: z, dir: Math.PI / 2 }; } };
+  let hot = null, layout = null;
+  function build() {
+    const B = svg.clientWidth && svg.clientWidth < 520 ? NARROW : WIDE; if (B === layout) return; layout = B;
+    svg.setAttribute('viewBox', `0 0 ${B.vw} ${B.vh}`); svg.replaceChildren();
+    EDGES.forEach(e => { const g = B.path(e, B.P[e[0]], B.P[e[1]], B), [x, y] = g.tip, a = g.dir;
+      const ep = mk('path', { d: g.d, class: 'te' + (e[2] ? ' dash' : ''), 'data-e': e[0] + '>' + e[1] }); svg.append(ep);
+      const mid = ep.getPointAtLength(ep.getTotalLength() * (e[2] ? .3 : .5)), at = (B.labelAt || {})[e[0] + '>' + e[1]] || [mid.x, mid.y - 6, 'middle'];
+      svg.append(mk('text', { x: at[0], y: at[1], 'text-anchor': at[2], class: 'el', 'data-e': e[0] + '>' + e[1] }, TOOK[e[0] + '>' + e[1]]));
+      svg.append(mk('path', { d: `M${x} ${y} L${x - 9 * Math.cos(a - .45)} ${y - 9 * Math.sin(a - .45)} L${x - 9 * Math.cos(a + .45)} ${y - 9 * Math.sin(a + .45)} Z`, class: 'ah', 'data-e': e[0] + '>' + e[1] })); });
+    Object.entries(NODES).forEach(([id, n]) => { const [x, y] = B.P[id];
+      const g = mk('g', { class: 'tn', 'data-node': id, tabindex: 0, role: 'link', 'aria-label': `${n.n}, ${n.d}: open its chapter` });
+      g.append(mk('rect', { x: x - B.bw / 2, y: y - B.bh / 2, width: B.bw, height: B.bh, rx: 9 }));
+      g.append(mk('text', { x, y: B.inside ? y - 3 : y + 4.5, 'text-anchor': 'middle', class: 'nm' }, n.n));
+      g.append(mk('text', { x, y: B.inside ? y + 13 : y + B.bh / 2 + 15, 'text-anchor': 'middle', class: 'dt', 'data-claim': n.c }, n.d));
+      g.addEventListener('mouseenter', () => setHot(id)); g.addEventListener('focus', () => setHot(id));
+      g.addEventListener('mouseleave', () => setHot(null)); g.addEventListener('blur', () => { g.dataset.armed = ''; setHot(null); });
+      const go = () => { location.hash = n.ch; };
+      // On touch there is no hover: the first tap highlights, a second tap on the same paper opens its chapter.
+      g.addEventListener('pointerdown', e => { g.dataset.touch = e.pointerType === 'touch' ? '1' : ''; });
+      g.addEventListener('click', () => { if (g.dataset.touch && g.dataset.armed !== '1') { g.dataset.armed = '1'; setHot(id); return; } go(); }); g.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      svg.append(g); });
+    setHot(hot, true);
+  }
+  function setHot(id, force) {
+    if (id === hot && !force) return; hot = id;
+    const inc = EDGES.filter(e => e[1] === id).map(e => e[0] + '>' + e[1]), anc = new Set(EDGES.filter(e => e[1] === id).map(e => e[0]));
+    svg.classList.toggle('hot', !!id);
+    svg.querySelectorAll('.tn').forEach(g => { g.classList.toggle('on', g.dataset.node === id); g.classList.toggle('anc', anc.has(g.dataset.node)); });
+    svg.querySelectorAll('.te, .ah, .el').forEach(p => p.classList.toggle('on', inc.includes(p.dataset.e)));
+    document.querySelectorAll('#ch-timeline .timeline li').forEach(li => li.classList.toggle('tl-on', li.dataset.node === id));
+    out.textContent = id ? SAY[id] : IDLE;
+  }
+  document.querySelectorAll('#ch-timeline .timeline li').forEach(li => { li.addEventListener('mouseenter', () => setHot(li.dataset.node)); li.addEventListener('mouseleave', () => setHot(null)); });
+  new ResizeObserver(build).observe(svg);
+  build(); out.textContent = IDLE;
+})();
+</script>
+</section>
+
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>DETR reframed detection as predicting a set: a fixed number of query slots, trained with a one-to-one Hungarian matching so that duplicates are punished by the loss itself, which removes anchors and NMS. The price was dense attention over every pixel, which made training long and small objects hard. Deformable DETR made attention sparse and multi-scale; DAB-DETR made each query an explicit box refined layer by layer; DN-DETR and DINO stabilized training with denoising queries and hard negatives, reaching strong accuracy in a dozen epochs. RT-DETR then showed that, once NMS is counted, a DETR can beat YOLO at real-time speed, and RF-DETR trained a single weight-sharing network from which a whole family of speed-accuracy trade-offs can be chosen after training.</p>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>DETR</b> (2005.12872v3): Sec. 3.1 for Eq. 1-2 and the matching cost; Appendix A.2, Eq. 9-10, for the box and GIoU losses; Sec. 4.2 and Fig. 4 for NMS per decoder layer; Appendix A.3 for the complexity terms.</li>
+  <li><b>Deformable DETR</b> (2010.04159v4): Sec. 4.1, Eq. 2-3; Appendix A.1 for the complexity derivation; Appendix A.4 for iterative refinement, two-stage, and the offset initialization drawn above.</li>
+  <li><b>DAB-DETR</b> (2201.12329v4): Sec. 3 for why a positional prior speeds up training; Sec. 4, Eq. 1-8; Table 3 for the ablation.</li>
+  <li><b>DN-DETR</b> (2203.01305v3): Sec. 3.1, Eq. 1-2, for the instability metric; Sec. 4.3-4.4 and Eq. 7 for noise and the attention mask; Table 5 for the mask ablation.</li>
+  <li><b>DINO</b> (2203.03605v4): Sec. 3.3-3.5 for contrastive denoising, mixed query selection and look forward twice (Eq. 2); Table 4 for the ablation; Appendix D.3-D.4 for implementation details and hyperparameters.</li>
+  <li><b>RT-DETR</b> (2304.08069v3): Sec. 3 with Table 1 and Fig. 2 for the NMS analysis; Sec. 4.2, Eq. 1, for the hybrid encoder; Sec. 4.3, Eq. 2-3, for query selection; Table 5 for decoder-layer truncation.</li>
+  <li><b>RF-DETR</b> (2511.09554v2): Sec. 3 and Fig. 3 for the search space; the latency protocol in Sec. 4; Table 7 for the chosen configurations; Appendix L for what the search discovered.</li>
+</ul>
+</section>
+</main>
+</body>
+</html>

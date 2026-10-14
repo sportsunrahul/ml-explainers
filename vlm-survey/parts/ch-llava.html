@@ -1,0 +1,159 @@
+<!-- ============================ ACT III ============================ -->
+<p class="kicker"><span class="act-n">Act III</span>From describing to conversing</p>
+<section id="ch-llava" class="chapter">
+<h2>Chat needs conversations to learn from</h2>
+<p>Flamingo and BLIP-2 learned from captions and web pages, not from instructions. Flamingo can be prompted into multi-image dialogues, but in LLaVA's side-by-side tests BLIP-2 and OpenFlamingo (an open-source version of Flamingo) mostly describe the scene when given an open request ("What is unusual about this image?", "Can you explain this meme in detail?"). LLaVA's bet was that the bridge can be almost trivially simple if the training data is the right kind: conversations about images, written for it by a language model that was never shown the pictures.</p>
+
+<figure class="viz" id="viz-connectors" data-computed>
+  <span class="badge computed">Computed, toy parts</span>
+  <canvas id="connectors-canvas" role="img" aria-label="A connector diagram: the encoder's patch grid (blue) passes through a connector (green) into a language model (yellow, or brown when frozen). A bar along the bottom shows how many visual tokens enter the language model's input sequence."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-connectors-flamingo" aria-pressed="false">Flamingo</button>
+    <button type="button" id="btn-connectors-qformer" aria-pressed="false">BLIP-2</button>
+    <button type="button" id="btn-connectors-llava" aria-pressed="true">LLaVA</button>
+    <button type="button" id="btn-connectors-llava15" aria-pressed="false">LLaVA-1.5</button>
+    <button type="button" id="btn-connectors-compare" aria-pressed="false">Compare all four</button>
+    <button type="button" id="btn-connectors-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="connectors-readout" aria-live="polite"></p>
+  <figcaption>Before you press LLaVA-1.5, guess: its image is <span data-claim="page-connectors-336">336</span> pixels wide instead of <span data-claim="page-connectors-224">224</span>, <span data-computed>1.5</span> times wider. How many more tokens does the language model have to read? The latent counts (Flamingo <span data-claim="flamingo-latents">64</span>, BLIP-2 <span data-claim="page-qformer-queries">32</span>) are stated in those papers; the patch counts <span data-computed>256</span> and <span data-computed>576</span> are computed from the patch grids (<span data-computed>224/14 = 16, 336/14 = 24</span>, squared), not stated by LLaVA. The text length on the sequence bar is a toy value, and the layer stacks are schematic.</figcaption>
+</figure>
+
+<h3>The wall: nobody had written the conversations</h3>
+<p>By 2023 the web had offered up billions of image-caption pairs, and the previous chapters showed how to learn from them. A caption, though, is one flat sentence. It never asks a follow-up question, never explains its reasoning, never answers "why". A model trained only on captions learns to caption. What a visual assistant needs is data in the shape of the task: a person asks something about an image, an assistant answers, and the exchange goes on. Collecting that from human annotators at scale is slow and expensive, so almost none existed.</p>
+
+<h3>A model that cannot see writes the data</h3>
+<p>LLaVA's trick was to have GPT-4, used as a text-only model, write the conversations. GPT-4 never looks at the pixels; as the paper's caption puts it, <span data-claim="page-connectors-not-prompted">the visual image is not used to prompt GPT</span>. Instead each COCO image is described to it in words, two ways: the human-written captions COCO already has, and the list of labeled bounding boxes, each an object name with four normalized coordinates. From that text, GPT-4 invents what an assistant who could see the image would say. For each kind of output the authors wrote a few examples by hand, which the paper calls <span data-claim="page-connectors-seed">the only human annotations we have during data collection</span>, and passed them to GPT-4 as in-context demonstrations.</p>
+<table class="data">
+  <thead><tr><th>GPT-4 is given (text only)</th><th>GPT-4 writes (one of three kinds)</th></tr></thead>
+  <tbody>
+    <tr><td>Captions: "A group of people standing outside of a black vehicle with various luggage." "People try to fit all of their luggage in an SUV." ...</td><td><b>Conversation</b>: "What type of vehicle is featured in the image?" "The image features a black sport utility vehicle (SUV) ..."</td></tr>
+    <tr><td>Boxes: <code>person: [0.681, 0.242, 0.774, 0.694]</code>, <code>backpack: [0.384, 0.696, 0.485, 0.914]</code>, ...</td><td><b>Detailed description</b>: "The image is an underground parking area with a black sport utility vehicle (SUV) parked. There are three people in the scene ..."</td></tr>
+    <tr><td></td><td><b>Complex reasoning</b>: "What challenges do these people face?" "... They are facing the challenge of fitting all their luggage into the black SUV ..."</td></tr>
+  </tbody>
+</table>
+<p class="eqno">Abridged from Table 1 of LLaVA v2, which shows one image's contexts and all three kinds of response.</p>
+<p>This produced <span data-claim="llava-instruct-total">158K</span> training samples: <span data-claim="llava-split-conv">58K</span> multi-turn conversations, <span data-claim="llava-split-detail">23K</span> detailed descriptions and <span data-claim="llava-split-complex">77K</span> complex-reasoning answers. The kind of data mattered more than any architecture change in this chapter. On the paper's own chat benchmark, where GPT-4 grades LLaVA's answers against its own text-only answers, the full mix scores <span data-claim="llava-bench-coco-rel">85.1</span>. Conversations alone score <span data-claim="llava-ablate-conv-only">73.8</span>, and the same model with no instruction tuning at all scores <span data-claim="llava-ablate-no-it">21.5</span>. Fine-tuned on the ScienceQA benchmark, LLaVA alone reaches <span data-claim="llava-sqa-alone">90.92%</span>; the headline <span data-claim="llava-sqa-gpt4-judge">92.53%</span> is LLaVA combined with GPT-4 as a judge, above the previous best of <span data-claim="llava-sqa-prior-sota">91.68%</span>.</p>
+
+<h3>The simplest possible bridge</h3>
+<p>With the data taken care of, the connector could be nearly trivial. LLaVA takes the frozen <span data-claim="llava-clip-encoder">CLIP ViT-L/14</span> encoder from the first chapter, reads out its grid of patch features, and multiplies every patch vector by one learned matrix. That is the whole bridge, a <span data-claim="page-connectors-linear">simple linear layer</span>, and it outputs vectors the same size as the language model's word embeddings, so to the language model each patch looks like one more word:</p>
+<div class="eq" id="eq-connectors" data-build data-viz="viz-connectors"><div class="tex tex-display">
+\htmlData{step=3, link=tokens}{\htmlClass{t-blue}{H_v}} = \htmlData{step=2, link=proj}{\htmlClass{t-green}{W}} \cdot \htmlData{step=1, link=grid}{\htmlClass{t-blue}{Z_v}}, \qquad \htmlData{step=1, link=grid}{\htmlClass{t-blue}{Z_v} = g(X_v)}
+</div></div>
+<p class="eqno">Eq. 1 in LLaVA v2.</p>
+<ul class="gloss">
+  <li><span class="tex">X_v</span>: the input image.</li>
+  <li><span class="tex">g</span>: the frozen CLIP vision encoder, and <span class="tex">\htmlClass{t-blue}{Z_v}</span> its grid of patch features: the blue grid in the figure, one vector per patch.</li>
+  <li><span class="tex">\htmlClass{t-green}{W}</span>: the trainable projection matrix, the green box. The same matrix is applied to every patch.</li>
+  <li><span class="tex">\htmlClass{t-blue}{H_v}</span>: the resulting visual tokens, one per patch, now the width of a word embedding: the blue part of the sequence bar.</li>
+</ul>
+<p>Which layer of the encoder to read turned out to matter a little. LLaVA uses the grid features from just before the encoder's last layer; on ScienceQA, the last layer instead gives <span data-claim="page-connectors-lastlayer">89.96%</span> against <span data-claim="llava-sqa-alone">90.92%</span>. The paper's explanation is that the final layer summarizes the image globally for CLIP's matching game, while the layer before still describes local detail.</p>
+
+<h3>How many tokens is a picture?</h3>
+<p>Every connector on this page answers the same question differently: how does the image reach the language model, and how many vectors does it cost? Press the four models in turn.</p>
+<p>Flamingo's resampler squeezes any grid into <span data-claim="flamingo-latents">64</span> latents, and those latents never enter the text sequence at all. New cross-attention layers (green) interleaved with the frozen language model's layers read them, so the sequence stays as long as the text. BLIP-2's Q-Former uses <span data-claim="page-connectors-blip2-32">32 queries</span>, and their outputs are prepended to the text as a short soft prompt. LLaVA does no squeezing: every patch becomes a token, <span data-computed>16 &times; 16 = 256</span> of them at <span data-claim="page-connectors-224">224</span> pixels, sitting in the sequence right next to the words.</p>
+<p>Now the prediction. LLaVA-1.5 moves to the <span data-claim="page-connectors-336">336</span>-pixel CLIP encoder, a <span data-computed>1.5</span> times wider image. Press it: the grid goes from <span data-computed>16 to 24</span> patches per side, and the token count goes from <span data-computed>256</span> to <span data-computed>24 &times; 24 = 576</span>, <span data-computed>2.25</span> times as many, because tokens grow with the square of the width. Press <b>Compare all four</b> for the whole picture. The trade is plain: LLaVA hands the language model everything the encoder saw and lets its full self-attention decide what matters, at the price of a sequence that the image mostly fills. <a href="#ch-recipes">The recipes chapter</a> returns to whether squeezing or keeping every patch is better, once someone tested it carefully.</p>
+
+<h3>LLaVA-1.5: three small edits</h3>
+<p>Half a year later, the same group asked what the simplest changes could buy. Three turned out to matter. The linear layer becomes a <span data-claim="page-connectors-mlp">two-layer MLP</span> (the paper cites the same switch helping in self-supervised learning; it does not state the activation). The encoder becomes the <span data-claim="page-connectors-336">336</span>-pixel CLIP, which is the <span data-computed>576</span>-token version above. And the training mix adds academic question-answering datasets such as VQAv2 and GQA.</p>
+<p>That last edit has a catch. Academic benchmarks want one-word answers ("yellow"), while chat data wants full sentences, and a model trained on both gets confused about which to give when. LLaVA-1.5's fix is to say which one you want, in plain words, at the end of every short-answer question: <span data-claim="llava15-format-prompt"><code>Answer the question using a single word or phrase.</code></span> Multiple-choice questions get <span data-claim="llava15-format-prompt-mc"><code>Answer with the option's letter from the given choices directly.</code></span> The paper shows the effect on a model that has only finished alignment pretraining: asked about a shirt's color with a normal prompt it says <span data-claim="page-connectors-long-answer">"The man is wearing a yellow shirt."</span>; with the formatting prompt appended it says <span data-claim="page-connectors-short-answer">"Yellow."</span></p>
+<table class="data">
+  <thead><tr><th>Change, added one at a time (7B unless noted)</th><th>GQA / MME / MM-Vet</th></tr></thead>
+  <tbody>
+    <tr><td>LLaVA, <span data-claim="page-connectors-224">224</span> px</td><td><span data-claim="llava15-abl-base">-- / 809.6 / 25.5</span></td></tr>
+    <tr><td>+ VQAv2 data</td><td><span data-claim="llava15-abl-vqa">47.0 / 1197.0 / 27.7</span></td></tr>
+    <tr><td>+ response formatting prompt</td><td><span data-claim="llava15-abl-format">46.8 / 1323.8 / 26.3</span></td></tr>
+    <tr><td>+ MLP connector</td><td><span data-claim="llava15-abl-mlp">47.3 / 1355.2 / 27.8</span></td></tr>
+    <tr><td>+ OKVQA and OCR data</td><td><span data-claim="llava15-abl-okvqa-ocr">50.0 / 1377.6 / 29.6</span></td></tr>
+    <tr><td>+ region-level VQA</td><td><span data-claim="llava15-abl-region">50.3 / 1426.5 / 30.8</span></td></tr>
+    <tr><td>+ <span data-claim="page-connectors-336">336</span> px</td><td><span data-claim="llava15-abl-res">51.4 / 1450 / 30.3</span></td></tr>
+    <tr><td>+ GQA data (GQA's training images now seen)</td><td><span data-claim="llava15-abl-gqa">62.0 / 1469.2 / 30.7</span></td></tr>
+    <tr><td>+ ShareGPT text-only conversations</td><td><span data-claim="llava15-abl-sharegpt">62.0 / 1510.7 / 31.1</span></td></tr>
+    <tr><td>+ 13B language model</td><td><span data-claim="llava15-abl-13b">63.3 / 1531.3 / 36.1</span></td></tr>
+  </tbody>
+</table>
+<p class="eqno">Scaling-results table of LLaVA-1.5 v2. MME is a sum of sub-scores (higher is better); GQA is accuracy; MM-Vet is a GPT-4-graded score.</p>
+<p>Two rows are big jumps: adding VQAv2 lifts MME by <span data-computed>almost 400</span> points, and adding GQA's own training data lifts GQA by <span data-computed>more than 10</span> points. The other changes are smaller, and the final model comes from stacking them all. The whole recipe is small: <span data-claim="llava15-pretrain-size">558K</span> image-caption pairs to align the connector, then a <span data-claim="llava15-mixture-total">665K</span>-example instruction mix, <span data-claim="llava15-total-data">1.2M publicly available</span> examples in total, trained in <span data-claim="page-connectors-day">~1 day on a single 8-A100 node</span> (<span data-claim="page-connectors-hours">~6 hours of pretraining and ~20 hours of visual instruction tuning</span>). With that, the paper reports <span data-claim="page-connectors-11">state-of-the-art across 11 benchmarks</span>, against models trained on hundreds of millions of pairs.</p>
+
+<h3>Inside LLaVA: forward, then backward</h3>
+<p>The connector figure showed how many tokens a picture costs; here is the whole training step around it, with the tensor shapes at every stage. The variant buttons switch between the two papers and between their two training stages, which differ architecturally in one thing: which boxes are allowed to learn (the data, learning rate, batch and epochs differ too).</p>
+
+<figure class="viz archflow" id="viz-llavaflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-llavaflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-llavaflow-encode" aria-pressed="false">2 CLIP</button>
+    <button type="button" id="btn-llavaflow-project" aria-pressed="false">3 Project</button>
+    <button type="button" id="btn-llavaflow-tokens" aria-pressed="false">4 Text</button>
+    <button type="button" id="btn-llavaflow-splice" aria-pressed="false">5 Splice</button>
+    <button type="button" id="btn-llavaflow-llm" aria-pressed="false">6 LLM</button>
+    <button type="button" id="btn-llavaflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-llavaflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-llavaflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model and training stage">
+    <span>variant</span>
+    <button type="button" id="btn-llavaflow-v1s1" aria-pressed="true">LLaVA stage 1</button>
+    <button type="button" id="btn-llavaflow-v1s2" aria-pressed="false">LLaVA stage 2</button>
+    <button type="button" id="btn-llavaflow-v15s1" aria-pressed="false">LLaVA-1.5 stage 1</button>
+    <button type="button" id="btn-llavaflow-v15s2" aria-pressed="false">LLaVA-1.5 stage 2</button>
+  </div>
+  <canvas id="llavaflow-canvas" role="img" aria-label="LLaVA's training step as a diagram: an image lane (blue) through the frozen CLIP encoder (brown) to its patch grid and a projector (green), and a text lane (yellow) through the language model's token embeddings, meeting in one spliced sequence that the language model reads before the loss (red). In the backward stages red arrows run from the loss back through the language model to the projector and stop at CLIP; in stage 1 the language model is brown (frozen), in stage 2 it is outlined red (trained)."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-llavaflow-prev">Previous</button>
+    <button type="button" id="btn-llavaflow-next">Next</button>
+    <button type="button" id="btn-llavaflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="llavaflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>The image lane (<b class="c-blue">blue</b>) ends in a <b class="c-green">green</b> projector, the text lane (<b class="c-yellow">yellow</b>) in the language model's embedding table, and the two merge into one sequence before the language model ever runs. Unlike Flamingo, nothing is inserted inside the language model: after the splice it is an ordinary text model reading an unusually long prompt. <b class="c-brown">Brown</b> boxes are frozen; which ones are brown depends on the variant. Press <b>1 Inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>1. An image and a conversation</h4>
+      <p>One example is a square image, <span data-claim="page-connectors-224">224</span> pixels for LLaVA and <span data-claim="page-connectors-336">336</span> for LLaVA-1.5, plus text. What the text is depends on the stage. Stage 1 uses caption pairs, <span data-claim="llava-cc3m-filtered">595K image-text pairs</span> filtered from CC3M for LLaVA (<span data-claim="llava15-pretrain-size">558K</span> for LLaVA-1.5), each turned into a one-turn chat: a randomly chosen "describe the image briefly" request, answered by the caption. Stage 2 uses the real conversations: the <span data-claim="llava-instruct-total">158K</span> GPT-4-written samples for LLaVA, the <span data-claim="llava15-mixture-total">665K</span> mix for LLaVA-1.5.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>2. The frozen CLIP encoder, read one layer early</h4>
+      <p>The encoder is the first chapter's <span data-claim="llava-clip-encoder">CLIP ViT-L/14</span> (for LLaVA-1.5, its <span data-claim="llava15-arch-encoder">CLIP-ViT-L-336px</span> version), with <span data-claim="clip-arch-l14-dims">24 / 1024</span> layers / width in CLIP's own table. <span data-claim="llava-arch-grid-quote">The grid features before and after the last Transformer layer are considered in our experiments</span>, and for its ScienceQA model the paper says <span data-claim="llava-arch-before-last">we use the visual features before the last layer</span>; it does not restate the choice for the chat model or for LLaVA-1.5 (our reading: the same layer). "Grid features" also means the <code>[class]</code> token is dropped: our reading, since the paper never mentions it. What remains is <span data-computed>16 &times; 16 = 256</span> vectors at 224 pixels, <span data-computed>24 &times; 24 = 576</span> at 336, each of width 1024.</p>
+    </div>
+    <div data-stage="project" hidden>
+      <h4>3. One matrix (or two layers) to word width</h4>
+      <p>LLaVA's connector is a <span data-claim="page-connectors-linear">simple linear layer</span>, Eq. 1's <span class="tex">H_v = W \cdot Z_v</span>, with output of <span data-claim="llava-arch-same-dim">the same dimensionality as the word embedding space in the language model</span>. We write that width <span class="tex">d_{\text{LLM}}</span>: neither paper states it, so, with <span class="tex">W</span> multiplying each 1024-number patch vector as in Eq. 1, <span class="tex">W</span> is <span class="tex">d_{\text{LLM}} \times 1024</span>. LLaVA-1.5 replaces it with a <span data-claim="page-connectors-mlp">two-layer MLP</span>, whose hidden width and activation the paper does not give. Either way the same weights are applied to every patch, so the token count does not change.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>4. The conversation becomes tokens</h4>
+      <p>The text is laid out in LLaVA's template (a system message, then <code>Human:</code> and <code>Assistant:</code> turns, each ending in <code>&lt;STOP&gt;</code>, which is <span data-claim="page-pipeline-stop"><code>###</code></span> in LLaVA), tokenized to <span class="tex">T</span> ids, and embedded by the language model's own table. The <a href="#viz-pipeline">training-step chapter</a> builds this template stage by stage.</p>
+    </div>
+    <div data-stage="splice" hidden>
+      <h4>5. Splice</h4>
+      <p>The visual tokens take the image's place in the first human turn: LLaVA's Eq. 2 writes the instruction as <span class="tex">[X_q^1, X_v]</span> or <span class="tex">[X_v, X_q^1]</span>, chosen at random. (Doing this by swapping an <code>&lt;image&gt;</code> placeholder token for the visual tokens is an implementation detail the paper does not describe.) From here on the language model sees one sequence of <span class="tex">256 + T</span> (LLaVA-1.5: <span class="tex">576 + T</span>) vectors, all of the same width, and cannot tell from the shape which came from pixels.</p>
+    </div>
+    <div data-stage="llm" hidden>
+      <h4>6. An ordinary language model</h4>
+      <p>The language model is <span data-claim="llava-arch-vicuna">Vicuna</span>: for ScienceQA the paper calls its main model the <span data-claim="llava-arch-13b">best 13B model</span> and trains a 7B only as an ablation; the chat model's size is not restated. LLaVA-1.5 uses <span data-claim="llava15-arch-vicuna">Vicuna v1.5</span> at <span data-claim="llava15-arch-sizes">7B and 13B</span>. It reads the spliced sequence with its usual causal self-attention, so every text token after the image can attend to every visual token. Its depth and width are not in these papers, which is why the shapes stay symbolic.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. Grade only the assistant</h4>
+      <p>The loss is next-token cross-entropy, but only where the model plays the assistant: it is <span data-claim="page-pipeline-predict">trained to predict the assistant answers and where to stop</span>. The visual tokens and the human's words are context, never targets. <a href="#eq-pipeline">The training-step chapter's Eq. 3</a> writes this out and draws the label row cell by cell; nothing about it changes between the stages.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. Same road back, different stops</h4>
+      <p>Switch between <b>LLaVA stage 1</b> and <b>LLaVA stage 2</b> here. In stage 1 the paper says <span data-claim="llava-arch-frozen-s1">we keep both the visual encoder and LLM weights frozen</span>, and the only trainable weights are <span data-claim="llava-arch-theta-s1">the projection matrix</span>. Yet the loss sits at the top of the language model and <span class="tex">W</span> sits below it, so the gradient has to run down through every frozen layer (brown, "gradient passes, no update") to reach it. The language model's embedding table, by contrast, is marked "gradient stops here": in stage 1 nothing upstream of it trains, so no gradient needs to be sent there. The paper's phrase for this stage is <span data-claim="page-pipeline-tokenizer">training a compatible visual tokenizer for the frozen LLM</span>.</p>
+      <p>For stage 2 the paper writes: <span data-claim="llava-arch-frozen-s2">We always keep the visual encoder weights frozen</span>. The trainable set grows to <span class="tex">\theta = \{W, \phi\}</span>, the projector plus the language model's weights <span class="tex">\phi</span> (we count the embedding table as part of <span class="tex">\phi</span>). CLIP is brown in all four variants and the gradient stops at its output. For LLaVA-1.5 the paper does not restate the frozen sets; it keeps LLaVA's two stages and <span data-claim="llava15-arch-same-hp">the same set of hyperparameters as the original LLaVA, except that we halve the learning rate in pretraining</span>, so the 1.5 variants follow LLaVA's pattern (our reading).</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p>LLaVA stage 1 trains for <span data-claim="page-pipeline-stage1-hp">1 epoch with a learning rate of 2e-3 and a batch size of 128</span>, stage 2 for <span data-claim="page-pipeline-stage2-hp">3 epochs, with a learning rate of 2e-5 and a batch size of 32</span>, both with the <span data-claim="llava-arch-optim">Adam optimizer with no weight decay and a cosine learning rate with a warmup ratio of 3%</span>, on <span data-claim="llava-hardware">8x A100</span>: stage 1 finishes <span data-claim="llava-time-stage1">within 4 hours</span>, stage 2 <span data-claim="llava-time-stage2">within 10 hours</span>. LLaVA-1.5 uses batch <span data-claim="page-pipeline-l15-pre-bs">256</span> and learning rate <span data-claim="page-pipeline-l15-pre-lr">1e-3</span> for stage 1, batch <span data-claim="page-pipeline-l15-ft-bs">128</span> and <span data-claim="page-pipeline-l15-ft-lr">2e-5</span> for stage 2, <span data-claim="page-pipeline-l15-epoch">1</span> epoch each, with <span data-claim="llava15-arch-adamw">AdamW</span> (<span data-claim="llava15-arch-sched">cosine decay, warmup ratio 0.03, weight decay 0</span>) and DeepSpeed stages <span data-claim="llava15-arch-deepspeed">2 / 3</span>, taking <span data-claim="page-connectors-hours">~6 hours of pretraining and ~20 hours of visual instruction tuning</span>. The step counts under the drawing are examples divided by batch size, times epochs: computed, not stated.</p>
+    </div>
+  </div>
+  <figcaption>Computed: token counts from the input resolution and the 14-pixel patch; the encoder width from CLIP's appendix table; step counts from dataset size, batch size and epochs. The language model's width <span class="tex">d_{\text{LLM}}</span>, its depth, the MLP's hidden width and the text length <span class="tex">T</span> stay symbolic because neither paper gives them. Before you open stage 8 in stage 1, guess: the language model is frozen and sits between the loss and the projector. Does the gradient reach the projector, and does it reach CLIP?</figcaption>
+</figure>
+
+<p>The step counts show how small this recipe is. LLaVA's stage 1 is <span data-computed>about 4,650</span> updates and its stage 2 <span data-computed>about 14,800</span>; LLaVA-1.5's are <span data-computed>about 2,180</span> and <span data-computed>about 5,200</span>, with larger batches and a single epoch (more data only in stage 2: 558K vs 595K in stage 1). One inconsistency: LLaVA-1.5 says the authors <span data-claim="llava15-arch-roughly">keep the training iterations and batch size roughly the same for instruction tuning as LLaVA</span>, yet its own table (batch 128, 1 epoch over 665K) gives the counts above, about a third of LLaVA's; and "the same set of hyperparameters" quoted in stage 8 holds only loosely, since batch sizes and epochs differ too. Stage 1 is cheap for another reason too: it updates only the projector, a single <span class="tex">d_{\text{LLM}} \times 1024</span> matrix in LLaVA, though every one of its steps still pays for a full forward and backward pass through the frozen language model.</p>
+
+<p>So a LLaVA-style model is three parts (a frozen encoder, a small learned bridge, a language model) plus a pile of image conversations. But how does a training step actually turn an image and a conversation into a gradient? What exactly is in a batch, which tokens is the model graded on, and which weights move? The next chapter walks one step through, end to end.</p>
+</section>

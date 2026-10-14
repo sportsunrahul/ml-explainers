@@ -1,0 +1,53 @@
+
+<section id="ch-map" class="chapter">
+<h2>The field now</h2>
+<p>How big did this get? On <span data-claim="scan-date">2026-10-09</span> the arXiv API returned <span data-claim="scan-deep">2,488</span> papers that name Mamba in the title or abstract, or describe a selective or structured state space, or state-space duality, in the abstract. <span data-claim="scan-2023">31</span> were first posted in 2023, <span data-claim="scan-2024">757</span> in 2024, <span data-claim="scan-2025">923</span> in 2025 and <span data-claim="scan-2026">749</span> in 2026 up to the scan. The busiest month so far was May 2026, with <span data-claim="scan-peak-count">112</span>.</p>
+
+<figure class="viz" id="viz-map" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="map-svg" role="img" aria-label="A bar chart of arXiv papers on Mamba and selective state-space models per month, from December 2023 to October 2026, rising to about one hundred a month, with marks at the releases of Mamba, Mamba-2 and Mamba-3; and a horizontal bar chart of a title-keyword split into domains, led by general vision, architecture and theory, and medical imaging."></svg>
+  <div class="controls">
+    <button type="button" id="btn-map-months" data-view="months" aria-pressed="true">Papers per month</button>
+    <button type="button" id="btn-map-domains" data-view="domains" aria-pressed="false">By domain (title keywords)</button>
+    <button type="button" id="btn-map-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="map-readout" aria-live="polite"></p>
+  <figcaption>Sourced from four arXiv API queries run on <span data-claim="scan-date">2026-10-09</span>: title Mamba (<span data-claim="scan-q-ti-mamba">1,122</span> results), abstract Mamba (<span data-claim="scan-q-abs-mamba">2,235</span>), abstract "selective state space", "structured state space" or "state space duality" (<span data-claim="scan-q-abs-ssm">470</span>), and title "state space model(s)" in machine learning, vision, language, audio and signal categories (<span data-claim="scan-q-ti-ssm">925</span>). Deduplicated by id (<span data-claim="scan-records">2,941</span> records) and dated by first submission. The solid bars are the first three queries; the light bars are the <span data-claim="scan-title-only">453</span> papers only the title query found, many of them classical filtering and control. The domain split is a title-keyword heuristic; the October bar is a partial month.</figcaption>
+</figure>
+
+<div class="aside">
+  <h4>Claim card: what this count can and cannot see</h4>
+  <p><b>Claim.</b> The scan finds <span data-claim="scan-deep">2,488</span> arXiv papers that build on or name Mamba-style state-space models, at between about 50 and 110 a month since mid-2024.</p>
+  <p><b>How.</b> The arXiv API, paginated to completion; the raw records with abstracts are kept in the project. Of the <span data-claim="scan-pre-mamba">56</span> records before December 2023, <span data-claim="scan-pre-s4era">45</span> match the structured-state-space query (most from the S4 era, some earlier control and logic papers) and <span data-claim="scan-pre-mambaword">11</span> only contain the word Mamba, several for unrelated software. <b>What it misses:</b> arXiv matches Mamba as a whole word, so titles like VMamba or MambaOut count only when the abstract also says "Mamba"; the linear-attention and gated-RNN families (RetNet, GLA, DeltaNet, Griffin, xLSTM, RWKV) use neither name and were added to the family tree by hand. <b>What would change it:</b> a wildcard or full-text search, or a classifier on abstracts instead of titles.</p>
+</div>
+
+<h3>Where state-space models went</h3>
+<p>Switch the figure to the domain view and one thing stands out: most of this work is not about language. By title keywords, general vision leads with <span data-claim="scan-dom-images">469</span> papers, model architecture and theory follow with <span data-claim="scan-dom-architecture">417</span>, and medical imaging has <span data-claim="scan-dom-medical">332</span>, about twice the <span data-claim="scan-dom-language">158</span> about language and large language models. Video (<span data-claim="scan-dom-video">156</span>), time series (<span data-claim="scan-dom-time">145</span>), 3D and point clouds (<span data-claim="scan-dom-3d">143</span>), remote sensing (<span data-claim="scan-dom-remote">136</span>) and audio (<span data-claim="scan-dom-audio">129</span>) are close behind. Our reading: these are the fields where inputs are long and high-resolution (3D scans, slide images, hyperspectral cubes, long recordings), so a cost linear in length is worth a lot. The chapter on vision is the caution: on short sequences the state-space part may not be what helps.</p>
+
+<h3>The family tree</h3>
+<figure class="viz" id="viz-tree" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="tree-svg" role="img" aria-label="A family tree of 40 papers placed by first arXiv date on a horizontal time axis and grouped into lanes: state spaces, linear attention, linear RNNs, vision, hybrids, and analyses of limits. Arcs join each paper to the earlier papers it builds on."></svg>
+  <div class="controls">
+    <button type="button" id="btn-tree-spine" data-show="spine" aria-pressed="true">Papers read in full</button>
+    <button type="button" id="btn-tree-all" data-show="all" aria-pressed="false">Every branch</button>
+    <button type="button" id="btn-tree-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Sourced: dates are first arXiv submissions from each abstract page; one-line summaries and headline numbers come from the papers (abstracts for the branches that were not read in full). The arcs follow what each paper says it builds on; four of them (Hyena, RetNet, Hymba, Falcon-H1) are this page's reading. Editorial, not a citation graph.</figcaption>
+</figure>
+
+<p>Three lines run through the tree. The state-space line goes from HiPPO's memory to S4's structure, to the diagonal simplifications (DSS, S4D, S5), to H3's gates, to Mamba's selection and Mamba-2's duality. The linear-attention line starts from the observation that dropping softmax turns attention into a recurrence, and adds gates (RetNet, GLA) and then a smarter write rule (DeltaNet). The linear-RNN line (LRU, Griffin, xLSTM, minGRU) arrives at the same place from the RNN side. Mamba-2 is where the first two meet: chapter 9 showed they compute the same matrix.</p>
+
+<h3>What came next</h3>
+<p>Mamba-3's own introduction names two layers as the ones used in production hybrids: Mamba-2 and Gated DeltaNet. So the latest step is a pair, not a single winner. Gated DeltaNet combines Mamba-2's decay gate, which erases memory quickly, with the delta rule, which overwrites one stored association instead of adding on top of it. Mamba-3 changes the discretization (an exponential-trapezoidal rule instead of zero-order hold), lets the state rotate with complex values, and processes several inputs per state update (MIMO) to use the hardware better. At 1.5 billion parameters its single-input version averages <span data-claim="mamba3-siso-1p5b-avg">56.4</span> on its downstream suite against <span data-claim="mamba3-gdn-1p5b-avg">55.8</span> for Gated DeltaNet, and the MIMO version <span data-claim="mamba3-mimo-1p5b-avg">57.6</span> (Mamba-3 Table 3).</p>
+<p>In deployed models the hybrid won. Nemotron-H reports up to <span data-claim="nemotronh-speed">3x</span> faster inference than Transformers of similar size, and Falcon-H1 claims to match or beat models up to <span data-claim="falconh1-rival">70B</span> parameters, both with attention layers kept for lookup.</p>
+
+<h3>Open questions</h3>
+<ul>
+  <li><b>How much state is enough?</b> Recall improves with state size (chapter 11), and Mamba-3 reaches Mamba-2's quality with a smaller state (chapter 9 and the family tree). Where the curve flattens for real long-context tasks is not settled.</li>
+  <li><b>How much attention is enough?</b> The studies in chapter 12 land near 7 to 8 percent of all layers, or roughly 12 to 16 percent of the sequence-mixing layers, measured on different models and data. Nobody has a rule.</li>
+  <li><b>When does vision need a state space?</b> MambaOut's answer is "only for long sequences". Dense prediction, video and 3D medical volumes are where that claim will be tested.</li>
+  <li><b>Can a recurrence track state exactly?</b> Fixed-depth SSMs and transformers share the same limit on tracking state (the Illusion of State card in chapter 11). Whether input-dependent, complex or non-diagonal transitions escape it in practice is open.</li>
+</ul>
+</section>

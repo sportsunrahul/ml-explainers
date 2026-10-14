@@ -1,0 +1,173 @@
+[
+ {
+  "id": "beat-gans-fid-in128",
+  "claim": "ADM-G FID on ImageNet 128x128 (250 steps) vs BigGAN-deep",
+  "value": "2.97 vs 6.02",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 128x128 block, rows ADM-G and BigGAN-deep",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-fid-in256",
+  "claim": "ADM-G FID on ImageNet 256x256 (250 steps) vs BigGAN-deep",
+  "value": "4.59 vs 6.95",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 256x256 block, rows ADM-G and BigGAN-deep",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-fid-in512",
+  "claim": "ADM-G FID on ImageNet 512x512 (250 steps) vs BigGAN-deep",
+  "value": "7.72 vs 8.43",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 512x512 block, rows ADM-G and BigGAN-deep",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-recall-in256",
+  "claim": "Recall on ImageNet 256x256, ADM-G vs BigGAN-deep (diffusion covers more modes)",
+  "value": "0.52 vs 0.28",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 256x256 block, Rec column",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-ddim25-fids",
+  "claim": "ADM-G FID with 25 DDIM steps on ImageNet 128/256/512",
+  "value": "5.98 / 5.44 / 8.41",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, rows ADM-G (25 steps)",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-upsample-fids",
+  "claim": "Best FID combining guided base model with upsampling stack (ADM-G + ADM-U, 250+250 steps) on ImageNet 256 and 512",
+  "value": "3.94 (256) / 3.85 (512)",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 6, rows ADM-G, ADM-U 250/250",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-cond-unguided",
+  "claim": "Class-conditional ADM on ImageNet 256 without guidance: FID / IS / precision / recall",
+  "value": "10.94 / 100.98 / 0.69 / 0.63",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, row Conditional=yes, Guidance=no",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-cond-s1",
+  "claim": "Class-conditional ADM on ImageNet 256 with classifier guidance scale 1.0: FID / IS / precision / recall",
+  "value": "4.59 / 186.70 / 0.82 / 0.52",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, row Conditional=yes, Guidance=yes, Scale 1.0",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-cond-s10",
+  "claim": "Class-conditional ADM on ImageNet 256 with classifier guidance scale 10.0: FID / IS / precision / recall (too much guidance hurts FID, raises IS and precision, lowers recall)",
+  "value": "9.11 / 283.92 / 0.88 / 0.32",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, row Conditional=yes, Guidance=yes, Scale 10.0",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-uncond",
+  "claim": "Unconditional ADM on ImageNet 256: FID unguided vs classifier scale 1.0 vs 10.0",
+  "value": "26.21 vs 33.03 vs 12.00",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, rows Conditional=no",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-tradeoff-statement",
+  "claim": "Scaling classifier gradients beyond 1.0 smoothly trades recall for higher precision and IS; FID and sFID are best at an intermediate scale",
+  "value": "qualitative (Figure 4 sweep, ImageNet 128)",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Sec 4.3 last paragraph; Figure 4",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-scales-used",
+  "claim": "Classifier gradient scale used for reported results, ImageNet 64/128/256/512",
+  "value": "250 steps: 1.0 / 0.5 / 1.0 / 4.0; 25 DDIM steps: - / 1.25 / 2.5 / 9.0",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 14",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-arch-final",
+  "claim": "Final ADM architecture: attention at 32, 16 and 8 resolutions, 64 channels per head, 2 residual blocks per resolution, BigGAN residual blocks for up/downsampling, adaptive group normalization",
+  "value": "attn 32,16,8; 64 ch/head; BigGAN up/down; AdaGN",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Sec 3.1 last paragraph (Table 11 exceptions: IN64 depth 3; IN128 uses 4 heads)",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-arch-ablation",
+  "claim": "FID change vs baseline (15.33 at 700K iters, ImageNet 128) from all architecture changes combined (160 ch, depth 2, 4 heads, attn 32,16,8, BigGAN up/down)",
+  "value": "-3.14 at 700K, -3.00 at 1200K",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 1, last row",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-adagn",
+  "claim": "FID with AdaGN vs Addition + GroupNorm (DDPM style) for injecting timestep/class embeddings",
+  "value": "13.06 vs 15.08",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-vs-iddpm-in64",
+  "claim": "ImageNet 64 FID: IDDPM (class-conditional) vs ADM vs ADM (dropout), without guidance",
+  "value": "2.92 vs 2.61 vs 2.07",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 64x64 block",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-lsun-bedroom",
+  "claim": "LSUN Bedrooms 256 FID, ADM (dropout) vs StyleGAN",
+  "value": "1.90 vs 2.35",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, LSUN Bedrooms block",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-sampling-steps",
+  "claim": "ImageNet diffusion models sampled with 250 steps, or 25 steps with DDIM; DDIM used whenever fewer than 50 steps",
+  "value": "250 / 25 (DDIM)",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5 caption; Sec 2.1 last paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-model-size-in256",
+  "claim": "ImageNet 256 diffusion model size and training iterations (batch 256)",
+  "value": "554M params, 1980K iterations",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 11, ImageNet 256 column",
+  "uncertain": false
+ }
+]

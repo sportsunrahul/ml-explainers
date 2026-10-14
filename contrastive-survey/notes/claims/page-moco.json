@@ -1,0 +1,74 @@
+[
+ {
+  "id": "moco-mom-K",
+  "claim": "MoCo momentum ablation queue size",
+  "value": "4096",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "Sec. 4.1 Ablation: momentum, '(K = 4096 here)'"
+ },
+ {
+  "id": "moco-derived-k4096-batches",
+  "claim": "batches of keys in a K = 4096 queue at batch 256",
+  "value": "16",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "derived here: 4096 / 256 (moco-mom-K, moco-batch)"
+ },
+ {
+  "id": "moco-derived-queue-batches",
+  "claim": "batches of keys in the K = 65536 queue at batch 256; the oldest key is this many steps old",
+  "value": "256",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "derived here: 65536 / 256 (moco-K, moco-batch)"
+ },
+ {
+  "id": "moco-derived-steps-epoch",
+  "claim": "training steps per ImageNet epoch at batch 256 (1.28M images)",
+  "value": "5000",
+  "paper": "Wu 2018 / MoCo",
+  "arxiv": "1805.01978v1",
+  "loc": "derived here: 1.28M / 256 = 5000 (wu2018-bank-size, moco-batch, wu2018-batch)"
+ },
+ {
+  "id": "moco-derived-halflife",
+  "claim": "steps for the key encoder to close half its gap at m = 0.999 (theta_q held fixed)",
+  "value": "693",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "derived here from Eq. 2: ln 2 / -ln 0.999 = 692.8"
+ },
+ {
+  "id": "moco-derived-move-256",
+  "claim": "fraction of the gap the key encoder closes over 256 steps at m = 0.999 (theta_q held fixed)",
+  "value": "23%",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "derived here from Eq. 2: 1 - 0.999^256 = 0.226"
+ },
+ {
+  "id": "moco-derived-left-5000",
+  "claim": "fraction of the gap left after 5000 steps at m = 0.999 (theta_q held fixed)",
+  "value": "0.7%",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "derived here from Eq. 2: 0.999^5000 = 0.0067"
+ },
+ {
+  "id": "moco-derived-e2e-neg",
+  "claim": "negatives per query for end-to-end at K = 1024 (K - 1)",
+  "value": "1023",
+  "paper": "MoCo",
+  "arxiv": "1911.05722v3",
+  "loc": "derived here: Fig. 3 caption says end-to-end uses K - 1 negatives; 1024 - 1"
+ },
+ {
+  "id": "mocov3-mom-gain",
+  "claim": "MoCo v3 ViT-B 300 ep: gain from the momentum encoder (m = 0.99 vs m = 0)",
+  "value": "2.2",
+  "paper": "MoCo v3",
+  "arxiv": "2104.02057v4",
+  "loc": "Sec. 6.2 Momentum encoder: 'The usage of the momentum encoder leads to 2.2% increase'"
+ }
+]

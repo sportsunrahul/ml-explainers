@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transformers and LLMs, explained in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F1F2F6;--panel:#FAFBFD;--ink:#1B1E2B;--muted:#5A6075;--line:#D0D4DF;
+ --q:#3563D6;--k:#D9822B;--v:#1F9D6B;--acc:#7A4FD0;--pro:#1F9D6B;--con:#C2410C;
+ --sans:"Red Hat Display","Helvetica Neue",Arial,sans-serif;--serif:"Spectral",Georgia,serif;--hw:900}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#111320;--panel:#191C2B;--ink:#E7E9F2;--muted:#9DA3B8;--line:#2C3045;--q:#7AA0FF;--k:#F2A65A;--v:#4CCB98;--acc:#A98BFF;--pro:#4CCB98;--con:#FB8A4C}}
+:root[data-theme="dark"]{--paper:#111320;--panel:#191C2B;--ink:#E7E9F2;--muted:#9DA3B8;--line:#2C3045;--q:#7AA0FF;--k:#F2A65A;--v:#4CCB98;--acc:#A98BFF;--pro:#4CCB98;--con:#FB8A4C}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18.5px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:var(--muted);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.prose{max-width:700px}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:var(--hw,700)}
+h1{font-size:clamp(46px,8.6vw,108px);line-height:.9;letter-spacing:-.04em;margin:0 0 22px}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.03;letter-spacing:-.025em;margin:0 0 14px}
+h3{font-size:24px;line-height:1.2;margin:40px 0 10px}
+h4{font-size:18px;margin:22px 0 6px}
+p{margin:0 0 16px}
+.lede{font-size:21px;line-height:1.55;color:var(--muted);max-width:640px}
+.part{font-family:var(--sans);font-size:15px;color:var(--muted);display:block;margin-bottom:6px}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav.top .brand{font-family:var(--sans);font-weight:800;margin-right:14px;white-space:nowrap}
+nav.top a{font-family:var(--sans);font-size:15px;text-decoration:none;padding:6px 11px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+nav.top a:hover{color:var(--ink);background:var(--panel)}
+header.hero{padding:54px 0 20px}
+section{padding:52px 0 20px;border-top:1px solid var(--line)}
+figure.fig{margin:26px 0 34px;background:var(--panel);border:1px solid var(--line);border-radius:var(--rad,12px);overflow:hidden}
+.canvas{position:relative;height:clamp(300px,50vw,470px);touch-action:pan-y;cursor:grab;user-select:none}
+.canvas:active{cursor:grabbing}
+.canvas canvas{display:block;width:100%;height:100%}
+.canvas .hint{position:absolute;right:12px;top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);pointer-events:none;background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 8px;border-radius:6px}
+.canvas .nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans);color:var(--muted)}
+.pad{padding:18px}
+figcaption{padding:14px 18px 16px;border-top:1px solid var(--line);font-family:var(--sans);font-size:15px;line-height:1.5}
+figcaption p{margin:8px 0 0;color:var(--muted);max-width:780px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{border:1px solid var(--line);border-radius:8px}
+.btn:hover,.seg button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--ink) 7%,transparent)}
+label.ctl{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+input[type=range]{accent-color:var(--acc);width:160px}
+input[type=checkbox]{accent-color:var(--acc);width:17px;height:17px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--acc) 11%,transparent);font-size:14.5px}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);margin-right:14px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.eq{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 16px;margin:14px 0 18px;overflow-x:auto;font-size:16.5px;line-height:1.7;white-space:nowrap}
+.eq small{display:block;white-space:normal;color:var(--muted);font-size:14px;margin-top:4px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.84em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14.5px;line-height:1.5}
+pre code{background:none;padding:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:720px){.pc{grid-template-columns:1fr}}
+.pc>div{border:1px solid var(--line);border-radius:12px;padding:14px 18px 6px;background:var(--panel)}
+.pc h4{margin-top:0}.pc .pro h4{color:var(--pro)}.pc .con h4{color:var(--con)}
+.pc ul{margin:0;padding-left:20px;font-size:16.5px;line-height:1.55}.pc li{margin-bottom:10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:18px 0 28px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:9px 14px;border-bottom:1px solid var(--line)}
+thead th{font-size:15px;border-bottom:2px solid var(--line)}
+tbody th{font-weight:700}
+td.y{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td,tr:last-child th{border-bottom:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.chips span{padding:3px 6px;border-radius:5px;white-space:pre}
+textarea{width:100%;font:inherit;font-family:var(--sans);font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--paper);color:var(--ink);resize:vertical}
+footer{border-top:1px solid var(--line);padding:32px 0 56px;font-family:var(--sans);font-size:14.5px;color:var(--muted)}
+footer ul{padding-left:18px}
+
+h3,h4{font-weight:700}
+.qc{color:var(--q);font-weight:600}.kc{color:var(--k);font-weight:600}.vc{color:var(--v);font-weight:600}
+.toks{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 0;font-family:var(--sans);font-weight:700}
+.toks span{padding:4px 10px;border-radius:6px;font-size:18px}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Sections"><div class="wrap"><span class="brand">Transformers in 3D</span>
+ <a href="#lm">Language models</a><a href="#tok">Tokens</a><a href="#attn">Attention</a><a href="#block">The block</a><a href="#pos">Positions</a>
+ <a href="#gen">Generation</a><a href="#kv">KV cache</a><a href="#scale">Scaling laws</a><a href="#eff">Efficiency</a><a href="#limits">Limits</a></div></nav>
+
+<header class="hero"><div class="wrap">
+ <h1>Attention, all the way down</h1>
+ <p class="lede">How the Transformer works, how a large language model turns it into a text generator, and the engineering (caches, kernels, experts, quantisation and adapters) that makes it affordable to train and run.</p>
+ <div class="toks" aria-hidden="true"><span style="background:color-mix(in srgb,var(--q) 18%,transparent)">The</span><span style="background:color-mix(in srgb,var(--k) 18%,transparent)">▁cat</span><span style="background:color-mix(in srgb,var(--v) 18%,transparent)">▁sat</span><span style="background:color-mix(in srgb,var(--acc) 18%,transparent)">▁on</span><span style="background:color-mix(in srgb,var(--q) 18%,transparent)">▁the</span><span style="background:color-mix(in srgb,var(--k) 18%,transparent)">▁mat</span><span style="border:1px dashed var(--muted);color:var(--muted)">▁?</span></div>
+</div></header>
+
+<main>
+<section id="lm"><div class="wrap prose">
+ <span class="part">1</span><h2>What a language model does</h2>
+ <p>A large language model (LLM) does one thing: given a sequence of tokens, it outputs a probability distribution over the next token. Generating text is just repeating that: pick a token, append it, predict again. Everything interesting (answering questions, writing code, reasoning) emerges from doing this one prediction extremely well after training on trillions of tokens.</p>
+ <p>The network that makes the prediction is almost always a <strong>decoder-only Transformer</strong>. The original Transformer (Vaswani et al., 2017) was an encoder–decoder for translation; GPT kept only the decoder half, with a mask so each position can only look backwards. That design, scaled from GPT-2 (1.5B parameters, 2019) to GPT-3 (175B, 2020) and beyond, is the basis of nearly every modern LLM.</p>
+</div></section>
+
+<section id="tok"><div class="wrap">
+ <div class="prose">
+  <span class="part">2</span><h2>Tokenisation</h2>
+  <p>Models don't read characters or words; they read <strong>tokens</strong>, chunks from a fixed vocabulary. Characters make sequences too long; whole words can't handle new words or typos. The standard compromise is <strong>byte-pair encoding</strong> (BPE, Sennrich et al., 2016): start from single characters (or bytes), repeatedly find the most frequent adjacent pair in the training corpus, and merge it into a new token. Frequent words become single tokens; rare words split into familiar pieces. GPT-2 used about 50,000 tokens; Llama 3 uses about 128,000.</p>
+  <p>Below, a real BPE tokenizer is trained live in your browser on a short paragraph about machine learning. Increase the number of merges and watch common words fuse into single tokens. A leading <code>▁</code> marks a space, as in SentencePiece.</p>
+ </div>
+ <figure class="fig" id="f-bpe"><div class="pad">
+   <label class="ctl" style="display:flex">Merges learned <input type="range" id="bpe-m" min="0" max="400" value="120"><span class="readout" id="bpe-mv"></span></label>
+   <textarea id="bpe-in" rows="2" aria-label="Text to tokenise">The transformer model learns attention patterns. Tokenization of unbelievably rare words splits them.</textarea>
+   <div class="chips" id="bpe-out" aria-live="polite"></div>
+  </div>
+  <figcaption><div class="readout" id="bpe-read"></div><p>Tokens the tokenizer saw often (“▁the”, “▁model”, “tion”) merge first. Words it never saw break into short pieces, which is why LLMs struggle with spelling, counting letters and arithmetic on long numbers: they never see the individual characters.</p></figcaption></figure>
+</div></section>
+
+<section id="attn"><div class="wrap">
+ <div class="prose">
+  <span class="part">3</span><h2>Attention</h2>
+  <p>Each token starts as a learned <strong>embedding</strong> vector. Attention is how tokens exchange information. Every token produces three vectors through learned linear maps: a <span class="qc">query</span> (what am I looking for?), a <span class="kc">key</span> (what do I contain?) and a <span class="vc">value</span> (what will I pass on?). Each token compares its query to every key, turns the scores into weights with a softmax, and takes the weighted average of the values.</p>
+  <div class="eq">Attention(Q, K, V) = softmax( Q Kᵀ / √d<sub>k</sub> + M ) V
+   <small>d<sub>k</sub> is the key dimension; dividing by √d<sub>k</sub> keeps the scores from growing with dimension and saturating the softmax. M is the <strong>causal mask</strong>: −∞ above the diagonal, so token i can only attend to tokens 1…i. Without it (as in BERT-style encoders), attention is bidirectional.</small></div>
+  <p><strong>Multi-head attention</strong> runs several attentions in parallel with separate projections (for example 32 heads of dimension 128 in a 4096-wide model), concatenates the results and projects back. Different heads learn different jobs. Some famous ones: <em>previous-token heads</em>, <em>induction heads</em> that copy patterns seen earlier in the context, and heads that resolve pronouns.</p>
+ </div>
+ <figure class="fig" id="f-attn"><div class="canvas" role="img" aria-label="3D bar chart of an attention matrix for an 11-token sentence, with a causal mask and selectable heads"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls">
+    <div class="seg" role="group" aria-label="Head" id="at-head"><button type="button" data-h="prev" aria-pressed="true">Previous-token head</button><button type="button" data-h="coref">Pronoun head</button><button type="button" data-h="rand">Untrained head</button></div>
+    <label class="ctl"><input type="checkbox" id="at-mask" checked> Causal mask</label>
+    <label class="ctl">Score scale <input type="range" id="at-t" min="10" max="300" value="100"></label></div>
+   <div class="controls" style="margin-top:10px"><span class="ctl">Query token</span><div class="seg" role="group" aria-label="Query token" id="at-q"></div></div>
+   <div class="status" id="at-read" aria-live="polite"></div>
+   <p>Rows are queries, columns are keys; each row sums to 1. The two trained-looking heads use hand-set score patterns that mimic heads found in real models; the untrained head uses random projections. Turn off the mask to see an encoder that can look ahead. Many real heads also dump attention on the first token, an “attention sink”.</p></figcaption></figure>
+</div></section>
+
+<section id="block"><div class="wrap prose">
+ <span class="part">4</span><h2>The Transformer block</h2>
+ <p>A model is a stack of identical blocks (32 in Llama 3 8B, 126 in Llama 3 405B). The key idea is the <strong>residual stream</strong>: a vector per token that flows through the whole network, and each block <em>adds</em> something to it rather than replacing it.</p>
+ <div class="eq">h = x + Attention( Norm(x) ) &nbsp;&nbsp; → &nbsp;&nbsp; out = h + MLP( Norm(h) )
+  <small>This is the “pre-norm” arrangement used by modern models; the original put the norm after the addition, which is harder to train deep. RMSNorm (rescaling by the root-mean-square, no mean subtraction) has largely replaced LayerNorm.</small></div>
+ <p>The <strong>MLP</strong> (feed-forward network) is applied to each token independently: expand to about 4× the width, apply a non-linearity, project back. Modern models use a gated variant, <strong>SwiGLU</strong>: SiLU(xW₁) ⊙ (xW₃) · W₂. Attention moves information <em>between</em> tokens; the MLP processes it <em>within</em> each token and holds much of the model's stored knowledge. Roughly two-thirds of the parameters live in MLPs. A useful rule of thumb: a model with L layers and width d has about 12·L·d² parameters.</p>
+ <p>At the end, a final norm and a linear “unembedding” map the last residual vector to one logit per vocabulary token, and a softmax turns those into next-token probabilities.</p>
+</div></section>
+
+<section id="pos"><div class="wrap">
+ <div class="prose">
+  <span class="part">5</span><h2>Positional encodings</h2>
+  <p>Attention by itself ignores order: shuffle the tokens and each output is unchanged apart from being shuffled too. Position must be injected. The original paper added fixed <strong>sinusoidal</strong> vectors to the embeddings; GPT-2 learned one vector per position. Both tie the model to the lengths it was trained on.</p>
+  <p><strong>RoPE</strong> (rotary position embedding, Su et al., 2021), now standard, rotates the query and key vectors instead. Split each vector into pairs of dimensions; rotate pair i by an angle proportional to position m and a frequency θ<sub>i</sub> = base<sup>−2i/d</sup>. Because rotations compose, the dot product between a query at position m and a key at position n depends only on m − n. Relative position comes for free.</p>
+  <div class="eq">⟨ R(mθ) q, R(nθ) k ⟩ = ⟨ q, R((n − m)θ) k ⟩
+   <small>Low-index pairs spin fast and track fine, local order; high-index pairs spin slowly and track long-range position. Context-extension tricks such as position interpolation and YaRN rescale these frequencies so a model trained on 8k tokens can handle 128k.</small></div>
+ </div>
+ <figure class="fig" id="f-rope"><div class="canvas" role="img" aria-label="Four stacked discs, one per dimension pair, with query and key arrows rotated by their positions"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls">
+    <label class="ctl">Query position m <input type="range" id="rp-m" min="0" max="40" value="6"><span class="readout" id="rp-mv"></span></label>
+    <label class="ctl">Key position n <input type="range" id="rp-n" min="0" max="40" value="2"><span class="readout" id="rp-nv"></span></label>
+    <button class="btn" type="button" id="rp-shift">Shift both by +5</button></div>
+   <div class="status" id="rp-read" aria-live="polite"></div>
+   <p>Each disc is one pair of dimensions. The <span class="qc">query</span> and <span class="kc">key</span> arrows keep their content but are rotated by their positions. Shift both positions together and every angle between arrows is unchanged, so the attention score stays the same. The frequency base here is 100 so all four discs visibly rotate; real models use 10,000 or more.</p></figcaption></figure>
+</div></section>
+
+<section id="gen"><div class="wrap prose">
+ <span class="part">6</span><h2>Training and generation</h2>
+ <p><strong>Pretraining</strong> uses plain cross-entropy on the next token at every position at once. Thanks to the causal mask, one forward pass over a 4,096-token sequence gives 4,096 training examples. This is called teacher forcing: the model always sees the true previous tokens during training.</p>
+ <div class="eq">L = − (1/T) Σ<sub>t</sub> log p<sub>θ</sub>( x<sub>t</sub> | x<sub>&lt;t</sub> )</div>
+ <p><strong>Generation</strong> turns the predicted distribution into a choice. Greedy decoding takes the top token and tends to loop. <strong>Temperature</strong> divides logits by T before the softmax: T &lt; 1 sharpens, T &gt; 1 flattens. <strong>Top-k</strong> keeps the k most likely tokens; <strong>top-p</strong> (nucleus) sampling keeps the smallest set whose probabilities sum to p. Generation has two phases with different costs: <em>prefill</em> processes the whole prompt in parallel and is compute-bound; <em>decode</em> produces one token at a time and is limited by memory bandwidth. That asymmetry is why the next section matters.</p>
+</div></section>
+
+<section id="kv"><div class="wrap">
+ <div class="prose">
+  <span class="part">7</span><h2>The KV cache</h2>
+  <p>When generating token t, attention needs the keys and values of all earlier tokens. They never change, because causal masking means earlier tokens never see later ones. So instead of recomputing them every step, the model stores them: the <strong>KV cache</strong>. Each step then only computes the new token's query, key and value. This turns generation from quadratic to linear in work, at the cost of memory that grows with context length.</p>
+  <div class="eq">KV memory = 2 × layers × KV heads × head dim × tokens × bytes per value
+   <small>The 2 is for keys and values. For a Llama-3-8B-sized model (32 layers, 8 KV heads of dimension 128, 16-bit) that is 128 KiB per token, or 1 GiB for an 8,192-token context, per sequence.</small></div>
+  <p>To shrink the cache, <strong>multi-query attention</strong> (MQA, Shazeer 2019) shares one key/value head across all query heads, and <strong>grouped-query attention</strong> (GQA, Ainslie et al., 2023) shares each key/value head across a group. PagedAttention (vLLM) stores the cache in fixed-size pages, like virtual memory, so many requests can share a GPU efficiently.</p>
+ </div>
+ <figure class="fig" id="f-kv"><div class="canvas" role="img" aria-label="Grid of key and value cubes per layer and token growing during generation, with recomputation flashing when the cache is off"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls">
+    <label class="ctl"><input type="checkbox" id="kv-on" checked> Use KV cache</label>
+    <span class="ctl">Attention type</span><div class="seg" role="group" aria-label="Attention type" id="kv-type"><button type="button" data-h="32">MHA (32 KV heads)</button><button type="button" data-h="8" aria-pressed="true">GQA (8)</button><button type="button" data-h="1">MQA (1)</button></div>
+    <label class="ctl">Context length <input type="range" id="kv-len" min="0" max="100" value="43"><span class="readout" id="kv-lv"></span></label></div>
+   <div class="status" id="kv-read" aria-live="polite"></div>
+   <p>Rows are layers, columns are tokens; <span class="kc">orange</span> cubes are keys, <span class="vc">green</span> cubes values. A flash means the cube was computed on this step. With the cache, only the newest column flashes. Without it, every column is recomputed each step. The memory figures use a Llama-3-8B-sized configuration.</p></figcaption></figure>
+</div></section>
+
+<section id="scale"><div class="wrap">
+ <div class="prose">
+  <span class="part">8</span><h2>Scaling laws</h2>
+  <p>Kaplan et al. (2020) found that loss falls as a smooth power law in model size N, data size D and compute C, over many orders of magnitude. Training compute is roughly C ≈ 6ND floating-point operations. Hoffmann et al. (<strong>Chinchilla</strong>, 2022) redid the analysis more carefully and concluded that for a fixed compute budget, parameters and tokens should grow in roughly equal proportion, about <strong>20 training tokens per parameter</strong>. Their 70B Chinchilla, trained on 1.4T tokens, beat the 280B Gopher trained with the same compute.</p>
+  <div class="eq">L(N, D) = E + A / N<sup>α</sup> + B / D<sup>β</sup> &nbsp;&nbsp; with E = 1.69, A = 406.4, B = 410.7, α = 0.34, β = 0.28
+   <small>E is the irreducible loss (the entropy of text); the other terms are the penalties for a finite model and finite data. The constants are Chinchilla's parametric fit.</small></div>
+  <p>In practice, models are now often trained far beyond the compute-optimal point (Llama 3 8B saw about 15T tokens, nearly 1,900 per parameter), because a smaller model trained longer is cheaper to <em>serve</em>. Scaling laws have since been extended to inference-time compute, which the post-training guide covers.</p>
+ </div>
+ <figure class="fig" id="f-scale"><div class="canvas" role="img" aria-label="3D loss surface over model size and dataset size, with a curve of equal compute and the compute-optimal point"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><label class="ctl">Compute budget <input type="range" id="sc-c" min="0" max="100" value="55"><span class="readout" id="sc-cv"></span></label></div>
+   <div class="status" id="sc-read" aria-live="polite"></div>
+   <p>The surface is the Chinchilla loss formula; height is loss above the irreducible 1.69. The gold curve is every (N, D) pair with the same compute, C = 6ND, and the sphere marks its lowest point. Too big a model on too little data, or the reverse, wastes compute.</p></figcaption></figure>
+</div></section>
+
+<section id="eff"><div class="wrap">
+ <div class="prose">
+  <span class="part">9</span><h2>Efficient training and inference</h2>
+  <h3>FlashAttention: the same maths, less memory traffic</h3>
+  <p>Standard attention writes the full N × N score matrix to GPU main memory (HBM), reads it back for the softmax, writes it again, and reads it once more to multiply by V. For long sequences this memory traffic, not arithmetic, is the bottleneck. <strong>FlashAttention</strong> (Dao et al., 2022) computes attention in tiles that fit in fast on-chip memory (SRAM), using an “online softmax” that keeps a running maximum and sum so blocks can be combined exactly. The N × N matrix is never stored. Results are identical, memory drops from quadratic to linear in N, and speed improves several times. FlashAttention-2 and -3 improved parallelism and use newer GPU features.</p>
+ </div>
+ <figure class="fig" id="f-flash"><div class="canvas" role="img" aria-label="Attention score matrix as tiles: standard attention stores all tiles in memory, FlashAttention processes one tile at a time in fast memory"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><div class="seg" role="group" aria-label="Algorithm" id="fa-k"><button type="button" data-k="std">Standard attention</button><button type="button" data-k="flash" aria-pressed="true">FlashAttention</button></div>
+   <label class="ctl">Sequence length <input type="range" id="fa-n" min="0" max="100" value="50"><span class="readout" id="fa-nv"></span></label></div>
+   <div class="status" id="fa-read" aria-live="polite"></div>
+   <p>The grid is the N × N score matrix split into blocks. Standard attention raises every block because each one is written to HBM. FlashAttention lights one block at a time inside SRAM, folds it into the output row (right) and discards it.</p></figcaption></figure>
+
+ <div class="prose">
+  <h3>Mixture of experts</h3>
+  <p>A <strong>mixture-of-experts</strong> (MoE) layer replaces the single MLP with many expert MLPs and a small <strong>router</strong> that sends each token to only the top-k of them (often k = 2). Total parameters grow, but compute per token stays close to that of one expert. Mixtral 8x7B has about 47B parameters but uses about 13B per token; DeepSeek-V3 has 671B with 37B active. The catch is balance: routers tend to favour a few experts, so training adds a <strong>load-balancing loss</strong>, and experts have a capacity limit beyond which tokens are dropped or overflow. All experts must also sit in memory, so MoE saves compute, not memory.</p>
+ </div>
+ <figure class="fig" id="f-moe"><div class="canvas" role="img" aria-label="Tokens routed to the top two of eight experts, with expert loads shown as heights"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><label class="ctl"><input type="checkbox" id="moe-bal"> Load-balancing loss</label><button class="btn" type="button" id="moe-new">Route a new batch</button></div>
+   <div class="status" id="moe-read" aria-live="polite"></div>
+   <p>Sixteen tokens each pick their top two of eight experts; line opacity is the router weight. Box height is the number of tokens an expert received. Without balancing, a few popular experts overflow their capacity and tokens get dropped.</p></figcaption></figure>
+
+ <div class="prose">
+  <h3>Quantisation</h3>
+  <p>Weights are usually trained in 16-bit formats. Storing them in 8 or 4 bits halves or quarters memory and speeds up memory-bound decoding. The simplest scheme scales each group of weights so the largest fits the integer range and rounds. The difficulty is <strong>outliers</strong>: a few very large values in LLM activations and weights stretch the range and wreck precision for everything else. LLM.int8() handles outlier features separately; GPTQ uses second-order information to compensate rounding errors; AWQ protects the most important channels; small per-group scales (for example every 64 or 128 weights) contain the damage.</p>
+ </div>
+ <figure class="fig" id="f-quant"><div class="canvas" role="img" aria-label="A weight matrix as bars that snap to fewer levels as the bit width drops, coloured by rounding error"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><span class="ctl">Bits</span><div class="seg" role="group" aria-label="Bits" id="q-b"></div>
+   <div class="seg" role="group" aria-label="Scaling" id="q-s"><button type="button" data-s="tensor">One scale per matrix</button><button type="button" data-s="group" aria-pressed="true">One scale per row</button></div></div>
+   <div class="status" id="q-read" aria-live="polite"></div>
+   <p>Bars are weights, including a few outlier columns like those found in real LLMs. Colour shows rounding error. With one scale for the whole matrix, outliers set the range and small weights round to zero at low bit widths. Per-row scales keep most of the precision.</p></figcaption></figure>
+
+ <div class="prose">
+  <h3>LoRA: fine-tuning with a tiny adapter</h3>
+  <p>Full fine-tuning updates every weight and needs optimizer state for all of them. <strong>LoRA</strong> (Hu et al., 2021) freezes the pretrained weight W and learns a low-rank update ΔW = B·A, with B of size d × r and A of size r × d, where r is small (4 to 64). Only A and B are trained, which cut trainable parameters for GPT-3 by about 10,000×, and the update can be merged into W after training, so inference costs nothing extra. <strong>QLoRA</strong> (Dettmers et al., 2023) goes further: the frozen base is quantised to 4 bits (the NF4 format) and LoRA adapters are trained on top, letting a 65B model be fine-tuned on a single 48 GB GPU.</p>
+ </div>
+ <figure class="fig" id="f-lora"><div class="canvas" role="img" aria-label="A frozen weight matrix with a low-rank update formed from two thin matrices"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><label class="ctl">Rank r <input type="range" id="lo-r" min="1" max="8" value="2"><span class="readout" id="lo-rv"></span></label></div>
+   <div class="status" id="lo-read" aria-live="polite"></div>
+   <p>The grey grid is the frozen weight matrix. The <span class="qc">tall</span> slab is B and the <span class="kc">wide</span> slab is A; the purple surface is their product ΔW, which can only express r independent patterns. Higher rank means a more expressive update and more parameters.</p></figcaption></figure>
+
+ <div class="prose">
+  <h3>More tricks worth knowing</h3>
+  <p><strong>Speculative decoding</strong> lets a small draft model propose several tokens and the large model verify them in one pass, keeping the large model's output distribution exactly while generating faster. <strong>Parallelism</strong> spreads training across thousands of GPUs: data parallelism with sharded optimizer states (ZeRO, FSDP), tensor parallelism that splits each matrix (Megatron-LM), pipeline parallelism that splits the layers, and sequence or context parallelism for long inputs. <strong>Mixed precision</strong> (bf16, and increasingly fp8) speeds up the arithmetic, and <strong>continuous batching</strong> keeps GPUs busy when serving many users.</p>
+ </div>
+</div></section>
+
+<section id="limits"><div class="wrap">
+ <div class="prose"><span class="part">10</span><h2>Strengths, limits and alternatives</h2></div>
+ <div class="pc"><div class="pro"><h4>Why Transformers won</h4><ul>
+  <li>Every position trains in parallel, unlike recurrent networks, so they use GPUs efficiently.</li>
+  <li>Any token can reach any other in one step, which makes long-range dependencies easy.</li>
+  <li>Performance scales smoothly and predictably with data and compute.</li>
+  <li>One architecture works for text, images, audio, video, proteins and actions.</li></ul></div>
+  <div class="con"><h4>Where they struggle</h4><ul>
+  <li>Attention cost grows with the square of sequence length, and the KV cache grows linearly.</li>
+  <li>Tokenisation causes odd failures with spelling, digits and non-English text.</li>
+  <li>Fixed-depth computation per token limits how much “thinking” fits in one step, which is why chain-of-thought helps.</li>
+  <li>They can state false things fluently; nothing in next-token training enforces truth.</li></ul></div></div>
+ <div class="prose"><p>Alternatives aim at the quadratic cost. <strong>State-space models</strong> such as Mamba (2023) and linear-attention variants keep a fixed-size state and scale linearly; <strong>hybrid</strong> models interleave a few attention layers with many such layers. They are competitive on many tasks, but pure attention still leads on precise recall over long contexts.</p></div>
+</div></section>
+</main>
+
+<footer><div class="wrap prose"><p><strong style="color:var(--ink)">Sources</strong></p><ul>
+ <li>Vaswani et al., 2017. Attention Is All You Need. <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a> · Brown et al., 2020. GPT-3. <a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></li>
+ <li>Sennrich et al., 2016. BPE for NMT. <a href="https://arxiv.org/abs/1508.07909">arXiv:1508.07909</a> · Su et al., 2021. RoFormer (RoPE). <a href="https://arxiv.org/abs/2104.09864">arXiv:2104.09864</a> · Shazeer, 2020. GLU variants. <a href="https://arxiv.org/abs/2002.05202">arXiv:2002.05202</a></li>
+ <li>Shazeer, 2019. Multi-query attention. <a href="https://arxiv.org/abs/1911.02150">arXiv:1911.02150</a> · Ainslie et al., 2023. GQA. <a href="https://arxiv.org/abs/2305.13245">arXiv:2305.13245</a> · Kwon et al., 2023. PagedAttention. <a href="https://arxiv.org/abs/2309.06180">arXiv:2309.06180</a></li>
+ <li>Kaplan et al., 2020. Scaling laws. <a href="https://arxiv.org/abs/2001.08361">arXiv:2001.08361</a> · Hoffmann et al., 2022. Chinchilla. <a href="https://arxiv.org/abs/2203.15556">arXiv:2203.15556</a></li>
+ <li>Dao et al., 2022. FlashAttention. <a href="https://arxiv.org/abs/2205.14135">arXiv:2205.14135</a> · Fedus et al., 2021. Switch Transformers. <a href="https://arxiv.org/abs/2101.03961">arXiv:2101.03961</a> · Jiang et al., 2024. Mixtral. <a href="https://arxiv.org/abs/2401.04088">arXiv:2401.04088</a> · DeepSeek-V3. <a href="https://arxiv.org/abs/2412.19437">arXiv:2412.19437</a></li>
+ <li>Dettmers et al., 2022. LLM.int8(). <a href="https://arxiv.org/abs/2208.07339">arXiv:2208.07339</a> · Frantar et al., 2022. GPTQ. <a href="https://arxiv.org/abs/2210.17323">arXiv:2210.17323</a> · Lin et al., 2023. AWQ. <a href="https://arxiv.org/abs/2306.00978">arXiv:2306.00978</a></li>
+ <li>Hu et al., 2021. LoRA. <a href="https://arxiv.org/abs/2106.09685">arXiv:2106.09685</a> · Dettmers et al., 2023. QLoRA. <a href="https://arxiv.org/abs/2305.14314">arXiv:2305.14314</a> · Leviathan et al., 2022. Speculative decoding. <a href="https://arxiv.org/abs/2211.17192">arXiv:2211.17192</a> · Gu and Dao, 2023. Mamba. <a href="https://arxiv.org/abs/2312.00752">arXiv:2312.00752</a></li></ul>
+ <p>The tokenizer, RoPE, scaling-law, quantisation and LoRA figures compute the real formulas. The attention heads, MoE router and KV-cache animations are illustrative.</p></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){"use strict";window.LABEL_FONT='"Red Hat Display", Arial, sans-serif';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function setPressed(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+const C={};
+function readColors(keys){keys.forEach(k=>{C[k]=new THREE.Color(cssv('--'+k)||'#888888');});}
+function hex(k){return cssv('--'+k);}
+function label(text,size,color){size=size||.42;const c=document.createElement('canvas');const ctx=c.getContext('2d');const fs=64;
+ const font='600 '+fs+'px '+(window.LABEL_FONT||'Arial, sans-serif');ctx.font=font;const w=Math.ceil(ctx.measureText(text).width)+24;c.width=w;c.height=Math.ceil(fs*1.35);
+ ctx.font=font;ctx.fillStyle=color||cssv('--ink');ctx.textBaseline='middle';ctx.fillText(text,12,c.height/2+2);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size*w/c.height,size,1);sp.renderOrder=10;return sp;}
+function emojiSprite(ch,size){const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.font='72px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,48,54);
+ const t=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size||.5,size||.5,1);sp.renderOrder=11;return sp;}
+function dotTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(32,32,28,0,7);g.fill();return new THREE.CanvasTexture(c);}
+function line(pts,color,opts){opts=opts||{};const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=opts.dashed?new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.12,transparent:true,opacity:opts.opacity||1}):new THREE.LineBasicMaterial({color,transparent:true,opacity:opts.opacity==null?1:opts.opacity});
+ const l=new THREE.Line(g,m);if(opts.dashed)l.computeLineDistances();return l;}
+function std(color,o){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.55,metalness:.05},o||{}));}
+function disposeTree(o){o.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});}
+
+const stages=[];
+function base(camPos,target,hfov){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(40,1.6,.1,300);camera.position.set(...camPos);camera.lookAt(new THREE.Vector3(...target));
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,.95));const d=new THREE.DirectionalLight(0xffffff,.65);d.position.set(5,10,8);scene.add(d);
+ const root=new THREE.Group();scene.add(root);return {scene,camera,root,hfov:hfov||60};}
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=e.target._stage;s.visible=e.isIntersecting;if(s.visible&&!s.renderer)mk(s);else if(!s.visible&&s.renderer)kill(s);}),{rootMargin:'200px 0px'});
+function mk(s){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0,0);s.wrap.insertBefore(r.domElement,s.wrap.firstChild);s.renderer=r;s.w=0;}
+ catch(err){if(!s.wrap.querySelector('.nogl'))s.wrap.insertAdjacentHTML('beforeend','<div class="nogl">3D view unavailable: this browser has WebGL turned off.</div>');}}
+function kill(s){s.renderer.dispose();if(s.renderer.forceContextLoss)s.renderer.forceContextLoss();s.renderer.domElement.remove();s.renderer=null;}
+function drag(s){let down=false,px=0,py=0,sx=0,sy=0;const w=s.wrap;
+ w.addEventListener('pointerdown',e=>{down=true;px=sx=e.clientX;py=sy=e.clientY;});
+ w.addEventListener('pointerup',e=>{if(down&&s.onClick&&Math.hypot(e.clientX-sx,e.clientY-sy)<6){const r=w.getBoundingClientRect();s.onClick(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1));}down=false;});
+ addEventListener('pointerup',()=>down=false);w.addEventListener('pointercancel',()=>down=false);
+ w.addEventListener('pointermove',e=>{if(!down)return;s.tRotY+=(e.clientX-px)*.008;s.tRotX=clamp(s.tRotX+(e.clientY-py)*.005,-.7,.7);px=e.clientX;py=e.clientY;});}
+function stage(id,build){const fig=document.getElementById(id);const wrap=fig.querySelector('.canvas');const s={fig,wrap,rotY:0,rotX:0,tRotY:0,tRotX:0,auto:0};
+ Object.assign(s,build(s));s.rotY=s.tRotY;s.rotX=s.tRotX;wrap._stage=s;stages.push(s);io.observe(wrap);drag(s);return s;}
+let lastT=performance.now();
+function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;const t=now/1000;
+ for(const s of stages){if(!s.renderer)continue;const w=s.wrap.clientWidth,h=s.wrap.clientHeight;
+  if(w!==s.w||h!==s.h){s.renderer.setSize(w,h,false);const a=w/h;s.camera.aspect=a;const hf=s.hfov*Math.PI/180;s.camera.fov=clamp(Math.max(2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI,s.vmin||34),24,80);s.camera.updateProjectionMatrix();s.w=w;s.h=h;}
+  if(!reduced)s.tRotY+=s.auto*dt;s.rotY+=(s.tRotY-s.rotY)*.12;s.rotX+=(s.tRotX-s.rotX)*.12;s.root.rotation.set(s.rotX,s.rotY,0);
+  if(s.update)s.update(t,dt);s.renderer.render(s.scene,s.camera);}
+ requestAnimationFrame(loop);}
+function startAll(fn){if(typeof THREE==='undefined'){document.querySelectorAll('.canvas').forEach(c=>c.insertAdjacentHTML('beforeend','<div class="nogl">The 3D library could not load. Check your connection and reload the page.</div>'));return;}
+ const ready=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+ ready.then(()=>{fn();requestAnimationFrame(loop);});}
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const fmtB=b=>b>=2**40?(b/2**40).toFixed(2)+' TiB':b>=2**30?(b/2**30).toFixed(2)+' GiB':b>=2**20?(b/2**20).toFixed(1)+' MiB':(b/1024).toFixed(0)+' KiB';
+const fmtN=n=>n>=1e12?(n/1e12).toFixed(n>=1e13?0:1)+'T':n>=1e9?(n/1e9).toFixed(n>=1e10?0:1)+'B':n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+'M':n>=1e3?(n/1e3).toFixed(0)+'k':n.toFixed(0);
+
+/* ---------- BPE (no WebGL) ---------- */
+(function(){const corpus=`Machine learning models learn patterns from data. A language model learns to predict the next token in a sequence of tokens. The transformer model uses attention to let every token look at other tokens. Attention patterns show which tokens the model uses. Training the model on more data makes the model better at prediction. The model learns representations of words and the relations between words. Tokenization splits text into tokens before the model reads the text. Learning rates, training data and model size all matter for training. The attention mechanism computes queries, keys and values for every token in the sequence. Larger models trained on larger datasets learn better representations. The transformer is the model behind modern language models, and attention is the mechanism behind the transformer. Researchers study attention patterns, training dynamics and the representations that language models learn during training.`;
+ const words={};(corpus.match(/\s*\S+/g)||[]).forEach(w=>{const k='▁'+w.trim();words[k]=(words[k]||0)+1;});
+ let vocab=Object.keys(words).map(w=>({s:[...w],f:words[w]}));const merges=[];
+ for(let m=0;m<400;m++){const cnt={};vocab.forEach(({s,f})=>{for(let i=0;i<s.length-1;i++){const p=s[i]+'\u0000'+s[i+1];cnt[p]=(cnt[p]||0)+f;}});let best=null,bc=1;for(const p in cnt)if(cnt[p]>bc){bc=cnt[p];best=p;}if(!best)break;merges.push(best);
+  const [a,b]=best.split('\u0000');vocab.forEach(v=>{const o=[];for(let i=0;i<v.s.length;i++){if(i<v.s.length-1&&v.s[i]===a&&v.s[i+1]===b){o.push(a+b);i++;}else o.push(v.s[i]);}v.s=o;});}
+ const sl=document.getElementById('bpe-m'),inp=document.getElementById('bpe-in'),out=document.getElementById('bpe-out'),rd=document.getElementById('bpe-read'),mv=document.getElementById('bpe-mv');sl.max=merges.length;
+ const cols=['--q','--k','--v','--acc','--con'];
+ function run(){const M=+sl.value;mv.textContent=M;const rank={};merges.slice(0,M).forEach((p,i)=>rank[p]=i);const toks=[];
+  (inp.value.match(/\s*\S+/g)||[]).forEach(w=>{let s=[...('▁'+w.trim())];while(s.length>1){let bi=-1,br=1e9;for(let i=0;i<s.length-1;i++){const r=rank[s[i]+'\u0000'+s[i+1]];if(r!==undefined&&r<br){br=r;bi=i;}}if(bi<0)break;s.splice(bi,2,s[bi]+s[bi+1]);}toks.push(...s);});
+  out.innerHTML='';toks.forEach((t,i)=>{const e=document.createElement('span');e.textContent=t;e.style.background=`color-mix(in srgb,var(${cols[i%5]}) 20%,transparent)`;out.appendChild(e);});
+  const chars=inp.value.replace(/\s+/g,' ').trim().length;rd.textContent=`${toks.length} tokens for ${chars} characters: ${(chars/Math.max(1,toks.length)).toFixed(2)} characters per token. ${M} merges learned on top of the base characters.`;}
+ sl.oninput=inp.oninput=run;run();})();
+
+/* ---------- attention matrix ---------- */
+const TOK=['The','cat','sat','on','the','mat','because','it','was','tired','.'];
+function buildAttn(s){const B=base([0,7.2,6.6],[0,.2,.3],56);s.tRotY=-.35;s.vmin=33;const N=TOK.length,sp=.42;const r=rng(6);
+ const E=TOK.map(()=>[...Array(12)].map(()=>randn(r))),Wq=[...Array(12)].map(()=>[...Array(8)].map(()=>randn(r)/3.5)),Wk=[...Array(12)].map(()=>[...Array(8)].map(()=>randn(r)/3.5));
+ const proj=(e,W)=>W[0].map((_,j)=>e.reduce((a,x,i)=>a+x*W[i][j],0));const Qs=E.map(e=>proj(e,Wq)),Ks=E.map(e=>proj(e,Wk));
+ const heads={prev:(i,j)=>(j===i-1?4:0)+(j===i?1:0)+(j===0?1:0),coref:(i,j)=>{const t={7:{1:5},8:{7:3,1:1.5},9:{1:3,7:2},4:{},5:{2:2,1:1}};return (t[i]&&t[i][j]||0)+(j===0?2:0)+(j===i?.5:0);},rand:(i,j)=>Qs[i].reduce((a,q,k)=>a+q*Ks[j][k],0)/Math.sqrt(8)};
+ const g=new THREE.BoxGeometry(.32,1,.32);g.translate(0,.5,0);const bars=[];
+ for(let i=0;i<N;i++){bars.push([]);for(let j=0;j<N;j++){const m=new THREE.Mesh(g,std(C.line.clone()));m.position.set((j-(N-1)/2)*sp,0,(i-(N-1)/2)*sp);m.scale.y=.02;m.userData.h=.02;B.root.add(m);bars[i].push(m);}
+  const l=label(TOK[i],.24,hex('q'));l.position.set(-(N+1)/2*sp-.35,.1,(i-(N-1)/2)*sp);B.root.add(l);const l2=label(TOK[i],.24,hex('k'));l2.position.set((i-(N-1)/2)*sp,.1,-(N+1)/2*sp-.25);B.root.add(l2);}
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(N*sp+.2,N*sp+.2),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.45,side:THREE.DoubleSide}));fl.rotation.x=-Math.PI/2;fl.position.y=-.01;B.root.add(fl);
+ const lq=label('queries',.26,hex('q'));lq.position.set(-(N+1)/2*sp-.4,.1,(N+1)/2*sp+.2);B.root.add(lq);const lk=label('keys',.26,hex('k'));lk.position.set((N+1)/2*sp+.2,.1,-(N+1)/2*sp-.25);B.root.add(lk);
+ let head='prev',q=7;const mask=document.getElementById('at-mask'),ts=document.getElementById('at-t'),rd=document.getElementById('at-read'),qs=document.getElementById('at-q');
+ TOK.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-pressed',i===q?'true':'false');b.onclick=()=>{q=i;setPressed(qs,b);compute();};qs.appendChild(b);});
+ function compute(){const sc=+ts.value/100;for(let i=0;i<N;i++){const row=[];for(let j=0;j<N;j++)row.push(mask.checked&&j>i?-Infinity:heads[head](i,j)*sc);const mx=Math.max(...row);const e=row.map(v=>v===-Infinity?0:Math.exp(v-mx));const z=e.reduce((a,b)=>a+b,0);
+   for(let j=0;j<N;j++){const p=e[j]/z;const m=bars[i][j];m.userData.h=Math.max(.02,p*1.7);const base_=i===q?C.acc:C.q;m.material.color.copy(C.line).lerp(base_,clamp(.25+p*1.4,0,1));if(mask.checked&&j>i)m.material.color.copy(C.line).lerp(C.panel,.5);}
+   if(i===q){const top=e.map((v,j)=>[v/z,j]).sort((a,b)=>b[0]-a[0]).slice(0,3);rd.innerHTML=`Query <b>“${TOK[q]}”</b> attends most to ${top.map(([p,j])=>`“${TOK[j]}” ${(p*100).toFixed(0)}%`).join(', ')}.${mask.checked?' Keys after the query are masked out.':' No mask: the query can also see future tokens.'}`;}}}
+ mask.onchange=ts.oninput=compute;document.querySelectorAll('#at-head [data-h]').forEach(b=>b.onclick=()=>{head=b.dataset.h;setPressed(b.parentNode,b);compute();});compute();
+ return Object.assign(B,{update(){for(const row of bars)for(const m of row)m.scale.y+=(m.userData.h-m.scale.y)*.15;}});}
+
+/* ---------- RoPE ---------- */
+function buildRope(s){const B=base([0,4.2,6.2],[0,1.3,0],50);s.tRotY=-.3;s.vmin=34;const P=4,base_=100,d=2*P;const th=[...Array(P)].map((_,i)=>Math.pow(base_,-2*i/d));
+ const r=rng(3);const q=[...Array(P)].map(()=>[randn(r),randn(r)]),k=[...Array(P)].map(()=>[randn(r),randn(r)]);const discs=[];
+ for(let i=0;i<P;i++){const y=i*.95;const disc=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.03,48),std(C.line,{transparent:true,opacity:.55}));disc.position.y=y;B.root.add(disc);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.1,.012,6,64),std(C.muted));ring.rotation.x=Math.PI/2;ring.position.y=y;B.root.add(ring);
+  const qa=new THREE.ArrowHelper(V(1,0,0),V(0,y+.03,0),1,C.q.getHex(),.2,.12),ka=new THREE.ArrowHelper(V(1,0,0),V(0,y+.03,0),1,C.k.getHex(),.2,.12);B.root.add(qa,ka);
+  const l=label(`pair ${i+1}: θ = ${th[i].toFixed(3)}`,.24,hex('muted'));l.position.set(-1.9,y+.1,0);B.root.add(l);discs.push({qa,ka,y});}
+ const ms=document.getElementById('rp-m'),ns=document.getElementById('rp-n'),rd=document.getElementById('rp-read');
+ const rot=(v,a)=>[v[0]*Math.cos(a)-v[1]*Math.sin(a),v[0]*Math.sin(a)+v[1]*Math.cos(a)];let cur=[...Array(P)].map(()=>[0,0]);
+ function compute(){const m=+ms.value,n=+ns.value;document.getElementById('rp-mv').textContent=m;document.getElementById('rp-nv').textContent=n;let dot=0,raw=0;
+  for(let i=0;i<P;i++){const a=rot(q[i],m*th[i]),b=rot(k[i],n*th[i]);dot+=a[0]*b[0]+a[1]*b[1];raw+=q[i][0]*k[i][0]+q[i][1]*k[i][1];cur[i]=[m*th[i],n*th[i]];}
+  rd.innerHTML=`Relative distance m − n = <b>${m-n}</b>. Rotated score q·k = <b>${dot.toFixed(3)}</b> (without rotation it would be ${raw.toFixed(3)} at every position).`;}
+ ms.oninput=ns.oninput=compute;document.getElementById('rp-shift').onclick=()=>{if(+ms.value<=35&&+ns.value<=35){ms.value=+ms.value+5;ns.value=+ns.value+5;}else{ms.value=+ms.value-30>0?+ms.value-30:ms.value;ns.value=Math.max(0,+ns.value-30);}compute();};compute();
+ const ang=[...Array(P)].map(()=>[0,0]);
+ return Object.assign(B,{update(){for(let i=0;i<P;i++){ang[i][0]+=(cur[i][0]-ang[i][0])*.12;ang[i][1]+=(cur[i][1]-ang[i][1])*.12;const a=rot(q[i],ang[i][0]),b=rot(k[i],ang[i][1]);
+  const la=Math.hypot(...a),lb=Math.hypot(...b);discs[i].qa.setDirection(V(a[0]/la,0,-a[1]/la));discs[i].qa.setLength(Math.min(1.1,.45+la*.3),.2,.12);discs[i].ka.setDirection(V(b[0]/lb,0,-b[1]/lb));discs[i].ka.setLength(Math.min(1.1,.45+lb*.3),.2,.12);}}});}
+
+/* ---------- KV cache ---------- */
+function buildKV(s){const B=base([0,2.4,7.6],[0,1.3,0],54);s.tRotY=-.45;s.vmin=32;const L=4,T=14;const cubes=[];const g=new THREE.BoxGeometry(.24,.24,.24);
+ for(let l=0;l<L;l++){cubes.push([]);for(let t=0;t<T;t++){const k=new THREE.Mesh(g,std(C.k.clone(),{emissive:C.k.clone(),emissiveIntensity:0}));k.position.set((t-(T-1)/2)*.42,l*.8+.3,-.17);const v=new THREE.Mesh(g,std(C.v.clone(),{emissive:C.v.clone(),emissiveIntensity:0}));v.position.set((t-(T-1)/2)*.42,l*.8+.3,.17);k.visible=v.visible=false;B.root.add(k,v);cubes[l].push([k,v,0]);}
+  const lb=label('layer '+(l+1),.26,hex('muted'));lb.position.set(-(T+2)/2*.42-.3,l*.8+.3,0);B.root.add(lb);}
+ const lt=label('tokens generated →',.28,hex('muted'));lt.position.set(0,-.2,.6);B.root.add(lt);
+ const on=document.getElementById('kv-on'),len=document.getElementById('kv-len'),rd=document.getElementById('kv-read');let kvh=8,t=0,acc=0,work=0,last=0;
+ document.querySelectorAll('#kv-type [data-h]').forEach(b=>b.onclick=()=>{kvh=+b.dataset.h;setPressed(b.parentNode,b);text();});
+ function text(){const T_=Math.round(1024*Math.pow(128,+len.value/100));document.getElementById('kv-lv').textContent=fmtN(T_);const per=2*32*kvh*128*2;
+  rd.innerHTML=`Cache per token: <b>${fmtB(per)}</b>. For ${fmtN(T_)} tokens: <b>${fmtB(per*T_)}</b> per sequence. &nbsp; K/V computations so far in the animation: <b>${work}</b> ${on.checked?'(one new column per step)':'(every column every step)'}; with a cache it would be ${t*L}.`;}
+ len.oninput=text;on.onchange=()=>{t=0;work=0;text();};text();
+ return Object.assign(B,{update(tm,dt){acc+=reduced?0:dt;if(reduced&&t===0){t=T;}
+  if(acc>.55){acc=0;if(t>=T){t=0;work=0;cubes.forEach(r=>r.forEach(c=>{c[0].visible=c[1].visible=false;}));}t++;
+   for(let l=0;l<L;l++)for(let j=0;j<t;j++){const c=cubes[l][j];c[0].visible=c[1].visible=true;if(!on.checked||j===t-1){c[2]=1;work++;}}text();}
+  cubes.forEach(r=>r.forEach(c=>{c[2]=Math.max(0,c[2]-dt*2.2);c[0].material.emissiveIntensity=c[1].material.emissiveIntensity=c[2]*.9;c[0].scale.setScalar(1+c[2]*.35);c[1].scale.setScalar(1+c[2]*.35);}));}});}
+
+/* ---------- scaling surface ---------- */
+function buildScale(s){const B=base([0,5.4,9.8],[0,.7,0],60);s.tRotY=-.6;s.vmin=33;const E=1.69,A=406.4,Bc=410.7,al=.34,be=.28;const Lf=(n,d)=>E+A/Math.pow(10,al*n)+Bc/Math.pow(10,be*d);
+ const n0=7,n1=12,d0=9,d1=13.5,W=5,G=40;const X=n=>(n-(n0+n1)/2)/(n1-n0)*W,Z=d=>-(d-(d0+d1)/2)/(d1-d0)*W,H=l=>(l-E)*1.15;
+ const geo=new THREE.PlaneGeometry(W,W,G,G);geo.rotateX(-Math.PI/2);const pos=geo.attributes.position;const cols=new Float32Array(pos.count*3);const c=new THREE.Color();
+ for(let k=0;k<pos.count;k++){const x=pos.getX(k),z=pos.getZ(k);const n=n0+(x/W+.5)*(n1-n0),d=d0+(-z/W+.5)*(d1-d0);const l=Lf(n,d);pos.setY(k,H(l));c.copy(C.q).lerp(C.acc,clamp((l-E)/2.8,0,1));cols.set([c.r,c.g,c.b],k*3);}
+ geo.setAttribute('color',new THREE.BufferAttribute(cols,3));geo.computeVertexNormals();B.root.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:.7,transparent:true,opacity:.9})));
+ B.root.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo),new THREE.LineBasicMaterial({color:C.ink,transparent:true,opacity:.07})));
+ [[7,'10M'],[9,'1B'],[11,'100B'],[12,'1T']].forEach(([n,t])=>{const l=label(t+' params',.22,hex('muted'));l.position.set(X(n),0,W/2+.35);B.root.add(l);});
+ [[9,'1B'],[11,'100B'],[13,'10T']].forEach(([d,t])=>{const l=label(t+' tokens',.22,hex('muted'));l.position.set(-W/2-.6,0,Z(d));B.root.add(l);});
+ const lL=label('loss',.26,hex('muted'));lL.position.set(-W/2,3.2,-W/2);B.root.add(lL);
+ let curve=null;const opt=new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),std(C.k));B.root.add(opt);const cs=document.getElementById('sc-c'),rd=document.getElementById('sc-read');
+ function compute(){const lc=19+cs.value/100*6;const Cv=Math.pow(10,lc);document.getElementById('sc-cv').textContent='10^'+lc.toFixed(1)+' FLOPs';const pts=[];let best=1e9,bn=0,bd=0;
+  for(let n=n0;n<=n1;n+=.02){const d=Math.log10(Cv/6)-n;if(d<d0||d>d1)continue;const l=Lf(n,d);pts.push(V(X(n),H(l)+.04,Z(d)));if(l<best){best=l;bn=n;bd=d;}}
+  if(curve){B.root.remove(curve);curve.geometry.dispose();}if(pts.length>1){curve=line(pts,C.k);B.root.add(curve);}opt.visible=pts.length>0;opt.position.set(X(bn),H(best)+.1,Z(bd));
+  const N=Math.pow(10,bn),D=Math.pow(10,bd);rd.innerHTML=pts.length?`Compute-optimal for this budget: <b>${fmtN(N)} parameters</b> trained on <b>${fmtN(D)} tokens</b> (${(D/N).toFixed(0)} tokens per parameter), predicted loss <b>${best.toFixed(3)}</b>. This parametric fit favours somewhat more data per parameter than the paper's headline rule of about 20.`:'This budget falls outside the plotted range.';}
+ cs.oninput=compute;compute();return B;}
+
+/* ---------- FlashAttention ---------- */
+function buildFlash(s){const B=base([0,5.2,6.6],[0,0,0],56);s.tRotY=-.35;s.vmin=34;const G=8,sp=.5;const tiles=[];const g=new THREE.BoxGeometry(.44,1,.44);g.translate(0,.5,0);
+ for(let i=0;i<G;i++){tiles.push([]);for(let j=0;j<G;j++){const m=new THREE.Mesh(g,std(C.line.clone()));m.position.set((j-(G-1)/2)*sp,0,(i-(G-1)/2)*sp);m.scale.y=.05;B.root.add(m);tiles[i].push({m,h:.05});}}
+ const qb=[],kb=[],ob=[];for(let i=0;i<G;i++){const a=new THREE.Mesh(new THREE.BoxGeometry(.3,.12,.44),std(C.q));a.position.set(-(G+1)/2*sp-.1,.06,(i-(G-1)/2)*sp);B.root.add(a);qb.push(a);
+  const b=new THREE.Mesh(new THREE.BoxGeometry(.44,.12,.3),std(C.k));b.position.set((i-(G-1)/2)*sp,.06,-(G+1)/2*sp-.1);B.root.add(b);kb.push(b);
+  const o=new THREE.Mesh(g,std(C.v));o.position.set((G+1)/2*sp+.15,0,(i-(G-1)/2)*sp);o.scale.set(.6,.02,1);B.root.add(o);ob.push(o);}
+ const l1=label('Q blocks',.24,hex('q'));l1.position.set(-(G+1)/2*sp-.1,.1,(G+1)/2*sp+.2);B.root.add(l1);const l2=label('K, V blocks',.24,hex('k'));l2.position.set((G+1)/2*sp,.1,-(G+1)/2*sp-.2);B.root.add(l2);
+ const l3=label('output O',.24,hex('v'));l3.position.set((G+1)/2*sp+.2,.1,(G+1)/2*sp+.25);B.root.add(l3);
+ const sram=new THREE.Mesh(new THREE.BoxGeometry(.6,.6,.6),new THREE.MeshBasicMaterial({color:C.acc,wireframe:true}));B.root.add(sram);const ls=label('SRAM tile',.24,hex('acc'));B.root.add(ls);
+ let kind='flash',step=0,acc=0;const ns=document.getElementById('fa-n'),rd=document.getElementById('fa-read');
+ function reset(){step=0;tiles.forEach(r=>r.forEach(t=>{t.h=.05;t.m.material.color.copy(C.line);}));ob.forEach(o=>o.scale.y=.02);}
+ function text(){const N=Math.round(1024*Math.pow(128,+ns.value/100));document.getElementById('fa-nv').textContent=fmtN(N);const sb=N*N*32*2;
+  rd.innerHTML=kind==='std'?`Standard attention stores the full score matrix: <b>${fmtB(sb)}</b> per layer for 32 heads in 16-bit, written and read several times.`:`FlashAttention never stores the ${fmtB(sb)} score matrix; extra memory is just the output and two running statistics per row, about <b>${fmtB(N*32*(128+2)*2)}</b>.`;}
+ document.querySelectorAll('#fa-k [data-k]').forEach(b=>b.onclick=()=>{kind=b.dataset.k;setPressed(b.parentNode,b);reset();text();});ns.oninput=text;text();
+ return Object.assign(B,{update(t,dt){acc+=dt;if(acc>(reduced?.02:.12)){acc=0;if(step>=G*G+6)reset();else{if(step<G*G){const i=Math.floor(step/G),j=step%G;const tl=tiles[i][j];
+    if(kind==='std'){tl.h=.9;tl.m.material.color.copy(C.k);}else{tl.h=.9;tl.m.material.color.copy(C.acc);ob[i].scale.y=.1+(j+1)/G*.8;}
+    sram.visible=kind==='flash';sram.position.set(tl.m.position.x,.5,tl.m.position.z);ls.position.set(tl.m.position.x,1.15,tl.m.position.z);ls.visible=kind==='flash';
+    if(kind==='std'&&step>=G*G-1)ob.forEach(o=>o.scale.y=.9);}step++;}}
+  tiles.forEach(r=>r.forEach(t=>{if(kind==='flash'&&t.h>.05){t.h=Math.max(.05,t.h-dt*2.5);if(t.h<=.06)t.m.material.color.copy(C.line);}t.m.scale.y+=(t.h-t.m.scale.y)*.2;}));}});}
+
+/* ---------- MoE ---------- */
+function buildMoE(s){const B=base([0,4.2,8.4],[0,.6,0],58);s.tRotY=-.25;s.vmin=33;const T=16,E=8,K=2;const r=rng(21);
+ const toks=[...Array(T)].map((_,i)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.13,14,10),std(C.q));m.position.set((i-(T-1)/2)*.42,.15,2.2);B.root.add(m);return m;});
+ const router=new THREE.Mesh(new THREE.BoxGeometry(6.8,.2,.4),std(C.acc,{transparent:true,opacity:.7}));router.position.set(0,.15,.9);B.root.add(router);const lr=label('router (top-2 gating)',.26,hex('acc'));lr.position.set(0,.55,.9);B.root.add(lr);
+ const g=new THREE.BoxGeometry(.6,1,.6);g.translate(0,.5,0);const ex=[...Array(E)].map((_,e)=>{const m=new THREE.Mesh(g,std(C.v));m.position.set((e-(E-1)/2)*.85,0,-1.4);m.scale.y=.05;m.userData.h=.05;B.root.add(m);const l=label('E'+(e+1),.24,hex('muted'));l.position.set((e-(E-1)/2)*.85,-.2,-.9);B.root.add(l);return m;});
+ const cap=new THREE.Mesh(new THREE.PlaneGeometry(7,.02),new THREE.MeshBasicMaterial({color:C.con,side:THREE.DoubleSide}));const capN=Math.ceil(1.25*T*K/E);cap.position.set(0,capN*.14,-1.4);B.root.add(cap);
+ const lc=label('capacity',.22,hex('con'));lc.position.set(3.8,capN*.14+.15,-1.4);B.root.add(lc);
+ let lines=[];const bal=document.getElementById('moe-bal'),rd=document.getElementById('moe-read');const pop=[2.2,1.6,0,-.4,-.6,-1,-1.2,-1.5];
+ function route(){lines.forEach(l=>{B.root.remove(l);l.geometry.dispose();l.material.dispose();});lines=[];const load=Array(E).fill(0);
+  for(let i=0;i<T;i++){const lg=[...Array(E)].map((_,e)=>randn(r)*.9+(bal.checked?0:pop[e]));const top=lg.map((v,e)=>[v,e]).sort((a,b)=>b[0]-a[0]).slice(0,K);const z=top.reduce((a,[v])=>a+Math.exp(v),0);
+   top.forEach(([v,e])=>{load[e]++;const w=Math.exp(v)/z;const l=line([toks[i].position.clone(),V(ex[e].position.x,.3,ex[e].position.z+.3)],C.acc,{opacity:.15+w*.7});B.root.add(l);lines.push(l);});}
+  load.forEach((n,e)=>{ex[e].userData.h=Math.max(.05,n*.14);ex[e].material.color.copy(n>capN?C.con:C.v);});const drop=load.reduce((a,n)=>a+Math.max(0,n-capN),0);const mean=T*K/E;
+  rd.innerHTML=`Tokens per expert: ${load.join(', ')}. Busiest expert gets <b>${(Math.max(...load)/mean).toFixed(1)}×</b> its fair share. With capacity ${capN} per expert, <b>${drop}</b> of ${T*K} assignments are dropped.`;}
+ bal.onchange=route;document.getElementById('moe-new').onclick=route;route();
+ return Object.assign(B,{update(){ex.forEach(m=>m.scale.y+=(m.userData.h-m.scale.y)*.12);}});}
+
+/* ---------- quantisation ---------- */
+function buildQuant(s){const B=base([0,5.2,6.8],[0,.2,0],54);s.tRotY=-.5;s.vmin=33;const G=20,sp=.24;const r=rng(13);const W=[...Array(G)].map(()=>[...Array(G)].map(()=>randn(r)*.3));
+ [3,14].forEach(c=>{for(let i=0;i<G;i++)W[i][c]*=1;});W[5][3]=3.2;W[12][14]=-3;W[16][8]=2.6;W[2][17]=-2.4;
+ const g=new THREE.BoxGeometry(.2,1,.2);g.translate(0,.5,0);const bars=[];for(let i=0;i<G;i++)for(let j=0;j<G;j++){const m=new THREE.Mesh(g,std(C.q.clone()));m.position.set((j-(G-1)/2)*sp,0,(i-(G-1)/2)*sp);B.root.add(m);bars.push({m,i,j,h:0});}
+ const pl=new THREE.Mesh(new THREE.PlaneGeometry(G*sp,G*sp),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.35,side:THREE.DoubleSide}));pl.rotation.x=-Math.PI/2;B.root.add(pl);
+ let bits=4,mode='group';const bs=document.getElementById('q-b'),rd=document.getElementById('q-read');[16,8,4,3,2].forEach(b=>{const e=document.createElement('button');e.type='button';e.textContent=b;e.setAttribute('aria-pressed',b===bits?'true':'false');e.onclick=()=>{bits=b;setPressed(bs,e);compute();};bs.appendChild(e);});
+ document.querySelectorAll('#q-s [data-s]').forEach(b=>b.onclick=()=>{mode=b.dataset.s;setPressed(b.parentNode,b);compute();});
+ function compute(){const lv=Math.pow(2,bits-1)-1;const gmax=Math.max(...W.flat().map(Math.abs));let err=0,zeros=0;
+  bars.forEach(b=>{const w=W[b.i][b.j];let q=w;if(bits<16){const mx=mode==='tensor'?gmax:Math.max(...W[b.i].map(Math.abs));const sc=mx/lv;q=Math.round(w/sc)*sc;}if(q===0&&w!==0)zeros++;const e=Math.abs(q-w);err+=e/(Math.abs(w)+.05);
+   b.h=q*.55;b.m.material.color.copy(C.v).lerp(C.con,clamp(e/.18,0,1));});
+  rd.innerHTML=`${bits}-bit ${bits<16?`(${2*lv+1} levels)`:'(original)'}: average relative error <b>${(err/bars.length*100).toFixed(1)}%</b>, <b>${zeros}</b> of ${bars.length} weights rounded to zero. A 70B-parameter model at this width needs about <b>${(70e9*bits/8/1e9).toFixed(0)} GB</b> for weights.`;}
+ compute();return Object.assign(B,{update(){bars.forEach(b=>{const t=b.m.scale.y+(b.h-b.m.scale.y)*.15;b.m.scale.y=Math.abs(t)<.005?.005:t;});}});}
+
+/* ---------- LoRA ---------- */
+function buildLoRA(s){const B=base([0,4.6,7.4],[0,.6,0],54);s.tRotY=-.55;s.vmin=33;const d=16,sp=.26,R=8;const r=rng(31);const Bm=[...Array(d)].map(()=>[...Array(R)].map(()=>randn(r))),Am=[...Array(R)].map(()=>[...Array(d)].map(()=>randn(r)));
+ const W0=new THREE.Mesh(new THREE.BoxGeometry(d*sp,.06,d*sp),std(C.muted,{transparent:true,opacity:.35}));B.root.add(W0);const lw=label('frozen W (d × d)',.26,hex('muted'));lw.position.set(0,-.25,d*sp/2+.3);B.root.add(lw);
+ const geo=new THREE.PlaneGeometry(d*sp,d*sp,d-1,d-1);geo.rotateX(-Math.PI/2);const cols=new Float32Array(d*d*3);geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ const surf=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:.85}));surf.position.y=1.2;B.root.add(surf);const ld=label('ΔW = B·A',.3,hex('acc'));ld.position.set(0,2.6,0);B.root.add(ld);
+ const bSlab=new THREE.Mesh(new THREE.BoxGeometry(.1,.1,d*sp),std(C.q));const aSlab=new THREE.Mesh(new THREE.BoxGeometry(d*sp,.1,.1),std(C.k));B.root.add(bSlab,aSlab);
+ const lb=label('B (d × r)',.24,hex('q'));const la=label('A (r × d)',.24,hex('k'));B.root.add(lb,la);
+ const rs=document.getElementById('lo-r'),rd=document.getElementById('lo-read');const tgt=new Float32Array(d*d),cur=new Float32Array(d*d);const c=new THREE.Color();
+ function compute(){const k=+rs.value;document.getElementById('lo-rv').textContent=k;let mx=0;for(let i=0;i<d;i++)for(let j=0;j<d;j++){let v=0;for(let q=0;q<k;q++)v+=Bm[i][q]*Am[q][j];tgt[i*d+j]=v;mx=Math.max(mx,Math.abs(v));}
+  for(let n=0;n<d*d;n++)tgt[n]/=mx;bSlab.scale.set(k*1.6,1,1);bSlab.position.set(-d*sp/2-.5-k*.08,1.2,0);aSlab.scale.set(1,1,k*1.6);aSlab.position.set(0,1.2,-d*sp/2-.5-k*.08);
+  lb.position.set(-d*sp/2-.6,1.55,d*sp/2);la.position.set(d*sp/2,1.55,-d*sp/2-.7);const D=4096;
+  rd.innerHTML=`For one 4096 × 4096 layer: full fine-tuning trains <b>${fmtN(D*D)}</b> weights; LoRA with r = ${k} trains <b>${fmtN(2*D*k)}</b> (${(2*D*k/(D*D)*100).toFixed(2)}%). The update's rank is at most ${k}.`;}
+ rs.oninput=compute;compute();
+ return Object.assign(B,{update(){const pos=geo.attributes.position;for(let n=0;n<d*d;n++){cur[n]+=(tgt[n]-cur[n])*.15;pos.setY(n,cur[n]*.9);c.copy(C.q).lerp(C.k,(cur[n]+1)/2);cols.set([c.r,c.g,c.b],n*3);}pos.needsUpdate=true;geo.attributes.color.needsUpdate=true;geo.computeVertexNormals();}});}
+
+startAll(()=>{readColors(['ink','muted','line','panel','q','k','v','acc','con']);
+ stage('f-attn',buildAttn);stage('f-rope',buildRope);stage('f-kv',buildKV);stage('f-scale',buildScale);stage('f-flash',buildFlash);stage('f-moe',buildMoE);stage('f-quant',buildQuant);stage('f-lora',buildLoRA);});
+})();
+</script>
+</body></html>

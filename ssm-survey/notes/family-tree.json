@@ -1,0 +1,608 @@
+[
+ {
+  "name": "hippo",
+  "label": "HiPPO",
+  "arxiv": "2008.07669v2",
+  "posted": "2020-08-17",
+  "family": "ssm",
+  "parents": [],
+  "line": "Memory as the optimal polynomial projection of the past, updated by a closed-form linear ODE."
+ },
+ {
+  "name": "linattn",
+  "label": "Linear attention",
+  "arxiv": "2006.16236v3",
+  "posted": "2020-06-29",
+  "family": "linattn",
+  "parents": [],
+  "line": "Kernel feature map replaces softmax; causal attention becomes an RNN with a fixed-size matrix state."
+ },
+ {
+  "name": "s4",
+  "label": "S4",
+  "arxiv": "2111.00396v3",
+  "posted": "2021-10-31",
+  "family": "ssm",
+  "parents": [
+   "lssl",
+   "hippo"
+  ],
+  "line": "HiPPO A as normal plus low-rank; the convolution kernel is computed cheaply via a Cauchy kernel and FFT."
+ },
+ {
+  "name": "lru",
+  "label": "LRU",
+  "arxiv": "2303.06349v1",
+  "posted": "2023-03-11",
+  "family": "rnn",
+  "parents": [
+   "s4"
+  ],
+  "line": "Linear complex-diagonal RNN with exponential parameterization and normalization matches S4 on LRA without HiPPO."
+ },
+ {
+  "name": "mamba",
+  "label": "Mamba",
+  "arxiv": "2312.00752v2",
+  "posted": "2023-12-01",
+  "family": "ssm",
+  "parents": [
+   "s4",
+   "h3",
+   "parscan"
+  ],
+  "line": "Selection: Delta, B, C depend on the input; computed by a fused hardware-aware parallel scan."
+ },
+ {
+  "name": "zoology",
+  "label": "Zoology",
+  "arxiv": "2312.04927v1",
+  "posted": "2023-12-08",
+  "family": "analysis",
+  "parents": [
+   "h3",
+   "hyena"
+  ],
+  "line": "Most of the perplexity gap between gated convolutions and attention is associative recall; introduces MQAR."
+ },
+ {
+  "name": "vim",
+  "label": "Vim",
+  "arxiv": "2401.09417v3",
+  "posted": "2024-01-17",
+  "family": "vision",
+  "parents": [
+   "mamba"
+  ],
+  "line": "ViT-style patch sequence scanned forward and backward by two selective SSMs per block."
+ },
+ {
+  "name": "vmamba",
+  "label": "VMamba",
+  "arxiv": "2401.10166v4",
+  "posted": "2024-01-18",
+  "family": "vision",
+  "parents": [
+   "mamba"
+  ],
+  "line": "SS2D cross-scan: four scan routes over the patch grid, merged so every patch sees all others."
+ },
+ {
+  "name": "repeat",
+  "label": "Repeat After Me",
+  "arxiv": "2402.01032v2",
+  "posted": "2024-02-01",
+  "family": "analysis",
+  "parents": [
+   "mamba"
+  ],
+  "line": "Proves fixed-state models are limited at copying, while two-layer transformers copy exponentially long strings."
+ },
+ {
+  "name": "jamba",
+  "label": "Jamba",
+  "arxiv": "2403.19887v2",
+  "posted": "2024-03-28",
+  "family": "hybrid",
+  "parents": [
+   "mamba"
+  ],
+  "line": "Interleaves attention and Mamba layers 1:7, MoE every other layer; KV cache 8x smaller."
+ },
+ {
+  "name": "mamba2",
+  "label": "Mamba-2",
+  "arxiv": "2405.21060v1",
+  "posted": "2024-05-31",
+  "family": "ssm",
+  "parents": [
+   "mamba",
+   "linattn"
+  ],
+  "line": "Scalar-A selective SSM equals masked linear attention (SSD); a chunked matmul algorithm allows larger states."
+ },
+ {
+  "name": "nvidia-mamba",
+  "label": "NVIDIA Mamba study",
+  "arxiv": "2406.07887v1",
+  "posted": "2024-06-12",
+  "family": "analysis",
+  "parents": [
+   "mamba",
+   "mamba2"
+  ],
+  "line": "Same-data 8B comparison: pure Mamba/Mamba-2 lag on copying and in-context learning; Mamba-2-Hybrid beats Transformer."
+ },
+ {
+  "name": "parscan",
+  "label": "Linear RNN scan",
+  "arxiv": "1709.04057v2",
+  "posted": "2017-09-12",
+  "family": "rnn",
+  "parents": [],
+  "line": "Linear recurrences are scans: Blelloch's parallel scan trains them in log depth over sequence length.",
+  "headline": {
+   "text": "up to 9x faster training and inference of linear RNNs",
+   "value": "9x",
+   "loc": "Abstract; Table 2 (SRU 9.21 at length 65,536)",
+   "claim_id": "parscan-model-speedup",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "lssl",
+  "label": "LSSL",
+  "arxiv": "2110.13985v1",
+  "posted": "2021-10-26",
+  "family": "ssm",
+  "parents": [
+   "hippo"
+  ],
+  "line": "Plugs HiPPO's A into a time-invariant state space; one layer is continuous, recurrent and convolutional.",
+  "headline": {
+   "text": "sCIFAR accuracy",
+   "value": "84.65",
+   "loc": "Table 1 (p8), row LSSL, column sCIFAR",
+   "claim_id": "lssl-scifar",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "dss",
+  "label": "DSS",
+  "arxiv": "2203.14343v3",
+  "posted": "2022-03-27",
+  "family": "ssm",
+  "parents": [
+   "s4"
+  ],
+  "line": "Drops S4's low-rank correction: a purely diagonal state matrix matches S4 on Long Range Arena."
+ },
+ {
+  "name": "s4d",
+  "label": "S4D",
+  "arxiv": "2206.11893v2",
+  "posted": "2022-06-23",
+  "family": "ssm",
+  "parents": [
+   "s4",
+   "dss"
+  ],
+  "line": "Diagonal A with S4's other choices; kernel is a Vandermonde product, and the HiPPO-derived init is what matters.",
+  "headline": {
+   "text": "S4D-Inv LRA average",
+   "value": "85.50",
+   "loc": "Table 5 (p14), row S4D-Inv, column Avg",
+   "claim_id": "s4d-lra-inv",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "hippo2",
+  "label": "HiPPO-2 (HTTYH)",
+  "arxiv": "2206.12037v2",
+  "posted": "2022-06-24",
+  "family": "ssm",
+  "parents": [
+   "hippo",
+   "s4"
+  ],
+  "line": "Explains S4's HiPPO matrix as projection onto exponentially-warped Legendre polynomials; adds Fourier variants and timescale init.",
+  "headline": {
+   "text": "S4 improved to 86% on Long Range Arena",
+   "value": "86%",
+   "loc": "Abstract (abs.html v2)",
+   "claim_id": "hippo2-lra",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "s5",
+  "label": "S5",
+  "arxiv": "2208.04933v3",
+  "posted": "2022-08-09",
+  "family": "ssm",
+  "parents": [
+   "s4"
+  ],
+  "line": "Replaces S4's many single-input SSMs with one multi-input, multi-output SSM computed by a parallel scan.",
+  "headline": {
+   "text": "Long Range Arena average",
+   "value": "87.4%",
+   "loc": "Abstract (abs.html v3)",
+   "claim_id": "s5-lra",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "h3",
+  "label": "H3",
+  "arxiv": "2212.14052v3",
+  "posted": "2022-12-28",
+  "family": "ssm",
+  "parents": [
+   "s4d",
+   "linattn"
+  ],
+  "line": "Stacks a shift SSM and a diagonal SSM with multiplicative gates, shaped like linear attention, for recall.",
+  "headline": {
+   "text": "associative recall accuracy, 2-layer (S4D: 86.0)",
+   "value": "99.8",
+   "loc": "Table 2, row H3, column Associative Recall",
+   "claim_id": "h3-ar",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "hyena",
+  "label": "Hyena",
+  "arxiv": "2302.10866v3",
+  "posted": "2023-02-21",
+  "family": "conv",
+  "parents": [
+   "h3"
+  ],
+  "line": "Replaces attention with implicitly parameterized long convolutions interleaved with data-controlled gating.",
+  "our_reading": true,
+  "reading_note": "h3 link is our reading; the abstract names no parent model",
+  "headline": {
+   "text": "Hyena operator faster than optimized attention at sequence length 64K",
+   "value": "100x",
+   "loc": "Abstract (abs.html v3)",
+   "claim_id": "hyena-speed-64k",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "rwkv",
+  "label": "RWKV",
+  "arxiv": "2305.13048v2",
+  "posted": "2023-05-22",
+  "family": "rnn",
+  "parents": [
+   "linattn"
+  ],
+  "line": "Linear-attention-style RNN that trains in parallel like a Transformer and decodes with constant memory.",
+  "headline": {
+   "text": "largest model, 'by far the largest dense RNN ever trained'",
+   "value": "14 billion",
+   "loc": "Abstract (abs.html v2)",
+   "claim_id": "rwkv-params",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "retnet",
+  "label": "RetNet",
+  "arxiv": "2307.08621v4",
+  "posted": "2023-07-17",
+  "family": "linattn",
+  "parents": [
+   "linattn"
+  ],
+  "line": "Retention: one mechanism with parallel, recurrent and chunkwise-recurrent forms, giving O(1) inference per token.",
+  "our_reading": true,
+  "reading_note": "linattn link is our reading; the abstract derives 'the connection between recurrence and attention' without naming linear attention"
+ },
+ {
+  "name": "gla",
+  "label": "GLA",
+  "arxiv": "2312.06635v6",
+  "posted": "2023-12-11",
+  "family": "linattn",
+  "parents": [
+   "linattn"
+  ],
+  "line": "Adds data-dependent gates to linear attention, trained with an I/O-aware kernel (FlashLinearAttention).",
+  "headline": {
+   "text": "trained on 2K, generalizes to sequences longer than 20K",
+   "value": "20K",
+   "loc": "Abstract (abs.html v6)",
+   "claim_id": "gla-lengthgen",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "based",
+  "label": "Based",
+  "arxiv": "2402.18668v2",
+  "posted": "2024-02-28",
+  "family": "linattn",
+  "parents": [
+   "linattn",
+   "zoology"
+  ],
+  "line": "Combines linear attention with sliding-window attention; window and feature size dial state size versus recall.",
+  "headline": {
+   "text": "higher generation throughput than FlashAttention-2 (1024 tokens, 1.3b)",
+   "value": "24x",
+   "loc": "Abstract (abs.html and PDF p1); Sec 1 (p2)",
+   "claim_id": "based-throughput",
+   "claim_file": "recall.json"
+  }
+ },
+ {
+  "name": "griffin",
+  "label": "Griffin",
+  "arxiv": "2402.19427v1",
+  "posted": "2024-02-29",
+  "family": "rnn",
+  "parents": [
+   "lru"
+  ],
+  "line": "Real-valued, input-gated LRU recurrence (RG-LRU); Hawk is purely recurrent, Griffin adds local attention.",
+  "headline": {
+   "text": "Griffin-7B average on 300B tokens (Llama-2-7B: 65.3 on 2T)",
+   "value": "65.8",
+   "loc": "Table 1 (p6), row Griffin 7B, column Average",
+   "claim_id": "griffin-7b-avg",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "illusion",
+  "label": "Illusion of State",
+  "arxiv": "2404.08819v3",
+  "posted": "2024-04-12",
+  "family": "analysis",
+  "parents": [
+   "s4",
+   "mamba"
+  ],
+  "line": "Proves S4- and Mamba-style SSMs lie in TC^0, like transformers, so they cannot express permutation composition."
+ },
+ {
+  "name": "xlstm",
+  "label": "xLSTM",
+  "arxiv": "2405.04517v2",
+  "posted": "2024-05-07",
+  "family": "rnn",
+  "parents": [],
+  "line": "Scales LSTM with exponential gating; sLSTM keeps scalar memory, mLSTM a parallelizable matrix memory."
+ },
+ {
+  "name": "mambaout",
+  "label": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "posted": "2024-05-13",
+  "family": "vision",
+  "parents": [
+   "mamba"
+  ],
+  "line": "Removes the SSM from Mamba blocks (Gated CNN); beats visual Mambas on ImageNet, trails on detection/segmentation.",
+  "headline": {
+   "text": "MambaOut-Small ImageNet top-1 (LocalVMamba-S: 83.7)",
+   "value": "84.1",
+   "loc": "Table 1, row MambaOut-Small",
+   "claim_id": "mambaout-small-top1",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "mlla",
+  "label": "MLLA (MILA)",
+  "arxiv": "2405.16605v2",
+  "posted": "2024-05-26",
+  "family": "vision",
+  "parents": [
+   "mamba",
+   "linattn"
+  ],
+  "line": "Recasts Mamba as linear attention with six differences; forget gate and block design matter most.",
+  "headline": {
+   "text": "MILA-B ImageNet top-1 (with MESA)",
+   "value": "85.3",
+   "loc": "Table 3, row MILA-B",
+   "claim_id": "mlla-milab-top1-tree",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "zamba",
+  "label": "Zamba",
+  "arxiv": "2405.16712v1",
+  "posted": "2024-05-26",
+  "family": "hybrid",
+  "parents": [
+   "mamba"
+  ],
+  "line": "7B Mamba backbone plus a single shared attention module, for attention's benefits at minimal parameter cost.",
+  "headline": {
+   "text": "training tokens, openly available data",
+   "value": "1T",
+   "loc": "Abstract (abs.html v1)",
+   "claim_id": "zamba-tokens",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "deltanet",
+  "label": "DeltaNet",
+  "arxiv": "2406.06484v6",
+  "posted": "2024-06-10",
+  "family": "linattn",
+  "parents": [
+   "linattn"
+  ],
+  "line": "Parallelizes delta-rule linear attention (DeltaNet) over sequence length using a Householder-product representation.",
+  "headline": {
+   "text": "model size trained for 100B tokens; beats Mamba and GLA",
+   "value": "1.3B",
+   "loc": "Abstract (abs.html v6)",
+   "claim_id": "deltanet-size",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "samba",
+  "label": "Samba",
+  "arxiv": "2406.07522v3",
+  "posted": "2024-06-11",
+  "family": "hybrid",
+  "parents": [
+   "mamba"
+  ],
+  "line": "Layer-wise mix of Mamba and sliding-window attention, aimed at unlimited-context language modeling in linear time.",
+  "headline": {
+   "text": "higher throughput than GQA Transformers on 128K-token prompts",
+   "value": "3.73x",
+   "loc": "Abstract (abs.html v3)",
+   "claim_id": "samba-throughput",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "mambavision",
+  "label": "MambaVision",
+  "arxiv": "2407.08083v2",
+  "posted": "2024-07-10",
+  "family": "vision",
+  "parents": [
+   "mamba"
+  ],
+  "line": "Hierarchical vision backbone: a redesigned Mamba mixer, with self-attention blocks in the final layers."
+ },
+ {
+  "name": "jamba15",
+  "label": "Jamba-1.5",
+  "arxiv": "2408.12570v1",
+  "posted": "2024-08-22",
+  "family": "hybrid",
+  "parents": [
+   "jamba"
+  ],
+  "line": "Jamba block scaled to 94B active / 398B total; ExpertsInt8 fits 256K context on 8 80GB GPUs.",
+  "headline": {
+   "text": "Jamba-1.5-Large KV cache at 256K context, 16-bit",
+   "value": "9GB",
+   "loc": "Table 1 (p2), row Jamba-1.5-Large",
+   "claim_id": "jamba15-kv-large",
+   "claim_file": "hybrid.json"
+  }
+ },
+ {
+  "name": "minrnn",
+  "label": "minLSTM/minGRU",
+  "arxiv": "2410.01201v3",
+  "posted": "2024-10-02",
+  "family": "rnn",
+  "parents": [],
+  "line": "Simplifies LSTM and GRU into minimal versions with fewer parameters that train fully in parallel."
+ },
+ {
+  "name": "hymba",
+  "label": "Hymba",
+  "arxiv": "2411.13676v1",
+  "posted": "2024-11-20",
+  "family": "hybrid",
+  "parents": [
+   "mamba"
+  ],
+  "line": "Hybrid-head parallel design: attention heads and SSM heads side by side, plus learnable meta tokens.",
+  "our_reading": true,
+  "reading_note": "mamba link is our reading; the abstract says 'SSMs' without naming Mamba",
+  "headline": {
+   "text": "cache size reduction vs Llama-3.2-3B (Hymba-1.5B-Base)",
+   "value": "11.67x",
+   "loc": "Abstract (abs.html v1)",
+   "claim_id": "hymba-cache",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "gdn",
+  "label": "Gated DeltaNet",
+  "arxiv": "2412.06464v3",
+  "posted": "2024-12-09",
+  "family": "linattn",
+  "parents": [
+   "mamba2",
+   "deltanet"
+  ],
+  "line": "Gated delta rule: Mamba-2's decay gate erases memory, the delta rule rewrites single key-value pairs.",
+  "headline": {
+   "text": "1.3B / 100B-token average accuracy (Mamba2 54.89, DeltaNet 52.14)",
+   "value": "55.32",
+   "loc": "Table 3, row Gated DeltaNet, column Avg.",
+   "claim_id": "gdn-avg",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "nemotronh",
+  "label": "Nemotron-H",
+  "arxiv": "2504.03624v4",
+  "posted": "2025-04-04",
+  "family": "hybrid",
+  "parents": [
+   "mamba2",
+   "nvidia-mamba"
+  ],
+  "line": "Mamba-2 hybrids at 8B and 56B; roughly 8% of layers are attention, the rest Mamba-2 and FFN.",
+  "headline": {
+   "text": "up to 3x faster inference than similar-size Transformers",
+   "value": "3x",
+   "loc": "Abstract; Sec 2.6 (8B vs Llama-3.1-8B)",
+   "claim_id": "nemotronh-speed",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "falconh1",
+  "label": "Falcon-H1",
+  "arxiv": "2507.22448v1",
+  "posted": "2025-07-30",
+  "family": "hybrid",
+  "parents": [
+   "mamba2"
+  ],
+  "line": "Parallel hybrid: attention and SSMs combined side by side, released from 0.5B to 34B parameters.",
+  "our_reading": true,
+  "reading_note": "mamba2 link is our reading; the abstract says 'SSMs' and names Mamba only for earlier Falcon models",
+  "headline": {
+   "text": "Falcon-H1-34B matches or outperforms models up to 70B",
+   "value": "70B",
+   "loc": "Abstract (abs.html v1)",
+   "claim_id": "falconh1-rival",
+   "claim_file": "branches.json"
+  }
+ },
+ {
+  "name": "mamba3",
+  "label": "Mamba-3",
+  "arxiv": "2603.15569v1",
+  "posted": "2026-03-16",
+  "family": "ssm",
+  "parents": [
+   "mamba2"
+  ],
+  "line": "Exponential-trapezoidal discretization, complex-valued (RoPE-like) state, and MIMO updates on top of Mamba-2; no short conv.",
+  "headline": {
+   "text": "1.5B average downstream accuracy, SISO (GDN 55.8, MIMO 57.6)",
+   "value": "56.4",
+   "loc": "Table 3, row Mamba-3-SISO-1.5B, column Average",
+   "claim_id": "mamba3-siso-1p5b-avg",
+   "claim_file": "branches.json"
+  }
+ }
+]

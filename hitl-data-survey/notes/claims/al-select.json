@@ -1,0 +1,2345 @@
+[
+ {
+  "id": "settles-cite-authors",
+  "claim": "author",
+  "value": "Burr Settles",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "PDF title page",
+  "source": "paper"
+ },
+ {
+  "id": "settles-cite-title",
+  "claim": "title",
+  "value": "Active Learning Literature Survey",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "PDF title page",
+  "source": "paper"
+ },
+ {
+  "id": "settles-cite-venue",
+  "claim": "venue",
+  "value": "Computer Sciences Technical Report 1648, University of Wisconsin-Madison",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "PDF title page; recommended citation in Sec 1 (p. 3)",
+  "source": "paper"
+ },
+ {
+  "id": "settles-cite-date",
+  "claim": "date",
+  "value": "2009 (PDF title page: \"Updated on: January 26, 2010\")",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 1 recommended citation and BibTeX entry (Year = {2009}); title page update line",
+  "source": "paper",
+  "note": "Not on arXiv. The author's recommended citation says 2009; the PDF we hold is the 26 Jan 2010 update."
+ },
+ {
+  "id": "settles-us-def",
+  "claim": "what uncertainty sampling does",
+  "value": "an active learner queries the instances about which it is least certain how to label",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 12, first paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "settles-us-binary",
+  "claim": "binary-case rule, attributed to Lewis and Gale 1994",
+  "value": "uncertainty sampling simply queries the instance whose posterior probability of being positive is nearest 0.5",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 12, first paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "settles-eq-lc",
+  "claim": "least confident query rule",
+  "value": "x^*_{LC} = \\underset{x}{\\operatorname{argmax}}\\; 1 - P_\\theta(\\hat{y}|x)",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 12, unnumbered display",
+  "source": "paper",
+  "note": "Transcribed from the PDF text layer (PDF only, no LaTeX source)."
+ },
+ {
+  "id": "settles-eq-lc-yhat",
+  "claim": "definition of y-hat in the least confident rule",
+  "value": "\\hat{y} = \\operatorname{argmax}_y P_\\theta(y|x)",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 12, sentence after the display",
+  "source": "paper"
+ },
+ {
+  "id": "settles-lc-reading",
+  "claim": "plain reading of least confident",
+  "value": "the expected 0/1-loss, i.e., the model's belief that it will mislabel x",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 12",
+  "source": "paper"
+ },
+ {
+  "id": "settles-lc-flaw",
+  "claim": "why margin was introduced",
+  "value": "the criterion for the least confident strategy only considers information about the most probable label",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 13, first paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "settles-eq-margin",
+  "claim": "margin query rule (margin sampling, Scheffer et al., 2001)",
+  "value": "x^*_{M} = \\underset{x}{\\operatorname{argmin}}\\; P_\\theta(\\hat{y}_1|x) - P_\\theta(\\hat{y}_2|x)",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 13, unnumbered display",
+  "source": "paper",
+  "note": "y-hat_1 and y-hat_2 are the first and second most probable class labels under the model."
+ },
+ {
+  "id": "settles-eq-entropy",
+  "claim": "entropy query rule",
+  "value": "x^*_{H} = \\underset{x}{\\operatorname{argmax}}\\; -\\sum_i P_\\theta(y_i|x) \\log P_\\theta(y_i|x)",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 13, unnumbered display",
+  "source": "paper",
+  "note": "y_i ranges over all possible labelings."
+ },
+ {
+  "id": "settles-binary-equiv",
+  "claim": "the three measures coincide for two classes",
+  "value": "For binary classification, entropy-based sampling reduces to the margin and least confident strategies above; in fact all three are equivalent to querying the instance with a class posterior closest to 0.5.",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 13",
+  "source": "paper"
+ },
+ {
+  "id": "settles-fig5",
+  "claim": "three-class simplex heatmaps of the three measures",
+  "value": "the most informative instance would lie at the center of the triangle",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 13-14; Figure 5 (p. 14), panels (a) least confident, (b) margin, (c) entropy",
+  "source": "paper"
+ },
+ {
+  "id": "settles-fig5-edges",
+  "claim": "where entropy differs from LC and margin on the simplex",
+  "value": "the entropy measure does not favor instances where only one of the labels is highly unlikely (i.e., along the outer side edges)",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 14, text after Figure 5",
+  "source": "paper"
+ },
+ {
+  "id": "settles-mixed",
+  "claim": "empirical comparison of the three measures",
+  "value": "have yielded mixed results, suggesting that the best strategy may be application-dependent",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 14",
+  "source": "paper"
+ },
+ {
+  "id": "settles-loss-match",
+  "claim": "which measure suits which objective",
+  "value": "entropy seems appropriate if the objective function is to minimize log-loss, while the other two (particularly margin) are more appropriate if we aim to reduce classification error",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.1, p. 14",
+  "source": "paper"
+ },
+ {
+  "id": "settles-outlier",
+  "claim": "failure case of uncertainty sampling (Figure 7)",
+  "value": "The least certain instance lies on the classification boundary, but is not \"representative\" of other instances in the distribution, so knowing its label is unlikely to improve accuracy on the data as a whole.",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.6, p. 25; Figure 7 (p. 26)",
+  "source": "paper"
+ },
+ {
+  "id": "settles-eq-id",
+  "claim": "information density query rule",
+  "value": "x^*_{ID} = \\underset{x}{\\operatorname{argmax}}\\; \\phi_A(x) \\times \\left( \\frac{1}{U} \\sum_{u=1}^{U} \\mathrm{sim}(x, x^{(u)}) \\right)^{\\beta}",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 3.6, p. 25, unnumbered display",
+  "source": "paper",
+  "note": "phi_A(x) is the base informativeness (e.g. uncertainty); the bracket is average similarity to the U unlabeled instances; beta weights the density term."
+ },
+ {
+  "id": "settles-biased",
+  "claim": "the AL-built labeled set is not i.i.d.",
+  "value": "the labeled instances are a biased distribution, not drawn i.i.d. from the underlying natural density",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 4.1, p. 27, second paragraph",
+  "source": "paper",
+  "note": "Same paragraph: the training set is \"inherently tied to the model that was used to generate it\". The exact phrase \"sampling bias\" does not occur here."
+ },
+ {
+  "id": "settles-guo-batch",
+  "claim": "reported negative result for myopic batch queries (Guo and Schuurmans 2008)",
+  "value": "off-the-shelf query strategies, when myopically employed in a batch-mode setting (Section 6.1) are often much worse than random sampling",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 4.1, p. 27, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "settles-qbest",
+  "claim": "why top-Q batches fail",
+  "value": "Myopically querying the \"Q-best\" queries according to some instance-level query strategy often does not work well, since it fails to consider the overlap in information content among the \"best\" instances.",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 6.1, p. 35, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "settles-qbest-random",
+  "claim": "ordering of batch strategies",
+  "value": "these approaches show improvements over random batch sampling, which in turn is generally better than simple \"Q-best\" batch construction",
+  "paper": "settles",
+  "version": "TR1648 (updated 2010-01-26)",
+  "loc": "Sec 6.1, p. 35, last sentence",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-cite-authors",
+  "claim": "authors",
+  "value": "David D. Lewis, William A. Gale",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "PDF p. 1 header",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-cite-title",
+  "claim": "title",
+  "value": "A Sequential Algorithm for Training Text Classifiers",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "PDF p. 1 header",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-cite-venue",
+  "claim": "venue",
+  "value": "SIGIR 94: Proceedings of Seventeenth Annual International ACM-SIGIR Conference on Research and Development in Information Retrieval, Springer-Verlag, London, pp. 3-12",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "PDF p. 1 header",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-cite-arxiv",
+  "claim": "arXiv id and version",
+  "value": "cmp-lg/9407020v2",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "abs.html submission history",
+  "source": "paper",
+  "uncertain": true,
+  "note": "v1 (24 Jul 1994, 1 KB) is marked withdrawn; v2 is 25 Jul 1994 (62 KB). The PDF margin stamp reads \"cmp-lg/9407020 24 Jul 94\". The PDF content is the 10-page paper, so it is v2."
+ },
+ {
+  "id": "lewisgale-cite-date",
+  "claim": "date",
+  "value": "1994 (arXiv v2: 25 Jul 1994; PDF stamp: 24 Jul 94)",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "abs.html submission history; PDF p. 1 margin stamp",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Two dates in the sources; the conference year is 1994."
+ },
+ {
+  "id": "lewisgale-rule",
+  "claim": "the uncertainty rule for a probabilistic classifier",
+  "value": "those examples with estimated P(C|w) values closest to 0.5 selected, since 0.5 corresponds to the classifier being most uncertain of the class label",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 4.3, first paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-b2",
+  "claim": "how a batch of b is actually filled",
+  "value": "choosing the b/2 examples closest to 0.5 and above it, and the b/2 examples closest to 0.5 and below it",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 4.3, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-b2-why",
+  "claim": "the reason for the split",
+  "value": "This method guarantees that no more than half the examples selected on an iteration are exact duplicates (unless all examples score above 0.5 or all score below 0.5).",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 4.3, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-500-abstract",
+  "claim": "headline label saving, abstract wording",
+  "value": "reduced by as much as 500-fold the amount of training data that would have to be manually classified to achieve a given level of effectiveness",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Abstract",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-500-intro",
+  "claim": "headline label saving, introduction wording",
+  "value": "reductions of up to 500-fold in the number of examples that must be labeled to produce a classifier with a given effectiveness",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 1 (Introduction), last paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-500-sec7",
+  "claim": "headline label saving, discussion wording",
+  "value": "In some cases, reaching a given level of effectiveness requires 500 times as many randomly selected examples as examples selected by uncertainty sampling.",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 7 (Discussion), third paragraph",
+  "source": "paper",
+  "note": "The 500x figure is stated in the abstract, Sec 1 and Sec 7; no table gives the 500x pair directly (it is read off Figure 2 curves)."
+ },
+ {
+  "id": "lewisgale-100k",
+  "claim": "typical saving",
+  "value": "In most cases effectiveness levels reached by random sampling only with 100,000 or more training examples are reached by uncertainty sampling with less than 1000 examples",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 7 (Discussion), third paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-rare",
+  "claim": "why random sampling fails for rare classes",
+  "value": "If only 1 in 1000 texts are class members (not atypical), and only 500 texts can be labeled, then a random sample will usually contain 500 negative examples and no positive ones.",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 1 (Introduction), third paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-loop",
+  "claim": "the uncertainty sampling loop",
+  "value": "1. Create an initial classifier 2. While teacher is willing to label examples (a) Apply the current classifier to each unlabeled example (b) Find the b examples for which the classifier is least certain of class membership (c) Have the teacher label the subsample of b examples (d) Train a new classifier on all labeled examples",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Figure 1 (p. 2)",
+  "source": "paper",
+  "note": "The text (Sec 3, Sec 5.2) calls this algorithm \"Figure 3\"; the PDF caption labels it Figure 1."
+ },
+ {
+  "id": "lewisgale-single-clf",
+  "claim": "stated weakness of a single classifier",
+  "value": "underestimation of true uncertainty, and biases caused by nonrepresentative classifiers",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 2, last paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-setup-seed",
+  "claim": "starting labeled set per run",
+  "value": "3 positive examples",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 5.2",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-setup-iters",
+  "claim": "iterations and batch size",
+  "value": "249 iterations of uncertainty sampling with a subsample size of 4",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 5.2",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-setup-runs",
+  "claim": "runs per category",
+  "value": "10",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 5.2 (\"we repeated this process 10 times for each category\")",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-setup-total",
+  "claim": "labels per run",
+  "value": "999",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 5.2 and Table 2 header \"3 + 996 uncer.\"",
+  "source": "paper",
+  "derived": true,
+  "note": "3 + 249 x 4 = 999."
+ },
+ {
+  "id": "lewisgale-data",
+  "claim": "corpus split",
+  "value": "319,463 titles train / 51,991 titles test",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 5.1",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-cat-freq",
+  "claim": "training-set frequency range of the 10 categories",
+  "value": "0.0007 to 0.0049",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Table 1, column 'Training Freq.' (tickertalk 0.0007 ... hostages 0.0049)",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-t2-boxoffice-unc",
+  "claim": "mean F1, boxoffice, 3 + 996 uncertainty-selected",
+  "value": ".700",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Table 2, row 'boxoffice', column '3 + 996 uncer.' (SD .041)",
+  "source": "paper",
+  "note": "The 'ffi' ligature is lost in the PDF text layer ('boxoce')."
+ },
+ {
+  "id": "lewisgale-t2-boxoffice-rand",
+  "claim": "mean F1, boxoffice, 3 + 7 random",
+  "value": ".222",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Table 2, row 'boxoffice', column '3 + 7 rand.' (SD .172)",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-t2-boxoffice-rel",
+  "claim": "mean F1, boxoffice, 3 + 996 relevance-selected",
+  "value": ".481",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Table 2, row 'boxoffice', column '3 + 996 rel.' (SD .053)",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-t2-boxoffice-full",
+  "claim": "mean F1, boxoffice, full training set",
+  "value": ".647",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Table 2, row 'boxoffice', column '3 + 319,460 full' (SD .023)",
+  "source": "paper"
+ },
+ {
+  "id": "lewisgale-6of10",
+  "claim": "uncertainty sample beats the full training set",
+  "value": "For 6 of 10 categories, the mean F=1 for a classifier trained on a uncertainty sample of 999 examples actually exceeds that from training on the full training set of 319,463 examples.",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 7 (Discussion), fourth paragraph",
+  "source": "paper",
+  "note": "The authors blame their feature selection on the full set, not a general effect."
+ },
+ {
+  "id": "lewisgale-sd",
+  "claim": "run-to-run variation",
+  "value": "Several of the standard deviations shown in Table 2 amount to 10% or more of the mean effectiveness",
+  "paper": "lewisgale",
+  "version": "cmp-lg/9407020v2",
+  "loc": "Sec 7 (Discussion), fifth paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-cite-authors",
+  "claim": "authors",
+  "value": "Yarin Gal, Riashat Islam, Zoubin Ghahramani",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "PDF p. 1; abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-cite-title",
+  "claim": "title",
+  "value": "Deep Bayesian Active Learning with Image Data",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "PDF p. 1; abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "1703.02910v1",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "PDF p. 1 margin stamp",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-cite-date",
+  "claim": "date",
+  "value": "8 Mar 2017",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "abs.html (v1, the only version); PDF stamp",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-cite-venue",
+  "claim": "venue",
+  "value": "not stated in v1",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "PDF p. 1 (no proceedings footer); abs.html (no comment or journal-ref)",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Source is written in the ICML 2017 template (icml2017.sty). The arXiv v1 we hold names no venue."
+ },
+ {
+  "id": "dbal-mc-dropout",
+  "claim": "how MC dropout samples the posterior",
+  "value": "Inference is done by training a model with dropout before every weight layer, and by performing dropout at test time as well to sample from the approximate posterior (stochastic forward passes, referred to as MC dropout).",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 3, paragraph 2 (src/example_paper.tex line 214)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-eq-predictive",
+  "claim": "MC dropout predictive distribution",
+  "value": "\\begin{aligned} p(y=c | \\mathbf{x}, \\mathcal{D}_{\\text{train}}) &= \\int p(y=c | \\mathbf{x}, \\boldsymbol{\\omega}) p(\\boldsymbol{\\omega} | \\mathcal{D}_{\\text{train}}) \\,\\text{d}\\boldsymbol{\\omega} \\\\ &\\approx \\int p(y=c | \\mathbf{x}, \\boldsymbol{\\omega}) q_\\theta^*(\\boldsymbol{\\omega}) \\,\\text{d}\\boldsymbol{\\omega} \\\\ &\\approx \\frac{1}{T} \\sum_{t=1}^T p(y=c | \\mathbf{x}, \\widehat{\\boldsymbol{\\omega}}_t) \\end{aligned}",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 3, unnumbered align* (tex lines 217-224)",
+  "source": "paper",
+  "note": "omega-hat_t ~ q*_theta(omega), the dropout distribution; T is the number of stochastic forward passes."
+ },
+ {
+  "id": "dbal-eq-select",
+  "claim": "acquisition rule",
+  "value": "x^* = \\text{argmax}_{x \\in \\mathcal{D}_\\text{pool}} a(x, \\mathcal{M})",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, first display (tex line 237)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-eq-maxent",
+  "claim": "Max Entropy acquisition",
+  "value": "\\mathbb{H}[y | \\mathbf{x}, \\mathcal{D}_{\\text{train}}] := - \\sum_c p(y=c | \\mathbf{x}, \\mathcal{D}_{\\text{train}}) \\log p(y=c | \\mathbf{x}, \\mathcal{D}_{\\text{train}})",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 1 (tex lines 247-250)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-eq-bald",
+  "claim": "BALD acquisition",
+  "value": "\\mathbb{I}[y, \\boldsymbol{\\omega} | \\mathbf{x}, \\mathcal{D}_{\\text{train}}] = \\mathbb{H}[y | \\mathbf{x}, \\mathcal{D}_{\\text{train}}] - \\mathbb{E}_{p(\\boldsymbol{\\omega} | \\mathcal{D}_{\\text{train}})} \\big[ \\mathbb{H}[y | \\mathbf{x}, \\boldsymbol{\\omega}] \\big]",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 2 (tex lines 258-260)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-bald-reading",
+  "claim": "plain reading of BALD",
+  "value": "Points that maximise this acquisition function are points on which the model is uncertain on average, but there exist model parameters that produce disagreeing predictions with high certainty.",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 2 (tex line 268)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-eq-varratio",
+  "claim": "Variation Ratios acquisition",
+  "value": "\\text{variation-ratio}[\\mathbf{x}] := 1 - \\max_y p(y | x, \\mathcal{D}_{\\text{train}})",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 3 (tex line 273)",
+  "source": "paper",
+  "note": "Same form as Settles' least confident score, applied to the MC-averaged prediction."
+ },
+ {
+  "id": "dbal-eq-meanstd",
+  "claim": "Mean STD acquisition",
+  "value": "\\begin{gathered} \\sigma_c = \\sqrt{\\mathbb{E}_{q(\\boldsymbol{\\omega})}[p(y=c | \\mathbf{x}, \\boldsymbol{\\omega})^2] - \\mathbb{E}_{q(\\boldsymbol{\\omega})}[p(y=c | \\mathbf{x}, \\boldsymbol{\\omega})]^2} \\\\ \\sigma(\\mathbf{x}) = \\frac{1}{C} \\sum_c \\sigma_c \\end{gathered}",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 4 (tex lines 279-283)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-meanstd-adhoc",
+  "claim": "authors' view of Mean STD",
+  "value": "more of an ad-hoc technique used in recent literature",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 4",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-eq-random",
+  "claim": "Random acquisition",
+  "value": "a(\\mathbf{x}) = \\text{unif}()",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, item 5",
+  "source": "paper",
+  "note": "unif() draws from a uniform distribution on [0, 1]."
+ },
+ {
+  "id": "dbal-eq-bald-mc",
+  "claim": "MC estimator of BALD",
+  "value": "\\widehat{\\mathbb{I}}[y, \\boldsymbol{\\omega} | \\mathbf{x}, \\mathcal{D}_{\\text{train}}] = - \\sum_c \\bigg(\\frac{1}{T} \\sum_t \\widehat{p}_c^t \\bigg) \\log \\bigg(\\frac{1}{T} \\sum_t \\widehat{p}_c^t \\bigg) + \\frac{1}{T} \\sum_{c,t} \\widehat{p}_c^t \\log \\widehat{p}_c^t",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, last line of the unnumbered align* (tex lines 330-332)",
+  "source": "paper",
+  "note": "The source writes the right-hand side first and ends with '=: \\widehat{\\bbI}[...]'; reordered here to a left-hand definition. First term: entropy of the averaged prediction. Second term: minus the average per-pass entropy."
+ },
+ {
+  "id": "dbal-eq-phat",
+  "claim": "per-pass probability vector",
+  "value": "\\widehat{\\mathbf{p}}^t = [\\widehat{p}_1^t, ..., \\widehat{p}_C^t] = \\text{softmax}(\\mathbf{f}^{\\widehat{\\boldsymbol{\\omega}}_t}(\\mathbf{x}))",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 4, display after the estimator (tex line 336)",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-aleatoric-epistemic",
+  "claim": "the two kinds of uncertainty",
+  "value": "Such deterministic models can capture aleatoric uncertainty -- the noise in the data -- but cannot capture epistemic uncertainty -- the uncertainty over the parameters of the CNN, which we try to minimise during active learning.",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.2, first paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-bayes-vs-det",
+  "claim": "Bayesian vs deterministic CNN (Figure 2)",
+  "value": "The Bayesian models, propagating uncertainty throughout the model, attain higher accuracy early on, and converge to a higher accuracy overall.",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.2, last paragraph; Figure 2",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-bald-noisy",
+  "claim": "authors' explanation of BALD skipping noisy points (melanoma experiment)",
+  "value": "This might be because BALD avoided selecting noisy points -- near-by images for which there exist multiple noisy labels of different classes. Such points have large aleatoric uncertainty -- uncertainty which cannot be explained away -- rather than large epistemic uncertainty",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.5, last paragraph",
+  "source": "paper",
+  "note": "Stated as a hypothesis ('might be'), not tested."
+ },
+ {
+  "id": "dbal-mnist-arch",
+  "claim": "MNIST model",
+  "value": "convolution-relu-convolution-relu-max pooling-dropout-dense-relu-dropout-dense-softmax, with 32 convolution kernels, 4x4 kernel size, 2x2 pooling, dense layer with 128 units, and dropout probabilities 0.25 and 0.5",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1, first paragraph (tex line 364)",
+  "source": "paper",
+  "note": "Follows the Keras MNIST example."
+ },
+ {
+  "id": "dbal-mnist-dropout-layers",
+  "claim": "number of dropout layers in the MNIST model",
+  "value": "2",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 architecture string",
+  "source": "paper",
+  "derived": true,
+  "note": "Counted from the architecture string: dropout 0.25 after max pooling, dropout 0.5 after the 128-unit dense layer. Sec 3 describes 'dropout before every weight layer'; the MNIST net has no dropout before either convolution or before the first dense layer."
+ },
+ {
+  "id": "dbal-mnist-init",
+  "claim": "initial labeled set",
+  "value": "20",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 (\"a (random but balanced) initial training set of 20 data points\")",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-mnist-val",
+  "claim": "validation set size for weight decay",
+  "value": "100",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1",
+  "source": "paper",
+  "note": "Table 2 uses a validation set of 5000 instead."
+ },
+ {
+  "id": "dbal-mnist-test",
+  "claim": "test set",
+  "value": "10K",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 (\"the standard test set of 10K points\"); the rest is the pool",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-mnist-per-round",
+  "claim": "images acquired per round",
+  "value": "10",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 (\"each time acquiring the 10 points that maximised the acquisition function\")",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-mnist-rounds",
+  "claim": "number of rounds",
+  "value": "100",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 (\"We repeated the acquisition process 100 times\")",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-mnist-repeats",
+  "claim": "repeats per experiment",
+  "value": "three",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 (\"Each experiment was repeated three times and the results averaged\")",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-mnist-total",
+  "claim": "total images acquired",
+  "value": "1000",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Figure 1 caption (\"up to 1000 images\")",
+  "source": "paper",
+  "derived": true,
+  "note": "100 rounds x 10 = 1000."
+ },
+ {
+  "id": "dbal-mnist-T",
+  "claim": "number of MC dropout passes T for MNIST acquisition",
+  "value": "not stated",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1 (no T given anywhere in the MNIST experiments)",
+  "source": "paper",
+  "uncertain": true,
+  "note": "The only explicit sample count in the paper is 20 MC dropout samples for logging test performance in the melanoma experiment (Sec 5.5). BatchBALD's 100 samples (batchbald-mnist-T) are BatchBALD's choice, not DBAL's."
+ },
+ {
+  "id": "dbal-test-eval",
+  "claim": "how test error was measured",
+  "value": "The test error of each model and each acquisition function was assessed after each acquisition, using the dropout approximation at test time. To decide what data points to acquire though we used MC dropout following the derivations above.",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-retrain",
+  "claim": "retraining protocol",
+  "value": "resetting the models after each acquisition, and training them again to convergence",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 6 (Future Research)",
+  "source": "paper",
+  "note": "Same paragraph: this cost '20 hours for each melanoma experiment'; not resetting may fall into local optima."
+ },
+ {
+  "id": "dbal-meanstd-random",
+  "claim": "Mean STD vs Random on MNIST",
+  "value": "Mean STD seems to perform similarly to Random",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 5.1, third paragraph; Figure 1",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-bald-10",
+  "claim": "acquired MNIST images for BALD to reach 10% test error",
+  "value": "145",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '10%', column 'BALD'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-varratios-10",
+  "claim": "acquired MNIST images for Variation Ratios to reach 10% test error",
+  "value": "120",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '10%', column 'Var Ratios'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-maxent-10",
+  "claim": "acquired MNIST images for Max Entropy to reach 10% test error",
+  "value": "165",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '10%', column 'Max Ent'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-meanstd-10",
+  "claim": "acquired MNIST images for Mean STD to reach 10% test error",
+  "value": "230",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '10%', column 'Mean STD'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-random-10",
+  "claim": "acquired MNIST images for Random to reach 10% test error",
+  "value": "255",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '10%', column 'Random'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-bald-5",
+  "claim": "acquired MNIST images for BALD to reach 5% test error",
+  "value": "335",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '5%', column 'BALD'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-varratios-5",
+  "claim": "acquired MNIST images for Variation Ratios to reach 5% test error",
+  "value": "295",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '5%', column 'Var Ratios'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-maxent-5",
+  "claim": "acquired MNIST images for Max Entropy to reach 5% test error",
+  "value": "355",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '5%', column 'Max Ent'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-meanstd-5",
+  "claim": "acquired MNIST images for Mean STD to reach 5% test error",
+  "value": "695",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '5%', column 'Mean STD'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-random-5",
+  "claim": "acquired MNIST images for Random to reach 5% test error",
+  "value": "835",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1, row '5%', column 'Random'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t1-units",
+  "claim": "unit of Table 1",
+  "value": "acquired images",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 1 caption (\"Number of acquired images to get to model error of % on MNIST.\") vs Sec 5.1 text (\"number of acquisition steps\")",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Caption says images, body says acquisition steps. Values exceed 100 (the number of steps), so they are images. The caption also drops the error value. 8 of 10 cells are not multiples of the per-round size 10 (only 120 and 230 are); how they were read off the averaged curve is not stated."
+ },
+ {
+  "id": "dbal-intro-295",
+  "claim": "headline from the introduction",
+  "value": "5% test error on MNIST with only 295 labelled images without relying on unlabelled data (in comparison, 835 labelled images are needed to achieve 5% test error using random sampling",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Sec 1, fifth paragraph",
+  "source": "paper",
+  "note": "295 is the Var Ratios cell of Table 1, not BALD (335)."
+ },
+ {
+  "id": "dbal-t2-random",
+  "claim": "MNIST test error after 1000 acquired images, Random",
+  "value": "4.66%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'Random'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-bald",
+  "claim": "MNIST test error after 1000 acquired images, BALD",
+  "value": "1.80%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'BALD'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-maxent",
+  "claim": "MNIST test error after 1000 acquired images, Max Entropy",
+  "value": "1.74%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'Max Entropy'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-varratios",
+  "claim": "MNIST test error after 1000 acquired images, Var Ratios",
+  "value": "1.64%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'Var Ratios'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-ladder-gamma",
+  "claim": "semi-supervised Ladder Network (Gamma-model), 1000 labels",
+  "value": "1.53%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'Ladder Network (Gamma-model)'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-ladder-full",
+  "claim": "semi-supervised Ladder Network (full), 1000 labels",
+  "value": "0.84%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'Ladder Network (full)'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-dgn",
+  "claim": "semi-supervised DGN, 1000 labels",
+  "value": "2.40%",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2, row 'DGN'",
+  "source": "paper"
+ },
+ {
+  "id": "dbal-t2-val",
+  "claim": "validation set used for Table 2",
+  "value": "5000",
+  "paper": "dbal",
+  "version": "1703.02910v1",
+  "loc": "Table 2 caption (\"we use a large validation set of size 5000\")",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-cite-authors",
+  "claim": "authors",
+  "value": "Neil Houlsby, Ferenc Huszár, Zoubin Ghahramani, Máté Lengyel",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "PDF p. 1; abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-cite-title",
+  "claim": "title",
+  "value": "Bayesian Active Learning for Classification and Preference Learning",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "1112.5745v1",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "PDF margin stamp ([stat.ML])",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-cite-date",
+  "claim": "date",
+  "value": "24 Dec 2011",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "abs.html; PDF stamp",
+  "source": "paper",
+  "note": "The PDF title block prints 'November 27, 2024' (a \\today compile artifact); ignore it."
+ },
+ {
+  "id": "houlsby-cite-venue",
+  "claim": "venue",
+  "value": "not stated (arXiv preprint)",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "abs.html (no comment or journal-ref); PDF p. 1",
+  "source": "paper",
+  "uncertain": true
+ },
+ {
+  "id": "houlsby-eq1",
+  "claim": "information gain about the parameters (objective before the rewrite)",
+  "value": "\\operatorname*{arg\\,max}_{\\boldsymbol{x}} \\mathrm{H}[\\boldsymbol{\\theta} | \\mathcal{D}] - \\mathbb{E}_{y\\sim p(y|\\boldsymbol{x}\\mathcal{D})} \\left[ \\mathrm{H}[\\boldsymbol{\\theta}| y, \\boldsymbol{x},\\mathcal{D}] \\right]",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 2, Eq (1) (src/BALD_arxiv.tex lines 86-89)",
+  "source": "paper",
+  "note": "The missing comma in p(y|x D) is in the source."
+ },
+ {
+  "id": "houlsby-eq2",
+  "claim": "BALD objective in output space",
+  "value": "\\operatorname*{arg\\,max}_{\\boldsymbol{x}} \\mathrm{H}[y \\vert \\boldsymbol{x}, \\mathcal{D}] - \\mathbb{E}_{\\boldsymbol{\\theta}\\sim p(\\boldsymbol{\\theta}|\\mathcal{D})} \\left[ \\mathrm{H}[y \\vert \\boldsymbol{x},\\boldsymbol{\\theta}] \\right]",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 2, Eq (2) (src/BALD_arxiv.tex line 96)",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-mi",
+  "claim": "Eq (1) is a mutual information",
+  "value": "the objective in Eqn. (1) is equivalent to the conditional mutual information between the unknown output and the parameters",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 2, paragraph before Eq (2)",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-intuition",
+  "claim": "plain reading of Eq (2)",
+  "value": "we seek the x for which the model is marginally most uncertain about y (high H[y|x,D]), but for which individual settings of the parameters are confident (low E[H[y|x,theta]])",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 2, paragraph after Eq (2)",
+  "source": "paper",
+  "note": "Expectation subscript (theta ~ p(theta|D)) dropped in this plain-text quote."
+ },
+ {
+  "id": "houlsby-naming",
+  "claim": "origin of the name BALD",
+  "value": "This can be interpreted as seeking the x for which the parameters under the posterior disagree about the outcome the most, so we refer to this objective as Bayesian Active Learning by Disagreement (BALD).",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 2, paragraph after Eq (2) (PDF p. 3)",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-mes",
+  "claim": "why max entropy (MES) fails for classification",
+  "value": "it fails to differentiate between model uncertainty and observation uncertainty (about which our model may be confident)",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 4 (Related Methodologies), paragraph 'Information Theoretic approaches'",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-mes-noisy",
+  "claim": "MES on the noisy toy set",
+  "value": "MES performs poorly on the noisy dataset (Fig. 3(a)) because it discards knowledge of observation noise",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 5, Discussion paragraph; Figure 3(a)",
+  "source": "paper"
+ },
+ {
+  "id": "houlsby-model",
+  "claim": "models BALD was first applied to",
+  "value": "Gaussian process classification and preference learning",
+  "paper": "houlsby",
+  "version": "1112.5745v1",
+  "loc": "Sec 3 (closed form for GPC, Eq labeled eqn:BALD_GPC)",
+  "source": "paper",
+  "note": "Not neural networks; DBAL brought BALD to CNNs."
+ },
+ {
+  "id": "mcdropout-cite-authors",
+  "claim": "authors",
+  "value": "Yarin Gal, Zoubin Ghahramani",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-cite-title",
+  "claim": "title",
+  "value": "Dropout as a Bayesian Approximation: Representing Model Uncertainty in Deep Learning",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "1506.02142v6",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "PDF margin stamp",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-cite-date",
+  "claim": "date",
+  "value": "4 Oct 2016 (v6); v1 6 Jun 2015",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-cite-venue",
+  "claim": "venue",
+  "value": "ICML 2016",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "PDF p. 1 footer (\"Proceedings of the 33rd International Conference on Machine Learning, New York, NY, USA, 2016. JMLR: W&CP volume 48\"); arXiv comment",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-eq6",
+  "claim": "MC dropout predictive mean",
+  "value": "\\mathbb{E}_{q(\\mathbf{y}^* | \\mathbf{x}^*)} (\\mathbf{y}^*) \\approx \\frac{1}{T} \\sum_{t=1}^T \\widehat{\\mathbf{y}}^*(\\mathbf{x}^*, \\mathbf{W}_{1}^t, ..., \\mathbf{W}_{L}^t)",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 4, Eq (6) (src tex line 381)",
+  "source": "paper",
+  "note": "W_i^t are the weight matrices with the t-th sampled dropout masks applied."
+ },
+ {
+  "id": "mcdropout-def",
+  "claim": "what MC dropout is in practice",
+  "value": "We refer to this Monte Carlo estimate as MC dropout. In practice this is equivalent to performing T stochastic forward passes through the network and averaging the results.",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 4, text after Eq (6)",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-T1000",
+  "claim": "T used to draw the regression figures",
+  "value": "The number of forward iterations used to estimate the uncertainty (T) was 1000 for drawing purposes.",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 5.1, last paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-T10",
+  "claim": "a small T that is enough",
+  "value": "A much smaller numbers can be used to get a reasonable estimation to the predictive mean and uncertainty (see fig. 3 for example with T = 10).",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 5.1, last paragraph; Figure 3 caption ('approximated with 10 samples')",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-T100",
+  "claim": "passes in the rotated-digit classification example",
+  "value": "100 stochastic forward passes",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 5.2; Figure 4 caption (\"A scatter of 100 forward passes\")",
+  "source": "paper"
+ },
+ {
+  "id": "mcdropout-cost",
+  "claim": "cost of MC dropout",
+  "value": "the forward passes can be done concurrently, resulting in constant running time identical to that of standard dropout",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 4, last paragraph",
+  "source": "paper",
+  "note": "Same paragraph: 'Note that the dropout NN model itself is not changed.'"
+ },
+ {
+  "id": "mcdropout-softmax",
+  "claim": "softmax is not model confidence",
+  "value": "A model can be uncertain in its predictions even with a high softmax output (fig. 1).",
+  "paper": "mcdropout",
+  "version": "1506.02142v6",
+  "loc": "Sec 1, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-cite-authors",
+  "claim": "authors",
+  "value": "Ozan Sener, Silvio Savarese",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-cite-title",
+  "claim": "title",
+  "value": "Active Learning for Convolutional Neural Networks: A Core-Set Approach",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "1708.00489v4",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-cite-date",
+  "claim": "date",
+  "value": "1 Jun 2018 (v4); v1 1 Aug 2017",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-cite-venue",
+  "claim": "venue",
+  "value": "ICLR 2018",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "PDF page header (\"Published as a conference paper at ICLR 2018\"); arXiv comment \"ICLR 2018 Paper\"",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-corr-intro",
+  "claim": "the paper's diagnosis",
+  "value": "We argue that the main factor behind this ineffectiveness is the correlation caused via batch acquisition/sampling.",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 1, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-b1",
+  "claim": "why one-at-a-time querying is not feasible for CNNs",
+  "value": "i) a single point is likely to have no statistically significant impact on the accuracy due to the local optimization methods, and ii) each iteration requires a full training until convergence which makes it intractable to query labels one-by-one",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 1, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-bayes-scale",
+  "claim": "claim about Bayesian AL at scale",
+  "value": "our empirical analysis suggests that they do not scale to large-scale datasets because of batch sampling",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 2 (Related Work), paragraph on Bayesian AL",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-batch-random",
+  "claim": "uncertainty methods vs random in batch mode",
+  "value": "however, they are still not effective in the batch setting since random sampling outperforms them. We believe this is due to the correlation in the queried labels as a consequence of active learning in batch setting.",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 5, paragraph starting 'Our results suggest that both oracle uncertainty information and Bayesian estimation'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-tsne",
+  "claim": "what Figure 5 shows",
+  "value": "due to the correlation among samples, uncertainty based methods fail to cover the large portion of the space confirming our hypothesis",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 5, text after Figure 5",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-fig5-setup",
+  "claim": "Figure 5 tSNE setup",
+  "value": "the initial labeled pool of 1000 images are shown in blue, 1000 images chosen to be labeled in green and remaining ones in red",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 5 caption (CIFAR)",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-conclusion",
+  "claim": "conclusion sentence",
+  "value": "classical uncertainty based methods have limited applicability to the CNNs due to the correlations caused by batch sampling",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 6 (Conclusion)",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-eq5",
+  "claim": "k-Center objective",
+  "value": "\\min_{\\mathbf{s}^1:|\\mathbf{s}^1| \\leq b} \\max_i \\min_{j \\in \\mathbf{s}^1 \\cup \\mathbf{s}^0} \\Delta(\\mathbf{x}_i,\\mathbf{x}_j)",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.3, Eq (5) (src/active_learning.tex line 354)",
+  "source": "paper",
+  "note": "s^0 = already labeled indices, s^1 = new batch, b = budget, Delta = distance in feature space."
+ },
+ {
+  "id": "coreset-kcenter-words",
+  "claim": "k-Center in words",
+  "value": "choose b center points such that the largest distance between a data point and its nearest center is minimized",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.3, first paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-nphard",
+  "claim": "complexity of k-Center",
+  "value": "NP-Hard",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.3 (\"Unfortunately this problem is NP-Hard\")",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-thm1",
+  "claim": "Theorem 1 bound, as written",
+  "value": "\\left| \\frac{1}{n}\\sum_{i \\in [n]} l(\\mathbf{x}_i,y_i; A_{\\mathbf{s}}) - \\frac{1}{|\\mathbf{s}|}\\sum_{j \\in \\mathbf{s}} l(\\mathbf{x}_j,y_j;A_{\\mathbf{s}}) \\right| \\leq \\delta (\\lambda^l + \\lambda^\\mu LC)+ \\sqrt{\\frac{L^2 \\log(1/\\gamma)}{2n}}",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.2, Theorem 1 (src lines 289-300)",
+  "source": "paper",
+  "note": "The hypothesis names the regression-function Lipschitz constant lambda^eta; the bound (and the appendix proof) writes lambda^mu. Same quantity, two symbols in the source. C = number of classes, L = loss bound, n = dataset size; holds with probability at least 1 - gamma."
+ },
+ {
+  "id": "coreset-thm1-assume",
+  "claim": "Theorem 1 assumptions",
+  "value": "loss l(.,y,w) is lambda^l-Lipschitz for all y, w and bounded by L; regression function is lambda^eta-Lipschitz; s is a delta_s cover of the n points; zero training loss on s; with probability at least 1 - gamma",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.2, Theorem 1 statement",
+  "source": "paper",
+  "note": "Paraphrased into ASCII from the theorem text."
+ },
+ {
+  "id": "coreset-fig1-bound",
+  "claim": "the bound in big-O form",
+  "value": "\\left| \\frac{1}{n}\\sum_{i \\in [n]} l(\\mathbf{x}_i,y_i,A_{\\mathbf{s}}) -\\frac{1}{|\\mathbf{s}|}\\sum_{j \\in \\mathbf{s}} l(\\mathbf{x}_j,y_j;A_{\\mathbf{s}}) \\right| \\leq \\mathcal{O}\\left(\\delta_\\mathbf{s}\\right) + \\mathcal{O}\\left(\\sqrt{\\frac{1}{n}}\\right)",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 1 caption",
+  "source": "paper",
+  "note": "The caption mixes ',' and ';' before A_s; kept as in source."
+ },
+ {
+  "id": "coreset-cover-def",
+  "claim": "meaning of a delta cover",
+  "value": "a set of balls with radius delta centered at each member of s can cover the entire s*",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.2, text after Theorem 1",
+  "source": "paper",
+  "note": "Source writes the Greek delta; ASCII here."
+ },
+ {
+  "id": "coreset-thm1-reading",
+  "claim": "what the bound implies for labels",
+  "value": "this bound does not depend on the number of labelled points. In other words, a provided label does not help the core-set loss unless it decreases the covering radius.",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.2, text after Theorem 1",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-l2-vs-ce",
+  "claim": "theory/experiment loss mismatch",
+  "value": "we also perform our experiments using the cross-entropy loss although we use l2 loss in our theoretical study",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.2, paragraph before Lemma 1",
+  "source": "paper",
+  "note": "The theorem also assumes zero training error, which the authors call 'not an entirely realistic assumption'."
+ },
+ {
+  "id": "coreset-alg1-step",
+  "claim": "greedy k-Center step (Algorithm 1, k-Center-Greedy)",
+  "value": "u=\\arg\\max_{i \\in [n] \\setminus \\mathbf{s}} \\min_{j \\in \\mathbf{s}} \\Delta(\\mathbf{x}_i, \\mathbf{x}_j)",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Algorithm 1, repeat loop (src line 342)",
+  "source": "paper",
+  "note": "Then s = s U {u}, until |s| = b + |s^0|; return s \\ s^0. Initialize s = s^0."
+ },
+ {
+  "id": "coreset-2opt",
+  "claim": "greedy approximation guarantee",
+  "value": "\\max_i \\min_{j \\in \\mathbf{s}^1 \\cup \\mathbf{s}^0} \\Delta(\\mathbf{x}_i,\\mathbf{x}_j) \\leq 2 \\times OPT",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.3, paragraph after Eq (5)",
+  "source": "paper",
+  "note": "OPT is the optimal k-Center value. The source calls the greedy result a '2-OPT solution'."
+ },
+ {
+  "id": "coreset-feature",
+  "claim": "distance and feature layer",
+  "value": "We use the l2 distance between activations of the final fully-connected layer as the distance.",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.4 (Implementation Details)",
+  "source": "paper",
+  "note": "BADGE describes its Coreset baseline as using 'the network's penultimate layer' (badge-coreset-baseline). The outline says penultimate."
+ },
+ {
+  "id": "coreset-impl",
+  "claim": "training setup",
+  "value": "VGG-16; RMSProp, learning rate 1e-3; CNNs trained from scratch after each iteration",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 4.4 (Implementation Details)",
+  "source": "paper",
+  "note": "Weakly supervised variant uses Ladder networks."
+ },
+ {
+  "id": "coreset-t1-caption",
+  "claim": "Table 1 setting",
+  "value": "b = 5k and |s0| = 10k",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Table 1 caption (\"Average run-time of our algorithm ... in seconds\")",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-t1-distance",
+  "claim": "run-time: distance matrix (s)",
+  "value": "104.2",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Table 1, column 'Distance Matrix'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-t1-greedy",
+  "claim": "run-time: greedy 2-OPT (s)",
+  "value": "2",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Table 1, column 'Greedy (2-OPT)'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-t1-mip-iter",
+  "claim": "run-time: one MIP iteration (s)",
+  "value": "7.5",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Table 1, column 'MIP (iteration)'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-t1-mip-total",
+  "claim": "run-time: MIP total (s)",
+  "value": "244.03",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Table 1, column 'MIP (total)'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-t1-total",
+  "claim": "run-time: total (s)",
+  "value": "360.23",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Table 1, column 'Total'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-t1-hw",
+  "claim": "hardware for Table 1",
+  "value": "Intel Core i7-5930K@3.50GHz and 64GB memory",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Footnote 1 (p. 9)",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-fig6-text",
+  "claim": "MIP vs greedy",
+  "value": "Figure 6 suggests a small but significant drop in the accuracy when the 2-OPT solution is used.",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 5, paragraph 'Optimality of the k-Center Solution'",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-fig6-greedy-1",
+  "claim": "CIFAR-100 accuracy, k-Center-Greedy, point 1 (about 5k labels)",
+  "value": "0.29",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, red 'Greedy' curve, point label 1 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 5k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-mip-1",
+  "claim": "CIFAR-100 accuracy, robust k-Center (Our Method), point 1 (about 5k labels)",
+  "value": "0.30",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, purple 'Our Method' curve, point label 1 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 5k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-greedy-2",
+  "claim": "CIFAR-100 accuracy, k-Center-Greedy, point 2 (about 10k labels)",
+  "value": "0.43",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, red 'Greedy' curve, point label 2 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 10k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-mip-2",
+  "claim": "CIFAR-100 accuracy, robust k-Center (Our Method), point 2 (about 10k labels)",
+  "value": "0.45",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, purple 'Our Method' curve, point label 2 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 10k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-greedy-3",
+  "claim": "CIFAR-100 accuracy, k-Center-Greedy, point 3 (about 20k labels)",
+  "value": "0.52",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, red 'Greedy' curve, point label 3 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 20k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-mip-3",
+  "claim": "CIFAR-100 accuracy, robust k-Center (Our Method), point 3 (about 20k labels)",
+  "value": "0.54",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, purple 'Our Method' curve, point label 3 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 20k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-greedy-4",
+  "claim": "CIFAR-100 accuracy, k-Center-Greedy, point 4 (about 40k labels)",
+  "value": "0.63",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, red 'Greedy' curve, point label 4 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 40k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-mip-4",
+  "claim": "CIFAR-100 accuracy, robust k-Center (Our Method), point 4 (about 40k labels)",
+  "value": "0.64",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, purple 'Our Method' curve, point label 4 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (about 40k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-mip-5",
+  "claim": "CIFAR-100 accuracy, robust k-Center (Our Method), point 5 (50k labels)",
+  "value": "0.65",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, purple 'Our Method' curve, point label 5 of 5",
+  "source": "paper",
+  "note": "x position read from the plot (50k labelled images); the printed point label is exact."
+ },
+ {
+  "id": "coreset-fig6-greedy-5",
+  "claim": "CIFAR-100 accuracy, k-Center-Greedy, point 5 (50k labels)",
+  "value": "no printed label",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 6, red 'Greedy' curve, last point",
+  "source": "paper",
+  "uncertain": true,
+  "note": "The last Greedy marker overlaps the purple 0.65 marker and carries no label of its own."
+ },
+ {
+  "id": "coreset-setup",
+  "claim": "experiment protocol",
+  "value": "five random initializations of the initial pool of labeled points; mean accuracy with std-dev error bars; CIFAR-10, CIFAR-100, SVHN",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 5, first paragraph; Figures 3 and 4 captions",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-fig4-c10-ours",
+  "claim": "CIFAR-10 accuracy at labeled ratio 0.4, fully supervised, core-set",
+  "value": "about 78.5%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 4, CIFAR-10 panel, pink 'Our Method', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig4-c10-random",
+  "claim": "CIFAR-10 accuracy at labeled ratio 0.4, fully supervised, Random",
+  "value": "about 74%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 4, CIFAR-10 panel, red 'Random', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig4-c10-dbal",
+  "claim": "CIFAR-10 accuracy at labeled ratio 0.4, fully supervised, DBAL",
+  "value": "about 73%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 4, CIFAR-10 panel, yellow 'DBAL[GIG 17]', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig4-c100-ours",
+  "claim": "CIFAR-100 accuracy at labeled ratio 0.4, fully supervised, core-set",
+  "value": "about 54.5%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 4, CIFAR-100 panel, pink 'Our Method', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig4-c100-random",
+  "claim": "CIFAR-100 accuracy at labeled ratio 0.4, fully supervised, Random",
+  "value": "about 48.5%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 4, CIFAR-100 panel, red 'Random', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig3-c10-ours",
+  "claim": "CIFAR-10 accuracy at labeled ratio 0.4, weakly supervised, core-set",
+  "value": "about 82.5%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 3, CIFAR-10 panel, pink 'Our Method', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig3-c10-random",
+  "claim": "CIFAR-10 accuracy at labeled ratio 0.4, weakly supervised, Random",
+  "value": "about 75%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 3, CIFAR-10 panel, red 'Random', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-fig3-c10-dbal",
+  "claim": "CIFAR-10 accuracy at labeled ratio 0.4, weakly supervised, DBAL",
+  "value": "about 77%",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Figure 3, CIFAR-10 panel, yellow 'DBAL[GIG 17]', x = 0.4",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "coreset-c100-weaker",
+  "claim": "weaker gain with many classes",
+  "value": "our algorithm is less effective in CIFAR-100 when compared with CIFAR-10 and SVHN. This can easily be explained using our theoretical analysis. Our bound over the core-set loss scales with the number of classes",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 5, second paragraph after Figure 4",
+  "source": "paper"
+ },
+ {
+  "id": "coreset-no-unc",
+  "claim": "uncertainty left out",
+  "value": "Our method does not use any uncertainty. And, incorporating uncertainty to our method in a principled way is an open problem",
+  "paper": "coreset",
+  "version": "1708.00489v4",
+  "loc": "Sec 5, paragraph on BMDR",
+  "source": "paper"
+ },
+ {
+  "id": "badge-cite-authors",
+  "claim": "authors",
+  "value": "Jordan T. Ash, Chicheng Zhang, Akshay Krishnamurthy, John Langford, Alekh Agarwal",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "PDF p. 1; abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "badge-cite-title",
+  "claim": "title",
+  "value": "Deep Batch Active Learning by Diverse, Uncertain Gradient Lower Bounds",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "abs.html; PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "badge-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "1906.03671v2",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "badge-cite-date",
+  "claim": "date",
+  "value": "24 Feb 2020 (v2); v1 9 Jun 2019",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "badge-cite-venue",
+  "claim": "venue",
+  "value": "ICLR 2020",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "abs.html journal-ref (\"2020 International Conference on Learning Representations\"); PDF header",
+  "source": "paper"
+ },
+ {
+  "id": "badge-no-hyper",
+  "claim": "trade-off without tuning",
+  "value": "BADGE trades off between uncertainty and diversity without requiring any hand-tuned hyperparameters",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Abstract",
+  "source": "paper"
+ },
+ {
+  "id": "badge-eq-grademb",
+  "claim": "gradient embedding (Algorithm 1, step 4.2)",
+  "value": "g_x = \\frac{\\partial}{\\partial \\theta_\\text{out}} \\ell_{\\text{CE}}(f(x;\\theta),\\hat{y}(x)) \\vert_{\\theta = \\theta_t}",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Algorithm 1, line 4, item 2 (src/algorithm.tex line 21)",
+  "source": "paper",
+  "note": "theta_out = parameters of the final (output) layer; y-hat(x) = the model's own predicted label (a 'hypothetical label')."
+ },
+ {
+  "id": "badge-kmeanspp",
+  "claim": "how the batch is picked (Algorithm 1, step 5)",
+  "value": "Compute S_t, a random subset of U \\ S, using the k-MEANS++ seeding algorithm on {g_x : x in U \\ S} and query for their labels.",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Algorithm 1, line 5",
+  "source": "paper"
+ },
+ {
+  "id": "badge-norm",
+  "claim": "why gradient norm encodes uncertainty",
+  "value": "if the model is highly certain about the example's label, then the example's gradient embedding will have a small norm, and vice versa for samples where the model is uncertain",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 3 (Algorithm), paragraph 'The gradient embedding'",
+  "source": "paper"
+ },
+ {
+  "id": "badge-setup",
+  "claim": "batch-mode setup",
+  "value": "M = 100 initial random labels; batch size B in {100, 1000, 10000}",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4 (Experiments), second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "badge-archs-data",
+  "claim": "architectures and datasets",
+  "value": "MLP, ResNet-18, VGG-11; SVHN, CIFAR10, MNIST and four OpenML datasets (#6, #155, #156, #184)",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4 (Experiments), after the baseline list",
+  "source": "paper",
+  "note": "MNIST uses only the MLP. Four of the seven datasets are non-image."
+ },
+ {
+  "id": "badge-settings",
+  "claim": "number of (dataset, batch size, architecture) settings in the penalty matrix",
+  "value": "33",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4, paragraph 'Pairwise comparisons' (\"three different batch sizes and eleven dataset-architecture pairs, making the total number of (D, B, A) combinations 3 x 11 = 33\"); Figure 4 title 'Overall(33)'",
+  "source": "paper"
+ },
+ {
+  "id": "badge-penalty-protocol",
+  "claim": "how a penalty is scored",
+  "value": "5 runs per setting; two-sided t-test; algorithm i beats j if t > 2.776; each win adds 1/n_{D,B,A} to P_{i,j}; the largest entry of P is at most 33",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4, paragraph 'Pairwise comparisons'",
+  "source": "paper"
+ },
+ {
+  "id": "badge-baseline-conf",
+  "claim": "what 'Conf' is",
+  "value": "selects B examples with smallest predicted class probability, max_{i=1}^K f(x;theta)_i",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4, baseline list item 2 (Confidence Sampling)",
+  "source": "paper",
+  "note": "Same as least confident."
+ },
+ {
+  "id": "badge-coreset-baseline",
+  "claim": "what 'Coreset' is in BADGE",
+  "value": "The embedding of each example is computed by the network's penultimate layer and the samples at each round are selected using a greedy furthest-first traversal conditioned on all labeled examples",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4, baseline list item 1",
+  "source": "paper",
+  "note": "Greedy k-Center (core-set Alg 1), not the robust MIP version. Core-set itself says 'final fully-connected layer'."
+ },
+ {
+  "id": "badge-fig4-avg-badge",
+  "claim": "penalty column average for BADGE over 33 settings (lower is better)",
+  "value": "0.66",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'BADGE'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-albl",
+  "claim": "penalty column average for ALBL over 33 settings (lower is better)",
+  "value": "4.08",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'ALBL'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-coreset",
+  "claim": "penalty column average for Coreset over 33 settings (lower is better)",
+  "value": "6.9",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'Coreset'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-conf",
+  "claim": "penalty column average for Conf over 33 settings (lower is better)",
+  "value": "5.93",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'Conf'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-marg",
+  "claim": "penalty column average for Marg over 33 settings (lower is better)",
+  "value": "1.56",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'Marg'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-entropy",
+  "claim": "penalty column average for Entropy over 33 settings (lower is better)",
+  "value": "8.01",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'Entropy'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-rand",
+  "claim": "penalty column average for Rand over 33 settings (lower is better)",
+  "value": "6.01",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4, bottom row (column-wise average), column 'Rand'",
+  "source": "paper",
+  "note": "Printed as-is in Figure 4 (also in src/figs/comp_matrices/one_sample_t/comp_matrix_overall.pdf)."
+ },
+ {
+  "id": "badge-fig4-avg-check",
+  "claim": "how the column average is computed",
+  "value": "column sum / 7, diagonal 0 included",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Figure 4 matrix entries",
+  "source": "paper",
+  "derived": true,
+  "note": "BADGE column: (0.0+0.34+1.65+0.54+0.96+0.31+0.84)/7 = 4.64/7 = 0.663. Coreset column: (10.97+5.18+0.0+7.61+10.87+6.05+7.61)/7 = 48.29/7 = 6.899. Both match the printed 0.66 and 6.9."
+ },
+ {
+  "id": "badge-large-batch",
+  "claim": "batch-size effect",
+  "value": "when batch size is small (100 or 1000) or when an MLP is used, both BADGE and Margin perform best. However, in the regime when the batch size is large (10000), Margin's performance degrades, while BADGE, ALBL and Coreset are the best performing approaches.",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4, paragraph 'Cumulative distribution functions of normalized errors'",
+  "source": "paper"
+ },
+ {
+  "id": "badge-coreset-mlp",
+  "claim": "when diversity alone hurts",
+  "value": "Coreset often performs worse than random on sufficiently complex data when not using a convolutional network",
+  "paper": "badge",
+  "version": "1906.03671v2",
+  "loc": "Sec 4, paragraph 'Learning curves' (Figure 3b)",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-cite-authors",
+  "claim": "authors",
+  "value": "Andreas Kirsch, Joost van Amersfoort, Yarin Gal",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-cite-title",
+  "claim": "title",
+  "value": "BatchBALD: Efficient and Diverse Batch Acquisition for Deep Bayesian Active Learning",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "1906.08158v2",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "PDF margin stamp",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-cite-date",
+  "claim": "date",
+  "value": "28 Oct 2019 (v2); v1 19 Jun 2019",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-cite-venue",
+  "claim": "venue",
+  "value": "NeurIPS 2019",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "PDF p. 1 footer (\"33rd Conference on Neural Information Processing Systems (NeurIPS 2019), Vancouver, Canada.\")",
+  "source": "paper",
+  "note": "abs.html has no comment or journal-ref; the PDF footer states the venue."
+ },
+ {
+  "id": "batchbald-eq3",
+  "claim": "top-b BALD written as a sum of single-point scores",
+  "value": "a_{\\mathtt{BALD}} \\left( \\left\\{ \\boldsymbol{x}_{1}, ..., \\boldsymbol{x}_{b} \\right\\}, p(\\boldsymbol{\\omega} \\mid \\mathcal{D}_{\\textbf{train}}) \\right) = \\sum_{i=1}^{b} \\mathbb{I}(y_i \\, ; \\, \\boldsymbol{\\omega} \\mid \\boldsymbol{x}_i, \\mathcal{D}_{\\textbf{train}})",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 2.2, Eq (3)",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-eq4",
+  "claim": "BatchBALD: joint score of the batch",
+  "value": "a_{\\mathtt{BatchBALD}} \\left( \\left\\{ \\boldsymbol{x}_{1}, ..., \\boldsymbol{x}_{b} \\right\\}, p(\\boldsymbol{\\omega} \\mid \\mathcal{D}_{\\textbf{train}}) \\right) = \\mathbb{I}(y_1, ..., y_b \\, ; \\, \\boldsymbol{\\omega} \\mid \\boldsymbol{x}_1, ..., \\boldsymbol{x}_b, \\mathcal{D}_{\\textbf{train}})",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 3.1, Eq (4)",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-eq8",
+  "claim": "BatchBALD as joint entropy minus expected conditional joint entropy",
+  "value": "a_{\\mathtt{BatchBALD}} \\left( \\left\\{ \\boldsymbol{x}_1, ..., \\boldsymbol{x}_n \\right\\}, p(\\boldsymbol{\\omega}) \\right) = \\mathbb{H}(y_1, ..., y_n) - \\mathbb{E}_{p(\\boldsymbol{\\omega})} \\left[ \\mathbb{H}(y_1, ..., y_n \\mid \\boldsymbol{\\omega}) \\right]",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 3.3, Eq (8) (src label eq:BB_simple, line 471)",
+  "source": "paper",
+  "note": "Conditioning on x_1..x_n and D_train is dropped for brevity in the source."
+ },
+ {
+  "id": "batchbald-overcount",
+  "claim": "what goes wrong with summed BALD",
+  "value": "BALD overestimates the joint mutual information. BatchBALD, however, takes the overlap between variables into account and will strive to acquire a better cover of omega.",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Figure 3 caption",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-size1",
+  "claim": "relation at batch size 1",
+  "value": "For acquisition size 1, BatchBALD and BALD are equivalent.",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 3.1, last paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-greedy",
+  "claim": "greedy guarantee",
+  "value": "a_BatchBALD is submodular, which means the greedy algorithm is 1 - 1/e-approximate",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 3.2; Algorithm 1",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-repeated",
+  "claim": "Repeated MNIST setup",
+  "value": "each MNIST image repeated three times; isotropic Gaussian noise with standard deviation 0.1 added; acquisition size 10; 10 MC dropout samples",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 4.1",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-repeated-result",
+  "claim": "BALD on redundant data",
+  "value": "In this illustrative scenario, BALD performs poorly, and even randomly acquiring points performs better.",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 4.1; Figure 2",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-mnist-T",
+  "claim": "MC dropout samples in the MNIST comparison",
+  "value": "100",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 4.2 (\"perform AL on the MNIST dataset using 100 MC dropout samples\")",
+  "source": "paper",
+  "note": "BatchBALD's own setting; DBAL does not state T (dbal-mnist-T)."
+ },
+ {
+  "id": "batchbald-mnist-init",
+  "claim": "initial labeled set",
+  "value": "a balanced set of 20 data points, two of each class (similar to [12])",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 4.1",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-outperform",
+  "claim": "why its BALD row beats DBAL's",
+  "value": "Due to differences in model architecture, hyper parameters and model retraining, we significantly outperform the original results in Gal et al. [12]",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Sec 4.2",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-t1-batchbald-90",
+  "claim": "points to 90% MNIST accuracy, BatchBALD (25/50/75% quartiles)",
+  "value": "70 / 90 / 110",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, row 'BatchBALD', column '90% accuracy'",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-t1-batchbald-95",
+  "claim": "points to 95% MNIST accuracy, BatchBALD (25/50/75% quartiles)",
+  "value": "190 / 200 / 230",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, row 'BatchBALD', column '95% accuracy'",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-t1-bald-90",
+  "claim": "points to 90% MNIST accuracy, BALD reimplementation (quartiles)",
+  "value": "120 / 120 / 170",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, row 'BALD' (footnote: reimplementation using reported experimental setup), column '90% accuracy'",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-t1-bald-95",
+  "claim": "points to 95% MNIST accuracy, BALD reimplementation (quartiles)",
+  "value": "250 / 250 / >300",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, row 'BALD' (footnote: reimplementation using reported experimental setup), column '95% accuracy'",
+  "source": "paper"
+ },
+ {
+  "id": "batchbald-t1-dbal-90",
+  "claim": "points to 90% MNIST accuracy, BALD as reported by Gal et al. 2017",
+  "value": "145",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, row 'BALD [gal2017deep]' (PDF: 'BALD [12]'), column '90% accuracy'",
+  "source": "paper",
+  "note": "Equals dbal-t1-bald-10 (10% error = 90% accuracy)."
+ },
+ {
+  "id": "batchbald-t1-dbal-95",
+  "claim": "points to 95% MNIST accuracy, BALD as reported by Gal et al. 2017",
+  "value": "335",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, row 'BALD [gal2017deep]' (PDF: 'BALD [12]'), column '95% accuracy'",
+  "source": "paper",
+  "note": "Equals dbal-t1-bald-5."
+ },
+ {
+  "id": "batchbald-t1-footnote",
+  "claim": "meaning of the middle BALD row",
+  "value": "reimplementation using reported experimental setup",
+  "paper": "batchbald",
+  "version": "1906.08158v2",
+  "loc": "Table 1, footnote on row 'BALD'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-cite-authors",
+  "claim": "authors",
+  "value": "Andreas Kirsch, Sebastian Farquhar, Parmida Atighehchian, Andrew Jesson, Frederic Branchaud-Charron, Yarin Gal",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "abs.html; PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-cite-title",
+  "claim": "title",
+  "value": "Stochastic Batch Acquisition: A Simple Baseline for Deep Active Learning",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "abs.html; PDF p. 1",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-cite-arxiv",
+  "claim": "arXiv id",
+  "value": "2106.12059v3",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-cite-date",
+  "claim": "date",
+  "value": "19 Sep 2023 (v3); v1 22 Jun 2021",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-cite-venue",
+  "claim": "venue",
+  "value": "Transactions on Machine Learning Research (09/2023)",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "PDF page header; arXiv comment 'TMLR Paper'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-eq14",
+  "claim": "power acquisition: perturbed log score",
+  "value": "s^\\text{power}(i; \\mathcal{I}^\\text{train}) := \\log s(i; \\mathcal{I}^\\text{train}) + \\epsilon_i",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Sec 3, Eq (14)",
+  "source": "paper",
+  "note": "epsilon_i ~ Gumbel(0; beta^{-1}) i.i.d.; take the top-K of the perturbed scores."
+ },
+ {
+  "id": "stochbatch-eq15",
+  "claim": "power acquisition: equivalent sampling distribution",
+  "value": "p_{\\text{power}}(i) \\propto \\left(\\frac{1}{s(i ; \\mathcal{I}^\\text{train})}\\right)^{-\\beta}",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Sec 3, Eq (15)",
+  "source": "paper",
+  "note": "Equivalent to sampling without replacement with probability proportional to s(i)^beta (Proposition 3.1)."
+ },
+ {
+  "id": "stochbatch-gumbel",
+  "claim": "Gumbel-top-k fact behind the method",
+  "value": "if we draw epsilon_i ~ Gumbel(0; beta^{-1}) independently, then arg top_k {s_i + epsilon_i}_i is an (ordered) sample without replacement from the categorical distribution Categorical(exp(beta s_i) / sum_j exp(beta s_j))",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Sec 3, Proposition 3.1",
+  "source": "paper",
+  "note": "ASCII transcription of the proposition."
+ },
+ {
+  "id": "stochbatch-beta",
+  "claim": "default coldness",
+  "value": "beta := 1",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Sec 3 (\"we fix beta := 1 for our main experiments\")",
+  "source": "paper",
+  "note": "beta -> infinity recovers top-K; beta -> 0 gives uniform (random) acquisition."
+ },
+ {
+  "id": "stochbatch-zero",
+  "claim": "why power suits BALD and entropy",
+  "value": "as scores -> 0, the (perturbed) log scores -> -infinity and will have probability mass -> 0 assigned",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Sec 3, paragraph 'Power Acquisition'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-topk",
+  "claim": "acquisition runtime at K = 10, top-K BALD (s)",
+  "value": "0.2 +- 0.0",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1, row K = 10, column 'Top-K (BALD)'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-power",
+  "claim": "acquisition runtime at K = 10, PowerBALD (s)",
+  "value": "0.2 +- 0.0",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1, row K = 10, column 'Stochastic (PowerBALD)'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-batchbald",
+  "claim": "acquisition runtime at K = 10, BatchBALD (s)",
+  "value": "566.0 +- 17.4",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1, row K = 10, column 'BatchBALD'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-badge",
+  "claim": "acquisition runtime at K = 10, BADGE (s)",
+  "value": "9.2 +- 0.3",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1, row K = 10, column 'BADGE'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-setup",
+  "claim": "Table 1 setting",
+  "value": "Synthetic pool set with M = 10,000 pool points with 10 classes. BatchBALD & BALD: 20 parameter samples. 5 trials, +- s.d.",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1 caption",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-acc-topk",
+  "claim": "mean accuracy over acquisition steps on Repeated-MNIST x4, top-K BALD",
+  "value": "80%",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1 header superscript, 'Top-K (BALD)'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-acc-power",
+  "claim": "mean accuracy over acquisition steps on Repeated-MNIST x4, PowerBALD",
+  "value": "90%",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1 header superscript, 'Stochastic (PowerBALD)'",
+  "source": "paper"
+ },
+ {
+  "id": "stochbatch-t1-acc-batchbald",
+  "claim": "mean accuracy over acquisition steps on Repeated-MNIST x4, BatchBALD",
+  "value": "90%",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1 header superscript, 'BatchBALD'",
+  "source": "paper",
+  "note": "In these experiments BatchBALD uses acquisition size 5, the others 10 (Sec 4)."
+ },
+ {
+  "id": "stochbatch-t1-acc-badge",
+  "claim": "mean accuracy over acquisition steps on Repeated-MNIST x4, BADGE",
+  "value": "86%",
+  "paper": "stochbatch",
+  "version": "2106.12059v3",
+  "loc": "Table 1 header superscript, 'BADGE'",
+  "source": "paper"
+ }
+]

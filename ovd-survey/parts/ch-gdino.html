@@ -1,0 +1,164 @@
+<style>
+/* gdino: the Algorithm 1 listing; the page head has no pre style, and a long line must scroll inside the block, not widen the page. */
+pre.gdino-code { max-width:var(--stage, 60rem); overflow-x:auto; font:.8rem/1.5 ui-monospace, Menlo, Consolas, monospace; background:var(--panel); border-radius:10px; padding:.7rem .9rem; margin:.4rem 0 1.2rem; }
+pre.gdino-code code { font:inherit; }
+</style>
+<section id="ch-gdino" class="chapter">
+<h2>Grounding DINO: DINO-DETR that reads</h2>
+<div class="tapstrip" data-model="gdino" role="img" aria-label="Tap strip for Grounding DINO. The text lane drops into the encoder, into the choice of queries, into the decoder that builds the region features, and into the final score: all four tap positions."></div>
+<p class="note">Where text enters Grounding DINO: in the encoder (a feature enhancer), in the choice of the decoder's starting boxes, in every decoder layer, and at the final score.</p>
+
+<p>GLIP let the prompt change the image features inside the encoder. Grounding DINO starts from DINO, a DETR-style detector, and lets the prompt in at two more places; the most visible one is that the prompt now chooses where the decoder starts to look.</p>
+
+<figure class="viz" id="viz-qsel" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls" role="group" aria-label="Where text enters">
+    <button type="button" id="btn-qsel-fusion" aria-pressed="false">1 Encoder fusion</button>
+    <button type="button" id="btn-qsel-select" aria-pressed="true">2 Query selection</button>
+    <button type="button" id="btn-qsel-decoder" aria-pressed="false">3 Decoder</button>
+  </div>
+  <canvas id="qsel-canvas" tabindex="0" role="img" aria-label="A drawn warehouse with a person, a pallet, a forklift, a traffic cone and a shelf, under a grid of 16 by 9 image tokens. Each token is shaded green by its best score against the words of the prompt. The highest-scoring tokens get a green outline and a blue anchor box. A panel lists the prompt's words, the scores of one token, and the selected queries, each with a position part from its token and a learned content part."></canvas>
+  <div class="controls" role="group" aria-label="Prompt">
+    <button type="button" id="btn-qsel-forklift" aria-pressed="true"><span class="prompt">forklift</span></button>
+    <button type="button" id="btn-qsel-pallet" aria-pressed="false"><span class="prompt">pallet . person</span></button>
+    <button type="button" id="btn-qsel-cone" aria-pressed="false"><span class="prompt">traffic cone</span></button>
+    <button type="button" id="btn-qsel-ladder" aria-pressed="false"><span class="prompt">ladder</span></button>
+    <label for="qsel-k">queries kept <input type="range" id="qsel-k" min="1" max="24" step="1" value="8"> <span id="qsel-k-val">8</span></label>
+    <button type="button" id="btn-qsel-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="qsel-readout" aria-live="polite"></p>
+  <figcaption>Each image token's score for a word is a dot product of two toy feature vectors; its heat is the maximum over the words, as in Eq. 1 below. The top tokens give the anchor boxes of the decoder's queries. Hover a token, or focus the figure and use the arrow keys, to see its scores. Toy throughout: one feature scale, 144 tokens instead of thousands, a handful of queries instead of <span data-claim="gdino-nq">900</span>, made-up features, and anchors drawn where an encoder might put them. Stage 1 draws each word's attention over the image tokens; stage 3 moves the anchors onto objects and scores them against the text.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> The prompt <span class="prompt">ladder</span> names nothing in this warehouse, but query selection always keeps a fixed number of tokens. Before you press <em>ladder</em>, decide where those tokens will go, and what must then stop them from turning into false detections.</p>
+
+<p>They land on the shelf, the thing that looks most like a ladder, with low scores. The selection has no "nothing here" answer: it keeps the top tokens whatever their scores are. Press <em>3 Decoder</em> and the final score rejects every one of them. In a real model that last check can fail. The paper lists false positives, which it calls hallucination, as a limitation (Sec. 5), and a false box has to start from some selected token (<span class="reading">our reading</span>). Try <span class="prompt">traffic cone</span> too: the cone covers only four tokens, so the remaining queries go to the next-best region.</p>
+
+<h3>DINO in one paragraph</h3>
+<p>Your DETR explainer built DINO step by step, so here is only the outline. DETR treats detection as set prediction: a fixed set of object queries reads the image through a transformer decoder, and each query outputs one box and one class (<a href="../detr-family/explainer.html#ch-queries">object queries</a>). Deformable attention lets each query look at a few sampled points on several feature scales instead of at every pixel (<a href="../detr-family/explainer.html#ch-deformable">Deformable DETR</a>). DAB-DETR splits each query into a content part and a positional part, and makes the positional part an explicit anchor box (<a href="../detr-family/explainer.html#ch-anchor-queries">DAB-DETR</a>). DINO adds denoising training and mixed query selection: the anchor boxes start from the encoder's best-scoring locations for this image, while the content part stays a learned vector (<a href="../detr-family/explainer.html#ch-denoising">DN-DETR and DINO</a>). Grounding DINO keeps all of this and adds text.</p>
+
+<h3>Text chooses the queries</h3>
+<p>In DINO, the encoder's class head ranks the image tokens, and the best tokens give the anchor boxes. A closed-set class head cannot rank tokens for a name it never learned. Grounding DINO ranks each image token by its best match with any token of the prompt (Sec. 3.2):</p>
+
+<div class="eq" id="eq-gdino-qsel" data-build data-viz="viz-qsel"><div class="tex tex-display">
+\htmlData{step=4, link=topk}{\mathbf{I}_{N_q} = \texttt{Top}_{N_q}\big(}\htmlData{step=3, link=max}{\texttt{Max}^{(-1)}(}\htmlData{step=1, link=image}{\htmlClass{t-blue}{\mathbf{X}_{I}}}\,\htmlData{step=2, link=text scores}{\htmlClass{t-yellow}{\mathbf{X}_{T}^{\intercal}}}\htmlData{step=3, link=max}{)}\htmlData{step=4, link=topk}{\big)}
+</div></div>
+<p class="eqno">Eq. 1 in Grounding DINO (2303.05499v5).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{\mathbf{X}_{I}}</span>: the image tokens after the feature enhancer, all scales flattened into one list, <span class="tex">N_I \times d</span>. The paper gives <span class="tex">N_I</span> as more than <span data-claim="gdino-ni">10,000</span> and <span class="tex">d =</span> <span data-claim="gdino-d">256</span>.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{\mathbf{X}_{T}}</span>: the text tokens after the enhancer, <span class="tex">N_T \times d</span>, with at most <span data-claim="gdino-max-text-tokens">256</span> tokens.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mathbf{X}_{I}}\htmlClass{t-yellow}{\mathbf{X}_{T}^{\intercal}}</span>: every image token scored against every text token, <span class="tex">N_I \times N_T</span>.</li>
+  <li><span class="tex">\texttt{Max}^{(-1)}</span>: the maximum along the last axis, the text axis. Each image token keeps its best match with any word: the heat in the figure.</li>
+  <li><span class="tex">\texttt{Top}_{N_q}</span> and <span class="tex">\mathbf{I}_{N_q}</span>: the indices of the <span class="tex">N_q =</span> <span data-claim="gdino-nq">900</span> hottest image tokens, the same query count as DINO.</li>
+</ul>
+<p>The paper's Algorithm 1 writes the same thing in three lines of PyTorch (one variable name made consistent here):</p>
+<pre class="gdino-code"><code>logits = torch.einsum("bic,btc->bit", image_feat, text_feat)   # bs, num_img_tokens, num_text_tokens
+logits_per_img_feat = logits.max(-1)[0]                        # bs, num_img_tokens
+topk_idx = torch.topk(logits_per_img_feat, num_query, dim=1)[1]  # bs, num_query</code></pre>
+<p>The selected tokens fill only half of each query. Grounding DINO follows DINO's mixed query selection: the positional part, a dynamic anchor box, is "initialized with encoder outputs" at the selected tokens, and the content part is "set to be learnable" (Sec. 3.2). So the prompt decides where the queries start, not what they carry. The figure's query list shows this split. The paper's Fig. 7 shows the selected boxes move when only the prompt changes.</p>
+
+<h3>Three more places for text</h3>
+<p><b>Encoder fusion: the feature enhancer.</b> Before any selection, the image and text features meet in a stack of feature enhancer layers, <span data-claim="gdino-enh-layers">6</span> of them (Sec. 3.1, Fig. 3). In each layer, the image tokens run deformable self-attention and the text tokens run ordinary self-attention; an image-to-text and a text-to-image cross-attention, "inspired by GLIP", exchange information between them; then each side has a feed-forward network (FFN). So the <span class="tex">\htmlClass{t-blue}{\mathbf{X}_{I}}</span> in Eq. 1 already depends on the prompt. Press <em>1 Encoder fusion</em> to see each word reach into the image.</p>
+<p><b>The cross-modality decoder.</b> Each of the <span data-claim="gdino-dec-layers">6</span> decoder layers runs self-attention among the queries, a deformable cross-attention into the image tokens, a cross-attention into the text tokens, and an FFN (Sec. 3.3). In the paper's words, "each decoder layer has an extra text cross-attention layer compared with the DINO decoder layer". Each layer also refines the boxes, as in DINO.</p>
+<p><b>The score.</b> There is no class matrix at the end. As in GLIP (<a href="#ch-glip">chapter 7</a>), each output query takes a dot product with every text token, which gives one logit per token, and a phrase wins when its tokens light up (Sec. 3.5).</p>
+<p>The paper's ablation removes one piece at a time (Table 7). Every model here is Grounding DINO T with a Swin-T backbone, pre-trained on Objects365 (O365) only, and evaluated zero-shot with box AP:</p>
+<table class="data">
+  <thead><tr><th>Variant (Table 7)</th><th>COCO minival AP</th><th>LVIS minival AP</th></tr></thead>
+  <tbody>
+    <tr><td>Full model</td><td><span data-claim="gdino-abl-full-coco-zs">46.7</span></td><td><span data-claim="gdino-abl-full-lvis">16.1</span></td></tr>
+    <tr><td>Without encoder fusion</td><td><span data-claim="gdino-abl-noenc-coco-zs">45.8</span></td><td><span data-claim="gdino-abl-noenc-lvis">13.1</span></td></tr>
+    <tr><td>Static query selection</td><td><span data-claim="gdino-abl-staticq-coco-zs">46.3</span></td><td><span data-claim="gdino-abl-staticq-lvis">13.6</span></td></tr>
+    <tr><td>Without text cross-attention</td><td><span data-claim="gdino-abl-notextca-coco-zs">46.1</span></td><td><span data-claim="gdino-abl-notextca-lvis">14.3</span></td></tr>
+    <tr><td>Word-level prompt (no sub-sentence mask)</td><td><span data-claim="gdino-abl-word-coco-zs">46.4</span></td><td><span data-claim="gdino-abl-word-lvis">15.6</span></td></tr>
+  </tbody>
+</table>
+<p>Each piece helps, and LVIS reacts far more than COCO. That fits the test: LVIS has <span data-claim="ch1-lvis-categories">1,203</span> categories, while COCO's <span data-claim="glip-coco-prompt-phrases">80</span> are all (approximately) inside O365, so COCO here measures a new image domain, not new names. The paper's text (Sec. 4.5) credits query selection with +3.0 AP, while its own table gives 2.5 (the other two quoted gains match); the table is shown here.</p>
+
+<h3 id="gdino-subsentence">Sub-sentence prompts: names that do not talk to each other</h3>
+<p>For detection data, the category names are joined into one prompt, as in GLIP. BERT then lets every word attend to every other word, so "pallet" gets mixed with whatever names happen to share its prompt. During training the names are sampled at random for each image (App. B), so the same word would get a different feature in every prompt. Grounding DINO adds an attention mask that blocks attention between different category names (Sec. 3.4).</p>
+
+<figure class="viz" id="viz-subsentence" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="subsentence-canvas" role="img" aria-label="Left: an attention matrix between the words of a prompt, rows attending to columns. At word level every cell is open. At sub-sentence level only the cells inside each category name stay open and the rest are blocked. Right: the feature of the word pallet after attention, drawn as eight bars for two different prompts, with their cosine similarity."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-subsentence-word" aria-pressed="true">Word level</button>
+    <button type="button" id="btn-subsentence-sub" aria-pressed="false">Sub-sentence level</button>
+    <button type="button" id="btn-subsentence-a" aria-pressed="true">Prompt A</button>
+    <button type="button" id="btn-subsentence-b" aria-pressed="false">Prompt B</button>
+    <button type="button" id="btn-subsentence-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="subsentence-readout" aria-live="polite"></p>
+  <figcaption>One toy attention layer over random 8-dimensional word vectors, temperature 1, no residual path. Prompt A is <span class="prompt">forklift . pallet . traffic cone .</span> and prompt B is <span class="prompt">traffic cone . helmet . pallet .</span>; the separators and BERT's own start and end tokens are left out of the drawing. The real text encoder is BERT-base, which stacks many attention layers; the toy shows one.</figcaption>
+</figure>
+
+<p>In the toy at word level, "pallet" spends about half of its attention on other names, so its feature changes when its neighbours change. With the mask, it sees only its own words, and its feature is the same in every prompt. A two-word name such as "traffic cone" still keeps one feature per word, which a single sentence-level vector, as in OWL-ViT, would lose. The paper calls this the sub-sentence level representation. Removing it costs the least of the four pieces in the table above.</p>
+
+<h3>Inside Grounding DINO: forward, then backward</h3>
+<p>Here is the whole network as one training step. Step forward through the boxes, then backward to see what the loss trains. The buttons switch between the two sizes in the paper.</p>
+
+<figure class="viz archflow" id="viz-gdinoflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-gdinoflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-gdinoflow-backbones" aria-pressed="false">2 Backbones</button>
+    <button type="button" id="btn-gdinoflow-enhancer" aria-pressed="false">3 Enhancer</button>
+    <button type="button" id="btn-gdinoflow-select" aria-pressed="false">4 Selection</button>
+    <button type="button" id="btn-gdinoflow-decoder" aria-pressed="false">5 Decoder</button>
+    <button type="button" id="btn-gdinoflow-heads" aria-pressed="false">6 Heads</button>
+    <button type="button" id="btn-gdinoflow-loss" aria-pressed="false">7 Match and loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-gdinoflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-gdinoflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-gdinoflow-t" aria-pressed="true">Grounding DINO T</button>
+    <button type="button" id="btn-gdinoflow-l" aria-pressed="false">Grounding DINO L</button>
+  </div>
+  <canvas id="gdinoflow-canvas" role="img" aria-label="Grounding DINO's training step as a diagram. The image goes through the Swin backbone and the prompt through BERT; both meet in the feature enhancer. Query selection picks image tokens, the decoder reads image and text features, the heads give boxes and per-token logits, and the loss compares them with the targets. In the backward stages red arrows reach every box with weights, including both backbones."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-gdinoflow-prev">Previous</button>
+    <button type="button" id="btn-gdinoflow-next">Next</button>
+    <button type="button" id="btn-gdinoflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="gdinoflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Two backbones, one fusion encoder, a selection step, one decoder and one loss. The <b class="c-blue">image path</b> runs along the bottom and the <b class="c-yellow">text path</b> along the top; they meet in the feature enhancer and stay coupled to the end. Press <b>1 Inputs</b>, then <b>Next</b>. Before the backward stages, guess which boxes the gradient reaches.</p></div>
+    <div data-stage="inputs" hidden><h4>1. An image and a prompt</h4><p>For detection data the category names are joined into one prompt, such as "cat . person . mouse ." in Fig. 3, and the names are "randomly sampled ... from all categories in a dataset on the fly" (App. B). The text holds at most <span data-claim="gdino-max-text-tokens">256</span> tokens. For grounding data the prompt is the caption or expression itself. The paper does not state the training image size, so the shapes below keep it as H x W.</p></div>
+    <div data-stage="backbones" hidden><h4>2. Two backbones</h4><p>The image backbone is Swin-T for Grounding DINO T and Swin-L for L. T takes feature maps at strides <span data-claim="page-gdino-scales-t">8x to 32x</span> and adds a <span data-claim="page-gdino-scale-t-extra">64x</span> map by downsampling the last one ("4scale", as in DINO). L takes four maps at <span data-claim="page-gdino-scales-l">4x to 32x</span>. The text backbone is <span data-claim="gdino-text-backbone">BERT-base</span> from Hugging Face. Both end at width d = <span data-claim="gdino-d">256</span>; the paper does not describe the projection layers (<span class="reading">our reading</span>: one linear projection per input).</p></div>
+    <div data-stage="enhancer" hidden><h4>3. The feature enhancer</h4><p><span data-claim="gdino-enh-layers">6</span> layers with <span data-claim="gdino-heads">8</span> attention heads, FFN width <span data-claim="gdino-ffn">2048</span> and dropout <span data-claim="gdino-dropout">0.0</span> (Table 8). Fig. 3 draws each layer as self-attention first (deformable for the image, ordinary for the text), then the two cross-attentions, then the FFNs. MM-Grounding-DINO, which rebuilt the model from the released test code, puts the two cross-attentions first (its Algorithm 1). The image side has more than <span data-claim="gdino-ni">10,000</span> tokens, so its self-attention samples a few points per token instead of comparing all pairs.</p></div>
+    <div data-stage="select" hidden><h4>4. Language-guided query selection</h4><p><a href="#eq-gdino-qsel">Eq. 1</a>: score every image token against every text token, keep each image token's maximum, take the top <span data-claim="gdino-nq">900</span>. The selected tokens' encoder outputs initialize the anchor boxes; the content queries are learned. Eq. 1 itself has no weights. Its scores still learn, because the paper adds an auxiliary loss "after the encoder outputs" (Sec. 3.5).</p></div>
+    <div data-stage="decoder" hidden><h4>5. The cross-modality decoder</h4><p><span data-claim="gdino-dec-layers">6</span> layers. In each: self-attention among the 900 queries, deformable cross-attention into the image tokens, cross-attention into the text tokens (the new part), then an FFN. Each layer refines the anchor boxes, and each layer's output is kept for the auxiliary losses. The paper does not say whether DINO's denoising queries are kept, so the figure leaves them out.</p></div>
+    <div data-stage="heads" hidden><h4>6. Boxes and per-token logits</h4><p>Each query predicts a box. For its class, it takes a dot product with each text token: one logit per token, <span class="tex">900 \times N_T</span> per image. A category name that spans several tokens wins when its tokens light up together. No row of the output belongs to a fixed class, so the same weights serve any prompt.</p></div>
+    <div data-stage="loss" hidden><h4>7. Matching and loss</h4><p>First, Hungarian matching pairs queries with ground-truth objects, with a cost made of a class term, box L1 at weight <span data-claim="gdino-w-l1">5.0</span> and GIoU at weight <span data-claim="gdino-w-giou">2.0</span>. Then the same three parts become the loss: a focal loss on every query-token logit (the contrastive classification from GLIP), and L1 and GIoU on matched boxes. The class weights conflict in the paper: Sec. 4.1 gives <span data-claim="gdino-match-cost-cls-text">2.0</span> for matching and <span data-claim="gdino-loss-cls-text">1.0</span> for the loss, Table 8 gives <span data-claim="gdino-match-cost-cls-table8">1.0</span> and <span data-claim="gdino-loss-cls-table8">2.0</span>. Auxiliary losses follow every decoder layer and the encoder outputs.</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>Everywhere that has weights. From the loss into the heads, through all decoder layers, into the feature enhancer, and on into both backbones: Swin and BERT are drawn red because Table 8 gives each of them a learning rate (<span data-claim="gdino-lr-img-backbone">1e-5</span> for the image backbone, <span data-claim="gdino-lr-text-backbone">1e-5</span> for the text backbone). The paper never says "not frozen"; that is <span class="reading">our reading</span> of Table 8. Query selection (Eq. 1) has no weights of its own. The only frozen parts in the paper are in a side experiment, described below the figure.</p></div>
+    <div data-stage="update" hidden><h4>9. One optimizer step</h4><p><span data-claim="gdino-optimizer">AdamW</span> with learning rate <span data-claim="gdino-lr">1e-4</span> (backbones <span data-claim="gdino-lr-img-backbone">1e-5</span>), weight decay <span data-claim="gdino-wd">0.0001</span> and gradient clipping at max norm <span data-claim="gdino-clip-norm">0.1</span>. Grounding DINO T trains on <span data-claim="gdino-t-gpus">16 Nvidia V100</span> GPUs with a total batch of <span data-claim="gdino-t-batch">32</span>; L on <span data-claim="gdino-l-gpus">64 Nvidia A100</span> GPUs with a batch of <span data-claim="gdino-l-batch">64</span>. The paper states no pre-training epochs or learning-rate schedule.</p></div>
+  </div>
+  <figcaption>Computed from the paper's configuration (Sec. 4.1, Table 8): layer counts, width, query count, text length, feature strides, loss weights, optimizer and hardware. The input size is not in the paper, so the readout gives token counts as a formula and, labelled as our reading, at an assumed 800 x 1333 input. Model sizes: T <span data-claim="gdino-t-params">172M</span> and L <span data-claim="gdino-l-params">341M</span> parameters (Table 4).</figcaption>
+</figure>
+
+<p>The paper does freeze parts in one experiment (App. C.1, Table 9). It starts from a DINO already trained on O365, freezes "the modules co-existing in DINO and Grounding DINO", and trains only the new text and fusion parts. With Swin-T and O365 data, this reaches <span data-claim="gdino-xfer-dino-o365-lvis">17.9</span> zero-shot AP on LVIS minival, against <span data-claim="gdino-xfer-scratch-o365-lvis">16.2</span> for the same model trained from scratch; COCO and ODinW come out about the same or slightly lower. A trained closed-set detector can learn to read with most of its weights fixed.</p>
+
+<h3>What it scores, and with which checkpoint</h3>
+<p>Grounding DINO reports three zero-shot tests, and each number belongs to a specific checkpoint. The table keeps the pre-training data on every row (Tables 2 to 4; box AP throughout):</p>
+<table class="data">
+  <thead><tr><th>Model, pre-training data</th><th>COCO 2017val AP</th><th>LVIS minival AP (APr)</th><th>ODinW-35 mean AP</th></tr></thead>
+  <tbody>
+    <tr><td>GLIP-T, O365 + GoldG</td><td><span data-claim="gdino-coco-zs-glipt-c">46.7</span></td><td><span data-claim="glip-lvis-minival-c-ap">24.9</span> (<span data-claim="gdino-lvis-zs-glipt-c-apr">17.7</span>)</td><td>not in these tables</td></tr>
+    <tr><td>Grounding DINO T, O365</td><td><span data-claim="gdino-coco-zs-t-o365">46.7</span></td><td>not reported</td><td>not reported</td></tr>
+    <tr><td>Grounding DINO T, O365 + GoldG</td><td><span data-claim="gdino-coco-zs-t-og">48.1</span></td><td><span data-claim="gdino-lvis-zs-t-og-ap">25.6</span> (<span data-claim="gdino-lvis-zs-t-og-apr">14.4</span>)</td><td><span data-claim="gdino-odinw35-avg-t-og">20.0</span></td></tr>
+    <tr><td>GLIP-T, O365 + GoldG + Cap4M</td><td>not in these tables</td><td><span data-claim="gdino-lvis-zs-glipt-ap">26.0</span> (<span data-claim="gdino-lvis-zs-glipt-apr">20.8</span>)</td><td><span data-claim="gdino-odinw35-avg-glipt">19.6</span></td></tr>
+    <tr><td>Grounding DINO T, O365 + GoldG + Cap4M</td><td><span data-claim="gdino-coco-zs-t-ogc">48.4</span></td><td><span data-claim="gdino-lvis-zs-t-ogc-ap">27.4</span> (<span data-claim="gdino-lvis-zs-t-ogc-apr">18.1</span>)</td><td><span data-claim="gdino-odinw35-avg-t-ogc">22.3</span></td></tr>
+    <tr><td>Grounding DINO L, O365 + OpenImages + GoldG</td><td><span data-claim="gdino-coco-zs-l">52.5</span></td><td>not reported</td><td>not reported</td></tr>
+    <tr><td>Grounding DINO L, O365 + OpenImages + GoldG + Cap4M + COCO + RefCOCO</td><td><span data-claim="gdino-coco-l-with-coco">60.7</span>, not zero-shot (COCO in training)</td><td><span data-claim="gdino-lvis-zs-l-ap">33.9</span> (<span data-claim="gdino-lvis-zs-l-apr">22.2</span>)</td><td><span data-claim="gdino-odinw35-avg-l">26.1</span></td></tr>
+  </tbody>
+</table>
+<p>Read the table with four cautions.</p>
+<ul>
+  <li><b>Two different L models.</b> The headline <span data-claim="gdino-coco-zs-l">52.5</span> COCO AP and the LVIS <span data-claim="gdino-lvis-zs-l-ap">33.9</span> and ODinW <span data-claim="gdino-odinw35-avg-l">26.1</span> come from different checkpoints. No single Grounding DINO L has all three numbers.</li>
+  <li><b>COCO "zero-shot" means no COCO images, not new names.</b> O365 covers (approximately) all of COCO's categories; the paper even maps O365 categories to COCO to evaluate DINO the same way.</li>
+  <li><b>Rare classes go the other way.</b> With the same data, Grounding DINO T beats GLIP-T on LVIS AP (<span data-claim="gdino-lvis-zs-t-ogc-ap">27.4</span> against <span data-claim="gdino-lvis-zs-glipt-ap">26.0</span>) but loses on the rare classes (APr <span data-claim="gdino-lvis-zs-t-ogc-apr">18.1</span> against <span data-claim="gdino-lvis-zs-glipt-apr">20.8</span>). The paper suggests this "may be a characteristic limitation" of DETR-like models (Sec. 4.2). Its LVIS numbers are on MDETR's minival, and it does not say whether it uses the fixed-AP protocol that later papers use, so do not set them beside other papers' LVIS columns.</li>
+  <li><b>The ODinW mean hides a long tail.</b> The paper's ODinW numbers average 35 datasets (we recomputed them from its per-dataset Tables 12 to 14). The medians are much lower: <span data-claim="gdino-odinw35-med-t-og">9.5</span>, <span data-claim="gdino-odinw35-med-t-ogc">11.9</span> and <span data-claim="gdino-odinw35-med-l">18.4</span> for the three rows above. Half of these small, real-world datasets score below that. <a href="#ch-when">Chapter 12</a> looks at them one by one.</li>
+</ul>
+</section>

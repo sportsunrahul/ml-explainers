@@ -1,0 +1,177 @@
+<!-- ============================ ACT II ============================ -->
+<p class="kicker"><span class="act-n">Act II</span>Teaching a language model to see</p>
+<section id="ch-bootstrap" class="chapter">
+<h2>Web captions are noisy</h2>
+<p>The text scraped alongside web images is often a file name, an advert or a holiday note, and a model trained on it learns that noise too. BLIP's fix was to let the model clean its own data: a captioner writes a new caption for every web image, and a filter throws out every caption, old or new, that does not match its picture.</p>
+
+<style>
+#viz-capfilt .capfilt-verdict { font:.92rem/1.45 system-ui, sans-serif; margin:.5rem 0 0; padding:.45rem .6rem; border-left:3px solid var(--green); background:var(--panel2); border-radius:0 6px 6px 0; }
+#viz-capfilt .capfilt-verdict b { color:var(--green); }
+</style>
+<figure class="viz" id="viz-capfilt" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="capfilt-canvas" tabindex="0" role="img" aria-label="Five line-drawn web images, each with its scraped alt-text and a synthetic caption written by the captioner; a filter score bar beside each text marks it kept (green) or dropped (red)."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-capfilt-raw">Raw web pairs</button>
+    <button type="button" id="btn-capfilt-caption">Captioner writes</button>
+    <button type="button" id="btn-capfilt-filter">Filter judges</button>
+    <button type="button" id="btn-capfilt-clean">Cleaned set</button>
+    <button type="button" id="btn-capfilt-beam" aria-pressed="false">Captioner: beam search</button>
+    <button type="button" id="btn-capfilt-nucleus" aria-pressed="true">Captioner: nucleus sampling</button>
+    <button type="button" id="btn-capfilt-verdict">Which trained the better model?</button>
+    <button type="button" id="btn-capfilt-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="capfilt-readout" aria-live="polite"></p>
+  <p class="capfilt-verdict" id="capfilt-verdict" aria-live="polite"><b>From the paper (BLIP Table 2, not the toy):</b> pre-trained on the <span data-claim="page-capfilt-14m">14M</span>-image set, COCO image-retrieval R@1 after finetuning is <span data-claim="page-capfilt-ir-none">60.7</span> without CapFilt, <span data-claim="page-capfilt-ir-beam">61.9</span> with beam search and <span data-claim="page-capfilt-ir-nucleus">63.1</span> with nucleus sampling, even though the filter flagged <span data-claim="page-capfilt-noise-beam">19%</span> of the beam captions and <span data-claim="page-capfilt-noise-nucleus">25%</span> of the nucleus captions as noise. The noisier captioner won.</p>
+  <figcaption>Step through the four stages, then compare the two decoders. What is toy: five line drawings instead of millions of photos, and the filter scores are hand-set to show the mechanism, not produced by a network. A text is dropped when its score is below 0.5, which is what "the ITM head predicts unmatched" means for a two-way classifier. The captions were written to match the paper's description of the two decoders (beam: safe and common; nucleus: diverse, sometimes wrong); the only real numbers are in the green box, which appears when you ask which model trained better.</figcaption>
+</figure>
+
+<h3>The wall: alt-text is not a caption</h3>
+<p>CLIP and ALIGN showed that scale can paper over noisy text when all you want is a matching score. BLIP wanted more: a model that can also match finely and <em>write</em> captions, trained on the same kind of web data. Its authors put the problem plainly: human-annotated pairs such as COCO are expensive and few, while the web pairs used instead are plentiful, and <span data-claim="page-capfilt-alt-noisy">the alt-texts often do not accurately describe the visual content of the images</span>. Press <b>Raw web pairs</b>: of the five toy images, one is labeled with its file name, one with a sofa advert and one with a holiday date.</p>
+<p>Throwing more of this at a model does not fix it; every bad pair teaches a wrong association. What BLIP needed was a way to judge each pair and to replace bad text with good text, at the scale of millions of images, without hiring annotators. The trick is that one model can learn both skills, judging and writing, from the same data.</p>
+
+<h3>One model, three jobs</h3>
+<p>BLIP is a single model with a vision transformer for the image and one text transformer that runs in three modes. Each mode is trained by its own objective, and all three are trained together on every image-text pair. Press the buttons below to see which parts each one uses.</p>
+
+<figure class="viz" id="viz-capfilt-med" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="capfilt-med-canvas" tabindex="0" role="img" aria-label="Diagram of BLIP's model: one ViT image encoder feeding three passes of the text transformer (text encoder for ITC, image-grounded encoder for ITM, image-grounded decoder for LM), with shared layers joined by equals signs."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-capfilt-med-all" aria-pressed="true">All three</button>
+    <button type="button" id="btn-capfilt-med-itc" aria-pressed="false">ITC pass</button>
+    <button type="button" id="btn-capfilt-med-itm" aria-pressed="false">ITM pass</button>
+    <button type="button" id="btn-capfilt-med-lm" aria-pressed="false">LM pass</button>
+    <button type="button" id="btn-capfilt-med-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="capfilt-med-readout" aria-live="polite"></p>
+  <figcaption>Structure from BLIP Sec. 3.1 and 3.2 (the paper calls this model MED, a multimodal mixture of encoder-decoder); layer stacks are drawn once, but each block of the real text transformer repeats them. A blue edge marks each place where the image features enter.</figcaption>
+</figure>
+
+<p><b>ITC, image-text contrastive.</b> This is the chapter 1 matching game. The text encoder reads the caption on its own, with no access to the image, and its <code>[CLS]</code> vector is scored against the image's vector; matched pairs are pulled together and the batch's other pairs pushed apart. BLIP borrows one refinement from an earlier model, ALBEF: <span data-claim="page-capfilt-momentum">a momentum encoder is introduced to produce features</span>, a slowly updated copy of the model whose soft scores soften the hard "only the diagonal is right" targets, since some of the "negatives" in a web batch are in fact fine captions.</p>
+<p><b>ITM, image-text matching.</b> A yes-or-no question: does this caption belong to this image? Now the text transformer does see the image: a cross-attention layer inserted into every block lets each word look at the image features. The answer comes from <span data-claim="page-capfilt-itm-head">an ITM head (a linear layer)</span> on the output of a special <code>[Encode]</code> token. Easy negatives would teach little (a dog photo against a caption about spreadsheets), so BLIP mines hard ones. In the paper's words, "<span data-claim="page-capfilt-hard-neg">negatives pairs with higher contrastive similarity in a batch are more likely to be selected</span>". ITC's scores make the wrong captions that look most right the likeliest picks, and ITM learns to tell them apart word by word.</p>
+<p><b>LM, language modeling.</b> Write the caption. The same stack, with causal self-attention so each word sees only the words before it (and the image through cross-attention), predicts the caption one token at a time, starting from a <code>[Decode]</code> token.</p>
+<p>The sharing is the clever part. Encoding and decoding differ mainly in <em>how words look at each other</em>, bidirectionally or only backward, so BLIP's text encoder and decoder <span data-claim="blip-arch-shared-except-sa">share all parameters except for the SA layers</span>, between the encoder and the decoder: the paper's reason is that <span data-claim="page-capfilt-sa-reason">the differences between the encoding and decoding tasks are best captured by the SA layers</span>. Cross-attention, feed-forward layers and embeddings are one set of weights, used by every pass that has them. The paper tested the alternatives (Table 3, <span data-claim="page-capfilt-14m">14M</span>-image pre-training): sharing everything gives <span data-claim="page-capfilt-params-all">224M</span> parameters but the worst COCO image retrieval (R@1 <span data-claim="page-capfilt-med-ir-all">59.5</span>, the two jobs fight over one self-attention); sharing nothing costs <span data-claim="page-capfilt-params-none">361M</span> and scores <span data-claim="page-capfilt-med-ir-none">60.5</span>; sharing all but self-attention costs <span data-claim="page-capfilt-params-except-sa">252M</span> and scores best, <span data-claim="page-capfilt-med-ir-except-sa">60.7</span>.</p>
+
+<p>Each pair costs one pass through the heavy vision transformer and three passes through the text transformer. The three losses, term by term:</p>
+<div class="eq" id="eq-capfilt" data-build data-viz="viz-capfilt-med"><div class="tex tex-display">
+\htmlData{step=4}{\htmlClass{t-red}{\mathcal{L}} =} \htmlData{step=1, link=itc}{\htmlClass{t-red}{\mathcal{L}_{\text{ITC}}}} \htmlData{step=2, link=itm}{+\; \underbrace{-\big[\,y \log p_{\text{match}} + (1-y)\log(1-p_{\text{match}})\big]}_{\htmlClass{t-red}{\mathcal{L}_{\text{ITM}}}}} \htmlData{step=3, link=lm}{+\; \underbrace{-\sum_{t} \log p\big(\htmlClass{t-yellow}{w_t} \mid \htmlClass{t-yellow}{w_{<t}},\, \htmlClass{t-blue}{I}\big)}_{\htmlClass{t-red}{\mathcal{L}_{\text{LM}}}}}
+</div></div>
+<p class="eqno">Written out from the prose of BLIP v2 Sec. 3.2, which has no numbered equations. The paper says the three objectives are jointly optimized and prints no weights; the plain sum is our transcription.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{\text{ITC}}}</span>: the contrastive loss of chapter 1, over image and caption vectors from the unimodal encoders, with the momentum encoder's soft targets.</li>
+  <li><span class="tex">y</span>: 1 if the pair is a true match, 0 if it is a (hard) negative. <span class="tex">p_{\text{match}}</span>: the ITM head's probability that the caption matches the image, read off the <code>[Encode]</code> token. The bracket is ordinary binary cross-entropy.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{w_t}</span>: the caption's <span class="tex">t</span>-th token; <span class="tex">\htmlClass{t-yellow}{w_{&lt;t}}</span>: the tokens before it; <span class="tex">\htmlClass{t-blue}{I}</span>: the image, reached through cross-attention. BLIP applies label smoothing of <span data-claim="blip-lm-label-smoothing">0.1</span> to this cross-entropy.</li>
+</ul>
+
+<h3>Inside BLIP: forward, then backward</h3>
+<p>The figure above showed which layers each pass uses. Below is one whole training step of the real model, as a slide per stage: one image pass, three text passes, three losses, then the gradient going back. The line under the drawing gives tensor shapes computed from BLIP's two ViT sizes (pick one to change them); <span class="tex">N</span> is the batch and <span class="tex">L</span> the caption length, which the paper does not fix.</p>
+
+<figure class="viz archflow" id="viz-blipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-blipflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-blipflow-tokens" aria-pressed="false">2 Tokens</button>
+    <button type="button" id="btn-blipflow-vit" aria-pressed="false">3 ViT</button>
+    <button type="button" id="btn-blipflow-itc" aria-pressed="false">4 ITC pass</button>
+    <button type="button" id="btn-blipflow-itm" aria-pressed="false">5 ITM pass</button>
+    <button type="button" id="btn-blipflow-lm" aria-pressed="false">6 LM pass</button>
+    <button type="button" id="btn-blipflow-loss" aria-pressed="false">7 Losses</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-blipflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-blipflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Image encoder size">
+    <span>ViT</span>
+    <button type="button" id="btn-blipflow-b" aria-pressed="true">ViT-B/16</button>
+    <button type="button" id="btn-blipflow-l" aria-pressed="false">ViT-L/16</button>
+  </div>
+  <canvas id="blipflow-canvas" role="img" aria-label="BLIP's training step as a diagram: the image lane (blue) runs patches and one ViT pass; the caption lane (yellow) feeds three text passes (text encoder, image-grounded encoder, image-grounded decoder), which lead to a similarity table, an ITM head and next-word logits, then three red losses summed into one. A momentum-encoder box feeds soft targets to the ITC loss. In the backward stages red arrows run from the loss back through all three passes into the ViT."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-blipflow-prev">Previous</button>
+    <button type="button" id="btn-blipflow-next">Next</button>
+    <button type="button" id="btn-blipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="blipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>One image lane (<b class="c-blue">blue</b>) and one caption lane (<b class="c-yellow">yellow</b>) that splits into three passes. The two passes that read the image through cross-attention, the image-grounded encoder and decoder ("grounded" in the drawing), are <b class="c-green">green</b>. Each pass ends in its own <b class="c-red">red</b> loss, and the three add up to one. The grey box on top is the momentum copy, which trains nothing but supplies targets. Press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of pairs</h4>
+      <p>Draw <span class="tex">N</span> (image, text) pairs: <span data-claim="blip-arch-batch-b">2880</span> with ViT-B, <span data-claim="blip-arch-batch-l">2400</span> with ViT-L. Each image is a random <span data-claim="blip-arch-res">224</span> &times; 224 crop (finetuning later moves up to <span data-claim="blip-arch-res-ft">384</span>). The text is web alt-text or a human caption; after CapFilt, some of it is the model's own synthetic captions.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>2. Both inputs become token sequences</h4>
+      <p><b class="c-blue">Image:</b> the ViT recipe of <a href="#ch-patches">the patches chapter</a>: <span data-computed>16 &times; 16</span>-pixel patches, each flattened and linearly mapped to the ViT's width, plus position embeddings and <span data-claim="blip-arch-img-cls">an additional [CLS] token to represent the global image feature</span>. BLIP explores <span data-claim="blip-arch-vit-variants">ViT-B/16 and ViT-L/16</span>; their widths are <span data-claim="vit-arch-bootstrap-b-width">768</span> and <span data-claim="vit-arch-bootstrap-l-width">1024</span> (ViT's own Table 1).</p>
+      <p><b class="c-yellow">Text:</b> BERT's tokenizer and word embeddings, since the text transformer is <span data-claim="blip-arch-text-init">BERT-base</span>. BLIP's paper prints no text width; BERT-base's hidden size is <span data-claim="page-qformer-dim">768</span>, which BLIP-2 states for its own BERT-base-initialized Q-Former. The embedding table is shared by all three passes.</p>
+    </div>
+    <div data-stage="vit" hidden>
+      <h4>3. The image goes through the ViT once</h4>
+      <p>Each pair needs only <span data-claim="blip-arch-one-vit-pass">one forward pass through the computational-heavier visual transformer</span> (<span data-claim="vit-arch-bootstrap-b-layers">12</span> layers for ViT-B, <span data-claim="vit-arch-bootstrap-l-layers">24</span> for ViT-L), <span data-claim="blip-arch-vit-init">initialized from ViT pre-trained on ImageNet</span>, not from CLIP. Its output is used twice: the <code>[CLS]</code> row alone for the contrastive score, and every row as the keys and values of the cross-attention layers in the two green passes.</p>
+    </div>
+    <div data-stage="itc" hidden>
+      <h4>4. Pass one: the text alone (ITC)</h4>
+      <p>The caption, headed by <code>[CLS]</code>, runs through the text encoder with bi-directional self-attention and no cross-attention: it never sees the image. Its <code>[CLS]</code> output is scored against each image's <code>[CLS]</code> output, an <span class="tex">N \times N</span> table within the batch, as in chapter 1. BLIP's own paper mentions no queue, but BLIP-2 describes its own choice as <span data-claim="blip2-arch-itc-inbatch">in-batch negatives instead of the momentum queue in BLIP</span>, so BLIP (following ALBEF) also scored against a queue of momentum features, extra negatives whose number neither paper prints. BLIP does not print the projection or temperature used here; it defers to ALBEF.</p>
+      <p>The targets are not plain one-hot rows. BLIP follows ALBEF: <span data-claim="page-capfilt-momentum">a momentum encoder is introduced to produce features</span>, and <span data-claim="blip-arch-soft-labels">soft labels are created from the momentum encoder as training targets</span>, so a web caption that fits another image equally well is not punished as a pure negative. The momentum copy has no gradient of its own; our reading of "momentum encoder", as in ALBEF, is a slowly moving average of the trained weights. The paper does not give its coefficient.</p>
+    </div>
+    <div data-stage="itm" hidden>
+      <h4>5. Pass two: text that reads the image (ITM)</h4>
+      <p>Same text encoder, but with <span data-claim="blip-arch-ca-insert">one additional cross-attention (CA) layer between the self-attention (SA) layer and the feed forward network (FFN) for each transformer block</span>. With ViT-L the image features are wider than the text (<span data-claim="vit-arch-bootstrap-l-width">1024</span> vs <span data-claim="page-qformer-dim">768</span>), so the CA layer's key and value maps also change width (our reading; the paper does not discuss it). A task token <code>[Encode]</code> is added to the text, and <span data-claim="blip-arch-encode-token">the output embedding of [Encode] is used as the multimodal representation</span>, fed to <span data-claim="page-capfilt-itm-head">an ITM head (a linear layer)</span>; the paper says only "binary classification", so the two outputs in the drawing are our reading.</p>
+      <p>Which pairs? The true pairs, plus negatives picked with the ITC table from stage 4: <span data-claim="page-capfilt-hard-neg">negatives pairs with higher contrastive similarity in a batch are more likely to be selected</span>. Picking is sampling, not a computation the gradient flows through, so the drawing has no arrow from the similarity table to this pass. The paper does not say how many negatives; we write the number of pairs as <span class="tex">N'</span>.</p>
+    </div>
+    <div data-stage="lm" hidden>
+      <h4>6. Pass three: write the caption (LM)</h4>
+      <p>The decoder <span data-claim="blip-arch-causal">replaces the bi-directional self-attention layers in the image-grounded text encoder with causal self-attention layers</span>; everything else, cross-attention, FFN and embeddings, is the encoder's own weights again (encoder and decoder <span data-claim="blip-arch-shared-except-sa">share all parameters except for the SA layers</span>). The sequence starts with <code>[Decode]</code> and ends with an end-of-sequence token, and every position predicts the next one, through an output layer over the vocabulary that the paper does not describe (our reading: BERT's usual word-prediction head).</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. Three losses, one number</h4>
+      <p><b class="c-red">ITC</b> grades the similarity table (the batch, plus the momentum queue that BLIP-2 attributes to BLIP when it chooses <span data-claim="blip2-arch-itc-inbatch">in-batch negatives instead of the momentum queue in BLIP</span>) against the momentum encoder's soft targets, rows and columns. <b class="c-red">ITM</b> grades one yes/no answer per pair, the true pairs as "match" and the sampled negatives as "no match". <b class="c-red">LM</b> grades every caption position's next-token prediction, with label smoothing of <span data-claim="blip-lm-label-smoothing">0.1</span>. <span data-claim="blip-arch-joint">We jointly optimize three objectives</span>, the paper says, with no printed weights; the plain sum of <a href="#eq-capfilt">the equation above</a> is our transcription.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. The gradient: three roads, shared stops</h4>
+      <p>Each loss sends its gradient back down its own pass, and the passes meet wherever they share weights. Reading the sharing rule (Sec. 3.1 and 3.2) as a table of which loss reaches which weights (derived here; the paper gives only the rule):</p>
+      <table class="data">
+        <thead><tr><th>weights</th><th>ITC</th><th>ITM</th><th>LM</th></tr></thead>
+        <tbody>
+          <tr><td>ViT, patch embedding</td><td>yes</td><td>yes (via CA)</td><td>yes (via CA)</td></tr>
+          <tr><td>word embeddings, FFN</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>bi-directional SA</td><td>yes</td><td>yes</td><td>no</td></tr>
+          <tr><td>cross-attention</td><td>no</td><td>yes</td><td>yes</td></tr>
+          <tr><td>causal SA</td><td>no</td><td>no</td><td>yes</td></tr>
+          <tr><td>ITM head / output layer</td><td>no</td><td>ITM head</td><td>output layer</td></tr>
+          <tr><td>momentum encoders</td><td colspan="3">no gradient (they follow the trained weights)</td></tr>
+        </tbody>
+      </table>
+      <p>That is the point of the design: the FFN and embeddings learn from all three jobs at once, while the one part where encoding and decoding really differ, self-attention, keeps a separate copy for each. Nothing is <b class="c-brown">brown</b>: in BLIP every weight trains, ViT included.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p><span data-claim="blip-arch-optim">AdamW</span> with weight decay <span data-claim="blip-arch-wd">0.05</span>; the learning rate is warmed up to <span data-claim="blip-arch-lr-b">3e-4</span> for ViT-B or <span data-claim="blip-arch-lr-l">2e-4</span> for ViT-L and <span data-claim="blip-arch-lr-decay">decayed linearly with a rate of 0.85</span>. Training runs <span data-claim="blip-arch-epochs">20 epochs</span> on <span data-claim="blip-arch-gpus">two 16-GPU nodes</span>. On the <span data-claim="page-capfilt-14m">14M</span>-image set with ViT-B, if an epoch is one pass over the 14M images (the paper does not define it), that is <span data-computed>about 4,900</span> steps per epoch and <span data-computed>about 97,000</span> in all. Then the momentum encoders take their small step toward the new weights, and the next batch starts.</p>
+    </div>
+  </div>
+  <figcaption>Computed: image shapes come from the <span data-claim="blip-arch-res">224</span>-pixel pre-training crop, the patch size 16 and ViT's widths; the text width is BERT-base's; <span class="tex">N</span>, <span class="tex">N'</span>, <span class="tex">L</span> and the vocabulary <span class="tex">|V|</span> stay symbolic because the paper does not print them. Before you open stage 8, guess: which weights will get a gradient from all three losses, and which from only one?</figcaption>
+</figure>
+
+<p>Cost per step, then, is one heavy ViT pass and three light text passes, where a model with separate encoder and decoder would pay for more weights: sharing all but self-attention gives <span data-claim="page-capfilt-params-except-sa">252M</span> parameters against <span data-claim="page-capfilt-params-none">361M</span> for no sharing, and the paper counts <span data-claim="blip-arch-three-text-passes">three forward passes through the text transformer</span> per pair. The paper's reason for sharing the rest is that <span data-claim="blip-arch-shared-similar">the embedding layers, CA layers and FFN function similarly between encoding and decoding tasks</span>.</p>
+
+<h3>Captioning and filtering</h3>
+<p>Here is the bootstrap, which the paper calls CapFilt. First pre-train a BLIP model on the noisy corpus. Then make two copies of it and give each one job, each finetuned on its own with COCO's human-written captions:</p>
+<ul>
+  <li>the <b>captioner</b> is the image-grounded decoder, finetuned with the LM loss. It writes <span data-claim="page-capfilt-one-caption">one caption per image</span> for every web image. Press <b>Captioner writes</b>.</li>
+  <li>the <b>filter</b> is the image-grounded encoder, finetuned with ITC and ITM. It judges both the original web text and the new synthetic caption, and <span data-claim="page-capfilt-noisy-rule">a text is considered to be noisy if the ITM head predicts it as unmatched to the image</span>. Press <b>Filter judges</b>.</li>
+</ul>
+<p>Watch what the filter does in the toy. The file name, the advert and the holiday note are struck out; so is one synthetic caption, which invented a camper and snow. Web texts that genuinely describe their pictures survive. Press <b>Cleaned set</b>: the kept texts, together with the human-annotated pairs, form a new dataset, and a <em>new</em> model is pre-trained on it from scratch.</p>
+<p>Why two separately finetuned copies instead of one model doing both? If the captioner and filter share weights, the filter tends to approve its own twin's mistakes. The paper measures this confirmation bias (Table 4): with shared parameters the filter flags only <span data-claim="page-capfilt-share-noise">8%</span> of synthetic captions as noise, against <span data-claim="page-capfilt-noise-nucleus">25%</span> when decoupled, and the downstream model is worse (COCO image-retrieval R@1 <span data-claim="page-capfilt-share-ir">62.2</span> vs <span data-claim="page-capfilt-ir-nucleus">63.1</span>).</p>
+
+<h3>Predict: safe captions or surprising ones?</h3>
+<p>The captioner can decode in two ways. <b>Beam search</b> keeps the few most probable partial sentences at each step and returns the single most likely caption: fluent, safe, generic. <b>Nucleus sampling</b> draws each word at random from the smallest set of candidates whose probabilities add up to <span class="tex">p</span> (BLIP uses <span class="tex">p =</span> <span data-claim="blip-capfilt-nucleus-p">0.9</span>): livelier, more specific, and sometimes wrong. The filter catches more of the sampled captions, so nucleus sampling leaves the noisier synthetic data.</p>
+<p>Before you press anything: which captioner should train the better model, the safe one or the noisy one? Press <b>Captioner: beam search</b>, then <b>Captioner: nucleus sampling</b>, and compare. In the toy, every beam caption passes the filter, but they are short and alike ("a dog on the beach", "a car parked on the street"); the sampled captions lose one to the filter yet mention frisbees, basil leaves and reflections, and the readout counts almost twice as many different content words. Then press <b>Which trained the better model?</b></p>
+<p>The noisy one wins. The paper's explanation, offered as a hypothesis, is in its section title, "Diversity is Key for Synthetic Captions": sampled captions are more diverse and surprising, so they carry more new information, while beam search tends to produce safe captions that are common in the dataset and adds little the model did not already know. The filter makes the gamble affordable: bold captions that are wrong get thrown away, and bold captions that are right stay.</p>
+
+<h3>What cleaning buys</h3>
+<p>BLIP pre-trains on <span data-claim="blip-data-14m">14M images</span> (COCO and Visual Genome with human captions; Conceptual Captions, Conceptual 12M and SBU with web text) and on a <span data-claim="blip-data-129m">129M</span>-image set that adds <span data-claim="page-capfilt-laion">115M</span> LAION web images. On the <span data-claim="page-capfilt-14m">14M</span> set (Table 1), COCO image retrieval R@1 goes from <span data-claim="page-capfilt-ir-none">60.7</span> without CapFilt to <span data-claim="page-capfilt-ir-f-only">61.5</span> with the filter alone, <span data-claim="page-capfilt-ir-c-only">62.0</span> with the captioner alone, and <span data-claim="page-capfilt-ir-nucleus">63.1</span> with both. The gain survives scale: on the <span data-claim="blip-data-129m">129M</span> set it goes from <span data-claim="page-capfilt-129m-ir-none">62.0</span> to <span data-claim="page-capfilt-129m-ir-cf">64.3</span>.</p>
+<p>Two ideas from this chapter carry forward. Web data can be cleaned by a model trained on it, and BLIP-2, two chapters on, reuses BLIP's captioner for exactly that. And one text transformer can both judge and write, with only its self-attention layers kept separate; BLIP-2 goes one step further: its three objectives share the same weights and differ only in the attention mask.</p>
+<p>So far, though, the model only writes captions. It cannot answer a question, follow an instruction or reason about what it sees, because its text side is a BERT-sized transformer (initialized from BERT-base), far smaller than the language models that can hold a conversation. The obvious move is to take a big pretrained language model that already can do all that, and bolt vision onto it without breaking it. That is the next chapter.</p>
+</section>

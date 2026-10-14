@@ -1,0 +1,39 @@
+<section id="ch-map" class="chapter">
+<h2>Six families on one map</h2>
+<p>The field split into families, and each family answers "what is the model of normal?" in its own way. They did not replace each other: they grew side by side, and the newest growth is in one model for many products and in vision-language models.</p>
+
+<figure class="viz" id="viz-map">
+  <span class="badge computed">Computed</span>
+  <svg class="chart" id="svg-map" role="img" aria-label="Bar chart of arXiv papers on industrial visual anomaly detection per year from 2018 to 2026. The bars grow every year. Buttons highlight the papers whose title or abstract matches one keyword family."></svg>
+  <div class="controls" role="group" aria-label="Highlight a keyword family">
+    <span>Highlight</span>
+    <button type="button" id="btn-map-vlm" aria-pressed="false">Vision-language</button>
+    <button type="button" id="btn-map-multiclass" aria-pressed="false">Multi-class</button>
+    <button type="button" id="btn-map-fewshot" aria-pressed="false">Few-shot</button>
+    <button type="button" id="btn-map-synthetic" aria-pressed="false">Synthetic defects</button>
+    <button type="button" id="btn-map-recon" aria-pressed="false">Reconstruction</button>
+    <button type="button" id="btn-map-memory" aria-pressed="false">Memory bank</button>
+    <button type="button" id="btn-map-st" aria-pressed="false">Student-teacher</button>
+    <button type="button" id="btn-map-flow" aria-pressed="false">Normalizing flow</button>
+    <button type="button" id="btn-map-3d" aria-pressed="false">3D</button>
+    <button type="button" id="btn-map-edge" aria-pressed="false">Edge, real-time</button>
+    <button type="button" id="btn-map-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Computed from our arXiv scan of <span data-claim="map-scan-date">2026-10-09</span>: papers by the date of their first version, in the industrial visual subset. A family is a keyword match on the title and abstract (a heuristic: families overlap, and a paper can match several). The 2026 bar runs to the scan date.</figcaption>
+</figure>
+
+<p>Predict before you press: <em>which family started latest, and which grew fastest after it started?</em> Press "Vision-language". It has no papers before 2023 and then becomes the largest family. "Multi-class" follows the same curve one step behind. "Normalizing flow" stays small throughout. "Memory bank" grows slowly and never fades: the oldest idea on the page is still in use.</p>
+
+<h3>How the counts were made</h3>
+<p>Four paginated arXiv searches (abstracts naming MVTec, abstracts naming "industrial anomaly", titles with "anomaly detection" whose abstracts mention defects, manufacturing or industry, and abstracts naming VisA) returned <span data-claim="map-unique">1,165</span> unique papers. Keeping only image papers that mention a benchmark, industry, defects, surfaces or inspection, and dropping surveillance-video work, leaves <span data-claim="map-subset">780</span>. The subset grew from <span data-claim="map-year-2020">18</span> papers in 2020 to <span data-claim="map-year-2023">101</span> in 2023 and <span data-claim="map-year-2025">201</span> in 2025, and 2026 had <span data-claim="map-year-2026">191</span> by early October.</p>
+<p>Over the whole subset, the keyword matches rank like this: reconstruction <span data-claim="map-fam-recon">203</span>, vision-language <span data-claim="map-fam-vlm">202</span>, synthetic defects <span data-claim="map-fam-synthetic">153</span>, multi-class <span data-claim="map-fam-multiclass">142</span>, memory bank <span data-claim="map-fam-memory">80</span>, student-teacher <span data-claim="map-fam-st">52</span>, normalizing flow <span data-claim="map-fam-flow">19</span>. Edge and real-time words appear in <span data-claim="map-fam-edge">98</span>. Read these as a shape, not a census: arXiv search misses papers that use none of the terms, and keyword matching misfiles some papers. A paper that says "reconstruction" in passing counts as reconstruction.</p>
+
+<figure class="viz" id="viz-lanes">
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="svg-lanes" role="img" aria-label="Seven lanes over time from 2019 to 2026, one per family plus benchmarks, with the papers read in full placed at the date of their first version. Each paper links to its chapter."></svg>
+  <figcaption>The papers read in full, placed at the date of their first arXiv version (MVTec AD at CVPR 2019, which is not on arXiv). Each name links to its chapter. The DINOv2 methods sit in the lanes they extend: AnomalyDINO with the memory banks, Dinomaly with the multi-class models (one model for many products).</figcaption>
+</figure>
+
+<p>The page follows these lanes. Act II stays in the first family, where the model of normal is a set of stored features, and refines it three times. Act III tries two other answers: learn the density of normal features exactly, or invent defects and train a classifier. Act IV makes the detector fast and then makes one detector serve many products. Act V removes the training images altogether. Act VI puts the published timings of many of these methods on one chart of speed against accuracy.</p>
+</section>

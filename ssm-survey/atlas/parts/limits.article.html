@@ -1,0 +1,27 @@
+  <article data-chapter="limits">
+    <header class="ch-head"><span class="num">10 of 10</span><h2>Where SSMs lose, and hybrids</h2><p class="subhead">A fixed memory runs out of room; a little attention buys it back</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">Recall</button><button type="button" role="tab" data-step="1">Hybrids</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <div class="controls">
+        <label class="slider">State size N <input type="range" id="limits-atlas-N" min="2" max="5" step="1" value="4"></label>
+        <label class="slider">Pairs stored K <input type="range" id="limits-atlas-K" min="0" max="1000" step="1" value="625"></label>
+        <div class="row"><span>Keys</span><button type="button" class="tool" data-keys="random" aria-pressed="true">Random</button><button type="button" class="tool" data-keys="ortho" aria-pressed="false">Orthogonal</button></div>
+      </div>
+      <p>Store K key-value pairs in a <button class="inline-term" data-open="state">state</button> of N x N numbers by adding each pair on top of the others, the way linear attention does. Then ask for each key's value. This is <button class="inline-term" data-open="mqar">associative recall</button>, and the cache of attention (brown) gets every answer right.</p>
+      <p>The state (yellow) does well while K is small. Past K = N the keys can no longer stay out of each other's way, and the answers fill with crosstalk. Real models fail the same way on a <button class="inline-term" data-open="phonebook">phone book</button> or a <button class="inline-term" data-open="copying">copying task</button>: in NVIDIA's 8B study, pure Mamba models began to give wrong numbers past about 500 tokens of phone book. A big enough state wins, though: Mamba-2 with a state of 256 beat attention on recall at small model width. <button class="inline-term" data-open="statetracking">State tracking</button> is a separate limit.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <div class="controls">
+        <label class="slider">Attention layers of 32 <input type="range" id="limits-atlas-n" min="0" max="32" step="1" value="4"></label>
+        <div class="row"><span>Preset</span><button type="button" class="tool" data-n="0">Pure Mamba</button><button type="button" class="tool" data-n="4">1:7, Jamba</button><button type="button" class="tool" data-n="32">All attention</button></div>
+        <div class="row"><span>Context</span><button type="button" class="tool" data-ctx="8192" aria-pressed="false">8K</button><button type="button" class="tool" data-ctx="131072" aria-pressed="false">128K</button><button type="button" class="tool" data-ctx="262144" aria-pressed="true">256K</button></div>
+      </div>
+      <p>A <button class="inline-term" data-open="hybrid">hybrid</button> keeps most layers as Mamba and a few as attention. Only attention layers keep a cache, so the cache shrinks with every one removed, while the attention left over handles the exact lookups.</p>
+      <p>Jamba keeps 1 attention layer in 8, with a <button class="inline-term" data-open="moe">mixture of experts</button> on every other layer: its cache at 256K tokens is 4GB against 32GB for Mixtral. NVIDIA's 8B hybrid (4 attention layers of 56) beat a Transformer trained on the same data on all 12 standard tasks and solved the phone book past 150K tokens.</p>
+    </div>
+    <p class="note">Step 1 is our illustration with exact arithmetic on one random draw; no paper gives a formula for how many pairs a state can hold. Step 2 is computed: 4 KiB per token per attention layer, back-solved from Jamba's Table 1 (our reading). Filled markers are the papers' KV tables, hollow ones computed from their configurations.</p>
+    <p class="inscription">A fixed-size state is lossy compression: it loses exact facts once they outnumber its room. A few attention layers bring them back for a small part of attention's memory.</p>
+    <button type="button" class="continue" data-go="bill">Back to the start</button>
+  </article>

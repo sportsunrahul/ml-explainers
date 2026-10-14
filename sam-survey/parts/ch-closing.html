@@ -1,0 +1,45 @@
+<section id="ch-timeline" class="chapter">
+<h2>Timeline</h2>
+<p>The papers this page reads in full or as deltas, at their first arXiv date. The family tree in chapter 12 shows the same dates with every branch.</p>
+<ol class="timeline">
+    <li><span class="tl-date" data-claim="tl-fcn">2014-11-14</span> <b>FCN</b>: every pixel gets a class</li>
+    <li><span class="tl-date" data-claim="tl-unet">2015-05-18</span> <b>U-Net</b>: skip connections carry detail</li>
+    <li><span class="tl-date" data-claim="tl-dios">2016-03-13</span> <b>DIOS</b>: clicks become input channels</li>
+    <li><span class="tl-date" data-claim="tl-maskrcnn">2017-03-20</span> <b>Mask R-CNN</b>: box first, then a mask per object</li>
+    <li><span class="tl-date" data-claim="tl-stm">2019-04-01</span> <b>STM</b>: a memory of past frames for video</li>
+    <li><span class="tl-date" data-claim="tl-vit">2020-10-22</span> <b>ViT</b>: images as patch tokens</li>
+    <li><span class="tl-date" data-claim="tl-ritm">2021-02-12</span> <b>RITM</b>: the previous mask fed back; iterative training</li>
+    <li><span class="tl-date" data-claim="tl-maskformer">2021-07-13</span> <b>MaskFormer</b>: a set of (class, mask) pairs</li>
+    <li><span class="tl-date" data-claim="tl-mae">2021-11-11</span> <b>MAE</b>: masked pretraining for ViTs</li>
+    <li><span class="tl-date" data-claim="tl-mask2former">2021-12-02</span> <b>Mask2Former</b>: masked attention; one design for three tasks</li>
+    <li><span class="tl-date" data-claim="tl-vitdet">2022-03-30</span> <b>ViTDet</b>: windowed ViT for dense tasks</li>
+    <li><span class="tl-date" data-claim="tl-xmem">2022-07-14</span> <b>XMem</b>: three memory stores for long videos</li>
+    <li><span class="tl-date" data-claim="tl-simpleclick">2022-10-20</span> <b>SimpleClick</b>: a plain ViT for clicks</li>
+    <li><span class="tl-date" data-claim="tl-sam">2023-04-05</span> <b>SAM</b>: any prompt, a valid mask; SA-1B</li>
+    <li><span class="tl-date" data-claim="tl-hqsam">2023-06-02</span> <b>HQ-SAM</b>: an extra token for fine detail</li>
+    <li><span class="tl-date" data-claim="tl-mobilesam">2023-06-25</span> <b>MobileSAM</b>: distil the encoder</li>
+    <li><span class="tl-date" data-claim="tl-sam2">2024-08-01</span> <b>SAM 2</b>: streaming memory for video; SA-V</li>
+    <li><span class="tl-date" data-claim="tl-sam3">2025-11-20</span> <b>SAM 3</b>: concept prompts, every instance; SA-Co</li>
+    <li><span class="tl-date" data-claim="tl-sam3d">2025-11-20</span> <b>SAM 3D</b>: from a mask to a 3D object</li>
+</ol>
+</section>
+
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>Segmentation models used to learn a fixed list of classes from one labelled dataset. Interactive segmentation showed another way: let a person point, feed the last mask back, and train on simulated clicks. SAM made that the whole task, "a valid mask for any prompt", returned three masks for an ambiguous click, split the cost into a heavy encoder that runs once and a light decoder that runs per click, and grew its own training set with a data engine that ended fully automatic. SAM 2 added a memory so one click follows an object through a video. SAM 3 changed the prompt from "this object" to "this kind of object" and separated "is it here?" from "where is each one?". SAM 3D turned a mask into a 3D object with the same data-engine recipe. Around this line grew faster encoders, sharper masks, domain adaptations and pipelines. For inspection, our reading of the papers is that SAM is a useful labelling tool and a source of pseudo-labels, and a weak zero-shot defect detector.</p>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<ul>
+  <li><b>The task and ambiguity:</b> SAM v1, Sec. 2 and App. A, "Making the model ambiguity-aware". Then chapter 3 here.</li>
+  <li><b>The architecture and its shapes:</b> SAM v1, Sec. 3 and App. A (image encoder, prompt encoder, lightweight mask decoder, Fig. 14). Then the walkthrough in chapter 4.</li>
+  <li><b>The training loop:</b> SAM v1, App. A, "Training algorithm" (the eleven rounds). Compare SAM 2 v2, App. D.2.1 (pre-training changes) and D.2.2 (the simulated-click loop in full training).</li>
+  <li><b>The data engine:</b> SAM v1, Sec. 4 and App. B (automatic mask generation: grid, filters, NMS, crops); SAM 2 v2, Sec. 5; SAM 3 v2, Sec. 4 and App. D (AI verifiers).</li>
+  <li><b>Memory for video:</b> SAM 2 v2, Sec. 4 (memory attention, memory encoder, memory bank) and App. D.1; for the roots, STM (1904.00607) and XMem (2207.07115).</li>
+  <li><b>Concepts and the presence score:</b> SAM 3 v2, Sec. 3 and App. C.2 (the presence product, the ambiguity head with its winner-takes-all loss); the cgF1 metric in Sec. 5.</li>
+  <li><b>3D:</b> SAM 3D v2, Sec. 2 to 3 for the model and the data engine; Eq. 1 (flow matching) and Eqs. 2 to 3 (DPO for flow models) are in the appendix "Details on Model Training".</li>
+  <li><b>Speed:</b> MobileSAM Sec. 3 (decoupled distillation) and EfficientViT-SAM Table 1 (one setup for many variants).</li>
+  <li><b>Inspection:</b> Boxes2Pixels (2604.11162) for pseudo-label training; "Segment Anything Is Not Always Perfect" (2304.05750) Table 1 for the failure cases; DefectSAM (2311.10245) for fine-tuning on a new modality.</li>
+</ul>
+</section>

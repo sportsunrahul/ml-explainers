@@ -1,0 +1,281 @@
+[
+ {
+  "id": "chameleon-arch-scratch",
+  "claim": "Training regime",
+  "value": "trained from scratch in an end-to-end fashion",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 1 Introduction; Fig. 1 caption",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-licensed",
+  "claim": "Image tokenizer training data",
+  "value": "we use only licensed images",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.1 Image Tokenization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-makeascene",
+  "claim": "Image tokenizer basis",
+  "value": "based on Make-A-Scene",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.1 Image Tokenization (cites Gafni et al., Make-A-Scene)",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-crop",
+  "claim": "Image preprocessing",
+  "value": "resized and center cropped into 512x512 images for tokenization",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.2 First Stage, Text-Image",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-llama2",
+  "claim": "Architecture base",
+  "value": "largely follows LLaMa-2",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-blocks",
+  "claim": "Block components",
+  "value": "RMSNorm, SwiGLU, RoPE",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture (RMSNorm; SwiGLU activation; rotary positional embeddings)",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-ctx",
+  "claim": "Context length (both sizes)",
+  "value": "4k",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table 1 (llama_models)",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-gqa",
+  "claim": "Grouped-query attention",
+  "value": "34B only",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table 1 (llama_models): GQA check for 34B, cross for 7B",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-qknorm",
+  "claim": "QK-Norm definition",
+  "value": "applying layer norm to the query and key vectors within the attention",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-qk-essential",
+  "claim": "QK-Norm needed at both sizes",
+  "value": "QK-norm is essential in both cases",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-dropout",
+  "claim": "Dropout placement (7B)",
+  "value": "dropout after the attention and feed-forward layers",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-dropout-7b",
+  "claim": "Dropout rate 7B",
+  "value": "a dropout of 0.1",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization; Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-reorder",
+  "claim": "34B needs norm reordering",
+  "value": "required an additional re-ordering of the norms",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-final-softmax",
+  "claim": "Why z-loss",
+  "value": "does not solve the problem of logit shift in the final softmax",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-zcoef",
+  "claim": "z-loss coefficient",
+  "value": "10^-5",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization; Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-optim",
+  "claim": "Optimizer",
+  "value": "AdamW",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-betas",
+  "claim": "Adam betas",
+  "value": "0.9 and 0.95",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-eps",
+  "claim": "Adam epsilon",
+  "value": "10^-5",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-warmup",
+  "claim": "Linear warm-up steps",
+  "value": "4000",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-decay",
+  "claim": "LR schedule",
+  "value": "exponential decay schedule of the learning rate to 0",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-wd",
+  "claim": "Weight decay",
+  "value": "0.1",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-clip",
+  "claim": "Gradient clipping",
+  "value": "global gradient clipping at a threshold of 1.0",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-lr",
+  "claim": "Peak learning rate (both sizes)",
+  "value": "1.0 x 10^-4",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table 1 (llama_models)",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-batch-7b",
+  "claim": "Global batch 7B (tokens)",
+  "value": "2^23",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-batch-34b",
+  "claim": "Global batch 34B (tokens)",
+  "value": "3 x 2^22",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-600k",
+  "claim": "Fraction of training shown in the 600k-step curves",
+  "value": "600k steps of training (55% for 7B and 80% for 34B)",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-gpus",
+  "claim": "Concurrent GPUs (7B / 34B)",
+  "value": "1024 / 3072",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table 2 (resource_usage)",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-gpuh",
+  "claim": "GPU hours (7B / 34B)",
+  "value": "856,481 / 4,282,407",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table 2 (resource_usage), printed without separators",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-a100",
+  "claim": "Hardware",
+  "value": "NVIDIA A100 80 GB",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Pre-Training Hardware",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-sft-mask",
+  "claim": "SFT loss masking",
+  "value": "selectively masking the loss for the prompt tokens",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 3.2 Fine-Tuning Strategy",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-arch-flip",
+  "claim": "Text-image pair order",
+  "value": "50% of the time the image comes before the text",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.2 Pre-Training Data",
+  "uncertain": false
+ }
+]

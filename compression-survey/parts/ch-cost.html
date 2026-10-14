@@ -1,0 +1,76 @@
+<p class="kicker"><span class="act-n">Act I</span>What costs time</p>
+<section id="ch-cost" class="chapter">
+<h2>Where the time goes</h2>
+<p>A GPU spends its time on two jobs: doing arithmetic, and moving numbers between its memory and its compute units. A layer finishes when the slower of the two jobs finishes, so before compressing anything, ask which job a layer is waiting on.</p>
+
+<figure class="viz" id="viz-roofline" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Number format">
+    <span class="lbl">Format</span>
+    <button type="button" id="btn-roof-fp32" aria-pressed="false">FP32</button>
+    <button type="button" id="btn-roof-fp16" aria-pressed="true">FP16</button>
+    <button type="button" id="btn-roof-int8" aria-pressed="false">INT8</button>
+    <button type="button" id="btn-roof-w4" aria-pressed="false">4-bit weights</button>
+  </div>
+  <canvas id="roof-canvas" role="img" aria-label="A roofline chart with arithmetic intensity on the horizontal axis and operations per second on the vertical axis, both logarithmic. A slanted memory limit meets a flat math limit for the chosen number format. Six layers are dots; the chosen one is ringed."></canvas>
+  <div class="controls" role="group" aria-label="Layer">
+    <span class="lbl">Layer</span>
+    <button type="button" id="btn-roof-l-c3" aria-pressed="true">3x3 conv, 40x40</button>
+    <button type="button" id="btn-roof-l-hi" aria-pressed="false">early 3x3 conv, 160x160</button>
+    <button type="button" id="btn-roof-l-c1" aria-pressed="false">1x1 conv</button>
+    <button type="button" id="btn-roof-l-dw" aria-pressed="false">depthwise conv</button>
+    <button type="button" id="btn-roof-l-hd" aria-pressed="false">head conv on 5x5</button>
+    <button type="button" id="btn-roof-l-fc" aria-pressed="false">LLM layer, 1 token</button>
+    <button type="button" id="btn-roof-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="roof-readout" aria-live="polite"></p>
+  <figcaption>Each dot is one layer. Its operations and bytes are computed exactly from the layer's shape, assuming every weight and activation crosses memory once. The GPU is a toy: one memory bandwidth (500 GB/s) and math limits in the ratio 1 : 8 : 16 for FP32 without tensor cores, FP16 and INT8. Real kernels land below the roof; chapter 13 shows how a compiler picks the kernel that gets closest.</figcaption>
+</figure>
+
+<p>Read the chart from left to right. The horizontal position of a layer is its <em>arithmetic intensity</em>: how many operations it does for every byte it moves. A layer on the left does little work per byte, so it waits on memory and sits under the slanted line. A layer on the right does a lot of work per byte, so it waits on arithmetic and sits under the flat line. The corner where the two lines meet is the GPU's balance point.</p>
+
+<div class="eq" id="eq-roof" data-build data-viz="viz-roofline"><div class="tex tex-display">
+\htmlData{step=1, link=point}{t_{\text{layer}}} = \max\Big(\htmlData{step=2, link=roof}{\frac{\text{operations}}{P_{\text{math}}}},\; \htmlData{step=3, link=mem}{\frac{\text{bytes moved}}{B_{\text{memory}}}}\Big)
+</div></div>
+<p class="eqno">The roofline model, our notation. The chart plots operations divided by this time.</p>
+<ul class="gloss">
+  <li><span class="tex">t_{\text{layer}}</span>: how long one layer takes.</li>
+  <li><span class="tex">P_{\text{math}}</span>: the GPU's peak rate of arithmetic for the chosen number format. Tensor cores raise it a lot for FP16 and again for INT8.</li>
+  <li><span class="tex">B_{\text{memory}}</span>: the memory bandwidth in bytes per second. The number format does not change it, but a shorter format means fewer bytes to move.</li>
+</ul>
+
+<p>Now press the format buttons with the big 3x3 conv selected. From FP32 to FP16 it gets much faster, because it was waiting on arithmetic and tensor cores raise the math limit. Then select the depthwise conv and do the same: it gets only twice as fast, because it was waiting on memory and FP16 only halves the bytes.</p>
+<p><b>Make a guess before you press "4-bit weights".</b> This format stores weights in 4 bits but still does FP16 arithmetic. Which layers will it speed up? The answer is the ones whose bytes are mostly weights: the head conv on a small 5x5 map, and a language-model layer that processes one token at a time. The big 3x3 conv does not get faster at all. Its bytes are mostly activations, and its time is spent on arithmetic. That single fact explains why the large-language-model methods in Act V store weights in 4 bits, while vision models are usually quantized to 8 bits throughout.</p>
+
+<h3>Four levers</h3>
+<p>Everything on this page pulls one of four levers, and each lever acts on a different term of the equation:</p>
+<ul>
+  <li><b class="c-yellow">A smaller model</b> (<a href="#ch-distill">distillation</a>): fewer operations and fewer bytes, because the network itself is smaller. A small student network learns from a large teacher.</li>
+  <li><b class="c-yellow">Fewer bits per number</b> (<a href="#ch-grid">quantization</a>, Act III and <a href="#ch-fp8">FP8</a>): fewer bytes, and on tensor cores a higher math limit.</li>
+  <li><b class="c-brown">Fewer numbers</b> (<a href="#ch-prune">pruning</a>, Act IV): fewer operations and bytes, but only when the zeros come in a shape the hardware can skip.</li>
+  <li><b class="c-green">Better kernels</b> (<a href="#ch-tensorrt">the compiler</a>, chapter 13): fusing layers removes trips to memory, and choosing the fastest kernel for each layer moves every dot closer to its roof.</li>
+</ul>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>In the toy, the 3x3 convolutions on large feature maps are bound by arithmetic, so FP16 and then INT8 tensor cores speed them up most. The 1x1 and depthwise convolutions are bound by memory, and their bytes are mostly activations, so they speed up only when their activations get shorter too, not only their weights. (The head conv on a 5x5 map is the exception: its bytes are mostly weights.) This is why detectors are normally quantized with 8-bit weights <em>and</em> 8-bit activations. Chapters 4 to 7 build that from first principles.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-roofline'), out = document.getElementById('roof-readout');
+  const kit = KIT.roofline(document.getElementById('roof-canvas'), { fig });
+  const precBtns = ['fp32', 'fp16', 'int8', 'w4'].map(k => document.getElementById('btn-roof-' + k));
+  const layBtns = KIT.ROOF_LAYERS.map(L => document.getElementById('btn-roof-l-' + L.key));
+  const sync = () => {
+    precBtns.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-roof-' + kit.state.prec)));
+    layBtns.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-roof-l-' + kit.state.sel)));
+    out.innerHTML = KIT.roofText(kit.info());
+  };
+  precBtns.forEach(b => b.addEventListener('click', () => { kit.set({ prec: b.id.slice(9) }); sync(); }));
+  layBtns.forEach(b => b.addEventListener('click', () => { kit.set({ sel: b.id.slice(11) }); sync(); }));
+  document.getElementById('btn-roof-reset').addEventListener('click', () => { kit.set({ prec: 'fp16', sel: 'c3' }); sync(); });
+  sync();
+})();
+</script>
+</section>

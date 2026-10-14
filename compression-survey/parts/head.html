@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compressing vision models</title>
+<meta name="description" content="An intuition-first survey of model compression for GPU inference: knowledge distillation, integer quantization from first principles, PTQ and QAT, pruning, LLM-era quantization, FP8, what TensorRT does, and a decision guide for detection and segmentation.">
+<style>
+:root { color-scheme: dark light;
+  --bg:#121519; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#262b33; --panel:#191d23; --panel2:#21262e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#f6f7f9; --fg:#1b1f24; --muted:#5d636b; --rule:#dde1e6; --panel:#eef0f3; --panel2:#e3e6ea;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--fg);
+  font:1.125rem/1.7 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+/* Display face: KaTeX_Main is embedded with the math CSS, so headings share the equations' face at no cost. */
+h1, h2, .kicker { font-family:KaTeX_Main, Charter, Georgia, serif; font-weight:700; letter-spacing:-.005em; }
+header.hero { padding:2.2rem 0 1rem; max-width:none; }
+.hero-stage { position:relative; margin:0 0 1.4rem; }
+.hero-stage canvas { display:block; width:100%; }
+.hero-stage button { position:absolute; right:0; bottom:-.2rem; font:.82rem system-ui, sans-serif; color:var(--muted); background:none; border:1px solid var(--rule); border-radius:999px; padding:.2rem .7rem; cursor:pointer; }
+.hero-stage button:hover { color:var(--fg); border-color:var(--muted); }
+.hero-stage button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+header.hero h1 { font-size:clamp(2.5rem, 5.6vw, 4.2rem); line-height:1.04; margin:0 0 .9rem; text-wrap:balance; }
+header.hero p.hook { font-size:1.3rem; line-height:1.5; color:var(--fg); opacity:.86; margin:0 0 1.4rem; max-width:36rem; }
+.papers { display:flex; flex-wrap:wrap; gap:.35rem .4rem; margin:0; padding:0; list-style:none; font:.82rem system-ui, sans-serif; max-width:var(--stage, 60rem); }
+.papers li a { display:inline-block; color:var(--muted); text-decoration:none; border:1px solid var(--rule); border-radius:999px; padding:.18rem .6rem; }
+.papers li a:hover { color:var(--fg); border-color:var(--muted); }
+.papers li a:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.papers-note { font:.82rem system-ui, sans-serif; color:var(--muted); margin:0 0 .5rem; }
+h2 { font-size:2.1rem; line-height:1.15; margin:3.6rem 0 1rem; text-wrap:balance; }
+h3 { font:600 1.3rem/1.3 Charter, "Bitstream Charter", Georgia, serif; margin:2.2rem 0 .5rem; }
+a { color:var(--blue); text-underline-offset:.15em; text-decoration-thickness:1px; }
+p { margin:0 0 1.05rem; }
+.kicker { font-size:2rem; line-height:1.15; color:var(--fg); margin:5.5rem 0 -1.6rem; padding-top:1.4rem; border-top:1px solid var(--rule); }
+.kicker .act-n { display:block; font:400 1rem/1.4 system-ui, sans-serif; color:var(--muted); margin-bottom:.3rem; }
+nav.toc { font-family:system-ui, sans-serif; font-size:.95rem; margin:2.2rem 0 2.4rem; columns:2 18rem; column-gap:2.5rem; }
+nav.toc > strong { display:none; }
+nav.toc ol { margin:0; padding:0; list-style:none; counter-reset:toc; }
+nav.toc li { margin:.15rem 0; break-inside:avoid; counter-increment:toc; padding-left:1.8rem; position:relative; }
+nav.toc li:not(.act)::before { content:counter(toc); position:absolute; left:0; color:var(--muted); font-variant-numeric:tabular-nums; }
+nav.toc li a { color:var(--fg); text-decoration:none; }
+nav.toc li a:hover { color:var(--blue); }
+nav.toc .act { counter-increment:none; padding-left:0; margin:1rem 0 .25rem; font:700 1.05rem/1.3 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); break-after:avoid; }
+nav.toc .act:first-child { margin-top:0; }
+nav.toc .toc-more { break-inside:avoid; margin-top:1rem; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:.3rem 1.2rem; }
+nav.toc .toc-more li { counter-increment:none; padding-left:0; }
+nav.toc .toc-more li::before { content:none; }
+.key { display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; font:.9rem system-ui, sans-serif; margin:.4rem 0 1rem; }
+.key span::before { content:""; display:inline-block; width:.8em; height:.8em; border-radius:50%; margin-right:.4em; vertical-align:-.05em; background:currentColor; }
+.c-blue{color:var(--blue)} .c-yellow{color:var(--yellow)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-brown{color:var(--brown)}
+.t-blue{color:var(--blue)} .t-yellow{color:var(--yellow)} .t-green{color:var(--green)} .t-red{color:var(--red)} .t-brown{color:var(--brown)}
+b.c-blue, b.c-yellow, b.c-green, b.c-red, b.c-brown { font-weight:700; }
+figure.viz { margin:1.8rem 0; padding:1rem; background:var(--panel); border-radius:14px; position:relative; }
+figure.viz canvas, figure.viz svg.chart { display:block; width:100%; border-radius:9px; background:var(--bg); touch-action:none; }
+figure.viz canvas.pe3 { touch-action:pan-y; }
+figure.viz canvas:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.8rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls > span.lbl { color:var(--muted); margin-right:.1rem; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.34rem .85rem; cursor:pointer; transition:border-color .15s, background-color .15s, transform .08s; }
+.controls button:hover { border-color:var(--muted); }
+.controls button:active { transform:scale(.97); }
+.controls button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+.controls button.reset { color:var(--muted); background:none; }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; color:var(--muted); }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+.controls output { color:var(--fg); font-variant-numeric:tabular-nums; min-width:2.6em; }
+@media (prefers-reduced-motion: reduce) { .controls button { transition:none; } .controls button:active { transform:none; } }
+.readout { font:.92rem/1.5 system-ui, sans-serif; color:var(--fg); margin:.6rem 0 0; min-height:2.9em; font-variant-numeric:tabular-nums; }
+.bits { font:.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:var(--yellow); letter-spacing:.02em; }
+figcaption { font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.6rem; max-width:var(--measure, 40rem); }
+.badge { position:absolute; top:.65rem; right:.75rem; font:600 .74rem/1 system-ui, sans-serif; padding:.3rem .6rem; border-radius:999px; border:1px solid currentColor; background:var(--panel); z-index:2; }
+.badge.toy { color:var(--brown); } .badge.computed { color:var(--blue); } .badge.sourced { color:var(--green); }
+figure.viz > .controls:first-of-type, figure.viz > .fig-top { padding-right:7.5rem; }
+.eq { position:relative; overflow-x:auto; overflow-y:hidden; margin:.8rem 0 1.1rem; padding:.3rem 0; }
+.eqno { font:.82rem system-ui, sans-serif; color:var(--muted); margin:-.8rem 0 .9rem; }
+.gloss { font-size:1rem; margin:-.3rem 0 1.3rem; padding-left:1rem; border-left:2px solid var(--rule); }
+.gloss li { margin:.25rem 0; }
+.note { font:.9rem/1.55 system-ui, sans-serif; color:var(--muted); margin:1rem 0; }
+.aside { font-size:1rem; background:var(--panel); border-left:3px solid var(--blue); border-radius:0 10px 10px 0; padding:.8rem 1rem; margin:1.4rem 0; }
+.aside h4 { font:600 .98rem system-ui, sans-serif; margin:0 0 .35rem; }
+.aside p:last-child { margin-bottom:0; }
+/* "On a detector": the per-chapter bridge to the decision guide. */
+.aside.detector { border-left-color:var(--green); }
+.aside.claim { border-left-color:var(--yellow); }
+.aside.claim dl { margin:0; display:grid; grid-template-columns:max-content 1fr; gap:.25rem .9rem; font-size:.97rem; }
+.aside.claim dt { font:600 .9rem/1.6 system-ui, sans-serif; color:var(--muted); }
+.aside.claim dd { margin:0; }
+@media (max-width:520px) { .aside.claim dl { grid-template-columns:1fr; } .aside.claim dt { margin-top:.4rem; } }
+.tree { position:relative; margin:.4rem 0 0; }
+.tree-pill { position:absolute; font:.8rem/1.3 system-ui, sans-serif; padding:.18rem .6rem; border:1px solid var(--rule); border-radius:999px; background:var(--bg); color:var(--fg); cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:border-color .15s; }
+.tree-pill:hover { border-color:var(--muted); }
+.tree-pill[aria-pressed="true"] { border-color:var(--fg); font-weight:600; }
+.tree-pill:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.guide-recipe { min-height:12em; }
+.g-sum { margin:0 0 .5rem; color:var(--muted); }
+.g-steps { margin:0; padding-left:1.4rem; }
+.g-steps li { margin:.5rem 0; line-height:1.55; }
+.g-bullet { display:block; margin:.25rem 0 0 .2rem; }
+.g-ev { color:var(--muted); }
+.g-stop { display:block; color:var(--green); font-weight:600; margin-top:.2rem; }
+#viz-guide-tables h3 { transition:color .3s; }
+#viz-guide-tables h3.g-hl { color:var(--green); }
+#viz-guide-tables h3.g-hl::after { content:"  (supports the current recipe)"; font:400 .85rem system-ui, sans-serif; color:var(--muted); }
+table.data { border-collapse:collapse; font:.88rem system-ui, sans-serif; width:100%; margin:.6rem 0 1rem; font-variant-numeric:tabular-nums; }
+table.data th, table.data td { border-bottom:1px solid var(--rule); padding:.3rem .4rem; text-align:right; }
+table.data th:first-child, table.data td:first-child { text-align:left; }
+table.data th { color:var(--muted); font-weight:600; }
+table.data caption { caption-side:bottom; text-align:left; font-size:.82rem; color:var(--muted); padding-top:.4rem; }
+.katex { font-size:1.05em; }
+/* KaTeX hides its MathML with clip; anchor it so its unclipped box cannot widen the page on phones. */
+.katex-mathml { left:0; top:0; width:1px; height:1px; overflow:hidden; }
+.tex-display .katex-display { margin:.4rem 0; text-align:left; }
+.tex-display .katex-display > .katex { text-align:left; }
+@media (max-width: 520px) {
+  table.data { display:block; overflow-x:auto; }
+  h2 { font-size:1.75rem; }
+  .kicker { font-size:1.6rem; margin-top:4rem; }
+  figure.viz > .controls:first-of-type, figure.viz > .fig-top { padding-right:0; margin-top:1.9rem; }
+}
+</style>
+<script>
+/* Shared helpers for all interactives. A superset of the atlas shell's PE, so the figure kits in parts/kit run in both pages. */
+const PE = (() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.cueReplay === '1';
+  const redrawers = new Set();
+  const onTheme = fn => { redrawers.add(fn); return () => redrawers.delete(fn); };
+  const themeChanged = () => redrawers.forEach(f => f());
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged);
+  function canvas(el, aspect, draw) {
+    const ctx = el.getContext('2d'), state = { w: 0, h: 0 };
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * (typeof aspect === 'function' ? aspect(w) : aspect)), r = devicePixelRatio || 1;
+      if (!w || !h) return;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); state.w = w; state.h = h; draw(ctx, w, h);
+    }
+    const ro = new ResizeObserver(resize); ro.observe(el);
+    const off = onTheme(() => draw(ctx, state.w, state.h));
+    return { redraw: () => draw(ctx, state.w, state.h), resize, state, ctx, destroy: () => { ro.disconnect(); off(); } };
+  }
+  function animate(ms, step, done) {
+    if (instant()) { step(1); done && done(); return () => {}; }
+    let t0 = null, id = 0, stop = false;
+    const f = t => { if (stop) return; if (t0 === null) t0 = t; const u = Math.min(1, (t - t0) / ms);
+      step(u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2); if (u < 1) id = requestAnimationFrame(f); else done && done(); };
+    id = requestAnimationFrame(f);
+    return () => { stop = true; cancelAnimationFrame(id); };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function gauss(r) { return () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r()); }
+  function label(ctx, text, x, y, color, size = 12, align = 'left', weight = 600) {
+    ctx.save(); ctx.font = `${weight} ${size}px system-ui, sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  function dot(ctx, x, y, r, color, alpha = 1) { ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+  function ring(ctx, x, y, r, color, lw = 2, alpha = 1) { ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke(); ctx.restore(); }
+  function arrow(ctx, x1, y1, x2, y2, color, lw = 2, head = 8, alpha = 1) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = Math.hypot(x2 - x1, y2 - y1), hd = Math.min(head, L * .45);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - hd * .6 * Math.cos(a), y2 - hd * .6 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - hd * Math.cos(a - .42), y2 - hd * Math.sin(a - .42));
+    ctx.lineTo(x2 - hd * Math.cos(a + .42), y2 - hd * Math.sin(a + .42)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function box(ctx, x, y, w, h, color, text, alpha = 1) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.fillStyle = css('--panel');
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.fill(); ctx.stroke(); ctx.restore();
+    if (text) { const lines = text.split('\n'); lines.forEach((t, i) => label(ctx, t, x + w / 2, y + h / 2 + 4 + (i - (lines.length - 1) / 2) * 14, color, 12, 'center')); }
+  }
+  function polyline(ctx, pts, color, lw = 2, dash = null, alpha = 1) {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.globalAlpha = alpha; if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); ctx.restore(); }
+  function axes(ctx, b, xr, yr, o = {}) {
+    const lx = o.logx ? Math.log10 : v => v, ly = o.logy ? Math.log10 : v => v;
+    const X = v => b.x + (lx(v) - lx(xr[0])) / (lx(xr[1]) - lx(xr[0])) * b.w, Y = v => b.y + b.h - (ly(v) - ly(yr[0])) / (ly(yr[1]) - ly(yr[0])) * b.h;
+    const M = css('--muted'), R = css('--rule');
+    ctx.save(); ctx.strokeStyle = R; ctx.lineWidth = 1; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = M;
+    (o.xt || []).forEach(v => { ctx.beginPath(); ctx.moveTo(X(v), b.y); ctx.lineTo(X(v), b.y + b.h); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(o.xf ? o.xf(v) : v, X(v), b.y + b.h + 14); });
+    (o.yt || []).forEach(v => { ctx.beginPath(); ctx.moveTo(b.x, Y(v)); ctx.lineTo(b.x + b.w, Y(v)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(o.yf ? o.yf(v) : v, b.x - 5, Y(v) + 4); });
+    ctx.textAlign = 'center'; if (o.xl) ctx.fillText(o.xl, b.x + b.w / 2, b.y + b.h + 29);
+    if (o.yl) { ctx.translate(b.x - (o.ylo || 34), b.y + b.h / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(o.yl, 0, 0); }
+    ctx.restore(); return { X, Y };
+  }
+  function mix(c1, c2, u) {
+    const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+    const a = p(c1), b = p(c2); return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], u))).join(',')})`;
+  }
+  function view(W, H, span) { const s = H / span; return { s, X: x => W / 2 + x * s, Y: y => H / 2 - y * s, ix: px => (px - W / 2) / s, iy: py => (H / 2 - py) / s }; }
+  // Pulse a named layer when an equation term with that link word is shown or hovered.
+  function linkPulses(fig, redraw) {
+    const glow = {};
+    fig.addEventListener('pe-link', e => { const k = e.detail;
+      animate(1100, u => { glow[k] = Math.sin(Math.PI * u); redraw(); }, () => { glow[k] = 0; redraw(); }); });
+    return k => glow[k] || 0;
+  }
+  const softmax = v => { const m = Math.max(...v), e = v.map(x => Math.exp(x - m)), Z = e.reduce((s, x) => s + x, 0); return e.map(x => x / Z); };
+  return { css, instant, onTheme, themeChanged, canvas, animate, rng, gauss, label, clamp, lerp, dot, ring, arrow, box, polyline, axes, mix, view, linkPulses, softmax };
+})();
+</script>
+</head>

@@ -1,0 +1,21 @@
+sim-fp8: viz-fp8 (parts/kit/80-fp8.js), run in node through the kit's own code (KIT.fp8Stats), 2026-10-10.
+Settings: 16384 values per tensor, PE.rng(7) + PE.gauss, Student-t with nu = 3 (chi-square from 3 squared normals),
+each tensor divided by its RMS. Per-tensor max scaling (our reading of Micikevicius Sec. 2): INT8 scale = max|x|/127,
+clip [-128, 127], round half to even; FP8 scale = max|x|/448 (E4M3) or max|x|/57344 (E5M2), round to nearest
+representable value, ties to even code, saturate at the max. "Bits" = -log2(RMSE) on the unit-RMS tensor (our
+analogue of van Baalen's inverted normalized RMSE; their FP8-E4 is a 255-value variant, so this is not their number).
+Sensitivity (separate run of the same code): Student-t at n = 4096 is a near tie (INT8 7.08e-4 vs E4M3 7.19e-4);
+nu = 4 or 5 lets INT8 win; at nu = 3, n = 16384, E4M3 wins for 40 of 40 seeds (1..40).
+
+E4M3 code classes: {"zero":2,"sub":14,"normal":238,"nan":2} max 448 positive nonzero 126
+E5M2 code classes: {"zero":2,"sub":6,"normal":240,"inf":2,"nan":6} max 57344 positive nonzero 123
+RNE checks: e4m3(17)=16 (tie 16/18 -> 16, code even), e4m3(19)=20, e4m3(1000)=448, int8(2.5)=2, int8(3.5)=4
+uniform: n=16384 max|x|=1.745 MSE int8=1.540e-5 e4m3=6.513e-4 e5m2=2.612e-3 bits int8=7.99 e4m3=5.29 e5m2=4.29 best=int8
+  E5M2 marks left of the axis: 48
+  readout: <b>uniform</b>: 16384 values scaled to RMS 1, largest |x| = 1.74. Each format is scaled so its largest value lands on that maximum. Mean squared error: INT8 1.54e-5, E4M3 6.51e-4, E5M2 2.61e-3. Lowest: <b class="c-green">INT8</b>, about 8.0 bits of accuracy (our computation).
+normal: n=16384 max|x|=3.949 MSE int8=8.125e-5 e4m3=6.999e-4 e5m2=2.759e-3 bits int8=6.79 e4m3=5.24 e5m2=4.25 best=int8
+  E5M2 marks left of the axis: 43
+  readout: <b>normal (Gaussian)</b>: 16384 values scaled to RMS 1, largest |x| = 3.95. Each format is scaled so its largest value lands on that maximum. Mean squared error: INT8 8.12e-5, E4M3 7.00e-4, E5M2 2.76e-3. Lowest: <b class="c-green">INT8</b>, about 6.8 bits of accuracy (our computation).
+student: n=16384 max|x|=19.522 MSE int8=1.964e-3 e4m3=6.561e-4 e5m2=2.633e-3 bits int8=4.50 e4m3=5.29 e5m2=4.28 best=e4m3
+  E5M2 marks left of the axis: 33
+  readout: <b>Student-t with 3 degrees of freedom (heavy tails)</b>: 16384 values scaled to RMS 1, largest |x| = 19.52. Each format is scaled so its largest value lands on that maximum. Mean squared error: INT8 1.96e-3, E4M3 6.56e-4, E5M2 2.63e-3. Lowest: <b class="c-green">E4M3</b>, about 5.3 bits of accuracy (our computation).

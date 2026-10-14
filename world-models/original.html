@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World models and video generation, explained in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Petrona:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F2F1F5;--panel:#FBFAFD;--ink:#1D1A26;--muted:#625D70;--line:#D4D0DE;
+ --time:#5F3DC4;--act:#E8590C;--real:#2B8A3E;--imag:#D6336C;--acc:#5F3DC4;--pro:#2B8A3E;--con:#D6336C;
+ --sans:"Archivo","Helvetica Neue",Arial,sans-serif;--serif:"Petrona",Georgia,serif;--hw:900}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#121019;--panel:#1A1722;--ink:#EAE7F2;--muted:#A49EB5;--line:#2F2B3B;--time:#9C82FF;--act:#FF8A4C;--real:#5CCB6E;--imag:#FF6B9E;--acc:#9C82FF;--pro:#5CCB6E;--con:#FF6B9E}}
+:root[data-theme="dark"]{--paper:#121019;--panel:#1A1722;--ink:#EAE7F2;--muted:#A49EB5;--line:#2F2B3B;--time:#9C82FF;--act:#FF8A4C;--real:#5CCB6E;--imag:#FF6B9E;--acc:#9C82FF;--pro:#5CCB6E;--con:#FF6B9E}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18.5px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:var(--muted);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.prose{max-width:700px}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:var(--hw,700)}
+h1{font-size:clamp(46px,8.6vw,108px);line-height:.9;letter-spacing:-.04em;margin:0 0 22px}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.03;letter-spacing:-.025em;margin:0 0 14px}
+h3{font-size:24px;line-height:1.2;margin:40px 0 10px}
+h4{font-size:18px;margin:22px 0 6px}
+p{margin:0 0 16px}
+.lede{font-size:21px;line-height:1.55;color:var(--muted);max-width:640px}
+.part{font-family:var(--sans);font-size:15px;color:var(--muted);display:block;margin-bottom:6px}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav.top .brand{font-family:var(--sans);font-weight:800;margin-right:14px;white-space:nowrap}
+nav.top a{font-family:var(--sans);font-size:15px;text-decoration:none;padding:6px 11px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+nav.top a:hover{color:var(--ink);background:var(--panel)}
+header.hero{padding:54px 0 20px}
+section{padding:52px 0 20px;border-top:1px solid var(--line)}
+figure.fig{margin:26px 0 34px;background:var(--panel);border:1px solid var(--line);border-radius:var(--rad,12px);overflow:hidden}
+.canvas{position:relative;height:clamp(300px,50vw,470px);touch-action:pan-y;cursor:grab;user-select:none}
+.canvas:active{cursor:grabbing}
+.canvas canvas{display:block;width:100%;height:100%}
+.canvas .hint{position:absolute;right:12px;top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);pointer-events:none;background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 8px;border-radius:6px}
+.canvas .nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans);color:var(--muted)}
+.pad{padding:18px}
+figcaption{padding:14px 18px 16px;border-top:1px solid var(--line);font-family:var(--sans);font-size:15px;line-height:1.5}
+figcaption p{margin:8px 0 0;color:var(--muted);max-width:780px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{border:1px solid var(--line);border-radius:8px}
+.btn:hover,.seg button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--ink) 7%,transparent)}
+label.ctl{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+input[type=range]{accent-color:var(--acc);width:160px}
+input[type=checkbox]{accent-color:var(--acc);width:17px;height:17px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--acc) 11%,transparent);font-size:14.5px}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);margin-right:14px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.eq{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 16px;margin:14px 0 18px;overflow-x:auto;font-size:16.5px;line-height:1.7;white-space:nowrap}
+.eq small{display:block;white-space:normal;color:var(--muted);font-size:14px;margin-top:4px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.84em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14.5px;line-height:1.5}
+pre code{background:none;padding:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:720px){.pc{grid-template-columns:1fr}}
+.pc>div{border:1px solid var(--line);border-radius:12px;padding:14px 18px 6px;background:var(--panel)}
+.pc h4{margin-top:0}.pc .pro h4{color:var(--pro)}.pc .con h4{color:var(--con)}
+.pc ul{margin:0;padding-left:20px;font-size:16.5px;line-height:1.55}.pc li{margin-bottom:10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:18px 0 28px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:9px 14px;border-bottom:1px solid var(--line)}
+thead th{font-size:15px;border-bottom:2px solid var(--line)}
+tbody th{font-weight:700}
+td.y{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td,tr:last-child th{border-bottom:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.chips span{padding:3px 6px;border-radius:5px;white-space:pre}
+textarea{width:100%;font:inherit;font-family:var(--sans);font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--paper);color:var(--ink);resize:vertical}
+footer{border-top:1px solid var(--line);padding:32px 0 56px;font-family:var(--sans);font-size:14.5px;color:var(--muted)}
+footer ul{padding-left:18px}
+
+h3,h4{font-weight:700}
+.calc{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:10px}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Sections"><div class="wrap"><span class="brand">World models in 3D</span>
+ <a href="#idea">The idea</a><a href="#rl">World models in RL</a><a href="#video">Video generation</a><a href="#consist">Consistency</a><a href="#interactive">Interactive worlds</a>
+ <a href="#robots">Robotics</a><a href="#jepa">Pixels or latents</a><a href="#models">Key models</a><a href="#open">Open problems</a></div></nav>
+
+<header class="hero"><div class="wrap">
+ <h1>Simulating the world, one frame at a time</h1>
+ <p class="lede">A world model predicts what happens next, given what it has seen and what an agent does. Video generators predict what the world looks like over time. The two ideas are merging into models that can be played like games, used to train robots, and queried like simulators.</p>
+</div></header>
+
+<main>
+<section id="idea"><div class="wrap prose">
+ <span class="part">1</span><h2>Two traditions, converging</h2>
+ <p>In reinforcement learning, a <strong>world model</strong> is a learned model of the environment's dynamics: given the current state and an action, predict the next state and reward. An agent that has one can plan or practise “in its imagination” instead of acting in the costly real world.</p>
+ <p>In generative modelling, <strong>video models</strong> learn to produce realistic clips from text or images. To do that well they must implicitly learn a lot about the world: objects persist, things fall, light reflects. Condition such a model on actions and it becomes a world model. This is the bet behind interactive systems such as Genie and GameNGen, and behind “world foundation models” for robotics.</p>
+</div></section>
+
+<section id="rl"><div class="wrap">
+ <div class="prose"><span class="part">2</span><h2>World models in reinforcement learning</h2>
+ <p>Ha and Schmidhuber's <strong>World Models</strong> (2018) compressed game frames with a VAE, predicted the next latent with a recurrent network, and trained a tiny controller entirely inside the model's “dream”, then transferred it to the real game. <strong>PlaNet</strong> (2019) and the <strong>Dreamer</strong> series learned latent dynamics from pixels and optimised behaviour by imagining rollouts; DreamerV3 (2023) used one set of hyperparameters across many domains and was the first to collect diamonds in Minecraft from scratch. <strong>MuZero</strong> (2019) learned a model that predicts only what matters for planning (value, policy and reward) rather than observations, and matched AlphaZero at Go, chess and shogi without knowing the rules.</p>
+ <p>The central difficulty is <strong>compounding error</strong>. A model that is slightly wrong per step becomes very wrong after many steps, and a planner will happily exploit those errors, choosing actions that only look good inside the model.</p></div>
+ <figure class="fig" id="f-plan"><div class="canvas" role="img" aria-label="An agent plans a throw toward a target using imagined trajectories from a learned model, then the real trajectory is compared"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><label class="ctl">Model error <input type="range" id="pl-e" min="0" max="40" value="5"><span class="readout" id="pl-ev"></span></label>
+   <button class="btn" type="button" id="pl-t">Move target</button><label class="ctl"><input type="checkbox" id="pl-all" checked> Show all imagined options</label></div>
+   <div class="status" id="pl-read" aria-live="polite"></div>
+   <p>The agent can throw at 15 combinations of direction and speed. It imagines each throw with its learned model (<span style="color:var(--imag);font-weight:600">pink</span>, slightly wrong gravity and drag), picks the one that lands nearest the target, then throws for real (<span style="color:var(--real);font-weight:600">green</span>). Small per-step errors compound over the flight, so long throws miss by more.</p></figcaption></figure>
+</div></section>
+
+<section id="video"><div class="wrap">
+ <div class="prose"><span class="part">3</span><h2>How video generators work</h2>
+ <p>Modern video generators are diffusion or flow models (see the diffusion guide) extended in time. <strong>Video Diffusion Models</strong> (Ho et al., 2022) extended the image U-Net with <strong>factorised</strong> attention: spatial attention within each frame, then temporal attention across frames at each location. Imagen Video (2022) chained a base model with spatial and temporal super-resolution stages; Make-A-Video (2022) started from a text-to-image model and learned motion from unlabelled video. <strong>Latent video diffusion</strong> (Align your Latents, 2023; Stable Video Diffusion, 2023) moved the process into an autoencoder's latent space.</p>
+ <p>Current systems follow the recipe popularised by <strong>Sora</strong> (OpenAI, 2024). A <strong>3D causal VAE</strong> compresses video in space and time (commonly 8× per side and 4× in time). The latent is cut into <strong>spacetime patches</strong>, each a small block of height × width × time, which become tokens for a <strong>diffusion transformer</strong> trained with diffusion or flow matching, conditioned on text through a large text encoder. Movie Gen (Meta, 2024), HunyuanVideo (2024), CogVideoX (2024), Wan (2025) and Google's Veo models are variants of this design; Veo 3 (2025) also generates synchronised audio.</p></div>
+ <figure class="fig" id="f-st"><div class="canvas" role="img" aria-label="A stack of video frames divided into spacetime patches, with the tokens a query attends to highlighted under different attention patterns"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><span class="ctl">Patch</span><div class="seg" role="group" aria-label="Patch shape" id="st-p"><button type="button" data-p="1,4" aria-pressed="true">1 frame × small</button><button type="button" data-p="2,4">2 frames × small</button><button type="button" data-p="4,2">4 frames × large</button></div>
+   <div class="seg" role="group" aria-label="Attention pattern" id="st-a"><button type="button" data-a="full" aria-pressed="true">Full 3D attention</button><button type="button" data-a="space">Spatial only</button><button type="button" data-a="time">Temporal only</button></div></div>
+   <div class="calc"><label class="ctl">Clip length <input type="range" id="st-d" min="2" max="60" value="5"><span class="readout" id="st-dv"></span></label>
+   <div class="seg" role="group" aria-label="Resolution" id="st-r"><button type="button" data-r="480">480p</button><button type="button" data-r="720" aria-pressed="true">720p</button><button type="button" data-r="1080">1080p</button></div></div>
+   <div class="status" id="st-read" aria-live="polite"></div>
+   <p>Frames run left to right. Each box is one token. The purple box is a query; filled boxes are the tokens it attends to. Full attention sees everything, which gives the best consistency but costs grow with the square of the token count. The calculator assumes 24 fps, a VAE with 8× spatial and 4× temporal compression, and 2×2 latent patches.</p></figcaption></figure>
+</div></section>
+
+<section id="consist"><div class="wrap">
+ <div class="prose"><span class="part">4</span><h2>Temporal consistency</h2>
+ <p>The hardest part of video is keeping things the same over time: an object's shape, identity and position must evolve smoothly, and something that leaves the frame should come back unchanged. Generating frames independently fails immediately. Generating all frames jointly with attention across time works for short clips. Generating long videos piece by piece (autoregressively) lets errors accumulate and drift, so long-video systems add memory, re-anchoring to earlier frames, and noise-augmented training to make the model robust to its own mistakes.</p></div>
+ <figure class="fig" id="f-cons"><div class="canvas" role="img" aria-label="A ball's trajectory across sixteen frames generated independently, jointly, or autoregressively, compared with the true path"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><div class="seg" role="group" aria-label="Generation strategy" id="cs-k"><button type="button" data-k="ind">Each frame independently</button><button type="button" data-k="joint" aria-pressed="true">All frames jointly</button><button type="button" data-k="ar">Autoregressive chunks</button></div><button class="btn" type="button" id="cs-new">Generate again</button></div>
+   <div class="status" id="cs-read" aria-live="polite"></div>
+   <p>The grey line is the true path of a bouncing ball; coloured spheres are where each strategy places it. Independent frames jitter. Joint generation is smooth. Autoregressive chunks are smooth within a chunk but drift further from the truth over time. Illustrative simulation.</p></figcaption></figure>
+</div></section>
+
+<section id="interactive"><div class="wrap">
+ <div class="prose"><span class="part">5</span><h2>Interactive world models</h2>
+ <p>Add actions to a video model and you can play it. <strong>Genie</strong> (DeepMind, 2024), an 11B-parameter model trained on unlabelled videos of 2D platform games, learned a small set of <strong>latent actions</strong> on its own by asking which discrete code best explains the change between consecutive frames. Users could then “control” any image, even a sketch. <strong>GameNGen</strong> (2024) ran a diffusion model conditioned on past frames and key presses to simulate the game DOOM in real time at about 20 frames per second. <strong>DIAMOND</strong> (2024) trained RL agents inside a diffusion world model of Atari games. Genie 2 (2024) extended this to 3D worlds, and Genie 3 (2025) generates explorable environments in real time at 720p for several minutes, with memory of what was seen earlier.</p>
+ <p>The loop is the same in all of them: encode recent frames into tokens, feed them with the action to a dynamics model, generate the next frame's tokens, decode, repeat.</p></div>
+ <figure class="fig" id="f-loop"><div class="canvas" role="img" aria-label="An action-conditioned world model loop: past frames and an action go into a dynamics model that produces the next frame, which you can control with buttons"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><span class="ctl">Action</span><div class="seg" role="group" aria-label="Action"><button type="button" data-a="left">← Left</button><button type="button" data-a="none">Wait</button><button type="button" data-a="jump">Jump</button><button type="button" data-a="right">Right →</button></div></div>
+   <div class="status" id="lp-read" aria-live="polite"></div>
+   <p>Press an action: it is fed with the context of recent frames (left) into the dynamics model, which produces the next frame (right), which joins the context. A hand-written game stands in for the learned model here; a real world model learns these dynamics from video, including gravity, collisions and what lies off-screen.</p></figcaption></figure>
+</div></section>
+
+<section id="robots"><div class="wrap prose">
+ <span class="part">6</span><h2>World models for robotics</h2>
+ <p>Robot data is scarce and expensive; video of the world is abundant. World models offer three uses. <strong>As simulators:</strong> UniSim (2023) learned an action-conditioned video simulator from diverse datasets to train policies; NVIDIA's <strong>Cosmos</strong> (2025) released open world foundation models and video tokenizers meant to be fine-tuned into simulators for robots and vehicles. <strong>As planners:</strong> UniPi (2023) generated a video of the task being done and then inferred the actions to follow it; Meta's <strong>V-JEPA 2</strong> (2025) learned video representations by prediction, then an action-conditioned version planned robot-arm motions toward image goals. <strong>As data generators:</strong> synthetic rollouts augment real demonstrations.</p>
+ <p>A parallel line builds <strong>vision-language-action</strong> (VLA) models that map images and instructions straight to actions: RT-2 (2023) fine-tuned a VLM to output actions as tokens, OpenVLA (2024) is an open 7B version, and π0 (2024) adds a flow-matching action head for smooth, high-frequency control. VLAs are policies rather than world models, but they share the same pretrained vision and language backbones, and hybrid systems use a world model to check or improve a VLA's plans.</p>
+</div></section>
+
+<section id="jepa"><div class="wrap prose">
+ <span class="part">7</span><h2>Predict pixels, or predict meaning?</h2>
+ <p>There is a live debate about what a world model should predict. <strong>Generative</strong> models predict pixels (or latents that decode to pixels). That is directly checkable and lets people watch the model's imagination, but spends capacity on details that don't matter for decisions, like the exact texture of leaves. <strong>Predictive-representation</strong> models, championed by Yann LeCun as JEPA (joint-embedding predictive architecture), predict only abstract features of the future, ignoring unpredictable detail. They are cheaper and may generalise better for planning, but are harder to inspect and evaluate. MuZero sits at the extreme of predicting only what matters for reward. Which approach wins, or how they combine, is open.</p>
+</div></section>
+
+<section id="models"><div class="wrap">
+ <div class="prose"><span class="part">8</span><h2>Key models</h2></div>
+ <div class="tbl"><table><thead><tr><th>Model</th><th>Year</th><th>Kind</th><th>Contribution</th></tr></thead><tbody>
+  <tr><th><a href="https://arxiv.org/abs/1803.10122">World Models</a></th><td class="y">2018</td><td>RL world model</td><td>VAE plus recurrent dynamics; train a controller inside the dream</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/1911.08265">MuZero</a></th><td class="y">2019</td><td>RL world model</td><td>Plans with a learned model of value, policy and reward only</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2301.04104">DreamerV3</a></th><td class="y">2023</td><td>RL world model</td><td>Imagination training across domains; Minecraft diamonds from scratch</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2204.03458">Video Diffusion Models</a></th><td class="y">2022</td><td>Video generation</td><td>Space-time factorised U-Net for video diffusion</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2311.15127">Stable Video Diffusion</a></th><td class="y">2023</td><td>Video generation</td><td>Open latent video diffusion; showed data curation matters</td></tr>
+  <tr><th>Sora</th><td class="y">2024</td><td>Video generation</td><td>Diffusion transformer on spacetime patches; minute-long clips (technical report)</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2410.13720">Movie Gen</a></th><td class="y">2024</td><td>Video generation</td><td>30B flow-matching transformer with personalisation, editing and audio</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2503.20314">Wan</a></th><td class="y">2025</td><td>Video generation</td><td>Open-weight video models with a causal 3D VAE</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2402.15391">Genie</a></th><td class="y">2024</td><td>Interactive</td><td>Latent actions learned from unlabelled game videos</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2408.14837">GameNGen</a></th><td class="y">2024</td><td>Interactive</td><td>Real-time neural simulation of DOOM with diffusion</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2405.12399">DIAMOND</a></th><td class="y">2024</td><td>Interactive / RL</td><td>RL agents trained inside a diffusion world model</td></tr>
+  <tr><th>Genie 3</th><td class="y">2025</td><td>Interactive</td><td>Real-time, explorable 3D worlds with minutes of consistency (blog announcement)</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2310.06114">UniSim</a></th><td class="y">2023</td><td>Robotics</td><td>Action-conditioned simulator learned from diverse video</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2501.03575">Cosmos</a></th><td class="y">2025</td><td>Robotics</td><td>Open world foundation models and video tokenizers for physical AI</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2506.09985">V-JEPA 2</a></th><td class="y">2025</td><td>Robotics</td><td>Predictive video representations used for zero-shot robot planning</td></tr>
+  <tr><th><a href="https://arxiv.org/abs/2410.24164">π0</a></th><td class="y">2024</td><td>VLA policy</td><td>VLM backbone with a flow-matching action expert</td></tr>
+ </tbody></table></div>
+</div></section>
+
+<section id="open"><div class="wrap">
+ <div class="prose"><span class="part">9</span><h2>Strengths, limits and open problems</h2></div>
+ <div class="pc"><div class="pro"><h4>What they can do</h4><ul>
+  <li>Generate short, photorealistic, controllable video from text or images.</li>
+  <li>Simulate game-like environments interactively in real time.</li>
+  <li>Let agents practise and plan without costly real-world trials.</li>
+  <li>Turn the internet's video into a training signal for physical understanding.</li></ul></div>
+  <div class="con"><h4>What is still hard</h4><ul>
+  <li>Physics: objects merge, liquids misbehave and counts change; realism is not correctness.</li>
+  <li>Long horizons: memory, object permanence and compounding error over minutes or hours.</li>
+  <li>Control: precise, reliable action-conditioning and causal effects of actions.</li>
+  <li>Cost: training and generation are extremely compute-hungry.</li>
+  <li>Evaluation: metrics like FVD and VBench capture look, not whether the world behaves correctly.</li>
+  <li>Misuse: convincing fake video raises provenance and consent concerns.</li></ul></div></div>
+</div></section>
+</main>
+
+<footer><div class="wrap prose"><p><strong style="color:var(--ink)">Sources</strong></p><ul>
+ <li>Ha and Schmidhuber, 2018. <a href="https://arxiv.org/abs/1803.10122">arXiv:1803.10122</a> · Hafner et al., 2019. PlaNet. <a href="https://arxiv.org/abs/1811.04551">arXiv:1811.04551</a> · Dreamer. <a href="https://arxiv.org/abs/1912.01603">arXiv:1912.01603</a> · DreamerV3. <a href="https://arxiv.org/abs/2301.04104">arXiv:2301.04104</a> · Schrittwieser et al., 2019. MuZero. <a href="https://arxiv.org/abs/1911.08265">arXiv:1911.08265</a></li>
+ <li>Ho et al., 2022. Video Diffusion Models. <a href="https://arxiv.org/abs/2204.03458">arXiv:2204.03458</a> · Imagen Video. <a href="https://arxiv.org/abs/2210.02303">arXiv:2210.02303</a> · Make-A-Video. <a href="https://arxiv.org/abs/2209.14792">arXiv:2209.14792</a> · Blattmann et al., 2023. Align your Latents. <a href="https://arxiv.org/abs/2304.08818">arXiv:2304.08818</a></li>
+ <li>HunyuanVideo. <a href="https://arxiv.org/abs/2412.03603">arXiv:2412.03603</a> · CogVideoX. <a href="https://arxiv.org/abs/2408.06072">arXiv:2408.06072</a> · VBench. <a href="https://arxiv.org/abs/2311.17982">arXiv:2311.17982</a> · Unterthiner et al., 2018. FVD. <a href="https://arxiv.org/abs/1812.01717">arXiv:1812.01717</a></li>
+ <li>Du et al., 2023. UniPi. <a href="https://arxiv.org/abs/2302.00111">arXiv:2302.00111</a> · Brohan et al., 2023. RT-2. <a href="https://arxiv.org/abs/2307.15818">arXiv:2307.15818</a> · Kim et al., 2024. OpenVLA. <a href="https://arxiv.org/abs/2406.09246">arXiv:2406.09246</a></li>
+ <li>Sora, Veo, Genie 2 and Genie 3 were described in company technical reports and blog posts rather than papers.</li></ul>
+ <p>The planning figure runs a real simulation with a deliberately wrong model; the token calculator uses the stated assumptions; the consistency and interactive figures are illustrative.</p></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){"use strict";window.LABEL_FONT='"Archivo", Arial, sans-serif';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function setPressed(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+const C={};
+function readColors(keys){keys.forEach(k=>{C[k]=new THREE.Color(cssv('--'+k)||'#888888');});}
+function hex(k){return cssv('--'+k);}
+function label(text,size,color){size=size||.42;const c=document.createElement('canvas');const ctx=c.getContext('2d');const fs=64;
+ const font='600 '+fs+'px '+(window.LABEL_FONT||'Arial, sans-serif');ctx.font=font;const w=Math.ceil(ctx.measureText(text).width)+24;c.width=w;c.height=Math.ceil(fs*1.35);
+ ctx.font=font;ctx.fillStyle=color||cssv('--ink');ctx.textBaseline='middle';ctx.fillText(text,12,c.height/2+2);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size*w/c.height,size,1);sp.renderOrder=10;return sp;}
+function emojiSprite(ch,size){const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.font='72px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,48,54);
+ const t=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size||.5,size||.5,1);sp.renderOrder=11;return sp;}
+function dotTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(32,32,28,0,7);g.fill();return new THREE.CanvasTexture(c);}
+function line(pts,color,opts){opts=opts||{};const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=opts.dashed?new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.12,transparent:true,opacity:opts.opacity||1}):new THREE.LineBasicMaterial({color,transparent:true,opacity:opts.opacity==null?1:opts.opacity});
+ const l=new THREE.Line(g,m);if(opts.dashed)l.computeLineDistances();return l;}
+function std(color,o){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.55,metalness:.05},o||{}));}
+function disposeTree(o){o.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});}
+
+const stages=[];
+function base(camPos,target,hfov){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(40,1.6,.1,300);camera.position.set(...camPos);camera.lookAt(new THREE.Vector3(...target));
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,.95));const d=new THREE.DirectionalLight(0xffffff,.65);d.position.set(5,10,8);scene.add(d);
+ const root=new THREE.Group();scene.add(root);return {scene,camera,root,hfov:hfov||60};}
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=e.target._stage;s.visible=e.isIntersecting;if(s.visible&&!s.renderer)mk(s);else if(!s.visible&&s.renderer)kill(s);}),{rootMargin:'200px 0px'});
+function mk(s){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0,0);s.wrap.insertBefore(r.domElement,s.wrap.firstChild);s.renderer=r;s.w=0;}
+ catch(err){if(!s.wrap.querySelector('.nogl'))s.wrap.insertAdjacentHTML('beforeend','<div class="nogl">3D view unavailable: this browser has WebGL turned off.</div>');}}
+function kill(s){s.renderer.dispose();if(s.renderer.forceContextLoss)s.renderer.forceContextLoss();s.renderer.domElement.remove();s.renderer=null;}
+function drag(s){let down=false,px=0,py=0,sx=0,sy=0;const w=s.wrap;
+ w.addEventListener('pointerdown',e=>{down=true;px=sx=e.clientX;py=sy=e.clientY;});
+ w.addEventListener('pointerup',e=>{if(down&&s.onClick&&Math.hypot(e.clientX-sx,e.clientY-sy)<6){const r=w.getBoundingClientRect();s.onClick(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1));}down=false;});
+ addEventListener('pointerup',()=>down=false);w.addEventListener('pointercancel',()=>down=false);
+ w.addEventListener('pointermove',e=>{if(!down)return;s.tRotY+=(e.clientX-px)*.008;s.tRotX=clamp(s.tRotX+(e.clientY-py)*.005,-.7,.7);px=e.clientX;py=e.clientY;});}
+function stage(id,build){const fig=document.getElementById(id);const wrap=fig.querySelector('.canvas');const s={fig,wrap,rotY:0,rotX:0,tRotY:0,tRotX:0,auto:0};
+ Object.assign(s,build(s));s.rotY=s.tRotY;s.rotX=s.tRotX;wrap._stage=s;stages.push(s);io.observe(wrap);drag(s);return s;}
+let lastT=performance.now();
+function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;const t=now/1000;
+ for(const s of stages){if(!s.renderer)continue;const w=s.wrap.clientWidth,h=s.wrap.clientHeight;
+  if(w!==s.w||h!==s.h){s.renderer.setSize(w,h,false);const a=w/h;s.camera.aspect=a;const hf=s.hfov*Math.PI/180;s.camera.fov=clamp(Math.max(2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI,s.vmin||34),24,80);s.camera.updateProjectionMatrix();s.w=w;s.h=h;}
+  if(!reduced)s.tRotY+=s.auto*dt;s.rotY+=(s.tRotY-s.rotY)*.12;s.rotX+=(s.tRotX-s.rotX)*.12;s.root.rotation.set(s.rotX,s.rotY,0);
+  if(s.update)s.update(t,dt);s.renderer.render(s.scene,s.camera);}
+ requestAnimationFrame(loop);}
+function startAll(fn){if(typeof THREE==='undefined'){document.querySelectorAll('.canvas').forEach(c=>c.insertAdjacentHTML('beforeend','<div class="nogl">The 3D library could not load. Check your connection and reload the page.</div>'));return;}
+ const ready=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+ ready.then(()=>{fn();requestAnimationFrame(loop);});}
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const fmtN=n=>n>=1e12?(n/1e12).toFixed(1)+' trillion':n>=1e9?(n/1e9).toFixed(1)+' billion':n>=1e6?(n/1e6).toFixed(1)+' million':Math.round(n).toLocaleString();
+
+/* ---------- planning with a learned model ---------- */
+function buildPlan(s){const B=base([0,5,10.5],[3,.8,0],60);s.tRotY=-.35;s.vmin=32;const root=B.root;
+ const gnd=new THREE.Mesh(new THREE.PlaneGeometry(12,7),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.45,side:THREE.DoubleSide}));gnd.rotation.x=-Math.PI/2;gnd.position.x=4;root.add(gnd);
+ const grid=new THREE.GridHelper(12,12,C.line.getHex(),C.line.getHex());grid.position.x=4;root.add(grid);
+ const start=new THREE.Mesh(new THREE.CylinderGeometry(.25,.3,.2,20),std(C.act));root.add(start);const ls=label('agent',.28,hex('act'));ls.position.set(0,.5,0);root.add(ls);
+ const tgt=new THREE.Mesh(new THREE.TorusGeometry(.4,.06,8,32),std(C.time));tgt.rotation.x=Math.PI/2;root.add(tgt);const lt=label('target',.28,hex('time'));root.add(lt);
+ let T=[7,1.2];const grp=new THREE.Group();root.add(grp);const es=document.getElementById('pl-e'),all=document.getElementById('pl-all'),rd=document.getElementById('pl-read');
+ const acts=[];[-.35,-.17,0,.17,.35].forEach(az=>[6.5,8,9.5].forEach(sp=>acts.push([az,sp])));
+ function sim(a,g,k){const el=.75;let p=V(0,.1,0),v=V(Math.cos(a[0])*Math.cos(el)*a[1],Math.sin(el)*a[1],-Math.sin(a[0])*Math.cos(el)*a[1]);const pts=[p.clone()];const dt=.03;
+  for(let i=0;i<400;i++){v.y-=g*dt;v.multiplyScalar(1-k*dt);p.addScaledVector(v,dt);pts.push(p.clone());if(p.y<0)break;}return pts;}
+ function run(){const e=+es.value/100;document.getElementById('pl-ev').textContent=Math.round(e*100)+'%';tgt.position.set(T[0],.02,-T[1]);lt.position.set(T[0],.5,-T[1]);
+  while(grp.children.length){const c=grp.children.pop();c.geometry.dispose();c.material.dispose();}
+  let best=null,bd=1e9;acts.forEach(a=>{const pts=sim(a,9.8*(1-.6*e),.12*(1-e));const L=pts[pts.length-1];const d=Math.hypot(L.x-T[0],L.z+T[1]);if(d<bd){bd=d;best={a,pts};}if(all.checked)grp.add(line(pts,C.imag,{opacity:.18}));});
+  grp.add(line(best.pts,C.imag,{dashed:true}));const real=sim(best.a,9.8,.12);grp.add(line(real,C.real));const iL=best.pts[best.pts.length-1],rL=real[real.length-1];
+  [[iL,C.imag],[rL,C.real]].forEach(([p,c])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.13,12,8),std(c));m.position.set(p.x,.05,p.z);grp.add(m);});
+  const miss=Math.hypot(rL.x-T[0],rL.z+T[1]),gap=Math.hypot(rL.x-iL.x,rL.z-iL.z);
+  rd.innerHTML=`Imagined landing is <b>${bd.toFixed(2)} m</b> from the target; the real throw lands <b>${miss.toFixed(2)} m</b> away, <b>${gap.toFixed(2)} m</b> from where the model predicted. ${miss<.6?'Plan succeeded.':'Plan failed: the model looked confident but was wrong.'}`;}
+ es.oninput=run;all.onchange=run;const r=rng(3);document.getElementById('pl-t').onclick=()=>{T=[3.5+r()*5,(r()*2-1)*2.2];run();};run();return B;}
+
+/* ---------- spacetime patches ---------- */
+function frameCanvas(t,T){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,0,64);gr.addColorStop(0,'#9CC4E6');gr.addColorStop(1,'#E4EEF4');g.fillStyle=gr;g.fillRect(0,0,64,64);
+ g.fillStyle='#8DB27A';g.fillRect(0,48,64,16);const u=t/(T-1);const x=8+u*48,y=46-Math.abs(Math.sin(u*Math.PI*2))*30;g.fillStyle='#D6336C';g.beginPath();g.arc(x,y,6,0,7);g.fill();return c;}
+function buildST(s){const B=base([2,3.4,9],[0,0,0],56);s.tRotY=-.7;s.tRotX=.12;s.vmin=32;const T=8,W=2.4,gap=.55;const frames=[];
+ for(let t=0;t<T;t++){const m=new THREE.Mesh(new THREE.PlaneGeometry(W,W),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(frameCanvas(t,T)),side:THREE.DoubleSide,transparent:true,opacity:.9}));m.rotation.y=-Math.PI/2;m.position.x=(t-(T-1)/2)*gap;B.root.add(m);frames.push(m);}
+ const lt=label('time →',.3,hex('time'));lt.position.set(0,-W/2-.35,W/2);B.root.add(lt);
+ const grp=new THREE.Group();B.root.add(grp);let pt=1,ps=4,att='full';const rd=document.getElementById('st-read');
+ function build(){while(grp.children.length){const c=grp.children.pop();c.geometry.dispose();c.material.dispose();}const nt=T/pt,sz=W/ps;const q=[Math.floor((nt-1)/2),Math.floor((ps-1)/2),Math.floor((ps-1)/2)];
+  for(let a=0;a<nt;a++)for(let i=0;i<ps;i++)for(let j=0;j<ps;j++){const w=pt*gap*.92,cx=((a+.5)*pt-T/2)*gap-gap/2,cy=-W/2+(i+.5)*sz,cz=-W/2+(j+.5)*sz;const g=new THREE.BoxGeometry(Math.max(w,.08),sz*.94,sz*.94);
+   const isQ=a===q[0]&&i===q[1]&&j===q[2];const on=att==='full'||(att==='space'&&a===q[0])||(att==='time'&&i===q[1]&&j===q[2]);
+   const e=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:isQ?C.time:C.muted,transparent:true,opacity:isQ?1:.35}));e.position.set(cx+gap/2,cy,cz);grp.add(e);
+   if(on){const f=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:isQ?C.time:C.act,transparent:true,opacity:isQ?.55:.14,depthWrite:false}));f.position.copy(e.position);grp.add(f);}else g.dispose();}
+  calc();}
+ function calc(){const d=+document.getElementById('st-d').value;document.getElementById('st-dv').textContent=d+' s';const rv=document.querySelector('#st-r [aria-pressed="true"]').dataset.r;const [w,h]={480:[854,480],720:[1280,720],1080:[1920,1080]}[rv];
+  const frames=24*d,lt=1+Math.floor((frames-1)/4),S=Math.round(h/8/2)*Math.round(w/8/2),N=lt*S;const full=N*N,fac=lt*S*S+S*lt*lt;
+  rd.innerHTML=`${d} s at ${rv}p: ${frames} frames → ${lt} latent frames × ${S.toLocaleString()} patches = <b>${fmtN(N)} tokens</b>. Full attention compares <b>${fmtN(full)}</b> token pairs per layer; factorised space-then-time attention compares ${fmtN(fac)}, about <b>${Math.round(full/fac)}×</b> fewer.`;}
+ document.querySelectorAll('#st-p [data-p]').forEach(b=>b.onclick=()=>{[pt,ps]=b.dataset.p.split(',').map(Number);setPressed(b.parentNode,b);build();});
+ document.querySelectorAll('#st-a [data-a]').forEach(b=>b.onclick=()=>{att=b.dataset.a;setPressed(b.parentNode,b);build();});
+ document.querySelectorAll('#st-r [data-r]').forEach(b=>b.onclick=()=>{setPressed(b.parentNode,b);calc();});document.getElementById('st-d').oninput=calc;build();return B;}
+
+/* ---------- temporal consistency ---------- */
+function buildCons(s){const B=base([1,2.6,9.5],[0,.8,0],60);s.tRotY=-.55;s.vmin=32;const T=16,gap=.5;
+ for(let t=0;t<T;t++){const f=new THREE.Mesh(new THREE.PlaneGeometry(1.8,2.4),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.25,side:THREE.DoubleSide,depthWrite:false}));f.rotation.y=-Math.PI/2;f.position.set((t-(T-1)/2)*gap,1,0);B.root.add(f);}
+ const truth=t=>{const u=t/(T-1);return V((t-(T-1)/2)*gap,.05+Math.abs(Math.sin(u*Math.PI*2))*1.9,(u-.5)*1.1);};B.root.add(line([...Array(T*4)].map((_,i)=>truth(i/4)),C.muted,{opacity:.8}));
+ const balls=[...Array(T)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.12,14,10),std(C.imag));B.root.add(m);return m;});let path=null;let kind='joint';const rd=document.getElementById('cs-read');const tg=balls.map(()=>V());
+ function gen(){const r=rng(Math.floor(Math.random()*1e6));const P=[];let drift=V(0,0,0),sm=V(0,0,0);
+  for(let t=0;t<T;t++){const p=truth(t);if(kind==='ind')p.add(V(0,randn(r)*.35,randn(r)*.35));else if(kind==='joint'){sm.lerp(V(0,randn(r)*.12,randn(r)*.12),.3);p.add(sm);}else{if(t%4===0)drift.add(V(0,randn(r)*.2,randn(r)*.2));sm.lerp(V(0,randn(r)*.06,randn(r)*.06),.3);p.add(drift).add(sm);}P.push(p);}
+  P.forEach((p,i)=>{tg[i].copy(p);balls[i].material.color.copy(kind==='ind'?C.imag.clone().lerp(C.act,r()):C.imag);balls[i].scale.setScalar(kind==='ind'?.7+r()*.6:1);});
+  if(path){B.root.remove(path);path.geometry.dispose();}path=line(P,C.imag,{opacity:.8});B.root.add(path);
+  let jit=0;for(let t=1;t<T;t++)jit+=P[t].clone().sub(truth(t)).sub(P[t-1].clone().sub(truth(t-1))).length();const end=P[T-1].distanceTo(truth(T-1));
+  rd.innerHTML=`Frame-to-frame jitter <b>${(jit/(T-1)).toFixed(2)}</b>, distance from the true position in the last frame <b>${end.toFixed(2)}</b>. ${kind==='ind'?'No frame knows about the others: the ball flickers and even changes size and colour.':kind==='joint'?'Attention across all frames keeps motion smooth and faithful.':'Each chunk continues from the last, so small errors accumulate into drift.'}`;}
+ document.querySelectorAll('#cs-k [data-k]').forEach(b=>b.onclick=()=>{kind=b.dataset.k;setPressed(b.parentNode,b);gen();});document.getElementById('cs-new').onclick=gen;gen();balls.forEach((b,i)=>b.position.copy(tg[i]));
+ return Object.assign(B,{update(){balls.forEach((b,i)=>b.position.lerp(tg[i],.15));}});}
+
+/* ---------- interactive world-model loop ---------- */
+function buildLoop(s){const B=base([0,1.6,12.5],[0,.4,0],62);s.tRotY=-.18;s.tRotX=.08;s.vmin=28;const root=B.root;
+ let st={x:14,y:0,vy:0};const hist=[];const S=64;
+ function draw(state,c){const g=c.getContext('2d');g.fillStyle='#CFE3F3';g.fillRect(0,0,S,S);g.fillStyle='#7FAE6B';g.fillRect(0,50,S,14);g.fillStyle='#A5795A';g.fillRect(38,36,14,4);
+  g.fillStyle='#F4C65A';g.beginPath();g.arc(52,10,5,0,7);g.fill();const px=state.x,py=50-state.y;g.fillStyle='#5F3DC4';g.fillRect(px-3,py-9,6,9);g.fillStyle='#F2D3B3';g.fillRect(px-2,py-12,4,3);}
+ function mkFrame(w){const c=document.createElement('canvas');c.width=c.height=S;const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w),new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide}));return {c,t,m};}
+ const ctx=[...Array(4)].map((_,i)=>{const f=mkFrame(1.1);f.m.position.set(-6.6+i*.35,1-i*.05,-i*.4);root.add(f.m);return f;});const lc=label('context: recent frames',.26,hex('muted'));lc.position.set(-6.1,2.1,0);root.add(lc);
+ const tok=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),std(C.time,{transparent:true,opacity:.85}));tok.position.set(-3.6,1,0);root.add(tok);const lt=label('tokenizer',.26,hex('time'));lt.position.set(-3.6,1.8,0);root.add(lt);
+ const dyn=new THREE.Group();for(let k=0;k<6;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(.14,1.8,1.4),std(C.time,{transparent:true,opacity:.8}));b.position.set(-1.8+k*.5,1,0);dyn.add(b);}root.add(dyn);const ld=label('dynamics model (transformer or diffusion)',.26,hex('time'));ld.position.set(-.55,2.3,0);root.add(ld);
+ const act=new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.5),std(C.act));act.position.set(-.55,-.9,0);root.add(act);const la=label('action',.26,hex('act'));la.position.set(-.55,-1.45,0);root.add(la);root.add(line([V(-.55,-.6,0),V(-.55,.05,0)],C.act));
+ const dec=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),std(C.time,{transparent:true,opacity:.85}));dec.position.set(2.8,1,0);root.add(dec);const lde=label('decoder',.26,hex('time'));lde.position.set(2.8,1.8,0);root.add(lde);
+ const nxt=mkFrame(2);nxt.m.position.set(5.6,1,0);root.add(nxt.m);const ln=label('predicted next frame',.28,hex('ink'));ln.position.set(5.6,2.35,0);root.add(ln);
+ [[-6,1,-3.1],[-3.1,1,-2.05],[.95,1,2.3],[3.3,1,4.6]].forEach(([a,y,b])=>root.add(line([V(a,y,0),V(b,y,0)],C.muted,{opacity:.7})));
+ const back=new THREE.CatmullRomCurve3([V(5.6,-.1,0),V(1,-2.3,.5),V(-5,-1.6,.3),V(-6.4,.4,0)]);root.add(line(back.getPoints(40),C.time,{dashed:true}));const lb=label('the prediction becomes context',.24,hex('time'));lb.position.set(0,-2.2,.5);root.add(lb);
+ const pk=new THREE.Mesh(new THREE.SphereGeometry(.12,12,8),std(C.act));root.add(pk);let pkT=-1;const rd=document.getElementById('lp-read');
+ function refresh(){for(let i=0;i<4;i++){const h=hist[hist.length-4+i]||st;draw(h,ctx[i].c);ctx[i].t.needsUpdate=true;}draw(st,nxt.c);nxt.t.needsUpdate=true;}
+ function stepAct(a){hist.push({...st});if(hist.length>8)hist.shift();if(a==='left')st.x=Math.max(4,st.x-7);if(a==='right')st.x=Math.min(60,st.x+7);const onLedge=x=>x>=38&&x<=52;const grounded=st.y===0||(st.y===14&&onLedge(st.x)&&st.vy===0);if(a==='jump'&&grounded)st.vy=12;
+  if(st.y===14&&st.vy===0&&!onLedge(st.x))st.vy=-1;const py=st.y;st.y+=st.vy;if(st.vy!==0||st.y>0)st.vy-=4;
+  if(st.vy<0&&onLedge(st.x)&&py>=14&&st.y<=14){st.y=14;st.vy=0;}if(st.y<=0){st.y=0;st.vy=0;}
+  refresh();pkT=0;rd.innerHTML=`Action <b>${a}</b> sent to the dynamics model with ${Math.min(4,hist.length)} context frames. ${a==='jump'?'Press Wait to let time advance, and try landing on the brown ledge.':'The model must also keep the scenery, sun and ledge consistent.'}`;}
+ document.querySelectorAll('#f-loop [data-a]').forEach(b=>b.onclick=()=>stepAct(b.dataset.a));refresh();rd.textContent='Press an action to generate the next frame.';
+ return Object.assign(B,{update(t,dt){if(pkT>=0){pkT+=dt*1.2;const x=-6.2+pkT*11.8;pk.visible=true;pk.position.set(Math.min(x,5.6),1,0.8);if(pkT>1)pkT=-1;}else pk.visible=false;}});}
+
+startAll(()=>{readColors(['ink','muted','line','panel','time','act','real','imag']);stage('f-plan',buildPlan);stage('f-st',buildST);stage('f-cons',buildCons);stage('f-loop',buildLoop);});
+})();
+</script>
+</body></html>

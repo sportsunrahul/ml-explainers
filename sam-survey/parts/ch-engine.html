@@ -1,0 +1,50 @@
+<section id="ch-engine" class="chapter">
+<h2>The data engine and SA-1B</h2>
+<p>A promptable model for "anything" needs masks of almost everything, and no such dataset existed. The SAM team built one with the model itself in the loop, until the model could label images on its own. Here is the last, fully automatic step on the desk scene.</p>
+
+<figure class="viz" id="viz-engine" data-scene="engine" data-toy>
+  <div class="controls"><div class="seg" role="tablist" aria-label="Filter step">
+    <button type="button" role="tab" data-step="0" id="btn-engine-all">All candidates</button>
+    <button type="button" role="tab" data-step="1" id="btn-engine-iou">Predicted IoU</button>
+    <button type="button" role="tab" data-step="2" id="btn-engine-stab">Stability</button>
+    <button type="button" role="tab" data-step="3" id="btn-engine-cover">Not the whole image</button>
+    <button type="button" role="tab" data-step="4" id="btn-engine-nms">Box NMS</button>
+    <button type="button" role="tab" data-step="5" id="btn-engine-clean">Clean-up</button>
+  </div></div>
+  <div class="stage" style="height:clamp(340px, 42vw, 450px)"></div>
+  <div class="controls">
+    <label>Toy grid <input type="range" min="4" max="16" step="1" value="8" data-grid id="rng-engine-grid" aria-label="Point grid size"> <b data-grid-value>8 x 8</b></label>
+    <button type="button" data-cue-reset id="btn-engine-reset">Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. The grid and the thresholds are SAM's (App. B); the order of the filters is our reading (the paper filters by predicted IoU and stability, then applies NMS, and does not place the other two steps); the toy grid is smaller than SAM's 32x32 so the points stay visible. The predicted IoU and the stability score are toy stand-ins computed from the drawn shapes, not a network's output. The cover filter and box NMS run the paper's rule on the toy masks.</figcaption>
+</figure>
+
+<p>Before you step through, guess: of all the candidate masks on the grid, what share survives? Most candidates are duplicates. Neighbouring points on the same mug return the same mug, so in this toy, box non-maximum suppression (NMS) removes far more than any quality filter.</p>
+
+<h3>Three stages, one model getting better</h3>
+<p><b>Assisted-manual.</b> Professional annotators clicked include and exclude points in a browser tool, and SAM drew the mask in real time. They labelled anything they could name or describe, and moved on when a mask took more than <span data-claim="sam-engine-s1-skip-seconds">30</span> seconds. The model was retrained <span data-claim="sam-engine-s1-retrains">6</span> times on the new masks, and its image encoder grew from <span data-claim="sam-engine-s1-encoder">ViT-B to ViT-H</span>. Time per mask fell from <span data-claim="sam-engine-s1-time-start">34</span> to <span data-claim="sam-engine-s1-time-end">14</span> seconds, and masks per image rose from <span data-claim="sam-engine-s1-mpi-start">20</span> to <span data-claim="sam-engine-s1-mpi-end">44</span>. This stage gave <span data-claim="sam-engine-s1-masks">4.3M</span> masks on <span data-claim="sam-engine-s1-images">120k</span> images.</p>
+<p><b>Semi-automatic.</b> To add the less obvious objects, a box detector trained on the stage-1 masks (one generic "object" class) pre-filled the confident objects, and annotators labelled what was left. This gave <span data-claim="sam-engine-s2-masks">5.9M</span> more masks on <span data-claim="sam-engine-s2-images">180k</span> images, with <span data-claim="sam-engine-s2-retrains">5</span> more retrains. The remaining objects were harder: time per mask went back to <span data-claim="sam-engine-s2-time">34</span> seconds. Masks per image reached <span data-claim="sam-engine-s2-mpi-end">72</span>.</p>
+<p><b>Fully automatic.</b> Now SAM labelled alone. It prompted each image with a <span data-claim="sam-engine-s3-grid">32x32</span> grid of points plus <span data-claim="sam-engine-s3-crops">20</span> zoomed-in crops for small objects, kept a mask only if its predicted IoU was at least <span data-claim="sam-engine-s3-iou-thresh">88.0</span> and it was stable, removed masks covering <span data-claim="sam-engine-s3-cover-filter">95%</span> or more of the image, and removed duplicates with box NMS at <span data-claim="sam-engine-s3-nms">0.7</span>. A mask is <dfn>stable</dfn> when thresholding its logits at <span data-claim="sam-engine-s3-stab-lo">-1</span> and at <span data-claim="sam-engine-s3-stab-hi">+1</span> gives nearly the same mask: their IoU must be at least <span data-claim="sam-engine-s3-stab-thresh">95.0</span>. A last clean-up removed stray parts and filled holes under <span data-claim="sam-engine-s3-min-area">100</span> pixels. This ran on <span data-claim="sam-engine-s3-images">11M</span> images and produced <span data-claim="sam-engine-s3-masks">1.1B</span> masks.</p>
+
+<figure class="viz" id="viz-stages" data-scene="stages">
+  <div class="stage" style="height:clamp(330px, 36vw, 400px)"></div>
+  <div class="controls"><button type="button" data-replay id="btn-stages-replay">Replay</button><button type="button" data-cue-reset id="btn-stages-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Sourced numbers from the SAM paper (Sec. 4 and 5). The first two bars are each stage's final masks per image, with a line from its starting value. The third bar is the SA-1B average (automatic masks only); the paper gives no starting value for stage 3, so no line is drawn.</figcaption>
+</figure>
+
+<p>One detail is easy to miss: the masks of SA-1B were not made by the SAM you can download. They came from a special version trained only on the stage 1 and 2 masks, with <span data-claim="sam-engine-gen-decoder-layers">3</span> decoder layers instead of <span data-claim="sam-dec-layers">2</span> and <span data-claim="sam-engine-gen-points">4</span> sampled points per mask instead of <span data-claim="sam-default-points">9</span>. The released SAM was then trained on SA-1B alone.</p>
+
+<div class="claim-card">
+<h4>Claim card: are automatic masks good enough to train on?</h4>
+<dl>
+  <dt>Claim</dt><dd>The fully automatic masks are close to what professional annotators would draw.</dd>
+  <dt>How measured</dt><dd>The authors sampled <span data-claim="sam-sa1b-qc-images">500</span> images (about <span data-claim="sam-sa1b-qc-masks">50k</span> masks) and asked annotators to correct each automatic mask with the brush tool. They then compared each mask with its corrected version by IoU.</dd>
+  <dt>Result</dt><dd><span data-claim="sam-sa1b-qc-90">94%</span> of pairs had an IoU above 90%, and <span data-claim="sam-sa1b-qc-75">97%</span> above 75%. Earlier work found that two annotators agree at <span data-claim="sam-sa1b-inter-annotator">85-91%</span> IoU.</dd>
+  <dt>What would falsify it</dt><dd>Corrections that change many masks a lot, or a model trained on the automatic masks doing clearly worse than one trained on the manual ones. In the ablation of Sec. 7.6, training on the automatic masks alone scored only <span data-claim="sam-abl-auto-only-gap">0.5</span> mIoU below training on all the data.</dd>
+</dl>
+</div>
+
+<p>The data engine made about <span data-claim="sam-sa1b-masks">1.1B</span> masks, <span data-claim="sam-sa1b-auto-pct">99.1%</span> of them automatically, and SA-1B releases only the automatic ones: <span data-claim="sam-sa1b-images">11M</span> licensed images, about <span data-claim="sam-sa1b-mpi">100</span> per image. That is <span data-claim="sam-sa1b-vs-oi-masks">400x</span> more masks than Open Images, the largest dataset before it. The masks carry no class names. SA-1B teaches where things are, not what they are called.</p>
+</section>

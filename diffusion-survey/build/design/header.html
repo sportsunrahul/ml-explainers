@@ -1,0 +1,61 @@
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="Time runs left to right. Three yellow clusters of data spread out as noise is added until they become one brown bell curve of pure noise; green paths then start from noise and flow back into the three clusters."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+  </div>
+  <h1>Diffusion models, intuition first</h1>
+  <p class="hook">How a model learns to make new images by learning to remove noise, and how ten years of papers made that fast, steerable and cheap.</p>
+  <p class="hero-cap">Above, computed for a one-dimensional toy: three clusters of data, Improved DDPM's cosine noise schedule, and the exact best denoiser in place of a trained network. Forward paths add random noise; reverse paths follow the deterministic DDIM sampler.</p>
+  <p class="papers-note">The papers, oldest first, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/1503.03585v8" title="arXiv 1503.03585v8">Sohl-Dickstein et al.</a></li>
+    <li><a href="https://arxiv.org/abs/1907.05600v3" title="arXiv 1907.05600v3">NCSN</a></li>
+    <li><a href="https://arxiv.org/abs/2006.11239v2" title="arXiv 2006.11239v2">DDPM</a></li>
+    <li><a href="https://arxiv.org/abs/2010.02502v4" title="arXiv 2010.02502v4">DDIM</a></li>
+    <li><a href="https://arxiv.org/abs/2011.13456v2" title="arXiv 2011.13456v2">Score SDE</a></li>
+    <li><a href="https://arxiv.org/abs/2102.09672v1" title="arXiv 2102.09672v1">Improved DDPM</a></li>
+    <li><a href="https://arxiv.org/abs/2105.05233v4" title="arXiv 2105.05233v4, Diffusion Models Beat GANs on Image Synthesis">ADM</a></li>
+    <li><a href="https://arxiv.org/abs/2112.10752v2" title="arXiv 2112.10752v2">Latent Diffusion</a></li>
+    <li><a href="https://arxiv.org/abs/2206.00364v2" title="arXiv 2206.00364v2">EDM</a></li>
+    <li><a href="https://arxiv.org/abs/2207.12598v1" title="arXiv 2207.12598v1">Classifier-Free Guidance</a></li>
+    <li><a href="https://arxiv.org/abs/2209.03003v1" title="arXiv 2209.03003v1">Rectified Flow</a></li>
+    <li><a href="https://arxiv.org/abs/2210.02747v2" title="arXiv 2210.02747v2">Flow Matching</a></li>
+    <li><a href="https://arxiv.org/abs/2212.09748v2" title="arXiv 2212.09748v2">DiT</a></li>
+    <li><a href="https://arxiv.org/abs/2303.01469v2" title="arXiv 2303.01469v2">Consistency Models</a></li>
+    <li><a href="https://arxiv.org/abs/2403.03206v1" title="arXiv 2403.03206v1">SD3</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: the idea</li>
+    <li><a href="#ch-generate" data-rail="Generating">What does it mean to generate?</a></li>
+    <li class="act">Act II: DDPM, the full arc</li>
+    <li><a href="#ch-forward" data-rail="Forward process">The forward process: adding noise on a schedule</a></li>
+    <li><a href="#ch-denoise" data-rail="Predict the noise">Learning to undo it: predict the noise</a></li>
+    <li><a href="#ch-sample" data-rail="Sampling">Sampling: walking back from noise</a></li>
+    <li class="act">Act III: the score view and faster sampling</li>
+    <li><a href="#ch-score" data-rail="Scores and SDEs">Scores, Langevin, and the SDE that unifies everything</a></li>
+    <li><a href="#ch-fast" data-rail="DDIM and EDM">Fewer steps: DDIM and EDM</a></li>
+    <li class="act">Act IV: control and scale</li>
+    <li><a href="#ch-guidance" data-rail="Guidance">Steering: classifier and classifier-free guidance</a></li>
+    <li><a href="#ch-latent" data-rail="Latent diffusion">Diffuse in a compressed space: latent diffusion</a></li>
+    <li><a href="#ch-dit" data-rail="DiT">Swap the U-Net for a transformer: DiT</a></li>
+    <li class="act">Act V: straight paths and one step</li>
+    <li><a href="#ch-flow" data-rail="Flow matching">Rectified flow and flow matching</a></li>
+    <li><a href="#ch-consistency" data-rail="Consistency">Consistency models: jump to the end</a></li>
+    <li><a href="#ch-sd3" data-rail="SD3">Where it landed: SD3</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Family tree</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-yellow">real data</span>
+  <span class="c-brown">pure noise</span>
+  <span class="c-blue">what the model predicts</span>
+  <span class="c-green">generated samples and their paths</span>
+  <span class="c-red">error, loss</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means a real formula from a paper, evaluated directly or run on a small two-dimensional toy dataset. <b>Toy model</b> means an illustration, not the paper's network. <b>Sourced</b> means the numbers come from the paper's own tables. Numbers in the text are checked against a claim list kept with this page. In an equation, hover or tap a term that names part of a figure: that part of the figure lights up.</p>

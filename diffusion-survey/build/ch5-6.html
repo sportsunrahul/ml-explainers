@@ -1,0 +1,280 @@
+
+<!-- ============================ ACT III ============================ -->
+<p class="kicker">Act III: the score view and faster sampling</p>
+<section id="ch-score" class="chapter">
+<h2>Scores, Langevin, and the SDE that unifies everything</h2>
+<p>A year before DDPM, a different group reached the same models from another direction: instead of predicting noise, learn an <b class="c-blue">arrow field</b> that points toward more likely data. Slide the noise level and watch the field; arrows fade where a network would never have seen a training example.</p>
+
+<figure class="viz" id="viz-score-field" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="score-canvas" aria-label="Blue arrows of the score field of the noised swiss roll at the chosen noise level, faded where no noised training data lands. Particles can follow annealed Langevin dynamics, the reverse SDE, or the probability flow ODE." role="img"></canvas>
+  <div class="controls">
+    <label for="rng-score-sigma">noise level <input type="range" id="rng-score-sigma" min="0" max="100" step="1" value="35"></label>
+    <button type="button" id="btn-score-small">Small noise</button>
+    <button type="button" id="btn-score-large">Large noise</button>
+    <button type="button" id="btn-score-langevin">Annealed Langevin</button>
+    <button type="button" id="btn-score-sde">Reverse SDE paths</button>
+    <button type="button" id="btn-score-ode">Probability flow ODE paths</button>
+    <button type="button" id="btn-score-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="score-readout" aria-live="polite"></p>
+  <figcaption>The field is the exact score of the noised toy data, <span class="tex">\nabla_x \log p_\sigma(x) = (\hat x_0 - x)/\sigma^2</span>, with arrow lengths compressed for display. Faded arrows sit where noised training samples almost never land, so a real network gets no training signal there. The SDE and ODE buttons start eight particles from the same points and integrate each process with the exact score.</figcaption>
+</figure>
+
+<h3>The score: an arrow toward more likely data</h3>
+<p>For a probability density <span class="tex">p(x)</span>, the <b>score</b> is the direction in which the log-density rises fastest:</p>
+<div class="eq" id="eq-score-def" data-build data-viz="viz-score-field"><div class="tex tex-display">
+\htmlData{step=1, link=field}{\htmlClass{t-blue}{s(x)}} = \htmlData{step=2, link=uphill}{\nabla_x \log p(x)}
+</div></div>
+<p class="eqno">Definition used by NCSN v3 Sec. 2</p>
+<p>The <span class="tex">\nabla</span> ("gradient") collects the slopes along each axis into one arrow. The score has a lovely property: you never need the density's normalizing constant, the number that makes it integrate to one and that is usually impossible to compute, because taking the log turns it into an additive constant and the gradient deletes it. That is why "learn the score" is a tractable goal where "learn the density" is not.</p>
+<p>Given a score, <b>Langevin dynamics</b> turns it into a sampler: take a small step uphill, add a little noise, repeat.</p>
+<div class="eq" id="eq-langevin" data-build data-viz="viz-score-field"><div class="tex tex-display">
+\htmlData{step=1, link=particles}{\htmlClass{t-green}{\tilde x_t}} = \tilde x_{t-1} + \htmlData{step=2, link=field}{\frac{\epsilon}{2}\,\htmlClass{t-blue}{\nabla_x \log p(\tilde x_{t-1})}} + \htmlData{step=3, link=jitter}{\htmlClass{t-brown}{\sqrt{\epsilon}\; z_t}}
+</div></div>
+<p class="eqno">Eq. 4 in NCSN v3</p>
+<p>With a tiny step <span class="tex">\epsilon</span> and many iterations, the jitter balances the uphill pull and the particles settle into exactly the distribution <span class="tex">p</span>. Compare it with DDPM's reverse step in the last chapter: move by the network's output, add scaled noise. Same shape.</p>
+
+<h3>NCSN: why one noise level is not enough</h3>
+<p>You still need the score of <em>data</em>, which you do not have. <b>Denoising score matching</b> gets it indirectly: add Gaussian noise of size <span class="tex">\sigma</span> to a data point and train a network to point from the noisy point back toward the clean one. The optimum of that game is the score of the noised data distribution. It is the same "denoise" task as DDPM in different clothes, and the two predictions are rescalings of each other:</p>
+<div class="eq" id="eq-score-denoiser" data-build data-viz="viz-score-field"><div class="tex tex-display">
+\htmlData{step=1, link=field}{\htmlClass{t-blue}{\nabla_x \log p(x;\sigma)}} = \frac{\htmlData{step=2, link=guess}{\htmlClass{t-blue}{D(x;\sigma)}} - x}{\sigma^2} \quad\Longleftrightarrow\quad \htmlClass{t-blue}{\epsilon_\theta} = -\sqrt{1-\bar\alpha_t}\;\htmlClass{t-blue}{\nabla_x \log p_t(x)}
+</div></div>
+<p class="eqno">Left: Eqs. 2-3 in EDM v2, where <span class="tex">D</span> is the best denoiser (the <span class="tex">\hat x_0</span> guess). Right: the same fact in DDPM's variables.</p>
+<p>Song and Ermon's NCSN (<span data-claim="page-date-ncsn">12 Jul 2019</span>) found the catch. Press <b>Small noise</b>: the noised training samples hug the spiral, so a network would only ever be trained on a thin band, and its arrows everywhere else would be guesses. Starting a sampler from random noise means starting exactly where the arrows are untrustworthy. Press <b>Large noise</b>: now training samples fill the plane and the field is learnable everywhere, but it describes a blurred spiral.</p>
+<p>The fix was to use both: train one network on a ladder of noise levels, from <span class="tex">\sigma_1 = 1</span> down to <span data-claim="page-ncsn-sigma-min">0.01</span> in <span data-claim="ncsn-image-num-levels">L = 10</span> geometric rungs, told which rung it is on, and sample by <b>annealed Langevin dynamics</b>: a few Langevin steps at the largest noise, then the next level down, and so on (<span data-claim="page-ncsn-T">100</span> steps per level on images). Press <b>Annealed Langevin</b>. On CIFAR-10 NCSN reached an Inception Score of <span data-claim="page-ncsn-is">8.87</span> and FID <span data-claim="ncsn-cifar10-fid">25.32</span>. A ladder of noise levels, a network told its level, a coarse-to-fine sampler: that is a diffusion model. DDPM's paper said as much.</p>
+
+<h3>Score SDE: let the ladder become a slope</h3>
+<p>Song and colleagues then asked what happens with infinitely many rungs (<span data-claim="page-date-score-sde">26 Nov 2020</span>). The noising becomes a continuous random process, a <b>stochastic differential equation</b> (SDE). Read <span class="tex">\mathrm{d}x</span> as "the tiny change in <span class="tex">x</span> over a tiny time <span class="tex">\mathrm{d}t</span>":</p>
+<div class="eq" id="eq-forward-sde" data-build data-viz="viz-score-field"><div class="tex tex-display">
+\mathrm{d}x = \htmlData{step=1, link=drift}{f(x, t)\,\mathrm{d}t} + \htmlData{step=2, link=jitter}{\htmlClass{t-brown}{g(t)\,\mathrm{d}w}}
+</div></div>
+<p class="eqno">Eq. 5 in Score SDE v2</p>
+<ul class="gloss">
+  <li><span class="tex">f(x,t)\,\mathrm{d}t</span>: the <em>drift</em>, a deterministic push (for DDPM, a gentle shrink toward the origin).</li>
+  <li><span class="tex">g(t)\,\mathrm{d}w</span>: the <em>diffusion</em>, a random kick; <span class="tex">w</span> is Brownian motion, and <span class="tex">\mathrm{d}w</span> is an infinitesimal Gaussian nudge.</li>
+</ul>
+<p>Two choices recover the two earlier models. NCSN is a <b>variance-exploding</b> SDE, <span class="tex">\mathrm{d}x = \sqrt{\mathrm{d}[\sigma^2(t)]/\mathrm{d}t}\;\mathrm{d}w</span> (Eq. 9): no drift, noise piles up. DDPM is a <b>variance-preserving</b> SDE, <span class="tex">\mathrm{d}x = -\tfrac12\beta(t)\,x\,\mathrm{d}t + \sqrt{\beta(t)}\,\mathrm{d}w</span> (Eq. 11): shrink exactly as fast as noise is added, the continuous version of Chapter 2's bookkeeping.</p>
+<p>A 1982 result by Anderson says any such process can be run backwards in time, and the reverse process needs just one extra ingredient, the score:</p>
+<div class="eq" id="eq-reverse-sde" data-build data-viz="viz-score-field"><div class="tex tex-display">
+\mathrm{d}x = \big[f(x,t) - \htmlData{step=1, link=field}{g(t)^2\,\htmlClass{t-blue}{\nabla_x \log p_t(x)}}\big]\,\mathrm{d}t + \htmlData{step=2, link=jitter}{\htmlClass{t-brown}{g(t)\,\mathrm{d}\bar w}}
+</div></div>
+<p class="eqno">Eq. 6 in Score SDE v2</p>
+<p>That is the whole generative model: learn <span class="tex">\nabla_x \log p_t</span> at every noise level with denoising score matching, then integrate this equation from noise back to data. DDPM's sampler and NCSN's annealed Langevin are two particular ways to discretize it.</p>
+
+<h3>The deterministic twin: the probability flow ODE</h3>
+<p>The most consequential line in the paper is a quieter one. There is an <em>ordinary</em> differential equation, no noise at all, whose solutions have exactly the same distribution at every time as the SDE's:</p>
+<div class="eq" id="eq-pf-ode" data-build data-viz="viz-score-field"><div class="tex tex-display">
+\mathrm{d}x = \big[f(x,t) - \htmlData{step=1, link=half}{\tfrac12}\, g(t)^2\,\htmlData{step=2, link=field}{\htmlClass{t-blue}{\nabla_x \log p_t(x)}}\big]\,\mathrm{d}t
+</div></div>
+<p class="eqno">Eq. 13 in Score SDE v2</p>
+<p>Half the score term, and the random kick is gone. Before you press the buttons, predict: will the two sets of paths end on the same points? Press <b>Reverse SDE paths</b>, then <b>Probability flow ODE paths</b>. The SDE paths jitter and end somewhere random on the spiral; the ODE paths are smooth curves, and each starting point always lands on the same spot. Across many particles both produce the same spiral.</p>
+<p>Determinism buys three things. Any off-the-shelf ODE solver can take large adaptive steps (the paper cut score evaluations by <span data-claim="page-sde-ode-90">over 90%</span> without visible loss). The map from noise to data is invertible, so an image can be encoded into its noise. And the change-of-variables formula gives exact likelihoods: the same DDPM model scores <span data-claim="page-sde-exact-ddpm">3.28</span> bits per dimension exactly, against its bound of <span data-claim="page-ddpm-bound-nll">3.70</span>. With a better architecture the paper reached CIFAR-10 FID <span data-claim="score-sde-cifar10-fid">2.20</span>, IS <span data-claim="score-sde-cifar10-is">9.89</span>, <span data-claim="page-sde-nll">2.99</span> bits per dimension, and the first <span data-claim="score-sde-1024-celebahq">1024x1024</span> samples from a score-based model.</p>
+</section>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-score-field'), el = document.getElementById('score-canvas');
+  const slider = document.getElementById('rng-score-sigma'), out = document.getElementById('score-readout');
+  const data = PE.swissRoll(240, 11), SMAX = 3, SMIN = .02;
+  const sigOf = v => SMIN * Math.pow(SMAX / SMIN, v / 100);
+  const S = { v: 35, mode: null, P: null, paths: null, u: 0, level: 0 };
+  let stop = () => {};
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  const D = (x, y, s) => PE.idealX0(x, y, 1, s * s, data);
+  // Density of noised data at a point, relative to its peak: how often training ever lands here.
+  const cover = (x, y, s) => { let q = 0; for (const p of data) q += Math.exp(-((x - p[0]) ** 2 + (y - p[1]) ** 2) / (2 * s * s)); return q; };
+  // VE reverse processes with the exact score, on a geometric sigma grid.
+  function integrate(kind) {
+    const g = PE.gauss(PE.rng(12)), starts = [[2.2, 1.8], [-2.4, 1.2], [.3, -2.6], [2.6, -1.2], [-1.6, -2.2], [-.4, 2.6], [1.2, .2], [-2.8, -.2]];
+    const K = 160, grid = Array.from({ length: K + 1 }, (_, k) => SMAX * Math.pow(SMIN / SMAX, k / K));
+    return starts.map(s0 => { let [x, y] = s0; const path = [[x, y]];
+      for (let k = 0; k < K; k++) { const s = grid[k], sn = grid[k + 1], d = D(x, y, s), sc = [(d[0] - x) / (s * s), (d[1] - y) / (s * s)], ds2 = s * s - sn * sn;
+        if (kind === 'sde') { x += ds2 * sc[0] + Math.sqrt(ds2) * g(); y += ds2 * sc[1] + Math.sqrt(ds2) * g(); }
+        else { x += .5 * ds2 * sc[0]; y += .5 * ds2 * sc[1]; }
+        path.push([x, y]); }
+      return path; });
+  }
+  function langevinFrames() {
+    const g = PE.gauss(PE.rng(4)), L = 10, steps = 24, frames = [];
+    let P = Array.from({ length: 220 }, () => [SMAX * g(), SMAX * g()]); frames.push({ P, s: SMAX });
+    for (let i = 0; i < L; i++) { const s = SMAX * Math.pow(SMIN / SMAX, i / (L - 1)), a = .1 * s * s;
+      for (let k = 0; k < steps; k++) P = P.map(([x, y]) => { const d = D(x, y, s);
+        return [x + .5 * a * (d[0] - x) / (s * s) + Math.sqrt(a) * g(), y + .5 * a * (d[1] - y) / (s * s) + Math.sqrt(a) * g()]; });
+      frames.push({ P, s }); }
+    return frames;
+  }
+  let lframes = null;
+  const cv = PE.canvas(el, w => w < 560 ? 1 : .62, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), Bl = PE.css('--blue'), G = PE.css('--green'), Br = PE.css('--brown'), M = PE.css('--muted');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 6.4), s = S.mode === 'langevin' ? S.curS : sigOf(S.v), rs = W < 500 ? 1.4 : 1.9;
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .4));
+    // Arrow grid.
+    const n = W < 500 ? 13 : 19, step = 6.4 / n * (W / H), gF = glow('field'), peak = cover(data[120][0], data[120][1], s);
+    for (let i = 0; i <= n * W / H; i++) for (let j = 0; j <= n; j++) {
+      const x = -3.2 * W / H + (i + .5) * 6.4 / n, y = -3.2 + (j + .5) * 6.4 / n, d = D(x, y, s), vx = d[0] - x, vy = d[1] - y, L = Math.hypot(vx, vy);
+      if (L < 1e-6) continue;
+      const c = Math.min(1, cover(x, y, s) / (peak * .08)), len = Math.min(.42 * 6.4 / n, .9 * L) * (1 + .3 * gF);
+      PE.arrow(ctx, V.X(x), V.Y(y), V.X(x + vx / L * len), V.Y(y + vy / L * len), Bl, 1.3 + gF, 5, .12 + .8 * c);
+    }
+    if (S.mode === 'langevin' && lframes) { const f = lframes[S.level]; f.P.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs + .4, G, .85)); }
+    if (S.paths) { S.paths.forEach(pth => { const k = Math.max(1, Math.round(S.u * (pth.length - 1)));
+      PE.polyline(ctx, pth.slice(0, k + 1).map(p => [V.X(p[0]), V.Y(p[1])]), S.mode === 'sde' ? G : G, S.mode === 'sde' ? 1.2 : 2.2, S.mode === 'sde' ? null : null, .9);
+      PE.dot(ctx, V.X(pth[0][0]), V.Y(pth[0][1]), 4, Br); const e = pth[k]; PE.dot(ctx, V.X(e[0]), V.Y(e[1]), 4.5, G); });
+      if (S.prev) S.prev.forEach(pth => PE.polyline(ctx, pth.map(p => [V.X(p[0]), V.Y(p[1])]), M, 1, [3, 3], .6)); }
+    PE.label(ctx, `noise level sigma = ${s.toFixed(3)}`, 10, 18, M, 12);
+  });
+  function readout() {
+    const s = S.mode === 'langevin' ? S.curS : sigOf(S.v);
+    if (S.mode === 'langevin') { out.textContent = `Annealed Langevin, level ${S.level} of 10 (sigma = ${s.toFixed(3)}): coarse levels gather particles toward the data's rough shape, fine levels sharpen them onto the arms.`; return; }
+    if (S.mode === 'sde') { out.textContent = 'Reverse SDE: jagged paths, because every step adds fresh noise. Run it again from the same starts and they end elsewhere on the spiral.'; return; }
+    if (S.mode === 'ode') { out.textContent = 'Probability flow ODE: smooth, deterministic paths (dashed gray: the SDE paths from the same starts). Same starting point, same ending point, every time.'; return; }
+    out.textContent = s < .1 ? `sigma = ${s.toFixed(3)}: noised training data hugs the spiral, so most arrows out in the plane are faded: a network would never be trained there.`
+      : s > 1 ? `sigma = ${s.toFixed(2)}: noised training data covers the whole plane, so the field is learnable everywhere, but it only describes a blurred spiral.`
+      : `sigma = ${s.toFixed(2)}: in between; arrows near the spiral are trustworthy, far ones less so.`;
+  }
+  function setV(v) { stop(); S.mode = null; S.paths = null; S.prev = null; const v0 = S.v;
+    stop = PE.animate(700, u => { S.v = PE.lerp(v0, v, u); slider.value = Math.round(S.v); cv.redraw(); readout(); }); }
+  slider.addEventListener('input', () => { stop(); S.mode = null; S.paths = null; S.prev = null; S.v = +slider.value; cv.redraw(); readout(); });
+  document.getElementById('btn-score-small').addEventListener('click', () => setV(8));
+  document.getElementById('btn-score-large').addEventListener('click', () => setV(92));
+  document.getElementById('btn-score-langevin').addEventListener('click', () => {
+    stop(); lframes = lframes || langevinFrames(); S.mode = 'langevin'; S.paths = null; S.prev = null;
+    stop = PE.animate(4000, u => { S.level = Math.min(10, Math.floor(u * 10.999)); S.curS = lframes[S.level].s; cv.redraw(); readout(); });
+  });
+  const runPaths = kind => { stop(); S.prev = kind === 'ode' ? integrate('sde') : null; S.mode = kind; S.paths = integrate(kind); S.v = 0; slider.value = 0;
+    stop = PE.animate(2400, u => { S.u = u; cv.redraw(); readout(); }); };
+  document.getElementById('btn-score-sde').addEventListener('click', () => runPaths('sde'));
+  document.getElementById('btn-score-ode').addEventListener('click', () => runPaths('ode'));
+  document.getElementById('btn-score-reset').addEventListener('click', () => { stop(); S.mode = null; S.paths = null; S.prev = null; S.v = 35; slider.value = 35; cv.redraw(); readout(); });
+  readout();
+})();
+</script>
+
+<section id="ch-fast" class="chapter">
+<h2>Fewer steps: DDIM and EDM</h2>
+<p>Once sampling is "follow a deterministic curve", speed becomes a numerical question: how few, and how well placed, can the steps along that curve be? Pick a sampler and a step budget and compare its path (green) with the exact curve (white).</p>
+
+<figure class="viz" id="viz-steps" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="steps-canvas" aria-label="Eight noise starting points integrated to the data with the chosen sampler and number of steps, drawn over the exact probability-flow ODE paths; all particle endpoints shown." role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-steps-anc" aria-pressed="false">DDPM-style (random)</button>
+    <button type="button" id="btn-steps-ddim" aria-pressed="true">DDIM (Euler, DDPM spacing)</button>
+    <button type="button" id="btn-steps-euler-rho" aria-pressed="false">Euler, EDM spacing</button>
+    <button type="button" id="btn-steps-edm" aria-pressed="false">EDM (Heun, EDM spacing)</button>
+  </div>
+  <div class="controls">
+    <span>steps:</span>
+    <button type="button" id="btn-steps-n3" aria-pressed="false">3</button>
+    <button type="button" id="btn-steps-n5" aria-pressed="false">5</button>
+    <button type="button" id="btn-steps-n10" aria-pressed="true">10</button>
+    <button type="button" id="btn-steps-n20" aria-pressed="false">20</button>
+    <button type="button" id="btn-steps-n50" aria-pressed="false">50</button>
+    <button type="button" id="btn-steps-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="steps-readout" aria-live="polite"></p>
+  <figcaption>All four samplers use the exact ideal denoiser, run in EDM's noise-level coordinates (<span class="tex">\sigma_{\max}</span> = 8 for this small toy, <span class="tex">\sigma_{\min}</span> = <span data-claim="edm-sigma-min">0.002</span>, <span class="tex">\rho</span> = <span data-claim="edm-rho">7</span>). "DDPM spacing" puts steps evenly in DDPM's step index <span class="tex">t</span>; "EDM spacing" is EDM Eq. 5. Heun uses two network calls per step except the last. "Path error" is the mean distance from each endpoint to where the exact ODE takes the same start. With a perfect denoiser the samplers differ less than with a real, imperfect network; the sourced table below shows the real gap.</figcaption>
+</figure>
+
+<h3>DDIM: same model, a deterministic sampler</h3>
+<p>DDIM (<span data-claim="page-date-ddim">6 Oct 2020</span>, concurrent with Score SDE) started from an observation about DDPM's loss: it only depends on the one-shot marginals <span class="tex">q(x_t \mid x_0)</span>, never on how consecutive steps are chained. So there is a whole family of different forward processes, most of them not step-by-step Markov chains, that share those marginals and therefore share the <em>same trained network</em>. Each has its own reverse sampler. DDIM's update reads naturally in three parts:</p>
+<div class="eq" id="eq-ddim" data-build data-viz="viz-steps"><div class="tex tex-display">
+x_{t-1} = \htmlData{step=1, link=xhat}{\sqrt{\bar\alpha_{t-1}}\;\htmlClass{t-blue}{\hat x_0}} + \htmlData{step=2, link=direction}{\sqrt{1-\bar\alpha_{t-1}-\sigma_t^2}\;\htmlClass{t-blue}{\epsilon_\theta(x_t, t)}} + \htmlData{step=3, link=fresh}{\htmlClass{t-brown}{\sigma_t\,\epsilon_t}}
+</div></div>
+<p class="eqno">Eq. 12 in DDIM v4, rewritten in DDPM's <span class="tex">\bar\alpha</span> (DDIM's own <span class="tex">\alpha_t</span> means DDPM's <span class="tex">\bar\alpha_t</span>, a notation trap)</p>
+<ul class="gloss">
+  <li><span class="tex">\sqrt{\bar\alpha_{t-1}}\,\hat x_0</span>: the predicted clean image, scaled to the next noise level.</li>
+  <li>The middle term re-adds the <em>predicted</em> noise at the next level's size: "keep the same noise direction, just less of it".</li>
+  <li><span class="tex">\sigma_t\,\epsilon_t</span>: optional fresh noise. A knob <span class="tex">\eta</span> sets <span class="tex">\sigma_t</span>: <span class="tex">\eta = 1</span> behaves like DDPM, <span class="tex">\eta = 0</span> is fully deterministic.</li>
+</ul>
+<p>With <span class="tex">\eta = 0</span> the sampler is a fixed map from noise to image, and it may skip: jump from step 1000 straight to 950, 900 and so on, using only a subsequence of noise levels. DDIM also showed it is a simple (Euler) discretization of the probability flow ODE from the last chapter (its Proposition 1). On the same trained CIFAR-10 model:</p>
+<table class="data" aria-label="CIFAR-10 FID by number of sampling steps, DDIM Table 1">
+  <thead><tr><th>sampler, CIFAR-10 FID (lower is better)</th><th>10 steps</th><th>20</th><th>50</th><th>100</th><th>1000</th></tr></thead>
+  <tbody>
+    <tr><td>DDIM (<span class="tex">\eta = 0</span>)</td><td data-claim="page-ddim-t1-ddim-10">13.36</td><td data-claim="page-ddim-t1-ddim-20">6.84</td><td data-claim="page-ddim-t1-ddim-50">4.67</td><td data-claim="page-ddim-t1-ddim-100">4.16</td><td data-claim="page-ddim-t1-ddim-1000">4.04</td></tr>
+    <tr><td>DDPM-like (<span class="tex">\eta = 1</span>)</td><td data-claim="page-ddim-t1-ddpm-10">41.07</td><td data-claim="page-ddim-t1-ddpm-20">18.36</td><td data-claim="page-ddim-t1-ddpm-50">8.01</td><td data-claim="page-ddim-t1-ddpm-100">5.78</td><td data-claim="page-ddim-t1-ddpm-1000">4.73</td></tr>
+    <tr><td>DDPM, larger variance <span class="tex">\hat\sigma</span></td><td data-claim="page-ddim-t1-sighat-10">367.43</td><td data-claim="page-ddim-t1-sighat-20">133.37</td><td data-claim="page-ddim-t1-sighat-50">32.72</td><td data-claim="page-ddim-t1-sighat-100">9.99</td><td data-claim="page-ddim-t1-sighat-1000">3.17</td></tr>
+  </tbody>
+</table>
+<p class="eqno">DDIM v4, Table 1 (CIFAR-10 rows)</p>
+<p>At a thousand steps the original sampler is still marginally best, but DDIM degrades gracefully while the stochastic ones collapse. The paper summarizes this as <span data-claim="ddim-speedup-abstract">10x to 50x</span> faster sampling for comparable quality. Because the map is deterministic, the same starting noise gives recognizably the same image at any step count, and interpolating between two noises interpolates between images.</p>
+
+<h3>EDM: one ODE, a handful of knobs</h3>
+<p>By 2022 there were many samplers and many training recipes, each described in its own notation. Karras and colleagues at NVIDIA (<span data-claim="page-date-edm">1 Jun 2022</span>, "Elucidating the Design Space") rewrote them all as one ODE in terms of the noise level <span class="tex">\sigma</span> itself:</p>
+<div class="eq" id="eq-edm-ode" data-build data-viz="viz-steps"><div class="tex tex-display">
+\mathrm{d}x = -\htmlData{step=1, link=rate}{\dot\sigma(t)\,\sigma(t)}\;\htmlData{step=2, link=direction}{\htmlClass{t-blue}{\nabla_x \log p\big(x;\sigma(t)\big)}}\;\mathrm{d}t
+</div></div>
+<p class="eqno">Eq. 1 in EDM v2</p>
+<p>With EDM's preferred choice <span class="tex">\sigma(t) = t</span> this becomes <span class="tex">\mathrm{d}x/\mathrm{d}\sigma = (x - D(x;\sigma))/\sigma</span>: at every noise level, the direction of travel is from the current point toward the denoiser's guess. Then every earlier method is just a row of choices in one table (Table 1 in the paper): the schedule, the scaling, where the steps go, which solver, how the network's input and output are scaled, and which noise levels training emphasizes. Because the choices are independent, they could be improved one at a time. The two that matter most for sampling:</p>
+<ul>
+  <li><b>Where to step.</b> Steps are spaced by
+    <span class="tex">\sigma_i = \big(\sigma_{\max}^{1/\rho} + \tfrac{i}{N-1}(\sigma_{\min}^{1/\rho} - \sigma_{\max}^{1/\rho})\big)^{\rho}</span> (Eq. 5) with <span class="tex">\rho</span> = <span data-claim="edm-rho">7</span>, <span class="tex">\sigma_{\max}</span> = <span data-claim="edm-sigma-max">80</span> and <span class="tex">\sigma_{\min}</span> = <span data-claim="edm-sigma-min">0.002</span> for images. Large <span class="tex">\rho</span> crowds steps near low noise, where the image's details are decided and errors are most visible.</li>
+  <li><b>How to step.</b> Euler takes the slope at the start of a step and walks straight. <b>Heun</b> takes that trial step, measures the slope where it landed, and redoes the step with the average of the two slopes. Twice the network calls per step, but its error per step shrinks much faster as steps get smaller, so it wins overall.</li>
+</ul>
+<p>Try the toy: switching DDIM's spacing to EDM's (<b>Euler, EDM spacing</b>) is what rescues the few-step samples here, and Heun then tracks the exact curve most closely. On real models, swapping in EDM's sampler alone, without retraining, cut the network evaluations needed for near-best quality by <span data-claim="page-edm-nfe-vp">7.3x</span> for a VP model, <span data-claim="page-edm-nfe-ve">300x</span> for a VE model and <span data-claim="page-edm-nfe-ddim">3.2x</span> for DDIM.</p>
+<p>EDM also fixed training. The raw network is wrapped so it always sees inputs and targets of unit size (Eq. 7, "preconditioning"): at low noise it predicts a small correction to its input, at high noise it predicts the clean image directly, which answers the twist from Chapter 3. Training noise levels are drawn from a log-normal distribution concentrated on the middle levels that matter most. The result was CIFAR-10 FID <span data-claim="edm-cifar10-uncond-fid">1.97 at 35 NFE</span> unconditionally and <span data-claim="edm-cifar10-cond-fid">1.79 at 35 NFE</span> class-conditionally, beating the previous records (<span data-claim="page-edm-prev-records">1.85 and 2.10</span>) with 35 network function evaluations (NFE) instead of hundreds or thousands.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('steps-canvas'), out = document.getElementById('steps-readout');
+  const data = PE.swissRoll(240, 11), SMAX = 8, SMIN = .002, A = PE.linearAbar;
+  const S = { solver: 'ddim', N: 10, u: 1 };
+  let stop = () => {};
+  const D = (x, y, s) => PE.idealX0(x, y, 1, s * s, data);
+  const rhoGrid = N => { const a = []; for (let i = 0; i < N; i++) a.push((SMAX ** (1 / 7) + i / (N - 1) * (SMIN ** (1 / 7) - SMAX ** (1 / 7))) ** 7); a.push(0); return a; };
+  const ddpmGrid = N => { const a = []; for (let i = 0; i < N; i++) { const t = Math.round(PE.T * (1 - i / N)); a.push(Math.min(SMAX, Math.sqrt((1 - A[t]) / A[t]))); } a.push(0); return a; };
+  const g0 = PE.gauss(PE.rng(5)), P0 = Array.from({ length: 120 }, () => [SMAX * g0(), SMAX * g0()]), show = [3, 17, 29, 44, 58, 71, 86, 102];
+  function run(grid, solver, keep) { const g = PE.gauss(PE.rng(9)); let calls = 0;
+    const res = P0.map(([x, y], idx) => { const path = [[x, y]];
+      for (let i = 0; i < grid.length - 1; i++) { const s = grid[i], sn = grid[i + 1], d = D(x, y, s); calls += idx === 0 ? 1 : 0;
+        if (solver === 'anc') { if (sn === 0) { x = d[0]; y = d[1]; } else { const r = sn * sn / (s * s), sd = sn * Math.sqrt(1 - r); x = r * x + (1 - r) * d[0] + sd * g(); y = r * y + (1 - r) * d[1] + sd * g(); } }
+        else { const dx = (x - d[0]) / s, dy = (y - d[1]) / s; let xn = x + (sn - s) * dx, yn = y + (sn - s) * dy;
+          if (solver === 'heun' && sn > 0) { const d2 = D(xn, yn, sn); calls += idx === 0 ? 1 : 0; xn = x + (sn - s) * (dx + (xn - d2[0]) / sn) / 2; yn = y + (sn - s) * (dy + (yn - d2[1]) / sn) / 2; }
+          x = xn; y = yn; }
+        if (keep) path.push([x, y]); }
+      return { end: [x, y], path }; });
+    return { res, calls }; }
+  const truth = run(rhoGrid(240), 'heun', true).res;
+  const ref = PE.swissRoll(2000, 77), nn = p => Math.sqrt(Math.min(...ref.map(q => (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)));
+  let cur = null;
+  function compute() { const grid = S.solver === 'ddim' || S.solver === 'anc' ? ddpmGrid(S.N) : rhoGrid(S.N);
+    cur = run(grid, S.solver === 'edm' ? 'heun' : S.solver === 'anc' ? 'anc' : 'euler', true); }
+  // Map the huge sigma range into the plot: show positions divided by sqrt(1 + sigma^2) (the VP view).
+  const cv = PE.canvas(el, w => w < 560 ? 1 : .6, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), G = PE.css('--green'), F = PE.css('--fg'), Br = PE.css('--brown');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 4.4), rs = W < 500 ? 1.4 : 1.9;
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .35));
+    const sc = (p, s) => [p[0] / Math.sqrt(1 + s * s), p[1] / Math.sqrt(1 + s * s)];
+    const tg = rhoGrid(240), grid = S.solver === 'ddim' || S.solver === 'anc' ? ddpmGrid(S.N) : rhoGrid(S.N);
+    show.forEach(i => PE.polyline(ctx, truth[i].path.map((p, k) => { const q = sc(p, tg[k]); return [V.X(q[0]), V.Y(q[1])]; }), F, 1, null, .45));
+    if (cur) {
+      const n = Math.max(1, Math.round(S.u * (grid.length - 1)));
+      show.forEach(i => { const pts = cur.res[i].path.slice(0, n + 1).map((p, k) => { const q = sc(p, grid[k]); return [V.X(q[0]), V.Y(q[1])]; });
+        PE.polyline(ctx, pts, G, 2, null, .95); pts.forEach(([x, y]) => PE.dot(ctx, x, y, 2.6, G));
+        const q0 = sc(P0[i], SMAX); PE.dot(ctx, V.X(q0[0]), V.Y(q0[1]), 3.5, Br); });
+      if (S.u >= 1) cur.res.forEach(r => PE.dot(ctx, V.X(r.end[0]), V.Y(r.end[1]), rs + .6, G, .8));
+    }
+    PE.label(ctx, 'white: exact ODE path   green: sampler   (positions shown rescaled by the noise level)', 10, H - 10, PE.css('--muted'), W < 500 ? 9.5 : 11);
+  });
+  function readout() {
+    const err = cur.res.reduce((s, r, i) => s + Math.hypot(r.end[0] - truth[i].end[0], r.end[1] - truth[i].end[1]), 0) / cur.res.length;
+    const dist = cur.res.reduce((s, r) => s + nn(r.end), 0) / cur.res.length;
+    const name = { anc: 'DDPM-style random sampler', ddim: 'DDIM', 'euler-rho': 'Euler with EDM spacing', edm: 'EDM Heun' }[S.solver];
+    out.textContent = `${name}, ${S.N} steps = ${cur.calls} network calls. Distance of samples to the data: ${dist.toFixed(3)}. `
+      + (S.solver === 'anc' ? 'Path error is not meaningful: this sampler is random and does not follow the ODE.' : `Path error vs the exact ODE: ${err.toFixed(3)}.`);
+  }
+  const solvers = { anc: 'btn-steps-anc', ddim: 'btn-steps-ddim', 'euler-rho': 'btn-steps-euler-rho', edm: 'btn-steps-edm' }, Ns = [3, 5, 10, 20, 50];
+  function set(o) { stop(); Object.assign(S, o); compute();
+    Object.entries(solvers).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', k === S.solver));
+    Ns.forEach(n => document.getElementById('btn-steps-n' + n).setAttribute('aria-pressed', n === S.N));
+    readout(); stop = PE.animate(1300, u => { S.u = u; cv.redraw(); }); }
+  Object.entries(solvers).forEach(([k, id]) => document.getElementById(id).addEventListener('click', () => set({ solver: k })));
+  Ns.forEach(n => document.getElementById('btn-steps-n' + n).addEventListener('click', () => set({ N: n })));
+  document.getElementById('btn-steps-reset').addEventListener('click', () => set({ solver: 'ddim', N: 10 }));
+  compute(); readout();
+})();
+</script>

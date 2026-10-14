@@ -1,0 +1,128 @@
+<section id="ch-coteach" class="chapter">
+<h2>Two networks check each other</h2>
+<p>Chapter 7 showed that early in training a small loss usually means a correct label. Co-teaching trains only on the small-loss part of each batch, and adds one twist: two networks pick for each other.</p>
+
+<figure class="viz" id="viz-coteach" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="coteach-canvas" class="tiles" role="img" aria-label="Two rows of the same 32 CIFAR-10 images, each sorted by one network's loss; the images left of a dashed line are kept and outlined in green, the rest are dimmed. When revealed, images with a flipped label carry a red strike. Below: the clean share of the kept images and the test accuracy per epoch for Co-teaching, and the test accuracy of plain training."></canvas>
+  <div class="controls">
+    <span style="color:var(--muted)">epoch</span>
+    <button type="button" id="btn-coteach-e2" aria-pressed="false">2</button>
+    <button type="button" id="btn-coteach-e10" aria-pressed="true">10</button>
+    <button type="button" id="btn-coteach-e50" aria-pressed="false">50</button>
+    <button type="button" id="btn-coteach-e200" aria-pressed="false">200</button>
+    <button type="button" id="btn-coteach-hide" aria-pressed="true">Hide the truth</button>
+    <button type="button" id="btn-coteach-reveal" aria-pressed="false">Reveal flipped labels</button>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-coteach-two" aria-pressed="true">Co-teaching (two networks)</button>
+    <button type="button" id="btn-coteach-self" aria-pressed="false">Plain training (one network)</button>
+    <button type="button" id="btn-coteach-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="coteach-readout" aria-live="polite"></p>
+  <figcaption>Computed from our runs A and B: the same 40% symmetric noise, network and schedule as chapter 7; run B trains two networks with Co-teaching. The batch is 32 training images drawn for this figure, 13 of them with a flipped label; the losses are each network's at the end of the chosen epoch. Guess before you reveal: at epoch 200, are the kept images cleaner or dirtier than at epoch 10?</figcaption>
+</figure>
+
+<p>Each step, both networks compute the loss of every image in the batch. Each keeps its own <span class="tex">R(T)</span> fraction with the smallest loss, and then hands that pick to the <em>other</em> network, which takes its gradient step on it:</p>
+
+<div class="eq" id="eq-coteach" data-build data-viz="viz-coteach"><div class="tex tex-display">
+\begin{aligned}
+\htmlData{step=1, link=keep}{\bar{\mathcal{D}}_f} &\htmlData{step=1, link=keep}{= \arg\min_{\mathcal{D}' : |\mathcal{D}'| \ge R(T)|\bar{\mathcal{D}}|} \htmlClass{t-red}{\ell(f, \mathcal{D}')}} \\
+\htmlData{step=2, link=swap}{w_f} &\htmlData{step=2, link=swap}{\leftarrow w_f - \eta \nabla \htmlClass{t-red}{\ell(f, \bar{\mathcal{D}}_g)}, \quad w_g \leftarrow w_g - \eta \nabla \htmlClass{t-red}{\ell(g, \bar{\mathcal{D}}_f)}} \\
+\htmlData{step=3, link=rate}{R(T)} &\htmlData{step=3, link=rate}{= 1 - \min\Big\{ \tfrac{T}{T_k}\,\tau, \; \tau \Big\}}
+\end{aligned}
+</div></div>
+<p class="eqno">Han et al. (2018), Algorithm 1, steps 4 (and 5 for <span class="tex">g</span>), 6 and 7, and 8.</p>
+<ul class="gloss">
+  <li><span class="tex">\bar{\mathcal{D}}</span>: the mini-batch; <span class="tex">\bar{\mathcal{D}}_f</span>: the images network <span class="tex">f</span> keeps.</li>
+  <li><span class="tex">R(T)</span>: the share kept at epoch <span class="tex">T</span>. It starts at 1 (keep everything while nothing is memorized yet) and falls over <span data-claim="coteaching-tk">T_k = 10</span> epochs to <span class="tex">1 - \tau</span>, where <span class="tex">\tau</span> is set to the noise rate.</li>
+</ul>
+
+<p>Why two networks? One network that picks its own small-loss images trains on its own mistakes: a wrong label it happens to fit gets a small loss, gets kept, and gets fit harder. Two networks with different random starts make different mistakes, so each filters some of the other's. Press "Plain training": with one network, by epoch 200 every flipped image has a small loss, and the sort tells you nothing.</p>
+
+<p>In our run, the clean share of network <span class="tex">f</span>'s kept set rose from <span data-claim="run-b-prec-e1">60.3%</span> in epoch 1 to <span data-claim="run-b-prec-e10">92.9%</span> in epoch 10, then slipped to <span data-claim="run-b-prec-e200">88.0%</span> by epoch 200. Over the last ten epochs Co-teaching averaged <span data-claim="run-b-last10">78.56%</span> test accuracy, against <span data-claim="run-a-last10">60.58%</span> for plain training on the same labels. The paper's own CIFAR-10 numbers bracket ours: <span data-claim="coteaching-t5-sym50-coteaching">74.02% +/- 0.04%</span> at 50% noise and <span data-claim="coteaching-t5-sym20-coteaching">82.32% +/- 0.07%</span> at 20%, against <span data-claim="coteaching-t5-sym50-standard">48.87% +/- 0.52%</span> and <span data-claim="coteaching-t5-sym20-standard">76.25% +/- 0.28%</span> for standard training. The slow slide in precision is what the follow-up Co-teaching+ attacked: as training goes on, the two networks come to agree, and the peer check weakens.</p>
+
+<h3>Inside Co-teaching: forward, then backward</h3>
+<figure class="viz archflow" id="viz-ctflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-ctflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-ctflow-nets" aria-pressed="false">2 Two networks</button>
+    <button type="button" id="btn-ctflow-losses" aria-pressed="false">3 Per-image loss</button>
+    <button type="button" id="btn-ctflow-select" aria-pressed="false">4 Keep small loss</button>
+    <button type="button" id="btn-ctflow-loss" aria-pressed="false">5 Swap and average</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-ctflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-ctflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Epoch">
+    <span>epoch</span>
+    <button type="button" id="btn-ctflow-ep1" aria-pressed="false">1</button>
+    <button type="button" id="btn-ctflow-ep5" aria-pressed="false">5</button>
+    <button type="button" id="btn-ctflow-ep10" aria-pressed="true">10 and later</button>
+  </div>
+  <canvas id="ctflow-canvas" role="img" aria-label="Co-teaching's training step as a diagram: a batch of images goes into two copies of the 9-layer CNN; each produces per-image losses; each keeps its small-loss subset; the subsets cross over into two losses. In the backward stages red arrows run from each loss into the network on the other side of the swap."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ctflow-prev">Previous</button>
+    <button type="button" id="btn-ctflow-next">Next</button>
+    <button type="button" id="btn-ctflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ctflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Two identical networks, one batch, two losses that cross over. Press <b>1 Batch</b>, then <b>Next</b>.</p></div>
+    <div data-stage="batch" hidden><h4>1. One batch</h4><p><span data-claim="coteaching-batch">128</span> CIFAR-10 images with their (possibly wrong) labels. In the official code there is no augmentation.</p></div>
+    <div data-stage="nets" hidden><h4>2. Two networks</h4><p>Two copies of the same 9-layer CNN (LReLU with slope <span data-claim="coteaching-lrelu">0.01</span>, batch norm, dropout), initialized differently. Both see the same batch.</p></div>
+    <div data-stage="losses" hidden><h4>3. Per-image loss</h4><p>Each network computes the cross-entropy of every image against its given label: 128 numbers each, not one average.</p></div>
+    <div data-stage="select" hidden><h4>4. Keep the small losses</h4><p>Each network sorts its 128 losses and keeps the smallest <span class="tex">R(T)</span> share. The kept indices are the only thing passed on.</p></div>
+    <div data-stage="loss" hidden><h4>5. Swap</h4><p>Network <span class="tex">f</span>'s loss is averaged over the images <span class="tex">g</span> kept, and the other way round.</p></div>
+    <div data-stage="backward" hidden><h4>6. Where the gradient goes</h4><p>Each loss sends gradient only into its own network, and only through the images its peer kept. The dropped images contribute nothing this step. Nothing is frozen.</p></div>
+    <div data-stage="update" hidden><h4>7. Update</h4><p>Adam with learning rate <span data-claim="coteaching-lr">0.001</span> steps both networks, for <span data-claim="coteaching-epochs">200</span> epochs. The official code also decays the learning rate from epoch 80 (code-only). At the end of each epoch <span class="tex">R(T)</span> is updated.</p></div>
+  </div>
+  <figcaption>Computed: tensor shapes from the paper's batch size and the 10 CIFAR-10 classes; kept counts from <span class="tex">R(T)</span> with <span class="tex">\tau = 0.4</span> and <span class="tex">T_k = 10</span>, as in our run B.</figcaption>
+</figure>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>You do not have to wait for the review queue to empty before you train. Train with small-loss selection, set the drop rate from an estimate of the noise rate (chapter 9 gives one), and send the images that both networks keep dropping to review.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('coteach-readout');
+  const f = FIG.coteach(document.getElementById('coteach-canvas'), { say: t => out.textContent = t });
+  const id = k => document.getElementById('btn-coteach-' + k);
+  const es = [2, 10, 50, 200].map(e => id('e' + e)), rv = [id('hide'), id('reveal')], md = [id('two'), id('self')];
+  es.forEach((b, k) => b.addEventListener('click', () => { KIT.press(es, b); f.epoch([2, 10, 50, 200][k]); }));
+  rv.forEach(b => b.addEventListener('click', () => { KIT.press(rv, b); f.reveal(b === rv[1]); }));
+  md.forEach(b => b.addEventListener('click', () => { KIT.press(md, b); f.mode(b === md[0] ? 'two' : 'self'); }));
+  id('reset').addEventListener('click', () => { KIT.press(es, es[1]); KIT.press(rv, rv[0]); KIT.press(md, md[0]); f.reset(); });
+})();
+(() => {
+  const x = ' x ';
+  const keep = v => Math.floor(128 * v.R + 1e-9);   // the official code keeps int(R * batch)
+  ArchFlow.mount({
+    prefix: 'ctflow', grid: { cols: 5, rows: 2 },
+    boxes: {
+      batch: { c: 0, r: .5, lane: 'yellow', title: ['images +', 'given labels'], glyph: 'photos', data: true },
+      f: { c: 1, r: 0, lane: 'blue', title: ['network f'], glyph: 'layers' }, g: { c: 1, r: 1, lane: 'blue', title: ['network g'], glyph: 'layers' },
+      lf: { c: 2, r: 0, lane: 'red', title: ['losses of f'], glyph: 'vector', nograd: true }, lg: { c: 2, r: 1, lane: 'red', title: ['losses of g'], glyph: 'vector', nograd: true },
+      kf: { c: 3, r: 0, lane: 'green', title: ['f keeps', 'small losses'], glyph: 'tokens', nograd: true }, kg: { c: 3, r: 1, lane: 'green', title: ['g keeps', 'small losses'], glyph: 'tokens', nograd: true },
+      Lf: { c: 4, r: 0, lane: 'red', title: ['loss of f on', "g's pick"], glyph: 'loss' }, Lg: { c: 4, r: 1, lane: 'red', title: ['loss of g on', "f's pick"], glyph: 'loss' },
+    },
+    edges: [['batch', 'f'], ['batch', 'g'], ['f', 'lf'], ['g', 'lg'], ['lf', 'kf'], ['lg', 'kg'], ['kg', 'Lf'], ['kf', 'Lg'], ['f', 'Lf'], ['g', 'Lg']],
+    stages: [{ key: 'batch', show: ['batch'] }, { key: 'nets', show: ['f', 'g'] }, { key: 'losses', show: ['lf', 'lg'] }, { key: 'select', show: ['kf', 'kg'] },
+      { key: 'loss', show: ['Lf', 'Lg'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: { ep1: { R: .96, e: 1 }, ep5: { R: .8, e: 5 }, ep10: { R: .6, e: 10 } }, variant: 'ep10',
+    shape: (id, v) => ({ batch: `128${x}3${x}32${x}32`, f: `128${x}10 logits`, g: `128${x}10 logits`, lf: '128 losses', lg: '128 losses', kf: `${keep(v)} indices`, kg: `${keep(v)} indices`, Lf: 'one number', Lg: 'one number' })[id],
+    params: id => (id === 'f' || id === 'g') ? '9 conv layers + 1 linear' : null,
+    frozen: () => false,
+    readout: (s, v) => ({ overview: `Epoch ${v.e}: R(T) = ${v.R.toFixed(2)}, so each network keeps ${keep(v)} of 128 images.`,
+      batch: `A batch of 128 images: 128${x}3${x}32${x}32.`, nets: 'Both networks map the batch to 128 x 10 logits.',
+      losses: 'Per-image cross-entropy: 128 numbers per network.', select: `Each keeps the ${keep(v)} smallest of its 128 losses (R(T) = ${v.R.toFixed(2)}).`,
+      loss: `Loss of f = mean cross-entropy of f on g's ${keep(v)} images; loss of g likewise on f's.`,
+      backward: "Gradient flows from each loss into its own network only, through the peer's kept images.", update: 'Adam steps both networks; R(T) is updated at the end of the epoch.' })[s],
+  });
+})();
+</script>
+</section>

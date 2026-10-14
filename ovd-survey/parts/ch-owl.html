@@ -1,0 +1,129 @@
+<p class="kicker"><span class="act-n">Act III</span>Make CLIP the detector (2022-2023)</p>
+
+<section id="ch-owl" class="chapter">
+<h2>OWL-ViT: every patch is a candidate object</h2>
+<div class="tapstrip" data-model="owl" role="img" aria-label="The tap strip for OWL-ViT. The image lane runs from image through backbone, encoder, queries and region features to the score. The text lane joins it only at the final score."></div>
+<p class="note">Where text enters: only at the final score. The image tower never sees the query, so one pass over the image serves any number of queries.</p>
+
+<p>ViLD kept a two-stage detector and taught its region head to imitate CLIP. OWL-ViT goes the other way: it takes CLIP's own image tower and lets every token that comes out of it be a detection.</p>
+
+<figure class="viz" id="viz-owl" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="owl-canvas" tabindex="0" role="img" aria-label="The warehouse scene under a grid of 16 by 9 tokens. Every token draws one faint blue box: tokens on an object draw boxes around that object, tokens on the background draw small boxes on their own patch. A panel lists four queries, the word forklift, the word pallet, the rare name delineator, and an example box cut from another image, with the selected token's score for each, and a strip of all token scores with the threshold."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-owl-boxes" aria-pressed="true">Every token predicts a box</button>
+    <button type="button" id="btn-owl-forklift" aria-pressed="false">Query <span class="prompt">forklift</span></button>
+    <button type="button" id="btn-owl-pallet" aria-pressed="false">Query <span class="prompt">pallet</span></button>
+    <button type="button" id="btn-owl-rare" aria-pressed="false">Query <span class="prompt">delineator</span></button>
+    <button type="button" id="btn-owl-image" aria-pressed="false">Query by example box</button>
+    <button type="button" id="btn-owl-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls">
+    <label for="owl-thr">Score threshold <b id="owl-thr-value">0.50</b></label>
+    <input type="range" id="owl-thr" min="0.05" max="0.95" step="0.05" value="0.5">
+  </div>
+  <p class="readout" id="owl-readout" aria-live="polite"></p>
+  <figcaption>Each token's score for a query is a dot product of two embeddings, passed through a sigmoid. Green cells and green boxes are tokens at or above the threshold. Click a token, or focus the figure and use the arrow keys, to see its box and its score for every query. <span class="prompt">delineator</span> is a specialist name for a road marker like the cone; the example box is a cone cut from another image. The embeddings are six-dimensional toys tuned by hand; real ones have hundreds of dimensions.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> Press <em>Query forklift</em>. Before you press <em>Query pallet</em>, decide which boxes will move. Then press it.</p>
+
+<p>None of them move. Each box and each embedding comes from the image alone. A new query adds one new column of dot products against embeddings that already exist. The paper calls this "no fusion between image and text encoders", and it is why a query costs almost nothing.</p>
+
+<h3>Take away the pooling</h3>
+<p>CLIP's image tower is a Vision Transformer (ViT). It cuts the image into square patches, turns each patch into a token, and runs attention layers over all the tokens (<a href="../vlm-survey/explainer.html#ch-patches">VLM survey, patches</a>). At the top, CLIP pools the tokens into one vector and matches that vector to a caption (<a href="../vlm-survey/explainer.html#ch-shared-space">the shared space</a>). One vector per image is right for classification. A detector needs one vector per object.</p>
+<p>OWL-ViT removes the pooling and the final projection (Sec. 3.1). Each output token then feeds two small heads: a linear class head that gives one embedding per token, and a small MLP that gives one box per token. A ViT-B/32 at <span data-claim="owl-page-res-768">768 x 768</span> pixels has <span data-claim="owlvit-b32-768-tokens">576</span> tokens, so it predicts <span data-claim="owlvit-b32-768-tokens">576</span> boxes. LVIS images hold at most <span data-claim="owlvit-lvis-max-instances">294</span> objects, so the tokens are enough. The two heads hold at most <span data-claim="owlvit-head-params">1.1%</span> of the parameters; everything else comes pretrained.</p>
+
+<h3>One box per token, anchored to its own patch</h3>
+<p>The box MLP predicts four numbers per token. A fixed bias puts each token's default box on its own patch of the grid, and the MLP learns only the offset, like the anchor offsets of a region proposal network (chapter 3). The bias matters most for a pure ViT: without it, ViT-B/32 lost <span data-claim="owlvit-abl-b32-no-loc-bias-dap">-2.8</span> AP and <span data-claim="owlvit-abl-b32-no-loc-bias-dapr">-2.9</span> APr, and the hybrid R26+B/32 lost <span data-claim="owlvit-abl-no-loc-bias-dap">-1.2</span> and <span data-claim="owlvit-abl-no-loc-bias-dapr">-1.1</span> (LVIS, Tables 3 and A5).</p>
+
+<h3>The score, in chapter 1's notation</h3>
+<p>Neither OWL paper prints an equation: they describe the heads and the loss in words. The score is the dot product from chapter 1, computed for every token and every query, with a sigmoid in place of a softmax. In our notation:</p>
+
+<div class="eq" id="eq-owl" data-build data-viz="viz-owl"><div class="tex tex-display">
+\begin{gathered}
+\htmlData{step=1, link=tokens}{\htmlClass{t-blue}{O} = \mathrm{head}_{\mathrm{cls}}\big(\mathrm{ViT}(\text{image})\big)} \qquad \htmlData{step=2, link=boxes}{\htmlClass{t-blue}{B} = \mathrm{MLP}\big(\mathrm{ViT}(\text{image})\big) + b_{\mathrm{grid}}} \\
+\htmlData{step=3, link=queries}{\htmlClass{t-yellow}{Q} = \big[\mathrm{Enc}(q_1); \ldots; \mathrm{Enc}(q_m)\big]} \qquad \htmlData{step=4, link=scores}{\htmlClass{t-green}{S} = \sigma\big(\htmlClass{t-blue}{O}\,\htmlClass{t-yellow}{Q}^{\top}\big)}
+\end{gathered}
+</div></div>
+<p class="eqno">Our notation, after GLIP Eq. 3 in chapter 1. OWL-ViT (2205.06230v2) describes this head in words in Sec. 3.1 and prints no equation.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{O}</span>: one class embedding per token, <span class="tex">N \times d</span> for <span class="tex">N</span> tokens.</li>
+  <li><span class="tex">\htmlClass{t-blue}{B}</span>: one box per token, <span class="tex">N \times 4</span>. <span class="tex">b_{\mathrm{grid}}</span> places each default box on its token's own patch.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{Q}</span>: one embedding per query, <span class="tex">m \times d</span>. The text tower encodes each query alone, at most <span data-claim="owlvit-text-maxlen">16</span> text tokens long. A query can also be an image embedding (below).</li>
+  <li><span class="tex">\htmlClass{t-green}{S}</span>: <span class="tex">N \times m</span> probabilities. <span class="tex">\sigma</span> is a sigmoid on each entry, so a box can match several queries, or none. You keep the boxes whose score passes your threshold.</li>
+</ul>
+<p>The sigmoid also suits the training data. Large detection sets such as LVIS label each image in a federated way: some classes are marked present, some absent, and the rest are unknown. A softmax would force each box to pick exactly one class; a sigmoid per query does not (Sec. 3.2).</p>
+
+<h3>No fusion, so queries are cheap</h3>
+<p>GLIP (chapters 7 and 8) joins all class names into one sentence and mixes it into the image encoder; MDETR also fuses text into the image side, and for detection runs one pass per class name. Their image features then depend on the prompt, and a new prompt means a new pass through the fusion layers. OWL-ViT encodes each query alone and never mixes text into the image tower. So it can use thousands of queries per image (Sec. 3.1). In the LVIS test, every image gets all <span data-claim="owlvit-lvis-queries">1203</span> class names as queries, each written in <span data-claim="owlvit-eval-prompts">7</span> prompt templates whose scores are averaged. Chapter 8 measures what fusion buys in exchange.</p>
+
+<h3>Training: DETR's matching, and a careful text tower</h3>
+<p>Training follows DETR (<a href="../detr-family/explainer.html#ch-matching">DETR family, matching</a>): a bipartite matching gives each labelled object exactly one prediction, and every other prediction learns "no object". OWL-ViT keeps the matching but has no decoder; the tokens are the predictions. The loss adds an L1 box loss, a generalized IoU loss and a focal sigmoid classification loss, with equal weights (focal alpha <span data-claim="owlvit-focal-alpha">0.3</span>, gamma <span data-claim="owlvit-focal-gamma">2.0</span>). Each training image gets its positive and known-absent classes as queries, plus classes sampled by frequency until it has at least <span data-claim="owlvit-min-negatives">50</span> negatives.</p>
+<p>Nothing is frozen. Both towers train end to end on about <span data-claim="owlvit-det-images">2 million</span> detection images, but the text tower's learning rate is <span data-claim="owlvit-lr-text">2e-6</span>, <span data-claim="owlvit-lr-text-ratio">100x</span> below the image tower's in the ablation baseline (Sec. 4.6). The paper suggests the small rate keeps the text tower from forgetting what it learned from captions. Its ablation table (Table A5, R26+B/32) shows the trade: training the text tower at the image rate changes AP by <span data-claim="owlvit-abl-same-lr-dap">-3.0</span> and APr by <span data-claim="owlvit-abl-same-lr-dapr">-8.5</span>; freezing it changes them by <span data-claim="owlvit-abl-frozen-text-dap">-1.5</span> and <span data-claim="owlvit-abl-frozen-text-dapr">-2.3</span>. The text calls full freezing "poor"; the table shows it is less bad than a full learning rate.</p>
+
+<h3>Inside OWL-ViT: forward, then backward</h3>
+<p>The stepper follows one batch through the model. The model buttons recompute the shapes from each model's resolution and patch size.</p>
+
+<figure class="viz archflow" id="viz-owlflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-owlflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-owlflow-vit" aria-pressed="false">2 ViT</button>
+    <button type="button" id="btn-owlflow-nopool" aria-pressed="false">3 No pooling</button>
+    <button type="button" id="btn-owlflow-heads" aria-pressed="false">4 Heads</button>
+    <button type="button" id="btn-owlflow-queries" aria-pressed="false">5 Queries</button>
+    <button type="button" id="btn-owlflow-scores" aria-pressed="false">6 Scores</button>
+    <button type="button" id="btn-owlflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-owlflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-owlflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model">
+    <span>model</span>
+    <button type="button" id="btn-owlflow-b32" aria-pressed="false">CLIP B/32 at 768</button>
+    <button type="button" id="btn-owlflow-b16" aria-pressed="false">CLIP B/16 at 768</button>
+    <button type="button" id="btn-owlflow-l14" aria-pressed="true">CLIP L/14 at 840</button>
+    <button type="button" id="btn-owlflow-v2" aria-pressed="false">OWLv2 L/14 at 1008</button>
+  </div>
+  <canvas id="owlflow-canvas" role="img" aria-label="OWL-ViT's training step as a diagram. The image goes through the ViT image tower; every output token feeds a class head and a box MLP. Query strings go through the text tower. Class embeddings and query embeddings meet in a green score box, which feeds matching and the loss together with the boxes. In the backward stages every box with weights, including the text tower, gets a red outline: nothing is frozen."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-owlflow-prev">Previous</button>
+    <button type="button" id="btn-owlflow-next">Next</button>
+    <button type="button" id="btn-owlflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="owlflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One image tower, one text tower, two small heads. The <b class="c-blue">image lane</b> and the <b class="c-yellow">text lane</b> meet only in the <b class="c-green">score</b> box, and the <b class="c-red">loss</b> grades scores and boxes together. Press <b>1 Image</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. One image, padded to a square</h4><p>Images are resized to the detection resolution: <span data-claim="owl-page-res-768">768</span> pixels for the CLIP B/32 and B/16 models, <span data-claim="owl-page-res-840">840</span> for L/14 (Table A3). OWLv2 uses <span data-claim="owlv2-res-14">1008</span> for its /14 models. After random cropping, each image is padded to a square with gray at the bottom and right (App. A1.6). The batch holds <span data-claim="owlvit-ft-batch">256</span> images.</p></div>
+    <div data-stage="vit" hidden><h4>2. Patches become tokens</h4><p>A standard ViT. Its position embeddings, learned at the small pretraining size, are interpolated to the detection size (Sec. 4.1). The token count grows with the square of the resolution: <span data-claim="owlvit-b32-768-tokens">576</span> for B/32 at 768 (printed), <span data-claim="owlvit-b16-768-tokens">2304</span> for B/16 at 768 and <span data-claim="owlvit-l14-840-tokens">3600</span> for L/14 at 840 (<span class="reading">our reading</span>), <span data-claim="owlv2-l14-1008-tokens">5184</span> for OWLv2's L/14 at 1008 (printed).</p></div>
+    <div data-stage="nopool" hidden><h4>3. Keep every token</h4><p>CLIP's pooling and final projection are removed, so every token survives to the heads. The CLIP towers also emit a class token; OWL-ViT multiplies it into every patch token and applies a layer norm (App. A1.3), so the predictions come from the patch tokens.</p></div>
+    <div data-stage="heads" hidden><h4>4. Two small heads per token</h4><p>A linear class head turns each token into an embedding that lives in the text tower's space. A small MLP turns each token into a box: an offset from a default box centred on the token's own patch (Sec. 4.1). The heads hold at most <span data-claim="owlvit-head-params">1.1%</span> of the parameters.</p></div>
+    <div data-stage="queries" hidden><h4>5. Queries, one at a time</h4><p>Each query string, at most <span data-claim="owlvit-text-maxlen">16</span> text tokens long, goes through the text tower alone. In training, the queries are the image's positive and known-absent classes plus sampled pseudo-negatives (at least <span data-claim="owlvit-min-negatives">50</span>). In the LVIS test, every image gets all <span data-claim="owlvit-lvis-queries">1203</span> names, each in <span data-claim="owlvit-eval-prompts">7</span> templates.</p></div>
+    <div data-stage="scores" hidden><h4>6. One matrix of scores</h4><p>Every token embedding meets every query embedding in a dot product. A sigmoid turns each entry into a probability on its own. This is the only place where text and image meet.</p></div>
+    <div data-stage="loss" hidden><h4>7. Matching, then three losses</h4><p>DETR's bipartite matching pairs each labelled object with one prediction. Matched predictions get an L1 and a generalized IoU box loss; all predictions get a focal sigmoid loss (alpha <span data-claim="owlvit-focal-alpha">0.3</span>, gamma <span data-claim="owlvit-focal-gamma">2.0</span>), and the three have equal weights. The loss is normalized per image, and each image's gradient is clipped to norm <span data-claim="owlvit-grad-clip">1.0</span> before the batch is summed (App. A1.9).</p></div>
+    <div data-stage="backward" hidden><h4>8. The gradient reaches everything</h4><p>From the loss into the box MLP and the class head, down every ViT layer to the patch embedding, and through the scores into the text tower. No box is brown. The text tower is the careful part: freezing it changed LVIS AP by <span data-claim="owlvit-abl-frozen-text-dap">-1.5</span> and APr by <span data-claim="owlvit-abl-frozen-text-dapr">-2.3</span>, and training it at the image rate changed them by <span data-claim="owlvit-abl-same-lr-dap">-3.0</span> and <span data-claim="owlvit-abl-same-lr-dapr">-8.5</span> (R26+B/32, Table A5).</p></div>
+    <div data-stage="update" hidden><h4>9. Two learning rates</h4><p>OWL-ViT: Adam with cosine decay, image learning rate <span data-claim="owlvit-lr-clip-b">5e-5</span> for the CLIP B models and <span data-claim="owlvit-lr-clip-l14">2e-5</span> for L/14, at most <span data-claim="owlvit-ft-steps-max">140k</span> steps (<span data-claim="owlvit-ft-steps-l14">70k</span> for L/14; Table A3). The paper's recipe sets the text tower to <span data-claim="owlvit-lr-text">2e-6</span>; it does not print a separate text rate for each CLIP row. OWLv2 uses <span data-claim="owlv2-lr-text">2e-6</span> for the text tower of every model and <span data-claim="owlv2-lr-l14">2e-5</span> for the L/14 image tower (App. A.7, Table A2).</p></div>
+  </div>
+  <figcaption>Computed: token counts are (resolution / patch size) squared, from each model's detection resolution. The widths d and d<sub>q</sub> are not printed in either paper, so they stay symbolic. "Low lr" on the text tower means a learning rate far below the image tower's.</figcaption>
+</figure>
+
+<h3>Query by example</h3>
+<p>The class head does not care where a query vector comes from. Give it the embedding of a box from another image, and it finds things that look like that box: one-shot detection. The toy's last button does this with a cone. To get the query, OWL-ViT runs the model on the example image, takes the predicted boxes that overlap the example box with IoU above <span data-claim="owlvit-oneshot-iou">0.65</span>, and keeps the embedding most unlike the others (App. A1.7). In about <span data-claim="owlvit-oneshot-fallback">10%</span> of cases no box overlaps enough, and the paper falls back to a generic text query.</p>
+<p>On COCO categories held out from training, one-shot AP50 rises from <span data-claim="owlvit-oneshot-ait-unseen-mean">24.3</span> for AIT, the best earlier method, to <span data-claim="owlvit-oneshot-unseen-mean">41.8</span>; both are means over four splits. Averaging the embeddings of <span data-claim="owlvit-oneshot-unseen-k10-mean">10 examples per class gives 46.8</span> (Table 2). These numbers come from a different model than the rest of this chapter: an R50+H/32 hybrid at <span data-claim="owl-page-res-960">960</span> pixels (Table A3), which has <span data-claim="owlvit-r50h32-960-tokens">900</span> tokens (<span class="reading">our reading</span>). The paper's Fig. 2 shows the case the toy imitates: a text query for one moth species fails, and an image query finds it. Chapter 11 returns to visual prompts.</p>
+
+<h3>How well it names rare things</h3>
+<p>OWL-ViT never sees a box of an LVIS rare class: the paper removes those boxes from all its detection data (Sec. 4.3). So its rare-class AP measures names learned only in image-text pretraining.</p>
+<table class="data">
+  <caption class="note" style="caption-side:bottom;text-align:left">OWL-ViT Table 1, LVIS v1.0 val. Box AP: OWL-ViT has no mask head and the table does not say box or mask, so "box" is <span class="reading">our reading</span>. APr is AP on the rare classes. The last row trains only on the LVIS base classes; its overall AP includes trained classes and is not shown.</caption>
+  <thead><tr><th>Image tower and resolution</th><th>Detection training data</th><th>AP</th><th>APr</th></tr></thead>
+  <tbody>
+    <tr><td>CLIP B/32, <span data-claim="owl-page-res-768">768</span></td><td>Objects365 + Visual Genome</td><td><span data-claim="owlvit-lvis-clip-b32-ap">22.1</span></td><td><span data-claim="owlvit-lvis-clip-b32-apr">18.9</span></td></tr>
+    <tr><td>CLIP B/16, <span data-claim="owl-page-res-768">768</span></td><td>Objects365 + Visual Genome</td><td><span data-claim="owlvit-lvis-clip-b16-ap">27.2</span></td><td><span data-claim="owlvit-lvis-clip-b16-apr">20.6</span></td></tr>
+    <tr><td>CLIP L/14, <span data-claim="owl-page-res-840">840</span></td><td>Objects365 + Visual Genome</td><td><span data-claim="owlvit-lvis-clip-l14-ap">34.6</span></td><td><span data-claim="owlvit-lvis-clip-l14-apr">31.2</span></td></tr>
+    <tr><td>CLIP L/14, <span data-claim="owl-page-res-840">840</span></td><td>LVIS base classes</td><td>not shown</td><td><span data-claim="owlvit-lvis-clip-l14-base-apr">25.6</span></td></tr>
+  </tbody>
+</table>
+<p>Read the last two rows together. The same model reaches <span data-claim="owlvit-lvis-clip-l14-apr">31.2</span> APr with Objects365 and Visual Genome but <span data-claim="owlvit-lvis-clip-l14-base-apr">25.6</span> with LVIS base. With LVIS-base training, ViLD's ensemble with ALIGN reaches a box APr of <span data-claim="vild-t8-align-box-apr">27.0</span> (ViLD Table 8, an ALIGN EfficientNet-B7 backbone). So with like training data, OWL-ViT does not beat ViLD on rare classes; much of its lead comes from more detection data (<span class="reading">our reading</span>; the backbones and pretraining differ). Chapter 6 takes that lesson to its end: if data is the limit, make more of it.</p>
+</section>

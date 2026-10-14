@@ -1,0 +1,14 @@
+  <article data-chapter="disagree">
+    <header class="ch-head"><span class="num">3 of 9</span><h2>Ambiguous or unfamiliar?</h2><p class="subhead">MC dropout and BALD</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-preset="ambiguous" aria-pressed="false">Ambiguous image</button>
+      <button type="button" class="tool" data-preset="unfamiliar" aria-pressed="true">Unfamiliar image</button>
+      <button type="button" class="tool" data-preset="confident" aria-pressed="false">Confident image</button>
+    </div>
+    <p>Two images can be equally "unsure". One is ambiguous to everyone: another label will not help. The other is unfamiliar to the model: one label fixes it. Keep <button class="inline-term" data-open="dropout">dropout</button> on at test time and run the image several times: each pass is a slightly different network. <button class="inline-term" data-open="bald">BALD</button> measures how much those passes disagree.</p>
+    <p class="note">The triangle holds all three-class probability vectors; the dome's height is <button class="inline-term" data-open="entropy">entropy</button>. Blue points are the passes. The yellow bar is BALD: the dome's height at their mean minus their average height. Ambiguous: every pass sits at the top, and the gap closes. Drag to turn.</p>
+    <table class="data"><thead><tr><th>MNIST labels to reach</th><th>10% error</th><th>5% error</th></tr></thead><tbody>
+      <tr><td>BALD</td><td>145</td><td>335</td></tr><tr><td>Variation ratios</td><td>120</td><td>295</td></tr><tr><td>Max entropy</td><td>165</td><td>355</td></tr><tr><td>Random</td><td>255</td><td>835</td></tr></tbody></table>
+    <p class="inscription">Do not buy labels for images that are ambiguous to everyone. Ask about the ones on which the model disagrees with itself.</p>
+    <button type="button" class="continue" data-go="cover">Continue with a batch of near-duplicates</button>
+  </article>

@@ -1,0 +1,32 @@
+<section id="ch-map" class="chapter">
+<h2>The 2026 explosion</h2>
+<p>How big is this field? On <span data-claim="scan-date">2026-10-08</span> the arXiv API returned <span data-claim="scan-total">569</span> unique papers whose title contains JEPA or whose abstract names a joint-embedding predictive architecture: <span data-claim="scan-2023">7</span> in 2023, <span data-claim="scan-2024">38</span> in 2024, <span data-claim="scan-2025">76</span> in 2025, and <span data-claim="scan-2026">447</span> so far in 2026 (<span data-approx>416</span> in its first nine months, <span data-claim="scan-sept-2026">97</span> of them in September alone; one earlier paper is from 2022). The curve is the shape of a field being discovered.</p>
+
+<figure class="viz" id="viz-map" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="map-svg" role="img" aria-label="A bar chart of JEPA papers per month from 2024 to October 2026, rising from a few per month to over sixty, and a horizontal bar chart of a title-keyword classification into domains, with world models and planning the largest group."></svg>
+  <div class="controls">
+    <button type="button" id="btn-map-months" data-view="months" aria-pressed="true">Papers per month</button>
+    <button type="button" id="btn-map-domains" data-view="domains" aria-pressed="false">By domain (title keywords)</button>
+    <button type="button" id="btn-map-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="map-readout" aria-live="polite"></p>
+  <figcaption>Sourced from three arXiv API queries on <span data-claim="scan-date">2026-10-08</span> (title: JEPA; abstract: "joint-embedding predictive" or "joint embedding predictive"; abstract: JEPA or JEPAs), deduplicated by id, dated by first submission. The domain split is a title-keyword heuristic, first matching rule wins; it undercounts anything whose title names neither a domain nor a task. arXiv only; the October bar is a partial month.</figcaption>
+</figure>
+
+<div class="aside">
+  <h4>Claim card: how this count was made, and what it misses</h4>
+  <p><b>Claim.</b> At least <span data-claim="scan-total">569</span> arXiv papers name JEPA in their title or abstract, and the monthly rate in 2026 is several times that of 2025.</p>
+  <p><b>How.</b> The arXiv API, paginated to completion; the raw records with abstracts are kept in the project. <b>What it misses:</b> papers that use the idea without the name (DINO-WM, Navigation World Models and PLDM all needed to be added by hand), non-arXiv venues, and the title-keyword domain split cannot see a paper's method. <b>What would change it:</b> a different query, or a classifier run on the abstracts rather than the titles.</p>
+</div>
+
+<h3>What the field is arguing about</h3>
+<p>Read the 2026 titles and five questions recur, each with a paper that names it.</p>
+<ul>
+  <li><b>One future or many?</b> A deterministic predictor returns one latent successor "even when hidden intent, partial observation, or stochastic dynamics make several futures plausible" (Branch-JEPA, <span data-claim="branch-jepa-published">2026-07-06</span>; Var-JEPA and a variational JEPA, <span data-claim="vjepa-variational-published">2026-01-20</span>, give the probabilistic answer).</li>
+  <li><b>Does a single frame know its velocity?</b> "A single-frame embedding carries no velocity information, for any encoder, including the official released LeWM weights" (Frozen in a Frame, <span data-claim="velocity-blind-spot-published">2026-10-03</span>): a world model that encodes one frame at a time cannot represent momentum.</li>
+  <li><b>Is forward prediction enough?</b> Forward prediction "does not explicitly enforce reliable identifiability of robot-centric physical state" (Physical State Grounding, <span data-claim="psg-jepa-published">2026-08-07</span>); H-JEPA's inverse-dynamics fix on DROID is the same concern.</li>
+  <li><b>Is the latent distance the right cost?</b> Training "optimizes short-horizon latent prediction, whereas planning requires a multi-step ranking of imagined futures by goal progress" (Temporal-Distance JEPA, <span data-claim="temporal-distance-jepa-published">2026-07-28</span>).</li>
+  <li><b>When does training collapse?</b> A linearised gradient flow gives a per-mode stability ratio and a predicted phase boundary (Drive vs. Decay, <span data-claim="drive-vs-decay-published">2026-10-01</span>), the 2024 deep-linear theory of chapter 5 pushed further.</li>
+</ul>
+</section>

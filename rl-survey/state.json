@@ -1,0 +1,58 @@
+{
+  "slug": "rl-survey",
+  "stage": "understand",
+  "created": "2026-10-14",
+  "prompt": "Reinforcement learning from scratch as a learning path: bandits, MDPs and returns, Bellman equations, dynamic programming, Monte Carlo vs TD, SARSA and Q-learning, DQN, policy gradients, actor-critic and GAE, TRPO/PPO, then bridges to model-based RL and RL for LLMs. Teaching first, papers second; freedom to improve the flow.",
+  "reader_background": "ML engineer at a computer-vision company; knows deep learning basics; new to RL. Explain from scratch.",
+  "mode": "course: a learning path, not a literature survey and not a named-paper list. No arXiv scan or map chapter.",
+  "sources_plan": {
+    "classical_core": "Sutton and Barto, Reinforcement Learning: An Introduction, 2nd ed. (2018; RLbook2020.pdf at incompleteideas.net). Non-arXiv primary source for the bandit to Q-learning chapters; most figures there are toy or computed, not sourced.",
+    "arxiv_resolved_2026-10-14": "notes/resolve-raw.xml (26 ids, all matched)",
+    "non_arxiv_primary": [
+      "Sutton 1988, Learning to predict by the methods of temporal differences (TD)",
+      "Watkins 1989 thesis; Watkins and Dayan 1992 (Q-learning)",
+      "Williams 1992 (REINFORCE)",
+      "Sutton, McAllester, Singh, Mansour 2000 (policy gradient theorem, NeurIPS 1999)",
+      "Mnih et al. 2015, Nature (DQN, human-level control)"
+    ]
+  },
+  "cross_links": {
+    "world-models": "Dreamer, MuZero and world models: the model-based chapter is a short bridge plus link, not a re-explanation",
+    "post-training": "RLHF with PPO, DPO, GRPO and reasoning RL: the LLM chapter is a short bridge plus link"
+  },
+  "design_decisions": {
+    "spine": "RL differs from supervised learning in three ways: exploration, delayed credit, and data that the policy itself generates. Each chapter fixes part of one.",
+    "live_vs_recorded": "Tabular algorithms (bandits, DP sweeps, MC/TD, SARSA/Q-learning, Dyna, small REINFORCE) run live in the page with a seeded rng. DQN and PPO on CartPole are trained offline in NumPy (build/sim/ -> notes/sim-*.txt) and shown as a scrubber, badge Computed.",
+    "plants": "n-step returns in MC vs TD (for GAE); importance sampling and on/off-policy at SARSA vs Q-learning (for the PPO ratio and the replay buffer)"
+  },
+  "worktree": "EnterWorktree failed (repo has no commits); working in place like sibling projects",
+  "narration": "none: long page only (steps 4-7 skipped; cue ids and player hooks still built)",
+  "atlas": false,
+  "chapters_approved": {
+    "shape": "extended 15 chapters + PPO interlude + practice guide (approved 2026-10-14)",
+    "list": [
+      "ch-score Learning from a score, not an answer",
+      "ch-bandits Explore or exploit",
+      "ch-mdp MDPs, returns and discount",
+      "ch-bellman Bellman equations",
+      "ch-dp Dynamic programming",
+      "ch-mctd Monte Carlo vs TD",
+      "ch-qlearn SARSA vs Q-learning",
+      "ch-approx Function approximation and the deadly triad",
+      "ch-dqn DQN and its family",
+      "ch-pg Policy gradients",
+      "ch-ac Actor-critic and GAE",
+      "ch-ppo TRPO to PPO (+ interlude: one PPO update end to end)",
+      "ch-continuous Continuous actions: Gaussian policies, DDPG, TD3, SAC",
+      "ch-model Model-based RL (bridge to world-models)",
+      "ch-llm RL for LLMs (bridge to post-training)",
+      "ch-guide RL in practice"
+    ]
+  },
+  "compute": {
+    "probed": null,
+    "note": "no narration chosen; pod not probed"
+  },
+  "exercises": "every chapter: NumPy tab (from scratch, own tiny envs) AND PyTorch tab (autograd, gymnasium envs, CleanRL style); user asked for both (2026-10-14). Every snippet is run locally before it goes on the page.",
+  "python_env": "rl-survey/.venv (torch + gymnasium), created 2026-10-14"
+}

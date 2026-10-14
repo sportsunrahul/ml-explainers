@@ -1,0 +1,15 @@
+  <article data-chapter="overview" data-chip="Where text enters">
+    <header class="ch-head"><span class="num">1 of 2</span><h2>Where text enters</h2><p class="subhead">One change, five designs</p></header>
+    <div class="tools"><button type="button" class="tool" data-replay>Replay</button></div>
+    <p>A <button class="inline-term" data-open="detector">detector</button> finds boxes and names them. The naming step ends in a fixed list of classes. In the warehouse on the stage, the detector finds the forklift, but its list has no row for it, so it calls the box background.</p>
+    <p>Replace the list with a text encoder and the forklift is one typed word away. Every model in this tour does that. They differ in where the text enters the network:</p>
+    <ul>
+      <li><b>ViLD</b> and <b>OWL-ViT</b>: only at the final score.</li>
+      <li><b>GLIP</b>: also inside the encoder, so the image features depend on the prompt.</li>
+      <li><b>Grounding DINO</b>: in the encoder, in the choice of queries, and in the decoder.</li>
+      <li><b>YOLO-World</b>: in the neck, then folded into the weights before deployment.</li>
+    </ul>
+    <p class="note">The stage is a toy drawing; the scores on it are made up to show the mechanism. The strip at the bottom is the map for the rest of the tour.</p>
+    <p class="inscription">Every open-vocabulary detector replaces the class list with text. The design question is how early the text gets in.</p>
+    <button type="button" class="continue" data-go="reads">Continue with the class list</button>
+  </article>

@@ -1,0 +1,243 @@
+<p class="kicker"><span class="act-n">Act II</span>A smaller student</p>
+<section id="ch-distill" class="chapter">
+<h2>Knowledge distillation</h2>
+<p>A large trained network (the teacher) knows more than its top answer: it also knows which wrong answers are nearly right. Knowledge distillation trains a smaller network (the student) to copy the teacher's whole output distribution, made softer by a temperature, instead of only the correct label.</p>
+
+<figure class="viz" id="viz-temp" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Temperature">
+    <label for="temp-slider">Temperature T <input type="range" id="temp-slider" min="1" max="20" step="0.5" value="1" data-link="temp"> <output id="temp-out" for="temp-slider">1.0</output></label>
+    <button type="button" id="btn-temp-t1" aria-pressed="true">T = 1</button>
+    <button type="button" id="btn-temp-t3" aria-pressed="false">T = 3</button>
+    <button type="button" id="btn-temp-t20" aria-pressed="false">T = 20</button>
+  </div>
+  <canvas id="temp-canvas" role="img" aria-label="Left: for one image of a truck, six pairs of bars show the teacher's probabilities in blue and the student's in yellow at the chosen temperature, with red arrows from each student bar toward the teacher's value, and the logits divided by T written under each class. Right: the size of the soft-loss gradient against temperature on a log scale, one red curve without the T squared factor that falls steeply and one with it that levels off, a dashed line for the hard-label gradient and a dotted line for Hinton's high-temperature limit."></canvas>
+  <div class="controls" role="group" aria-label="Soft-loss scaling">
+    <span class="lbl">Soft loss</span>
+    <button type="button" id="btn-temp-plain" aria-pressed="true" data-link="plain">without T<sup>2</sup></button>
+    <button type="button" id="btn-temp-tsq" aria-pressed="false" data-link="tsq">with T<sup>2</sup></button>
+    <button type="button" id="btn-temp-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="temp-readout" aria-live="polite"></p>
+  <figcaption>Computed toy. The six classes and both sets of logits are ours, not a paper's. The softmax at temperature T, the gradient (q &minus; p)/T and its high-temperature limit are Hinton's Eq. 1, 2 and 4, run live. The limit (dotted) is computed after subtracting each logit vector's mean, as Eq. 4 assumes; the softmax does not change under that shift. Gradient sizes are the length of the gradient vector over all six logits. The hard-label gradient is the student's T = 1 output minus the one-hot label.</figcaption>
+</figure>
+
+<p>Start at T = 1 and look at the blue bars. The teacher is sure this image is a truck, and the other classes look like zero. They are not zero. In our toy, the teacher gives "bus" <span data-toy>0.047</span> and "cat" less than <span data-toy>0.001</span>. That ratio is knowledge: a truck can look a bit like a bus, and not at all like a cat. Hinton, Vinyals and Dean give the same kind of example: "An image of a BMW, for example, may only have a very small chance of being mistaken for a garbage truck, but that mistake is still many times more probable than mistaking it for a carrot." The truck, bus and cat are our example; the BMW, garbage truck and carrot are theirs.</p>
+<p>At T = 1 those small numbers barely affect a loss, because they are so close to zero. Now drag the slider to the right, or press "T = 3". Every bar moves toward the average, and the wrong classes become visible. The teacher now says bus <span data-toy>0.21</span> and cat <span data-toy>0.014</span>, while our student says <span data-toy>0.096</span> for both. The red arrows show where the soft loss pushes the student: bus up, cat down. The student is right about "truck" but wrong about which mistakes are reasonable, and only a soft target can tell it so.</p>
+
+<div class="eq" id="eq-distill-softmax" data-build data-viz="viz-temp"><div class="tex tex-display">
+\htmlData{step=1, link=student}{\htmlClass{t-yellow}{q_i}} = \frac{\exp(\htmlData{step=2, link=logits}{z_i} / \htmlData{step=3, link=temp}{T})}{\htmlData{step=4, link=teacher student}{\sum_j \exp(z_j/T)}}
+</div></div>
+<p class="eqno">Eq. 1 in Hinton et al., arXiv 1503.02531v1 (the source writes "exp" without the upright font).</p>
+<ul class="gloss">
+  <li><span class="tex">z_i</span>: the logit for class <span class="tex">i</span>, the raw score the network computes before the softmax. Hinton writes <span class="tex">z</span> for the student and <span class="tex">v</span> for the teacher.</li>
+  <li><span class="tex">T</span>: the temperature. Dividing every logit by <span class="tex">T</span> shrinks the gaps between them, so a larger <span class="tex">T</span> gives a softer, more even distribution. The paper says <span class="tex">T</span> "is normally set to 1". The rows under the bars show the logits after this division.</li>
+  <li><span class="tex">q_i</span>: the probability for class <span class="tex">i</span>. The sum over all classes <span class="tex">j</span> makes the probabilities add up to one.</li>
+</ul>
+
+<h3>Two losses, one weight</h3>
+<p>The paper trains the student on a weighted average of two objectives, and gives them in words, not as an equation. The first is the cross-entropy with the teacher's soft targets, computed at the same high temperature in both networks. The second is the ordinary cross-entropy with the correct label, computed from the same student logits at T = 1. The authors "found that the best results were generally obtained by using a condiderably [sic] lower weight on the second objective function". Later papers write the same recipe as one line:</p>
+
+<div class="eq" id="eq-distill-loss" data-build data-viz="viz-temp"><div class="tex tex-display">
+\mathcal{L} = \htmlData{step=1, link=hard}{(1-\lambda)\,\htmlClass{t-red}{\mathrm{CE}}\big(y,\ \htmlClass{t-yellow}{q(z;1)}\big)} \;+\; \htmlData{step=2, link=tsq}{\lambda\,T^2}\, \htmlData{step=3, link=kl}{\htmlClass{t-red}{\mathrm{KL}}\big(\htmlClass{t-blue}{p(v;T)}\,\|\,\htmlClass{t-yellow}{q(z;T)}\big)}
+</div></div>
+<p class="eqno">Our transcription of Hinton et al. Sec. 2 (prose only), in the form of DeiT Eq. 2 (Touvron et al., arXiv 2012.12877v2). DeiT prints the KL arguments student first; the teacher-first direction here is our reading. Hinton writes a cross-entropy, which has the same gradient for the student (our reading).</p>
+<ul class="gloss">
+  <li><span class="tex">p(v;T)</span>: the teacher's softmax at temperature <span class="tex">T</span> (blue bars); <span class="tex">q(z;T)</span>: the student's (yellow bars); <span class="tex">q(z;1)</span>: the student's ordinary output at T = 1.</li>
+  <li><span class="tex">\mathrm{CE}(y, \cdot)</span>: the hard-label loss, cross-entropy with the one-hot label <span class="tex">y</span>.</li>
+  <li><span class="tex">\mathrm{KL}(p \,\|\, q)</span>: the Kullback-Leibler divergence, how many extra nats it costs to describe the teacher's distribution with the student's. It is the cross-entropy minus the teacher's own entropy, which the student cannot change. The figure prints it at the top.</li>
+  <li><span class="tex">\lambda</span>: the weight. The conventions differ between papers. Hinton's speech run used <span data-claim="hinton-speech-hard-weight">0.5</span> as the relative weight on the hard term; DeiT puts <span class="tex">\lambda</span> = <span data-claim="deit-soft-lambda">0.1</span> on the soft term with <span class="tex">\tau</span> = <span data-claim="deit-soft-tau">3.0</span>, the opposite emphasis.</li>
+  <li><span class="tex">T^2</span>: the factor the next section explains.</li>
+</ul>
+
+<h3>Why multiply by T<sup>2</sup></h3>
+<p>Turning up the temperature has a side effect on training: it shrinks the soft loss's gradient. Hinton derives the gradient of the soft cross-entropy <span class="tex">C</span> with respect to one student logit:</p>
+
+<div class="eq" id="eq-distill-grad" data-build data-viz="viz-temp"><div class="tex tex-display">
+\htmlData{step=1, link=plain}{\htmlClass{t-red}{\frac{\partial C}{\partial z_i}}} = \htmlData{step=2, link=temp}{\frac{1}{T}}\left(\htmlData{step=3, link=gap}{q_i - p_i}\right) = \frac{1}{T}\left(\htmlData{step=4, link=student}{\htmlClass{t-yellow}{\frac{e^{z_i/T}}{\sum_j e^{z_j/T}}}} -\htmlData{step=5, link=teacher}{\htmlClass{t-blue}{\frac{e^{v_i/T}}{\sum_j e^{v_j/T}}}}\right)
+</div></div>
+<p class="eqno">Eq. 2 in Hinton et al., arXiv 1503.02531v1.</p>
+<ul class="gloss">
+  <li><span class="tex">q_i - p_i</span>: the gap between the student's and the teacher's probability for class <span class="tex">i</span>, the red arrows in the figure.</li>
+  <li><span class="tex">1/T</span>: a factor that comes from dividing the logits by <span class="tex">T</span> inside the softmax.</li>
+  <li><span class="tex">v_i</span>: the teacher's logit. The teacher's logits are given inputs here; only the student's logits <span class="tex">z_i</span> are differentiated.</li>
+</ul>
+<p>There are two shrinking effects, not one. The factor <span class="tex">1/T</span> is visible. The gap <span class="tex">q_i - p_i</span> also shrinks, because at high temperature both distributions move toward uniform. When the temperature is large compared with the logits, Hinton expands <span class="tex">e^x \approx 1 + x</span>:</p>
+
+<div class="eq" id="eq-distill-approx" data-build data-viz="viz-temp"><div class="tex tex-display">
+\htmlData{step=1, link=limit}{\frac{\partial C}{\partial z_i} \approx} \frac{1}{T}\left( \htmlData{step=2, link=student}{\htmlClass{t-yellow}{\frac{1+z_i/T}{N + \sum_j z_j/T}}} - \htmlData{step=3, link=teacher}{\htmlClass{t-blue}{\frac{1+v_i/T}{N + \sum_j v_j/T}}} \right)
+</div></div>
+<p class="eqno">Eq. 3 in Hinton et al., arXiv 1503.02531v1. <span class="tex">N</span> is the number of classes.</p>
+<p>If each logit vector has zero mean, the sums vanish and the result is short:</p>
+<div class="eq" id="eq-distill-limit" data-build data-viz="viz-temp"><div class="tex tex-display">
+\htmlData{step=1, link=limit}{\frac{\partial C}{\partial z_i} \approx} \htmlData{step=2, link=plain}{\frac{1}{NT^2}}\htmlData{step=3, link=logits}{\left( z_i - v_i \right)}
+</div></div>
+<p class="eqno">Eq. 4 in Hinton et al., arXiv 1503.02531v1.</p>
+<ul class="gloss">
+  <li><span class="tex">1/(NT^2)</span>: the gradient falls as the square of the temperature. This is the dotted line in the figure.</li>
+  <li><span class="tex">z_i - v_i</span>: at high temperature the student simply moves its logits toward the teacher's. Minimizing <span class="tex">\tfrac{1}{2}(z_i - v_i)^2</span>, the logit matching of earlier model-compression work, is therefore the high-temperature limit of distillation.</li>
+</ul>
+<p><b>Make a guess before you press "with T<sup>2</sup>".</b> Without the factor, the soft-loss gradient at T = 20 is about <span data-toy>55</span> times smaller than the hard-label gradient in our toy, so the hard label would drive training alone. What will the curve look like after you multiply by <span class="tex">T^2</span>? It stops falling. From about T = <span data-toy>6</span> on it stays near the Eq. 4 value, so the ratio between the two loss terms no longer depends on the temperature you pick. The paper's words: "Since the magnitudes of the gradients produced by the soft targets scale as <span class="tex">1/T^2</span> it is important to multiply them by <span class="tex">T^2</span> when using both hard and soft targets." Note that "roughly unchanged" does not mean "equal": in our toy the soft term ends up about <span data-toy>7</span> times larger than the hard term, and the weight <span class="tex">\lambda</span> sets the final balance. At low temperature the factor does not hold the gradient constant, because the softmax is saturated there and the approximation does not apply.</p>
+<p>Which temperature is right is a tuning choice. Hinton's small MNIST student used T = <span data-claim="hinton-mnist-temperature">20</span>. For students with at least <span data-claim="hinton-mnist-big-student-units">300</span> units per layer, all temperatures above <span data-claim="hinton-mnist-big-student-temp">8</span> gave fairly similar results; a <span data-claim="hinton-mnist-tiny-student-units">30</span>-unit student did best at <span data-claim="hinton-mnist-tiny-student-temp">2.5 to 4</span>. The paper reads this as a sign that a very small student does better when it ignores the teacher's most negative logits, which "could be very noisy".</p>
+
+<h3>Inside distillation: forward, then backward</h3>
+<p>One training step runs the same image through two networks. The figure below steps through it with Hinton's MNIST pair. <b>Make a guess before you press "6 Gradients": which boxes will the gradient reach?</b></p>
+
+<figure class="viz archflow" id="viz-distflow">
+  <span class="badge sourced">Sourced</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-distflow-input" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-distflow-teacher" aria-pressed="false">2 Teacher</button>
+    <button type="button" id="btn-distflow-student" aria-pressed="false">3 Student</button>
+    <button type="button" id="btn-distflow-losses" aria-pressed="false">4 Two losses</button>
+    <button type="button" id="btn-distflow-total" aria-pressed="false">5 Sum</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-distflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-distflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <canvas id="distflow-canvas" role="img" aria-label="One distillation step as a diagram. An image goes to a frozen teacher (brown, dashed) whose logits are divided by T, and to a student (yellow) whose logits are used twice: divided by T, and at T equal to 1. The teacher and student outputs at temperature T meet in a soft loss; the student output at T equal to 1 and the label meet in a hard loss; the two losses add up. In the backward stages red arrows run from the losses back to the student only and never enter the teacher branch."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-distflow-prev">Previous</button>
+    <button type="button" id="btn-distflow-next">Next</button>
+    <button type="button" id="btn-distflow-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="distflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Top lane: the <b class="c-blue">teacher</b>, drawn <b class="c-brown">brown</b> because its weights do not change. Middle lanes: the <b class="c-yellow">student</b>, whose logits are used twice. Right: the two <b class="c-red">losses</b> and their weighted sum. Press <b>1 Inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="input" hidden>
+      <h4>1. One case from the transfer set</h4>
+      <p>The examples the student learns from form the transfer set. Hinton says it "could consist entirely of unlabeled data" or be the original training set, and that "using the original training set works well". With a label <span class="tex">y</span>, the hard loss can be used too; without one, only the soft loss remains. The MNIST experiment trains on all <span data-claim="hinton-mnist-train-cases">60,000</span> training cases.</p>
+    </div>
+    <div data-stage="teacher" hidden>
+      <h4>2. The teacher makes soft targets</h4>
+      <p>The MNIST teacher has two hidden layers of <span data-claim="hinton-mnist-teacher-units">1200</span> rectified linear units, trained earlier with dropout, weight constraints and input jitter of up to <span data-claim="hinton-mnist-jitter">two pixels</span>. Its logits <span class="tex">v</span> are divided by <span class="tex">T</span> and passed through a softmax to give the soft targets <span class="tex">p</span>. Hinton never says "frozen". We read the teacher as fixed because Eq. 2 differentiates only the student's logits and the teacher is trained before distillation starts (our reading). Wang et al.'s detector code states it outright: it puts the teacher in evaluation mode and turns off gradients for all its parameters (code-only).</p>
+    </div>
+    <div data-stage="student" hidden>
+      <h4>3. The student, one set of logits used twice</h4>
+      <p>The MNIST student has two hidden layers of <span data-claim="hinton-mnist-student-units">800</span> units and no regularization. Its logits <span class="tex">z</span> go to the soft loss divided by the same <span class="tex">T</span> as the teacher's, and to the hard loss unchanged (T = 1). After training the student runs at T = 1 only: "after it has been trained it uses a temperature of 1".</p>
+    </div>
+    <div data-stage="losses" hidden>
+      <h4>4. Two losses</h4>
+      <p>The soft loss compares <span class="tex">p</span> and <span class="tex">q</span> at temperature <span class="tex">T</span> and is multiplied by <span class="tex">T^2</span>. The hard loss is the ordinary cross-entropy with the label. In the MNIST result the only regularizer the student had was "the additional task of matching the soft targets produced by the large net at a temperature of <span data-claim="hinton-mnist-temperature">20</span>".</p>
+    </div>
+    <div data-stage="total" hidden>
+      <h4>5. A weighted sum</h4>
+      <p>The total is the objective above. Hinton puts "a condiderably [sic] lower weight" on the hard term; the speech run gave it a relative weight of <span data-claim="hinton-speech-hard-weight">0.5</span>. The MNIST weight is not stated.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>6. The gradient reaches the student only</h4>
+      <p>Both losses send gradients back into the student's logits and through every student layer. Nothing on the teacher side has weights that train, so no gradient goes there at all: the teacher branch is marked "gradient stops here". The soft-loss gradient is Eq. 2, <span class="tex">(q_i - p_i)/T</span>, times <span class="tex">T^2</span> from the objective.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>7. Update the student</h4>
+      <p>An optimizer step changes the student's weights and nothing else. The MNIST optimizer is not stated; the speech models were trained with "distributed stochastic gradient descent". The teacher's forward pass is the extra cost of distillation: it runs on every training case, but never at deployment.</p>
+    </div>
+  </div>
+  <figcaption>Sourced setup: Hinton et al. Sec. 2 and 3, the MNIST networks as boxes. That the teacher is frozen is our reading of Hinton; Wang et al.'s code freezes it explicitly. The image glyph is drawn blue only as a picture.</figcaption>
+</figure>
+
+<p>The answer to the guess: the student only. The teacher sits upstream of the soft loss, but the gradient never enters its branch, because nothing there will be updated. A deep-learning framework skips that branch only if you tell it to, by freezing the teacher or computing its output without gradient tracking.</p>
+
+<h3>What distillation bought in the paper</h3>
+<p>On MNIST, the large teacher made <span data-claim="hinton-mnist-teacher-errors">67</span> test errors. The small net trained on hard labels alone made <span data-claim="hinton-mnist-student-errors">146</span>. The same small net trained to match the teacher's soft targets at T = <span data-claim="hinton-mnist-temperature">20</span> made <span data-claim="hinton-mnist-distilled-errors">74</span>. These are counts from the prose of Sec. 3; the paper has no table for them.</p>
+<p>The speech experiment is a different kind of compression. The teacher was an ensemble of <span data-claim="hinton-speech-ensemble-size">10</span> acoustic models, and the student was one model with the same architecture as each of them. So the gain is ten forward passes down to one, not a smaller network. "More than <span data-claim="hinton-speech-transfer-share">80</span>% of the improvement in frame classification accuracy" of the ensemble carried over:</p>
+<table class="data">
+  <thead><tr><th>System (speech, <span data-claim="hinton-speech-layers">8</span>-layer acoustic model)</th><th>Test Frame Accuracy</th><th>WER</th></tr></thead>
+  <tbody>
+    <tr><td>Baseline, one model</td><td><span data-claim="hinton-speech-baseline-frame">58.9</span>%</td><td><span data-claim="hinton-speech-baseline-wer">10.9</span>%</td></tr>
+    <tr><td>Ensemble of <span data-claim="hinton-speech-ensemble-size">10</span> models</td><td><span data-claim="hinton-speech-ensemble-frame">61.1</span>%</td><td><span data-claim="hinton-speech-ensemble-wer">10.7</span>%</td></tr>
+    <tr><td>Distilled single model, same size</td><td><span data-claim="hinton-speech-distilled-frame">60.8</span>%</td><td><span data-claim="hinton-speech-distilled-wer">10.7</span>%</td></tr>
+  </tbody>
+  <caption>Hinton et al. Table 1, column names as printed (the prose calls the baseline numbers development-set figures). WER: word error rate. Distillation temperature <span data-claim="hinton-speech-best-temp">2</span>, the best of those tried.</caption>
+</table>
+<p>The third result shows soft targets acting as a regularizer. With only <span data-claim="hinton-reg-data-fraction">3</span>% of the speech data, about <span data-claim="hinton-reg-examples">20M</span> examples, a model trained on hard labels overfit badly; early stopping caught it at <span data-claim="hinton-reg-3pct-hard-test">44.5</span>% test frame accuracy. The same model trained on soft targets reached <span data-claim="hinton-reg-3pct-soft-test">57.0</span>%, close to the <span data-claim="hinton-reg-full-test">58.9</span>% of a baseline trained on all the data (Table 5). The soft-target model needed no early stopping. The authors' reading: "a lot of helpful information can be carried in soft targets that could not possibly be encoded with a single hard target."</p>
+
+<h3>Distilling a detector or a vision transformer</h3>
+<p>Hinton's method was built and tested on classifiers. Wang et al. give three reasons it transfers poorly to detection. "A detection model may only involve a few classes", so there is little inter-class similarity to distill. Detection also needs localization, which a softmax over classes does not describe. And background locations far outnumber objects. On their small one-stage detector, adding only Hinton's output loss to the quarter-width student raised mAP by just <span data-claim="wang-toy-quarter-vanilla-kd">0.9</span> points.</p>
+<p>The alternative is to match features inside the network. FitNets (Romero et al.) does this with a "hint": a small regressor maps a middle layer of the student onto a middle layer of the teacher, and an L2 loss pulls them together before ordinary distillation. In their CIFAR-10 run the <span data-claim="fitnets-guided-layer">11th</span> student layer imitates the teacher's second layer, and a thin, deep FitNet with about <span data-claim="fitnets-cifar10-fitnet-params">2.5M</span> parameters beats its <span data-claim="fitnets-cifar10-teacher-params">9M</span>-parameter teacher. On a detector, imitating the whole feature map hurts: it dropped the quarter-width toy detector by <span data-claim="wang-toy-quarter-full-imitation">8.9</span> mAP, because most of the map is noisy background.</p>
+<p>Wang et al. imitate features only near objects. For each ground-truth box they compute its overlap (IoU) with every anchor on the last feature map that carries anchors, keep the locations whose IoU exceeds <span class="tex">\psi</span> times that box's best IoU, with <span class="tex">\psi</span> = <span data-claim="wang-psi">0.5</span>, and add an L2 loss between an adapted student feature and the teacher feature at those locations only. The loss weight is not stated in the paper; the official code uses <span data-claim="wang-lambda-code">0.01</span> (code-only). For an FPN detector they build the mask per pyramid level. DeiT (Touvron et al.) takes a third route for vision transformers: a learned distillation token sits beside the class token, and its output head is trained on the teacher's predicted class while the class head learns the true label.</p>
+<table class="data">
+  <thead><tr><th>Method, student, teacher</th><th>Dataset, metric</th><th>Student alone</th><th>Distilled</th><th>Teacher</th></tr></thead>
+  <tbody>
+    <tr><td>Wang 2019 near-object imitation; Faster R-CNN R50-FPN with halved channels; teacher Faster R-CNN R50-FPN</td><td>COCO, AP</td><td><span data-claim="wang-coco-fpn-r50h-ap">31.2</span></td><td><span data-claim="wang-coco-fpn-r50h-i-ap">34.8</span></td><td><span data-claim="wang-coco-fpn-r50-ap">36.9</span></td></tr>
+    <tr><td>Wang 2019 near-object imitation; ShuffleNet-based toy one-stage detector, quarter width; teacher full width</td><td>KITTI val, mAP</td><td><span data-claim="wang-toy-quarter-map">45.96</span></td><td><span data-claim="wang-toy-quarter-i-map">52.63</span> (+<span data-claim="wang-toy-quarter-gain-table">6.7</span>)</td><td><span data-claim="wang-toy-teacher-map">62.63</span></td></tr>
+    <tr><td>Same toy detector, Hinton output loss only</td><td>KITTI val, mAP</td><td>as above</td><td>+<span data-claim="wang-toy-quarter-vanilla-kd">0.9</span> change</td><td>as above</td></tr>
+    <tr><td>Same toy detector, full feature-map imitation (FitNets-style hints)</td><td>KITTI val, mAP</td><td>as above</td><td>&minus;<span data-claim="wang-toy-quarter-full-imitation">8.9</span> change</td><td>as above</td></tr>
+    <tr><td>DeiT distillation token; DeiT-B (ViT); teacher RegNetY-16GF (convnet)</td><td>ImageNet, top-1 %</td><td><span data-claim="deit-t3-none-b">81.8</span></td><td><span data-claim="deit-t3-both-b">83.4</span></td><td><span data-claim="deit-teacher-acc">82.9</span></td></tr>
+  </tbody>
+  <caption>All differences are absolute points. Wang Table 5 (COCO) and Table 1 (KITTI) use different detectors and datasets; Table 1 prints only the change for its last rows. DeiT Table 3 and Sec. 5.2. Toolchains are not stated.</caption>
+</table>
+<p>Two cautions about these rows. The DeiT student is not smaller: DeiT-B has <span data-claim="deit-b-params">86M</span> parameters and its teacher <span data-claim="deit-teacher-params">84M</span>. The gain comes from learning from a different architecture, and plain soft distillation gave DeiT-B no gain at all (<span data-claim="deit-t3-soft-b">81.8</span>). The Wang students, by contrast, are the teacher's own design with halved channels, which is the usual case for a deployed detector. Distillation also stacks with the other levers: a distilled student can still be quantized (<a href="#ch-grid">chapter 4</a> onward) or pruned (<a href="#ch-prune">chapter 8</a>). Seen through <a href="#ch-cost">the cost model</a>, it is the only lever that cuts operations and bytes in every layer at once, but it is also the only one that needs a full training run.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>Do not expect logit distillation alone to help much: on Wang's toy detector it added under a point. Imitate the teacher's features near the objects, on each level of the feature pyramid, with a teacher of the same family (in their COCO run, a half-width Faster R-CNN R50-FPN gained <span data-claim="wang-coco-fpn-gain-ap">3.6</span> AP). It costs a training run with the teacher's forward pass on every image, so the <a href="#ch-guide">decision guide</a> places it after cheaper post-training quantization.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-temp'), out = document.getElementById('temp-readout');
+  const kit = KIT.temp(document.getElementById('temp-canvas'), { fig });
+  const slider = document.getElementById('temp-slider'), val = document.getElementById('temp-out');
+  const presets = [1, 3, 20].map(t => [t, document.getElementById('btn-temp-t' + t)]);
+  const plain = document.getElementById('btn-temp-plain'), tsq = document.getElementById('btn-temp-tsq');
+  const sync = () => {
+    const T = kit.state.Tt;
+    val.textContent = T.toFixed(1);
+    presets.forEach(([t, b]) => b.setAttribute('aria-pressed', String(t === T)));
+    plain.setAttribute('aria-pressed', String(!kit.state.t2)); tsq.setAttribute('aria-pressed', String(kit.state.t2));
+  };
+  const say = () => { out.innerHTML = KIT.tempText(kit.info()); };
+  const setT = T => { slider.value = T; kit.set({ T }); sync(); };
+  slider.addEventListener('input', () => { kit.set({ T: +slider.value }); sync(); });
+  slider.addEventListener('change', say);
+  presets.forEach(([t, b]) => b.addEventListener('click', () => { setT(t); say(); }));
+  plain.addEventListener('click', () => { kit.set({ t2: false }); sync(); say(); });
+  tsq.addEventListener('click', () => { kit.set({ t2: true }); sync(); say(); });
+  document.getElementById('btn-temp-reset').addEventListener('click', () => { setT(1); kit.set({ t2: false }); sync(); say(); });
+  sync(); say();
+
+  const S2 = '\u00b2', L = '\u03bb';
+  ArchFlow.mount({
+    prefix: 'distflow', grid: { cols: 5, rows: 4 },
+    boxes: {
+      img: { c: 0, r: .5, lane: 'mixed', title: ['image x'], glyph: 'photo', data: true },
+      teacher: { c: 1, r: 0, lane: 'blue', title: ['teacher'], glyph: 'layers' },
+      student: { c: 1, r: 1, lane: 'yellow', title: ['student'], glyph: 'layers' },
+      tlog: { c: 2, r: 0, lane: 'blue', title: ['teacher logits'], glyph: 'vector' },
+      slogT: { c: 2, r: 1, lane: 'yellow', title: ['student logits'], glyph: 'vector' },
+      slog1: { c: 2, r: 2, lane: 'yellow', title: ['student logits'], glyph: 'vector' },
+      label: { c: 2, r: 3, lane: 'mixed', title: ['label y'], glyph: 'unit', data: true },
+      soft: { c: 3, r: .5, lane: 'red', title: ['soft loss'], glyph: 'loss' },
+      hard: { c: 3, r: 2.5, lane: 'red', title: ['hard loss'], glyph: 'loss' },
+      total: { c: 4, r: 1.5, lane: 'red', title: ['total loss'], glyph: 'loss' },
+    },
+    edges: [['img', 'teacher'], ['img', 'student'], ['teacher', 'tlog'], ['student', 'slogT'], ['student', 'slog1'],
+      ['tlog', 'soft'], ['slogT', 'soft'], ['slog1', 'hard'], ['label', 'hard'], ['soft', 'total'], ['hard', 'total']],
+    stages: [{ key: 'input', show: ['img', 'label'] }, { key: 'teacher', show: ['teacher', 'tlog'] },
+      { key: 'student', show: ['student', 'slogT', 'slog1'] }, { key: 'losses', show: ['soft', 'hard'] },
+      { key: 'total', show: ['total'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: {}, variant: undefined,
+    shape: id => ({ img: 'MNIST digit', teacher: '2 x 1200 ReLU', student: '2 x 800 ReLU', tlog: 'p = softmax|(v / T)',
+      slogT: 'q = softmax|(z / T)', slog1: 'softmax(z)|at T = 1', label: 'one-hot', soft: 'T' + S2 + ' KL(p, q)',
+      hard: 'CE(y,|softmax(z))', total: '(1 - ' + L + ') hard|+ ' + L + ' soft' })[id],
+    params: id => id === 'student' ? 'student weights' : null,
+    frozen: id => id === 'teacher',
+    readout: s => ({
+      overview: 'One training step: the same image goes through a frozen teacher and a trainable student; two losses compare their outputs and the label.',
+      input: 'Step 1: an image x from the transfer set and, if it has one, its label y.',
+      teacher: 'Step 2: the teacher computes logits v; dividing by T and a softmax give the soft targets p.',
+      student: 'Step 3: the student computes logits z once; they are used divided by T (soft loss) and as they are (hard loss).',
+      losses: 'Step 4: soft loss T^2 KL(p || q) at temperature T; hard loss cross-entropy with y at T = 1.',
+      total: 'Step 5: the total is (1 - lambda) times the hard loss plus lambda times the soft loss.',
+      backward: 'Backward: gradients flow from both losses into the student. The teacher branch has nothing to train, so no gradient enters it.',
+      update: 'Update: the optimizer changes the student\'s weights only; the teacher is unchanged.',
+    })[s],
+  });
+})();
+</script>
+</section>

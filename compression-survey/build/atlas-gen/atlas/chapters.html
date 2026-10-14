@@ -1,0 +1,144 @@
+  <article data-chapter="cost">
+    <header class="ch-head"><span class="num">1 of 10</span><h2>Where the time goes</h2><p class="subhead">Every layer waits on memory or on arithmetic</p></header>
+    <div class="controls">
+      <div class="row"><span>Format</span><button type="button" class="tool" data-prec="fp32">FP32</button><button type="button" class="tool" data-prec="fp16">FP16</button><button type="button" class="tool" data-prec="int8">INT8</button><button type="button" class="tool" data-prec="w4">4-bit weights</button></div>
+      <div class="row"><span>Layer</span><button type="button" class="tool" data-layer="c3">3x3 conv</button><button type="button" class="tool" data-layer="dw">depthwise</button><button type="button" class="tool" data-layer="hd">head on 5x5</button><button type="button" class="tool" data-layer="fc">LLM, 1 token</button></div>
+    </div>
+    <p>A GPU does two jobs: arithmetic, and moving numbers between memory and its compute units. A layer takes as long as the slower job. Its <button type="button" class="inline-term" data-open="intensity">arithmetic intensity</button>, operations per byte moved, says which job that is.</p>
+    <p>Pick the 3x3 conv and step through the formats. From <button type="button" class="inline-term" data-open="fp32">FP32 to FP16</button> it gets much faster, because <button type="button" class="inline-term" data-open="tensorcore">tensor cores</button> raise the math limit. The depthwise conv gets only twice as fast: it waits on memory, and FP16 only halves its bytes.</p>
+    <p>Now guess before you press "4-bit weights" (weights stored in 4 bits, FP16 arithmetic). Only layers whose bytes are mostly weights speed up: the head conv on a small map and a language-model layer working on one token. The big conv does not change.</p>
+    <p class="note">The layer costs are computed exactly from each shape, with every tensor crossing memory once. The GPU is a toy: 500 GB/s and math limits in the ratio 1 : 8 : 16 for FP32, FP16 and INT8.</p>
+    <p class="inscription">Shorter numbers help twice: fewer bytes to move, and faster math units. Shrinking only the weights helps only layers that are mostly weights.</p>
+    <button type="button" class="continue" data-go="distill">Continue with Distillation</button>
+  </article>
+
+  <article data-chapter="distill">
+    <header class="ch-head"><span class="num">2 of 10</span><h2>Knowledge distillation</h2><p class="subhead">A small student copies a big teacher's soft answers</p></header>
+    <div class="controls">
+      <label class="slider"><span>Temperature T <b data-temp-val>1.0</b></span><input type="range" data-temp min="1" max="20" step="0.5" value="1" aria-label="Temperature T"></label>
+      <div class="row"><span>Soft loss</span><button type="button" class="tool" data-t2="off">without T<sup>2</sup></button><button type="button" class="tool" data-t2="on">with T<sup>2</sup></button></div>
+    </div>
+    <p>A big trained network, the <b class="c-blue">teacher</b>, knows more than its top answer. It also knows which wrong answers are nearly right: a truck looks a bit like a bus and not at all like a cat. Distillation trains a smaller <b class="c-yellow">student</b> to copy that whole pattern, not just the label.</p>
+    <p>The network's raw class scores are <button type="button" class="inline-term" data-open="kd-logits">logits</button>. A <button type="button" class="inline-term" data-open="kd-softmax">softmax</button> turns them into probabilities. At T = 1 the teacher's wrong-class probabilities are almost zero, so they barely affect the loss. Drag the <button type="button" class="inline-term" data-open="kd-temperature">temperature</button> up: the bars even out and the teacher's ranking of wrong classes appears. The red arrows show how the student is pulled toward it.</p>
+    <p>The student's loss measures the difference between the two distributions with the <button type="button" class="inline-term" data-open="kd-kl">KL divergence</button>. But a high temperature also shrinks this loss's gradient, roughly as 1/T<sup>2</sup>. Press "without T<sup>2</sup>" and watch the right-hand curve fall far below the hard-label line. Hinton, Vinyals and Dean multiply the soft loss by T<sup>2</sup>; press "with T<sup>2</sup>" and the curve levels off.</p>
+    <p class="note">Computed toy: the six classes and both sets of logits are ours. The softmax with temperature, the gradient and its high-temperature limit (dotted) are the paper's Eq. 1, 2 and 4, run live. Hinton's own example is a BMW that has a very small chance of being taken for a garbage truck, but that is still many times more likely than being taken for a carrot.</p>
+    <p class="inscription">Soft targets carry how the teacher generalizes. The temperature exposes them, and the T<sup>2</sup> factor keeps their pull steady as you change it.</p>
+    <button type="button" class="continue" data-go="grid">Continue with The integer grid</button>
+  </article>
+
+  <article data-chapter="grid">
+    <header class="ch-head"><span class="num">3 of 10</span><h2>Numbers on a grid</h2><p class="subhead">A ruler with 256 marks, a scale and a zero-point</p></header>
+    <div class="controls">
+      <div class="row"><span>Bits</span><button type="button" class="tool" data-bits="8">8</button><button type="button" class="tool" data-bits="4">4</button><button type="button" class="tool" data-bits="2">2</button></div>
+      <div class="row"><span>Grid</span><button type="button" class="tool" data-sym="0">asymmetric</button><button type="button" class="tool" data-sym="1">symmetric</button></div>
+      <div class="row"><span>Range</span><button type="button" class="tool" data-range="tight">tight</button><button type="button" class="tool" data-range="minmax">min to max</button><button type="button" class="tool" data-range="wide">wide</button></div>
+    </div>
+    <p>To store a tensor in 8 bits, lay a ruler with 256 evenly spaced marks over its values and keep only the number of each value's nearest mark. The <button type="button" class="inline-term" data-open="scale">scale</button> S is the spacing between marks, and the <button type="button" class="inline-term" data-open="zeropoint">zero-point</button> Z is the mark that stands for 0.0, so a code q means S(q &minus; Z).</p>
+    <p>The blue <button type="button" class="inline-term" data-open="histogram">histogram</button> is the data; the yellow blocks below it are the same values after quantization. A value inside the range moves to its nearest mark: rounding error. A value outside is pushed to the end mark: clipping error.</p>
+    <p>Guess before you press "wide": which red bar grows, and which shrinks? At 8 bits covering every value wins. At 2 bits the marks are so coarse that the tight range has the smaller total. A symmetric grid fixes Z = 0, which is simpler arithmetic but wastes codes on one-sided data.</p>
+    <p class="note">The 4000 values are a toy sample; S, Z and both errors are computed exactly on it. Drag the white knobs to move the range ends.</p>
+    <p class="inscription">The range is a trade: wider means more rounding error, narrower means more clipping error. The best range depends on the bit-width.</p>
+    <button type="button" class="continue" data-go="granularity">Continue with Per channel</button>
+  </article>
+
+  <article data-chapter="granularity">
+    <header class="ch-head"><span class="num">4 of 10</span><h2>One scale or many?</h2><p class="subhead">Per-tensor against per-channel weight grids</p></header>
+    <div class="controls">
+      <div class="row"><span>Grid</span><button type="button" class="tool" data-mode="tensor">per-tensor</button><button type="button" class="tool" data-mode="channel">per-channel</button></div>
+      <div class="row"><span>Height</span><button type="button" class="tool" data-zoom="0">true scale</button><button type="button" class="tool" data-zoom="1">zoom each channel</button></div>
+    </div>
+    <p>Each row of blue dots is one output channel of a depthwise 3x3 layer: its nine weights. After batch norm is folded into the weights, a few channels are far wider than the rest. One grid for the whole tensor must stretch over the widest channel, so the narrow channels fall between a few marks.</p>
+    <p>Press "zoom each channel" to see them: a typical narrow channel spans only a handful of the 256 levels, and its weights snap onto a few terraces. The red sticks are the rounding error. Then press "per-channel": with one <button type="button" class="inline-term" data-open="perchannel">scale per output channel</button>, every channel gets all 256 levels and the red sticks vanish.</p>
+    <p>On real networks the difference is drastic. Krishnamoorthi's 8-bit MobileNet-v1 scored 0.001 top-1 with one scale per layer and 0.703 with one per channel.</p>
+    <p class="note">Toy weights shaped after Nagel 2021 Fig. 5 as read off the figure (32 channels, six wide ones). Levels, errors and MSE are computed exactly. Drag to turn the landscape.</p>
+    <p class="inscription">Give each output channel of the weights its own scale. Activations keep one scale per tensor, because their scale must factor out of the sum.</p>
+    <button type="button" class="continue" data-go="calib">Continue with Calibration</button>
+  </article>
+
+  <article data-chapter="calib">
+    <header class="ch-head"><span class="num">5 of 10</span><h2>Calibration</h2><p class="subhead">Choosing the clip value for an activation tensor</p></header>
+    <div class="controls">
+      <div class="row"><span>Calibrator</span><button type="button" class="tool" data-method="max">max</button><button type="button" class="tool" data-method="p9999">percentile 99.99</button><button type="button" class="tool" data-method="entropy">entropy (KL)</button><button type="button" class="tool" data-method="mse">MSE</button></div>
+    </div>
+    <p>Activations depend on the input image, so their range comes from data. <button type="button" class="inline-term" data-open="calibration">Calibration</button> runs a few hundred representative images through the float network, records a histogram per tensor, and picks one clip value.</p>
+    <p>Max keeps every value, so one outlier sets the spacing for all. A <button type="button" class="inline-term" data-open="percentile">percentile</button> clips a fixed share of the tail. Entropy picks the clip whose quantized histogram differs least from the original by <button type="button" class="inline-term" data-open="kl-calib">KL divergence</button>. MSE picks the clip with the smallest squared error.</p>
+    <p>Guess before you press "entropy (KL)": will it clip more values than the percentile, or fewer? Here it clips fewer, because it looks at the tail's shape rather than a fixed count.</p>
+    <table class="data"><thead><tr><th>COCO val, mAP</th><th class="n">FP32</th><th class="n">max</th><th class="n">entropy</th><th class="n">99.99%</th></tr></thead><tbody>
+      <tr><td>Faster R-CNN, resnet50-fpn</td><td class="n">36.95</td><td class="n">36.38</td><td class="n">36.82</td><td class="n">36.69</td></tr>
+      <tr><td>Mask R-CNN, resnet50-fpn</td><td class="n">37.89</td><td class="n">37.51</td><td class="n">37.75</td><td class="n">37.55</td></tr>
+      <tr><td>RetinaNet, resnext101-32x4d-fpn</td><td class="n">39.30</td><td class="n">38.90</td><td class="n">38.97</td><td class="n">38.55</td></tr>
+    </tbody></table>
+    <p class="note">The histogram is a toy of 100,000 ReLU outputs; each calibrator runs its real algorithm on it (entropy is our reading of Wu Sec. 3.4). The table is Wu et al. 2020, Table 5: INT8, per-channel max weights, per-tensor activations, absolute mAP as printed.</p>
+    <p class="inscription">Clipping a few outliers buys finer marks for everything else. Try more than one calibrator and measure on your own validation set.</p>
+    <button type="button" class="continue" data-go="qat">Continue with QAT and STE</button>
+  </article>
+
+  <article data-chapter="qat">
+    <header class="ch-head"><span class="num">6 of 10</span><h2>Training through the rounding</h2><p class="subhead">The straight-through estimator lets a gradient pass a staircase</p></header>
+    <div class="controls">
+      <div class="row"><span>Gradient</span><button type="button" class="tool" data-mode="true">true</button><button type="button" class="tool" data-mode="ste">straight-through</button><button type="button" class="tool" data-mode="lsq">+ learned step</button></div>
+      <div class="row"><span>Train</span><button type="button" class="tool" data-act="step1">1 step</button><button type="button" class="tool" data-act="step5">5 steps</button><button type="button" class="tool" data-act="reset">Reset</button></div>
+    </div>
+    <p>Quantization-aware training (QAT) rounds the weights in every forward pass, so the network learns weights that still work after rounding. Rounding inside a float tensor like this is called <button type="button" class="inline-term" data-open="fakequant">fake quantization</button>. The network keeps a full-precision copy of each weight, the <button type="button" class="inline-term" data-open="shadow">shadow weight</button> (blue dot), and uses only its rounded value (yellow dot).</p>
+    <p>Training needs a <button type="button" class="inline-term" data-open="qatgrad">gradient</button>: how much the loss changes when a weight moves. The staircase is flat almost everywhere, so its true gradient is zero. Press "true", then "1 step": the weight never moves.</p>
+    <p>The <button type="button" class="inline-term" data-open="ste">straight-through estimator</button> pretends that rounding is the identity, but only inside the grid's range. Press "straight-through", then guess before you press "5 steps": where will the weight stop? It climbs to the top level and stops there, short of the red target. Past the top of the range the estimator passes no gradient.</p>
+    <p>Learned step size quantization (LSQ) also trains the distance between grid levels. Press "+ learned step" and train: the grid stretches until its top level reaches the target.</p>
+    <p class="note">Computed toy: one weight, a 3-bit grid in the form of LSQ (Esser et al.) Eq. 1-2, the loss is the squared distance from the rounded weight to the target, plain gradient descent. The clipped estimator is Esser Eq. 5, Krishnamoorthi Eq. 15 and Wu Eq. 13; Bengio et al. named the estimator.</p>
+    <p class="inscription">Round in the forward pass; in the backward pass, let the gradient through as if nothing were rounded. Learn the range too, or values beyond it get stuck.</p>
+    <button type="button" class="continue" data-go="sparsity">Continue with Sparsity</button>
+  </article>
+
+  <article data-chapter="sparsity">
+    <header class="ch-head"><span class="num">7 of 10</span><h2>Sparsity</h2><p class="subhead">Zeros save time only in a shape the GPU can skip</p></header>
+    <div class="controls">
+      <div class="row"><span>Pattern</span><button type="button" class="tool" data-pattern="unstructured">Unstructured</button><button type="button" class="tool" data-pattern="24">2:4</button><button type="button" class="tool" data-pattern="chan">Whole channels</button></div>
+      <div class="row"><label class="slider"><span>Zeros <b id="atlas-sparse-s-value">50%</b></span><input id="atlas-sparse-s" type="range" min="0" max="87.5" step="12.5" value="50" aria-label="Share of weights set to zero"></label></div>
+    </div>
+    <p>The stage shows one layer: each row is an output channel, each column an input. Many trained weights are close to zero. <button type="button" class="inline-term" data-open="magnitude">Magnitude pruning</button> sets the smallest ones to exactly zero; the share of zeros is the layer's <button type="button" class="inline-term" data-open="sparsity">sparsity</button>. Green cells are kept, brown cells are pruned.</p>
+    <p>Guess before you switch patterns: at the same sparsity, which pattern keeps the most of the weights' total size, and which one does a GPU run faster? Unstructured pruning keeps the most, because it removes exactly the smallest weights. But a dense GPU kernel still multiplies every zero.</p>
+    <p>The <button type="button" class="inline-term" data-open="pattern24">2:4 pattern</button> must drop two of every four inputs, so it loses a few large weights. In return, <button type="button" class="inline-term" data-open="sparsetc">sparse tensor cores</button> skip half the multiplies. <button type="button" class="inline-term" data-open="structured">Whole channels</button> lose the most, but what is left is a smaller dense layer that any kernel runs faster.</p>
+    <p class="note">The layer is a toy with random weights. The pruning for each pattern and the kept share are computed exactly. The tensor-core facts are from Mishra et al. (NVIDIA): up to 2x math throughput for 2:4, with a 2-bit index per kept weight.</p>
+    <p class="inscription">Fewer weights is not the same as less time. Prune in a shape the hardware skips: 2:4 on newer NVIDIA GPUs, or whole channels anywhere.</p>
+    <button type="button" class="continue" data-go="outliers">Continue with Outliers</button>
+  </article>
+
+  <article data-chapter="outliers">
+    <header class="ch-head"><span class="num">8 of 10</span><h2>Outliers</h2><p class="subhead">A few huge channels ruin one shared scale</p></header>
+    <div class="controls">
+      <div class="row"><span>Method</span><button type="button" class="tool" data-act="orig">One scale per tensor</button><button type="button" class="tool" data-act="int8">LLM.int8()</button><button type="button" class="tool" data-act="smooth">SmoothQuant</button></div>
+      <label class="slider"><span>Migration strength alpha <b data-alpha-value>0.50</b></span><input type="range" min="0" max="1" step="0.05" value="0.5" data-alpha aria-label="Migration strength alpha"></label>
+    </div>
+    <p>A <button type="button" class="inline-term" data-open="llm">large language model</button> multiplies its <button type="button" class="inline-term" data-open="activation">activations</button> by weight matrices, layer after layer. The front surface is one layer's input: one row per token, one column per channel. A few channels are <button type="button" class="inline-term" data-open="outlier">outliers</button>, far larger than the rest, and they stay large in every token. The surface behind it is the layer's weights.</p>
+    <p>With <button type="button" class="inline-term" data-open="per-tensor">one INT8 scale per tensor</button>, the largest value sets the step between the 256 levels. A typical channel then spans only a few levels and rounds badly; it shows red. SmoothQuant measured <b>2-3</b> levels for such channels in a real model.</p>
+    <p>Two fixes. <b>LLM.int8()</b> keeps the outlier channels in 16-bit floating point (green) and quantizes the rest. It is accurate, but the extra 16-bit multiply often makes it slower than plain FP16. <b>SmoothQuant</b> <button type="button" class="inline-term" data-open="smoothing">smooths</button> instead: it divides each activation channel by a scale and multiplies the matching weights by the same scale, so the product does not change.</p>
+    <p>Guess first, then drag alpha to 1. The ridges leave the activations and appear in the weights. At 0.5, the paper's default, both are easy to quantize, and every multiply stays INT8.</p>
+    <p class="note">Toy data, exact arithmetic. The activations are invented and shaped after SmoothQuant Fig. 4, read off the plot. The quantizers, the LLM.int8() split (threshold 6.0) and the smoothing formula are the papers' own. The two papers describe outlier size differently: up to 20x (Dettmers et al.) and ~100x (Xiao et al.).</p>
+    <p class="inscription">One big channel can waste a whole tensor's grid. Keep it aside in 16 bits, or move its size into the weights, where it is easy to absorb.</p>
+    <button type="button" class="continue" data-go="fp8">Continue with FP8</button>
+  </article>
+
+  <article data-chapter="fp8">
+    <header class="ch-head"><span class="num">9 of 10</span><h2>FP8</h2><p class="subhead">Eight bits as a float: dense near zero, sparse far away</p></header>
+    <div class="controls">
+      <div class="row"><span>Tensor</span><button type="button" class="tool" data-dist="uniform">Uniform</button><button type="button" class="tool" data-dist="normal">Normal</button><button type="button" class="tool" data-dist="student">Student-t</button></div>
+    </div>
+    <p>An 8-bit integer spaces its levels evenly. An 8-bit <button type="button" class="inline-term" data-open="fp8-float">floating-point</button> number spends some bits on an <button type="button" class="inline-term" data-open="fp8-exponent">exponent</button>, which picks a power of two, and the rest on a <button type="button" class="inline-term" data-open="fp8-mantissa">mantissa</button>, which picks a mark between that power and the next. So its marks are dense near zero and sparse far away.</p>
+    <p>The stage shows a tensor's values (blue) on a logarithmic axis, with every positive value of three formats (yellow) below it: INT8, <button type="button" class="inline-term" data-open="fp8-e4m3">E4M3</button> and <button type="button" class="inline-term" data-open="fp8-e5m2">E5M2</button>. Each format first gets a <button type="button" class="inline-term" data-open="fp8-scale">scaling factor</button>, so that its largest value meets the tensor's largest value. The red bars (or red values on a phone) are the error after rounding.</p>
+    <p>On the uniform and normal tensors, INT8 has the lowest error. Now guess which format wins on the Student-t tensor, where a few values are about twenty times the typical size. It is E4M3: one huge value stretches INT8's even steps, while E4M3 keeps the same relative precision at every size.</p>
+    <p class="note">Computed: all 256 codes of E4M3 and E5M2 are decoded with the rules of the FP8 paper by Micikevicius et al. The tensors are toys in the three shapes van Baalen et al. compare; the scaling and the errors are our computation.</p>
+    <p class="inscription">FP8 wins only when a tensor has large outliers. Convolutional detectors rarely do, so 8-bit integers stay the default there.</p>
+    <button type="button" class="continue" data-go="guide">Continue with Decision guide</button>
+  </article>
+
+  <article data-chapter="guide">
+    <header class="ch-head"><span class="num">10 of 10</span><h2>Decision guide</h2><p class="subhead">Cheap and safe first; measure after every step</p></header>
+    <div class="controls">
+      <div class="row"><span>GPU</span><button type="button" class="tool" data-gpu="cc75">CC 7.5</button><button type="button" class="tool" data-gpu="cc80">CC 8.0/8.6</button><button type="button" class="tool" data-gpu="cc89">CC 8.9</button><button type="button" class="tool" data-gpu="cc90">CC 9.0</button></div>
+      <div class="row"><span>Model</span><button type="button" class="tool" data-model="cnn">ResNet-style</button><button type="button" class="tool" data-model="dw">depthwise-heavy</button><button type="button" class="tool" data-model="yolo">YOLO</button><button type="button" class="tool" data-model="vit">transformer</button></div>
+      <div class="row"><span>Budget</span><button type="button" class="tool" data-budget="0.3">0.3 pt</button><button type="button" class="tool" data-budget="1">1 pt</button><button type="button" class="tool" data-budget="2">2 pt</button><button type="button" class="tool" data-train="1">can fine-tune</button><button type="button" class="tool" data-train="0">cannot</button></div>
+    </div>
+    <div id="atlas-guide-text" class="atlas-guide"></div>
+    <p class="note">The step order and the expected loss behind each stop are our reading of the sourced tables in the full explainer's last chapter. CC means the GPU's compute capability.</p>
+    <p class="inscription">For a ResNet-style detector, per-channel INT8 with a good calibrator is the first and often the last step. Losses show up in depthwise-heavy models and below 8 bits.</p>
+    <div class="end-links"><a class="btn" href="explainer.html">Read the full explainer</a><button class="btn" type="button" data-go="title">Back to the title</button></div>
+  </article>

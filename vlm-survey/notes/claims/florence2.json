@@ -1,0 +1,245 @@
+[
+ {
+  "id": "florence2-bins",
+  "claim": "Number of location bins used to quantise coordinates",
+  "value": "1,000 bins",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Task formulation, Region bullet",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-box-form",
+  "claim": "Box representation token layout",
+  "value": "(x0, y0, x1, y1): location tokens for top-left and bottom-right corners",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Task formulation, Box representation",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-quad-form",
+  "claim": "Quad box token layout",
+  "value": "(x0, y0, ..., x3, y3): 4 corners, starting top-left, going clockwise (text detection and recognition)",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Task formulation, Quad box representation",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-poly-form",
+  "claim": "Polygon token layout",
+  "value": "(x0, y0, ..., xn, yn): vertices in clockwise order (referring segmentation)",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 3 Task formulation, Polygon Representation",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-token-spelling",
+  "claim": "Literal spelling of a location token in the appendix prompts, e.g. the prompt 'What is the polygon mask of region <loc_586><loc_294><loc_929><loc_814>'. The LaTeX source (sec/results/region_to_seg.tex) writes $\\langle$loc\\_586$\\rangle$, i.e. angle brackets and an underscore; pdftotext drops the underscore, so the PDF text layer reads 'loc 586'",
+  "value": "<loc_586>",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Appendix E.6, Fig. 16 (PDF p. 29)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-params",
+  "claim": "Model sizes",
+  "value": "232M (Florence-2-B) and 771M (Florence-2-L); Table 4 heads 0.23B / 0.77B",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-davit-b",
+  "claim": "Florence-2-B DaViT encoder",
+  "value": "dims [128,256,512,1024], blocks [1,1,9,1], heads [4,8,16,32], 90M params",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 15 (appendix C)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-encdec-b",
+  "claim": "Florence-2-B enc-dec transformer",
+  "value": "6 encoder layers, 6 decoder layers, dim 768, 140M params",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 15 (appendix C)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-davit-l",
+  "claim": "Florence-2-L DaViT + enc-dec",
+  "value": "DaViT dims [256,512,1024,2048], 360M; enc-dec 12+12 layers, dim 1024, 410M",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 15 (appendix C)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-images",
+  "claim": "FLD-5B image count",
+  "value": "126M images",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 4.1 / Sec. 5.1",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-total",
+  "claim": "FLD-5B total annotations",
+  "value": "5.4B (intro); rounded to 5B in Fig. 3 caption and Table 1",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Intro para on data engine; Fig. 1 caption",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-text",
+  "claim": "FLD-5B text annotations",
+  "value": "500M",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 5.1 Overview",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-region-text",
+  "claim": "FLD-5B region-text annotations",
+  "value": "1.3B",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 5.1 Overview",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-tpr",
+  "claim": "FLD-5B text-phrase-region annotations",
+  "value": "3.6B",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 5.1 Overview",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-sources",
+  "claim": "FLD-5B image sources",
+  "value": "ImageNet-22k, Object 365, Open Images, Conceptual Captions, LAION filtered by BLIP",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 4.1 Image Collection",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-fld-text-lengths",
+  "claim": "Avg tokens of brief / detailed / more detailed text",
+  "value": "7.95 / 31.65 / 70.53",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 2 (Table 3 is semantic-element stats)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-engine-phases",
+  "claim": "Data engine phases",
+  "value": "(1) initial annotation with specialist models, (2) data filtering, (3) iterative data refinement",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 4.2; Fig. 3 caption",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-zs-coco-cap",
+  "claim": "Zero-shot COCO caption CIDEr, Florence-2-B / -L vs Flamingo 80B",
+  "value": "133.0 / 135.6 vs 84.3",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.2 text",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-zs-coco-det",
+  "claim": "Zero-shot COCO detection val2017 mAP, B / L",
+  "value": "34.7 / 37.5",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 4 (zero-shot)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-zs-flickr",
+  "claim": "Zero-shot Flickr30k grounding R@1, B / L vs Kosmos-2 (1.6B)",
+  "value": "83.6 / 84.4 vs 78.7",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 4 (zero-shot)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-zs-refcoco",
+  "claim": "Zero-shot RefCOCO val accuracy, B / L vs Kosmos-2",
+  "value": "53.9 / 56.3 vs 52.3",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 4 (zero-shot)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-zs-res",
+  "claim": "Zero-shot RefCOCO referring segmentation val mIoU, B / L",
+  "value": "34.6 / 35.8",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 4 (zero-shot)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-ft-coco-det",
+  "claim": "Fine-tuned generalist COCO detection val2017 mAP, B / L",
+  "value": "41.4 / 43.4",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-ft-refcoco",
+  "claim": "Fine-tuned generalist RefCOCO val accuracy, B / L",
+  "value": "92.6 / 93.4",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-ft-res",
+  "claim": "Fine-tuned generalist RefCOCO RES val mIoU, B / L",
+  "value": "78.0 / 80.5",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-freeze-enc",
+  "claim": "Freezing the vision encoder hurts detection (zero-shot COCO AP)",
+  "value": "6.9 frozen vs 19.7 unfrozen (both V and L pretrained)",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Table 12 (Table 7 is COCO detection)",
+  "uncertain": false
+ },
+ {
+  "id": "florence2-training",
+  "claim": "Training recipe",
+  "value": "batch 2048/3072 (B/L), 384x384 to 3 billion effective samples, then 768x768 tuning for 0.5B (B) / 0.1B (L) samples",
+  "paper": "Florence-2",
+  "version": "v1",
+  "loc": "Sec. 6.1 Setup",
+  "uncertain": false
+ }
+]

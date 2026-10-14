@@ -1,0 +1,59 @@
+<body>
+<main>
+<header class="hero">
+  <figure class="viz hero-fig" id="viz-hero" data-scene="overview" data-toy aria-label="A toy desk scene. A click lands on the logo of a mug; the image is encoded once; three masks lift off: the logo, the mug, and the mug with its saucer, each with a predicted score.">
+    <div class="stage"></div>
+    <p class="readout" aria-live="polite"></p>
+    <button type="button" class="hero-replay" id="btn-hero-replay" data-replay>Replay</button>
+  </figure>
+  <h1>Segment Anything, the journey</h1>
+  <p class="hook">Point at something in a picture and get its outline back. How that gesture became one model for any image, then for video, then for every object of a named kind, and then for the object's 3D shape.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/1411.4038v2" title="arXiv 1411.4038v2">FCN</a></li>
+    <li><a href="https://arxiv.org/abs/1505.04597v1" title="arXiv 1505.04597v1">U-Net</a></li>
+    <li><a href="https://arxiv.org/abs/1703.06870v3" title="arXiv 1703.06870v3">Mask R-CNN</a></li>
+    <li><a href="https://arxiv.org/abs/2107.06278v2" title="arXiv 2107.06278v2">MaskFormer</a></li>
+    <li><a href="https://arxiv.org/abs/2112.01527v3" title="arXiv 2112.01527v3">Mask2Former</a></li>
+    <li><a href="https://arxiv.org/abs/2304.02643v1" title="arXiv 2304.02643v1">Segment Anything (SAM)</a></li>
+    <li><a href="https://arxiv.org/abs/2408.00714v2" title="arXiv 2408.00714v2">SAM 2</a></li>
+    <li><a href="https://arxiv.org/abs/2511.16719v2" title="arXiv 2511.16719v2">SAM 3</a></li>
+    <li><a href="https://arxiv.org/abs/2511.16624v2" title="arXiv 2511.16624v2">SAM 3D</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: before SAM</li>
+    <li value="1"><a href="#ch-before" data-rail="Four masks">Four ways to draw a mask</a></li>
+    <li><a href="#ch-clicks" data-rail="Clicks">A human in the loop</a></li>
+    <li class="act">Act II: Segment Anything (2023)</li>
+    <li value="3"><a href="#ch-promptable" data-rail="Any prompt">Any prompt, a valid mask</a></li>
+    <li><a href="#ch-sam-arch" data-rail="Heavy once">Heavy once, light many times</a></li>
+    <li><a href="#ch-training" data-rail="Training step">One training step: eleven rounds</a></li>
+    <li><a href="#ch-engine" data-rail="Data engine">The data engine and SA-1B</a></li>
+    <li><a href="#ch-zeroshot" data-rail="Zero-shot">What prompting buys</a></li>
+    <li class="act">Act III: time, concepts, depth</li>
+    <li value="8"><a href="#ch-sam2" data-rail="SAM 2">SAM 2: video is images with memory</a></li>
+    <li><a href="#ch-sam3" data-rail="SAM 3">SAM 3: every object of this kind</a></li>
+    <li><a href="#ch-sam3d" data-rail="SAM 3D">SAM 3D: from a mask to an object</a></li>
+    <li class="act">Act IV: the family</li>
+    <li value="11"><a href="#ch-efficient" data-rail="Efficient">SAM on a budget</a></li>
+    <li><a href="#ch-family" data-rail="Family">Compose, adapt, track</a></li>
+    <li><a href="#ch-map" data-rail="Map">The explosion</a></li>
+    <li class="act">Act V: inspection</li>
+    <li value="14"><a href="#ch-inspection" data-rail="Inspection">Where SAM helps inspection, and where it fails</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Timeline</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Every model in the SAM line answers the same request. Someone points at <b class="c-blue">an image</b> with <b class="c-yellow">a prompt</b> (a click, a box, a word), and the model returns <b class="c-green">a mask</b>: the set of pixels that belong to the thing. The models before SAM, in chapter 1, take no prompt at all, and SAM 3D, at the end of the line, returns a 3D shape instead of a mask. The papers differ in what counts as a prompt, how many answers come back, and what the model had to see to learn it. One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">the image and its features</span>
+  <span class="c-yellow">prompts: points, boxes, words, examples</span>
+  <span class="c-green">predicted masks and outputs</span>
+  <span class="c-red">loss, error, gradient</span>
+  <span class="c-brown">frozen, discarded, background, exclude clicks</span>
+</div>
+<p class="note">Each figure carries a badge. <b>Toy model</b> means an illustration of the mechanism on a drawn desk scene, not a paper's numbers. <b>Computed from the paper</b> means the figure runs a paper's own configuration or algorithm. <b>Sourced numbers</b> means it plots numbers printed in a paper or counted from a dated arXiv query. In equations, hover or tap a colored term to light up the part of the figure it names.</p>

@@ -1,0 +1,63 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="Twelve blue points sit on a circle, each with a yellow twin: two views of the same image. First a green spring pulls each blue point toward its yellow twin. Then red arrows push one point away from the views of every other image. Last, real contrastive-loss gradient steps move all 24 points: twins meet and the twelve pairs spread evenly around the circle."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge computed" style="top:.6rem;right:.75rem">Computed</span>
+  </div>
+  <h1>Learning by comparing</h1>
+  <p class="hook">Show a network two crops of the same photo and ask it to pick out the partner among many other photos. Nobody labels anything, yet to win this game the network has to learn what makes an image itself. This page builds contrastive learning from that one game: the loss, the tricks that made it work at scale, what it really optimizes, how it fails, and where it lives on today.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/1807.03748v2" title="arXiv 1807.03748v2">Contrastive predictive coding (CPC)</a></li>
+    <li><a href="https://arxiv.org/abs/1805.01978v1" title="arXiv 1805.01978v1">Instance discrimination (Wu et al.)</a></li>
+    <li><a href="https://arxiv.org/abs/1911.05722v3" title="arXiv 1911.05722v3">MoCo</a></li>
+    <li><a href="https://arxiv.org/abs/2003.04297v1" title="arXiv 2003.04297v1">MoCo v2</a></li>
+    <li><a href="https://arxiv.org/abs/2104.02057v4" title="arXiv 2104.02057v4">MoCo v3</a></li>
+    <li><a href="https://arxiv.org/abs/2002.05709v3" title="arXiv 2002.05709v3">SimCLR</a></li>
+    <li><a href="https://arxiv.org/abs/2005.10242v10" title="arXiv 2005.10242v10">Alignment and uniformity (Wang and Isola)</a></li>
+    <li><a href="https://arxiv.org/abs/2012.09740v2" title="arXiv 2012.09740v2">Behaviour of the contrastive loss (Wang and Liu)</a></li>
+    <li><a href="https://arxiv.org/abs/2007.00224v3" title="arXiv 2007.00224v3">Debiased contrastive learning</a></li>
+    <li><a href="https://arxiv.org/abs/2010.04592v2" title="arXiv 2010.04592v2">Hard negative samples</a></li>
+    <li><a href="https://arxiv.org/abs/2006.09882v5" title="arXiv 2006.09882v5">SwAV</a></li>
+    <li><a href="https://arxiv.org/abs/2103.03230v3" title="arXiv 2103.03230v3">Barlow Twins</a></li>
+    <li><a href="https://arxiv.org/abs/2110.09348v3" title="arXiv 2110.09348v3">Dimensional collapse (Jing et al.)</a></li>
+    <li><a href="https://arxiv.org/abs/2004.11362v5" title="arXiv 2004.11362v5">Supervised contrastive learning</a></li>
+    <li><a href="https://arxiv.org/abs/2103.00020v1" title="arXiv 2103.00020v1">CLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2303.15343v4" title="arXiv 2303.15343v4">SigLIP</a></li>
+    <li><a href="http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf" title="Hadsell, Chopra, LeCun, CVPR 2006">DrLIM contrastive loss (CVPR 2006)</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: the idea</li>
+    <li value="1"><a href="#ch-compare" data-rail="Comparing">Learning by comparing</a></li>
+    <li><a href="#ch-map" data-rail="The field">The field at a glance</a></li>
+    <li><a href="#ch-infonce" data-rail="InfoNCE">InfoNCE: find your partner in a lineup</a></li>
+    <li class="act">Act II: the recipes</li>
+    <li value="4"><a href="#ch-moco" data-rail="MoCo">Negatives at scale: a memory bank, then a momentum queue</a></li>
+    <li><a href="#ch-simclr" data-rail="SimCLR">SimCLR: strong augmentation, a big batch, a throwaway head</a></li>
+    <li class="act">Act III: why it works</li>
+    <li value="6"><a href="#ch-sphere" data-rail="The sphere">Alignment and uniformity on the sphere</a></li>
+    <li><a href="#ch-negatives" data-rail="Negatives">Hard negatives and false negatives</a></li>
+    <li class="act">Act IV: beyond pairs</li>
+    <li value="8"><a href="#ch-beyond" data-rail="No negatives">Without negatives: clusters, redundancy, collapse</a></li>
+    <li class="act">Act V: labels and language</li>
+    <li value="9"><a href="#ch-supcon" data-rail="SupCon">When you have labels: supervised contrastive</a></li>
+    <li><a href="#ch-clip" data-rail="CLIP, SigLIP">Image and text: CLIP's softmax, SigLIP's sigmoid</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-step">Interlude: one SimCLR step</a></li><li><a href="#ch-guide">When to reach for it</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Every figure on this page uses the same five colors, and each color means one thing everywhere:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">the anchor: one view of an image</span>
+  <span class="c-yellow">the positive: its partner view, or its caption</span>
+  <span class="c-green">agreement: the pull between partners</span>
+  <span class="c-red">negatives, their push, the loss</span>
+  <span class="c-brown">no gradient: a momentum copy, a stored bank</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means the figure runs the real loss or algorithm, often on small made-up data. <b>Toy model</b> means an illustration of the mechanism. <b>Sourced</b> means what is drawn comes from the papers. The three-dimensional figures turn when you drag them (or with the arrow keys once focused). In an equation, hover over or tap a term that names part of a figure, and that part lights up. Most chapters end with an "In practice" note on what the idea means when you train or use such a model. Background chapters elsewhere: <a href="../jepa-survey/explainer.html">the JEPA survey</a> for BYOL, DINO and the energy view of collapse, <a href="../vlm-survey/explainer.html">the VLM survey</a> for CLIP inside vision-language models, and <a href="../ovd-survey/explainer.html">the open-vocabulary detection survey</a> for CLIP inside detectors.</p>

@@ -1,0 +1,47 @@
+<section id="ch-benchmarks" class="chapter">
+<h2>How noisy are real datasets?</h2>
+<p>Synthetic noise is a lab setting. The real question is how many labels are wrong in datasets people actually use, including the test sets that decide which model ships.</p>
+
+<figure class="viz" id="viz-audit" data-sourced>
+  <span class="badge sourced">Sourced numbers</span>
+  <canvas id="audit-canvas" role="img" aria-label="Three panels. Bars of the share of test labels confirmed wrong in ten datasets, from 10.12% for QuickDraw to 0.15% for MNIST. A funnel for the ImageNet validation set: 50,000 images, 5,440 flagged, 2,916 confirmed errors, 1,428 correctable. Bars of seven ImageNet models' accuracy on the 1,428 correctable images, ranked, with original or corrected labels."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-audit-orig" aria-pressed="true">Score against the original labels</button>
+    <button type="button" id="btn-audit-corr" aria-pressed="false">Score against the corrected labels</button>
+    <button type="button" id="btn-audit-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="audit-readout" aria-live="polite"></p>
+  <figcaption>Sourced: Northcutt, Athalye and Mueller (2021), Table 1, Sec. 4 and Table S1 (agreement threshold 3 of 5). Ranks are among the 34 pre-trained ImageNet models in Table S1. Before you switch to corrected labels, guess which model moves up.</figcaption>
+</figure>
+
+<p>Northcutt, Athalye and Mueller checked the test sets of ten popular benchmarks. They let confident learning (chapter 9) flag likely errors, then showed the flagged examples (a random sample of them for the two largest datasets) to five crowd workers next to the given label and the suggested one. An example counted as an error when fewer than three of the five workers accepted its given label. Their headline: "<span data-claim="pervasive-abs-avg">we estimate an average of at least 3.3% errors across the 10 datasets</span>", and "<span data-claim="pervasive-abs-imagenet">label errors comprise at least 6% of the ImageNet validation set</span>". On ImageNet, <span data-claim="pervasive-t1-imagenet-cl">5,440</span> flags led to <span data-claim="pervasive-t1-imagenet-validated">2,916</span> confirmed errors. Not every flag was an error: "<span data-claim="pervasive-abs-51">51% of the algorithmically-flagged candidates are indeed erroneously labeled, on average across the datasets</span>".</p>
+
+<p>Now the part that matters for model selection. On the images whose label is wrong, a model scores well by reproducing the wrong label, and big models are best at that. Press the second button. Against the corrected labels, ResNet-18 rises from rank <span data-claim="pervasive-ts1-pt-resnet18-rank1">34</span> to rank <span data-claim="pervasive-ts1-pt-resnet18-crank1">1</span>, and NASNet-Large falls from rank <span data-claim="pervasive-ts1-k-nasnetlarge-rank1">1</span> to <span data-claim="pervasive-ts1-k-nasnetlarge-crank1">29</span>. On the full validation set the ranking barely moves, because errors are a few percent of it. But if your test set were a little noisier, the authors found, "<span data-claim="pervasive-abs-resnet">on ImageNet with corrected labels: ResNet-18 outperforms ResNet-50 if the prevalence of originally mislabeled test examples increases by just 6%</span>".</p>
+
+<div class="claim-card">
+<h4>Claim card: Northcutt, Athalye and Mueller (2021)</h4>
+<dl>
+<dt>Claim</dt><dd>Label errors are common in benchmark test sets, and they can change which model looks best.</dd>
+<dt>How measured</dt><dd>Out-of-sample predictions and confident learning shortlist suspects in ten test sets; five workers vote on each; models are re-scored on the correctable subset with original and corrected labels, and on test sets subsampled to a higher error share.</dd>
+<dt>Result</dt><dd>At least 3.3% errors on average; on the correctable ImageNet images, lower-capacity models such as ResNet-18 rise to the top once labels are corrected, and NASNet-Large falls to 29th of 34.</dd>
+<dt>Would have falsified it</dt><dd>Workers rejecting most flags, or model rankings on the correctable set staying the same under corrected labels.</dd>
+</dl></div>
+
+<p>Crowd labels are noisier still before anyone checks them. Wei et al. had three crowd workers label every CIFAR-10 training image. A single crowd label per image was wrong <span data-claim="cifarn-c10-random1">17.23%</span> of the time; a majority vote of three cut that to <span data-claim="cifarn-c10-aggregate">9.03%</span>; and taking, for each image, any of the three labels that was wrong gives a worst case of <span data-claim="cifarn-c10-worst">40.21%</span>.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Audit the evaluation set before you trust a model comparison. Label evaluation images with more votes than training images, re-check the ones a model confidently disagrees with, and report accuracy on the corrected set. A leaderboard built on unchecked labels can favor the model that best copies your labelers' mistakes.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('audit-readout');
+  const f = FIG.audit(document.getElementById('audit-canvas'), { say: t => out.textContent = t });
+  const bs = ['orig', 'corr'].map(k => document.getElementById('btn-audit-' + k));
+  bs.forEach(b => b.addEventListener('click', () => { KIT.press(bs, b); f.corrected(b.id.endsWith('corr')); }));
+  document.getElementById('btn-audit-reset').addEventListener('click', () => { KIT.press(bs, bs[0]); f.reset(); });
+  f.reset();
+})();
+</script>
+</section>

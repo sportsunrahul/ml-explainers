@@ -1,0 +1,884 @@
+[
+ {
+  "id": "detr-headline-ap",
+  "claim": "DETR (ResNet-50, 6 enc + 6 dec layers, width 256, long schedule) reaches 42.0 box AP on COCO val.",
+  "value": "42.0 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-headline-ap-text",
+  "claim": "Text phrasing of the headline: DETR is competitive with Faster R-CNN with the same number of parameters, achieving 42 AP on COCO val.",
+  "value": "42 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-fpn-plus-ap",
+  "claim": "Enhanced Faster R-CNN baseline (R50-FPN+, with GIoU, random crops, 9x schedule) reaches 42.0 AP.",
+  "value": "42.0 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-fpn-ap",
+  "claim": "Detectron2 model-zoo Faster R-CNN R50-FPN (3x schedule) reaches 40.2 AP.",
+  "value": "40.2 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-aps",
+  "claim": "DETR (R50) small-object AP.",
+  "value": "20.5 AP_S",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "detr-apm",
+  "claim": "DETR (R50) medium-object AP.",
+  "value": "45.8 AP_M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_M",
+  "uncertain": false
+ },
+ {
+  "id": "detr-apl",
+  "claim": "DETR (R50) large-object AP.",
+  "value": "61.1 AP_L",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "detr-ap50",
+  "claim": "DETR (R50) AP at IoU 0.5.",
+  "value": "62.4 AP_50",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_50",
+  "uncertain": false
+ },
+ {
+  "id": "detr-ap75",
+  "claim": "DETR (R50) AP at IoU 0.75.",
+  "value": "44.2 AP_75",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_75",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-plus-aps",
+  "claim": "Faster RCNN-FPN+ small-object AP.",
+  "value": "26.6 AP_S",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-plus-apl",
+  "claim": "Faster RCNN-FPN+ large-object AP.",
+  "value": "53.4 AP_L",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-plus-apm",
+  "claim": "Faster RCNN-FPN+ medium-object AP.",
+  "value": "45.4 AP_M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_M",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-plus-flops",
+  "claim": "Faster RCNN-FPN+ compute and speed.",
+  "value": "180/26 GFLOPS/FPS",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column GFLOPS/FPS",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-plus-params",
+  "claim": "Faster RCNN-FPN+ parameter count.",
+  "value": "42M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column #params",
+  "uncertain": false
+ },
+ {
+  "id": "detr-apl-delta-text",
+  "claim": "Text says DETR gains +7.8 on AP_L and lags by -5.5 on AP_S (vs Faster R-CNN). UNCERTAIN: the text does not name the comparison row, and Table 1 does not reproduce these deltas: vs 'Faster RCNN-FPN+' the arithmetic is 61.1-53.4 = +7.7 AP_L and 20.5-26.6 = -6.1 AP_S; vs 'Faster RCNN-FPN' it is +9.1 AP_L and -3.7 AP_S. Quote only as the paper's text claim.",
+  "value": "+7.8 AP_L / -5.5 AP_S",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1",
+  "uncertain": true
+ },
+ {
+  "id": "detr-flops-fps",
+  "claim": "DETR (R50) compute and speed, measured with torchscript models.",
+  "value": "86/28 GFLOPS/FPS",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column GFLOPS/FPS",
+  "uncertain": false
+ },
+ {
+  "id": "detr-fps-text",
+  "claim": "Baseline DETR runs at 28 FPS, similarly to Faster R-CNN-FPN with the same backbone.",
+  "value": "28 FPS",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.2, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-fps-table2",
+  "claim": "Table 2 lists the 6-encoder-layer model (the baseline config) at 86/23 GFLOPS/FPS. UNCERTAIN: conflicts with 28 FPS in Table 1 and Section 4.2 text for what appears to be the same architecture; possibly a stale v1 number (v1 text said 23 FPS, visible in the \\oldnew macro's first argument). Prefer detr-flops-fps.",
+  "value": "86/23 GFLOPS/FPS",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 2, row '6', column GFLOPS/FPS",
+  "uncertain": true
+ },
+ {
+  "id": "detr-params-table",
+  "claim": "DETR (R50) parameter count as rounded in the table.",
+  "value": "41M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column #params",
+  "uncertain": false
+ },
+ {
+  "id": "detr-params-text",
+  "claim": "The 6+6 layer width-256 DETR has 41.3M parameters, like Faster R-CNN with FPN.",
+  "value": "41.3M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "detr-params-backbone",
+  "claim": "Parameters in the ResNet-50 backbone of DETR.",
+  "value": "23.5M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "detr-params-transformer",
+  "claim": "Parameters in the transformer of DETR.",
+  "value": "17.8M",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "detr-dc5-ap",
+  "claim": "DETR-DC5 (R50, dilated C5, stride 16) AP.",
+  "value": "43.3 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR-DC5', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-dc5-aps",
+  "claim": "DETR-DC5 (R50) small-object AP.",
+  "value": "22.5 AP_S",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR-DC5', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "detr-dc5-flops",
+  "claim": "DETR-DC5 (R50) compute and speed.",
+  "value": "187/12 GFLOPS/FPS",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR-DC5', column GFLOPS/FPS",
+  "uncertain": false
+ },
+ {
+  "id": "detr-r101-ap",
+  "claim": "DETR-R101 AP.",
+  "value": "43.5 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR-R101', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-dc5-r101-ap",
+  "claim": "DETR-DC5-R101 AP, best DETR detection number in the paper.",
+  "value": "44.9 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR-DC5-R101', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-r101-plus-ap",
+  "claim": "Faster RCNN-R101-FPN+ AP.",
+  "value": "44.0 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-R101-FPN+', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "detr-dc5-cost",
+  "claim": "DC5 increases feature resolution by a factor of two, costs 16x more in encoder self-attention, and about 2x overall compute.",
+  "value": "2x resolution, 16x encoder self-attention cost, 2x overall",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-short-long-ap",
+  "claim": "Ablation baseline DETR (R50, 6 enc, 6 dec, width 256) achieves 40.6 AP on the short schedule and 42.0 AP on the long schedule.",
+  "value": "40.6 AP (short) / 42.0 AP (long)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.2, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-long-schedule-gain",
+  "claim": "The 500-epoch schedule adds 1.5 AP over the 300-epoch schedule. UNCERTAIN: Section 4.2 gives 40.6 (short) and 42.0 (long), a 1.4 AP difference; the ablation number is a median over the last 10 epochs while the Faster R-CNN comparison uses the last epoch, which may explain it, but the paper does not say.",
+  "value": "+1.5 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "uncertain": true
+ },
+ {
+  "id": "detr-epochs-short",
+  "claim": "Ablation schedule: 300 epochs with a learning-rate drop by a factor of 10 after 200 epochs.",
+  "value": "300 epochs, LR /10 after 200",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-epochs-long",
+  "claim": "Long schedule used for the Faster R-CNN comparison: 500 epochs with a learning-rate drop after 400 epochs.",
+  "value": "500 epochs, LR drop after 400",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-epochs",
+  "claim": "Faster R-CNN+ baselines are trained with the 9x schedule, approximately 109 epochs.",
+  "value": "9x schedule (109 epochs)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1 paragraph; Appendix A.4 'Baseline'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-frcnn-enhancements",
+  "claim": "GIoU, random crop, and the 9x schedule add 1-2 AP to Faster R-CNN in total.",
+  "value": "1-2 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-train-cost",
+  "claim": "Training the baseline for 300 epochs on 16 V100 GPUs takes 3 days, with 4 images per GPU (total batch size 64).",
+  "value": "16 V100, 3 days, 4 img/GPU, batch 64",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-readme-epoch-time",
+  "claim": "Official repo README: a single epoch takes 28 minutes, so 300 epochs take around 6 days on a single machine with 8 V100 cards.",
+  "value": "28 min/epoch; ~6 days for 300 epochs on 8 V100",
+  "paper": "DETR",
+  "version": "README (github.com/facebookresearch/detr, fetched 2026-09-29)",
+  "loc": "Official repo README, 'Usage - Object detection' > 'Training'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-readme-150ep",
+  "claim": "Official repo README: a 150-epoch schedule (3 days on a single machine) achieves 39.5/60.3 AP/AP50.",
+  "value": "39.5 AP / 60.3 AP50 at 150 epochs",
+  "paper": "DETR",
+  "version": "README (github.com/facebookresearch/detr, fetched 2026-09-29)",
+  "loc": "Official repo README, 'Usage - Object detection' > 'Training'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-readme-inftime",
+  "claim": "Official repo README model zoo: DETR R50 (500-epoch schedule) inference time 0.036 s per image over the first 100 val5k images, box AP 42.0.",
+  "value": "0.036 s, 42.0 box AP",
+  "paper": "DETR",
+  "version": "README (github.com/facebookresearch/detr, fetched 2026-09-29)",
+  "loc": "Official repo README, 'Model Zoo' table, row 0 'DETR R50'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-optimizer",
+  "claim": "Optimizer AdamW; transformer LR 1e-4, backbone LR 1e-5, weight decay 1e-4.",
+  "value": "AdamW, lr 10^-4 (transformer), 10^-5 (backbone), wd 10^-4",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'; Appendix A.4",
+  "uncertain": false
+ },
+ {
+  "id": "detr-grad-clip",
+  "claim": "Gradient clipping with maximal gradient norm 0.1.",
+  "value": "0.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Training hyperparameters'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-dropout",
+  "claim": "Transformer dropout, applied after every multi-head attention and FFN before layer norm.",
+  "value": "0.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4 'Technical details'; Appendix A.4 'Transformer'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-lambda-l1",
+  "claim": "Weight of the L1 box loss.",
+  "value": "lambda_L1 = 5",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-lambda-iou",
+  "claim": "Weight of the GIoU box loss.",
+  "value": "lambda_iou = 2",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-noobj-downweight",
+  "claim": "The log-probability term is down-weighted by a factor 10 when the target class is no-object, to account for class imbalance.",
+  "value": "factor 10",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.1, paragraph after Eq. (2)",
+  "uncertain": false
+ },
+ {
+  "id": "detr-n-queries",
+  "claim": "All models were trained with N=100 decoder query slots.",
+  "value": "N = 100",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'; also Fig. 7 caption",
+  "uncertain": false
+ },
+ {
+  "id": "detr-backbone-dims",
+  "claim": "Backbone output activation map: C=2048 channels at H0/32 x W0/32.",
+  "value": "C = 2048, stride 32",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.2, 'Backbone'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-d-model",
+  "claim": "Transformer width (d) used for the main model.",
+  "value": "d = 256",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1 and 4.2 ('width 256')",
+  "uncertain": false
+ },
+ {
+  "id": "detr-heads",
+  "claim": "Number of attention heads in the main model.",
+  "value": "8 heads",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "detr-layers",
+  "claim": "Main model uses 6 encoder and 6 decoder layers (text says '6 transformer and 6 decoder layers').",
+  "value": "6 encoder / 6 decoder layers",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1; Section 4.2 first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pred-ffn",
+  "claim": "Prediction head: a 3-layer perceptron with ReLU and hidden dim d for the box (normalized center, height, width), plus a linear projection with softmax for the class.",
+  "value": "3-layer MLP (box) + linear (class)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.2, 'Prediction feed-forward networks (FFNs)'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-box-format",
+  "claim": "Boxes are vectors in [0,1]^4: center coordinates plus height and width relative to image size.",
+  "value": "b in [0,1]^4 (cx, cy, h, w)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.1, matching-cost paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-scale-aug",
+  "claim": "Scale augmentation: shortest side resized to between 480 and 800 pixels, longest side at most 1333.",
+  "value": "short side 480-800, long side <= 1333",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-crop-aug",
+  "claim": "Random crop augmentation (probability 0.5, crop then resize to 800-1333) improves performance by approximately 1 AP.",
+  "value": "p = 0.5, ~1 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-empty-slot-override",
+  "claim": "At inference, overriding empty-class slots with the second highest scoring class improves AP by 2 points vs filtering out empty slots.",
+  "value": "+2 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-coco-size",
+  "claim": "COCO 2017: 118k training images and 5k validation images.",
+  "value": "118k train / 5k val",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Dataset'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-coco-instances",
+  "claim": "COCO has 7 instances per image on average, up to 63 instances in a single training image.",
+  "value": "7 avg, 63 max",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Dataset'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-enc0-ap",
+  "claim": "With 0 encoder layers: 36.7 AP, 54.2 AP_L, 33.4M params, 76/28 GFLOPS/FPS.",
+  "value": "36.7 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 2, row '0'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-enc3-ap",
+  "claim": "With 3 encoder layers: 40.1 AP.",
+  "value": "40.1 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 2, row '3'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-enc6-ap",
+  "claim": "With 6 encoder layers (baseline): 40.6 AP, 60.2 AP_L.",
+  "value": "40.6 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 2, row '6'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-enc12-ap",
+  "claim": "With 12 encoder layers: 41.6 AP, 49.2M params, 95/20 GFLOPS/FPS.",
+  "value": "41.6 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 2, row '12'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-no-encoder-drop",
+  "claim": "Without encoder layers, overall AP drops by 3.9 points, with a 6.0 AP drop on large objects.",
+  "value": "-3.9 AP / -6.0 AP_L",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.2, 'Number of encoder layers' (matches Table 2 rows 0 vs 6)",
+  "uncertain": false
+ },
+ {
+  "id": "detr-decoder-gain",
+  "claim": "AP and AP50 improve after every decoder layer, totalling +8.2/9.5 AP between the first and last layer (long-schedule baseline).",
+  "value": "+8.2 AP / +9.5 AP50",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.2, 'Number of decoder layers' (refers to Fig. 4)",
+  "uncertain": false
+ },
+ {
+  "id": "detr-nms-thresh",
+  "claim": "NMS applied in the Fig. 4 experiment uses threshold 0.7 (from the plot legend 'NMS=0.7'); text says 'default parameters' of Detectron2.",
+  "value": "NMS=0.7",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Fig. 4 legend (PDF); Section 4.2 text",
+  "uncertain": false
+ },
+ {
+  "id": "detr-ffn-removal",
+  "claim": "Removing FFNs from the transformer reduces parameters from 41.3M to 28.7M (10.8M left in the transformer) and drops performance by 2.3 AP.",
+  "value": "-2.3 AP (41.3M -> 28.7M params)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.2, 'Importance of FFN'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-posenc-none",
+  "claim": "With no spatial positional encodings (output encodings learned at input only): 32.8 AP, -7.8 vs baseline.",
+  "value": "32.8 AP (-7.8)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 3, row 'none / none / learned at input'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-posenc-input-once",
+  "claim": "Sine spatial encodings and output encodings passed once at input: 39.2 AP, -1.4 vs baseline.",
+  "value": "39.2 AP (-1.4)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 3, row 'sine at input / sine at input / learned at input'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-posenc-learned",
+  "claim": "Learned spatial encodings passed at every attention: 39.6 AP, -1.0.",
+  "value": "39.6 AP (-1.0)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 3, row 'learned at attn. x3'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-posenc-no-encoder",
+  "claim": "No spatial encodings in the encoder (sine at attention in decoder): 39.3 AP, -1.3.",
+  "value": "39.3 AP (-1.3)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 3, row 'none / sine at attn. / learned at attn.'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-posenc-baseline",
+  "claim": "Baseline positional encoding: fixed sine at every attention layer in encoder and decoder, learned object queries: 40.6 AP, 61.6 AP50.",
+  "value": "40.6 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 3, last row",
+  "uncertain": false
+ },
+ {
+  "id": "detr-loss-no-giou",
+  "claim": "Loss ablation, class + L1 only (no GIoU): 35.8 AP (-4.8), AP_S 13.7.",
+  "value": "35.8 AP (-4.8)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 4, row 'class, l1'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-loss-no-l1",
+  "claim": "Loss ablation, class + GIoU only (no L1): 39.9 AP (-0.7), AP_L 57.9.",
+  "value": "39.9 AP (-0.7)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 4, row 'class, GIoU'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-loss-all",
+  "claim": "Loss ablation baseline, class + L1 + GIoU: 40.6 AP, AP_S 19.9, AP_M 44.3, AP_L 60.2.",
+  "value": "40.6 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 4, last row",
+  "uncertain": false
+ },
+ {
+  "id": "detr-giraffes",
+  "claim": "No training image has more than 13 giraffes; DETR finds all 24 giraffes in a synthetic image.",
+  "value": "13 (train max), 24 (detected)",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.3, 'Generalization to unseen numbers of instances'; Fig. 5",
+  "uncertain": false
+ },
+ {
+  "id": "detr-query-viz",
+  "claim": "Fig. 7 visualizes box predictions for 20 of the N=100 slots over all COCO 2017 val images; each slot specializes on areas and box sizes, and almost all have an image-wide-box mode.",
+  "value": "20 of 100 slots",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Fig. 7 caption; Section 4.3",
+  "uncertain": false
+ },
+ {
+  "id": "detr-saturation",
+  "claim": "On a 10x10 grid of repeated objects, DETR detects all instances up to 50 visible; with all 100 instances it detects only 30 on average.",
+  "value": "all up to 50; 30 of 100",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.5, 'Increasing the number of instances'; Fig. 12",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-pq-r50",
+  "claim": "DETR (R50) panoptic quality on COCO val.",
+  "value": "43.4 PQ",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 5, row 'DETR' (R50), column PQ",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-pq-r101",
+  "claim": "DETR-R101 panoptic quality on COCO val, best in the table.",
+  "value": "45.1 PQ",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 5, row 'DETR-R101', column PQ",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-pfpn-r101",
+  "claim": "PanopticFPN++ (R101, retrained with DETR augmentation, 18x schedule) panoptic quality.",
+  "value": "44.1 PQ",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 5, row 'PanopticFPN++' (R101), column PQ",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-stuff",
+  "claim": "DETR-R101 stuff PQ vs PanopticFPN++ R101 stuff PQ (DETR especially dominant on stuff).",
+  "value": "37.0 PQ^st vs 33.6 PQ^st",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 5, rows 'DETR-R101' and 'PanopticFPN++' (R101), column PQ^st",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-mask-ap",
+  "claim": "DETR-R101 mask AP (things) 33.0 vs PanopticFPN++ R101 39.7; text calls it a deficit of up to 8 mAP vs baselines.",
+  "value": "33.0 AP vs 39.7 AP; 'up to 8 mAP' deficit",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 5, column AP; Section 4.4, 'Main results'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-test",
+  "claim": "DETR panoptic on COCO test set.",
+  "value": "46 PQ",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.4, 'Main results', last paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-categories",
+  "claim": "COCO panoptic has 53 stuff categories in addition to 80 things categories.",
+  "value": "53 stuff + 80 things",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.4, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "detr-pano-head-epochs",
+  "claim": "Mask head trained for 25 epochs on a frozen DETR; masks at stride 4; inference filters detections below 85% confidence and empty masks under 4 pixels.",
+  "value": "25 epochs, stride 4, 85% conf, 4 px",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.4, mask head and 'Training details' paragraphs",
+  "uncertain": false
+ },
+ {
+  "id": "detr-inference-50-lines",
+  "claim": "Inference code for DETR can be implemented in less than 50 lines of PyTorch.",
+  "value": "< 50 lines",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.2, second paragraph; Appendix A.6 listing",
+  "uncertain": false
+ },
+ {
+  "id": "detr-listing-input",
+  "claim": "The Appendix A.6 listing instantiates DETR(num_classes=91, hidden_dim=256, nheads=8, 6 enc, 6 dec) with 100 learned query_pos embeddings and a dummy 1x3x800x1200 input; the class head outputs num_classes + 1 logits (extra no-object).",
+  "value": "91 classes (+1), hidden 256, 8 heads, 100 queries, input 800x1200",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.6, Listing 1 (tex/python/detr.py)",
+  "uncertain": false
+ },
+ {
+  "id": "detr-batch-zero-pad",
+  "claim": "Input images are batched with 0-padding so they all have the dimensions (H0, W0) of the largest image of the batch. [repo] util/misc.py takes the max height and max width separately (_max_by_axis) and pads on the right and bottom.",
+  "value": "0-padding to the largest image",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Sec 3.2 'Backbone', footnote",
+  "uncertain": false
+ },
+ {
+  "id": "detr-1x1-flatten",
+  "claim": "A 1x1 convolution reduces the channel dimension of the backbone map from C to d; the spatial dimensions are collapsed into one, giving a d x HW sequence for the encoder.",
+  "value": "1x1 conv C -> d; d x HW",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Sec 3.2 'Transformer encoder'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-aux-losses",
+  "claim": "Prediction FFNs and Hungarian loss are added after each decoder layer; all prediction FFNs share their parameters, with an additional shared layer-norm on their input. The stated motivation: especially to help the model output the correct number of objects of each class.",
+  "value": "after each decoder layer; shared FFNs",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Sec 3.2 'Auxiliary decoding losses'; Sec 4.2 'Number of decoder layers'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-loss-norm",
+  "claim": "Appendix A.2 says all losses are normalized by the number of objects inside the batch and that in distributed training one must use the total number of objects in all GPUs' sub-batches; Sec 3.1 says it only of the two box losses (L1, GIoU), and the repo matches Sec 3.1: loss_bbox and loss_giou divide by the all-reduced num_boxes while loss_ce is a class-weighted cross-entropy mean over all slots (models/detr.py loss_labels, loss_boxes, SetCriterion.forward).",
+  "value": "normalized by total objects across all sub-batches",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.2 'Losses', first paragraph; Sec 3.1 paragraph on the box loss; repo models/detr.py",
+  "uncertain": false
+ },
+ {
+  "id": "detr-posenc-shared",
+  "claim": "Positional encodings are shared between all layers; object queries (output encodings) are always learned.",
+  "value": "shared between all layers",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Sec 4.2 'Importance of positional encodings'",
+  "uncertain": false
+ },
+ {
+  "id": "detr-decoder-zero-init",
+  "claim": "The decoder receives queries initially set to zero, with the learned object queries added as positional encodings.",
+  "value": "initially set to zero",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.3 architecture description; repo models/transformer.py tgt = torch.zeros_like(query_embed)",
+  "uncertain": false
+ },
+ {
+  "id": "detr-repo-padding-mask",
+  "claim": "[repo] The pixel padding mask is downsampled to the backbone feature size with F.interpolate (default mode 'nearest', so a boundary cell that is all padding can be marked real) and passed as src_key_padding_mask to the encoder and memory_key_padding_mask to the decoder.",
+  "value": "padding mask on encoder and decoder attention",
+  "paper": "DETR",
+  "version": "README/repo (github.com/facebookresearch/detr, main)",
+  "loc": "models/backbone.py BackboneBase.forward (F.interpolate of mask); models/transformer.py Transformer.forward",
+  "uncertain": false
+ },
+ {
+  "id": "detr-repo-scales",
+  "claim": "[repo] Scale augmentation draws the short side from [480, 512, ..., 800] (step 32) with max_size 1333; with p=0.5 it first resizes, random-crops (384-600) and resizes again.",
+  "value": "480..800 step 32, max 1333",
+  "paper": "DETR",
+  "version": "README/repo (github.com/facebookresearch/detr, main)",
+  "loc": "datasets/coco.py make_coco_transforms",
+  "uncertain": false
+ },
+ {
+  "id": "detr-repo-matcher",
+  "claim": "[repo] The Hungarian matcher runs under torch.no_grad and calls scipy linear_sum_assignment once per image on that image's cost block.",
+  "value": "no_grad; one assignment per image",
+  "paper": "DETR",
+  "version": "README/repo (github.com/facebookresearch/detr, main)",
+  "loc": "models/matcher.py HungarianMatcher.forward",
+  "uncertain": false
+ },
+ {
+  "id": "detr-repo-ffn",
+  "claim": "[repo] Transformer FFN hidden size (dim_feedforward) default.",
+  "value": "2048",
+  "paper": "DETR",
+  "version": "README/repo (github.com/facebookresearch/detr, main)",
+  "loc": "models/transformer.py Transformer.__init__",
+  "uncertain": false
+ },
+ {
+  "id": "detr-listing-sigmoid",
+  "claim": "The Appendix A.6 listing applies a sigmoid to the box head output (linear_bbox(h).sigmoid()), so boxes are in [0, 1].",
+  "value": "sigmoid",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.6, Listing 1 (tex/python/detr.py line 31)",
+  "uncertain": false
+ },
+ {
+  "id": "detr-repo-flip",
+  "claim": "[repo] Training transforms start with RandomHorizontalFlip (the paper does not mention flipping).",
+  "value": "RandomHorizontalFlip",
+  "paper": "DETR",
+  "version": "README/repo (github.com/facebookresearch/detr, main)",
+  "loc": "datasets/coco.py make_coco_transforms",
+  "uncertain": false
+ }
+]

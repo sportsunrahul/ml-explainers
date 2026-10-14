@@ -1,0 +1,975 @@
+[
+ {
+  "id": "pg-detr-n",
+  "claim": "As displayed on the page; derived from detr-n-queries: All models were trained with N=100 decoder query slots.",
+  "value": "N = 100",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'; also Fig. 7 caption",
+  "derived_from": "detr-n-queries",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-lambda-l1",
+  "claim": "As displayed on the page; derived from detr-lambda-l1: Weight of the L1 box loss.",
+  "value": "5",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'",
+  "derived_from": "detr-lambda-l1",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-lambda-iou",
+  "claim": "As displayed on the page; derived from detr-lambda-iou: Weight of the GIoU box loss.",
+  "value": "2",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'",
+  "derived_from": "detr-lambda-iou",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-noobj",
+  "claim": "As displayed on the page; derived from detr-noobj-downweight: The log-probability term is down-weighted by a factor 10 when the target class is no-object, to account for class imbalance.",
+  "value": "factor 10",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.1, paragraph after Eq. (2)",
+  "derived_from": "detr-noobj-downweight",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-decoder-gain",
+  "claim": "As displayed on the page; derived from detr-decoder-gain: AP and AP50 improve after every decoder layer, totalling +8.2/9.5 AP between the first and last layer (long-schedule baseline).",
+  "value": "+8.2 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.2, 'Number of decoder layers' (refers to Fig. 4)",
+  "derived_from": "detr-decoder-gain",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-ap",
+  "claim": "As displayed on the page; derived from detr-headline-ap: DETR (ResNet-50, 6 enc + 6 dec layers, width 256, long schedule) reaches 42.0 box AP on COCO val.",
+  "value": "42.0 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP",
+  "derived_from": "detr-headline-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-frcnn-ap",
+  "claim": "As displayed on the page; derived from detr-frcnn-fpn-plus-ap: Enhanced Faster R-CNN baseline (R50-FPN+, with GIoU, random crops, 9x schedule) reaches 42.0 AP.",
+  "value": "42.0 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP",
+  "derived_from": "detr-frcnn-fpn-plus-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-apl",
+  "claim": "As displayed on the page; derived from detr-apl: DETR (R50) large-object AP.",
+  "value": "61.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_L",
+  "derived_from": "detr-apl",
+  "uncertain": false
+ },
+ {
+  "id": "pg-frcnn-apl",
+  "claim": "As displayed on the page; derived from detr-frcnn-plus-apl: Faster RCNN-FPN+ large-object AP.",
+  "value": "53.4",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_L",
+  "derived_from": "detr-frcnn-plus-apl",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-aps",
+  "claim": "As displayed on the page; derived from detr-aps: DETR (R50) small-object AP.",
+  "value": "20.5",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_S",
+  "derived_from": "detr-aps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-frcnn-aps",
+  "claim": "As displayed on the page; derived from detr-frcnn-plus-aps: Faster RCNN-FPN+ small-object AP.",
+  "value": "26.6",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_S",
+  "derived_from": "detr-frcnn-plus-aps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-apl-v",
+  "claim": "As displayed on the page; derived from detr-apl: DETR (R50) large-object AP.",
+  "value": "61.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_L",
+  "derived_from": "detr-apl",
+  "uncertain": false
+ },
+ {
+  "id": "pg-frcnn-apl-v",
+  "claim": "As displayed on the page; derived from detr-frcnn-plus-apl: Faster RCNN-FPN+ large-object AP.",
+  "value": "53.4",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_L",
+  "derived_from": "detr-frcnn-plus-apl",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-aps-v",
+  "claim": "As displayed on the page; derived from detr-aps: DETR (R50) small-object AP.",
+  "value": "20.5",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column AP_S",
+  "derived_from": "detr-aps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-frcnn-aps-v",
+  "claim": "As displayed on the page; derived from detr-frcnn-plus-aps: Faster RCNN-FPN+ small-object AP.",
+  "value": "26.6",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'Faster RCNN-FPN+', column AP_S",
+  "derived_from": "detr-frcnn-plus-aps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-500",
+  "claim": "As displayed on the page; derived from detr-epochs-long: Long schedule used for the Faster R-CNN comparison: 500 epochs with a learning-rate drop after 400 epochs.",
+  "value": "500 epochs",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-epochs-long",
+  "uncertain": false
+ },
+ {
+  "id": "pg-frcnn-109",
+  "claim": "As displayed on the page; derived from detr-frcnn-epochs: Faster R-CNN+ baselines are trained with the 9x schedule, approximately 109 epochs.",
+  "value": "109 epochs",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1 paragraph; Appendix A.4 'Baseline'",
+  "derived_from": "detr-frcnn-epochs",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-dc5-16x",
+  "claim": "As displayed on the page; derived from detr-dc5-cost: DC5 increases feature resolution by a factor of two, costs 16x more in encoder self-attention, and about 2x overall compute.",
+  "value": "16x",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-dc5-cost",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-28fps",
+  "claim": "As displayed on the page; derived from detr-flops-fps: DETR (R50) compute and speed, measured with torchscript models.",
+  "value": "28",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR', column GFLOPS/FPS",
+  "derived_from": "detr-flops-fps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-dc5-12fps",
+  "claim": "As displayed on the page; derived from detr-dc5-flops: DETR-DC5 (R50) compute and speed.",
+  "value": "12",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Table 1, row 'DETR-DC5', column GFLOPS/FPS",
+  "derived_from": "detr-dc5-flops",
+  "uncertain": false
+ },
+ {
+  "id": "pg-detr-d",
+  "claim": "As displayed on the page; derived from detr-d-model: Transformer width (d) used for the main model.",
+  "value": "d = 256",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1 and 4.2 ('width 256')",
+  "derived_from": "detr-d-model",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-mk",
+  "claim": "As displayed on the page; derived from ddetr-M8-K4: Default heads and sampling points per head per level",
+  "value": "M = 8, K = 4",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5 'Implementation Details'; Appendix A.4 (M = 8)",
+  "derived_from": "ddetr-M8-K4",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-l",
+  "claim": "As displayed on the page; derived from ddetr-L4: Number of feature levels in the encoder: C3-C5 via 1x1 conv plus C6 via 3x3 stride-2 conv on C5",
+  "value": "L = 4",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 4.1 'Deformable Transformer Encoder'; Appendix A.2",
+  "derived_from": "ddetr-L4",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-128",
+  "claim": "As displayed on the page; derived from ddetr-derived-points: Sampling points per query: L*K per head, M*L*K total at defaults",
+  "value": "128 per query",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Derived: M=8, K=4 (Sec 5), L=4 (Sec 4.1)",
+  "derived_from": "ddetr-derived-points",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-ap",
+  "claim": "As displayed on the page; derived from ddetr-t1-ddetr-ap: Deformable DETR: AP on COCO 2017 val",
+  "value": "43.8 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column AP",
+  "derived_from": "ddetr-t1-ddetr-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-50",
+  "claim": "As displayed on the page; derived from ddetr-t1-ddetr-epochs: Deformable DETR: Epochs on COCO 2017 val",
+  "value": "50 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column Epochs",
+  "derived_from": "ddetr-t1-ddetr-epochs",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-aps",
+  "claim": "As displayed on the page; derived from ddetr-t1-ddetr-aps: Deformable DETR: AP_S on COCO 2017 val",
+  "value": "26.4",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column AP_S",
+  "derived_from": "ddetr-t1-ddetr-aps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-refine",
+  "claim": "As displayed on the page; derived from ddetr-t1-refine-ap: + iterative bounding box refinement: AP on COCO 2017 val",
+  "value": "45.4 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '+ iterative bounding box refinement', column AP",
+  "derived_from": "ddetr-t1-refine-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-2stage",
+  "claim": "As displayed on the page; derived from ddetr-t1-twostage-ap: ++ two-stage Deformable DETR: AP on COCO 2017 val",
+  "value": "46.2 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '++ two-stage Deformable DETR', column AP",
+  "derived_from": "ddetr-t1-twostage-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-slower",
+  "claim": "As displayed on the page; derived from ddetr-speed-vs-frcnn: Deformable DETR runtime is slower than Faster R-CNN + FPN",
+  "value": "25% slower",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5.1 para 2",
+  "derived_from": "ddetr-speed-vs-frcnn",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dab-300",
+  "claim": "As displayed on the page; derived from dab-300-queries: Number of anchors used as queries (following Deformable DETR and Conditional DETR)",
+  "value": "300",
+  "paper": "DAB-DETR",
+  "version": "v4",
+  "loc": "Appendix A para 2; Table 2 caption",
+  "derived_from": "dab-300-queries",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dab-t20",
+  "claim": "As displayed on the page; derived from dab-T20: Temperature chosen empirically for all models",
+  "value": "T=20",
+  "paper": "DAB-DETR",
+  "version": "v4",
+  "loc": "Sec. 4.5 (Temperature Tuning), last sentence",
+  "derived_from": "dab-T20",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dab-update",
+  "claim": "As displayed on the page; derived from dab-abl-no-update: Ablation without anchor update",
+  "value": "1.7 AP",
+  "paper": "DAB-DETR",
+  "version": "v4",
+  "loc": "Table 3, row 2; Sec. 5.2",
+  "derived_from": "dab-abl-no-update",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dab-ap",
+  "claim": "As displayed on the page; derived from dab-dc5-r50-star-ap: DAB-DETR-DC5-R50* AP, 50 epochs (headline)",
+  "value": "45.7",
+  "paper": "DAB-DETR",
+  "version": "v4",
+  "loc": "Table 2 (tab:main_results), row DAB-DETR-DC5-R50*; also Abstract, Sec. 1",
+  "derived_from": "dab-dc5-r50-star-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dn-lambda",
+  "claim": "As displayed on the page; derived from dn-lambda1: Center shifting noise scale lambda_1 (|dx|<lambda_1 w/2, |dy|<lambda_1 h/2, lambda_1 in (0,1))",
+  "value": "0.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.3 (definition); Sec. 5.1 (value)",
+  "derived_from": "dn-lambda1",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dn-gamma",
+  "claim": "As displayed on the page; derived from dn-gamma: Label flipping ratio gamma",
+  "value": "0.2",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.3 (definition); Sec. 5.1 (value)",
+  "derived_from": "dn-gamma",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dn-groups",
+  "claim": "As displayed on the page; derived from dn-groups-default: Default number of denoising groups",
+  "value": "5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.1 Implementation Details",
+  "derived_from": "dn-groups-default",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dn-nomask",
+  "claim": "As displayed on the page; derived from dn-abl-nomask: Box + label denoising without attention mask",
+  "value": "24.0",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 5 row 4",
+  "derived_from": "dn-abl-nomask",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dn-mask",
+  "claim": "As displayed on the page; derived from dn-abl-full: Ablation (R50, 50 ep, 1 group): box + label denoising + attention mask",
+  "value": "43.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 5 row 1",
+  "derived_from": "dn-abl-full",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dino-abl-start",
+  "claim": "As displayed on the page; derived from dino-abl-1: Ablation row 1 DN-DETR",
+  "value": "43.4",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 1",
+  "derived_from": "dino-abl-1",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dino-abl-end",
+  "claim": "As displayed on the page; derived from dino-abl-6: Ablation row 6 DINO (+ contrastive DN)",
+  "value": "47.9",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 6",
+  "derived_from": "dino-abl-6",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dino-12ep",
+  "claim": "As displayed on the page; derived from dino-t1-4s: R50 12 ep DINO-4scale: AP, AP_S, GFLOPS, params, FPS",
+  "value": "49.0",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1, row DINO-4scale",
+  "derived_from": "dino-t1-4s",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-nms-0001",
+  "claim": "As displayed on the page; derived from rtdetr-t1-conf0001: NMS at conf thr 0.001, IoU 0.7: AP / NMS time (best AP setting)",
+  "value": "2.36 ms",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 1 right, row 0.001; Sec. 3.1 text",
+  "derived_from": "rtdetr-t1-conf0001",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-qs",
+  "claim": "As displayed on the page; derived from rtdetr-t4-um: Uncertainty-minimal query selection (RT-DETR-R50, 1x): AP / Prop_cls / Prop_both",
+  "value": "48.7",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 4, row Uncertainty-minimal; Sec. 5.3 text (+0.8 AP)",
+  "derived_from": "rtdetr-t4-um",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-dec",
+  "claim": "As displayed on the page; derived from rtdetr-dec-5of6: Using the 5th decoder layer of the 6-layer model",
+  "value": "0.1 AP",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.4 text; Table 5",
+  "derived_from": "rtdetr-dec-5of6",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-ap",
+  "claim": "As displayed on the page; derived from rtdetr-r50-ap: RT-DETR-R50 COCO val2017 AP",
+  "value": "53.1",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 2, row RT-DETR R50, AP^val; also Abstract, Sec. 1",
+  "derived_from": "rtdetr-r50-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-fps",
+  "claim": "As displayed on the page; derived from rtdetr-r50-fps: RT-DETR-R50 FPS (bs=1, T4, TensorRT FP16)",
+  "value": "108",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 2, row RT-DETR R50, FPS_bs=1",
+  "derived_from": "rtdetr-r50-fps",
+  "uncertain": false
+ },
+ {
+  "id": "pg-yolov8l-ap",
+  "claim": "As displayed on the page; derived from rtdetr-yolov8l: YOLOv8-L metrics as measured in the paper",
+  "value": "52.9",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 2, row YOLOv8-L",
+  "derived_from": "rtdetr-yolov8l",
+  "uncertain": false
+ },
+ {
+  "id": "pg-yolov8l-fps",
+  "claim": "As displayed on the page; derived from rtdetr-yolov8l: YOLOv8-L metrics as measured in the paper",
+  "value": "71",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 2, row YOLOv8-L",
+  "derived_from": "rtdetr-yolov8l",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rf-n-ap",
+  "claim": "As displayed on the page; derived from rfdetr-t2-cocodet-rfdetroursn: Table 2 row: RF-DETR (Ours) (size N)",
+  "value": "48.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RF-DETR (Ours)' size N",
+  "derived_from": "rfdetr-t2-cocodet-rfdetroursn",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rf-n-ms",
+  "claim": "As displayed on the page; derived from rfdetr-t2-cocodet-rfdetroursn: Table 2 row: RF-DETR (Ours) (size N)",
+  "value": "2.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RF-DETR (Ours)' size N",
+  "derived_from": "rfdetr-t2-cocodet-rfdetroursn",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rf-n-gain",
+  "claim": "As displayed on the page; derived from rfdetr-nano-beats-dfine: RF-DETR (nano) beats D-FINE (nano) on COCO by this many AP at similar latency",
+  "value": "5.3 AP",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract; Table 2",
+  "derived_from": "rfdetr-nano-beats-dfine",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rf-2xl",
+  "claim": "As displayed on the page; derived from rfdetr-first-60ap: RF-DETR (2x-large) is the first real-time detector to surpass 60 AP on COCO",
+  "value": "60.1 AP at 17.2 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract; Table 2/12 row RF-DETR 2XL",
+  "derived_from": "rfdetr-first-60ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rf-search",
+  "claim": "As displayed on the page; derived from rfdetr-search-cost: Estimated cost of the search",
+  "value": "10,000 GPU hours",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "derived_from": "rfdetr-search-cost",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-detr",
+  "claim": "DETR v1 submission date on the arXiv abs page",
+  "value": "2020-05-26",
+  "paper": "DETR",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2005.12872, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-ddetr",
+  "claim": "Deformable DETR v1 submission date on the arXiv abs page",
+  "value": "2020-10-08",
+  "paper": "Deformable DETR",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2010.04159, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-dab",
+  "claim": "DAB-DETR v1 submission date on the arXiv abs page",
+  "value": "2022-01-28",
+  "paper": "DAB-DETR",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2201.12329, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-dn",
+  "claim": "DN-DETR v1 submission date on the arXiv abs page",
+  "value": "2022-03-02",
+  "paper": "DN-DETR",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2203.01305, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-dino",
+  "claim": "DINO v1 submission date on the arXiv abs page",
+  "value": "2022-03-07",
+  "paper": "DINO",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2203.03605, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-rt",
+  "claim": "RT-DETR v1 submission date on the arXiv abs page",
+  "value": "2023-04-17",
+  "paper": "RT-DETR",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2304.08069, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-date-rf",
+  "claim": "RF-DETR v1 submission date on the arXiv abs page",
+  "value": "2025-11-12",
+  "paper": "RF-DETR",
+  "version": "v1",
+  "loc": "arxiv.org/abs/2511.09554, Submission history [v1] (fetched 2026-09-29)",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-detr-ap",
+  "claim": "As displayed on the page; derived from ddetr-t1-detr-ap: DETR: AP on COCO 2017 val",
+  "value": "42.0 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column AP",
+  "derived_from": "ddetr-t1-detr-ap",
+  "uncertain": false
+ },
+ {
+  "id": "pg-ddetr-detr-500",
+  "claim": "As displayed on the page; derived from ddetr-detr-500ep: DETR needs 500 epochs to converge on COCO",
+  "value": "500 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 1 Introduction, para 2; Table 1 row 'DETR', Epochs column",
+  "derived_from": "ddetr-detr-500ep",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dab-50",
+  "claim": "As displayed on the page; derived from dab-train-epochs: Training schedule",
+  "value": "50 epochs",
+  "paper": "DAB-DETR",
+  "version": "v4",
+  "loc": "Appendix A",
+  "derived_from": "dab-train-epochs",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-qs-vanilla",
+  "claim": "As displayed on the page; derived from rtdetr-t4-vanilla: Vanilla query selection (RT-DETR-R50, 1x): AP / Prop_cls / Prop_both",
+  "value": "47.9",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Table 4, row Vanilla",
+  "derived_from": "rtdetr-t4-vanilla",
+  "uncertain": false
+ },
+ {
+  "id": "pg-rt-640",
+  "claim": "As displayed on the page; derived from rtdetr-input-size: Input size: RT-DETR and YOLOs 640x640; other DETRs 800x1333",
+  "value": "640 x 640",
+  "paper": "RT-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.1, paragraph after Table 2",
+  "derived_from": "rtdetr-input-size",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dino-12",
+  "claim": "DINO-4scale R50 49.0 AP is in Table 1, the 12-epoch setting",
+  "value": "12 epochs",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1 (12-epoch setting, caption and Sec. 4.2)",
+  "derived_from": "dino-t1-4s",
+  "uncertain": false
+ },
+ {
+  "id": "pg-dino-abl-base",
+  "claim": "As displayed on the page; derived from dino-abl-3: Ablation row 3 strong baseline (+ pure query selection)",
+  "value": "46.5",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 3",
+  "derived_from": "dino-abl-3",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-img-gpu",
+  "claim": "As displayed on the page; derived from detr-train-cost: Training the baseline for 300 epochs on 16 V100 GPUs takes 3 days, with 4 images per GPU (total batch size 64).",
+  "value": "4 images per GPU",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-train-cost",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-gpus",
+  "claim": "As displayed on the page; derived from detr-train-cost: Training the baseline for 300 epochs on 16 V100 GPUs takes 3 days, with 4 images per GPU (total batch size 64).",
+  "value": "16 V100 GPUs",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-train-cost",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-batch",
+  "claim": "As displayed on the page; derived from detr-train-cost: Training the baseline for 300 epochs on 16 V100 GPUs takes 3 days, with 4 images per GPU (total batch size 64).",
+  "value": "batch of 64",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-train-cost",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-3days",
+  "claim": "As displayed on the page; derived from detr-train-cost: Training the baseline for 300 epochs on 16 V100 GPUs takes 3 days, with 4 images per GPU (total batch size 64).",
+  "value": "3 days",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-train-cost",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-short",
+  "claim": "As displayed on the page; derived from detr-scale-aug: Scale augmentation: shortest side resized to between 480 and 800 pixels, longest side at most 1333.",
+  "value": "480 to 800 pixels",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "derived_from": "detr-scale-aug",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-long",
+  "claim": "As displayed on the page; derived from detr-scale-aug: Scale augmentation: shortest side resized to between 480 and 800 pixels, longest side at most 1333.",
+  "value": "at most 1333",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "derived_from": "detr-scale-aug",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-crop",
+  "claim": "As displayed on the page; derived from detr-crop-aug: Random crop augmentation (probability 0.5, crop then resize to 800-1333) improves performance by approximately 1 AP.",
+  "value": "probability 0.5",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "derived_from": "detr-crop-aug",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-c",
+  "claim": "As displayed on the page; derived from detr-backbone-dims: Backbone output activation map: C=2048 channels at H0/32 x W0/32.",
+  "value": "2048 channels",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.2, 'Backbone'",
+  "derived_from": "detr-backbone-dims",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-stride",
+  "claim": "As displayed on the page; derived from detr-backbone-dims: Backbone output activation map: C=2048 channels at H0/32 x W0/32.",
+  "value": "stride 32",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.2, 'Backbone'",
+  "derived_from": "detr-backbone-dims",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-d",
+  "claim": "As displayed on the page; derived from detr-d-model: Transformer width (d) used for the main model.",
+  "value": "d = 256",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1 and 4.2 ('width 256')",
+  "derived_from": "detr-d-model",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-enc",
+  "claim": "As displayed on the page; derived from detr-layers: Main model uses 6 encoder and 6 decoder layers (text says '6 transformer and 6 decoder layers').",
+  "value": "6 encoder layers",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1; Section 4.2 first paragraph",
+  "derived_from": "detr-layers",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-dec",
+  "claim": "As displayed on the page; derived from detr-layers: Main model uses 6 encoder and 6 decoder layers (text says '6 transformer and 6 decoder layers').",
+  "value": "6 decoder layers",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4.1, paragraph after Table 1; Section 4.2 first paragraph",
+  "derived_from": "detr-layers",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-heads",
+  "claim": "As displayed on the page; derived from detr-listing-input: The Appendix A.6 listing instantiates DETR(num_classes=91, hidden_dim=256, nheads=8, 6 enc, 6 dec) with 100 learned query_pos embeddings and a dummy 1x3x800x1200 input; the class head outputs num_classes + 1 logits (extra no-object).",
+  "value": "8 heads",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.6, Listing 1 (tex/python/detr.py)",
+  "derived_from": "detr-listing-input",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-cls",
+  "claim": "As displayed on the page; derived from detr-listing-input: The Appendix A.6 listing instantiates DETR(num_classes=91, hidden_dim=256, nheads=8, 6 enc, 6 dec) with 100 learned query_pos embeddings and a dummy 1x3x800x1200 input; the class head outputs num_classes + 1 logits (extra no-object).",
+  "value": "91 + 1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.6, Listing 1 (tex/python/detr.py)",
+  "derived_from": "detr-listing-input",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-ffn",
+  "claim": "As displayed on the page; derived from detr-repo-ffn: [repo] Transformer FFN hidden size (dim_feedforward) default.",
+  "value": "hidden size 2048",
+  "paper": "DETR",
+  "version": "README/repo (github.com/facebookresearch/detr, main)",
+  "loc": "models/transformer.py Transformer.__init__",
+  "derived_from": "detr-repo-ffn",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-n",
+  "claim": "As displayed on the page; derived from detr-n-queries: All models were trained with N=100 decoder query slots.",
+  "value": "100 queries",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'; also Fig. 7 caption",
+  "derived_from": "detr-n-queries",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-l1",
+  "claim": "As displayed on the page; derived from detr-lambda-l1: Weight of the L1 box loss.",
+  "value": "5 x L1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'",
+  "derived_from": "detr-lambda-l1",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-giou",
+  "claim": "As displayed on the page; derived from detr-lambda-iou: Weight of the GIoU box loss.",
+  "value": "2 x GIoU",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Losses'",
+  "derived_from": "detr-lambda-iou",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-noobj",
+  "claim": "As displayed on the page; derived from detr-noobj-downweight: The log-probability term is down-weighted by a factor 10 when the target class is no-object, to account for class imbalance.",
+  "value": "weight 0.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.1, paragraph after Eq. (2)",
+  "derived_from": "detr-noobj-downweight",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-lr",
+  "claim": "As displayed on the page; derived from detr-optimizer: Optimizer AdamW; transformer LR 1e-4, backbone LR 1e-5, weight decay 1e-4.",
+  "value": "1e-4",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'; Appendix A.4",
+  "derived_from": "detr-optimizer",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-lrbb",
+  "claim": "As displayed on the page; derived from detr-optimizer: Optimizer AdamW; transformer LR 1e-4, backbone LR 1e-5, weight decay 1e-4.",
+  "value": "1e-5 for the backbone",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'; Appendix A.4",
+  "derived_from": "detr-optimizer",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-wd",
+  "claim": "As displayed on the page; derived from detr-optimizer: Optimizer AdamW; transformer LR 1e-4, backbone LR 1e-5, weight decay 1e-4.",
+  "value": "weight decay 1e-4",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'; Appendix A.4",
+  "derived_from": "detr-optimizer",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-clip",
+  "claim": "As displayed on the page; derived from detr-grad-clip: Gradient clipping with maximal gradient norm 0.1.",
+  "value": "norm 0.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Appendix A.4, 'Training hyperparameters'",
+  "derived_from": "detr-grad-clip",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-drop",
+  "claim": "As displayed on the page; derived from detr-dropout: Transformer dropout, applied after every multi-head attention and FFN before layer norm.",
+  "value": "dropout 0.1",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4 'Technical details'; Appendix A.4 'Transformer'",
+  "derived_from": "detr-dropout",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-300",
+  "claim": "As displayed on the page; derived from detr-epochs-short: Ablation schedule: 300 epochs with a learning-rate drop by a factor of 10 after 200 epochs.",
+  "value": "300 epochs",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-epochs-short",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-300drop",
+  "claim": "As displayed on the page; derived from detr-epochs-short: Ablation schedule: 300 epochs with a learning-rate drop by a factor of 10 after 200 epochs.",
+  "value": "after 200",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-epochs-short",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-500",
+  "claim": "As displayed on the page; derived from detr-epochs-long: Long schedule used for the Faster R-CNN comparison: 500 epochs with a learning-rate drop after 400 epochs.",
+  "value": "500 epochs",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-epochs-long",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-500drop",
+  "claim": "As displayed on the page; derived from detr-epochs-long: Long schedule used for the Faster R-CNN comparison: 500 epochs with a learning-rate drop after 400 epochs.",
+  "value": "after 400",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details' paragraph",
+  "derived_from": "detr-epochs-long",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-mlp",
+  "claim": "As displayed on the page; derived from detr-pred-ffn: Prediction head: a 3-layer perceptron with ReLU and hidden dim d for the box (normalized center, height, width), plus a linear projection with softmax for the class.",
+  "value": "3-layer",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 3.2, 'Prediction feed-forward networks (FFNs)'",
+  "derived_from": "detr-pred-ffn",
+  "uncertain": false
+ },
+ {
+  "id": "pg-tr-override",
+  "claim": "As displayed on the page; derived from detr-empty-slot-override: At inference, overriding empty-class slots with the second highest scoring class improves AP by 2 points vs filtering out empty slots.",
+  "value": "2 AP",
+  "paper": "DETR",
+  "version": "v3",
+  "loc": "Section 4, 'Technical details'",
+  "derived_from": "detr-empty-slot-override",
+  "uncertain": false
+ }
+]

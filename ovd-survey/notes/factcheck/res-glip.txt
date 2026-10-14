@@ -1,0 +1,79 @@
+# GLIP group (GLIP 2112.03857v2, MDETR 2104.12763v2, GLIPv2 2206.05836v2). Format: item | verdict | severity | what is wrong | what source says | loc
+# Claims: 43 checked: 38 confirmed / 5 wrong / 0 unverifiable
+# Outline: 33 items checked: 28 confirmed / 5 wrong / 0 unverifiable
+glip-code-sep | confirmed | | | ". " in yaml; paper Sec. 3.1 also shows the "person. bicycle. car. ... . toothbrush" prompt, so code_only is conservative but defensible | code/glip_Swin_T_O365_GoldG.yaml DATASETS.SEPARATION_TOKENS; src/sections/3_glip.tex:26
+glip-code-lang-lr | wrong | minor wording | flagged code_only, but the value is in the paper | App. C.1: "base learning rate of 1x10^-5 for the language backbone and 1x10^-4 for all other parameters" (v2 abs.html comment: "fixed hyper-parameters in Appendix C.1") | yaml SOLVER.LANG_LR 0.00001; src/sections/5_appendix_for_all.tex:75 (PDF App. C.1)
+glip-code-bert | confirmed | | | bert-base-uncased, FREEZE False; paper only says "pre-trained BERT", so code_only is right for the variant | yaml MODEL.LANGUAGE_BACKBONE
+glip-code-dyhead-t | confirmed | | | NUM_CONVS 6; paper gives L symbolically only | yaml MODEL.DYHEAD.NUM_CONVS; 3_glip.tex:54
+glip-code-min-size | confirmed | | (note) same yaml also sets AUGMENT.MULT_MIN_SIZE_TRAIN (480,560,640,720,800), so training short side is likely multi-scale; 800 is certain only for test | MIN_SIZE_TRAIN/TEST 800 | yaml INPUT, AUGMENT
+glip-code-channels | confirmed | | | DYHEAD.CHANNELS 256, BACKBONE.OUT_CHANNELS 256; not in paper | yaml
+glip-code-batch | wrong | minor wording | flagged code_only, but the value is in the paper | App. C.1: "Swin-Tiny models with 32 GPUs and a batch size of 64" | yaml SOLVER.IMS_PER_BATCH 64; 5_appendix_for_all.tex:75
+glip-code-max-size | confirmed | | | MAX_SIZE_TRAIN/TEST 1333; not in paper | yaml INPUT
+glip-code-lr | wrong | minor wording | flagged code_only, but 1e-4 is in the paper; only "AdamW" is code-only | App. C.1: "1x10^-4 for all other parameters" | yaml SOLVER.BASE_LR, OPTIMIZER ADAMW; 5_appendix_for_all.tex:75
+glip-code-dyhead-l | confirmed | | | NUM_CONVS 8 | code/glip_Swin_L.yaml MODEL.DYHEAD.NUM_CONVS
+glip-code-neg | wrong | wrong metric or setting | claim says 85 random NEGATIVE names; the paper defines 85 as the total number of categories in the prompt (all positives kept, negatives fill up to 85 with p=0.5; otherwise N uniform in [1, 85-|Cpos|]). Value is also in the paper, so code_only is wrong | "With a probability of 0.5, we sample from C_neg till we have 85 categories in the prompt" | yaml DATASETS.RANDOM_SAMPLE_NEG 85; 5_appendix_for_all.tex:111 (App. C.1, "Prompt design for detection data")
+glip-t8-fuse-o365-odinw-10 | confirmed | | | 54.9 (deep fusion, O365, ODinW 10-Shot, full-model tuning) | Table 8 (PDF p.13), 5_appendix_for_all.tex:~205
+glip-linear-dyhead-o365-5 | confirmed | | | 39.6 (row "DyHead-T O365", not O365-Cosine) | Table 12, 5_appendix_for_all.tex:~507
+mdetr-pretrain-pairs | confirmed | | | 1.3M | MDETR abstract (main.tex:74); Sec. 3.1 "Data combination" parts/experiments.tex:60
+glip-pseudo-boxes | confirmed | | | 78.1M (>0.5 conf) phrase-box pseudo annotations, 58.4M unique noun phrases | 1_intro.tex:48
+glip-venue | confirmed | | | abs.html Comments "CVPR 2022; ..."; main.tex:102-103 | abs.html:136
+glip-prompt-mushrooms-orig | confirmed | | | 13.6, prompt "Cow. Chanterelle"; GLIP-T identity backed by Table 14 GLIP-T row matching the designed-prompt column | Table 10, 5_appendix_for_all.tex:~355
+mdetr-lvis-100-apr | confirmed | | | 7.4 in Table 6 (box AP fixed, minival 5k); text says 7.5 | MDETR parts/experiments.tex:228 and :243 (Sec. 3.2.1)
+glip-t8-nofuse-goldg-odinw-0 | confirmed | | | 35.5 | Table 8 row (no fusion, O365,GoldG)
+glip-linear-dyhead-coco-3 | confirmed | | | 32.7 | Table 12 row DyHead-T COCO
+glip-ptune-l-10 | confirmed | | | 64.1 +-0.6 (Table header "Prompt Probing") | Table 13
+glip-coco-ft-t-cc3m | confirmed | | | 55.2 (row pre-train data "O365,GoldG,CC3M,SBU") | Table 2, 4_other.tex:~99
+glip-t5-row2-apr | confirmed | | | 7.8 (row 2 "+ GoldG" under "VG w/o COCO") | Table 5, 4_other.tex:~316
+glip-t8-nofuse-o365-odinw-5 | confirmed | | | 50.4 | Table 8
+glip-odinw-mushrooms-train | confirmed | | | 41/5/5 | Table 9
+glip-ptune-b-3-std | confirmed | | | 49.0 +-0.9 | Table 13
+glip-odinw-l-10shot-std | confirmed | | | 64.9 +-0.9 | Table 11
+glip-coco-zs-dyhead-o365 | confirmed | | | 43.6; Sec. 4.1 says predictions restricted to the 80 COCO classes | Table 2; 4_other.tex:~255
+glip-lvis-minival-a-apr | confirmed | | (note) "box AP" is inferred (paper says only AP; GLIP has no mask head); reading is safe | 14.2 | Table 3
+glip-ptune-c-3 | confirmed | | | 52.9 +-0.5 | Table 13
+glip-lvis-val-c-ap | confirmed | | | 16.5 | Table 3 Val v1.0 AP
+glip-linear-t-1 | confirmed | | | 48.9 +-0.2 | Table 12
+glip-odinw-dyhead-coco-3shot | confirmed | | | 44.2 +-0.4 | Table 11
+glip-t5-row8-apr | confirmed | | | 15.0 | Table 5 row 8 FourODs
+glip-prompt-rabbits-designed | confirmed | | | 70.2 (prompt "rabbit") | Table 10
+glip-fourods-vocab | wrong | minor wording | loc says Sec. 4.4 para 3; the sentence is in para 2 ("Second, ...") | "an aligned vocabulary of over 1,500 categories" | 4_other.tex:373
+glip-odinw-ft-batch | confirmed | | | batch size 4 | App. E.3 (5_appendix_for_all.tex:481), App. E.4 (:692)
+mdetr-tau | confirmed | | | tau = 0.07 | MDETR parts/method.tex:56 (Sec. 2.2.2, after Eq. 1)
+glip-prompt-packages-orig | confirmed | | | 50.0 | Table 10
+glip-zs-t-thermal | confirmed | | | 44.1 | Table 14 row GLIP-T
+glip-t8-fuse-o365-coco-zs | confirmed | | | 44.9 | Table 8
+glip-t8-nofuse-o365-odinw-full | confirmed | | | 63.6 | Table 8
+glip-t5-row8-coco | confirmed | | | 46.3 | Table 5 row 8
+outline-L39 | confirmed | | | Eq. (2) S_cls = O W^T; Eq. (3) S_ground = O P^T | 3_glip.tex; PDF p.3
+outline-L102 | confirmed | | | prompt "person. bicycle. car. ... . toothbrush" | 3_glip.tex:26
+outline-L104-105 | confirmed | | | "no more than 2,000 categories"; Flickr30K 44,518; VG Caption 110,689; 58.4M are "unique noun phrases" among 78.1M pseudo annotations | 3_glip.tex:72-74; 1_intro.tex:48
+outline-L106 | confirmed | | | "tooth#" and "#brush" | 3_glip.tex:34
+outline-L108-110 | confirmed | | | "0.8M gold grounding data brings a larger improvement on detecting rare categories than additional 2M detection data"; 27M = 3M human-annotated + 24M web image-text | 3_glip.tex:74; main.tex:163
+outline-L111 | confirmed | | | "Our grounding formulation is inspired by MDETR" | 3_glip.tex:42
+outline-L113-114 | confirmed | | | deep fusion makes visual features language-aware; X-MHA at each of the L DyHead modules ("last few encoding layers") | 3_glip.tex:44-58
+outline-L115-116 | confirmed | | | Table 7: GLIP-T inference 4.84 FPS (no fusion) vs 2.52 FPS (fusion), both on P100, batch 1; the no-fusion speed assumes cached prompt embeddings. OWL-ViT does argue this: early fusion "needs to be repeated for each image/query combination" | Table 7 (5_appendix_for_all.tex:156-158), App. D.1; owlvit/src/main.tex:232-233
+outline-L116-117+L289-290 | wrong | minor wording | "zero-shot ODinW" is the GLIP 13-dataset average; the page also shows ODinW-35 (OWL, GD), so label it ODinW-13. Like-for-like otherwise: both GLIP-T pre-trained on O365+GoldG, zero-shot | Table 8: no fusion O365,GoldG 0-shot 35.5; deep fusion O365,GoldG 0-shot 44.4 (O365-only rows: 28.7 vs 33.2) | Table 8, 5_appendix_for_all.tex:~218-235
+outline-L117 | confirmed | | | "GLIP-T (A) has no language-aware deep fusion; thus prompt tuning and linear tuning achieve similar performance and lag significantly behind full-model tuning" | 4_other.tex:~460 (Sec. 5.2)
+outline-L120 | confirmed | | | Eq. (4) X-MHA, (5) DyHeadModule, (6) BERTLayer | 3_glip.tex:47-51
+outline-L121 | confirmed | | | DyHead x6 and BERT-base are config-only (see L279-281) | code/glip_Swin_T_O365_GoldG.yaml
+outline-L122-123 | confirmed | | (note) model is GLIP-T zero-shot (caption typo "CLIP-T"); Pothole does not improve (17.8 -> 17.7), so the chart must not imply every rewrite helps | 6 datasets as listed | Table 10, 5_appendix_for_all.tex:332-360
+outline-L180-181 | confirmed | | | Table 11: ODinW-13 average AP, zero-shot + full-model tuning 1/3/5/10 (mean+-std of 3 runs) + All | Table 11
+outline-L193 | confirmed | | | Mushrooms "Cow. Chanterelle" 13.6 -> "flat mushroom. yellow mushroom" 73.8 (GLIP-T, zero-shot) | Table 10
+outline-L278 | confirmed | | | paper gives no input size, DyHead depth (L symbolic), added-BERT-layer count or d (only "max input length is 256 tokens") | 3_glip.tex:54; 5_appendix_for_all.tex:76
+outline-L279-280a | wrong | minor wording | "batch 64, lr 1e-4 / text 1e-5" are labelled code-only but are stated in the paper (App. C.1, the section the v2 comment says was fixed) | "32 GPUs and a batch size of 64 ... 1x10^-5 for the language backbone and 1x10^-4 for all other parameters" | 5_appendix_for_all.tex:75
+outline-L280b | wrong | wrong metric or setting | "85 sampled negative names" misdescribes it: 85 caps the TOTAL categories in the prompt (positives always kept), and it is in the paper, not code-only | "sample from C_neg till we have 85 categories in the prompt; with a probability of 0.5, we uniformly choose an integer N from [1, 85 - |C_pos|]" | 5_appendix_for_all.tex:111
+outline-L280c | wrong | minor wording | "800 x 1333 input" omits that the same yaml sets multi-scale training short sides (480-800); 800 x 1333 is the test size | AUGMENT.MULT_MIN_SIZE_TRAIN: (480,560,640,720,800); INPUT.MIN/MAX_SIZE 800/1333 | code/glip_Swin_T_O365_GoldG.yaml (both yamls)
+outline-L279-281 (rest) | confirmed | | | DyHead NUM_CONVS 6 (Swin-L 8), 256 channels, bert-base-uncased FREEZE False, SEPARATION_TOKENS ". "; no key for added BERT layers in either yaml, paper says only "newly-added BERT Layers" | both yamls; 3_glip.tex:54
+outline-L282 | confirmed | | | "COCO 80 categories are fully covered in Objects365"; setting called "zero-shot domain transfer" | 4_other.tex:~250
+outline-L283 | confirmed | | (note) "box AP" is inferred, paper says only AP and never says fixed vs standard AP for GLIP rows | App. C.2: "we monitor the performance on minival for all models and report the results with the best checkpoints"; no LVIS training data | 5_appendix_for_all.tex:121
+outline-L284 | confirmed | | | GLIP Table 3 MDETR row 20.9/24.9/24.3/24.2 = MDETR Table 6 "MDETR 10%" row; caption "Box AP fixed results on LVIS-v1", 5k minival. (The MaskRCNN gray row is MDETR's Mask R-CNN 100% row, also box AP fixed.) | GLIP 4_other.tex:~155; MDETR parts/experiments.tex:216-233
+outline-L285-286 | confirmed | | | 44,518 / 110,689 / 58.4M | as L104-105
+outline-L286-287 | wrong | minor wording | "holds only for APr" is too narrow: row 6 also beats row 8 on COCO 2017val zero-shot AP (46.7 vs 46.3), and the paper's sentence is about COCO and LVIS APr. Within LVIS minival it is APr only. Both sides: GLIP-T, zero-shot, LVIS MiniVal | row 6 (O365+GoldG): COCO 46.7, APr 17.7, APc 19.5, APf 31.0, AP 24.9; row 8 (FourODs): 46.3, 15.0, 22.5, 32.8, 26.8; text: "still trails behind Row 6 on COCO and APr of LVIS" | Table 5, 4_other.tex:~318-325, :373
+outline-L288-289 | confirmed | | (note) "only the fusion layers rerun" is our reading of the architecture; the paper only says the no-fusion model can cache prompt embeddings. 4.84 -> 2.52 is per-image speed with one prompt (P100, batch 1), not per-prompt cost | App. D.1 | 5_appendix_for_all.tex:262
+outline-L290 | confirmed | | (note) both numbers are the no-fusion GLIP-T (A), ODinW-13 avg, all training data. The deep-fusion side is GLIP-T (B) 58.5 vs 62.7, GLIP-T 62.4 vs 64.9, GLIP-L 67.9 vs 68.9; show one of these to make "only with deep fusion" visible | Table 13 GLIP-T (A) All 43.3; Table 11 GLIP-T (A) Full Tuning All 63.6 | Tables 11, 13
+outline-L291 | confirmed | | | "biasing the model to always predict boxes for a given text. This prevents evaluating in a true zero-shot transfer setting" | MDETR parts/experiments.tex:~236 (Sec. 3.2.1)
+outline-L292 | confirmed | | | GLIP-T (A) ODinW 28.7 (Table 8 0-shot, Table 11 Zero Shot) vs 28.8 (Table 14 Avg) | 5_appendix_for_all.tex:~194, ~384, ~744
+outline-L293a | confirmed | | | Table 10 caption "They can improve AP (CLIP-T)" | 5_appendix_for_all.tex:332
+outline-L293b | confirmed | | | MDETR Table 6 100% APr 7.4 vs text 7.5 | MDETR parts/experiments.tex:228, :243
+outline-L293c | confirmed | | | GLIPv2 Table 3 GLIP-T fine-tune 1-shot 51.3 vs GLIP Table 11 51.1+-0.1 (GLIPv2's own appendix also prints 51.1) | glipv2/src/sections/4_exps.tex:174; glipv2 5_appendix.tex:650
+outline-L294 | confirmed | | | Fig. 5 "Pascal VOC 2012 Val (AP50)" 61.9/63.6/65.3/69.4/74.0; Table 14 PascalVOC AP 47.7/50.6/51.6/56.2/61.7 (the AP50 values sit in LaTeX comments) | glip/src/figs/zs_detailed_v1.pdf; 5_appendix_for_all.tex:~725-800

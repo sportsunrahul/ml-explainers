@@ -1,0 +1,236 @@
+[
+ {
+  "id": "llava-instruct-total",
+  "claim": "Total GPT-generated instruction samples",
+  "value": "158K",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 3 last para",
+  "uncertain": false
+ },
+ {
+  "id": "llava-split-conv",
+  "claim": "Conversation samples",
+  "value": "58K",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 3 last para",
+  "uncertain": false
+ },
+ {
+  "id": "llava-split-detail",
+  "claim": "Detailed description samples",
+  "value": "23K",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 3 last para",
+  "uncertain": false
+ },
+ {
+  "id": "llava-split-complex",
+  "claim": "Complex reasoning samples (source writes 77k)",
+  "value": "77K",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 3 last para",
+  "uncertain": false
+ },
+ {
+  "id": "llava-unique-images",
+  "claim": "Approximate unique images in the instruction data",
+  "value": "~80K",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "llava-cc3m-filtered",
+  "claim": "Stage-1 CC3M subset after noun-phrase filtering",
+  "value": "595K image-text pairs",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.2 Stage 1; Appendix Data, CC3M paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "llava-clip-encoder",
+  "claim": "Vision encoder",
+  "value": "CLIP ViT-L/14",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-feature-layer",
+  "claim": "Feature layer used for ScienceQA best variant",
+  "value": "features before the last layer (last-layer: 89.96%, -0.96)",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 Ablations (i); ScienceQA design-ablation table",
+  "uncertain": false
+ },
+ {
+  "id": "llava-connector",
+  "claim": "Connector",
+  "value": "simple linear layer, trainable projection matrix W",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.1 Eq. 1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-stage1-epochs",
+  "claim": "Stage 1 (alignment) epochs / lr / batch",
+  "value": "1 epoch, lr 2e-3, batch size 128; encoder and LLM frozen, only W trainable",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5 para 2; Sec. 4.2 Stage 1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-stage2-epochs",
+  "claim": "Stage 2 (chatbot) epochs / lr / batch",
+  "value": "3 epochs, lr 2e-5, batch size 32; W and LLM trainable, encoder frozen",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5 para 2; Sec. 4.2 Stage 2",
+  "uncertain": false
+ },
+ {
+  "id": "llava-sqa-epochs",
+  "claim": "ScienceQA fine-tuning epochs (best variant)",
+  "value": "12 epochs",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "llava-hardware",
+  "claim": "Training hardware",
+  "value": "8x A100",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "llava-time-stage1",
+  "claim": "Stage 1 wall-clock",
+  "value": "within 4 hours",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Appendix Training Details",
+  "uncertain": false
+ },
+ {
+  "id": "llava-time-stage2",
+  "claim": "Stage 2 (Instruct-158K) wall-clock",
+  "value": "within 10 hours",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Appendix Training Details",
+  "uncertain": false
+ },
+ {
+  "id": "llava-bench-coco-rel",
+  "claim": "LLaVA-Bench (COCO) overall relative score vs text-only GPT-4",
+  "value": "85.1",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "data-ablation table (Sec. 5.1), Full data row, All; abstract",
+  "uncertain": false
+ },
+ {
+  "id": "llava-bench-coco-size",
+  "claim": "LLaVA-Bench (COCO) size",
+  "value": "30 images x 3 question types = 90 questions",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.1 LLaVA-Bench (COCO)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-bench-wild-size",
+  "claim": "LLaVA-Bench (In-the-Wild) size",
+  "value": "24 images, 60 questions",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.1 LLaVA-Bench (In-the-Wild)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-wild-scores",
+  "claim": "In-the-Wild relative score: LLaVA vs BLIP-2 vs OpenFlamingo",
+  "value": "67.3 vs 38.1 vs 19.1",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "In-the-Wild table (Sec. 5.1), All column",
+  "uncertain": false
+ },
+ {
+  "id": "llava-ablate-no-it",
+  "claim": "LLaVA-Bench (COCO) with no instruction tuning",
+  "value": "21.5",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "data-ablation table (Sec. 5.1), last row, All",
+  "uncertain": false
+ },
+ {
+  "id": "llava-ablate-conv-only",
+  "claim": "LLaVA-Bench (COCO) with conversation data only",
+  "value": "73.8",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "data-ablation table (Sec. 5.1), Conversation row, All",
+  "uncertain": false
+ },
+ {
+  "id": "llava-sqa-alone",
+  "claim": "ScienceQA average accuracy, LLaVA alone",
+  "value": "90.92%",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 para 2; ScienceQA table (Sec. 5.2)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-sqa-gpt4-judge",
+  "claim": "ScienceQA average accuracy, LLaVA + GPT-4 (judge)",
+  "value": "92.53%",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Abstract; ScienceQA table last row",
+  "uncertain": false
+ },
+ {
+  "id": "llava-sqa-prior-sota",
+  "claim": "Prior ScienceQA SoTA (MM-CoT Large)",
+  "value": "91.68%",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "ScienceQA table (Sec. 5.2)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-sqa-no-pretrain",
+  "claim": "ScienceQA without stage-1 pre-training",
+  "value": "85.81% (-5.11)",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 Ablations (iii)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-visual-tokens-224",
+  "claim": "Visual tokens per image at 224 px, patch 14 (COMPUTED, not stated in paper)",
+  "value": "256 (16x16)",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "computed from ViT-L/14 at 224",
+  "uncertain": true
+ }
+]

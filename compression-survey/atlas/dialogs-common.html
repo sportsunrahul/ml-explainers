@@ -1,0 +1,17 @@
+<dialog id="dlg-papers"><h3>Papers</h3><p>Read in full, each at the arXiv version the page was checked against:</p><ul>
+<li><a href="https://arxiv.org/abs/1503.02531v1">Hinton, Vinyals, Dean 2015: Distilling the knowledge in a neural network</a></li>
+<li><a href="https://arxiv.org/abs/1510.00149v5">Han, Mao, Dally 2016: Deep Compression</a></li>
+<li><a href="https://arxiv.org/abs/1712.05877v1">Jacob et al. 2017: Integer-arithmetic-only inference</a></li>
+<li><a href="https://arxiv.org/abs/1803.03635v5">Frankle, Carbin 2019: The lottery ticket hypothesis</a></li>
+<li><a href="https://arxiv.org/abs/2004.09602v1">Wu et al. 2020: Integer quantization for deep learning inference</a></li>
+<li><a href="https://arxiv.org/abs/2106.08295v1">Nagel et al. 2021: A white paper on neural network quantization</a></li>
+<li><a href="https://arxiv.org/abs/2208.07339v2">Dettmers et al. 2022: LLM.int8()</a></li>
+<li><a href="https://arxiv.org/abs/2209.05433v2">Micikevicius et al. 2022: FP8 formats for deep learning</a></li>
+<li><a href="https://arxiv.org/abs/2211.10438v7">Xiao et al. 2023: SmoothQuant</a></li>
+<li><a href="https://arxiv.org/abs/2210.17323v2">Frantar et al. 2023: GPTQ</a></li>
+<li><a href="https://arxiv.org/abs/2306.00978v6">Lin et al.: AWQ (v6)</a></li>
+<li><a href="https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html">NVIDIA TensorRT documentation, 11.4.0</a></li>
+</ul><p>The full explainer lists the 23 branch papers in its family tree.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-intensity"><h3>Arithmetic intensity</h3><p>The number of arithmetic operations a layer does for each byte it moves to or from GPU memory. A 3x3 convolution on a large feature map reuses each weight at every pixel, so it does hundreds of operations per byte. A layer that touches each weight once, such as a language-model layer processing one token, does about one.</p><p>Low intensity means the layer waits on memory; high intensity means it waits on arithmetic.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-tensorcore"><h3>Tensor cores</h3><p>Units on NVIDIA GPUs that multiply small matrices in one step. They run FP16 and INT8 (and, on newer GPUs, FP8 and FP4) much faster than ordinary FP32 arithmetic. A layer gets their speed only if it is written as a matrix multiply in a format they support.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-fp32"><h3>FP32, FP16, INT8</h3><p>FP32 is the 32-bit floating-point format a network is usually trained in. FP16 is a 16-bit float: half the bytes, and fast on tensor cores. INT8 is an 8-bit integer: a quarter of the bytes of FP32, and twice the FP16 tensor-core rate on the toy GPU here. INT8 needs a scale to map real values onto its 256 levels; chapter 3 shows how.</p><button class="btn" data-close>Close</button></dialog>

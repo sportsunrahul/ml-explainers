@@ -1,0 +1,9 @@
+[
+ {"id": "page-hybrid-nv-mixers", "claim": "Sequence-mixing layers in the NVIDIA Mamba-2-Hybrid 8B (24 Mamba-2 + 4 attention)", "value": "28", "paper": "An Empirical Study of Mamba-based Language Models", "arxiv": "2406.07887v1", "loc": "computed from Sec 4.2 layer counts", "our_reading": true},
+ {"id": "page-hybrid-nv-mixer-share", "claim": "Attention share of sequence-mixing layers, NVIDIA hybrid 8B and Nemotron-H 8B (4 / 28)", "value": "14.3%", "paper": "NVIDIA 8B study; Nemotron-H", "loc": "computed: 4 / (4 + 24) from Sec 4.2 (2406.07887) and Sec 2.1 (2504.03624)", "our_reading": true},
+ {"id": "page-hybrid-nh56-mixers", "claim": "Sequence-mixing layers in Nemotron-H 56B (54 Mamba-2 + 10 attention)", "value": "64", "paper": "Nemotron-H", "arxiv": "2504.03624v4", "loc": "computed from Sec 2.1 and Sec 3.5", "our_reading": true},
+ {"id": "page-hybrid-nh56-mixer-share", "claim": "Attention share of sequence-mixing layers, Nemotron-H 56B (10 / 64)", "value": "15.6%", "paper": "Nemotron-H", "arxiv": "2504.03624v4", "loc": "computed: 10 / 64", "our_reading": true},
+ {"id": "page-hybrid-jamba-share", "claim": "Attention share of sequence-mixing layers in Jamba (4 / 32), equal to Mamba-2's best hybrid (6 / 48)", "value": "12.5%", "paper": "Jamba; Mamba-2", "loc": "computed: 4 / 32 (Jamba Sec 3.1) and 6 / 48 (Mamba-2 Table 2)", "our_reading": true},
+ {"id": "page-hybrid-llama2-per-token", "claim": "Llama-2 7B KV bytes per token, back-solved from Jamba Table 1 (128GB / 262144 tokens, GB read as GiB)", "value": "512 KiB", "paper": "Jamba", "arxiv": "2403.19887v2", "loc": "our reading from Table 1", "our_reading": true},
+ {"id": "page-hybrid-jamba15-moe", "claim": "MoE layers in Jamba-1.5-Large (9 blocks x 4)", "value": "36", "paper": "Jamba-1.5", "arxiv": "2408.12570v1", "loc": "our reading from Sec 2 (e = 2, l = 8, 9 blocks)", "our_reading": true}
+]

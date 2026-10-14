@@ -1,0 +1,13 @@
+  <article data-chapter="memorize">
+    <header class="ch-head"><span class="num">6 of 9</span><h2>Clean first, wrong later</h2><p class="subhead">Memorization of noisy labels</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-epoch="5" aria-pressed="false">Epoch 5</button>
+      <button type="button" class="tool" data-epoch="12" aria-pressed="true">Epoch 12</button>
+      <button type="button" class="tool" data-epoch="20" aria-pressed="false">Epoch 20</button>
+      <button type="button" class="tool" data-epoch="200" aria-pressed="false">Epoch 200</button>
+    </div>
+    <p>A network can fit any labels, even random ones. But it learns the consistent pattern first. In our CIFAR-10 run with 39.69% of labels flipped, test accuracy peaked at 77.14% at epoch 12. At epoch 10 the network predicted 75.9% of the mislabeled images as their true class; by epoch 30 it had fit 98.2% of them to the wrong label.</p>
+    <p class="note">Computed from our run: per-image training-loss histograms (log scale) per epoch, green for correct labels and red for flipped ones. Early, the red sits far to the right; later it slides onto the green.</p>
+    <p class="inscription">Per-image loss points at wrong labels only early in training. Training accuracy never does.</p>
+    <button type="button" class="continue" data-go="audit">Continue with noisy benchmarks</button>
+  </article>

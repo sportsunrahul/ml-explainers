@@ -1,0 +1,78 @@
+[
+ {
+  "id": "llama3-8b-layers",
+  "claim": "Llama 3 8B number of layers",
+  "value": "32",
+  "paper": "The Llama 3 Herd of Models",
+  "arxiv": "2407.21783v3",
+  "loc": "Table 3, row Layers, column 8B"
+ },
+ {
+  "id": "llama3-8b-dim",
+  "claim": "Llama 3 8B model dimension",
+  "value": "4,096",
+  "paper": "The Llama 3 Herd of Models",
+  "arxiv": "2407.21783v3",
+  "loc": "Table 3, row Model Dimension, column 8B"
+ },
+ {
+  "id": "llama3-8b-heads",
+  "claim": "Llama 3 8B attention heads",
+  "value": "32",
+  "paper": "The Llama 3 Herd of Models",
+  "arxiv": "2407.21783v3",
+  "loc": "Table 3, row Attention Heads, column 8B"
+ },
+ {
+  "id": "llama3-8b-kvheads",
+  "claim": "Llama 3 8B key/value heads (GQA)",
+  "value": "8",
+  "paper": "The Llama 3 Herd of Models",
+  "arxiv": "2407.21783v3",
+  "loc": "Table 3, row Key/Value Heads, column 8B"
+ },
+ {
+  "id": "bill-headdim",
+  "claim": "Llama 3 8B head dimension = model dimension / attention heads",
+  "value": "128",
+  "paper": "computed",
+  "arxiv": "2407.21783v3",
+  "loc": "computed: 4,096 / 32 from Table 3",
+  "our_reading": true
+ },
+ {
+  "id": "bill-state-tokens",
+  "claim": "Mamba 2.8B recurrent state (16-bit) equals the Llama 3 8B KV cache of this many tokens",
+  "value": "95",
+  "paper": "computed",
+  "arxiv": "",
+  "loc": "computed: 64 x 5120 x (16 + 3) x 2 B = 12,451,840 B over 2 x 32 x 8 x 128 x 2 B = 131,072 B per token (parts/core-bill.js)",
+  "our_reading": true
+ },
+ {
+  "id": "bill-weights-gib",
+  "claim": "Llama 3 8B weights at 16 bits, nominal 8B parameters",
+  "value": "15 GiB",
+  "paper": "computed",
+  "arxiv": "2407.21783v3",
+  "loc": "computed: 8e9 x 2 B = 14.9 GiB",
+  "our_reading": true
+ },
+ {
+  "id": "bill-weights-crossover",
+  "claim": "context length at which the Llama 3 8B KV cache equals its 16-bit weights",
+  "value": "122,000",
+  "paper": "computed",
+  "arxiv": "2407.21783v3",
+  "loc": "computed: 1.6e10 B / 131,072 B per token = 122,070",
+  "our_reading": true
+ },
+ {
+  "id": "transformer-2017",
+  "claim": "Attention Is All You Need first posted",
+  "value": "2017",
+  "paper": "Attention Is All You Need",
+  "arxiv": "1706.03762",
+  "loc": "arXiv listing, submitted 12 Jun 2017"
+ }
+]

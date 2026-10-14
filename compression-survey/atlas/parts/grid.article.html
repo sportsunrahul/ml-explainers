@@ -1,0 +1,14 @@
+  <article data-chapter="grid">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Numbers on a grid</h2><p class="subhead">A ruler with 256 marks, a scale and a zero-point</p></header>
+    <div class="controls">
+      <div class="row"><span>Bits</span><button type="button" class="tool" data-bits="8">8</button><button type="button" class="tool" data-bits="4">4</button><button type="button" class="tool" data-bits="2">2</button></div>
+      <div class="row"><span>Grid</span><button type="button" class="tool" data-sym="0">asymmetric</button><button type="button" class="tool" data-sym="1">symmetric</button></div>
+      <div class="row"><span>Range</span><button type="button" class="tool" data-range="tight">tight</button><button type="button" class="tool" data-range="minmax">min to max</button><button type="button" class="tool" data-range="wide">wide</button></div>
+    </div>
+    <p>To store a tensor in 8 bits, lay a ruler with 256 evenly spaced marks over its values and keep only the number of each value's nearest mark. The <button type="button" class="inline-term" data-open="scale">scale</button> S is the spacing between marks, and the <button type="button" class="inline-term" data-open="zeropoint">zero-point</button> Z is the mark that stands for 0.0, so a code q means S(q &minus; Z).</p>
+    <p>The blue <button type="button" class="inline-term" data-open="histogram">histogram</button> is the data; the yellow blocks below it are the same values after quantization. A value inside the range moves to its nearest mark: rounding error. A value outside is pushed to the end mark: clipping error.</p>
+    <p>Guess before you press "wide": which red bar grows, and which shrinks? At 8 bits covering every value wins. At 2 bits the marks are so coarse that the tight range has the smaller total. A symmetric grid fixes Z = 0, which is simpler arithmetic but wastes codes on one-sided data.</p>
+    <p class="note">The 4000 values are a toy sample; S, Z and both errors are computed exactly on it. Drag the white knobs to move the range ends.</p>
+    <p class="inscription">The range is a trade: wider means more rounding error, narrower means more clipping error. The best range depends on the bit-width.</p>
+    {{CONTINUE}}
+  </article>

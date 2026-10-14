@@ -1,0 +1,1385 @@
+[
+ {
+  "id": "spade-published",
+  "claim": "SPADE v1 submission date",
+  "value": "2020-05-05",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "abs.html, submission history [v1]"
+ },
+ {
+  "id": "spade-v3-date",
+  "claim": "SPADE v3 (version read) date",
+  "value": "2021-02-03",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "abs.html, submission history [v3]; PDF stamp p.1"
+ },
+ {
+  "id": "spade-name",
+  "claim": "SPADE expansion",
+  "value": "Semantic Pyramid Anomaly Detection",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Abstract"
+ },
+ {
+  "id": "spade-backbone",
+  "claim": "SPADE backbone, ImageNet-pretrained, frozen",
+  "value": "Wide-ResNet50x2",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 Implementation Details (PDF p.6)",
+  "note": "printed as 'Wide-ResNet$50\\times2$'"
+ },
+ {
+  "id": "spade-resize",
+  "claim": "SPADE MVTec resize (pixels, square)",
+  "value": "256",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.6)"
+ },
+ {
+  "id": "spade-crop",
+  "claim": "SPADE MVTec crop, network input (pixels, square)",
+  "value": "224",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.6-7)"
+ },
+ {
+  "id": "spade-metric-res",
+  "claim": "SPADE metrics computed at (pixels, square)",
+  "value": "256",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-fmap-1",
+  "claim": "SPADE block 1 feature map side (56 x 56)",
+  "value": "56",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-fmap-2",
+  "claim": "SPADE block 2 feature map side (28 x 28)",
+  "value": "28",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-fmap-3",
+  "claim": "SPADE block 3 feature map side (14 x 14)",
+  "value": "14",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-global-dim",
+  "claim": "SPADE image-level feature: global-pooled last conv layer, dimension",
+  "value": "2048",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 5 Discussion, 'Optimizing runtime performance' (PDF p.14); Sec. 3.1"
+ },
+ {
+  "id": "spade-k-mvtec",
+  "claim": "SPADE image-level kNN K on MVTec AD",
+  "value": "50",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-k-stc",
+  "claim": "SPADE image-level kNN K on STC (runtime)",
+  "value": "1",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-kappa",
+  "claim": "SPADE pixel-level kNN kappa, all experiments",
+  "value": "1",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7)"
+ },
+ {
+  "id": "spade-sigma",
+  "claim": "SPADE Gaussian smoothing of the pixel score map",
+  "value": "4",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7), 'Gaussian filter ($\\sigma = 4$)'"
+ },
+ {
+  "id": "spade-eq-image",
+  "claim": "SPADE image score equation number (mean squared distance to K nearest global features)",
+  "value": "2",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.2, \\label{eq:knn1} (PDF p.5)"
+ },
+ {
+  "id": "spade-eq-pixel",
+  "claim": "SPADE pixel score equation number (mean squared distance to kappa nearest gallery features)",
+  "value": "3",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.3, \\label{eq:knn2} (PDF p.6)"
+ },
+ {
+  "id": "spade-stc-train-sub",
+  "claim": "SPADE STC training subsample",
+  "value": "5000",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 3.5 (PDF p.7), 'roughly $5000$ images'"
+ },
+ {
+  "id": "spade-wr50-ch-concat",
+  "claim": "SPADE pixel feature width if blocks 1-3 are concatenated (256+512+1024)",
+  "value": "1792",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "our reading: standard WRN-50-2 widths; the paper gives no channel counts (Sec. 3.4-3.5)",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "spade-gallery-size",
+  "claim": "SPADE gallery size per test pixel at K=50, if matched on the 56 x 56 grid (50 x 3,136)",
+  "value": "156,800",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "our reading from Sec. 3.3 + Sec. 3.5; resolution of matching not stated",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "spade-mvtec-img-auroc",
+  "claim": "SPADE (stage 1 = DN2, K=50) MVTec AD mean image AUROC",
+  "value": "85.5",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 1, row Average, column SPADE (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-mvtec-pix-auroc",
+  "claim": "SPADE MVTec AD mean pixel AUROC",
+  "value": "96.0",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Average, column SPADE (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-mvtec-pro",
+  "claim": "SPADE MVTec AD mean PRO (FPR 0 to 0.3)",
+  "value": "91.7",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column SPADE (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-mvtec-pix-auroc-tile",
+  "claim": "SPADE pixel AUROC, Tile (lowest class)",
+  "value": "87.4",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Tile, column SPADE (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-mvtec-pro-tile",
+  "claim": "SPADE PRO, Tile (lowest class)",
+  "value": "75.9",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Tile, column SPADE (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-pro-fpr-limit",
+  "claim": "PRO integrated over FPR from 0 to",
+  "value": "0.3",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Sec. 4.1 text before Table 2 (PDF p.9)"
+ },
+ {
+  "id": "spade-t1-geom",
+  "claim": "Geom (Golan & El-Yaniv) MVTec AD image AUROC (baseline row in SPADE)",
+  "value": "67.2",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 1, column Geom (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from the cited paper, not re-run"
+ },
+ {
+  "id": "spade-t1-ganomaly",
+  "claim": "GANomaly MVTec AD image AUROC (baseline row in SPADE)",
+  "value": "76.2",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 1, column GANomaly (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from the cited paper, not re-run"
+ },
+ {
+  "id": "spade-t1-ael2",
+  "claim": "AE_L2 MVTec AD image AUROC (baseline row in SPADE)",
+  "value": "75.4",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 1, column AE_L2 (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from the cited paper, not re-run"
+ },
+ {
+  "id": "spade-t1-itae",
+  "claim": "ITAE MVTec AD image AUROC (baseline row in SPADE)",
+  "value": "83.9",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 1, column ITAE (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from the cited paper, not re-run"
+ },
+ {
+  "id": "spade-t2-aessim",
+  "claim": "AE_SSIM MVTec AD mean pixel AUROC (baseline row in SPADE)",
+  "value": "87",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Average, column AE_SSIM (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied: 'reported by Bergmann et al. [MVTec AD] as well as newer results by Venkataramanan et al.'"
+ },
+ {
+  "id": "spade-t2-ael2",
+  "claim": "AE_L2 MVTec AD mean pixel AUROC (baseline row in SPADE)",
+  "value": "82",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Average, column AE_L2 (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied: 'reported by Bergmann et al. [MVTec AD] as well as newer results by Venkataramanan et al.'"
+ },
+ {
+  "id": "spade-t2-anogan",
+  "claim": "AnoGAN MVTec AD mean pixel AUROC (baseline row in SPADE)",
+  "value": "74",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Average, column AnoGAN (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied: 'reported by Bergmann et al. [MVTec AD] as well as newer results by Venkataramanan et al.'"
+ },
+ {
+  "id": "spade-t2-cnndict",
+  "claim": "CNN Dict MVTec AD mean pixel AUROC (baseline row in SPADE)",
+  "value": "78",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Average, column CNN Dict (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied: 'reported by Bergmann et al. [MVTec AD] as well as newer results by Venkataramanan et al.'"
+ },
+ {
+  "id": "spade-t2-cavga",
+  "claim": "CAVGA-R_u MVTec AD mean pixel AUROC (baseline row in SPADE)",
+  "value": "89",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 2, row Average, column CAVGA-R_u (PDF p.9)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied: 'reported by Bergmann et al. [MVTec AD] as well as newer results by Venkataramanan et al.'"
+ },
+ {
+  "id": "spade-t3-student",
+  "claim": "Student (Uninformed Students) MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "85.7",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column Student (Uninformed Students) (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-t3-1nn",
+  "claim": "1-NN MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "64",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column 1-NN (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-t3-ocsvm",
+  "claim": "OC-SVM MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "47.9",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column OC-SVM (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-t3-l2ae",
+  "claim": "l2-AE MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "79",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column l2-AE (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-t3-vae",
+  "claim": "VAE MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "63.9",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column VAE (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-t3-ssimae",
+  "claim": "SSIM-AE MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "69.4",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column SSIM-AE (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-t3-cnndict",
+  "claim": "CNN-Dict MVTec AD mean PRO (baseline row in SPADE)",
+  "value": "51.5",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 3, row Average, column CNN-Dict (PDF p.10)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256",
+  "note": "copied from Uninformed Students (Bergmann et al.) and its baselines"
+ },
+ {
+  "id": "spade-abl-14",
+  "claim": "SPADE PRO average, only the 14 x 14 level",
+  "value": "89.38",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 6, row Average, column (14) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-abl-28",
+  "claim": "SPADE PRO average, only the 28 x 28 level",
+  "value": "89.6",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 6, row Average, column (28) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-abl-56",
+  "claim": "SPADE PRO average, only the 56 x 56 level",
+  "value": "87.74",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 6, row Average, column (56) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-abl-10random",
+  "claim": "SPADE with 10 random normal images instead of 10NN, average (metric not named in caption)",
+  "value": "89.2",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 7, row Average, column SPADE (10 Random) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-abl-10nn",
+  "claim": "SPADE with 10NN retrieved images, average (metric not named in caption)",
+  "value": "91.4",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 7, row Average, column SPADE (10NN) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-abl-grid-random",
+  "claim": "SPADE Grid class, 10 random images",
+  "value": "73.2",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 7, row Grid, column SPADE (10 Random) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-abl-grid-10nn",
+  "claim": "SPADE Grid class, 10NN images",
+  "value": "86.3",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 7, row Grid, column SPADE (10NN) (PDF p.13)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> crop 224, metrics at 256"
+ },
+ {
+  "id": "spade-stc-img-auroc",
+  "claim": "SPADE STC image AUROC",
+  "value": "71.9",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 4, column SPADE (PDF p.10)",
+  "protocol": "one-class, full-shot, STC resized to 256, train subsampled to ~5000 images, K=1, test subsampled by 5"
+ },
+ {
+  "id": "spade-stc-pix-auroc",
+  "claim": "SPADE STC pixel AUROC",
+  "value": "89.9",
+  "paper": "SPADE",
+  "arxiv": "2005.02357v3",
+  "loc": "Table 5, column SPADE (PDF p.11)",
+  "protocol": "one-class, full-shot, STC resized to 256, train subsampled to ~5000 images, K=1, test subsampled by 5"
+ },
+ {
+  "id": "padim-published",
+  "claim": "PaDiM v1 (only version) date",
+  "value": "2020-11-17",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "abs.html, submission history [v1]; PDF stamp p.1"
+ },
+ {
+  "id": "padim-venue",
+  "claim": "PaDiM venue",
+  "value": "ICPR 2020",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "abs.html Comments: 'accepted at the 1st International Workshop on Industrial Machine Learning, ICPR 2020'"
+ },
+ {
+  "id": "padim-backbone-r18",
+  "claim": "PaDiM backbone option",
+  "value": "ResNet18",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-backbone-wr50",
+  "claim": "PaDiM backbone option",
+  "value": "Wide ResNet-50-2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-backbone-effb5",
+  "claim": "PaDiM backbone option",
+  "value": "EfficientNet-B5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-effb5-layers",
+  "claim": "PaDiM EfficientNet-B5 layers used (levels 2, 4, 5)",
+  "value": "7, 20, 26",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-r18-dim",
+  "claim": "PaDiM-R18 concatenated embedding size (layers 1-3)",
+  "value": "448",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II caption; Sec. V-A 'Dimensionality reduction' (PDF p.4)"
+ },
+ {
+  "id": "padim-wr50-dim",
+  "claim": "WR50 layers 1-3 concatenated width (256+512+1024)",
+  "value": "1792",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading: standard WRN-50-2 widths; not stated in the paper",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-rd-r18",
+  "claim": "PaDiM-R18 random reduction to",
+  "value": "100",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B model naming; Sec. V-B (PDF p.4-5)"
+ },
+ {
+  "id": "padim-rd-wr50",
+  "claim": "PaDiM-WR50 random reduction to",
+  "value": "550",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-B 'Localization' (PDF p.5)"
+ },
+ {
+  "id": "padim-eps",
+  "claim": "PaDiM covariance regularization epsilon",
+  "value": "0.01",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B, 'By default we use $\\bm{\\epsilon} = 0.01$' (PDF p.4)"
+ },
+ {
+  "id": "padim-sigma",
+  "claim": "PaDiM Gaussian filter on anomaly maps",
+  "value": "4",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-resize",
+  "claim": "PaDiM MVTec resize (pixels, square)",
+  "value": "256",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-crop",
+  "claim": "PaDiM MVTec center crop (pixels, square)",
+  "value": "224",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-B (PDF p.4)"
+ },
+ {
+  "id": "padim-eq-cov",
+  "claim": "PaDiM regularized covariance equation number",
+  "value": "1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. III-B, \\label{eqn:sigma} (PDF p.3)"
+ },
+ {
+  "id": "padim-eq-maha",
+  "claim": "PaDiM Mahalanobis distance equation number",
+  "value": "2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. III-C, unlabeled; number from PDF p.3"
+ },
+ {
+  "id": "padim-grid",
+  "claim": "PaDiM patch grid side at 224 input (56 x 56, largest map = layer 1)",
+  "value": "56",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading: Sec. III-A says W x H = resolution of the largest activation map; SPADE Sec. 3.5 states 56 x 56 for block 1 at 224",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-positions",
+  "claim": "PaDiM number of Gaussians per category at 224 input (56 x 56)",
+  "value": "3,136",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading from padim-grid",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-store-pos-wr50-floats",
+  "claim": "PaDiM-WR50-Rd550 floats stored per position (550 mean + 550 x 550 covariance)",
+  "value": "303,050",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading from Eq. 1 and d=550",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-store-pos-wr50-bytes",
+  "claim": "PaDiM-WR50-Rd550 bytes per position at float32",
+  "value": "1,212,200",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-store-pos-r18-floats",
+  "claim": "PaDiM-R18-Rd100 floats stored per position (100 + 100 x 100)",
+  "value": "10,100",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading from Eq. 1 and d=100",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-store-pos-r18-bytes",
+  "claim": "PaDiM-R18-Rd100 bytes per position at float32",
+  "value": "40,400",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-store-total-wr50",
+  "claim": "PaDiM-WR50-Rd550 Gaussians alone, 3,136 positions, float32",
+  "value": "3.80 GB",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading; matches Table VIII 3.8 for MVTec AD (paper does not itemize)",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-store-total-r18",
+  "claim": "PaDiM-R18-Rd100 Gaussians alone, 3,136 positions, float32",
+  "value": "0.127 GB",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "our reading; Table VIII prints 0.17 (consistent if R18 weights are added)",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "padim-mvtec-images-per-class",
+  "claim": "MVTec AD images per class as stated by PaDiM (approximately)",
+  "value": "240",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-A Datasets (PDF p.4)"
+ },
+ {
+  "id": "padim-mvtec-pix-auroc-wr50-rd550",
+  "claim": "PaDiM-WR50-Rd550 MVTec AD pixel AUROC, all classes",
+  "value": "97.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column PaDiM-WR50-Rd550 (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pro-wr50-rd550",
+  "claim": "PaDiM-WR50-Rd550 MVTec AD PRO, all classes",
+  "value": "92.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column PaDiM-WR50-Rd550 (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pix-auroc-wr50-tex",
+  "claim": "PaDiM-WR50-Rd550 pixel AUROC, all texture classes",
+  "value": "96.9",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All texture classes (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pro-wr50-tex",
+  "claim": "PaDiM-WR50-Rd550 PRO, all texture classes",
+  "value": "93.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All texture classes (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pix-auroc-wr50-obj",
+  "claim": "PaDiM-WR50-Rd550 pixel AUROC, all object classes",
+  "value": "97.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All object classes (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pro-wr50-obj",
+  "claim": "PaDiM-WR50-Rd550 PRO, all object classes",
+  "value": "91.6",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All object classes (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pix-auroc-r18-rd100",
+  "claim": "PaDiM-R18-Rd100 MVTec AD pixel AUROC, all classes",
+  "value": "96.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column PaDiM-R18-Rd100 (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pro-r18-rd100",
+  "claim": "PaDiM-R18-Rd100 MVTec AD PRO, all classes",
+  "value": "90.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column PaDiM-R18-Rd100 (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "Table II row Rd 100 prints (96.7, 90.5) as a 10-seed mean"
+ },
+ {
+  "id": "padim-mvtec-pix-auroc-r18-full",
+  "claim": "PaDiM-R18 (all 448 dims) MVTec AD pixel AUROC",
+  "value": "97.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row PaDiM-R18, column all classes; Table II row all (448) (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-pro-r18-full",
+  "claim": "PaDiM-R18 (all 448 dims) MVTec AD PRO",
+  "value": "90.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row PaDiM-R18, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-img-auroc-wr50-rd550",
+  "claim": "PaDiM-WR50-Rd550 MVTec AD image AUROC, all classes",
+  "value": "95.3",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all classes, column PaDiM-WR50-Rd550 (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-img-auroc-effb5",
+  "claim": "PaDiM EfficientNet-B5 MVTec AD image AUROC, all classes",
+  "value": "97.9",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all classes, column PaDiM EfficientNet-B5 (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-img-auroc-wr50-tex",
+  "claim": "PaDiM-WR50-Rd550 image AUROC, textures",
+  "value": "98.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all textures classes (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-img-auroc-wr50-obj",
+  "claim": "PaDiM-WR50-Rd550 image AUROC, objects",
+  "value": "93.6",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all objects classes (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-img-auroc-effb5-tex",
+  "claim": "PaDiM EfficientNet-B5 image AUROC, textures",
+  "value": "99.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all textures classes (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-mvtec-img-auroc-effb5-obj",
+  "claim": "PaDiM EfficientNet-B5 image AUROC, objects",
+  "value": "97.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all objects classes (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-tex-gain-auroc",
+  "claim": "PaDiM-WR50-Rd550 over SPADE on textures, pixel AUROC (p.p.)",
+  "value": "4.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-B 'Localization' text (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-tex-gain-pro",
+  "claim": "PaDiM-WR50-Rd550 over SPADE on textures, PRO (p.p.)",
+  "value": "4.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-B 'Localization' text (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l1-auroc",
+  "claim": "PaDiM-R18 ablation Layer 1, pixel AUROC all classes",
+  "value": "94.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 1, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l1-pro",
+  "claim": "PaDiM-R18 ablation Layer 1, PRO all classes",
+  "value": "86.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 1, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l2-auroc",
+  "claim": "PaDiM-R18 ablation Layer 2, pixel AUROC all classes",
+  "value": "95.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 2, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l2-pro",
+  "claim": "PaDiM-R18 ablation Layer 2, PRO all classes",
+  "value": "88.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 2, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l3-auroc",
+  "claim": "PaDiM-R18 ablation Layer 3, pixel AUROC all classes",
+  "value": "95.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 3, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l3-pro",
+  "claim": "PaDiM-R18 ablation Layer 3, PRO all classes",
+  "value": "88.3",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 3, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l123-auroc",
+  "claim": "PaDiM-R18 ablation Layer 1+2+3, pixel AUROC all classes",
+  "value": "96.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 1+2+3, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-l123-pro",
+  "claim": "PaDiM-R18 ablation Layer 1+2+3, PRO all classes",
+  "value": "89.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table I, row Layer 1+2+3, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-corr-gain-auroc",
+  "claim": "Gain of modeling cross-level correlation over Layer 1+2+3 sum, AUROC (p.p.)",
+  "value": "1.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A 'Inter-layer correlation' (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-abl-corr-gain-pro",
+  "claim": "Gain of modeling cross-level correlation over Layer 1+2+3 sum, PRO (p.p.)",
+  "value": "1.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A 'Inter-layer correlation' (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-rd100-auroc",
+  "claim": "PaDiM-R18 Rd 100, pixel AUROC all classes",
+  "value": "96.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row Rd 100, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-rd100-pro",
+  "claim": "PaDiM-R18 Rd 100, PRO all classes",
+  "value": "90.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row Rd 100, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-pca100-auroc",
+  "claim": "PaDiM-R18 PCA 100, pixel AUROC all classes",
+  "value": "93.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row PCA 100, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-pca100-pro",
+  "claim": "PaDiM-R18 PCA 100, PRO all classes",
+  "value": "85.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row PCA 100, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-rd200-auroc",
+  "claim": "PaDiM-R18 Rd 200, pixel AUROC all classes",
+  "value": "97.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row Rd 200, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-rd200-pro",
+  "claim": "PaDiM-R18 Rd 200, PRO all classes",
+  "value": "90.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row Rd 200, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-pca200-auroc",
+  "claim": "PaDiM-R18 PCA 200, pixel AUROC all classes",
+  "value": "95.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row PCA 200, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-pca200-pro",
+  "claim": "PaDiM-R18 PCA 200, PRO all classes",
+  "value": "89.3",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table II, row PCA 200, column all classes (PDF p.4)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-red-seeds",
+  "claim": "Random reduction: number of models averaged",
+  "value": "10",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A 'Dimensionality reduction' (PDF p.4-5)"
+ },
+ {
+  "id": "padim-red-rd-vs-pca-auroc",
+  "claim": "Rd beats PCA by at least, AUROC (p.p.)",
+  "value": "1.3",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A text after Table II (PDF p.5)"
+ },
+ {
+  "id": "padim-red-rd-vs-pca-pro",
+  "claim": "Rd beats PCA by at least, PRO (p.p.)",
+  "value": "1.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A text after Table II (PDF p.5)"
+ },
+ {
+  "id": "padim-red-rd100-cost-auroc",
+  "claim": "Rd100 vs all 448: AUROC drop (p.p.)",
+  "value": "0.4",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A text after Table II (PDF p.5)"
+ },
+ {
+  "id": "padim-red-rd100-cost-pro",
+  "claim": "Rd100 vs all 448: PRO drop (p.p.)",
+  "value": "0.3",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-A text after Table II (PDF p.5)"
+ },
+ {
+  "id": "padim-rdmvtec-auroc",
+  "claim": "PaDiM-WR50-Rd550 Rd-MVTec AD pixel AUROC, all classes",
+  "value": "92.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VI, row all classes (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions"
+ },
+ {
+  "id": "padim-rdmvtec-pro",
+  "claim": "PaDiM-WR50-Rd550 Rd-MVTec AD PRO, all classes",
+  "value": "73.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VI, row all classes (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions"
+ },
+ {
+  "id": "padim-rdmvtec-spade-auroc",
+  "claim": "SPADE (WR50, re-run by PaDiM) Rd-MVTec AD pixel AUROC",
+  "value": "87.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VI, row all classes, column SPADE (WR50) (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions",
+  "note": "re-run by PaDiM"
+ },
+ {
+  "id": "padim-rdmvtec-spade-pro",
+  "claim": "SPADE (WR50, re-run by PaDiM) Rd-MVTec AD PRO",
+  "value": "69.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VI, row all classes, column SPADE (WR50) (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions",
+  "note": "re-run by PaDiM"
+ },
+ {
+  "id": "padim-rdmvtec-vae-auroc",
+  "claim": "VAE (R18, PaDiM's own) Rd-MVTec AD pixel AUROC",
+  "value": "62.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VI, row all classes, column VAE (R18) (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions"
+ },
+ {
+  "id": "padim-rdmvtec-vae-pro",
+  "claim": "VAE (R18, PaDiM's own) Rd-MVTec AD PRO",
+  "value": "27.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VI, row all classes, column VAE (R18) (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions"
+ },
+ {
+  "id": "padim-rdmvtec-drop-padim",
+  "claim": "AUROC drop from MVTec AD to Rd-MVTec AD, PaDiM-WR50-Rd550 (p.p.)",
+  "value": "5.3",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-C text (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions"
+ },
+ {
+  "id": "padim-rdmvtec-drop-spade",
+  "claim": "AUROC drop from MVTec AD to Rd-MVTec AD, SPADE (p.p.)",
+  "value": "8.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-C text (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions"
+ },
+ {
+  "id": "padim-rdmvtec-drop-vae",
+  "claim": "AUROC drop from MVTec AD to Rd-MVTec AD, VAE (p.p.)",
+  "value": "12.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-C text (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, Rd-MVTec AD (random rotation -10..+10, random crop 256 -> 224, train and test), mean of 5 seeded versions",
+  "note": "Table III vs VI gives 74.4 - 62.1 = 12.3; text prints 12.2"
+ },
+ {
+  "id": "padim-rdmvtec-rotation",
+  "claim": "Rd-MVTec AD random rotation range, -10 to +10 degrees",
+  "value": "10",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. IV-A Datasets (PDF p.4)"
+ },
+ {
+  "id": "padim-stc-pix-auroc",
+  "claim": "PaDiM-R18-Rd100 STC pixel AUROC",
+  "value": "91.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table IV, column PaDiM-R18-Rd100 (PDF p.5)",
+  "protocol": "one-class, full-shot, STC resized to 256"
+ },
+ {
+  "id": "padim-stc-spade",
+  "claim": "SPADE STC pixel AUROC as printed in PaDiM",
+  "value": "89.9",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table IV, column SPADE (PDF p.5)",
+  "protocol": "one-class, full-shot, STC resized to 256",
+  "note": "copied from SPADE Table 5"
+ },
+ {
+  "id": "padim-stc-cavga",
+  "claim": "CAVGA-RU STC pixel AUROC as printed in PaDiM",
+  "value": "85",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table IV, column CAVGA-RU (PDF p.5)",
+  "protocol": "one-class, full-shot, STC resized to 256",
+  "note": "copied"
+ },
+ {
+  "id": "padim-time-spade",
+  "claim": "SPADE (WR50, re-run by PaDiM) average inference time, seconds",
+  "value": "7.10",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VII, column SPADE (WR50) (PDF p.6)",
+  "protocol": "MVTec AD, CPU Intel i7-4710HQ @ 2.50GHz, serial implementation, batch size not stated",
+  "note": "re-run by PaDiM"
+ },
+ {
+  "id": "padim-time-vae",
+  "claim": "VAE (R18) average inference time, seconds",
+  "value": "0.21",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VII, column VAE (R18) (PDF p.6)",
+  "protocol": "MVTec AD, CPU Intel i7-4710HQ @ 2.50GHz, serial implementation, batch size not stated"
+ },
+ {
+  "id": "padim-time-r18-rd100",
+  "claim": "PaDiM R18-Rd100 average inference time, seconds",
+  "value": "0.23",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VII, column PaDiM R18-Rd100 (PDF p.6)",
+  "protocol": "MVTec AD, CPU Intel i7-4710HQ @ 2.50GHz, serial implementation, batch size not stated"
+ },
+ {
+  "id": "padim-time-wr50-rd550",
+  "claim": "PaDiM-WR50-Rd550 average inference time, seconds",
+  "value": "0.95",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VII, column PaDiM-WR50-Rd550 (PDF p.6)",
+  "protocol": "MVTec AD, CPU Intel i7-4710HQ @ 2.50GHz, serial implementation, batch size not stated"
+ },
+ {
+  "id": "padim-fit-time-mvtec",
+  "claim": "PaDiM-WR50-Rd550 fit time per MVTec AD class, seconds (average)",
+  "value": "150",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-D 'Time complexity' (PDF p.6)",
+  "protocol": "Intel CPU 6154 3GHz 72th, serial"
+ },
+ {
+  "id": "padim-fit-time-stc",
+  "claim": "PaDiM-WR50-Rd550 fit time per STC scene, seconds (average)",
+  "value": "1500",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-D 'Time complexity' (PDF p.6)",
+  "protocol": "Intel CPU 6154 3GHz 72th, serial"
+ },
+ {
+  "id": "padim-vae-train-time",
+  "claim": "PaDiM's VAE baseline training time per MVTec class",
+  "value": "2h40",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-D 'Time complexity' (PDF p.6)",
+  "protocol": "one NVIDIA P5000 GPU, 10 000 images, 100 epochs"
+ },
+ {
+  "id": "padim-mem-spade-mvtec",
+  "claim": "SPADE (WR50) memory requirement on MVTec AD, GB (float32)",
+  "value": "1.4",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row MVTec AD, column SPADE (WR50) (PDF p.7)",
+  "note": "re-run by PaDiM"
+ },
+ {
+  "id": "padim-mem-spade-stc",
+  "claim": "SPADE (WR50) memory requirement on STC, GB (float32)",
+  "value": "37.0",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row STC, column SPADE (WR50) (PDF p.7)",
+  "note": "re-run by PaDiM"
+ },
+ {
+  "id": "padim-mem-vae-mvtec",
+  "claim": "VAE (R18) memory requirement on MVTec AD, GB (float32)",
+  "value": "0.09",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row MVTec AD, column VAE (R18) (PDF p.7)"
+ },
+ {
+  "id": "padim-mem-r18-rd100-mvtec",
+  "claim": "PaDiM R18-Rd100 memory requirement on MVTec AD, GB (float32)",
+  "value": "0.17",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row MVTec AD, column PaDiM R18-Rd100 (PDF p.7)"
+ },
+ {
+  "id": "padim-mem-r18-rd100-stc",
+  "claim": "PaDiM R18-Rd100 memory requirement on STC, GB (float32)",
+  "value": "0.21",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row STC, column PaDiM R18-Rd100 (PDF p.7)"
+ },
+ {
+  "id": "padim-mem-wr50-rd550-mvtec",
+  "claim": "PaDiM-WR50-Rd550 memory requirement on MVTec AD, GB (float32)",
+  "value": "3.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row MVTec AD, column PaDiM-WR50-Rd550 (PDF p.7)"
+ },
+ {
+  "id": "padim-mem-wr50-rd550-stc",
+  "claim": "PaDiM-WR50-Rd550 memory requirement on STC, GB (float32)",
+  "value": "5.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table VIII, row STC, column PaDiM-WR50-Rd550 (PDF p.7)"
+ },
+ {
+  "id": "padim-t3-spade-pix-auroc-printed",
+  "claim": "SPADE MVTec AD pixel AUROC, all classes, as printed in PaDiM",
+  "value": "96.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column SPADE (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "conflicts with SPADE Table 2 (96.0) and with the mean of PaDiM's own per-class SPADE values (96.03); per-class values are copied from SPADE. Use spade-mvtec-pix-auroc for the scoreboard."
+ },
+ {
+  "id": "padim-t3-spade-pro",
+  "claim": "SPADE MVTec AD PRO, all classes, as printed in PaDiM",
+  "value": "91.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column SPADE (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "copied from SPADE Table 3"
+ },
+ {
+  "id": "padim-t3-patchsvdd-pix-auroc",
+  "claim": "Patch SVDD MVTec AD pixel AUROC, all classes, as printed in PaDiM",
+  "value": "95.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column Patch SVDD (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "copied from Patch SVDD (2006.16067), not re-run"
+ },
+ {
+  "id": "padim-t3-student-pro",
+  "claim": "Student (Uninformed Students) MVTec AD PRO, as printed in PaDiM",
+  "value": "85.7",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column Student (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "copied"
+ },
+ {
+  "id": "padim-t3-vae-pix-auroc",
+  "claim": "PaDiM's own VAE MVTec AD pixel AUROC, all classes",
+  "value": "74.4",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column VAE (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-t3-vae-pro",
+  "claim": "PaDiM's own VAE MVTec AD PRO, all classes",
+  "value": "64.2",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table III, row All classes, column VAE (PDF p.5)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224"
+ },
+ {
+  "id": "padim-t5-spade-img-auroc",
+  "claim": "SPADE (WR50) MVTec AD image AUROC as printed in PaDiM",
+  "value": "85.5",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all classes, column SPADE (WR50) (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "copied from SPADE Table 1"
+ },
+ {
+  "id": "padim-t5-patchsvdd-img-auroc",
+  "claim": "Patch SVDD MVTec AD image AUROC as printed in PaDiM",
+  "value": "92.1",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all classes, column Patch SVDD (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "copied from Patch SVDD, not re-run"
+ },
+ {
+  "id": "padim-t5-mahalanobisad-img-auroc",
+  "claim": "MahalanobisAD (EfficientNet-B4) MVTec AD image AUROC as printed in PaDiM",
+  "value": "95.8",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Table V, row all classes, column MahalanobisAD (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "copied from Rippel et al. (2005.14140), not re-run"
+ },
+ {
+  "id": "padim-effb5-margin",
+  "claim": "PaDiM EfficientNet-B5 beats every model in image AUROC by at least (p.p.), as stated in the text",
+  "value": "2.6",
+  "paper": "PaDiM",
+  "arxiv": "2011.08785v1",
+  "loc": "Sec. V-B 'Detection' (PDF p.6)",
+  "protocol": "one-class, full-shot, one model per category, resize 256 -> center crop 224",
+  "note": "Table V gives 97.9 - 95.8 (MahalanobisAD) = 2.1; 2.6 equals the margin over PaDiM-WR50-Rd550 (95.3). Text and table disagree."
+ }
+]

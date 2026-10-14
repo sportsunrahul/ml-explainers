@@ -1,0 +1,55 @@
+<p class="kicker"><span class="act-n">Act I</span>Before SAM</p>
+<section id="ch-before" class="chapter">
+<h2>Four ways to draw a mask</h2>
+<p>A <dfn>mask</dfn> is the set of pixels that belong to one thing, drawn as a filled shape on the image. Before 2023, most segmentation models learned to draw masks for a fixed list of classes, from one labelled dataset. Step through four of them on the same desk scene.</p>
+
+<figure class="viz" id="viz-before" data-scene="before" data-toy>
+  <div class="controls"><div class="seg" role="tablist" aria-label="Model">
+    <button type="button" role="tab" data-step="0" id="btn-before-fcn">FCN</button>
+    <button type="button" role="tab" data-step="1" id="btn-before-unet">U-Net</button>
+    <button type="button" role="tab" data-step="2" id="btn-before-maskrcnn">Mask R-CNN</button>
+    <button type="button" role="tab" data-step="3" id="btn-before-m2f">MaskFormer / Mask2Former</button>
+  </div></div>
+  <div class="stage" style="height:clamp(300px, 36vw, 400px)"></div>
+  <div class="controls">
+    <span class="lbl">Output stride:</span>
+    <button type="button" data-stride="32" id="btn-before-s32">32 (FCN-32s)</button>
+    <button type="button" data-stride="16" id="btn-before-s16">16 (FCN-16s)</button>
+    <button type="button" data-stride="8" id="btn-before-s8">8 (FCN-8s)</button>
+  </div>
+  <div class="controls"><button type="button" data-cue-reset id="btn-before-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>A toy desk scene labelled the way each model family would label it. The class list (cup, plant, lamp, book) is ours; the real models used the datasets in the table below. The grid sizes are illustrative, not the papers' feature maps.</figcaption>
+</figure>
+
+<p><b>FCN</b> (2014) took an image classifier and made every layer a convolution, so one forward pass gives a score for every class at every location. The scores come out on a coarse grid: one cell per <span data-claim="fcn-stride">32</span> pixels. FCN then adds finer scores from earlier layers to sharpen the edges. On a subset of the PASCAL VOC 2011 validation set, the mean overlap (mean IU) went from <span data-claim="fcn-32s-miou">59.4</span> at stride 32 to <span data-claim="fcn-8s-miou">62.7</span> at stride 8. The output has <span data-claim="fcn-voc-classes">21</span> channels: the 20 PASCAL classes plus background.</p>
+<p><b>U-Net</b> (2015) made that idea symmetric. A contracting path shrinks the image and an expanding path grows it back, and skip connections copy detail from each level of the first path to the matching level of the second. It was built for cell images with very few labels: <span data-claim="unet-em-train">30</span> training images for one challenge, and <span data-claim="unet-output-classes">2</span> output classes. In our reading, its encoder-decoder shape with skip connections is still the template for many dense-prediction networks.</p>
+<p><b>Mask R-CNN</b> (2017) asked a different question: which pixels belong to <em>this</em> object? It detects each object with a box, cuts the features inside the box, and predicts a small <span data-claim="maskrcnn-mask-res">28x28</span> mask for it, one per class (<span data-claim="maskrcnn-mask-classes">80</span> COCO classes). Two cups become two masks, not one blob. That is <dfn>instance</dfn> segmentation; labelling pixels by class alone is <dfn>semantic</dfn> segmentation.</p>
+<p><b>MaskFormer</b> (2021) and <b>Mask2Former</b> (2021) dropped both the per-pixel classifier and the boxes. A transformer decoder holds a fixed set of <dfn>queries</dfn>, <span data-claim="m2f-queries">100</span> by default, as in <a href="../detr-family/explainer.html#ch-queries">DETR's object queries</a>. Each query predicts a class (or "no object") and a mask. The mask comes from a dot product between the query's embedding and the embedding of every pixel:</p>
+
+<div class="eq" id="eq-maskdot" data-build data-viz="viz-before"><div class="tex tex-display">
+\htmlData{step=1, link=mask}{\htmlClass{t-green}{m_i[h,w]}} = \mathrm{sigmoid}\big(\htmlData{step=2, link=query}{\htmlClass{t-green}{\mathcal{E}_{\text{mask}}[:,i]}}^{\mathsf T} \cdot \htmlData{step=3, link=pixel}{\htmlClass{t-blue}{\mathcal{E}_{\text{pixel}}[:,h,w]}}\big)
+</div></div>
+<p class="eqno">MaskFormer v2, Sec. 3.3 (unnumbered). Mask2Former v3 keeps this mask head.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{m_i[h,w]}</span>: how strongly pixel <span class="tex">(h,w)</span> belongs to mask <span class="tex">i</span>, between 0 and 1.</li>
+  <li><span class="tex">\htmlClass{t-green}{\mathcal{E}_{\text{mask}}[:,i]}</span>: the embedding that query <span class="tex">i</span> ends with, a vector of <span data-claim="maskformer-emb-dim">256</span> numbers.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mathcal{E}_{\text{pixel}}[:,h,w]}</span>: the embedding of one pixel, the same length, from a pixel decoder that runs at a quarter of the image resolution.</li>
+</ul>
+<p>Mask2Former's change is <dfn>masked attention</dfn>: each query looks only at the pixels inside the mask it predicted one layer earlier. In an ablation with a ResNet-50 backbone, removing it changes COCO instance AP by <span data-claim="m2f-no-maskattn-ap">-5.9</span>. With it, one architecture matched or beat the specialised models on all three tasks. The best results use a Swin-L backbone (with 200 queries on COCO): <span data-claim="m2f-coco-pq">57.8</span> PQ on COCO panoptic, <span data-claim="m2f-coco-ap">50.1</span> AP on COCO instances and <span data-claim="m2f-ade-miou">57.7</span> mIoU on ADE20K. <dfn>Panoptic</dfn> segmentation is the union of the two others: every pixel gets a class, and every countable object also gets its own mask.</p>
+
+<h3>What none of them could do</h3>
+<p>Look at the window and the pencil in the figure. They are not in the label list, so no model above can mask them, however clear their edges are. Each model learns its classes from one labelled dataset:</p>
+<table class="data">
+  <thead><tr><th>Model</th><th>Dataset</th><th>Classes</th></tr></thead>
+  <tbody>
+    <tr><td>FCN</td><td>PASCAL VOC</td><td><span data-claim="fcn-voc-classes">21</span>, with background</td></tr>
+    <tr><td>U-Net</td><td>ISBI cell images</td><td><span data-claim="unet-output-classes">2</span></td></tr>
+    <tr><td>Mask R-CNN</td><td>COCO instances</td><td><span data-claim="maskrcnn-mask-classes">80</span></td></tr>
+    <tr><td>Mask2Former</td><td>COCO panoptic</td><td><span data-claim="m2f-coco-pan-classes">133</span></td></tr>
+    <tr><td>Mask2Former</td><td>ADE20K</td><td><span data-claim="m2f-ade-classes">150</span></td></tr>
+    <tr><td>MaskFormer</td><td>ADE20K-Full</td><td><span data-claim="maskformer-adefull-classes">847</span> (the text also says 874)</td></tr>
+  </tbody>
+</table>
+<p>Even the "universal" Mask2Former is trained again for each task and each dataset. Its authors name the goal they did not reach: "a model that can be trained only once for multiple tasks and even for multiple datasets" (Mask2Former v3, Sec. 4.6). A second line of work had a piece of the answer. It did not ask the model to know any classes at all. It asked a person to point.</p>
+</section>

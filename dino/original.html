@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DINO, DINOv2 and DINOv3, explained in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF1F5; --panel:#F9FBFD; --ink:#172033; --muted:#56607A; --line:#C8D0DB;
+  --student:#13877F; --teacher:#D08511; --plum:#A63D86;
+  --g1:#3563B0; --g2:#5E8C31; --g3:#A63D86;
+  --sans:"Schibsted Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1522; --panel:#161E2E; --ink:#E5EAF2; --muted:#9AA5BA; --line:#2B3549;
+    --student:#3CC2B6; --teacher:#F2A93B; --plum:#DA78B9;
+    --g1:#7FA6EA; --g2:#9BCB67; --g3:#DA78B9;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1522; --panel:#161E2E; --ink:#E5EAF2; --muted:#9AA5BA; --line:#2B3549;
+  --student:#3CC2B6; --teacher:#F2A93B; --plum:#DA78B9;
+  --g1:#7FA6EA; --g2:#9BCB67; --g3:#DA78B9;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.68;-webkit-font-smoothing:antialiased}
+img,svg,canvas{max-width:100%}
+a{color:inherit;text-decoration-color:var(--muted);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--g1);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.prose{max-width:700px}
+h1,h2,h3,h4,.sans{font-family:var(--sans)}
+h1{font-size:clamp(44px,8.4vw,104px);line-height:.92;letter-spacing:-.035em;font-weight:800;margin:0 0 20px}
+h2{font-size:clamp(34px,5vw,56px);line-height:1;letter-spacing:-.025em;font-weight:800;margin:0 0 8px}
+h3{font-size:24px;line-height:1.2;letter-spacing:-.01em;font-weight:600;margin:44px 0 10px}
+h4{font-size:18px;font-weight:600;margin:22px 0 6px}
+p{margin:0 0 16px}
+.lede{font-size:21px;line-height:1.55;color:var(--muted);max-width:640px}
+
+/* nav */
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:6px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav.top .brand{font-family:var(--sans);font-weight:800;margin-right:14px;white-space:nowrap}
+nav.top a{font-family:var(--sans);font-size:15px;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+nav.top a:hover{color:var(--ink);background:var(--panel)}
+nav.top a .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+
+/* hero */
+header.hero{padding:56px 0 24px}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:32px;align-items:center}
+@media (max-width:860px){.hero-grid{grid-template-columns:1fr}}
+.gens{display:flex;flex-wrap:wrap;gap:18px 28px;margin-top:26px;font-family:var(--sans);font-size:15px}
+.gens div{border-top:3px solid var(--c);padding-top:8px;min-width:130px}
+.gens b{display:block;font-size:19px}
+.gens span{color:var(--muted)}
+
+/* sections */
+section{padding:56px 0 24px}
+section.gen{border-top:1px solid var(--line)}
+.gen-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.gen-head .year{font-family:var(--sans);font-size:20px;font-weight:600;color:var(--c);font-variant-numeric:tabular-nums}
+.gen-head .paper{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:17px;flex-basis:100%}
+.gen h2{color:var(--ink);box-shadow:inset 0 -.18em 0 color-mix(in srgb,var(--c) 45%,transparent)}
+
+/* figures */
+figure.fig{margin:28px 0 36px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.canvas{position:relative;height:clamp(300px,50vw,470px);touch-action:pan-y;cursor:grab;user-select:none}
+.canvas:active{cursor:grabbing}
+.canvas canvas{display:block;width:100%;height:100%}
+.canvas .hint{position:absolute;right:12px;top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);pointer-events:none;background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 8px;border-radius:6px}
+.canvas .nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans);color:var(--muted)}
+figcaption{padding:14px 18px 16px;border-top:1px solid var(--line);font-family:var(--sans);font-size:15px;line-height:1.5}
+figcaption p{margin:8px 0 0;color:var(--muted);max-width:760px}
+figcaption p b{color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{border:1px solid var(--line);border-radius:10px}
+.btn:hover,.seg button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--ink) 7%,transparent)}
+label.ctl{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+input[type=range]{accent-color:var(--plum);width:170px}
+input[type=checkbox]{accent-color:var(--plum);width:17px;height:17px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink)}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--plum) 10%,transparent);color:var(--ink);font-size:14.5px}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);margin-right:14px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.gram-side{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:10px}
+.gram-side canvas{width:170px;height:170px;image-rendering:pixelated;border:1px solid var(--line);border-radius:6px}
+
+/* math and code */
+.eq{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c,var(--plum));border-radius:8px;padding:12px 16px;margin:14px 0 18px;overflow-x:auto;font-size:16.5px;line-height:1.6;white-space:nowrap}
+.eq small{display:block;white-space:normal;color:var(--muted);font-size:14px;margin-top:4px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14.5px;line-height:1.5}
+pre code{background:none;padding:0}
+
+/* pros cons */
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:720px){.pc{grid-template-columns:1fr}}
+.pc > div{border:1px solid var(--line);border-radius:12px;padding:14px 18px 6px;background:var(--panel)}
+.pc h4{margin-top:0}
+.pc .pro h4{color:var(--student)} .pc .con h4{color:var(--teacher)}
+.pc ul{margin:0;padding-left:20px;font-size:16.5px;line-height:1.55}
+.pc li{margin-bottom:10px}
+.delta{border-left:4px solid var(--c);padding:6px 0 6px 16px;margin:18px 0}
+
+/* table */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:18px 0 28px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--line)}
+thead th{font-size:16px;border-bottom:2px solid var(--line)}
+thead th:nth-child(2){color:var(--g1)} thead th:nth-child(3){color:var(--g2)} thead th:nth-child(4){color:var(--g3)}
+tbody th{color:var(--muted);font-weight:600;width:160px}
+tr:last-child td,tr:last-child th{border-bottom:0}
+
+footer{border-top:1px solid var(--line);padding:32px 0 56px;font-family:var(--sans);font-size:14.5px;color:var(--muted)}
+footer ul{padding-left:18px}
+</style>
+</head>
+<body>
+
+<nav class="top" aria-label="Sections">
+  <div class="wrap">
+    <span class="brand">DINO in 3D</span>
+    <a href="#idea">The shared idea</a>
+    <a href="#dino"><span class="dot" style="background:var(--g1)"></span>DINO</a>
+    <a href="#dinov2"><span class="dot" style="background:var(--g2)"></span>DINOv2</a>
+    <a href="#dinov3"><span class="dot" style="background:var(--g3)"></span>DINOv3</a>
+    <a href="#compare">Side by side</a>
+    <a href="#choose">Which to use</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Learning to see with no labels</h1>
+      <p class="lede">An illustrated guide to Meta AI's DINO family: how a network can teach itself what images mean by comparing different views of the same picture, and how three papers turned that trick into the strongest general-purpose vision backbones available.</p>
+      <div class="gens">
+        <div style="--c:var(--g1)"><b>DINO</b><span>2021, the method</span></div>
+        <div style="--c:var(--g2)"><b>DINOv2</b><span>2023, the scale-up</span></div>
+        <div style="--c:var(--g3)"><b>DINOv3</b><span>2025, the dense fix</span></div>
+      </div>
+    </div>
+    <figure class="fig" id="f-hero" style="margin:0">
+      <div class="canvas" role="img" aria-label="A sphere of image embeddings that gradually organise into coloured clusters"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls"><button class="btn" id="hero-replay" type="button">Replay training</button></div>
+        <p>Each dot is one image's embedding on the unit sphere. Nobody tells the network which image is a dog or a boat, yet training pulls similar images together. The colours only appear so you can see the clusters emerge.</p>
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+<section id="idea">
+  <div class="wrap">
+    <div class="prose">
+      <h2>The shared idea</h2>
+      <p>All three papers answer one question: <em>how do you learn good visual features from images alone, with no captions and no class labels?</em> Their answer is <strong>self-distillation</strong>. Two copies of the same network look at different random views of one image. One copy, the <span style="color:var(--teacher);font-weight:600">teacher</span>, produces a target. The other, the <span style="color:var(--student);font-weight:600">student</span>, is trained to match it. The teacher is never trained directly; it is a slowly moving average of the student's past weights, so it behaves like a steadier, slightly wiser version of the student.</p>
+      <p>To match the teacher from a tiny crop of a bird's wing, the student has to understand that the wing belongs to a bird. That pressure to agree across views is what forces semantic understanding. The name comes from the method: <strong>DI</strong>stillation with <strong>NO</strong> labels.</p>
+      <p>What changes across generations is everything around that core: the amount and quality of data, the model size, extra loss terms that make patch-level features good, and in DINOv3 a new regulariser that stops those patch features from decaying during very long training.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DINO ============================ -->
+<section id="dino" class="gen" style="--c:var(--g1)">
+  <div class="wrap">
+    <div class="gen-head"><h2>DINO</h2><span class="year">2021</span><span class="paper">Caron et al., “Emerging Properties in Self-Supervised Vision Transformers”</span></div>
+    <div class="prose">
+      <h3>Main idea</h3>
+      <p>DINO showed that a Vision Transformer (ViT) trained by self-distillation learns features that are excellent for nearest-neighbour retrieval and, remarkably, that its attention maps segment objects on their own. Supervised ViTs do not show this. The method is also simpler than most of its predecessors: no negative pairs (unlike contrastive learning such as SimCLR or MoCo), no memory bank, no predictor network (unlike BYOL), and no batch normalisation in the head.</p>
+      <h3>The training loop</h3>
+      <p>Each image is augmented into several crops. Two <strong>global crops</strong> (224&nbsp;px, covering a large part of the image) and several <strong>local crops</strong> (96&nbsp;px, covering small parts). The teacher only sees the global crops. The student sees everything. The student must predict, from each view, the teacher's output for the <em>other</em> views. Matching a tiny local crop to a global view teaches “local-to-global” correspondence: the part implies the whole.</p>
+    </div>
+
+    <figure class="fig" id="f-pipe">
+      <div class="canvas" role="img" aria-label="3D diagram of the DINO pipeline: an image is cropped, global crops go to the teacher and student, local crops go only to the student, outputs are compared with a cross-entropy loss, and the teacher is updated as an average of the student"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <span class="legend"><i style="background:var(--teacher)"></i>Global crops and teacher</span>
+        <span class="legend"><i style="background:var(--student)"></i>Local crops and student</span>
+        <span class="legend"><i style="background:var(--plum)"></i>Loss and gradient</span>
+        <p>Global crops travel to both networks; local crops only reach the student. Both networks end in a softmax over K “prototype” dimensions. The loss compares the two distributions, gradients flow back into the student only, and the teacher's weights are then nudged toward the student's (the dashed arc).</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h4>The loss</h4>
+      <p>Both networks output K logits (K = 65,536 in the paper), turned into probabilities with a softmax at temperature τ. The student learns by minimising cross-entropy against the teacher's distribution, summed over all pairs of different views:</p>
+      <div class="eq">P<sub>t</sub>(x) = softmax((g<sub>θt</sub>(x) − c) / τ<sub>t</sub>) &nbsp;&nbsp; P<sub>s</sub>(x′) = softmax(g<sub>θs</sub>(x′) / τ<sub>s</sub>)<br>
+      L = Σ<sub>x ∈ {global}</sub> Σ<sub>x′ ≠ x</sub> − P<sub>t</sub>(x) · log P<sub>s</sub>(x′)
+      <small>τ<sub>t</sub> ≈ 0.04 to 0.07 (sharp), τ<sub>s</sub> = 0.1, c is the running centre of teacher outputs.</small></div>
+      <h4>The teacher is a moving average</h4>
+      <div class="eq">θ<sub>t</sub> ← λ θ<sub>t</sub> + (1 − λ) θ<sub>s</sub> &nbsp;&nbsp; λ goes from 0.996 to 1 on a cosine schedule
+      <small>No gradient ever flows into the teacher (a “stop-gradient”). It behaves like a model ensemble over training time, which is why it gives better targets than the student itself.</small></div>
+
+      <h3>Why it doesn't collapse</h3>
+      <p>Self-distillation has an obvious cheat. If both networks output the same thing for every image, the loss is perfect and nothing is learned. DINO blocks this with two opposing forces applied to the teacher's output:</p>
+      <p><strong>Centering</strong> subtracts a running mean c of teacher logits (updated with momentum 0.9). This stops any single dimension from dominating for every image, but on its own it pushes outputs toward a flat, uniform distribution. <strong>Sharpening</strong> uses a low teacher temperature, which makes outputs confident, but on its own lets one dimension win everywhere. Together they balance: each image gets a confident answer, and different images get different answers. Try it below. The bars are softmax outputs for 8 images over 16 prototypes, computed live from the same logits.</p>
+    </div>
+
+    <figure class="fig" id="f-collapse">
+      <div class="canvas" role="img" aria-label="3D bar chart of softmax probabilities for 8 images across 16 prototypes, changing with temperature and centering"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Presets">
+            <button type="button" data-preset="sharp">Sharpening only</button>
+            <button type="button" data-preset="center">Centering only</button>
+            <button type="button" data-preset="both" aria-pressed="true">Both, as in DINO</button>
+          </div>
+          <label class="ctl">Teacher temperature <input type="range" id="c-tau" min="0" max="100" value="18"><span class="readout" id="c-tau-v"></span></label>
+          <label class="ctl"><input type="checkbox" id="c-center" checked> Centering</label>
+        </div>
+        <div class="status" id="c-status" aria-live="polite"></div>
+        <p>Rows are images in a batch, columns are the K output dimensions. The logits contain a shared bias that favours one column (the seed of collapse) plus image-specific signal. Centering removes the shared bias; low temperature turns the remaining signal into a confident choice.</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h3>Architecture</h3>
+      <p>The backbone is a standard ViT. The image is cut into 16×16 or 8×8 pixel patches, each patch becomes a token, a learnable <code>[CLS]</code> token is prepended, and a stack of transformer blocks mixes them. The <code>[CLS]</code> output is the image's feature. On top sits a projection head used only during training: a 3-layer MLP (hidden size 2048), an ℓ2-normalised 256-d bottleneck, and a weight-normalised linear layer to K = 65,536 outputs. After training the head is thrown away. Models released: ViT-S/16, ViT-S/8, ViT-B/16, ViT-B/8 (about 21M and 85M parameters), plus a ResNet-50 for comparison.</p>
+      <p>The student and teacher have the <em>same</em> architecture. That is one of the things that makes DINO elegant: there is no separate target network design, only an averaged copy.</p>
+
+      <h3>The emergent surprise: attention that segments</h3>
+      <p>Look at where the <code>[CLS]</code> token attends in the last layer. In a DINO-trained ViT, different heads lock onto the object, its parts, or the background, producing clean masks without any segmentation labels. A supervised ViT trained on ImageNet classes attends in a noisier, scattered way, because it only needs enough evidence to name the class.</p>
+    </div>
+
+    <figure class="fig" id="f-attn">
+      <div class="canvas" role="img" aria-label="An image split into a 14 by 14 patch grid in 3D, with pillars showing how strongly the CLS token attends to each patch"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Attention source">
+            <button type="button" data-att="body" aria-pressed="true">DINO head 1</button>
+            <button type="button" data-att="head">DINO head 2</button>
+            <button type="button" data-att="bg">DINO head 3</button>
+            <button type="button" data-att="sup">Supervised ViT</button>
+          </div>
+        </div>
+        <p>The picture is split into 196 patches, the tokens a ViT actually processes. Pillar height shows the last-layer attention from <code>[CLS]</code> to each patch; the lines link <code>[CLS]</code> to its twelve strongest patches. The maps here are illustrative of the paper's findings, not computed by a real network.</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h3>Results in brief</h3>
+      <p>With a frozen backbone and a simple linear classifier, ViT-B/8 reached 80.1% top-1 on ImageNet, and a plain k-nearest-neighbour classifier reached 77.4%, which showed the feature space itself was semantically organised. It also did well on image retrieval, copy detection and video object segmentation, all without fine-tuning. Everything was trained on ImageNet-1k images only, with labels ignored.</p>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h4>Strengths</h4><ul>
+        <li>Simple: no negatives, no memory bank, no predictor, identical student and teacher.</li>
+        <li>Strong k-NN performance, so features are useful as-is for retrieval and search.</li>
+        <li>Attention maps give object segmentation for free, a genuinely new finding.</li>
+        <li>Works with both ViTs and ConvNets.</li>
+      </ul></div>
+      <div class="con"><h4>Weaknesses</h4><ul>
+        <li>Collapse control depends on carefully tuned temperatures, momentum and centering; small changes can destabilise training.</li>
+        <li>Multi-crop is compute-heavy, and small patches (ViT-B/8) are very expensive.</li>
+        <li>Trained only on ImageNet-1k, so features are biased toward object-centric photos and don't transfer as broadly as later versions.</li>
+        <li>The loss acts on the <code>[CLS]</code> token only, so individual patch features are not directly trained and dense tasks lag behind.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DINOv2 ============================ -->
+<section id="dinov2" class="gen" style="--c:var(--g2)">
+  <div class="wrap">
+    <div class="gen-head"><h2>DINOv2</h2><span class="year">2023</span><span class="paper">Oquab et al., “DINOv2: Learning Robust Visual Features without Supervision”</span></div>
+    <div class="prose">
+      <h3>Main idea</h3>
+      <p>DINOv2 asked whether self-supervised learning could produce <em>all-purpose</em> frozen features, the way large language models give text features that work for many tasks. The recipe was not a new principle but a careful scale-up: a much larger curated dataset, a billion-parameter ViT, a combined image-level and patch-level objective, and a lot of engineering so it trains stably and efficiently. The result was the first self-supervised backbone that matched or beat weakly supervised text-image models such as OpenCLIP on most vision benchmarks, including dense ones like depth and segmentation.</p>
+
+      <h3>Data curation: quality over raw size</h3>
+      <p>Simply training on raw web images makes features worse, because the web is dominated by a few kinds of content and many near-duplicates. DINOv2 built <strong>LVD-142M</strong>: starting from about 1.2 billion uncurated images, it removed near-duplicates with a copy-detection model, embedded everything with a self-supervised ViT, and then used a set of curated seed datasets (ImageNet-22k, ImageNet-1k, Google Landmarks and several fine-grained sets) to retrieve web images similar to them. Only images close to something in the seed collection were kept.</p>
+    </div>
+
+    <figure class="fig" id="f-cur">
+      <div class="canvas" role="img" aria-label="A 3D point cloud of image embeddings showing unbalanced raw web data, retrieval-based curation, and balanced cluster sampling"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Data pool">
+            <button type="button" data-cur="raw" aria-pressed="true">Raw web data</button>
+            <button type="button" data-cur="ret">Retrieval, DINOv2</button>
+            <button type="button" data-cur="bal">Balanced clusters, DINOv3</button>
+          </div>
+          <span class="readout" id="cur-read"></span>
+        </div>
+        <p>Each dot is an image in embedding space; colours are visual concepts. Raw data is dominated by a few huge clusters. DINOv2 keeps what is near curated seed sets (good quality, but only concepts the seeds already cover). DINOv3 adds balanced sampling from hierarchical k-means clusters so rare concepts are kept too. Toy data.</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h3>The training objective</h3>
+      <p>DINOv2 combines three losses, borrowing from DINO, iBOT and a nearest-neighbour regulariser.</p>
+      <h4>1. DINO loss on the image</h4>
+      <p>Exactly as before: student <code>[CLS]</code> output matches teacher <code>[CLS]</code> output across crops.</p>
+      <h4>2. iBOT loss on the patches</h4>
+      <p>Random patches in the student's input are replaced with a learnable mask token. The teacher sees the full image. For each masked position, the student must predict the teacher's output for that exact patch. This is masked image modelling in feature space rather than pixel space, and it is what makes DINOv2's patch features good for dense tasks. DINOv2 uses separate (“untied”) projection heads for the image-level and patch-level losses, which worked better at scale.</p>
+    </div>
+
+    <figure class="fig" id="f-ibot">
+      <div class="canvas" role="img" aria-label="Two patch grids in 3D: the student grid with masked patches and the teacher grid with full patches, connected by arcs for the patch-level loss and one arc between CLS tokens for the image-level loss"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls"><button class="btn" type="button" id="ibot-new">Draw a new mask</button>
+          <span class="legend"><i style="background:var(--student)"></i>Student predictions</span>
+          <span class="legend"><i style="background:var(--teacher)"></i>Teacher targets</span>
+          <span class="legend"><i style="background:var(--plum)"></i>Image-level DINO loss</span></div>
+        <p>Left: the student's view with grey mask tokens. Right: the teacher's unmasked view. Each thin arc is one term of the iBOT loss, pairing the teacher's feature for a patch with the student's prediction at the masked position. The thick arc between the two <code>[CLS]</code> cubes is the DINO loss.</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h4>3. KoLeo regulariser</h4>
+      <p>The Kozachenko–Leonenko entropy estimator encourages features within a batch to spread out evenly. For each feature, it looks at the distance d<sub>i</sub> to its nearest neighbour and penalises small distances:</p>
+      <div class="eq">L<sub>KoLeo</sub> = − (1/n) Σ<sub>i</sub> log d<sub>i</sub>, &nbsp;&nbsp; d<sub>i</sub> = min<sub>j≠i</sub> ‖x<sub>i</sub> − x<sub>j</sub>‖
+      <small>Applied to ℓ2-normalised <code>[CLS]</code> features with a small weight (0.1). Evenly spread features make nearest-neighbour retrieval much better.</small></div>
+    </div>
+
+    <figure class="fig" id="f-koleo">
+      <div class="canvas" role="img" aria-label="Points on a sphere with lines to their nearest neighbours; turning on KoLeo pushes clumped points apart"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls">
+          <label class="ctl"><input type="checkbox" id="k-on"> Apply KoLeo</label>
+          <button class="btn" type="button" id="k-reset">Reset to clumped</button>
+          <span class="readout" id="k-read"></span>
+        </div>
+        <p>Points are features on the unit sphere; each line joins a point to its nearest neighbour. The gradient of −log d pushes each point away from its closest neighbour, strongest when they are very close, so clumps dissolve into an even covering.</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h4>Centering, upgraded</h4>
+      <p>DINO's running-mean centering is replaced by <strong>Sinkhorn–Knopp</strong> normalisation (from SwAV). It rescales the teacher's batch of outputs so that every prototype is used equally across the batch, a stricter and more stable way to prevent collapse at large scale.</p>
+
+      <h3>Architecture and engineering</h3>
+      <p>The largest model is <strong>ViT-g/14</strong>: about 1.1 billion parameters, 40 blocks, width 1536, patch size 14 and SwiGLU feed-forward layers. Training used FlashAttention, sequence packing of global and local crops, efficient stochastic depth that skips dropped blocks entirely, and fully sharded data parallelism. At the end of pretraining, the model is trained briefly at 518&nbsp;px so it handles higher resolutions, a cheap way to get sharper dense features.</p>
+      <p>Smaller models (ViT-S/14, B/14, L/14) are not trained from scratch. They are <strong>distilled</strong> from the frozen ViT-g using the same self-supervised losses, which gives them better features than training them directly.</p>
+
+      <h4>A follow-up fix: registers</h4>
+      <p>Shortly after release, a companion paper (“Vision Transformers Need Registers”) found that large ViTs, DINOv2 included, repurpose some low-information background patches as scratch space for global computation. Those tokens get abnormally high norms and create artifacts in attention and feature maps. Adding a few extra learnable <strong>register tokens</strong>, which are discarded at output, gives the model dedicated scratch space and removes the artifacts. DINOv2 checkpoints “with registers” were released, and DINOv3 builds registers in from the start.</p>
+    </div>
+
+    <div class="delta"><p class="prose" style="margin:0"><strong>What improved over DINO:</strong> 142M curated images instead of 1.3M, a 1.1B model instead of 85M, patch-level supervision through iBOT, KoLeo for spread, Sinkhorn–Knopp for stability, high-resolution adaptation, and a distilled family of models. Frozen linear ImageNet accuracy rose to 86.5% (ViT-g/14), and frozen features became strong for depth estimation and segmentation too.</p></div>
+
+    <div class="pc">
+      <div class="pro"><h4>Strengths</h4><ul>
+        <li>Truly general frozen features: one backbone serves classification, retrieval, depth, segmentation and more with only a linear head.</li>
+        <li>Patch features are useful on their own, thanks to the iBOT objective.</li>
+        <li>Distilled small models are practical for real applications.</li>
+        <li>Open code and weights under Apache 2.0, which drove wide adoption.</li>
+      </ul></div>
+      <div class="con"><h4>Weaknesses</h4><ul>
+        <li>High-norm artifact tokens in feature maps (fixed later with registers).</li>
+        <li>Retrieval-based curation can only find content similar to its seed datasets, so it inherits their biases and misses unusual domains.</li>
+        <li>Patch size 14 gives coarse feature maps; fine detail still requires high-resolution inputs.</li>
+        <li>No link to language, so zero-shot text queries need an extra alignment step.</li>
+        <li>Training the ViT-g teacher is expensive and hard to reproduce.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DINOv3 ============================ -->
+<section id="dinov3" class="gen" style="--c:var(--g3)">
+  <div class="wrap">
+    <div class="gen-head"><h2>DINOv3</h2><span class="year">2025</span><span class="paper">Siméoni et al., “DINOv3”</span></div>
+    <div class="prose">
+      <h3>Main idea</h3>
+      <p>DINOv3 scaled again, to a 7-billion-parameter ViT trained on about 1.7 billion images, and in doing so hit a wall: when you train a large model for a long time, <strong>global features keep improving but dense patch features get worse</strong>. Patch similarity maps become noisy and lose their locality after roughly the first couple of hundred thousand iterations. The paper's central contribution is <strong>Gram anchoring</strong>, a regulariser that fixes this, letting the model keep its excellent patch features while training long enough to get the best global ones.</p>
+
+      <h3>The problem, and Gram anchoring</h3>
+      <p>Stack the ℓ2-normalised patch features of an image into a matrix X (one row per patch). Its Gram matrix <code>X Xᵀ</code> holds the cosine similarity between every pair of patches. That matrix <em>is</em> the dense structure: which patches belong together. DINOv3 keeps an earlier checkpoint of the teacher whose patch features were still clean, called the <strong>Gram teacher</strong>, and adds a loss that makes the student's Gram matrix match it:</p>
+      <div class="eq">L<sub>Gram</sub> = ‖ X<sub>S</sub> X<sub>S</sub>ᵀ − X<sub>G</sub> X<sub>G</sub>ᵀ ‖<sub>F</sub>²
+      <small>X<sub>S</sub>: student patch features. X<sub>G</sub>: Gram teacher patch features. Only relative similarities are constrained, so the features themselves are still free to move and improve.</small></div>
+      <p>This is the clever part. It does not freeze the features to old values, only the <em>pattern of similarities</em> between patches. Gram anchoring is switched on in a refinement phase after about one million iterations, and dense performance recovers quickly. A refinement called <strong>high-resolution Gram</strong> feeds the Gram teacher images at twice the resolution and downsamples its features, which gives even cleaner, more detailed targets.</p>
+    </div>
+
+    <figure class="fig" id="f-gram">
+      <div class="canvas" role="img" aria-label="3D surface showing cosine similarity between a query patch and all other patches, which degrades with long training and recovers with Gram anchoring"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <div class="controls">
+          <label class="ctl">Training iterations <input type="range" id="g-it" min="0" max="150" value="20"><span class="readout" id="g-it-v"></span></label>
+          <label class="ctl"><input type="checkbox" id="g-on"> Gram anchoring from 1M iterations</label>
+          <div class="seg" role="group" aria-label="Query patch">
+            <button type="button" data-q="bird" aria-pressed="true">Query on the bird</button>
+            <button type="button" data-q="sky">Query in the sky</button>
+          </div>
+        </div>
+        <div class="gram-side">
+          <canvas id="g-heat" width="144" height="144" aria-label="Gram matrix heatmap"></canvas>
+          <div class="readout" id="g-read" style="flex:1;min-width:220px"></div>
+        </div>
+        <p>The surface is the cosine similarity between the marked query patch and every other patch; the square is the full Gram matrix for all 144 patches. Early on the bird lights up as a clean island. Keep sliding without anchoring and the surface turns into noisy mush while the global score keeps rising. Turn on anchoring and drag past 1M to see it recover. Toy features, modelled on the paper's description.</p>
+      </figcaption>
+    </figure>
+
+    <div class="prose">
+      <h3>Training recipe</h3>
+      <p><strong>Data:</strong> <strong>LVD-1689M</strong>, curated from roughly 17 billion public Instagram images. It mixes three pools: images selected by balanced sampling across hierarchical k-means clusters (so rare concepts are not drowned out), a retrieval-based pool similar to DINOv2's, and raw ImageNet-1k. A separate model is trained on about 493 million satellite images.</p>
+      <p><strong>Objective:</strong> DINO loss plus iBOT loss plus KoLeo, as in DINOv2, then Gram anchoring added during refinement. All hyperparameters (learning rate, weight decay, teacher momentum) are held <strong>constant</strong> after warm-up instead of following cosine schedules. That means you don't have to decide the training length in advance and can simply keep training and pick checkpoints.</p>
+      <p><strong>High-resolution adaptation:</strong> a final stage trains on mixed crop sizes, including large global crops, with Gram anchoring still active, so the features stay stable and sharp at high input resolutions.</p>
+      <p><strong>Distillation:</strong> the 7B model is distilled into a family: ViT-S, S+, B, L, H+ (about 840M) and ConvNeXt Tiny to Large for efficient deployment. A multi-student setup shares one teacher's forward pass across several students to save compute.</p>
+
+      <h3>Architecture</h3>
+      <p>The teacher is a custom <strong>ViT-7B/16</strong>: about 6.7B parameters, 40 blocks, width 4096, 32 heads, patch size 16 and 4 register tokens. Instead of learned absolute position embeddings, it uses <strong>rotary position embeddings (RoPE)</strong> applied along both image axes, with random jittering of the coordinate box during training. That makes the model robust to changes in resolution and aspect ratio, which is what allows dense features to stay useful at large input sizes. The patch size moved from 14 back to 16, trading a little resolution per pixel for fewer tokens and better efficiency at scale.</p>
+
+      <h3>Extras</h3>
+      <p><strong>dino.txt</strong> aligns a text encoder to the frozen DINOv3 features, so the vision backbone can do zero-shot classification and open-vocabulary segmentation without being retrained with text. The satellite variant brings the same recipe to remote sensing, for tasks such as canopy height estimation.</p>
+    </div>
+
+    <div class="delta"><p class="prose" style="margin:0"><strong>What improved over DINOv2:</strong> about 6 times more parameters and 12 times more curated images, balanced cluster-based curation, Gram anchoring to keep dense features clean through long training, RoPE for resolution robustness, registers built in, constant schedules, and a broader distilled family including ConvNeXt. The 7B model reaches about 88.4% frozen linear accuracy on ImageNet, and its largest gains are on dense tasks: segmentation, depth, 3D correspondence, tracking and detection with a frozen backbone.</p></div>
+
+    <div class="pc">
+      <div class="pro"><h4>Strengths</h4><ul>
+        <li>State-of-the-art dense features from a single frozen backbone; often competitive with specialised, fine-tuned systems.</li>
+        <li>Stable at high resolutions thanks to RoPE and the high-resolution stage.</li>
+        <li>Wide model family, from small ViTs and ConvNeXts to 7B, plus satellite and text-aligned variants.</li>
+        <li>Gram anchoring is a general idea: any self-supervised method that loses dense quality with long training could use it.</li>
+      </ul></div>
+      <div class="con"><h4>Weaknesses</h4><ul>
+        <li>Enormous compute to train the 7B teacher, far beyond most labs.</li>
+        <li>A multi-stage pipeline (pretrain, Gram refinement, high-res, distil) with more hyperparameters to get right, including which checkpoint to use as the Gram teacher.</li>
+        <li>Released under a custom DINOv3 licence rather than Apache 2.0, and weights require accepting its terms.</li>
+        <li>On tasks that need language knowledge, such as reading text in images, text-supervised models can still do better.</li>
+        <li>The 7B model is heavy to run; most users will rely on the distilled versions.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ COMPARE ============================ -->
+<section id="compare" class="gen" style="--c:var(--ink)">
+  <div class="wrap">
+    <div class="gen-head"><h2>Side by side</h2></div>
+    <figure class="fig" id="f-scale">
+      <div class="canvas" role="img" aria-label="3D bar chart comparing parameter count and training images for DINO, DINOv2 and DINOv3 on a log scale"><span class="hint">Drag to rotate</span></div>
+      <figcaption>
+        <span class="legend"><i style="background:var(--muted)"></i>Solid: largest model's parameters</span>
+        <span class="legend"><i style="background:color-mix(in srgb,var(--muted) 45%,transparent)"></i>Translucent: training images</span>
+        <p>Heights are on a log scale, so every step up is roughly ten times more. Across four years, the largest model grew about 80 times and the training set about 1,300 times.</p>
+      </figcaption>
+    </figure>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th>DINO</th><th>DINOv2</th><th>DINOv3</th></tr></thead>
+        <tbody>
+          <tr><th>Year</th><td>2021</td><td>2023</td><td>2025</td></tr>
+          <tr><th>Core question</th><td>Can self-distillation train ViTs well?</td><td>Can SSL give all-purpose frozen features?</td><td>Can we scale SSL without losing dense quality?</td></tr>
+          <tr><th>Training data</th><td>ImageNet-1k, 1.28M images, labels unused</td><td>LVD-142M, retrieval-curated from about 1.2B</td><td>LVD-1689M, cluster-balanced plus retrieval from about 17B</td></tr>
+          <tr><th>Largest model</th><td>ViT-B/8, about 85M</td><td>ViT-g/14, about 1.1B</td><td>ViT-7B/16, about 6.7B</td></tr>
+          <tr><th>Patch size</th><td>16 or 8</td><td>14</td><td>16</td></tr>
+          <tr><th>Objectives</th><td>DINO (image level)</td><td>DINO + iBOT + KoLeo</td><td>DINO + iBOT + KoLeo, then + Gram anchoring</td></tr>
+          <tr><th>Anti-collapse</th><td>Centering + sharpening</td><td>Sinkhorn–Knopp + sharpening</td><td>Sinkhorn–Knopp + sharpening</td></tr>
+          <tr><th>Positions</th><td>Learned absolute</td><td>Learned absolute, interpolated</td><td>2D RoPE with jitter</td></tr>
+          <tr><th>Registers</th><td>No</td><td>Added in a follow-up</td><td>Built in (4)</td></tr>
+          <tr><th>Schedules</th><td>Cosine</td><td>Cosine</td><td>Constant after warm-up</td></tr>
+          <tr><th>Released models</th><td>ViT-S, ViT-B, ResNet-50</td><td>ViT-S, B, L, g (distilled from g)</td><td>ViT-S, S+, B, L, H+, 7B; ConvNeXt T to L; satellite; dino.txt</td></tr>
+          <tr><th>Frozen ImageNet linear</th><td>80.1%</td><td>86.5%</td><td>about 88.4%</td></tr>
+          <tr><th>Signature finding</th><td>Attention maps segment objects</td><td>SSL matches text-supervised features</td><td>Gram anchoring rescues dense features</td></tr>
+          <tr><th>Licence</th><td>Apache 2.0</td><td>Apache 2.0</td><td>DINOv3 licence</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <h3>The thread that connects them</h3>
+      <p>Each paper fixed the most visible weakness of the one before. DINO proved the principle but learned only from the <code>[CLS]</code> token on a small dataset. DINOv2 added patch-level learning and scaled data and model, which exposed that curation mattered more than size and that big ViTs grow artifact tokens. DINOv3 scaled further, found that long training quietly erodes dense features, and introduced a loss that protects the similarity structure between patches.</p>
+    </div>
+  </div>
+</section>
+
+<section id="choose" class="gen" style="--c:var(--ink)">
+  <div class="wrap prose">
+    <h2>Which one should you use?</h2>
+    <p style="margin-top:18px"><strong>For a new project needing dense features</strong> (segmentation, depth, correspondence, tracking, robotics), start with a distilled DINOv3 ViT-B or ViT-L, provided its licence works for you. <strong>For a permissive licence or a very large existing ecosystem</strong>, DINOv2 with registers remains an excellent, battle-tested choice. <strong>For learning the method</strong>, read and run the original DINO: it is small enough to train yourself and the core loop fits on a page.</p>
+    <p>A typical workflow is to keep the backbone frozen, extract <code>[CLS]</code> and patch features, and train only a light head. For example, loading DINOv2 in PyTorch:</p>
+<pre><code>import torch
+model = torch.hub.load("facebookresearch/dinov2", "dinov2_vitb14_reg")
+model.eval()
+feats = model.forward_features(images)       # images: (B, 3, H, W), H and W multiples of 14
+cls   = feats["x_norm_clstoken"]             # (B, 768)  global feature
+patch = feats["x_norm_patchtokens"]          # (B, N, 768)  dense features</code></pre>
+    <p>DINOv3 weights are distributed through the official repository and Hugging Face after accepting the licence; check its README for the current loading code.</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap prose">
+    <p><strong style="color:var(--ink)">Sources</strong></p>
+    <ul>
+      <li>Caron et al., 2021. Emerging Properties in Self-Supervised Vision Transformers. <a href="https://arxiv.org/abs/2104.14294">arXiv:2104.14294</a></li>
+      <li>Oquab et al., 2023. DINOv2: Learning Robust Visual Features without Supervision. <a href="https://arxiv.org/abs/2304.07193">arXiv:2304.07193</a></li>
+      <li>Darcet et al., 2023. Vision Transformers Need Registers. <a href="https://arxiv.org/abs/2309.16588">arXiv:2309.16588</a></li>
+      <li>Siméoni et al., 2025. DINOv3. <a href="https://arxiv.org/abs/2508.10104">arXiv:2508.10104</a></li>
+      <li>Zhou et al., 2021. iBOT: Image BERT Pre-Training with Online Tokenizer. <a href="https://arxiv.org/abs/2111.07832">arXiv:2111.07832</a></li>
+    </ul>
+    <p>The 3D figures are teaching illustrations built from toy data. Numbers in the text come from the papers; approximate values are marked as such.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function setPressed(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+
+if(typeof THREE==='undefined'){document.querySelectorAll('.canvas').forEach(c=>c.insertAdjacentHTML('beforeend','<div class="nogl">The 3D library could not load. Check your connection and reload the page.</div>'));return;}
+
+let C={};
+function readColors(){C={ink:new THREE.Color(cssv('--ink')),muted:new THREE.Color(cssv('--muted')),line:new THREE.Color(cssv('--line')),
+ student:new THREE.Color(cssv('--student')),teacher:new THREE.Color(cssv('--teacher')),plum:new THREE.Color(cssv('--plum')),
+ g1:new THREE.Color(cssv('--g1')),g2:new THREE.Color(cssv('--g2')),g3:new THREE.Color(cssv('--g3')),panel:new THREE.Color(cssv('--panel'))};}
+
+/* ---------- procedural picture: a bird on a hill ---------- */
+const IMG=(()=>{const c=document.createElement('canvas');const S=512;c.width=c.height=S;const g=c.getContext('2d');
+ const gr=g.createLinearGradient(0,0,0,S);gr.addColorStop(0,'#86B7E0');gr.addColorStop(.7,'#DCEAF3');g.fillStyle=gr;g.fillRect(0,0,S,S);
+ g.fillStyle='#F4C65A';g.beginPath();g.arc(.18*S,.18*S,.07*S,0,7);g.fill();
+ g.fillStyle='#96BB82';g.beginPath();g.moveTo(0,.7*S);g.bezierCurveTo(.3*S,.62*S,.62*S,.8*S,S,.68*S);g.lineTo(S,S);g.lineTo(0,S);g.fill();
+ g.fillStyle='#6F9A60';g.beginPath();g.moveTo(0,.86*S);g.bezierCurveTo(.4*S,.8*S,.7*S,.92*S,S,.84*S);g.lineTo(S,S);g.lineTo(0,S);g.fill();
+ g.strokeStyle='#5A3A22';g.lineWidth=.013*S;g.beginPath();g.moveTo(.44*S,.66*S);g.lineTo(.43*S,.76*S);g.moveTo(.52*S,.66*S);g.lineTo(.53*S,.76*S);g.stroke();
+ g.fillStyle='#7A3325';g.beginPath();g.moveTo(.3*S,.52*S);g.lineTo(.14*S,.44*S);g.lineTo(.18*S,.61*S);g.fill();
+ g.fillStyle='#B4462F';g.beginPath();g.ellipse(.47*S,.56*S,.2*S,.13*S,0,0,7);g.fill();
+ g.fillStyle='#E7925F';g.beginPath();g.ellipse(.52*S,.61*S,.13*S,.075*S,0,0,7);g.fill();
+ g.fillStyle='#8E3726';g.beginPath();g.arc(.66*S,.42*S,.09*S,0,7);g.fill();
+ g.fillStyle='#E8B33A';g.beginPath();g.moveTo(.735*S,.4*S);g.lineTo(.82*S,.43*S);g.lineTo(.735*S,.46*S);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(.685*S,.4*S,.018*S,0,7);g.fill();g.fillStyle='#111';g.beginPath();g.arc(.69*S,.4*S,.009*S,0,7);g.fill();
+ return c;})();
+function imgTex(){const t=new THREE.CanvasTexture(IMG);t.minFilter=THREE.LinearFilter;return t;}
+function masks(x,y){ // canvas coords 0..1, y down
+ const eb=((x-.47)/.2)**2+((y-.56)/.13)**2, eh=((x-.66)**2+(y-.42)**2)/.0081, es=((x-.18)**2+(y-.18)**2)/.0049;
+ const body=smooth(1.25,.6,eb), head=smooth(1.35,.6,eh), sun=smooth(1.5,.5,es);
+ return {body,head,sun,obj:Math.max(body,head),sky:y<.66?1-Math.max(body,head):0};}
+function tile(tex,u0,v0,du,dv,w,h){const g=new THREE.PlaneGeometry(w,h||w);const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,u0+uv.getX(i)*du,v0+uv.getY(i)*dv);
+ return new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));}
+
+/* ---------- labels ---------- */
+function label(text,size,color){size=size||.42;const c=document.createElement('canvas');const ctx=c.getContext('2d');const fs=64;
+ const font='600 '+fs+'px "Schibsted Grotesk", Arial, sans-serif';ctx.font=font;const w=Math.ceil(ctx.measureText(text).width)+24;c.width=w;c.height=Math.ceil(fs*1.35);
+ ctx.font=font;ctx.fillStyle=color||cssv('--ink');ctx.textBaseline='middle';ctx.fillText(text,12,c.height/2+2);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size*w/c.height,size,1);sp.renderOrder=10;return sp;}
+function dotTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(32,32,28,0,7);g.fill();const t=new THREE.CanvasTexture(c);return t;}
+function line(pts,color,opts){opts=opts||{};const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=opts.dashed?new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.12,transparent:true,opacity:opts.opacity||1}):new THREE.LineBasicMaterial({color,transparent:true,opacity:opts.opacity==null?1:opts.opacity});
+ const l=new THREE.Line(g,m);if(opts.dashed)l.computeLineDistances();return l;}
+function std(color,o){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.55,metalness:.05},o||{}));}
+
+/* ---------- stage system: one renderer per visible figure ---------- */
+const stages=[];
+function base(camPos,target,hfov){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(40,1.6,.1,300);camera.position.set(...camPos);camera.lookAt(new THREE.Vector3(...target));
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,.95));const d=new THREE.DirectionalLight(0xffffff,.65);d.position.set(5,10,8);scene.add(d);
+ const root=new THREE.Group();scene.add(root);return {scene,camera,root,hfov:hfov||60};}
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=e.target._stage;s.visible=e.isIntersecting;if(s.visible&&!s.renderer)mk(s);else if(!s.visible&&s.renderer)kill(s);}),{rootMargin:'200px 0px'});
+function mk(s){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0,0);s.wrap.insertBefore(r.domElement,s.wrap.firstChild);s.renderer=r;s.w=0;}
+ catch(err){if(!s.wrap.querySelector('.nogl'))s.wrap.insertAdjacentHTML('beforeend','<div class="nogl">3D view unavailable: this browser has WebGL turned off.</div>');}}
+function kill(s){s.renderer.dispose();if(s.renderer.forceContextLoss)s.renderer.forceContextLoss();s.renderer.domElement.remove();s.renderer=null;}
+function drag(s){let down=false,px=0,py=0;const w=s.wrap;
+ w.addEventListener('pointerdown',e=>{down=true;px=e.clientX;py=e.clientY;});
+ addEventListener('pointerup',()=>down=false);w.addEventListener('pointercancel',()=>down=false);
+ w.addEventListener('pointermove',e=>{if(!down)return;s.tRotY+=(e.clientX-px)*.008;s.tRotX=clamp(s.tRotX+(e.clientY-py)*.005,-.7,.7);px=e.clientX;py=e.clientY;});}
+function stage(id,build){const fig=document.getElementById(id);const wrap=fig.querySelector('.canvas');const s={fig,wrap,rotY:0,rotX:0,tRotY:0,tRotX:0,auto:0};
+ Object.assign(s,build(s));s.rotY=s.tRotY;s.rotX=s.tRotX;wrap._stage=s;stages.push(s);io.observe(wrap);drag(s);return s;}
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;
+ for(const s of stages){if(!s.renderer)continue;const w=s.wrap.clientWidth,h=s.wrap.clientHeight;
+  if(w!==s.w||h!==s.h){s.renderer.setSize(w,h,false);const a=w/h;s.camera.aspect=a;const hf=s.hfov*Math.PI/180;s.camera.fov=clamp(Math.max(2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI,s.vmin||36),24,80);s.camera.updateProjectionMatrix();s.w=w;s.h=h;}
+  if(!reduced)s.tRotY+=s.auto*dt;s.rotY+=(s.tRotY-s.rotY)*.12;s.rotX+=(s.tRotX-s.rotX)*.12;s.root.rotation.set(s.rotX,s.rotY,0);
+  if(s.update)s.update(t,dt);s.renderer.render(s.scene,s.camera);}
+ requestAnimationFrame(loop);}
+
+/* ================= HERO: embeddings self-organise ================= */
+function buildHero(s){const B=base([0,.5,7.4],[0,0,0],44);const R=2.3;s.auto=.12;
+ B.root.add(new THREE.Mesh(new THREE.SphereGeometry(R*.985,36,22),new THREE.MeshBasicMaterial({color:C.line,wireframe:true,transparent:true,opacity:.35})));
+ const r=rng(3),N=720,K=7;const pal=['#3563B0','#13877F','#D08511','#A63D86','#5E8C31','#C4442F','#6A5ACD'].map(h=>new THREE.Color(h));
+ const cen=[];for(let k=0;k<K;k++){const v=new THREE.Vector3(randn(r),randn(r),randn(r)).normalize();cen.push(v);}
+ const start=[],targ=[],cls=[];for(let i=0;i<N;i++){start.push(new THREE.Vector3(randn(r),randn(r),randn(r)).normalize());const k=i%K;cls.push(k);
+  targ.push(cen[k].clone().add(new THREE.Vector3(randn(r),randn(r),randn(r)).multiplyScalar(.2)).normalize());}
+ const pos=new Float32Array(N*3),col=new Float32Array(N*3);const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+ const pts=new THREE.Points(g,new THREE.PointsMaterial({size:.12,vertexColors:true,map:dotTex(),alphaTest:.5,transparent:true}));B.root.add(pts);
+ let t0=performance.now()/1000;document.getElementById('hero-replay').onclick=()=>{t0=performance.now()/1000;};
+ const grey=C.muted.clone(),tmp=new THREE.Vector3(),cc=new THREE.Color();
+ function set(p){for(let i=0;i<N;i++){tmp.copy(start[i]).lerp(targ[i],p).normalize().multiplyScalar(R);pos.set([tmp.x,tmp.y,tmp.z],i*3);cc.copy(grey).lerp(pal[cls[i]],smooth(.35,.95,p));col.set([cc.r,cc.g,cc.b],i*3);}
+  g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;}
+ set(reduced?1:0);
+ return Object.assign(B,{update(t){if(reduced){return;}let ph=(t-t0)/8;if(ph>1.9){t0=t;ph=0;}const p=ph<1?ph*ph*(3-2*ph):1;set(p);}});}
+
+/* ================= DINO pipeline ================= */
+function buildPipe(s){const B=base([.3,1.2,13],[-.6,0,0],62);s.tRotY=-.18;s.tRotX=.12;s.vmin=27;const root=B.root;const tex=imgTex();
+ const ink=cssv('--ink');
+ const src=tile(tex,0,0,1,1,2.6);src.position.set(-7.6,0,0);root.add(src);const l0=label('Input image',.36,ink);l0.position.set(-7.6,1.75,0);root.add(l0);
+ const crops=[{u:.04,v:.12,d:.82,g:1,x:-4.6,y:1.95,sz:1.3},{u:.16,v:.18,d:.76,g:1,x:-4.6,y:.45,sz:1.3},
+  {u:.52,v:.36,d:.26,g:0,x:-5.05,y:-1.2,sz:.62},{u:.3,v:.43,d:.3,g:0,x:-4.2,y:-1.2,sz:.62},{u:.08,v:.72,d:.24,g:0,x:-5.05,y:-2.05,sz:.62},{u:.62,v:.52,d:.22,g:0,x:-4.2,y:-2.05,sz:.62}];
+ const tIn=new THREE.Vector3(-2.2,1.9,0),sIn=new THREE.Vector3(-2.2,-1.9,0);const packets=[];const pg=new THREE.BoxGeometry(.16,.16,.16);
+ crops.forEach((c,i)=>{const colr=c.g?C.teacher:C.student;const m=tile(tex,c.u,c.v,c.d,c.d,c.sz);m.position.set(c.x,c.y,0);root.add(m);
+  const h=c.sz/2;root.add(line([new THREE.Vector3(c.x-h,c.y-h,.01),new THREE.Vector3(c.x+h,c.y-h,.01),new THREE.Vector3(c.x+h,c.y+h,.01),new THREE.Vector3(c.x-h,c.y+h,.01),new THREE.Vector3(c.x-h,c.y-h,.01)],colr));
+  const X=u=>-7.6-1.3+u*2.6,Y=v=>-1.3+v*2.6;root.add(line([new THREE.Vector3(X(c.u),Y(c.v),.02),new THREE.Vector3(X(c.u+c.d),Y(c.v),.02),new THREE.Vector3(X(c.u+c.d),Y(c.v+c.d),.02),new THREE.Vector3(X(c.u),Y(c.v+c.d),.02),new THREE.Vector3(X(c.u),Y(c.v),.02)],colr,{opacity:.9}));
+  const from=new THREE.Vector3(c.x+h,c.y,0);const tos=c.g?[tIn,sIn]:[sIn];
+  tos.forEach((to,j)=>{const pm=new THREE.Mesh(pg,std(colr));root.add(pm);packets.push({m:pm,from,to,off:(i*.17+j*.5)%1});});});
+ const lg=label('2 global crops (224 px)',.3,cssv('--teacher'));lg.position.set(-4.6,2.95,0);root.add(lg);
+ const ll=label('local crops (96 px)',.3,cssv('--student'));ll.position.set(-4.6,-2.75,0);root.add(ll);
+ function tower(y,colr,name){const g=new THREE.Group();for(let k=0;k<5;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(.14,1.35,1.35),std(colr,{transparent:true,opacity:.88}));b.position.set(-1.6+k*.62,y,0);g.add(b);}
+  const lb=label(name,.34,'#'+colr.getHexString());lb.position.set(-.35,y+(y>0?1.05:-1.05),0);g.add(lb);root.add(g);}
+ tower(1.9,C.teacher,'Teacher ViT (no gradients)');tower(-1.9,C.student,'Student ViT (trained)');
+ const K=10,tb=[],sb=[];const bg=new THREE.BoxGeometry(.13,1,.13);bg.translate(0,.5,0);
+ const tp=[.03,.04,.62,.05,.03,.08,.04,.05,.03,.03],sp=[.06,.08,.34,.09,.07,.12,.06,.07,.05,.06];
+ for(let k=0;k<K;k++){const a=new THREE.Mesh(bg,std(C.teacher));a.position.set(2.2+k*.2,1.25,0);root.add(a);tb.push(a);const b=new THREE.Mesh(bg,std(C.student));b.position.set(2.2+k*.2,-2.55,0);root.add(b);sb.push(b);}
+ const lp=label('softmax over K prototypes',.28,ink);lp.position.set(3.1,.55,0);root.add(lp);
+ const loss=new THREE.Mesh(new THREE.SphereGeometry(.42,28,18),std(C.plum));loss.position.set(6.1,0,0);root.add(loss);
+ const lL=label('cross-entropy loss',.32,cssv('--plum'));lL.position.set(6.1,.8,0);root.add(lL);
+ root.add(line([new THREE.Vector3(4.2,1.7,0),new THREE.Vector3(5.8,.3,0)],C.teacher));root.add(line([new THREE.Vector3(4.2,-2.0,0),new THREE.Vector3(5.8,-.3,0)],C.student));
+ const arrow=new THREE.ArrowHelper(new THREE.Vector3(-1,-.55,0).normalize(),new THREE.Vector3(5.7,-.75,.35),1.9,C.plum.getHex(),.3,.2);root.add(arrow);
+ const lgd=label('gradient',.26,cssv('--plum'));lgd.position.set(5.2,-1.55,.35);root.add(lgd);
+ const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.35,-1.15,.75),new THREE.Vector3(-.35,0,1.9),new THREE.Vector3(-.35,1.15,.75)]);
+ root.add(line(curve.getPoints(40),C.plum,{dashed:true}));
+ const le=label('EMA: θt ← λθt + (1−λ)θs',.3,cssv('--plum'));le.position.set(1.1,0,1.9);root.add(le);
+ const emaP=[];for(let i=0;i<6;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),std(C.plum));root.add(m);emaP.push(m);}
+ return Object.assign(B,{update(t){const sp_=reduced?0:t;
+  packets.forEach(p=>{const q=(sp_*.32+p.off)%1;const e=q*q*(3-2*q);p.m.position.lerpVectors(p.from,p.to,e);const sc=q>.85?(1-q)/.15:1;p.m.scale.setScalar(Math.max(.01,sc));});
+  for(let k=0;k<K;k++){tb[k].scale.y=Math.max(.02,tp[k]*2.3*(1+.05*Math.sin(sp_*2+k)));sb[k].scale.y=Math.max(.02,sp[k]*2.3*(1+.12*Math.sin(sp_*1.7+k*1.3)));}
+  emaP.forEach((m,i)=>m.position.copy(curve.getPoint(((sp_*.25)+i/6)%1)));}});}
+
+/* ================= Collapse bars ================= */
+function buildCollapse(s){const B=base([0,5.6,9.6],[0,.5,0],58);s.tRotY=-.35;const Rw=8,K=16;const r=rng(11);
+ const bias=new Array(K).fill(0);bias[4]=3.3;bias[11]=1.2;const S=[...Array(Rw)].map(()=>[...Array(K)].map(()=>randn(r)*1.15));
+ const g=new THREE.BoxGeometry(.32,1,.4);g.translate(0,.5,0);const bars=[];
+ for(let i=0;i<Rw;i++){bars.push([]);for(let k=0;k<K;k++){const m=new THREE.Mesh(g,std(C.teacher.clone()));m.position.set((k-7.5)*.42,0,(i-3.5)*.55);m.scale.y=.02;m.userData.h=.02;B.root.add(m);bars[i].push(m);}}
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(7.2,4.8),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.5,side:THREE.DoubleSide}));floor.rotation.x=-Math.PI/2;floor.position.y=-.01;B.root.add(floor);
+ const la=label('K prototypes',.32,cssv('--muted'));la.position.set(0,-.05,2.8);B.root.add(la);const lb=label('8 images',.32,cssv('--muted'));lb.position.set(-4.2,.05,0);B.root.add(lb);
+ const tau=document.getElementById('c-tau'),tv=document.getElementById('c-tau-v'),cen=document.getElementById('c-center'),st=document.getElementById('c-status');
+ const tauOf=v=>.03*Math.pow(10,v/50);
+ function compute(){const T=tauOf(+tau.value);tv.textContent=T.toFixed(T<.1?3:2);
+  const L=S.map(row=>row.map((v,k)=>v+bias[k]));if(cen.checked){for(let k=0;k<K;k++){let m=0;for(let i=0;i<Rw;i++)m+=L[i][k];m/=Rw;for(let i=0;i<Rw;i++)L[i][k]-=m;}}
+  const P=L.map(row=>{const mx=Math.max(...row);const e=row.map(v=>Math.exp((v-mx)/T));const z=e.reduce((a,b)=>a+b,0);return e.map(v=>v/z);});
+  const H=p=>-p.reduce((a,v)=>a+(v>1e-12?v*Math.log(v):0),0)/Math.log(K);
+  const rowH=P.reduce((a,p)=>a+H(p),0)/Rw;const avg=[...Array(K)].map((_,k)=>P.reduce((a,p)=>a+p[k],0)/Rw);const bH=H(avg);
+  let msg;if(rowH>.8)msg='<b>Uniform collapse.</b> Every image gets an almost flat distribution, so the targets carry no information.';
+  else if(rowH<.5&&bH<.45)msg='<b>Collapse to one dimension.</b> A single prototype wins for nearly every image, so all images look the same to the loss.';
+  else if(rowH<.62&&bH>.62)msg='<b>Healthy.</b> Each image gets a confident answer and the batch spreads across many prototypes. This is what DINO aims for.';
+  else msg='<b>In between.</b> Outputs are partly informative; training would drift toward one of the collapse modes.';
+  st.innerHTML=msg+` <span style="color:var(--muted)">Per-image entropy ${rowH.toFixed(2)}, batch entropy ${bH.toFixed(2)} (0 = peaked, 1 = flat).</span>`;
+  for(let i=0;i<Rw;i++)for(let k=0;k<K;k++){const m=bars[i][k];m.userData.h=Math.max(.02,P[i][k]*2.3);m.material.color.copy(C.line).lerp(C.teacher,clamp(P[i][k]*2.2+.15,0,1));}}
+ tau.oninput=()=>{setPressed(document.querySelector('#f-collapse .seg'),null);compute();};cen.onchange=tau.oninput;
+ document.querySelectorAll('#f-collapse [data-preset]').forEach(b=>b.onclick=()=>{const p=b.dataset.preset;tau.value=p==='center'?92:p==='sharp'?12:18;cen.checked=p!=='sharp';setPressed(b.parentNode,b);compute();});
+ compute();
+ return Object.assign(B,{update(){for(const row of bars)for(const m of row){m.scale.y+=(m.userData.h-m.scale.y)*.15;}}});}
+
+/* ================= Attention maps ================= */
+function buildAttn(s){const B=base([0,6.6,7.6],[0,.5,0],54);s.tRotY=-.25;const tex=imgTex();const G=14,sz=.34,gap=.025,step=sz+gap;
+ const cells=[];const pg=new THREE.BoxGeometry(.2,1,.2);pg.translate(0,.5,0);
+ for(let j=0;j<G;j++)for(let i=0;i<G;i++){const t=tile(tex,i/G,1-(j+1)/G,1/G,1/G,sz);t.rotation.x=-Math.PI/2;const x=(i-(G-1)/2)*step,z=(j-(G-1)/2)*step;t.position.set(x,0,z);B.root.add(t);
+  const p=new THREE.Mesh(pg,std(C.plum.clone(),{transparent:true,opacity:.92}));p.position.set(x,.01,z);p.scale.y=.01;B.root.add(p);
+  const m=masks((i+.5)/G,(j+.5)/G);cells.push({p,x,z,m,h:.01});}
+ const cls=new THREE.Mesh(new THREE.BoxGeometry(.38,.38,.38),std(C.g1));cls.position.set(0,2.6,0);B.root.add(cls);const lc=label('[CLS]',.3,cssv('--g1'));lc.position.set(0,3.1,0);B.root.add(lc);
+ const lpos=new Float32Array(12*6);const lgeo=new THREE.BufferGeometry();lgeo.setAttribute('position',new THREE.BufferAttribute(lpos,3));const lines=new THREE.LineSegments(lgeo,new THREE.LineBasicMaterial({color:C.g1,transparent:true,opacity:.55}));B.root.add(lines);
+ const r=rng(5);const noise=cells.map(()=>r()),spike=cells.map(()=>r()<.035?1:0);
+ function setMode(mode){cells.forEach((c,k)=>{let a;const n=noise[k];
+   if(mode==='body')a=c.m.body*.95+n*.05;else if(mode==='head')a=c.m.head+n*.05;else if(mode==='bg')a=c.m.sky*.55+c.m.sun*.45+n*.06;
+   else a=.32*c.m.obj+.45*n*n+.9*spike[k];c.h=a;});
+  const mx=Math.max(...cells.map(c=>c.h));cells.forEach(c=>c.h=c.h/mx*1.5);
+  const top=cells.map((c,k)=>[c.h,k]).sort((a,b)=>b[0]-a[0]).slice(0,12);
+  top.forEach(([h,k],n)=>{const c=cells[k];lpos.set([0,2.6,0,c.x,h,c.z],n*6);});lgeo.attributes.position.needsUpdate=true;}
+ document.querySelectorAll('#f-attn [data-att]').forEach(b=>b.onclick=()=>{setPressed(b.parentNode,b);setMode(b.dataset.att);});
+ setMode('body');
+ return Object.assign(B,{update(){cells.forEach(c=>{c.p.scale.y+=(Math.max(.01,c.h)-c.p.scale.y)*.14;});}});}
+
+/* ================= Curation point cloud ================= */
+function buildCur(s){const B=base([0,2,9.5],[0,0,0],48);s.auto=.08;const r=rng(21);
+ const sizes=[900,420,220,130,80,55,38,26,18,14,10,8];const pal=['#3563B0','#13877F','#D08511','#A63D86','#5E8C31','#C4442F','#6A5ACD','#2E9BD6','#B8860B','#D1497B','#4B8B3B','#8A5A44'].map(h=>new THREE.Color(h));
+ const pts=[];sizes.forEach((n,k)=>{const c=new THREE.Vector3(randn(r),randn(r)*.7,randn(r)).normalize().multiplyScalar(1.3+r()*1.6);const sp=.25+.2*Math.sqrt(n/900);
+  for(let i=0;i<n;i++){const p=c.clone().add(new THREE.Vector3(randn(r),randn(r),randn(r)).multiplyScalar(sp));pts.push({p,k,d:p.distanceTo(c)});}});
+ const seeds=new Set([1,3,4,6,8]);const byK=sizes.map((_,k)=>pts.filter(q=>q.k===k).sort((a,b)=>a.d-b.d));
+ let obj=null;const read=document.getElementById('cur-read');const tex=dotTex();
+ function show(mode){let keep=[];if(mode==='raw')keep=pts;else if(mode==='ret'){byK.forEach((arr,k)=>{if(seeds.has(k))keep.push(...arr.slice(0,Math.min(arr.length,Math.round(arr.length*.6))));});}
+  else byK.forEach(arr=>keep.push(...arr.slice(0,Math.min(arr.length,40))));
+  if(obj){B.root.remove(obj);obj.geometry.dispose();}const pos=new Float32Array(keep.length*3),col=new Float32Array(keep.length*3);
+  keep.forEach((q,i)=>{pos.set([q.p.x,q.p.y,q.p.z],i*3);const c=pal[q.k];col.set([c.r,c.g,c.b],i*3);});
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  obj=new THREE.Points(g,new THREE.PointsMaterial({size:.1,vertexColors:true,map:tex,alphaTest:.5,transparent:true}));B.root.add(obj);
+  const counts=sizes.map((_,k)=>keep.filter(q=>q.k===k).length);const used=counts.filter(c=>c>0).length;const top=Math.max(...counts)/keep.length*100;
+  read.textContent=`${keep.length} images, ${used} of ${sizes.length} concepts present, largest concept ${top.toFixed(0)}% of data`;}
+ document.querySelectorAll('#f-cur [data-cur]').forEach(b=>b.onclick=()=>{setPressed(b.parentNode,b);show(b.dataset.cur);});show('raw');
+ return B;}
+
+/* ================= iBOT masking ================= */
+function buildIbot(s){const B=base([0,6.8,9.2],[0,1.1,0],60);s.tRotY=-.12;const tex=imgTex();const G=8,sz=.42,step=.46;
+ function grid(cx){const g=[];for(let j=0;j<G;j++)for(let i=0;i<G;i++){const t=tile(tex,i/G,1-(j+1)/G,1/G,1/G,sz);t.rotation.x=-Math.PI/2;const x=cx+(i-(G-1)/2)*step,z=(j-(G-1)/2)*step;t.position.set(x,0,z);B.root.add(t);g.push({t,x,z});}return g;}
+ const L=grid(-2.35),Rg=grid(2.35);
+ const ls=label('Student sees masked patches',.3,cssv('--student'));ls.position.set(-2.35,-.1,2.35);B.root.add(ls);
+ const lt=label('Teacher sees the full image',.3,cssv('--teacher'));lt.position.set(2.35,-.1,2.35);B.root.add(lt);
+ const cS=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.4),std(C.student));cS.position.set(-2.35,2.2,-2.3);B.root.add(cS);
+ const cT=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.4),std(C.teacher));cT.position.set(2.35,2.2,-2.3);B.root.add(cT);
+ const clsCurve=new THREE.QuadraticBezierCurve3(cS.position.clone(),new THREE.Vector3(0,3.6,-2.3),cT.position.clone());
+ const tube=new THREE.Mesh(new THREE.TubeGeometry(clsCurve,30,.045,8,false),std(C.plum));B.root.add(tube);
+ const ld=label('DINO loss on [CLS]',.3,cssv('--plum'));ld.position.set(0,3.55,-2.3);B.root.add(ld);
+ const li=label('iBOT loss per masked patch',.26,cssv('--ink'));li.position.set(0,2.5,.6);B.root.add(li);
+ const dyn=new THREE.Group();B.root.add(dyn);const r=rng(9);const bobs=[];
+ const mg=new THREE.BoxGeometry(sz,.14,sz),sg=new THREE.SphereGeometry(.09,14,10);
+ function newMask(){while(dyn.children.length){const c=dyn.children.pop();if(c.geometry&&c.geometry!==mg&&c.geometry!==sg)c.geometry.dispose();}bobs.length=0;
+  L.forEach(c=>c.t.visible=true);const idx=[];for(let k=0;k<G*G;k++)if(r()<.3)idx.push(k);
+  idx.forEach((k,n)=>{const a=L[k],b=Rg[k];a.t.visible=false;const mb=new THREE.Mesh(mg,std(C.muted,{roughness:.9}));mb.position.set(a.x,.07,a.z);dyn.add(mb);
+   const ps=new THREE.Mesh(sg,std(C.student));ps.position.set(a.x,.8,a.z);dyn.add(ps);const pt=new THREE.Mesh(sg,std(C.teacher));pt.position.set(b.x,.8,b.z);dyn.add(pt);
+   bobs.push({ps,pt,ph:n*.7});
+   const cv=new THREE.QuadraticBezierCurve3(new THREE.Vector3(b.x,.8,b.z),new THREE.Vector3((a.x+b.x)/2,2.0+.3*Math.sin(n),(a.z+b.z)/2),new THREE.Vector3(a.x,.8,a.z));
+   dyn.add(line(cv.getPoints(24),C.ink,{opacity:.28}));});}
+ document.getElementById('ibot-new').onclick=newMask;newMask();
+ return Object.assign(B,{update(t){if(reduced)return;bobs.forEach(b=>{const y=.8+.06*Math.sin(t*2+b.ph);b.ps.position.y=y;b.pt.position.y=y;});}});}
+
+/* ================= KoLeo on a sphere ================= */
+function buildKoleo(s){const B=base([0,.4,6.8],[0,0,0],44);s.auto=.1;const N=170,R=2;
+ B.root.add(new THREE.Mesh(new THREE.SphereGeometry(R*.97,32,20),new THREE.MeshBasicMaterial({color:C.line,wireframe:true,transparent:true,opacity:.3})));
+ const P=[];const inst=new THREE.InstancedMesh(new THREE.SphereGeometry(.055,10,8),std(C.g2),N);B.root.add(inst);
+ const lp=new Float32Array(N*6);const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));B.root.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:C.plum,transparent:true,opacity:.7})));
+ const on=document.getElementById('k-on'),read=document.getElementById('k-read');const dummy=new THREE.Object3D();
+ function reset(){const r=rng(Math.floor(Math.random()*1e6));const cs=[...Array(5)].map(()=>new THREE.Vector3(randn(r),randn(r),randn(r)).normalize());P.length=0;
+  for(let i=0;i<N;i++)P.push(cs[i%5].clone().add(new THREE.Vector3(randn(r),randn(r),randn(r)).multiplyScalar(.14)).normalize());}
+ reset();document.getElementById('k-reset').onclick=()=>{reset();};
+ let frame=0;const nn=new Int32Array(N),nd=new Float32Array(N);
+ function neighbours(){for(let i=0;i<N;i++){let b=1e9,bj=0;for(let j=0;j<N;j++){if(i===j)continue;const d=P[i].distanceToSquared(P[j]);if(d<b){b=d;bj=j;}}nn[i]=bj;nd[i]=Math.sqrt(b);}}
+ const tmp=new THREE.Vector3();
+ return Object.assign(B,{update(){neighbours();
+  if(on.checked){for(let i=0;i<N;i++){const j=nn[i];const d=Math.max(nd[i],.02);tmp.subVectors(P[i],P[j]).multiplyScalar(.0022/(d*d));const len=tmp.length();if(len>.03)tmp.multiplyScalar(.03/len);P[i].add(tmp).normalize();}}
+  for(let i=0;i<N;i++){dummy.position.copy(P[i]).multiplyScalar(R);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix);const a=P[i],b=P[nn[i]];lp.set([a.x*R,a.y*R,a.z*R,b.x*R,b.y*R,b.z*R],i*6);}
+  inst.instanceMatrix.needsUpdate=true;lg.attributes.position.needsUpdate=true;
+  if(frame++%10===0){let mn=1e9,sum=0,logs=0;for(let i=0;i<N;i++){mn=Math.min(mn,nd[i]);sum+=nd[i];logs+=Math.log(Math.max(nd[i],1e-4));}
+   read.textContent=`Nearest-neighbour distance: min ${mn.toFixed(3)}, mean ${(sum/N).toFixed(3)}. KoLeo loss ${(-logs/N).toFixed(2)}`;}}});}
+
+/* ================= Gram anchoring ================= */
+function buildGram(s){const B=base([0,5.6,7.4],[0,.4,0],54);s.tRotY=-.3;s.vmin=31;const G=12,N=G*G,D=24,W=4.4;const r=rng(33);const tex=imgTex();
+ const vec=()=>{const v=[...Array(D)].map(()=>randn(r));const n=Math.hypot(...v);return v.map(x=>x/n);};
+ const A=vec(),Bs=vec(),Bg=vec(),Gl=vec();const patchM=[],clean=[],noiseA=[],noiseB=[];
+ for(let j=0;j<G;j++)for(let i=0;i<G;i++){const m=masks((i+.5)/G,(j+.5)/G);patchM.push(m);const sky=(j+.5)/G<.66?1:0;const o=m.obj;const pr=vec();
+  clean.push(A.map((a,d)=>o*a+(1-o)*(sky?Bs[d]:Bg[d])+.28*pr[d]));noiseA.push(vec());noiseB.push(vec());}
+ const img=tile(tex,0,0,1,1,W);img.rotation.x=-Math.PI/2;img.position.y=-.02;B.root.add(img);
+ const geo=new THREE.PlaneGeometry(W*(G-1)/G,W*(G-1)/G,G-1,G-1);geo.rotateX(-Math.PI/2);const cols=new Float32Array(geo.attributes.position.count*3);geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ const surf=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:.6,transparent:true,opacity:.9,flatShading:false}));B.root.add(surf);
+ const wire=new THREE.LineSegments(new THREE.WireframeGeometry(geo),new THREE.LineBasicMaterial({color:C.ink,transparent:true,opacity:.12}));B.root.add(wire);
+ const qm=new THREE.Mesh(new THREE.ConeGeometry(.12,.35,14),std(C.g1));qm.rotation.x=Math.PI;B.root.add(qm);
+ const it=document.getElementById('g-it'),itv=document.getElementById('g-it-v'),on=document.getElementById('g-on'),read=document.getElementById('g-read');const heat=document.getElementById('g-heat').getContext('2d');
+ let q=5*G+5;const qSky=2*G+8;let target=new Float32Array(N),cur=new Float32Array(N).fill(0);
+ function feats(iter){const learn=1-Math.exp(-iter/80);let drift=.04+.9*smooth(180,1000,iter);
+  if(on.checked&&iter>1000){const d0=.04+.9*smooth(180,1000,1000);drift=Math.max(.05,d0*Math.exp(-(iter-1000)/90));}
+  const a=(1-learn)*.95,b=drift*learn*.8;return clean.map((f,k)=>{const v=f.map((x,d)=>(1-a-b)*x+a*noiseA[k][d]*1.3+b*(Gl[d]+.9*noiseB[k][d]));const n=Math.hypot(...v);return v.map(x=>x/n);});}
+ const cA=new THREE.Color(cssv('--panel')),cB=C.plum.clone(),cc=new THREE.Color();
+ function compute(){const iter=+it.value*10;itv.textContent=(iter>=1000?(iter/1000).toFixed(2)+'M':iter+'k');const F=feats(iter);
+  const sim=(a,b)=>{let s_=0;for(let d=0;d<D;d++)s_+=a[d]*b[d];return s_;};
+  for(let k=0;k<N;k++)target[k]=sim(F[q],F[k]);
+  const id=heat.createImageData(N,N);let inO=0,nO=0,cross=0,nC=0;
+  for(let a=0;a<N;a++)for(let b=0;b<N;b++){const v=sim(F[a],F[b]);const t=clamp((v+.2)/1.2,0,1);cc.copy(cA).lerp(cB,t);const o=(a*N+b)*4;id.data[o]=cc.r*255;id.data[o+1]=cc.g*255;id.data[o+2]=cc.b*255;id.data[o+3]=255;
+   const oa=patchM[a].obj>.5,ob=patchM[b].obj>.5;if(a!==b){if(oa&&ob){inO+=v;nO++;}else if(oa!==ob){cross+=v;nC++;}}}
+  heat.putImageData(id,0,0);
+  const contrast=clamp((inO/nO-cross/nC),0,1);const dense=(contrast*100).toFixed(0);const glob=(55+33*(1-Math.exp(-iter/420))).toFixed(1);
+  read.innerHTML=`<b>Global quality</b> (e.g. classification): ${glob}<br><b>Dense quality</b> (object vs background separation): ${dense}<br><span style="color:var(--muted)">${on.checked&&iter>1000?'Gram anchoring is pulling the patch similarity pattern back toward the clean Gram teacher.':iter>400&&!on.checked?'Patch features are losing locality even though global quality is still rising.':'Patch features are clean and local.'}</span>`;
+  const pq=geo.attributes.position;const gx=q%G,gz=Math.floor(q/G);const st=W*(G-1)/G/(G-1);qm.position.set((gx-(G-1)/2)*st,0,(gz-(G-1)/2)*st);}
+ it.oninput=compute;on.onchange=compute;
+ document.querySelectorAll('#f-gram [data-q]').forEach(b=>b.onclick=()=>{setPressed(b.parentNode,b);q=b.dataset.q==='sky'?qSky:5*G+5;compute();});
+ compute();
+ return Object.assign(B,{update(){const pos=geo.attributes.position;for(let k=0;k<N;k++){cur[k]+=(target[k]-cur[k])*.15;const h=Math.max(0,cur[k])*1.3+.02;pos.setY(k,h);cc.copy(C.line).lerp(C.plum,clamp(cur[k],0,1));cols.set([cc.r,cc.g,cc.b],k*3);}
+  pos.needsUpdate=true;geo.attributes.color.needsUpdate=true;geo.computeVertexNormals();
+  const wp=wire.geometry;wire.geometry=new THREE.WireframeGeometry(geo);wp.dispose();qm.position.y=Math.max(0,cur[q])*1.3+.3;}});}
+
+/* ================= Scale bars ================= */
+function buildScale(s){const B=base([0,3.6,12],[0,1.5,0],56);s.tRotY=-.35;s.vmin=30;
+ const data=[['DINO',85e6,1.28e6,C.g1,'85M','1.28M'],['DINOv2',1.1e9,142e6,C.g2,'1.1B','142M'],['DINOv3',6.7e9,1.689e9,C.g3,'6.7B','1.69B']];
+ const g=new THREE.BoxGeometry(.8,1,.8);g.translate(0,.5,0);const bars=[];
+ data.forEach((d,i)=>{const x=(i-1)*2.9;const hp=(Math.log10(d[1])-5)*.7,hi=(Math.log10(d[2])-5)*.7;
+  const a=new THREE.Mesh(g,std(d[3]));a.position.set(x-.48,0,0);B.root.add(a);bars.push([a,hp]);
+  const b=new THREE.Mesh(g,std(d[3],{transparent:true,opacity:.42}));b.position.set(x+.48,0,0);B.root.add(b);bars.push([b,hi]);
+  const la=label(d[4]+' params',.28);la.position.set(x-.48,hp+.35,0);B.root.add(la);const lb=label(d[5]+' images',.28);lb.position.set(x+.48,hi+.35,0);B.root.add(lb);
+  const ln=label(d[0],.42,'#'+d[3].getHexString());ln.position.set(x,-.45,.6);B.root.add(ln);});
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(9.5,2.6),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.5,side:THREE.DoubleSide}));fl.rotation.x=-Math.PI/2;fl.position.y=-.01;B.root.add(fl);
+ bars.forEach(([m])=>m.scale.y=.01);
+ return Object.assign(B,{update(){bars.forEach(([m,h])=>{m.scale.y+=(h-m.scale.y)*.06;});}});}
+
+function init(){readColors();
+ stage('f-hero',buildHero);stage('f-pipe',buildPipe);stage('f-collapse',buildCollapse);stage('f-attn',buildAttn);
+ stage('f-cur',buildCur);stage('f-ibot',buildIbot);stage('f-koleo',buildKoleo);stage('f-gram',buildGram);stage('f-scale',buildScale);
+ requestAnimationFrame(loop);}
+const ready=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+ready.then(init);
+})();
+</script>
+</body>
+</html>

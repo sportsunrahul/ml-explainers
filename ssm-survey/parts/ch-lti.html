@@ -1,0 +1,94 @@
+
+<style>
+#ch-lti .claimcard, #ch-scan .claimcard { font-size:1rem; border:1px solid var(--rule); border-radius:12px; padding:.9rem 1.1rem .5rem; margin:1.5rem 0; background:var(--bg); }
+#ch-lti .claimcard h4, #ch-scan .claimcard h4 { font:600 1rem system-ui, sans-serif; margin:0 0 .6rem; }
+#ch-lti .claimcard dl, #ch-scan .claimcard dl { margin:0; }
+#ch-lti .claimcard dt, #ch-scan .claimcard dt { font:600 .78rem system-ui, sans-serif; color:var(--muted); margin:.55rem 0 .1rem; }
+#ch-lti .claimcard dd, #ch-scan .claimcard dd { margin:0; }
+#ch-lti .claimcard table.data, #ch-scan .claimcard table.data { margin:.4rem 0 .3rem; }
+#ch-lti table.data td.sel { color:var(--green); font-weight:600; }
+#ch-lti table.data td.lti { color:var(--red); }
+</style>
+<p class="kicker"><span class="act-n">Act III</span>Selection</p>
+<section id="ch-lti" class="chapter">
+<h2>Why time-invariance is not enough</h2>
+<p>S4 sends every token through the same kernel, so the weight a past token gets depends only on how many steps ago it arrived, never on what it was. Here is a task where that is exactly the wrong thing to depend on: four letters are scattered among filler, and a memory of four slots must hold them in order. Before you press Reveal, guess which of the two models below reads all four back.</p>
+
+<figure class="viz" id="viz-lti" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="lti-canvas" role="img" aria-label="A row of 24 input tokens: four blue letters among grey filler. Below it, two lanes. In the fixed-decay lane, four yellow curves show the fixed weight each of the four state slots gives each position, the same whatever the tokens are. In the selective lane, a gate is 1 under each letter and 0 under filler. On the right of each lane, the four yellow state slots and the letters read back from them, green where right and red where wrong."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-lti-random" aria-pressed="true">Random gaps</button>
+    <button type="button" id="btn-lti-even" aria-pressed="false">Even gaps</button>
+    <button type="button" id="btn-lti-new">New gaps</button>
+    <button type="button" id="btn-lti-reveal" aria-pressed="false">Reveal</button>
+    <label for="lti-p">Fixed step <input type="range" id="lti-p" min="5" max="100" step="1" value="17"></label>
+    <button type="button" id="btn-lti-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="lti-readout" aria-live="polite"></p>
+  <figcaption>Toy model, exact arithmetic. Both lanes run the same update on the same state of four slots, and both embed filler as zero, the most generous choice for the fixed model. Each step, every slot keeps a fraction 1 - g of itself and takes g of the slot before it; the first slot takes g of the token. The top lane uses one fixed g for every token, so its first slot forgets at the fixed rate 1 - g and the later slots hold blurred copies of older tokens. The bottom lane sets g from the token: 1 for a letter, 0 for filler. The read-out takes the strongest letter in each slot. The slider changes the fixed step; no value works for every spacing. "New gaps" draws a new random layout.</figcaption>
+</figure>
+
+<p>The task is <em>selective copying</em>, one of the two synthetic tests the Mamba paper uses to show what time-invariant models cannot do. Plain copying, with the letters always at the same positions, is easy for them: a kernel with its weight at exactly the right lags reads the letters off. Press <b>Even gaps</b> and the fixed decay gets them all, if blurrily, because its slots were tuned to that spacing. Randomize the gaps and the same kernel reads whatever happens to sit at those lags: a letter twice, or the wrong one.</p>
+
+<p>Two things go wrong, and both come from the kernel being fixed. It cannot skip filler: every filler token still moves the state, so a letter followed by a long run of filler fades, or slides into the wrong slot. And it cannot look anything up: which slot holds what is decided by position, so the model cannot keep "the token that came after X". The gate in the bottom lane fixes the first problem directly. It opens for a letter and stays shut for filler, so the state moves only when there is something to store, and a letter survives any gap untouched.</p>
+
+<p>In symbols, the difference is one subscript. A time-invariant model has one kernel; a selective one computes its parameters from each token.</p>
+
+<div class="eq" id="eq-lti" data-build data-viz="viz-lti"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=kernel}{\htmlClass{t-green}{y_t} = \sum_{k \ge 0} \overline{K}_k\, \htmlClass{t-blue}{x_{t-k}}, \qquad \overline{K}_k = C\,\overline{A}^{\,k}\,\overline{B}} \\[4pt]
+&\htmlData{step=2, link=gate}{\htmlClass{t-yellow}{h_t} = \overline{A}_t\, \htmlClass{t-yellow}{h_{t-1}} + \overline{B}_t\, \htmlClass{t-blue}{x_t}, \qquad \overline{A}_t,\ \overline{B}_t,\ C_t \ \text{computed from}\ \htmlClass{t-blue}{x_t}} \\[4pt]
+&\htmlData{step=3, link=weight}{\text{weight of}\ \htmlClass{t-blue}{x_s}\ \text{in}\ \htmlClass{t-green}{y_t} = C_t\, \overline{A}_t\, \overline{A}_{t-1} \cdots \overline{A}_{s+1}\, \overline{B}_s}
+\end{aligned}
+</div></div>
+<p class="eqno">Line 1: Eq. 3 in Mamba, the convolution form, valid only when A, B and C are the same at every step. Line 2: Eq. 2 in Mamba with the per-token parameters of its Algorithm 2. Line 3 is our own one-line expansion of line 2.</p>
+<ul class="gloss">
+  <li><span class="tex">\overline{K}_k</span> is the kernel S4 computes (<a href="#ch-s4">the S4 chapter</a>): one number per lag <span class="tex">k</span>. It is the same for every input, so position alone decides how much a token counts. That is the top lane's yellow curves.</li>
+  <li>In the selective form, <span class="tex">\overline{A}_t</span>, <span class="tex">\overline{B}_t</span> and <span class="tex">C_t</span> are computed from the current token <span class="tex">\htmlClass{t-blue}{x_t}</span>. The bottom lane's gate is the simplest such rule. The next chapter shows Mamba's.</li>
+  <li>Multiply the recurrence out and the weight of an old token is the product of every <span class="tex">\overline{A}</span> since it arrived. If the tokens in between all say "keep" (<span class="tex">\overline{A}</span> near 1, as filler does in the toy), the old token survives untouched, however long the gap.</li>
+</ul>
+
+<p>Drag the slider to try other fixed steps. A small step smears every letter across all four slots; a large one forgets all but the last few tokens. The readout counts how often each fixed step gets all four letters right over the same <span data-toy>200</span> random layouts: some steps do better than others, none comes close to the gate, which is right every time. Whatever fixed step you pick, there is a spacing that defeats it.</p>
+
+<div class="claimcard">
+  <h4>Claim card: selective copying needs selection, not just gating</h4>
+  <dl>
+    <dt>Claim</dt><dd>Time-invariant layers fail selective copying even inside gated architectures; making the layer selective solves it in every architecture.</dd>
+    <dt>How it was measured</dt><dd>Sequences of <span data-claim="mamba-selcopy-len">4096</span> tokens over a vocabulary of <span data-claim="mamba-selcopy-vocab">16</span>, with <span data-claim="mamba-selcopy-ntokens">16</span> data tokens to reproduce in order, <span data-claim="lti-selcopy-layers">2</span>-layer models, trained for <span data-claim="mamba-selcopy-steps">400K</span> steps. The architecture (no gate, H3's gated block, Mamba's block) and the layer inside it vary independently.</dd>
+    <dt>Result (accuracy, Mamba Table 1)</dt><dd>
+      <table class="data"><thead><tr><th>Architecture</th><th>S4 layer (time-invariant)</th><th>Hyena layer (time-invariant)</th><th>S6 layer (selective)</th></tr></thead>
+      <tbody>
+        <tr><td>No gate</td><td class="lti"><span data-claim="mamba-selcopy-s4-nogate">18.3</span></td><td>not run</td><td class="sel"><span data-claim="mamba-selcopy-s6-nogate">97.0</span></td></tr>
+        <tr><td>H3</td><td class="lti"><span data-claim="mamba-selcopy-h3">57.0</span></td><td class="lti"><span data-claim="mamba-selcopy-hyena">30.1</span></td><td class="sel"><span data-claim="mamba-selcopy-h3-s6">99.7</span></td></tr>
+        <tr><td>Mamba</td><td class="lti"><span data-claim="mamba-selcopy-mamba-s4">56.4</span></td><td class="lti"><span data-claim="mamba-selcopy-mamba-hyena">28.4</span></td><td class="sel"><span data-claim="mamba-selcopy-mamba">99.8</span></td></tr>
+      </tbody></table></dd>
+    <dt>What would have falsified it</dt><dd>A gated architecture with a time-invariant layer reaching the selective layer's accuracy. H3's gates multiply values position by position; the paper argues that such gating "does not interact along the sequence axis", and the gated rows with time-invariant layers stay at <span data-claim="mamba-selcopy-h3">57.0</span> or below.</dd>
+  </dl>
+</div>
+
+<p>The second failure, looking up a key seen earlier, is what an <em>induction head</em> does: having seen "Harry Potter" once, predict "Potter" the next time "Harry" appears. Attention does this naturally, since a query can match any earlier key by content.</p>
+
+<div class="claimcard">
+  <h4>Claim card: a time-invariant SSM cannot do induction heads; a selective one extrapolates</h4>
+  <dl>
+    <dt>Claim</dt><dd>A plain time-invariant SSM fails the induction-head task that attention solves. A selective SSM solves it and keeps solving it on sequences far longer than any it was trained on.</dd>
+    <dt>How it was measured</dt><dd>H3 paper, Table 2: two-layer models on sequences of <span data-claim="h3-indhead-len">30</span> tokens. Mamba paper, Table 11: <span data-claim="lti-ind-layers">2</span>-layer models trained at length <span data-claim="mamba-ind-train-len">256</span> and tested at lengths up to <span data-claim="mamba-ind-test-max">1048576</span>. (Mamba's "Table 2" is the plot of these numbers.)</dd>
+    <dt>Result</dt><dd>In the H3 paper, a plain S4D layer reaches <span data-claim="h3-indhead-s4d">35.6</span>% against <span data-claim="h3-indhead-attn">100.0</span>% for attention (chance is <span data-claim="h3-indhead-random">5.0</span>%). H3 itself adds a shift SSM and multiplicative gates and reaches <span data-claim="h3-indhead-h3">100.0</span>%. In the Mamba paper:
+      <table class="data"><thead><tr><th>Model</th><th>length <span class="tex">2^8</span> (trained)</th><th><span class="tex">2^9</span></th><th><span class="tex">2^{10}</span></th><th><span class="tex">2^{20}</span></th></tr></thead>
+      <tbody>
+        <tr><td>Attention, xPos positions</td><td><span data-claim="lti-ind-256-all">100.0</span></td><td><span data-claim="mamba-ind-mha-xpos-512">99.6</span></td><td><span data-claim="mamba-ind-mha-xpos-1024">67.6</span></td><td>out of memory</td></tr>
+        <tr><td>Attention, RoPE positions</td><td><span data-claim="lti-ind-256-all">100.0</span></td><td><span data-claim="mamba-ind-mha-rope-512">83.6</span></td><td><span data-claim="mamba-ind-mha-rope-1024">31.3</span></td><td>out of memory</td></tr>
+        <tr><td>H3 (time-invariant)</td><td><span data-claim="lti-ind-256-all">100.0</span></td><td><span data-claim="mamba-ind-h3-512">80.9</span></td><td><span data-claim="mamba-ind-h3-1024">39.5</span></td><td><span data-claim="mamba-ind-h3-1m">7.4</span></td></tr>
+        <tr><td>Hyena (time-invariant)</td><td><span data-claim="lti-ind-256-all">100.0</span></td><td>perfect</td><td><span data-claim="mamba-ind-hyena-1024">44.1</span></td><td><span data-claim="mamba-ind-hyena-1m">9.8</span></td></tr>
+        <tr><td>Mamba (selective)</td><td><span data-claim="lti-ind-256-all">100.0</span></td><td>perfect</td><td>perfect</td><td>perfect</td></tr>
+      </tbody></table>
+      Mamba generalizes to sequences <span data-claim="mamba-ind-extrap">4000x</span> longer than it was trained on; "no other method goes beyond <span data-claim="mamba-ind-others-max">2x</span>". The attention models were tested only up to <span data-claim="mamba-ind-mha-oom">16384</span> tokens, for lack of memory.</dd>
+    <dt>What would have falsified it</dt><dd>A time-invariant model holding its accuracy past the training length. H3 and Hyena learn the task at the length they saw, then fall toward chance as the gap between key and query grows. Our reading: a fixed kernel learns where the key usually is, not what it is.</dd>
+  </dl>
+</div>
+
+<p>Attention never had this problem: it weighs every past token by what it contains, through the match between query and key, and pays for that with the cache of <a href="#ch-bill">the first chapter</a>. Selection gives an SSM some of that ability at a different price. The convolution that made S4 fast (<a href="#ch-s4">the S4 chapter</a>) needs one kernel for every step: it is computed once and applied with a single FFT. Once the token sets <span class="tex">\overline{A}</span>, <span class="tex">\overline{B}</span> and <span class="tex">C</span>, there is no single kernel to compute, so the convolution is gone; <a href="#ch-scan">the scan chapter</a> shows how Mamba gets the speed back.</p>
+
+<p>First, the selective layer itself. The <a href="#ch-mamba">next chapter</a> lets each token set its own step size <span class="tex">\Delta</span> and its own <span class="tex">B</span> and <span class="tex">C</span>, and shows that with a single state the result is exactly a gated RNN.</p>
+</section>

@@ -1,0 +1,132 @@
+<section id="ch-when" class="chapter">
+<h2>When can a prompt replace a custom detector?</h2>
+<p>Every model on this page can be run on your images today with nothing but a list of names. The question is how close that gets you to a detector trained on your own labels. Four independent measurements answer it, and they agree.</p>
+
+<p class="predict"><strong>Guess first.</strong> On industrial images, how many labelled boxes per class does a fine-tuned detector need before it beats the best prompt-only model? A hundred? A thousand? Pick a number, then look at the second column of the chart.</p>
+
+<figure class="viz" id="viz-ladder" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="ladder-canvas" role="img" aria-label="A dot chart with four columns: prompt only, 10 boxes per class, 10 percent of the labels, and all labels. Each dot is one method's average AP on the chosen RF100-VL domain. A dashed green line joins Grounding DINO before and after a 10-shot fine-tune."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ladder-industrial" data-cat="Industrial" aria-pressed="true">Industrial</button>
+    <button type="button" id="btn-ladder-aerial" data-cat="Aerial" aria-pressed="false">Aerial</button>
+    <button type="button" id="btn-ladder-document" data-cat="Document" aria-pressed="false">Document</button>
+    <button type="button" id="btn-ladder-flora" data-cat="Flora &amp; Fauna" aria-pressed="false">Flora and fauna</button>
+    <button type="button" id="btn-ladder-medical" data-cat="Medical" aria-pressed="false">Medical</button>
+    <button type="button" id="btn-ladder-sports" data-cat="Sports" aria-pressed="false">Sports</button>
+    <button type="button" id="btn-ladder-other" data-cat="Other" aria-pressed="false">Other</button>
+    <button type="button" id="btn-ladder-all" data-cat="All" aria-pressed="false">All 100</button>
+    <button type="button" id="btn-ladder-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ladder-readout" aria-live="polite"></p>
+  <figcaption>RF100-VL (2505.20612v4), Table 2 (prompt only and 10 boxes per class) and Table 7 (10% and all labels). Each dot is one method's AP averaged over the domain's datasets, scored on the same full test split. Filled yellow: a text prompt and no training. Hollow yellow: ten examples placed in the prompt, still no training. Blue: trained on your labels. Diamonds are multimodal LLMs (Qwen 2.5-VL 72B, Gemini 2.5 Pro). The number above each column is its best dot. The 10% and all-labels columns are closed-set detectors (YOLOv8, YOLOv11, LW-DETR); only the first two columns contain Grounding DINO.</figcaption>
+</figure>
+
+<p>Read the Industrial column from left to right. The best prompt-only model, Grounding DINO with every class name in one prompt, averages <span data-claim="rf100vl-gdino-zs-industrial">10.3</span> AP. The same model fine-tuned on <span data-claim="rf100vl-kshot">10</span> boxes per class reaches <span data-claim="rf100vl-gdino-10shot-industrial">37.8</span>. Even YOLOv8n, a small detector with no text encoder at all, trained on those same ten boxes, scores <span data-claim="rf100vl-yolov8n-10shot-industrial">28.1</span>, which beats every model that only reads a prompt. The last two columns come from closed-set detectors (YOLOv8, YOLOv11 and LW-DETR), because RF100-VL did not run Grounding DINO with more labels. With 10% of the training images labelled they reach <span data-claim="rf100vl-semi-min-industrial">50.7</span> to <span data-claim="rf100vl-semi-max-industrial">52.9</span>, and with all labels <span data-claim="rf100vl-full-min-industrial">64.3</span> to <span data-claim="rf100vl-full-max-industrial">68.2</span>. So the answer to the guess is ten. Ten labelled boxes per class beat the prompt by a wide margin, and every further step up in labels still pays. Read the columns as label budgets, not as one model's learning curve: the units differ (ten boxes per class, a random tenth of the training images, all of them), and a single 10-shot run is noisy.</p>
+
+<div class="claimcard">
+  <h4>Card 1: on unfamiliar domains, ten labelled boxes beat any prompt</h4>
+  <dl>
+    <dt>Claim</dt><dd>On concepts that are rare on the web, no prompt-only detector comes close to the same detector fine-tuned on a handful of boxes.</dd>
+    <dt>Measured</dt><dd>RF100-VL collects <span data-claim="rf100vl-n-datasets">100</span> Roboflow datasets chosen because their classes are uncommon in internet pretraining. They are grouped into <span data-claim="rf100vl-n-categories">7</span> domains by their CLIP embeddings. Every method is scored with COCO-style AP on the same fully labelled test split; "10 boxes per class" is the paper's 10-shot split. Its "GroundingDINO" is MM-Grounding-DINO-L, prompted with all class names at once; OWLv2 gets one class per prompt.</dd>
+    <dt>Result</dt><dd>Across all 100 datasets: prompt only <span data-claim="rf100vl-gdino-zs-all">15.7</span>, 10-shot fine-tune <span data-claim="rf100vl-gdino-10shot-all">33.6</span>, all labels <span data-claim="rf100vl-full-min-all">55.4</span> to <span data-claim="rf100vl-full-max-all">59.8</span>. The same Grounding DINO scores <span data-claim="rf100vl-gdino-odinw13">49.2</span> on ODinW-13 according to RF100-VL; the benchmark you pick decides how good "zero-shot" looks.</dd>
+    <dt>Would falsify</dt><dd>A prompt-only model within a few AP of the 10-shot fine-tune on these domains.</dd>
+  </dl>
+</div>
+<p>One caution about the word "Industrial". It is a cluster of <span data-claim="rf100vl-ndatasets-industrial">22</span> datasets that CLIP embeddings put together, not a curated factory benchmark. It holds printed circuit boards (<code>deeppcb</code>), surface defects (<code>defect-detection</code>, <code>wheel-defect-detection</code>, <code>cable-damage</code>), small parts (<code>smd-components</code>, <code>screwdetectclassification</code>), but also <code>aircraft-turnaround-dataset</code>, <code>conveyor-t-shirts</code> and <code>water-meter</code> (RF100-VL Appendix R). It is the closest public evidence to an inspection line, and it is still only a proxy for yours.</p>
+
+<h3>The average you usually see hides the failures</h3>
+<p>Most papers report ODinW-13, the mean over 13 small datasets. ODinW has 35. The OWLv2 paper prints every one of them, and the picture changes when you look at all of them.</p>
+
+<figure class="viz" id="viz-odinw" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="odinw-canvas" tabindex="0" role="img" aria-label="A strip plot. Each dot is one ODinW dataset, placed by its zero-shot AP from 0 to 100. Rows show OWL-ST L/14, the same model after fine-tuning on LVIS, and Grounding DINO L. Marks show the mean over the 13 usual datasets and the median over all 35."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-odinw-13" aria-pressed="true">The usual 13</button>
+    <button type="button" id="btn-odinw-35" aria-pressed="false">All 35</button>
+    <button type="button" id="btn-odinw-ft" aria-pressed="false">After fine-tuning</button>
+    <button type="button" id="btn-odinw-gdino" aria-pressed="false">Grounding DINO L</button>
+    <button type="button" id="btn-odinw-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="odinw-readout" aria-live="polite"></p>
+  <figcaption>Zero-shot AP per ODinW dataset. OWL rows: OWLv2 (2306.09683v3) Table A4, rows 12 (OWL-ST, CLIP L/14) and 15 (OWL-ST+FT, fine-tuned on LVIS base). Grounding DINO L: Grounding DINO (2303.05499v5) Table 14, the checkpoint pretrained on O365, OI, GoldG, Cap4M, COCO and RefC. Filled dots are the 13 datasets of ODinW-13. Point at a dot, or focus the chart and use the arrow keys, to read its name.</figcaption>
+</figure>
+
+<div class="claimcard">
+  <h4>Card 2: the median dataset is much harder than the reported mean</h4>
+  <dl>
+    <dt>Claim</dt><dd>Strong zero-shot means on a familiar subset coexist with near-zero AP on many datasets.</dd>
+    <dt>Measured</dt><dd>Zero-shot AP on each of the 35 ODinW datasets, as printed by the papers themselves; no fine-tuning on any of them.</dd>
+    <dt>Result</dt><dd>OWL-ST L/14: mean over the usual 13 <span data-claim="owlv2-odinw-st-l14-mean13">53.0</span>, median over all 35 <span data-claim="owlv2-odinw-st-l14-median35">16.2</span>. Grounding DINO L: median over 35 <span data-claim="gdino-odinw35-med-l">18.4</span>, mean <span data-claim="gdino-odinw35-avg-l">26.1</span>.</dd>
+    <dt>Would falsify</dt><dd>A median over 35 close to the mean over 13.</dd>
+  </dl>
+</div>
+
+<h3>What a text encoder is worth in labels</h3>
+<p>GLIP measured the trade directly. It fine-tuned its own models and a closed-set detector of the same family on 1, 3, 5 and 10 examples per class and on all data, for each of the 13 ODinW datasets.</p>
+
+<figure class="viz" id="viz-shots" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="shots-canvas" role="img" aria-label="A line chart of ODinW-13 average AP against labelled examples per class: 0, 1, 3, 5, 10 and all. Lines for DyHead-T without text, GLIP-T and GLIP-L. A green level line runs from GLIP-T with no examples to DyHead-T at five examples."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-shots-dyhead" aria-pressed="true">Closed-set DyHead-T</button>
+    <button type="button" id="btn-shots-glipt" aria-pressed="false">Add GLIP-T</button>
+    <button type="button" id="btn-shots-glipl" aria-pressed="false">Add GLIP-L</button>
+    <button type="button" id="btn-shots-match" aria-pressed="false">Compare</button>
+    <button type="button" id="btn-shots-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="shots-readout" aria-live="polite"></p>
+  <figcaption>GLIP (2112.03857v2) Table 11: ODinW-13 average AP, full-model fine-tuning, mean of 3 runs per few-shot setting. DyHead-T is pretrained on Objects365 and has no text input, so it has no prompt-only point.</figcaption>
+</figure>
+
+<div class="claimcard">
+  <h4>Card 3: a prompt is worth a few labels, not a dataset</h4>
+  <dl>
+    <dt>Claim</dt><dd>Grounding pretraining buys the equivalent of a handful of labelled examples per class; labels still add a lot on top.</dd>
+    <dt>Measured</dt><dd>ODinW-13 average AP after full fine-tuning on k examples per class (3 random draws each), same evaluation for all models.</dd>
+    <dt>Result</dt><dd>GLIP-T with only a prompt: <span data-claim="glip-odinw-t-0shot">46.5</span>; DyHead-T with 5 examples per class: <span data-claim="glip-odinw-dyhead-o365-5shot">46.4</span>. GLIP-L with one example: <span data-claim="glip-odinw-l-1shot">59.9</span>, against DyHead-T on all data: <span data-claim="glip-odinw-dyhead-o365-full">60.8</span>. GLIP-T itself climbs to <span data-claim="glip-odinw-t-full">64.9</span> with all data.</dd>
+    <dt>Would falsify</dt><dd>Fine-tuning GLIP adding little over its prompt-only score.</dd>
+  </dl>
+</div>
+
+<h3>Fine-tuning has a price</h3>
+<p>Once you fine-tune, the model gets better at your classes and worse at everything else. OWLv2 measured it on LVIS and on the 35 ODinW datasets at once.</p>
+<div class="claimcard">
+  <h4>Card 4: fine-tuning on your classes erodes the open vocabulary</h4>
+  <dl>
+    <dt>Claim</dt><dd>Fine-tuning raises accuracy on the fine-tuned label space and lowers it on unrelated domains.</dd>
+    <dt>Measured</dt><dd>OWL-ST models before and after fine-tuning on LVIS base classes; LVIS val rare-class AP (classes never fine-tuned on) and zero-shot ODinW over 35 datasets.</dd>
+    <dt>Result</dt><dd>CLIP L/14: LVIS APr <span data-claim="owlv2-main-st-l14-val-apr">34.9</span> to <span data-claim="owlv2-main-stft-l14-val-apr">44.6</span>, while the ODinW median over 35 falls from <span data-claim="owlv2-odinw-st-l14-median35">16.2</span> to <span data-claim="owlv2-odinw-stft-l14-median35">6.3</span>. Averaging the weights before and after fine-tuning (fine-tuned weight <span data-claim="owlv2-ens-weight">0.4</span>) gives the best ODinW-13 mean, <span data-claim="owlv2-odinw-ens-l14-mean13">56.3</span>, but its median over 35 is <span data-claim="owlv2-odinw-ens-l14-median35">10.6</span>, still below the model that was never fine-tuned.</dd>
+    <dt>Would falsify</dt><dd>A fine-tuned model whose ODinW median holds steady.</dd>
+  </dl>
+</div>
+<p>LVIS rare classes improved even though no rare class was in the fine-tuning set. The paper's explanation: rare LVIS classes look like frequent ones ("heron" next to "bird"). Your defect classes probably do not look like anything in LVIS, so expect the ODinW behaviour, not the LVIS one.</p>
+
+<h3>A decision guide</h3>
+<p>The four cards turn into a short checklist. This is <span class="reading">our reading</span> of the evidence, not a result from any one paper.</p>
+<figure class="viz" id="viz-guide" data-toy>
+  <span class="badge toy">Our reading</span>
+  <div class="guide">
+    <div class="q"><span>Is the thing common on the web (people photograph and caption it)?</span>
+      <button type="button" id="btn-guide-common-yes" aria-pressed="false">Yes</button><button type="button" id="btn-guide-common-no" aria-pressed="false">No</button></div>
+    <div class="q"><span>Does it have one everyday name that means what you mean?</span>
+      <button type="button" id="btn-guide-name-yes" aria-pressed="false">Yes</button><button type="button" id="btn-guide-name-no" aria-pressed="false">No</button></div>
+    <div class="q"><span>Is it a bounded object, not a texture, stain or region?</span>
+      <button type="button" id="btn-guide-object-yes" aria-pressed="false">Yes</button><button type="button" id="btn-guide-object-no" aria-pressed="false">No</button></div>
+    <div class="q"><span>Would a stranger draw the box the way your label guide does?</span>
+      <button type="button" id="btn-guide-policy-yes" aria-pressed="false">Yes</button><button type="button" id="btn-guide-policy-no" aria-pressed="false">No</button></div>
+    <div class="controls"><button type="button" id="btn-guide-reset" data-cue-reset>Reset</button></div>
+  </div>
+  <p class="readout" id="guide-readout" aria-live="polite"></p>
+  <figcaption>Answer the four questions. Whatever the answer, label a test set of your own first: every number on this page was measured against labelled test images, and a prompt that looks right on five images can still score near zero.</figcaption>
+</figure>
+<style>
+#viz-guide .guide { display:grid; gap:.55rem; margin-top:2rem; font:.95rem/1.45 system-ui, sans-serif; }
+#viz-guide .q { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; }
+#viz-guide .q span { flex:1 1 18rem; }
+#viz-guide .q button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.25rem .8rem; cursor:pointer; }
+#viz-guide .q button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+#viz-guide .q button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+#viz-guide .readout { min-height:4.5em; }
+</style>
+</section>

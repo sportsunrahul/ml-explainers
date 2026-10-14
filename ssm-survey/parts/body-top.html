@@ -1,0 +1,60 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage" id="hero-stage" data-toy>
+    <canvas id="hero-canvas" role="img" aria-label="Twelve tokens arrive along a time axis. Each one adds a column of brown key and value cubes to a Transformer's KV cache, which grows wider with every token. Beside it, the yellow state of a state-space model is a fixed block of cells that only changes shade."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge toy" style="top:.6rem;right:.75rem">Toy model</span>
+  </div>
+  <h1>State-space models, intuition first</h1>
+  <p class="hook">Attention keeps every token it has seen and reads all of them again for each new one. A state-space model keeps a small memory of fixed size and updates it. This is the story of how that memory was made trainable, fast and selective, and where it still falls short.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/2006.16236v3" title="arXiv 2006.16236v3">Linear attention</a></li>
+    <li><a href="https://arxiv.org/abs/2008.07669v2" title="arXiv 2008.07669v2">HiPPO</a></li>
+    <li><a href="https://arxiv.org/abs/2111.00396v3" title="arXiv 2111.00396v3">S4</a></li>
+    <li><a href="https://arxiv.org/abs/2303.06349v1" title="arXiv 2303.06349v1">LRU</a></li>
+    <li><a href="https://arxiv.org/abs/2312.00752v2" title="arXiv 2312.00752v2">Mamba</a></li>
+    <li><a href="https://arxiv.org/abs/2312.04927v1" title="arXiv 2312.04927v1">Zoology</a></li>
+    <li><a href="https://arxiv.org/abs/2401.09417v3" title="arXiv 2401.09417v3">Vision Mamba (Vim)</a></li>
+    <li><a href="https://arxiv.org/abs/2401.10166v4" title="arXiv 2401.10166v4">VMamba</a></li>
+    <li><a href="https://arxiv.org/abs/2402.01032v2" title="arXiv 2402.01032v2">Repeat After Me</a></li>
+    <li><a href="https://arxiv.org/abs/2403.19887v2" title="arXiv 2403.19887v2">Jamba</a></li>
+    <li><a href="https://arxiv.org/abs/2405.21060v1" title="arXiv 2405.21060v1">Mamba-2 (Transformers are SSMs)</a></li>
+    <li><a href="https://arxiv.org/abs/2406.07887v1" title="arXiv 2406.07887v1">An empirical study of Mamba LMs</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: the bill, and the old fix</li>
+    <li value="1"><a href="#ch-bill" data-rail="The bill">The bill attention sends</a></li>
+    <li><a href="#ch-recurrence" data-rail="Linear recurrence">Linear recurrences, and why RNNs were dropped</a></li>
+    <li class="act">Act II: principled memory</li>
+    <li value="3"><a href="#ch-continuous" data-rail="Continuous time">Continuous time and discretization</a></li>
+    <li><a href="#ch-hippo" data-rail="HiPPO">HiPPO: memory as compression of the past</a></li>
+    <li><a href="#ch-s4" data-rail="S4">S4: structure and the convolution view</a></li>
+    <li class="act">Act III: selection</li>
+    <li value="6"><a href="#ch-lti" data-rail="Time-invariance">Why time-invariance is not enough</a></li>
+    <li><a href="#ch-mamba" data-rail="Mamba">Mamba: input-dependent selection</a></li>
+    <li><a href="#ch-scan" data-rail="Parallel scan">The parallel scan and the hardware-aware kernel</a></li>
+    <li><a href="#ch-ssd" data-rail="Mamba-2, SSD">Mamba-2: linear attention and state-space duality</a></li>
+    <li class="act">Act IV: beyond text, and honesty</li>
+    <li value="10"><a href="#ch-vision" data-rail="Vision">Vision Mamba, VMamba, and a counterpoint</a></li>
+    <li><a href="#ch-recall" data-rail="Where SSMs lose">Where SSMs still lose</a></li>
+    <li><a href="#ch-hybrid" data-rail="Hybrids">Hybrids: a little attention goes a long way</a></li>
+    <li><a href="#ch-map" data-rail="The field now">The field now</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-interlude">Interlude: one token, end to end</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Every figure on this page draws the same three things: <b class="c-blue">tokens</b> arriving in order, a <b class="c-yellow">memory</b> the model carries forward, and the <b class="c-green">output</b> it produces. Attention's memory is its KV cache, drawn in <b class="c-brown">brown</b>, and it grows with every token; a state-space model's memory is drawn as a small <b class="c-yellow">yellow</b> grid that never changes size. One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">input tokens x</span>
+  <span class="c-yellow">the state h, the memory</span>
+  <span class="c-green">output y</span>
+  <span class="c-red">cost: compute, bytes, error</span>
+  <span class="c-brown">attention and its KV cache, the baseline</span>
+</div>
+<p class="note">This page continues the transformers explainer: it assumes you know what attention and the KV cache are, and nothing else beyond basic deep learning. Each interactive carries a badge. <b>Computed</b> means a real formula or configuration from a paper, run directly or on a small toy. <b>Toy model</b> means an illustration of the mechanism, not the paper's numbers. <b>Sourced</b> means what is drawn comes from the papers or from a dated arXiv query. The three-dimensional figures can be turned by dragging (or with the arrow keys once focused). In an equation, hover or tap a term that names part of a figure: that part lights up.</p>

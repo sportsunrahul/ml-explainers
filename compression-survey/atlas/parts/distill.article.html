@@ -1,0 +1,13 @@
+  <article data-chapter="distill">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Knowledge distillation</h2><p class="subhead">A small student copies a big teacher's soft answers</p></header>
+    <div class="controls">
+      <label class="slider"><span>Temperature T <b data-temp-val>1.0</b></span><input type="range" data-temp min="1" max="20" step="0.5" value="1" aria-label="Temperature T"></label>
+      <div class="row"><span>Soft loss</span><button type="button" class="tool" data-t2="off">without T<sup>2</sup></button><button type="button" class="tool" data-t2="on">with T<sup>2</sup></button></div>
+    </div>
+    <p>A big trained network, the <b class="c-blue">teacher</b>, knows more than its top answer. It also knows which wrong answers are nearly right: a truck looks a bit like a bus and not at all like a cat. Distillation trains a smaller <b class="c-yellow">student</b> to copy that whole pattern, not just the label.</p>
+    <p>The network's raw class scores are <button type="button" class="inline-term" data-open="kd-logits">logits</button>. A <button type="button" class="inline-term" data-open="kd-softmax">softmax</button> turns them into probabilities. At T = 1 the teacher's wrong-class probabilities are almost zero, so they barely affect the loss. Drag the <button type="button" class="inline-term" data-open="kd-temperature">temperature</button> up: the bars even out and the teacher's ranking of wrong classes appears. The red arrows show how the student is pulled toward it.</p>
+    <p>The student's loss measures the difference between the two distributions with the <button type="button" class="inline-term" data-open="kd-kl">KL divergence</button>. But a high temperature also shrinks this loss's gradient, roughly as 1/T<sup>2</sup>. Press "without T<sup>2</sup>" and watch the right-hand curve fall far below the hard-label line. Hinton, Vinyals and Dean multiply the soft loss by T<sup>2</sup>; press "with T<sup>2</sup>" and the curve levels off.</p>
+    <p class="note">Computed toy: the six classes and both sets of logits are ours. The softmax with temperature, the gradient and its high-temperature limit (dotted) are the paper's Eq. 1, 2 and 4, run live. Hinton's own example is a BMW that has a very small chance of being taken for a garbage truck, but that is still many times more likely than being taken for a carrot.</p>
+    <p class="inscription">Soft targets carry how the teacher generalizes. The temperature exposes them, and the T<sup>2</sup> factor keeps their pull steady as you change it.</p>
+    {{CONTINUE}}
+  </article>

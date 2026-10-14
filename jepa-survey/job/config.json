@@ -1,0 +1,25 @@
+{
+ "backend": "qwen3",
+ "base_seed": 1234,
+ "sampling": "generate_config.json defaults (sha recorded by revision)",
+ "ref_text": "Here is a question worth sitting with. What if a detector simply predicted the set of objects in an image, all at once, with nothing to clean up afterwards?",
+ "voices": {
+  "A": {
+   "kind": "design",
+   "instruct": "A warm, curious male lecturer in his forties, unhurried pace, mid-low pitch, clear diction, a light smile in the voice."
+  },
+  "B": {
+   "kind": "design",
+   "instruct": "A calm, friendly female science narrator in her thirties, measured pace, mid pitch, clear and expressive, conversational rather than formal."
+  },
+  "C": {
+   "kind": "custom",
+   "speaker": "Ryan",
+   "instruct": "warm, curious lecturer, unhurried"
+  }
+ },
+ "run_voices": [
+  "A"
+ ],
+ "batch": 10
+}

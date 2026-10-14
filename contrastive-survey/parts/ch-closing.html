@@ -1,0 +1,29 @@
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>The whole page in six steps:</p>
+<ul>
+  <li><b>The idea</b> (<a href="#ch-compare">chapters 1</a> to <a href="#ch-infonce">3</a>). Two augmented views of one image should agree, and views of other images should not. Pulling alone collapses every image to one point, so something must push back. The modern push is InfoNCE: a softmax lineup that must pick the true partner out of many negatives.</li>
+  <li><b>The recipes</b> (<a href="#ch-moco">chapters 4</a> and <a href="#ch-simclr">5</a>). More negatives help. MoCo keeps them in a queue made by a slow momentum copy of the encoder. SimCLR takes them from one huge batch, and shows that the augmentations and a throwaway projection head matter as much as the loss.</li>
+  <li><b>Why it works</b> (<a href="#ch-sphere">chapter 6</a>). On the sphere, the loss balances alignment (partners close) and uniformity (everything spread out). The temperature decides how hard near neighbours are pushed.</li>
+  <li><b>Which negatives matter</b> (<a href="#ch-negatives">chapter 7</a>). Hard negatives carry most of the push. False negatives, images of the anchor's own class, quietly bias it.</li>
+  <li><b>Beyond pairs</b> (<a href="#ch-beyond">chapter 8</a>). Methods without negatives replace the push with a balancing rule: equal cluster use in SwAV, decorrelated features in Barlow Twins, or an asymmetric teacher and student. All of them still fight collapse, including the subtler dimensional kind.</li>
+  <li><b>Labels and language</b> (<a href="#ch-supcon">chapters 9</a> and <a href="#ch-clip">10</a>). With labels the same loss makes tight class clusters. With captions it becomes CLIP, whose softmax SigLIP replaced with a yes-or-no sigmoid per pair.</li>
+</ul>
+<p>Image-only pretraining has since moved to self-distillation, but these lessons, and the image-text models, are everywhere.</p>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<p>Each item names the place in the paper that this page draws from, in reading order.</p>
+<ul>
+  <li><b>The margin loss:</b> Hadsell, Chopra and LeCun, CVPR 2006, Sec. 2.1 and Eq. 4. Short, and the energy-based framing explains why the push is needed.</li>
+  <li><b>InfoNCE and the bound:</b> CPC (<a href="https://arxiv.org/abs/1807.03748v2">1807.03748v2</a>), Sec. 2.2 to 2.3 (Eq. 4 and the display after Eq. 5) and App. A.1. Then Poole et al. (<a href="https://arxiv.org/abs/1905.06922v1">1905.06922v1</a>), Sec. 2.3, for an exact proof, and Tschannen et al. (<a href="https://arxiv.org/abs/1907.13625v2">1907.13625v2</a>), Sec. 3 to 4, for why the bound is not the whole story.</li>
+  <li><b>The memory bank and the queue:</b> Wu et al. (<a href="https://arxiv.org/abs/1805.01978v1">1805.01978v1</a>), Sec. 3; MoCo (<a href="https://arxiv.org/abs/1911.05722v3">1911.05722v3</a>), Sec. 3.1 to 3.2 (Eq. 1 and 2) and Fig. 3; MoCo v3 (<a href="https://arxiv.org/abs/2104.02057v4">2104.02057v4</a>), Sec. 4 on training instability.</li>
+  <li><b>SimCLR:</b> <a href="https://arxiv.org/abs/2002.05709v3">2002.05709v3</a>, Sec. 2 (Eq. 1 and Algorithm 1), Sec. 3 (Fig. 5, augmentations), Sec. 4.2 (the projection head) and App. B.1 (batch size and epochs).</li>
+  <li><b>Geometry and temperature:</b> Wang and Isola (<a href="https://arxiv.org/abs/2005.10242v10">2005.10242v10</a>), Sec. 4.1 to 4.2 (Theorem 1); Wang and Liu (<a href="https://arxiv.org/abs/2012.09740v2">2012.09740v2</a>), Sec. 3 (Eq. 4 and 5) and Sec. 5 (the temperature sweep).</li>
+  <li><b>Negatives:</b> Chuang et al. (<a href="https://arxiv.org/abs/2007.00224v3">2007.00224v3</a>), Sec. 4 (Eq. 7 and 8); Robinson et al. (<a href="https://arxiv.org/abs/2010.04592v2">2010.04592v2</a>), Sec. 3.</li>
+  <li><b>Without negatives:</b> SwAV (<a href="https://arxiv.org/abs/2006.09882v5">2006.09882v5</a>), Sec. 3 and 3.1 (Eq. 1 to 5); Barlow Twins (<a href="https://arxiv.org/abs/2103.03230v3">2103.03230v3</a>), Sec. 2 (Eq. 1 and 2); Jing et al. (<a href="https://arxiv.org/abs/2110.09348v3">2110.09348v3</a>), Sec. 3 to 4 (Theorem 1). For BYOL, SimSiam and DINO, read <a href="../jepa-survey/explainer.html#ch-collapse">the JEPA survey's collapse chapter</a>.</li>
+  <li><b>Labels:</b> SupCon (<a href="https://arxiv.org/abs/2004.11362v5">2004.11362v5</a>), Sec. 3.2 (Eq. 2 and 3) and the supplementary Sec. 8 (the triplet loss as a special case).</li>
+  <li><b>Language:</b> CLIP (<a href="https://arxiv.org/abs/2103.00020v1">2103.00020v1</a>), Sec. 2.3 and Fig. 3; SigLIP (<a href="https://arxiv.org/abs/2303.15343v4">2303.15343v4</a>), Sec. 3.1 to 3.3 and Algorithm 1. For CLIP inside vision-language models and detectors, read <a href="../vlm-survey/explainer.html">the VLM survey</a> and <a href="../ovd-survey/explainer.html">the open-vocabulary detection survey</a>.</li>
+</ul>
+</section>

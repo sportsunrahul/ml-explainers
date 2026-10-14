@@ -1,0 +1,14 @@
+  <article data-chapter="outliers">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Outliers</h2><p class="subhead">A few huge channels ruin one shared scale</p></header>
+    <div class="controls">
+      <div class="row"><span>Method</span><button type="button" class="tool" data-act="orig">One scale per tensor</button><button type="button" class="tool" data-act="int8">LLM.int8()</button><button type="button" class="tool" data-act="smooth">SmoothQuant</button></div>
+      <label class="slider"><span>Migration strength alpha <b data-alpha-value>0.50</b></span><input type="range" min="0" max="1" step="0.05" value="0.5" data-alpha aria-label="Migration strength alpha"></label>
+    </div>
+    <p>A <button type="button" class="inline-term" data-open="llm">large language model</button> multiplies its <button type="button" class="inline-term" data-open="activation">activations</button> by weight matrices, layer after layer. The front surface is one layer's input: one row per token, one column per channel. A few channels are <button type="button" class="inline-term" data-open="outlier">outliers</button>, far larger than the rest, and they stay large in every token. The surface behind it is the layer's weights.</p>
+    <p>With <button type="button" class="inline-term" data-open="per-tensor">one INT8 scale per tensor</button>, the largest value sets the step between the 256 levels. A typical channel then spans only a few levels and rounds badly; it shows red. SmoothQuant measured <b>2-3</b> levels for such channels in a real model.</p>
+    <p>Two fixes. <b>LLM.int8()</b> keeps the outlier channels in 16-bit floating point (green) and quantizes the rest. It is accurate, but the extra 16-bit multiply often makes it slower than plain FP16. <b>SmoothQuant</b> <button type="button" class="inline-term" data-open="smoothing">smooths</button> instead: it divides each activation channel by a scale and multiplies the matching weights by the same scale, so the product does not change.</p>
+    <p>Guess first, then drag alpha to 1. The ridges leave the activations and appear in the weights. At 0.5, the paper's default, both are easy to quantize, and every multiply stays INT8.</p>
+    <p class="note">Toy data, exact arithmetic. The activations are invented and shaped after SmoothQuant Fig. 4, read off the plot. The quantizers, the LLM.int8() split (threshold 6.0) and the smoothing formula are the papers' own. The two papers describe outlier size differently: up to 20x (Dettmers et al.) and ~100x (Xiao et al.).</p>
+    <p class="inscription">One big channel can waste a whole tensor's grid. Keep it aside in 16 bits, or move its size into the weights, where it is easy to absorb.</p>
+    {{CONTINUE}}
+  </article>

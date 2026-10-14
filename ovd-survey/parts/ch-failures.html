@@ -1,0 +1,106 @@
+<section id="ch-failures" class="chapter">
+<h2>How they fail on rare industrial objects</h2>
+<p>Chapter 12 measured how far a prompt falls short on unfamiliar data. This chapter asks why. The papers point to seven separate causes, and each has a different fix, so it pays to know which one you are hitting.</p>
+
+<p class="predict"><strong>Guess first.</strong> You type <span class="prompt">porosity</span>, the welder's word for small gas holes in a weld. Where will its text vector land: near the image features of weld pores, or somewhere else? Press <em>Type the jargon name</em> and see.</p>
+
+<figure class="viz" id="viz-gap3d" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="gap3d-canvas" tabindex="0" role="img" aria-label="A unit sphere. Dim points are the trained embedding cloud from chapter 4. A cluster of blue points marks the image features of weld pores. Buttons add the text point of the jargon name and the text point of a plain description."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-gap3d-gap" aria-pressed="true">Weld pores, no prompt</button>
+    <button type="button" id="btn-gap3d-jargon" aria-pressed="false">Type the jargon name</button>
+    <button type="button" id="btn-gap3d-describe" aria-pressed="false">Describe the look</button>
+    <button type="button" id="btn-gap3d-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="gap3d-readout" aria-live="polite"></p>
+  <figcaption>The same toy sphere as chapter 4, hand-placed to show the mechanism; the cosines in the readout are computed from the toy positions. Drag to turn it. A text encoder places a word by how the web uses it. A trade term that rarely appears next to photos of the thing lands where its other meanings live.</figcaption>
+</figure>
+
+<h3>1. The name is jargon, an acronym or a word with another meaning</h3>
+<p>A text encoder learned each word from web captions. "Porosity" in a caption usually means rock or skin, not a weld. RF100-VL chose its datasets to make exactly this hard: it lists context-dependent names such as "Thunderbolt", a defect on a wire rope, scientific acronyms, and catch-all classes such as "Soft Plastic" (RF100-VL Fig. 2). The cheapest fix is to describe the look in common words, and GLIP measured it.</p>
+
+<figure class="viz" id="viz-rename" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="rename-canvas" role="img" aria-label="A dumbbell chart. For seven datasets, a hollow dot shows zero-shot AP with the original class name and a filled dot shows AP with a plain description, joined by an arrow."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-rename-names" aria-pressed="true">Original names</button>
+    <button type="button" id="btn-rename-described" aria-pressed="false">Plain descriptions</button>
+    <button type="button" id="btn-rename-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="rename-readout" aria-live="polite"></p>
+  <figcaption>Zero-shot AP before and after rewriting the class names, with no training. Six ODinW datasets from GLIP (2112.03857v2) Table 10, GLIP-T (the caption's "CLIP-T" is a typo); pushable-pullable from Revisiting Few-Shot Object Detection with VLMs (2312.14494v4) Sec. 4.3, MQ-GLIP with GPT-4o descriptions on nuImages.</figcaption>
+</figure>
+<p>On the Mushrooms dataset the original labels were the species names <span class="prompt">Cow. Chanterelle</span>, which scored <span data-claim="glip-prompt-mushrooms-orig">13.6</span> AP. The prompt <span class="prompt">flat mushroom. yellow mushroom</span> scored <span data-claim="glip-prompt-mushrooms-designed">73.8</span>. <span class="prompt">hand of a person</span> instead of <span class="prompt">hand</span> took EgoHands from <span data-claim="glip-prompt-egohands-orig">22.1</span> to <span data-claim="glip-prompt-egohands-designed">50.0</span>. Rewriting does not always help: Pothole stayed at <span data-claim="glip-prompt-pothole-orig">17.8</span> to <span data-claim="glip-prompt-pothole-designed">17.7</span>. When the labels are not words at all, a prompt has nothing to work with: MM-Grounding-DINO scores <span data-claim="mmgdino-brain-zs">0.4</span> AP zero-shot on a brain-tumour dataset whose classes are numeric codes, and <span data-claim="mmgdino-brain-ft">47.5</span> after fine-tuning. Grounding DINO's own worst ODinW case is PlantDoc, with names such as "Tomato leaf mosaic virus": <span data-claim="gdino-plantdoc">0.36</span> AP for the T model trained with Cap4M.</p>
+
+<h3>2. Your label policy is not the web's meaning</h3>
+<p>A class name is short; an annotation guide is long. The Foundational Few-Shot paper shows the gap on nuImages, a driving dataset with <span data-claim="fsod-vlm-nuimages-classes">18</span> classes: its guide boxes only the cab of a truck, and counts a rider as part of a bicycle (2312.14494v4, Fig. 1). A model that learned "truck" from the web boxes the whole vehicle and is scored as wrong. Every inspection line has rules like this: where a scratch ends, whether two touching pores are one defect, which side of a part counts. No prompt carries them; a few labelled examples do.</p>
+
+<h3>3. A defect is often a texture, not an object</h3>
+<p>Every model on this page learned to box things with edges: people, cars, pallets. Its proposals, queries or objectness scores were trained on such boxes. A stain, a corrosion patch or a faint surface scratch has no clear boundary and often fills the whole view. <span class="reading">our reading</span>: expect such targets to be missed or boxed arbitrarily, and treat them as a segmentation or anomaly-detection problem rather than a prompt problem. The sources measure this only indirectly; ViLD's most common failure on rare LVIS classes is a missed object, not a wrong name (ViLD App. A).</p>
+
+<h3>4. Small defects vanish when the image is resized</h3>
+<p>These models do not see your camera's full resolution. OWL-ViT B/32 resizes to <span data-claim="fail-owlvit-input">768</span> pixels and reads <span data-claim="fail-owlvit-patch">32</span> pixel patches; OWLv2 L/14 uses <span data-claim="owlv2-res-14">1008</span> pixels and <span data-claim="fail-owlv2-patch">14</span> pixel patches; GLIP-T tests at <span data-claim="glip-code-min-size">800</span> by <span data-claim="glip-code-max-size">1333</span> with a finest stride of <span data-claim="fail-glip-stride">8</span> in its official config; YOLO-World's released models take <span data-claim="yoloworld-input-res">640</span> pixels (official code).</p>
+
+<figure class="viz" id="viz-tiny" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="tiny-canvas" role="img" aria-label="Left: a camera image with a small red defect drawn to scale. Right: a zoom on the model's input showing a four by four block of patches or stride cells, with the defect's footprint drawn to scale inside it."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-tiny-owlvit" aria-pressed="true">OWL-ViT B/32</button>
+    <button type="button" id="btn-tiny-owlv2" aria-pressed="false">OWLv2 L/14</button>
+    <button type="button" id="btn-tiny-glip" aria-pressed="false">GLIP-T</button>
+    <button type="button" id="btn-tiny-yolow" aria-pressed="false">YOLO-World</button>
+    <button type="button" id="btn-tiny-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls">
+    <label>Image width <input type="range" id="tiny-width" min="1024" max="8192" step="256" value="4096"> <b id="tiny-width-v">4096</b> px</label>
+    <label>Defect size <input type="range" id="tiny-defect" min="2" max="120" step="1" value="20"> <b id="tiny-defect-v">20</b> px</label>
+  </div>
+  <p class="readout" id="tiny-readout" aria-live="polite"></p>
+  <figcaption>Computed from each model's input size. Assumptions (<span class="reading">our reading</span>): a 4:3 camera image; OWL models and YOLO-World scale the long side to their input size; GLIP scales the short side to 800 unless the long side would pass 1333. Real pipelines may tile the image instead, which is the usual fix.</figcaption>
+</figure>
+<p>A twenty-pixel defect in a 4,096-pixel frame becomes a few pixels at the model's input, a small fraction of one patch. The token that should report it is mostly background. The fix is not a better prompt: crop or tile the image so the defect stays large, or fine-tune at a higher resolution.</p>
+
+<h3>5. The score does not tell you when to stop</h3>
+<p>An inspection system needs a threshold: above it, reject the part. Open-vocabulary scores make that hard. With no threshold, a detector always returns its best boxes, so it fires on every image, including parts with no defect. Described Object Detection measured what a threshold buys for Grounding DINO.</p>
+
+<figure class="viz" id="viz-fppc" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="fppc-canvas" role="img" aria-label="A line chart against score threshold, from none to 0.9. A red line shows the percent of images without the described object on which Grounding DINO still predicts a box. A blue line shows mAP. Both fall as the threshold rises."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-fppc-0" aria-pressed="true">No threshold</button>
+    <button type="button" id="btn-fppc-2" aria-pressed="false">0.5</button>
+    <button type="button" id="btn-fppc-4" aria-pressed="false">0.7</button>
+    <button type="button" id="btn-fppc-6" aria-pressed="false">0.9</button>
+    <button type="button" id="btn-fppc-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="fppc-readout" aria-live="polite"></p>
+  <figcaption>Described Object Detection (2307.12813v2), Supp. Table 7: Grounding DINO base with a score threshold. Red: FPPC, the share of images without an instance of a description on which the model outputs any box for it, averaged over descriptions. Blue: FULL mAP.</figcaption>
+</figure>
+<p>Without a threshold, false alarms on clean images are at <span data-claim="d3-gdino-thrnone-fppc">100.0</span>%. At 0.5 they fall to <span data-claim="d3-gdino-thr05-fppc">60.6</span>% while mAP drops from <span data-claim="d3-gdino-thrnone-map">20.7</span> to <span data-claim="d3-gdino-thr05-map">18.4</span>; at 0.9 they reach <span data-claim="d3-gdino-thr09-fppc">8.5</span>%, and mAP collapses to <span data-claim="d3-gdino-thr09-map">3.8</span>. No threshold gives both. The papers add two warnings. CLIP's score for a crop does not reflect how well the box fits (ViLD App. B). Fine-tuned models' scores on unfamiliar queries "may be poorly calibrated and may depend on the precise wording of the query" (OWLv2 Sec. 5). <span class="reading">our reading</span>: a threshold tuned for one prompt will not transfer to the next one, so set it per class, on your own labelled images.</p>
+
+<h3>6. Attributes and "not" are mostly ignored</h3>
+<div class="claimcard">
+  <h4>Card: a detector that ignores the words still scores well on plain AP</h4>
+  <dl>
+    <dt>Claim</dt><dd>Open-vocabulary detectors find the noun and ignore the modifiers, and ordinary AP hides it.</dd>
+    <dt>Measured</dt><dd>OVDEval builds test sets with hard negatives: the same object with a wrong colour, material or relation, or a negated description. It scores with NMS-AP, which merges boxes on the same object across labels, so a model cannot win by putting every label on every box.</dd>
+    <dt>Result</dt><dd>Negation, GLIP (Swin-L): <span data-claim="ovdeval-glip-negation-ap">51.80</span> plain AP but <span data-claim="ovdeval-glip-negation-nmsap">29.30</span> NMS-AP. Attributes on average: GLIP <span data-claim="ovdeval-glip-attribute-avg-nmsap">5.55</span> and Grounding DINO <span data-claim="ovdeval-gdino-attribute-avg-nmsap">9.20</span> NMS-AP. Described Object Detection finds the same: the boxes for a description and its "without" twin are often the same (D3 Fig. 13).</dd>
+    <dt>Would falsify</dt><dd>NMS-AP close to plain AP on the hard-negative sets.</dd>
+  </dl>
+</div>
+<p>For inspection this matters directly. <span class="prompt">scratched panel</span>, <span class="prompt">panel without scratches</span> and <span class="prompt">panel</span> will tend to light up the same boxes. Ask for the defect itself, not for the part in a state.</p>
+
+<h3>7. Fine-tuning fixes your classes and costs the rest</h3>
+<p>Chapter 12's last card is the seventh cause. Once you fine-tune on your defects, the model's open-vocabulary behaviour on other domains drops: OWL-ST L/14's median over 35 ODinW datasets fell from <span data-claim="owlv2-odinw-st-l14-median35">16.2</span> to <span data-claim="owlv2-odinw-stft-l14-median35">6.3</span>. If you need both, keep the original weights next to the fine-tuned ones.</p>
+
+<h3>What to do on a new inspection task</h3>
+<p><span class="reading">our reading</span>, combining the seven causes:</p>
+<ol>
+  <li>Label a test set first: a few hundred images including clean parts, so false alarms are counted.</li>
+  <li>Try the prompt as a plain description of the look, one class per prompt and one at a time, and measure.</li>
+  <li>Crop or tile so the smallest defect covers at least a patch at the model's input.</li>
+  <li>If the prompt falls short, label about ten boxes per class and fine-tune an open-vocabulary detector; it was the best few-shot learner in RF100-VL.</li>
+  <li>Set thresholds per class on your clean and defective images, never once for all prompts.</li>
+</ol>
+</section>

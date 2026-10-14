@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seeing in tokens: visual tokenizers and VLMs, explained in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#EFF3F3;--panel:#F9FBFB;--ink:#152426;--muted:#56686B;--line:#C9D6D8;
+ --enc:#0B7285;--code:#E67700;--dec:#862E9C;--llm:#364FC7;--acc:#E67700;--pro:#2B8A3E;--con:#C92A2A;
+ --sans:"Sora","Helvetica Neue",Arial,sans-serif;--serif:"PT Serif",Georgia,serif;--hw:800}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#0F1718;--panel:#162022;--ink:#E3ECED;--muted:#9AAEB1;--line:#29393C;--enc:#3BC0D6;--code:#FFA94D;--dec:#D07BE3;--llm:#7C94FF;--acc:#FFA94D;--pro:#5CCB6E;--con:#FF6B6B}}
+:root[data-theme="dark"]{--paper:#0F1718;--panel:#162022;--ink:#E3ECED;--muted:#9AAEB1;--line:#29393C;--enc:#3BC0D6;--code:#FFA94D;--dec:#D07BE3;--llm:#7C94FF;--acc:#FFA94D;--pro:#5CCB6E;--con:#FF6B6B}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18.5px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:var(--muted);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.prose{max-width:700px}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:var(--hw,700)}
+h1{font-size:clamp(46px,8.6vw,108px);line-height:.9;letter-spacing:-.04em;margin:0 0 22px}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.03;letter-spacing:-.025em;margin:0 0 14px}
+h3{font-size:24px;line-height:1.2;margin:40px 0 10px}
+h4{font-size:18px;margin:22px 0 6px}
+p{margin:0 0 16px}
+.lede{font-size:21px;line-height:1.55;color:var(--muted);max-width:640px}
+.part{font-family:var(--sans);font-size:15px;color:var(--muted);display:block;margin-bottom:6px}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav.top .brand{font-family:var(--sans);font-weight:800;margin-right:14px;white-space:nowrap}
+nav.top a{font-family:var(--sans);font-size:15px;text-decoration:none;padding:6px 11px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+nav.top a:hover{color:var(--ink);background:var(--panel)}
+header.hero{padding:54px 0 20px}
+section{padding:52px 0 20px;border-top:1px solid var(--line)}
+figure.fig{margin:26px 0 34px;background:var(--panel);border:1px solid var(--line);border-radius:var(--rad,12px);overflow:hidden}
+.canvas{position:relative;height:clamp(300px,50vw,470px);touch-action:pan-y;cursor:grab;user-select:none}
+.canvas:active{cursor:grabbing}
+.canvas canvas{display:block;width:100%;height:100%}
+.canvas .hint{position:absolute;right:12px;top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);pointer-events:none;background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 8px;border-radius:6px}
+.canvas .nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans);color:var(--muted)}
+.pad{padding:18px}
+figcaption{padding:14px 18px 16px;border-top:1px solid var(--line);font-family:var(--sans);font-size:15px;line-height:1.5}
+figcaption p{margin:8px 0 0;color:var(--muted);max-width:780px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{border:1px solid var(--line);border-radius:8px}
+.btn:hover,.seg button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--ink) 7%,transparent)}
+label.ctl{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+input[type=range]{accent-color:var(--acc);width:160px}
+input[type=checkbox]{accent-color:var(--acc);width:17px;height:17px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--acc) 11%,transparent);font-size:14.5px}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);margin-right:14px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.eq{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 16px;margin:14px 0 18px;overflow-x:auto;font-size:16.5px;line-height:1.7;white-space:nowrap}
+.eq small{display:block;white-space:normal;color:var(--muted);font-size:14px;margin-top:4px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.84em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14.5px;line-height:1.5}
+pre code{background:none;padding:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:720px){.pc{grid-template-columns:1fr}}
+.pc>div{border:1px solid var(--line);border-radius:12px;padding:14px 18px 6px;background:var(--panel)}
+.pc h4{margin-top:0}.pc .pro h4{color:var(--pro)}.pc .con h4{color:var(--con)}
+.pc ul{margin:0;padding-left:20px;font-size:16.5px;line-height:1.55}.pc li{margin-bottom:10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:18px 0 28px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:9px 14px;border-bottom:1px solid var(--line)}
+thead th{font-size:15px;border-bottom:2px solid var(--line)}
+tbody th{font-weight:700}
+td.y{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td,tr:last-child th{border-bottom:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.chips span{padding:3px 6px;border-radius:5px;white-space:pre}
+textarea{width:100%;font:inherit;font-family:var(--sans);font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--paper);color:var(--ink);resize:vertical}
+footer{border-top:1px solid var(--line);padding:32px 0 56px;font-family:var(--sans);font-size:14.5px;color:var(--muted)}
+footer ul{padding-left:18px}
+
+h1{letter-spacing:-.05em}
+h3,h4{font-weight:700}
+:root{--hl:var(--acc)}
+.wrap.prose{max-width:1120px}.wrap.prose>*{max-width:700px}
+/* design-pass chrome: section bar with progress, a menu when the links do not fit, and equation terms that light their figure.
+   Each page sets --hl (its accent) on :root. */
+nav.top a[aria-current="true"]{color:var(--ink);background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.nav-cur,.nav-menu{display:none}
+nav.top.nav-collapsed .wrap>a{display:none}
+nav.top.nav-collapsed .nav-cur{display:block;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--sans);font-size:15px;color:var(--ink)}
+.nav-cur b{color:var(--hl);margin-right:.55em;font-variant-numeric:tabular-nums}
+nav.top.nav-collapsed .nav-menu{display:inline-flex}
+.nav-menu{font:inherit;font-family:var(--sans);font-size:14px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer;margin-left:auto;white-space:nowrap}
+.nav-menu:hover{background:var(--panel)}
+.nav-menu:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.nav-panel{display:none;position:absolute;left:0;right:0;top:100%;background:var(--paper);border-bottom:1px solid var(--line);max-height:min(72vh,560px);overflow-y:auto}
+nav.top.nav-open .nav-panel{display:block}
+.nav-panel ol{list-style:none;margin:0 auto;padding:10px 24px 16px;max-width:1120px;columns:2 17rem;column-gap:2rem}
+.nav-panel li{break-inside:avoid}
+.nav-panel a{display:flex;gap:.75em;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-family:var(--sans);font-size:15.5px;line-height:1.35}
+.nav-panel a span{min-width:1.4em;font-variant-numeric:tabular-nums}
+.nav-panel a:hover{background:var(--panel);color:var(--ink)}
+.nav-panel a[aria-current="true"]{color:var(--ink)}
+.nav-panel a[aria-current="true"] span{color:var(--hl);font-weight:700}
+.nav-prog{position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--hl);transform-origin:0 50%;transform:scaleX(var(--p,0));pointer-events:none}
+.eq .katex-display{margin:.1em 0;text-align:left}
+.eq .katex-display>.katex{text-align:left}
+.eq .katex{font-size:1.14em}
+.eq[data-viz] [data-link]{cursor:pointer;border-radius:4px;transition:background-color .2s}
+.eq[data-viz] [data-link]:hover,.eq[data-viz] [data-link]:focus-visible{background:color-mix(in srgb,var(--ink) 12%,transparent);outline:none}
+.pe-lit{background:color-mix(in srgb,var(--hl) 24%,transparent)!important;border-radius:4px;transition:background-color .2s}
+.eq-hint{display:block;white-space:normal;font-size:13px;color:var(--muted);margin-top:6px}
+@media (prefers-reduced-motion: reduce){.eq[data-viz] [data-link],.pe-lit{transition:none}}
+
+.t-enc{color:var(--enc)}.t-code{color:var(--code)}
+header.hero .lede{margin-bottom:26px}
+#f-hero .canvas{height:clamp(260px,34vw,380px)}
+</style>
+<link id="katex-css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.9/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
+</head>
+<body>
+<nav class="top" aria-label="Sections"><div class="wrap"><span class="brand">Seeing in tokens</span>
+ <a href="#why">Why tokenise</a><a href="#vae">VAEs</a><a href="#vq">VQ-VAE</a><a href="#vqgan">VQGAN</a><a href="#practice">In practice</a><a href="#ar">Image generation</a>
+ <a href="#vlm">VLMs</a><a href="#res">Resolution</a><a href="#eval">Failures</a><a href="#limits">Trade-offs</a></div></nav>
+
+<header class="hero"><div class="wrap">
+ <h1>Seeing in tokens</h1>
+ <p class="lede">How images are compressed into latents and discrete codes (VAEs, VQ-VAE, VQGAN), how those codes feed image generators, and how vision-language models connect a vision encoder to a language model so it can read pictures. This guide bridges diffusion models and LLMs.</p>
+ <figure class="fig" id="f-hero" style="margin:0"><div class="canvas" role="img" aria-label="A toy image tokenizer. A picture passes through a teal encoder into a grid of patch vectors. Each vector snaps to its nearest entry in an orange codebook and takes that entry's colour, so the grid becomes discrete tokens. A purple decoder rebuilds the picture from the tokens alone."><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><button class="btn" type="button" id="hero-replay">Replay</button>
+   <span class="legend"><i style="background:var(--enc)"></i>encoder and its patch vectors</span><span class="legend"><i style="background:var(--code)"></i>codebook</span><span class="legend"><i style="background:var(--dec)"></i>decoder</span></div>
+   <p>The encoder turns the picture into a grid of patch vectors. Each vector snaps to its nearest codebook entry and takes that entry's colour, so the picture becomes a grid of discrete tokens. The decoder rebuilds the picture from the tokens alone. This picture is an illustration: its toy tokenizer gets the codebook from k-means on patch colours, and its decoder only blends the code colours.</p></figcaption></figure>
+</div></header>
+
+<main>
+<section id="why"><div class="wrap prose">
+ <span class="part">1</span><h2>Why turn images into tokens?</h2>
+ <p>A 1024×1024 colour image has over three million numbers, most of them redundant. Generative models and language models both work far better on a compact representation. There are three consumers of that representation:</p>
+ <p><strong>Latent diffusion</strong> needs a <em>continuous</em> latent that is small but decodes back to a sharp image. <strong>Autoregressive and masked image generators</strong> need <em>discrete</em> tokens from a codebook, so they can predict them like words. <strong>Vision-language models</strong> need <em>embeddings</em> that carry meaning, usually from a CLIP-style encoder, which an LLM can read alongside text. The first two come from autoencoders trained to reconstruct; the third comes from encoders trained to understand. Much current research tries to get one tokenizer that does all three.</p>
+</div></section>
+
+<section id="vae"><div class="wrap">
+ <div class="prose"><span class="part">2</span><h2>Autoencoders and VAEs</h2>
+ <p>An <strong>autoencoder</strong> has an encoder that squeezes an image into a small latent z and a decoder that reconstructs the image from z. Trained only to reconstruct, its latent space has gaps: points between training examples decode to garbage, so you can't sample new images from it.</p>
+ <p>The <strong>variational autoencoder</strong> (Kingma and Welling, 2013) fixes this. The encoder outputs a Gaussian distribution q(z|x) with mean μ and standard deviation σ rather than a single point, and training maximises the evidence lower bound (ELBO): reconstruct well, while keeping each q(z|x) close to a standard normal prior.</p>
+ <div class="eq" id="eq-vae" data-viz="f-vae"><div class="tex-done tex-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>L</mi><mo>=</mo><msub><mi mathvariant="double-struck">E</mi><mrow><mi>q</mi><mo stretchy="false">(</mo><mi>z</mi><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mrow><mo>−</mo><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>∣</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>+</mo><mi>β</mi><mo>⋅</mo><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi></mrow><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mrow><mi>q</mi><mo stretchy="false">(</mo><mi>z</mi><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><mtext> </mtext><mi mathvariant="normal">∥</mi><mtext> </mtext><mrow><mi mathvariant="script">N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mo separator="true">,</mo><mspace width="2em"/><mi>z</mi><mo>=</mo><mi>μ</mi><mo>+</mo><mi>σ</mi><mo>⊙</mo><mi>ε</mi></mrow><annotation encoding="application/x-tex">L = \mathbb{E}_{q(z \mid x)}\big[ \htmlData{link=recon, label=the reconstruction term}{-\log p(x \mid z)} \big] + \htmlData{link=beta, label=the KL weight}{\beta} \cdot \htmlData{link=kl, label=the KL to the prior}{\mathrm{KL}}\big( \htmlData{link=q, label=the encoder Gaussians}{q(z \mid x)} \,\|\, \htmlData{link=prior, label=the prior}{\mathcal{N}(0, I)} \big), \qquad z = \mu + \htmlData{link=sigma, label=the posterior width}{\sigma} \odot \varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.2052em;vertical-align:-0.3552em;"></span><span class="mord"><span class="mord mathbb">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">q</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.044em;">z</span><span class="mrel mtight">∣</span><span class="mord mathnormal mtight">x</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing size1">[</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="enclosing" data-link="recon" data-label="the reconstruction term"><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="mclose">)</span></span><span class="mord"><span class="delimsizing size1">]</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="enclosing" data-link="beta" data-label="the KL weight"><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="enclosing" data-link="kl" data-label="the KL to the prior"><span class="mord"><span class="mord mathrm">KL</span></span></span><span class="mord"><span class="delimsizing size1">(</span></span><span class="enclosing" data-link="q" data-label="the encoder Gaussians"><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal">x</span><span class="mclose">)</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∥</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="enclosing" data-link="prior" data-label="the prior"><span class="mord mathcal" style="margin-right:0.1474em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="mclose">)</span></span><span class="mord"><span class="delimsizing size1">)</span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:2em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">μ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="enclosing" data-link="sigma" data-label="the posterior width"><span class="mord mathnormal" style="margin-right:0.0359em;">σ</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="mbin">⊙</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span></span></div><!-- original: L = E<sub>q(z|x)</sub> [ − log p(x|z) ] + β · KL( q(z|x) ‖ N(0, I) ), &nbsp;&nbsp; z = μ + σ ⊙ ε -->
+  <small>The <strong>reparameterisation trick</strong> writes the sample as μ + σ·ε with ε ~ N(0, I), so gradients flow through μ and σ. β = 1 is the standard VAE; β-VAE turns it up for smoother, more disentangled latents at the cost of blurrier reconstructions.</small><span class="eq-hint">Hover or tap a term to see it in the figure below.</span></div>
+ <p>The KL term pulls every encoding toward the origin and widens it, filling the gaps so any sample from the prior decodes to something plausible. Push it too hard and different images overlap, so reconstructions blur, a classic VAE weakness.</p></div>
+ <figure class="fig" id="f-vae"><div class="canvas" role="img" aria-label="A 2D latent space with encoded images as coloured discs and a grid of decoded thumbnails that fills in as the KL weight increases"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><label class="ctl" data-link="beta">KL weight β <input type="range" id="va-b" min="0" max="100" value="25"><span class="readout" id="va-bv"></span></label><button class="btn" type="button" id="va-s" data-link="prior">Sample from the prior</button></div>
+   <div class="status" id="va-read" aria-live="polite" data-link="kl sigma"></div>
+   <p>Discs are the encoder's Gaussians for 40 training images of five shapes. The floating thumbnails show what the decoder produces at each point of latent space; faded ones are in a “hole” where no training image was encoded. Low β: tight, sharp but gappy. High β: smooth and fully covered, but shapes blend. Toy model.</p></figcaption></figure>
+</div></section>
+
+<section id="vq"><div class="wrap">
+ <div class="prose"><span class="part">3</span><h2>VQ-VAE: discrete codes</h2>
+ <p>van den Oord et al. (<strong>VQ-VAE</strong>, 2017) made the latent discrete. The encoder produces a grid of vectors; each is replaced by its nearest entry in a learned <strong>codebook</strong> of K vectors. An image becomes a grid of integers, exactly the kind of sequence a Transformer can model.</p>
+ <div class="eq" id="eq-vq" data-viz="f-vq"><div class="tex-done tex-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>z</mi><mi>q</mi></msub><mo>=</mo><msub><mi>e</mi><mi>k</mi></msub><mo separator="true">,</mo><mspace width="1em"/><mrow><mi>k</mi><mo>=</mo><msub><mrow><mi mathvariant="normal">arg min</mi><mo>⁡</mo></mrow><mi>j</mi></msub></mrow><mtext> </mtext><mi mathvariant="normal">∥</mi><msub><mi>z</mi><mi>e</mi></msub><mo>−</mo><msub><mi>e</mi><mi>j</mi></msub><mi mathvariant="normal">∥</mi></mrow><annotation encoding="application/x-tex">\htmlClass{t-code}{z_q} = \htmlData{link=code, label=the chosen code}{\htmlClass{t-code}{e_k}}, \quad \htmlData{link=assign, label=the nearest-code assignment}{k = \operatorname{arg\,min}_{j}}\, \| \htmlData{link=ze, label=the encoder outputs}{\htmlClass{t-enc}{z_e}} - \htmlData{link=code, label=the codebook entries}{\htmlClass{t-code}{e_j}} \|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="enclosing t-code"><span class="mord"><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.1302em;vertical-align:-0.3802em;"></span><span class="enclosing" data-link="code" data-label="the chosen code"><span class="enclosing t-code"><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:1em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="enclosing" data-link="assign" data-label="the nearest-code assignment"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mop"><span class="mop"><span class="mord mathrm" style="margin-right:0.0139em;">arg</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathrm">min</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2175em;"><span style="top:-2.4559em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3802em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∥</span><span class="enclosing" data-link="ze" data-label="the encoder outputs"><span class="enclosing t-enc"><span class="mord"><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span></span></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="enclosing" data-link="code" data-label="the codebook entries"><span class="enclosing t-code"><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0572em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span class="mord">∥</span></span></span></span></span></div><div class="tex-done tex-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>L</mi><mo>=</mo><mi mathvariant="normal">∥</mi><mi>x</mi><mo>−</mo><mi>D</mi><mo stretchy="false">(</mo><msub><mi>z</mi><mi>q</mi></msub><mo stretchy="false">)</mo><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>+</mo><mrow><mi mathvariant="normal">∥</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false">[</mo><msub><mi>z</mi><mi>e</mi></msub><mo stretchy="false">]</mo><mo>−</mo><msub><mi>e</mi><mi>k</mi></msub><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup></mrow><mo>+</mo><mi>β</mi><mi mathvariant="normal">∥</mi><msub><mi>z</mi><mi>e</mi></msub><mo>−</mo><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false">[</mo><msub><mi>e</mi><mi>k</mi></msub><mo stretchy="false">]</mo><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">L = \| x - D(\htmlClass{t-code}{z_q}) \|^2 + \htmlData{link=cbloss, label=the codebook loss}{\| \mathrm{sg}[\htmlClass{t-enc}{z_e}] - \htmlClass{t-code}{e_k} \|^2} + \beta \| \htmlClass{t-enc}{z_e} - \mathrm{sg}[\htmlClass{t-code}{e_k}] \|^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∥</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.1502em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="enclosing t-code"><span class="mord"><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord"><span class="mord">∥</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="enclosing" data-link="cbloss" data-label="the codebook loss"><span class="mord">∥</span><span class="mord"><span class="mord mathrm" style="margin-right:0.0139em;">sg</span></span><span class="mopen">[</span><span class="enclosing t-enc"><span class="mord"><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="enclosing t-code"><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mord"><span class="mord">∥</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mord">∥</span><span class="enclosing t-enc"><span class="mord"><span class="mord mathnormal" style="margin-right:0.044em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathrm" style="margin-right:0.0139em;">sg</span></span><span class="mopen">[</span><span class="enclosing t-code"><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mclose">]</span><span class="mord"><span class="mord">∥</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></div><!-- original: z<sub>q</sub> = e<sub>k</sub>, &nbsp; k = argmin<sub>j</sub> ‖ z<sub>e</sub> − e<sub>j</sub> ‖ <br>
+  L = ‖ x − D(z<sub>q</sub>) ‖² + ‖ sg[z<sub>e</sub>] − e<sub>k</sub> ‖² + β ‖ z<sub>e</sub> − sg[e<sub>k</sub>] ‖² -->
+  <small>sg is stop-gradient. The second term moves codes toward encoder outputs (the codebook loss); the third keeps the encoder committed to its code (the commitment loss). Rounding to the nearest code has no gradient, so the <strong>straight-through estimator</strong> copies the decoder's gradient straight to the encoder.</small></div>
+ <p>The big practical problem is <strong>codebook collapse</strong>: many codes are never chosen, get no updates, and stay dead, wasting capacity. Fixes include updating codes by an exponential moving average of their assigned vectors (a running k-means), re-initialising dead codes to random encoder outputs, and using low-dimensional ℓ2-normalised codes (ViT-VQGAN).</p></div>
+ <figure class="fig" id="f-vq"><div class="canvas" role="img" aria-label="Encoder output vectors in 3D snapped to their nearest codebook vector, with the codebook updated by moving averages"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><button class="btn" type="button" id="vq-run" data-link="cbloss">Train codebook</button><button class="btn" type="button" id="vq-reset">Re-initialise</button>
+   <label class="ctl">Codebook size K <input type="range" id="vq-k" min="4" max="48" value="24"><span class="readout" id="vq-kv"></span></label><label class="ctl"><input type="checkbox" id="vq-dead"> Revive dead codes</label></div>
+   <div class="status" id="vq-read" aria-live="polite" data-link="assign"></div>
+   <p>Small dots are encoder outputs; large spheres are codes; each line joins an output to its nearest code. Codes start in a poor random spot. Training moves each used code toward the mean of its assigned outputs, but codes that start far away never win and stay grey. Turn on revival to recover them.</p></figcaption></figure>
+</div></section>
+
+<section id="vqgan"><div class="wrap">
+ <div class="prose"><span class="part">4</span><h2>VQGAN: sharp tokens</h2>
+ <p>Pixel-wise reconstruction losses reward blur, because an average of plausible images has lower squared error than any single sharp guess. Esser et al. (<strong>VQGAN</strong>, “Taming Transformers”, 2021) added a <strong>perceptual loss</strong> (distance between deep network features, LPIPS) and a <strong>patch-based adversarial loss</strong> from a discriminator. That let the tokenizer compress much more aggressively (16× per side, so a 256×256 image becomes 16×16 = 256 tokens) while decoding realistic textures. A GPT-style Transformer then learned to generate the token grid. The same autoencoder recipe, with a continuous KL latent instead of codes, became the Stable Diffusion VAE.</p>
+ <p>Below, a toy tokenizer cuts the picture into patches and assigns each patch to one of K codebook entries by k-means on its average colour. A real VQGAN uses a learned encoder, so each code stands for a whole texture pattern rather than a colour, but the bookkeeping is the same.</p></div>
+ <figure class="fig" id="f-tok"><div class="canvas" role="img" aria-label="An image split into patches, each lifted as a cube coloured by its codebook entry, with the reconstruction beside it"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><span class="ctl">Grid</span><div class="seg" role="group" aria-label="Grid size" id="tk-n"></div><span class="ctl">Codebook</span><div class="seg" role="group" aria-label="Codebook size" id="tk-k"></div></div>
+   <div class="status" id="tk-read" aria-live="polite"></div>
+   <p>Left: the original with its token grid lifted above it; for the coarsest grid the code indices are shown. Right: the image rebuilt from codes alone. Finer grids and bigger codebooks reconstruct better but make longer, harder sequences for a generator to model.</p></figcaption></figure>
+</div></section>
+
+<section id="practice"><div class="wrap">
+ <div class="prose"><span class="part">5</span><h2>Tokenizers in practice</h2>
+ <p>Every tokenizer trades three things: <strong>compression</strong> (fewer tokens is cheaper to generate), <strong>reconstruction</strong> (how faithful the decoded image is) and <strong>generability</strong> (how easy the latent is for a generator to model; a perfectly reconstructing but chaotic latent can be hard to learn). Continuous latents reconstruct best; discrete tokens suit next-token prediction.</p></div>
+ <div class="tbl"><table><thead><tr><th>Tokenizer</th><th>Year</th><th>Type</th><th>Typical setting</th><th>Notes</th></tr></thead><tbody>
+  <tr><th>VQ-VAE / VQ-VAE-2</th><td class="y">2017 / 2019</td><td>Discrete</td><td>Codebook 512; hierarchical in v2</td><td>Introduced codebooks; v2 added multi-scale codes</td></tr>
+  <tr><th>DALL·E dVAE</th><td class="y">2021</td><td>Discrete</td><td>256×256 → 32×32 tokens, 8,192 codes</td><td>Gumbel-softmax relaxation instead of straight-through</td></tr>
+  <tr><th>VQGAN</th><td class="y">2021</td><td>Discrete</td><td>16× downsampling, 1,024 to 16,384 codes</td><td>Perceptual and adversarial losses for sharp textures</td></tr>
+  <tr><th>ViT-VQGAN</th><td class="y">2021</td><td>Discrete</td><td>ViT encoder and decoder, 8,192 codes</td><td>Low-dimensional ℓ2-normalised codes improve usage</td></tr>
+  <tr><th>SD VAE (KL-f8)</th><td class="y">2022</td><td>Continuous</td><td>8× downsampling, 4 channels</td><td>Latent of Stable Diffusion 1 and 2; SD3 and FLUX use 16 channels</td></tr>
+  <tr><th>FSQ</th><td class="y">2023</td><td>Discrete</td><td>Round each of a few dimensions to fixed levels</td><td>No learned codebook, so no collapse</td></tr>
+  <tr><th>MAGVIT-v2 (LFQ)</th><td class="y">2023</td><td>Discrete</td><td>Binary codes, vocabulary up to 2<sup>18</sup></td><td>Lookup-free quantisation; strong for video</td></tr>
+  <tr><th>DC-AE</th><td class="y">2024</td><td>Continuous</td><td>32× to 64× downsampling</td><td>Very high compression for fast high-resolution diffusion</td></tr>
+ </tbody></table></div>
+</div></section>
+
+<section id="ar"><div class="wrap prose">
+ <span class="part">6</span><h2>Generating images from tokens</h2>
+ <p>With discrete tokens, image generation becomes language modelling. <strong>DALL·E</strong> (2021) generated 1,024 image tokens after the text tokens with one Transformer. <strong>Parti</strong> (2022) scaled a ViT-VQGAN plus encoder–decoder Transformer to 20B parameters. <strong>MaskGIT</strong> (2022) predicts all tokens in parallel and keeps the most confident ones each round, needing only about 8 steps instead of 256. <strong>LlamaGen</strong> (2024) showed a plain Llama-style model with a good tokenizer competes with diffusion, and <strong>VAR</strong> (2024) predicts images coarse to fine, one resolution scale at a time. Diffusion on continuous latents still leads on quality for most tasks, but token-based generators fit naturally into multimodal LLMs that output images as well as text.</p>
+</div></section>
+
+<section id="vlm"><div class="wrap">
+ <div class="prose"><span class="part">7</span><h2>Vision-language models</h2>
+ <p>A <strong>vision-language model</strong> (VLM) answers questions about images, reads documents and charts, and holds conversations about what it sees. Almost all share three parts: a <strong>vision encoder</strong> (usually a CLIP or SigLIP ViT), a <strong>connector</strong> that turns its features into something the LLM can consume, and a pretrained <strong>LLM</strong>. They differ mostly in the connector.</p>
+ <p><strong>Flamingo</strong> (DeepMind, 2022) kept the LLM frozen, compressed each image to 64 tokens with a Perceiver resampler, and inserted new gated cross-attention layers between the LLM's layers, which made it strong at few-shot learning from interleaved image-text documents. <strong>BLIP-2</strong> (2023) trained a small Q-Former whose 32 learned queries extract the image information most relevant to text. <strong>LLaVA</strong> (2023) did the simplest thing: a linear layer (an MLP in LLaVA-1.5) maps every ViT patch feature into the LLM's embedding space, and those visual tokens are simply placed before the text. Its training had two stages: align the projector on about 600K captioned images with everything else frozen, then fine-tune projector and LLM on about 158K GPT-4-generated visual conversations. That recipe became the template for most open VLMs. <strong>Early-fusion</strong> models such as Chameleon (2024) instead tokenize images with a VQ tokenizer and train one Transformer on interleaved discrete image and text tokens from scratch, so it can also generate images. Transfusion (2024) mixes next-token prediction for text with diffusion for images in one model.</p></div>
+ <figure class="fig" id="f-vlm"><div class="canvas" role="img" aria-label="3D diagram of a vision-language model with a switchable connector: projector, Q-Former, cross-attention or early fusion"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><div class="seg" role="group" aria-label="Architecture" id="vl-k"><button type="button" data-k="llava" aria-pressed="true">LLaVA (projector)</button><button type="button" data-k="blip">BLIP-2 (Q-Former)</button><button type="button" data-k="flam">Flamingo (cross-attention)</button><button type="button" data-k="early">Early fusion (Chameleon)</button></div>
+   <span class="ctl">Image size</span><div class="seg" role="group" aria-label="Image resolution" id="vl-r"><button type="button" data-r="224">224 px</button><button type="button" data-r="336" aria-pressed="true">336 px</button><button type="button" data-r="672">672 px tiled</button></div></div>
+   <div class="status" id="vl-read" aria-live="polite"></div>
+   <p>The picture enters on the left. <span style="color:var(--enc);font-weight:600">Teal</span> is the vision side, <span style="color:var(--code);font-weight:600">orange</span> the connector, <span style="color:var(--llm);font-weight:600">blue</span> the language model and its token stream. Cube counts in the stream are capped for display; the readout gives the real number of visual tokens.</p></figcaption></figure>
+</div></section>
+
+<section id="res"><div class="wrap prose">
+ <span class="part">8</span><h2>Resolution and token budgets</h2>
+ <p>A ViT-L/14 at 336 pixels produces 24×24 = 576 patch tokens. That's too coarse for small text in documents and charts, but raising resolution grows tokens quadratically. <strong>AnyRes</strong> tiling (LLaVA-NeXT) cuts a large image into encoder-sized tiles plus a low-resolution thumbnail for global context. <strong>Native resolution</strong> approaches (NaViT, Qwen2-VL) let the ViT accept any size and aspect ratio directly, packing variable numbers of patches, and Qwen2-VL adds 2D- and time-aware rotary positions (M-RoPE) for images and video. To keep the LLM's input manageable, models merge neighbouring patches (pixel shuffle, 2×2 pooling) or resample to a fixed number of tokens. Video multiplies the problem by the number of frames, so frame sampling and token compression are active research areas.</p>
+</div></section>
+
+<section id="eval"><div class="wrap prose">
+ <span class="part">9</span><h2>Evaluation and failure modes</h2>
+ <p>Common benchmarks include VQAv2 (everyday visual questions), TextVQA, DocVQA and ChartQA (reading), MMMU (college-level multimodal reasoning) and MathVista. The best-known failure is <strong>object hallucination</strong>: describing things that aren't in the image because the language model's priors override weak visual evidence (the POPE benchmark probes this with yes/no questions). VLMs also struggle with counting, precise spatial relations, fine-grained comparisons between images, and small details lost to resizing. Much progress has come from better data: dense human-written descriptions, synthetic document and chart data, and grounding data that links phrases to boxes.</p>
+</div></section>
+
+<section id="limits"><div class="wrap">
+ <div class="prose"><span class="part">10</span><h2>Trade-offs</h2></div>
+ <div class="tbl"><table><thead><tr><th>Connector</th><th>Examples</th><th>Visual tokens</th><th>Strengths</th><th>Weaknesses</th></tr></thead><tbody>
+  <tr><th>MLP projector</th><td>LLaVA, most open VLMs</td><td>All patches (hundreds to thousands)</td><td>Simple, preserves detail, easy to train</td><td>Long sequences; cost grows with resolution</td></tr>
+  <tr><th>Query-based resampler</th><td>BLIP-2, Qwen-VL</td><td>Fixed, e.g. 32 to 256</td><td>Cheap for the LLM; fixed budget</td><td>Can drop fine detail such as small text</td></tr>
+  <tr><th>Cross-attention</th><td>Flamingo, Llama 3.2 Vision</td><td>None in the text stream</td><td>LLM can stay frozen; handles many images</td><td>Extra layers; less tight integration</td></tr>
+  <tr><th>Early fusion</th><td>Chameleon, Janus</td><td>Discrete tokens, e.g. 1,024 per image</td><td>One model understands and generates</td><td>Discrete tokens lose detail; expensive to train from scratch</td></tr>
+ </tbody></table></div>
+ <div class="pc"><div class="pro"><h4>What works well</h4><ul>
+  <li>Reusing strong pretrained parts (CLIP-style encoders, LLMs) makes VLMs cheap to build.</li>
+  <li>Tokenizers let the same Transformer machinery handle images, video and audio.</li>
+  <li>Latent autoencoders cut the cost of diffusion by orders of magnitude.</li>
+  <li>VLMs read documents, screenshots and charts well enough to power agents.</li></ul></div>
+  <div class="con"><h4>What is still hard</h4><ul>
+  <li>Hallucinated objects and details, and overconfidence about what is visible.</li>
+  <li>Encoders trained for understanding reconstruct poorly, and vice versa, so unified models juggle two representations.</li>
+  <li>Token budgets: high resolution and long video overwhelm context windows.</li>
+  <li>Counting, spatial reasoning and fine-grained perception lag far behind language skills.</li></ul></div></div>
+</div></section>
+</main>
+
+<footer><div class="wrap prose"><p><strong style="color:var(--ink)">Sources</strong></p><ul>
+ <li>Kingma and Welling, 2013. Auto-Encoding Variational Bayes. <a href="https://arxiv.org/abs/1312.6114">arXiv:1312.6114</a></li><li>van den Oord et al., 2017. VQ-VAE. <a href="https://arxiv.org/abs/1711.00937">arXiv:1711.00937</a></li><li>Razavi et al., 2019. VQ-VAE-2. <a href="https://arxiv.org/abs/1906.00446">arXiv:1906.00446</a></li>
+ <li>Esser et al., 2021. Taming Transformers (VQGAN). <a href="https://arxiv.org/abs/2012.09841">arXiv:2012.09841</a></li><li>Ramesh et al., 2021. DALL·E. <a href="https://arxiv.org/abs/2102.12092">arXiv:2102.12092</a></li><li>Yu et al., 2021. ViT-VQGAN. <a href="https://arxiv.org/abs/2110.04627">arXiv:2110.04627</a></li>
+ <li>Mentzer et al., 2023. FSQ. <a href="https://arxiv.org/abs/2309.15505">arXiv:2309.15505</a></li><li>Yu et al., 2023. MAGVIT-v2. <a href="https://arxiv.org/abs/2310.05737">arXiv:2310.05737</a></li><li>Chen et al., 2024. DC-AE. <a href="https://arxiv.org/abs/2410.10733">arXiv:2410.10733</a></li>
+ <li>Chang et al., 2022. MaskGIT. <a href="https://arxiv.org/abs/2202.04200">arXiv:2202.04200</a></li><li>Yu et al., 2022. Parti. <a href="https://arxiv.org/abs/2206.10789">arXiv:2206.10789</a></li><li>Sun et al., 2024. LlamaGen. <a href="https://arxiv.org/abs/2406.06525">arXiv:2406.06525</a></li><li>Tian et al., 2024. VAR. <a href="https://arxiv.org/abs/2404.02905">arXiv:2404.02905</a></li>
+ <li>Alayrac et al., 2022. Flamingo. <a href="https://arxiv.org/abs/2204.14198">arXiv:2204.14198</a></li><li>Li et al., 2023. BLIP-2. <a href="https://arxiv.org/abs/2301.12597">arXiv:2301.12597</a></li><li>Liu et al., 2023. LLaVA. <a href="https://arxiv.org/abs/2304.08485">arXiv:2304.08485</a></li><li>LLaVA-1.5. <a href="https://arxiv.org/abs/2310.03744">arXiv:2310.03744</a></li>
+ <li>Chameleon Team, 2024. <a href="https://arxiv.org/abs/2405.09818">arXiv:2405.09818</a></li><li>Zhou et al., 2024. Transfusion. <a href="https://arxiv.org/abs/2408.11039">arXiv:2408.11039</a></li><li>Dehghani et al., 2023. NaViT. <a href="https://arxiv.org/abs/2307.06304">arXiv:2307.06304</a></li><li>Wang et al., 2024. Qwen2-VL. <a href="https://arxiv.org/abs/2409.12191">arXiv:2409.12191</a></li><li>Li et al., 2023. POPE. <a href="https://arxiv.org/abs/2305.10355">arXiv:2305.10355</a></li><li>Yue et al., 2023. MMMU. <a href="https://arxiv.org/abs/2311.16502">arXiv:2311.16502</a></li></ul>
+ <p>The codebook and tokenizer figures run real k-means; the VAE figure is a toy model of the β trade-off; the VLM diagram is illustrative.</p></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){"use strict";window.LABEL_FONT='"Sora", Arial, sans-serif';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function setPressed(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+const C={};
+function readColors(keys){keys.forEach(k=>{C[k]=new THREE.Color(cssv('--'+k)||'#888888');});}
+function hex(k){return cssv('--'+k);}
+function label(text,size,color){size=size||.42;const c=document.createElement('canvas');const ctx=c.getContext('2d');const fs=64;
+ const font='600 '+fs+'px '+(window.LABEL_FONT||'Arial, sans-serif');ctx.font=font;const w=Math.ceil(ctx.measureText(text).width)+24;c.width=w;c.height=Math.ceil(fs*1.35);
+ ctx.font=font;ctx.fillStyle=color||cssv('--ink');ctx.textBaseline='middle';ctx.fillText(text,12,c.height/2+2);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size*w/c.height,size,1);sp.renderOrder=10;return sp;}
+function emojiSprite(ch,size){const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.font='72px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,48,54);
+ const t=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size||.5,size||.5,1);sp.renderOrder=11;return sp;}
+function dotTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(32,32,28,0,7);g.fill();return new THREE.CanvasTexture(c);}
+function line(pts,color,opts){opts=opts||{};const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=opts.dashed?new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.12,transparent:true,opacity:opts.opacity||1}):new THREE.LineBasicMaterial({color,transparent:true,opacity:opts.opacity==null?1:opts.opacity});
+ const l=new THREE.Line(g,m);if(opts.dashed)l.computeLineDistances();return l;}
+function std(color,o){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.55,metalness:.05},o||{}));}
+function disposeTree(o){o.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});}
+
+const stages=[];
+function base(camPos,target,hfov){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(40,1.6,.1,300);camera.position.set(...camPos);camera.lookAt(new THREE.Vector3(...target));
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,.95));const d=new THREE.DirectionalLight(0xffffff,.65);d.position.set(5,10,8);scene.add(d);
+ const root=new THREE.Group();scene.add(root);return {scene,camera,root,hfov:hfov||60};}
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=e.target._stage;s.visible=e.isIntersecting;if(s.visible&&!s.renderer)mk(s);else if(!s.visible&&s.renderer)kill(s);}),{rootMargin:'200px 0px'});
+function mk(s){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0,0);s.wrap.insertBefore(r.domElement,s.wrap.firstChild);s.renderer=r;s.w=0;}
+ catch(err){if(!s.wrap.querySelector('.nogl'))s.wrap.insertAdjacentHTML('beforeend','<div class="nogl">3D view unavailable: this browser has WebGL turned off.</div>');}}
+function kill(s){s.renderer.dispose();if(s.renderer.forceContextLoss)s.renderer.forceContextLoss();s.renderer.domElement.remove();s.renderer=null;}
+function drag(s){let down=false,px=0,py=0,sx=0,sy=0;const w=s.wrap;
+ w.addEventListener('pointerdown',e=>{down=true;px=sx=e.clientX;py=sy=e.clientY;});
+ w.addEventListener('pointerup',e=>{if(down&&s.onClick&&Math.hypot(e.clientX-sx,e.clientY-sy)<6){const r=w.getBoundingClientRect();s.onClick(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1));}down=false;});
+ addEventListener('pointerup',()=>down=false);w.addEventListener('pointercancel',()=>down=false);
+ w.addEventListener('pointermove',e=>{if(!down)return;s.tRotY+=(e.clientX-px)*.008;s.tRotX=clamp(s.tRotX+(e.clientY-py)*.005,-.7,.7);px=e.clientX;py=e.clientY;});}
+function stage(id,build){const fig=document.getElementById(id);const wrap=fig.querySelector('.canvas');const s={fig,wrap,rotY:0,rotX:0,tRotY:0,tRotX:0,auto:0};
+ s.glowT={};fig.addEventListener('pe-link',e=>{s.glowT[e.detail]=performance.now();});s.g=k=>{const t0=s.glowT[k];if(!t0)return 0;const u=(performance.now()-t0)/1100;return u>=1?0:reduced?1:Math.sin(Math.PI*u);};
+ Object.assign(s,build(s));s.rotY=s.tRotY;s.rotX=s.tRotX;wrap._stage=s;stages.push(s);io.observe(wrap);drag(s);return s;}
+let lastT=performance.now();
+function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;const t=now/1000;
+ for(const s of stages){if(!s.renderer)continue;const w=s.wrap.clientWidth,h=s.wrap.clientHeight;
+  if(w!==s.w||h!==s.h){s.renderer.setSize(w,h,false);const a=w/h;s.camera.aspect=a;const hf=s.hfov*Math.PI/180;s.camera.fov=clamp(Math.max(2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI,s.vmin||34),24,80);s.camera.updateProjectionMatrix();s.w=w;s.h=h;}
+  if(!reduced)s.tRotY+=s.auto*dt;s.rotY+=(s.tRotY-s.rotY)*.12;s.rotX+=(s.tRotX-s.rotX)*.12;s.root.rotation.set(s.rotX,s.rotY,0);
+  if(s.update)s.update(t,dt);s.renderer.render(s.scene,s.camera);}
+ requestAnimationFrame(loop);}
+function startAll(fn){if(typeof THREE==='undefined'){document.querySelectorAll('.canvas').forEach(c=>c.insertAdjacentHTML('beforeend','<div class="nogl">The 3D library could not load. Check your connection and reload the page.</div>'));return;}
+ const ready=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+ ready.then(()=>{fn();requestAnimationFrame(loop);});}
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const PIC=(()=>{const c=document.createElement('canvas');const S=256;c.width=c.height=S;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,0,S);gr.addColorStop(0,'#86B7E0');gr.addColorStop(.7,'#DCEAF3');g.fillStyle=gr;g.fillRect(0,0,S,S);
+ g.fillStyle='#F4C65A';g.beginPath();g.arc(.18*S,.18*S,.07*S,0,7);g.fill();g.fillStyle='#96BB82';g.beginPath();g.moveTo(0,.7*S);g.bezierCurveTo(.3*S,.62*S,.62*S,.8*S,S,.68*S);g.lineTo(S,S);g.lineTo(0,S);g.fill();
+ g.fillStyle='#6F9A60';g.beginPath();g.moveTo(0,.86*S);g.bezierCurveTo(.4*S,.8*S,.7*S,.92*S,S,.84*S);g.lineTo(S,S);g.lineTo(0,S);g.fill();g.fillStyle='#7A3325';g.beginPath();g.moveTo(.3*S,.52*S);g.lineTo(.14*S,.44*S);g.lineTo(.18*S,.61*S);g.fill();
+ g.fillStyle='#B4462F';g.beginPath();g.ellipse(.47*S,.56*S,.2*S,.13*S,0,0,7);g.fill();g.fillStyle='#E7925F';g.beginPath();g.ellipse(.52*S,.61*S,.13*S,.075*S,0,0,7);g.fill();
+ g.fillStyle='#8E3726';g.beginPath();g.arc(.66*S,.42*S,.09*S,0,7);g.fill();g.fillStyle='#E8B33A';g.beginPath();g.moveTo(.735*S,.4*S);g.lineTo(.82*S,.43*S);g.lineTo(.735*S,.46*S);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(.685*S,.4*S,.018*S,0,7);g.fill();return c;})();
+const picPlane=(w)=>new THREE.Mesh(new THREE.PlaneGeometry(w,w),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(PIC),side:THREE.DoubleSide}));
+
+
+/* ---------- hero: encode, snap to the codebook, decode (toy tokenizer, illustrative) ---------- */
+function buildHero(s){const B=base([0,1.15,10.5],[0,.25,0],60);s.tRotY=-.1;s.tRotX=.06;s.vmin=20;
+ const n=8,K=8,muted=hex('muted');
+ // Same toy tokenizer as the tokenizer figure: average colour per patch, k-means codebook, codes ordered dark to light.
+ const px=PIC.getContext('2d').getImageData(0,0,256,256).data,P=256/n,cols=[];
+ for(let j=0;j<n;j++)for(let i=0;i<n;i++){let r_=0,g_=0,b_=0,c=0;for(let y=j*P;y<(j+1)*P;y+=2)for(let x=i*P;x<(i+1)*P;x+=2){const o=(y*256+x)*4;r_+=px[o];g_+=px[o+1];b_+=px[o+2];c++;}cols.push([r_/c,g_/c,b_/c]);}
+ const d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2,r=rng(5);let cen=[cols[Math.floor(r()*cols.length)].slice()];
+ while(cen.length<K){const dd=cols.map(c=>Math.min(...cen.map(e=>d2(c,e))));let u=r()*dd.reduce((a,b)=>a+b,0),k=0;while(k<dd.length-1&&u>dd[k]){u-=dd[k];k++;}cen.push(cols[k].slice());}
+ const as=new Int32Array(cols.length);
+ for(let it=0;it<12;it++){cols.forEach((c,i)=>{let b=1e18;cen.forEach((e,k)=>{const v=d2(c,e);if(v<b){b=v;as[i]=k;}});});
+  const S=cen.map(()=>[0,0,0,0]);cols.forEach((c,i)=>{const q=S[as[i]];q[0]+=c[0];q[1]+=c[1];q[2]+=c[2];q[3]++;});S.forEach((q,k)=>{if(q[3])cen[k]=[q[0]/q[3],q[1]/q[3],q[2]/q[3]];});}
+ const lum=e=>(.3*e[0]+.59*e[1]+.11*e[2])/255,ord=cen.map((e,k)=>k).sort((a,b)=>lum(cen[a])-lum(cen[b])),rank=[];ord.forEach((k,i)=>{rank[k]=i;});
+ const codeCol=ord.map(k=>new THREE.Color(cen[k][0]/255,cen[k][1]/255,cen[k][2]/255)),tok=[...as].map(k=>rank[k]);
+ const img=picPlane(1.6);img.material.transparent=true;B.root.add(img);
+ // The decoder output is the code colours alone, blended by linear filtering.
+ const rc=document.createElement('canvas');rc.width=rc.height=n;const rg=rc.getContext('2d'),rid=rg.createImageData(n,n);
+ tok.forEach((t,i)=>{const c=codeCol[t];rid.data.set([c.r*255,c.g*255,c.b*255,255],i*4);});rg.putImageData(rid,0,0);
+ const rt=new THREE.CanvasTexture(rc);rt.minFilter=THREE.LinearFilter;
+ const reb=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.6),new THREE.MeshBasicMaterial({map:rt,side:THREE.DoubleSide,transparent:true,opacity:0}));B.root.add(reb);
+ const slab=(col,hs)=>{const gr=new THREE.Group();hs.forEach((h,k)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.09,h,.8),std(col,{transparent:true,opacity:.9}));m.position.x=(k-(hs.length-1)/2)*.19;gr.add(m);});B.root.add(gr);return gr;};
+ const enc=slab(C.enc,[1.5,1.25,1,.8]),dec=slab(C.dec,[.8,1,1.25,1.5]);
+ const tg=new THREE.BoxGeometry(1,1,1);
+ const tiles=tok.map((t,i)=>{const c0=C.enc.clone().multiplyScalar(.65+.45*lum(cols[i]));const m=new THREE.Mesh(tg,std(c0.clone()));m.userData={c0,c1:codeCol[t]};B.root.add(m);return m;});
+ const swg=new THREE.BoxGeometry(.17,.17,.17),sw=codeCol.map(c=>{const m=new THREE.Mesh(swg,std(c));B.root.add(m);return m;});
+ const tray=new THREE.Mesh(new THREE.BoxGeometry(1,.04,.26),std(C.code));B.root.add(tray);
+ const lp=new Float32Array(n*n*6),lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));
+ // Only the row being looked up shows its lines, drawn over the tiles so the lookup reads as a scan.
+ const links=new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:C.ink,transparent:true,opacity:0,depthTest:false}));links.renderOrder=5;B.root.add(links);
+ const L=(t,c,z)=>{const l=label(t,z||.26,c);B.root.add(l);return l;};
+ const lImg=L('image',muted),lEnc=L('encoder',hex('enc')),lPv=L('patch vectors',hex('enc')),lTok=L('discrete tokens',hex('code')),
+  lCb=L('codebook',hex('code')),lDec=L('decoder',hex('dec')),lReb=L('rebuilt image',muted);
+ const arr=[0,1,2,3].map(()=>L('\u2192',muted,.34));
+ let narrow=null;
+ // Wide canvases run the pipeline in one row; narrow ones fold it into a "<": encode along the top, decode back along the bottom.
+ function layout(nw){narrow=nw;const G=nw?1.75:1.9,cell=G/n,gx=nw?1.5:0,gy=nw?-.05:0,sp=nw?.21:.235,iw=nw?1.3:1.6;
+  const pI=nw?[-1.95,.95]:[-4.6,0],pE=nw?[-.35,.95]:[-2.6,0],pD=nw?[-.35,-.95]:[2.6,0],pR=nw?[-1.95,-.95]:[4.6,0];
+  img.scale.setScalar(iw/1.6);img.position.set(pI[0],pI[1],0);reb.scale.setScalar(iw/1.6);reb.position.set(pR[0],pR[1],0);
+  enc.position.set(pE[0],pE[1],0);dec.position.set(pD[0],pD[1],0);enc.scale.setScalar(nw?.75:1);dec.scale.setScalar(nw?.75:1);
+  const cy=gy+G/2+(nw?.3:.38);
+  sw.forEach((m,k)=>m.position.set(gx+(k-(K-1)/2)*sp,cy,0));tray.scale.x=K*sp+.12;tray.position.set(gx,cy-.13,0);
+  tiles.forEach((m,i)=>{const x=i%n,y=Math.floor(i/n);m.userData.p=V(gx-G/2+(x+.5)*cell,gy+G/2-(y+.5)*cell,0);m.userData.w=cell*.86;m.position.copy(m.userData.p);
+   const q=sw[tok[i]].position;lp.set([m.userData.p.x,m.userData.p.y,.06,q.x,q.y,q.z],i*6);});lg.attributes.position.needsUpdate=true;
+  const by=nw?0:-1.2;
+  lImg.position.set(pI[0],nw?pI[1]-iw/2-.17:by,0);lReb.position.set(pR[0],nw?pR[1]-iw/2-.17:by,0);
+  lEnc.position.set(pE[0],nw?pE[1]+.77:by,0);lDec.position.set(pD[0],nw?pD[1]-.77:by,0);
+  lPv.position.set(gx,gy-G/2-.22,0);lTok.position.copy(lPv.position);lCb.position.set(gx,cy+.3,0);
+  const ap=nw?[[-1.15,.95,0],[.25,.55,-.46],[.25,-.6,Math.PI+.46],[-1.15,-.95,Math.PI]]:[[-3.37,0,0],[-1.61,0,0],[1.61,0,0],[3.37,0,0]];
+  arr.forEach((a,k)=>{a.position.set(ap[k][0],ap[k][1],0);a.material.rotation=ap[k][2];});
+  B.hfov=s.hfov=nw?30:60;B.camera.position.set(nw?-.1:0,nw?.85:1.15,10.5);B.camera.lookAt(nw?-.1:0,nw?-.05:.25,0);s.w=0;}
+ const T_END=6.2;let t0=performance.now()/1000;document.getElementById('hero-replay').onclick=()=>{t0=performance.now()/1000;};
+ const fade=(o,u)=>{o.material.opacity=u;o.visible=u>.002;};
+ const grow=(o,u)=>{o.scale.y=Math.max(.001,u);o.visible=u>0;};
+ function set(e){const st=(a,b)=>smooth(a,b,e);
+  fade(img,st(0,.5));fade(lImg,st(.2,.6));fade(arr[0],st(.5,.8));
+  enc.children.forEach((m,k)=>grow(m,st(.6+k*.1,1+k*.1)));fade(lEnc,st(.8,1.2));fade(arr[1],st(1.1,1.4));
+  const snapped=Math.floor(clamp((e-2.4)/1.4,0,1)*n*n),from=Math.max(0,snapped-n);
+  tiles.forEach((m,i)=>{const x=i%n,y=Math.floor(i/n),u=st(1.2+x*.07+y*.02,1.6+x*.07+y*.02),w=m.userData.w*u;m.scale.set(Math.max(.001,w),Math.max(.001,w),.12);m.visible=u>0;
+   const ts=2.4+i/(n*n)*1.4,v=st(ts,ts+.2);m.material.color.copy(m.userData.c0).lerp(m.userData.c1,v);m.position.z=.15*Math.sin(Math.PI*v);});
+  fade(lPv,st(1.4,1.8)*(1-st(3.55,3.8)));
+  sw.forEach((m,k)=>{const u=st(1.9+k*.05,2.2+k*.05);m.scale.setScalar(Math.max(.001,u));m.visible=u>0;});
+  const tu=st(1.9,2.3);tray.visible=tu>0;tray.scale.y=Math.max(.001,tu);fade(lCb,tu);
+  lg.setDrawRange(from*2,(snapped-from)*2);links.material.opacity=.7*(1-st(3.9,4.3));links.visible=snapped>0&&links.material.opacity>.002;
+  fade(lTok,st(3.85,4.15));fade(arr[2],st(4.1,4.4));
+  dec.children.forEach((m,k)=>grow(m,st(4.2+k*.1,4.6+k*.1)));fade(lDec,st(4.4,4.8));fade(arr[3],st(4.7,5));
+  fade(reb,st(4.9,5.7));fade(lReb,st(5.2,5.6));}
+ layout(false);set(reduced?T_END:0);
+ return Object.assign(B,{update(t){const nw=s.wrap.clientWidth/Math.max(1,s.wrap.clientHeight)<1.9;if(nw!==narrow)layout(nw);set(reduced?T_END:Math.min(T_END,t-t0));}});}
+
+/* ---------- VAE latent map ---------- */
+function buildVAE(s){const B=base([0,7.4,4.6],[0,0,.3],56);s.tRotY=-.25;s.vmin=34;const K=5,R=2.6;const pal=['#D9480F','#1971C2','#2B8A3E','#862E9C','#E67700'];
+ const cen=[...Array(K)].map((_,k)=>[1.7*Math.cos(k*2*Math.PI/K+.3),1.7*Math.sin(k*2*Math.PI/K+.3)]);const r=rng(2);const pts=[];for(let k=0;k<K;k++)for(let i=0;i<8;i++)pts.push({k,o:[randn(r),randn(r)]});
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(2*R,2*R),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.4,side:THREE.DoubleSide}));floor.rotation.x=-Math.PI/2;B.root.add(floor);
+ const discs=pts.map(p=>{const m=new THREE.Mesh(new THREE.CircleGeometry(1,28),new THREE.MeshBasicMaterial({color:new THREE.Color(pal[p.k]),transparent:true,opacity:.28,side:THREE.DoubleSide,depthWrite:false}));m.rotation.x=-Math.PI/2;B.root.add(m);return m;});
+ function shape(g,k,S,a){g.globalAlpha=a;g.fillStyle=pal[k];g.strokeStyle=pal[k];g.lineWidth=S*.1;const c=S/2,rr=S*.3;g.beginPath();
+  if(k===0)g.arc(c,c,rr,0,7);else if(k===1)g.rect(c-rr,c-rr,2*rr,2*rr);else if(k===2){g.moveTo(c,c-rr);g.lineTo(c+rr,c+rr);g.lineTo(c-rr,c+rr);g.closePath();}else if(k===3){for(let i=0;i<10;i++){const an=i*Math.PI/5-Math.PI/2,rad=i%2?rr*.45:rr;g.lineTo(c+rad*Math.cos(an),c+rad*Math.sin(an));}g.closePath();}else{g.arc(c,c,rr,0,7);g.stroke();return;}g.fill();}
+ const G=9,thumbs=[];for(let j=0;j<G;j++)for(let i=0;i<G;i++){const cv=document.createElement('canvas');cv.width=cv.height=48;const t=new THREE.CanvasTexture(cv);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));const x=-R+(i+.5)*2*R/G,z=-R+(j+.5)*2*R/G;sp.position.set(x,.35,z);sp.scale.set(.34,.34,1);B.root.add(sp);thumbs.push({cv,t,sp,x,y:-z});}
+ const ring=new THREE.Mesh(new THREE.RingGeometry(.96,1.04,72),new THREE.MeshBasicMaterial({color:C.ink,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.04;ring.visible=false;B.root.add(ring);
+ const prior=new THREE.Group();B.root.add(prior);const bs=document.getElementById('va-b'),rd=document.getElementById('va-read');let P=null;
+ function state(){const b=+bs.value/100*4;const shrink=1/(1+.45*b),sig=.1+.55*b/(1+b),spread=.28*shrink;return {b,post:pts.map(p=>({k:p.k,m:[cen[p.k][0]*shrink+p.o[0]*spread,cen[p.k][1]*shrink+p.o[1]*spread],s:sig}))};}
+ function dens(post,x,y){const w=Array(K).fill(0);post.forEach(q=>{w[q.k]+=Math.exp(-((x-q.m[0])**2+(y-q.m[1])**2)/(2*q.s*q.s))/(q.s*q.s);});return w;}
+ function compute(){const st=state();P=st.post;document.getElementById('va-bv').textContent=st.b.toFixed(2);P.forEach((q,i)=>{discs[i].position.set(q.m[0],.01+i*.0005,-q.m[1]);discs[i].scale.setScalar(2*q.s);});
+  const ref=1/(.1*.1)*.5;thumbs.forEach(th=>{const w=dens(P,th.x,th.y);const tot=w.reduce((a,b)=>a+b,0);const g=th.cv.getContext('2d');g.clearRect(0,0,48,48);const cover=clamp(tot/(ref*.02),0,1);
+   g.globalAlpha=.9;g.fillStyle=hex('panel');g.fillRect(0,0,48,48);w.forEach((v,k)=>{if(tot>0&&v/tot>.03)shape(g,k,48,(v/tot)*Math.max(.12,cover));});g.globalAlpha=1;th.t.needsUpdate=true;});
+  const kl=P.reduce((a,q)=>a+.5*(q.m[0]**2+q.m[1]**2+2*q.s*q.s-2-2*Math.log(q.s*q.s)),0)/P.length;
+  rd.innerHTML=`Average KL to the prior <b>${kl.toFixed(2)}</b> nats. Posterior width σ = <b>${P[0].s.toFixed(2)}</b>: ${P[0].s<.25?'sharp, distinct reconstructions but a gappy latent space.':P[0].s<.45?'a reasonable balance.':'smooth and well covered, but shapes overlap so reconstructions blur together.'}`;}
+ document.getElementById('va-s').onclick=()=>{while(prior.children.length){const c=prior.children.pop();c.geometry.dispose();c.material.dispose();}const r2=rng(Math.floor(Math.random()*1e6));let hit=0;
+  for(let i=0;i<60;i++){const x=randn(r2),y=randn(r2);const w=dens(P,x,y);const tot=w.reduce((a,b)=>a+b,0);const ok=tot>2;if(ok)hit++;const m=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),std(ok?C.pro:C.con));m.position.set(x,.08,-y);prior.add(m);}
+  rd.innerHTML+=` Prior samples landing on encoded data: <b>${Math.round(hit/60*100)}%</b> (green); the rest decode to blurry mixtures or nothing.`;};
+ bs.oninput=()=>{while(prior.children.length){const c=prior.children.pop();c.geometry.dispose();c.material.dispose();}compute();};compute();
+ return Object.assign(B,{update(){const gq=s.g('q'),gs=s.g('sigma'),gr=s.g('recon');
+  discs.forEach((m,i)=>{m.material.opacity=.28+.4*gq;m.scale.setScalar(2*P[i].s*(1+.35*gs));});
+  thumbs.forEach(th=>{const v=.34*(1+.5*gr);th.sp.scale.set(v,v,1);});
+  ring.material.opacity=.8*s.g('prior');ring.visible=ring.material.opacity>.002;}});}
+
+/* ---------- VQ codebook ---------- */
+function buildVQ(s){const B=base([0,1.6,7.8],[0,0,0],50);s.auto=.08;const r=rng(8);const X=[];const blobs=[[1.4,.6,.2,.35,180],[-1.2,1,-.5,.3,120],[-.4,-1.2,1,.28,70],[1.1,-1,-1.1,.22,30]];
+ blobs.forEach(([x,y,z,s_,n])=>{for(let i=0;i<n;i++)X.push(V(x+randn(r)*s_,y+randn(r)*s_,z+randn(r)*s_));});const N=X.length;
+ const pts=new THREE.InstancedMesh(new THREE.SphereGeometry(.035,6,5),std(C.enc),N);const d=new THREE.Object3D();X.forEach((p,i)=>{d.position.copy(p);d.updateMatrix();pts.setMatrixAt(i,d.matrix);});B.root.add(pts);
+ const lp=new Float32Array(N*6);const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));const segs=new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:C.muted,transparent:true,opacity:.35}));B.root.add(segs);pts.material.emissive.copy(C.enc);
+ let K=24,codes=[],age=[],running=false,codeMesh=null,cntK=[],cg=0,zg=0;const ks=document.getElementById('vq-k'),dead=document.getElementById('vq-dead'),rd=document.getElementById('vq-read');const asg=new Int32Array(N);
+ function init(){K=+ks.value;document.getElementById('vq-kv').textContent=K;const r2=rng(Math.floor(Math.random()*1e6));codes=[...Array(K)].map(()=>V(2.2+r2()*1.2,(r2()*2-1)*2.2,(r2()*2-1)*2.2));age=Array(K).fill(0);
+  if(codeMesh){B.root.remove(codeMesh);codeMesh.geometry.dispose();codeMesh.material.dispose();}codeMesh=new THREE.InstancedMesh(new THREE.SphereGeometry(.11,12,8),std(new THREE.Color(1,1,1)),K);B.root.add(codeMesh);assign();draw();}
+ function assign(){for(let i=0;i<N;i++){let b=1e9,bk=0;for(let k=0;k<K;k++){const dd=X[i].distanceToSquared(codes[k]);if(dd<b){b=dd;bk=k;}}asg[i]=bk;}}
+ function step(){const sum=codes.map(()=>V(0,0,0)),cnt=Array(K).fill(0);for(let i=0;i<N;i++){sum[asg[i]].add(X[i]);cnt[asg[i]]++;}
+  for(let k=0;k<K;k++){if(cnt[k]){codes[k].lerp(sum[k].divideScalar(cnt[k]),.15);age[k]=0;}else{age[k]++;if(dead.checked&&age[k]>15){codes[k].copy(X[Math.floor(Math.random()*N)]).add(V(randn(r)*.05,randn(r)*.05,randn(r)*.05));age[k]=0;}}}assign();}
+ function draw(){const cnt=Array(K).fill(0);let err=0;for(let i=0;i<N;i++){cnt[asg[i]]++;const c=codes[asg[i]];lp.set([X[i].x,X[i].y,X[i].z,c.x,c.y,c.z],i*6);err+=X[i].distanceTo(c);}lg.attributes.position.needsUpdate=true;
+  cntK=cnt;for(let k=0;k<K;k++){d.position.copy(codes[k]);d.scale.setScalar((cnt[k]?1:.7)*(1+.6*cg));d.updateMatrix();codeMesh.setMatrixAt(k,d.matrix);codeMesh.setColorAt(k,cnt[k]?C.code:C.line);}codeMesh.instanceMatrix.needsUpdate=true;if(codeMesh.instanceColor)codeMesh.instanceColor.needsUpdate=true;
+  const used=cnt.filter(c=>c>0).length;let H=0;cnt.forEach(c=>{if(c){const p=c/N;H-=p*Math.log(p);}});
+  rd.innerHTML=`Codes in use: <b>${used} of ${K}</b>. Codebook perplexity <b>${Math.exp(H).toFixed(1)}</b> (the effective number of codes). Average quantisation error <b>${(err/N).toFixed(3)}</b>.`;}
+ ks.oninput=init;document.getElementById('vq-reset').onclick=init;const run=document.getElementById('vq-run');run.onclick=()=>{running=!running;run.textContent=running?'Pause':'Train codebook';};init();
+ let acc=0;return Object.assign(B,{update(t,dt){if(running){acc+=dt;if(acc>(reduced?.3:.06)){acc=0;step();draw();}}
+  const gz=s.g('ze');pts.material.emissiveIntensity=.6*gz;if(gz||zg){zg=gz;X.forEach((p,i)=>{d.position.copy(p);d.scale.setScalar(1+gz);d.updateMatrix();pts.setMatrixAt(i,d.matrix);});pts.instanceMatrix.needsUpdate=true;}
+  segs.material.opacity=.35+.55*s.g('assign');
+  const gc=Math.max(s.g('code'),s.g('cbloss'));if(gc||cg){cg=gc;for(let k=0;k<K;k++){d.position.copy(codes[k]);d.scale.setScalar((cntK[k]?1:.7)*(1+.6*cg));d.updateMatrix();codeMesh.setMatrixAt(k,d.matrix);}codeMesh.instanceMatrix.needsUpdate=true;}}});}
+
+/* ---------- image tokens ---------- */
+function buildTok(s){const B=base([0,4.2,7],[0,.4,0],60);s.tRotY=-.25;s.vmin=33;const W=3.2;const img=picPlane(W);img.rotation.x=-Math.PI/2;img.position.x=-2;B.root.add(img);
+ const rc=document.createElement('canvas');const rt=new THREE.CanvasTexture(rc);rt.magFilter=THREE.NearestFilter;const rec=new THREE.Mesh(new THREE.PlaneGeometry(W,W),new THREE.MeshBasicMaterial({map:rt,side:THREE.DoubleSide}));rec.rotation.x=-Math.PI/2;rec.position.x=2;B.root.add(rec);
+ const l1=label('original',.28,hex('muted'));l1.position.set(-2,.1,W/2+.35);B.root.add(l1);const l2=label('rebuilt from codes',.28,hex('muted'));l2.position.set(2,.1,W/2+.35);B.root.add(l2);
+ const px=PIC.getContext('2d').getImageData(0,0,256,256).data;let n=16,K=16,cubes=null;const idx=new THREE.Group();B.root.add(idx);const rd=document.getElementById('tk-read');
+ function seg(id,vals,cur,fn){const e=document.getElementById(id);vals.forEach(v=>{const b=document.createElement('button');b.type='button';b.textContent=id==='tk-n'?v+'×'+v:v+' codes';b.setAttribute('aria-pressed',v===cur?'true':'false');b.onclick=()=>{fn(v);setPressed(e,b);compute();};e.appendChild(b);});}
+ seg('tk-n',[8,16,32],n,v=>n=v);seg('tk-k',[4,16,64],K,v=>K=v);
+ function compute(){const P=256/n;const cols=[];for(let j=0;j<n;j++)for(let i=0;i<n;i++){let r_=0,g_=0,b_=0,c=0;for(let y=j*P;y<(j+1)*P;y+=2)for(let x=i*P;x<(i+1)*P;x+=2){const o=(y*256+x)*4;r_+=px[o];g_+=px[o+1];b_+=px[o+2];c++;}cols.push([r_/c,g_/c,b_/c]);}
+  const r=rng(5);let cen=[cols[Math.floor(r()*cols.length)]];while(cen.length<K){const dd=cols.map(c=>Math.min(...cen.map(e=>(c[0]-e[0])**2+(c[1]-e[1])**2+(c[2]-e[2])**2)));const tot=dd.reduce((a,b)=>a+b,0);let u=r()*tot,k=0;while(k<dd.length-1&&u>dd[k]){u-=dd[k];k++;}cen.push(cols[k].slice());}
+  const as=new Int32Array(cols.length);for(let it=0;it<12;it++){cols.forEach((c,i)=>{let b=1e18,bk=0;cen.forEach((e,k)=>{const dd=(c[0]-e[0])**2+(c[1]-e[1])**2+(c[2]-e[2])**2;if(dd<b){b=dd;bk=k;}});as[i]=bk;});const S=cen.map(()=>[0,0,0,0]);cols.forEach((c,i)=>{const q=S[as[i]];q[0]+=c[0];q[1]+=c[1];q[2]+=c[2];q[3]++;});S.forEach((q,k)=>{if(q[3])cen[k]=[q[0]/q[3],q[1]/q[3],q[2]/q[3]];});}
+  rc.width=rc.height=n;const g=rc.getContext('2d');const id=g.createImageData(n,n);let err=0;cols.forEach((c,i)=>{const e=cen[as[i]];id.data.set([e[0],e[1],e[2],255],i*4);err+=Math.sqrt((c[0]-e[0])**2+(c[1]-e[1])**2+(c[2]-e[2])**2);});g.putImageData(id,0,0);rt.needsUpdate=true;
+  if(cubes){B.root.remove(cubes);cubes.geometry.dispose();cubes.material.dispose();}const sz=W/n;cubes=new THREE.InstancedMesh(new THREE.BoxGeometry(sz*.8,sz*.8,sz*.8),std(new THREE.Color(1,1,1)),n*n);const d=new THREE.Object3D();const cc=new THREE.Color();
+  cols.forEach((c,i)=>{const x=i%n,y=Math.floor(i/n);d.position.set(-2-W/2+(x+.5)*sz,.9+as[i]/K*.4,-W/2+(y+.5)*sz);d.updateMatrix();cubes.setMatrixAt(i,d.matrix);const e=cen[as[i]];cc.setRGB(e[0]/255,e[1]/255,e[2]/255);cubes.setColorAt(i,cc);});B.root.add(cubes);
+  while(idx.children.length){const c=idx.children.pop();c.material.map.dispose();c.material.dispose();}if(n===8)cols.forEach((c,i)=>{const x=i%n,y=Math.floor(i/n);const l=label(String(as[i]),.18,hex('ink'));l.position.set(-2-W/2+(x+.5)*sz,1.35+as[i]/K*.4,-W/2+(y+.5)*sz);idx.add(l);});
+  const bits=n*n*Math.log2(K),raw=256*256*24;rd.innerHTML=`<b>${n*n} tokens</b> from a ${K}-entry codebook: ${bits.toFixed(0)} bits versus ${raw.toLocaleString()} bits of raw 256×256 pixels, a <b>${(raw/bits).toFixed(0)}×</b> compression. Average colour error per patch <b>${(err/cols.length).toFixed(1)}</b> (0 to 441).`;}
+ compute();return B;}
+
+/* ---------- VLM architecture ---------- */
+function buildVLM(s){const B=base([.2,1.4,13.5],[0,0,0],66);s.tRotY=-.2;s.tRotX=.1;s.vmin=28;const root=B.root;const ink=hex('ink');
+ const img=picPlane(1.8);img.position.set(-7.4,1.4,0);root.add(img);const li=label('image',.28,hex('muted'));li.position.set(-7.4,2.6,0);root.add(li);
+ const vit=new THREE.Group();for(let k=0;k<5;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(.14,1.4,1.4),std(C.enc,{transparent:true,opacity:.88}));b.position.set(-5.6+k*.42,1.4,0);vit.add(b);}const lv=label('vision encoder (CLIP / SigLIP ViT)',.26,hex('enc'));lv.position.set(-4.8,2.5,0);vit.add(lv);root.add(vit);
+ const vq=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.2,1.2),std(C.code));vq.position.set(-4.8,1.4,0);root.add(vq);const lvq=label('VQ image tokenizer',.26,hex('code'));lvq.position.set(-4.8,2.4,0);root.add(lvq);
+ const llm=new THREE.Group();for(let k=0;k<8;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(.16,2.2,1.6),std(C.llm,{transparent:true,opacity:.85}));b.position.set(1+k*.62,.6,0);llm.add(b);}const ll=label('language model',.3,hex('llm'));ll.position.set(3.2,2.1,0);llm.add(ll);root.add(llm);
+ const xattn=new THREE.Group();for(let k=0;k<4;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(.1,2.2,1.6),std(C.code));b.position.set(1.31+k*1.24,.6,0);xattn.add(b);}const lx=label('gated cross-attention layers (new)',.24,hex('code'));lx.position.set(3.2,-.75,.9);xattn.add(lx);root.add(xattn);
+ const conn=new THREE.Group();root.add(conn);const stream=new THREE.Group();root.add(stream);const flows=new THREE.Group();root.add(flows);
+ let kind='llava',res=336;const rd=document.getElementById('vl-read');
+ function build(){[conn,stream,flows].forEach(g=>{while(g.children.length){const c=g.children.pop();c.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose();}});}});
+  vit.visible=kind!=='early';vq.visible=lvq.visible=kind==='early';xattn.visible=kind==='flam';
+  let nv,frozen,note;const tiles=res===672?5:1;const per=Math.pow((res===672?336:res)/14,2);
+  if(kind==='llava'){nv=per*tiles;const m=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),std(C.code));m.position.set(-1.9,1.4,0);conn.add(m);const l=label('MLP projector',.26,hex('code'));l.position.set(-1.9,2.2,0);conn.add(l);frozen='Vision encoder frozen; projector trained first, then projector and LLM fine-tuned.';note='Every patch becomes a token placed before the text.';}
+  else if(kind==='blip'){nv=32;const m=new THREE.Mesh(new THREE.BoxGeometry(1.3,1.3,1.3),std(C.code,{transparent:true,opacity:.55}));m.position.set(-1.9,1.4,0);conn.add(m);for(let q=0;q<8;q++){const c=new THREE.Mesh(new THREE.BoxGeometry(.16,.16,.16),std(C.code));c.position.set(-2.3+(q%4)*.27,1.2+Math.floor(q/4)*.35,.7);conn.add(c);}
+   const l=label('Q-Former, 32 learned queries',.26,hex('code'));l.position.set(-1.9,2.3,0);conn.add(l);frozen='Vision encoder and LLM both frozen; only the Q-Former and a projection are trained.';note='A fixed 32 tokens, whatever the resolution.';}
+  else if(kind==='flam'){nv=64;const m=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.1,1.1),std(C.code,{transparent:true,opacity:.6}));m.position.set(-1.9,1.4,0);conn.add(m);const l=label('Perceiver resampler, 64 latents',.26,hex('code'));l.position.set(-1.9,2.3,0);conn.add(l);
+   for(let k=0;k<4;k++)flows.add(line([V(-1.3,1.4,0),V(1.31+k*1.24,1.3,0)],C.code,{opacity:.7}));frozen='Vision encoder and LLM frozen; the resampler and new cross-attention layers are trained.';note='Visual features enter through cross-attention, not the token stream.';}
+  else{nv=1024;frozen='Nothing is borrowed: one Transformer is trained from scratch on mixed image and text tokens.';note='Discrete image tokens are interleaved with text, and the model can output them too.';}
+  const show=Math.min(kind==='flam'?0:12,Math.ceil(nv/64)),txt=6;let x=-2.6;const y=-1.6;
+  for(let i=0;i<show;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.24,.24,.24),std(kind==='early'?C.code:C.enc));c.position.set(x,y,0);stream.add(c);x+=.3;}
+  if(show){const l=label(`${nv.toLocaleString()} visual tokens`,.24,kind==='early'?hex('code'):hex('enc'));l.position.set(-2.6+show*.15,y-.45,0);stream.add(l);}
+  ['What','bird','is','this','?','→'].slice(0,txt).forEach((w,i)=>{const c=new THREE.Mesh(new THREE.BoxGeometry(.24,.24,.24),std(C.llm));c.position.set(x+.2,y,0);stream.add(c);const l=label(w,.2,ink);l.position.set(x+.2,y+.35,0);stream.add(l);x+=.5;});
+  stream.add(line([V(x+.2,y,0),V(1,-.4,0)],C.llm,{opacity:.6}));if(kind!=='flam')flows.add(line([V(kind==='early'?-4:-1.4,1,0),V(-2.4,-1.4,0)],kind==='early'?C.code:C.enc,{opacity:.6}));
+  const ans=label(kind==='early'?'→ text or image tokens':'→ “a robin”',.28,hex('llm'));ans.position.set(6.4,.6,0);stream.add(ans);
+  rd.innerHTML=`<b>${nv.toLocaleString()} visual tokens</b> per image${res===672&&kind==='llava'?' (four 336 px tiles plus a thumbnail)':''}. ${note} ${frozen}`;}
+ document.querySelectorAll('#vl-k [data-k]').forEach(b=>b.onclick=()=>{kind=b.dataset.k;setPressed(b.parentNode,b);build();});document.querySelectorAll('#vl-r [data-r]').forEach(b=>b.onclick=()=>{res=+b.dataset.r;setPressed(b.parentNode,b);build();});build();return B;}
+
+startAll(()=>{readColors(['ink','muted','line','panel','enc','code','dec','llm','pro','con']);stage('f-hero',buildHero);stage('f-vae',buildVAE);stage('f-vq',buildVQ);stage('f-tok',buildTok);stage('f-vlm',buildVLM);});
+})();
+</script>
+<script>
+(function(){"use strict";
+// Section bar: current-section highlight, reading progress, and a Sections menu whenever the links do not fit.
+const nav=document.querySelector('nav.top');
+if(nav){
+ const wrap=nav.querySelector('.wrap'),links=[...wrap.querySelectorAll(':scope > a[href^="#"]')];
+ const secs=links.map(a=>document.getElementById(a.getAttribute('href').slice(1)));
+ const cur=document.createElement('span');cur.className='nav-cur';
+ const btn=document.createElement('button');btn.type='button';btn.className='nav-menu';btn.textContent='Sections';
+ btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-controls','nav-panel');
+ const brand=wrap.querySelector('.brand');(brand||wrap.firstChild).after(cur);wrap.appendChild(btn);
+ const panel=document.createElement('div');panel.className='nav-panel';panel.id='nav-panel';
+ panel.innerHTML='<ol>'+links.map((a,i)=>'<li><a href="'+a.getAttribute('href')+'"><span>'+(i+1)+'</span>'+a.innerHTML+'</a></li>').join('')+'</ol>';
+ const prog=document.createElement('span');prog.className='nav-prog';nav.append(panel,prog);
+ const plinks=[...panel.querySelectorAll('a')];
+ const setOpen=o=>{nav.classList.toggle('nav-open',o);btn.setAttribute('aria-expanded',String(o));};
+ btn.addEventListener('click',()=>setOpen(!nav.classList.contains('nav-open')));
+ panel.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false);});
+ addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
+ function fit(){nav.classList.remove('nav-collapsed');if(wrap.scrollWidth>wrap.clientWidth+1)nav.classList.add('nav-collapsed');else setOpen(false);}
+ let queued=false;
+ function spy(){queued=false;const line=innerHeight*.3;let k=-1;
+  secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<=line)k=i;});
+  [links,plinks].forEach(set=>set.forEach((a,i)=>{if(i===k)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');}));
+  cur.innerHTML=k>=0?'<b>'+(k+1)+'</b>'+links[k].textContent:'';
+  const max=document.documentElement.scrollHeight-innerHeight;nav.style.setProperty('--p',max>0?(scrollY/max).toFixed(4):0);}
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(spy);}},{passive:true});
+ addEventListener('resize',()=>{fit();spy();});
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+ fit();spy();
+}
+// Equation terms: hover, focus or tap lights the term, the figure elements with the same data-link, and pulses the 3D stage.
+document.querySelectorAll('.eq[data-viz]').forEach(eq=>{
+ const fig=document.getElementById(eq.dataset.viz);if(!fig)return;
+ eq.querySelectorAll('[data-link]').forEach(t=>{
+  t.tabIndex=0;t.setAttribute('role','button');t.setAttribute('aria-label','Show '+(t.dataset.label||t.dataset.link)+' in the figure');
+  let last=0;
+  const fire=()=>{const now=performance.now();if(now-last<600)return;last=now;const lit=[t];
+   t.dataset.link.split(/\s+/).forEach(l=>{fig.querySelectorAll('[data-link~="'+l+'"]').forEach(x=>lit.push(x));fig.dispatchEvent(new CustomEvent('pe-link',{detail:l}));});
+   lit.forEach(x=>x.classList.add('pe-lit'));setTimeout(()=>lit.forEach(x=>x.classList.remove('pe-lit')),1100);};
+  t.addEventListener('mouseenter',fire);t.addEventListener('focus',fire);t.addEventListener('click',fire);
+  t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();last=0;fire();}});
+ });
+});
+})();
+</script>
+</body></html>

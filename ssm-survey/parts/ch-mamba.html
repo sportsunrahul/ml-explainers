@@ -1,0 +1,130 @@
+<style>
+#ch-mamba .tok-row { display:flex; flex-wrap:wrap; gap:.3rem; margin:.6rem 0 .1rem; font:.84rem system-ui, sans-serif; align-items:center; }
+#ch-mamba .tok-row > span { color:var(--muted); margin-right:.2rem; }
+#ch-mamba .tok-row label { display:inline-flex; align-items:center; gap:.25rem; border:1px solid var(--rule); border-radius:999px; padding:.15rem .5rem; cursor:pointer; color:var(--muted); background:var(--bg); }
+#ch-mamba .tok-row input { accent-color:var(--blue); margin:0; }
+#ch-mamba .tok-row label:has(input:checked) { color:var(--blue); border-color:var(--blue); }
+#ch-mamba .tok-row label:focus-within { outline:2px solid var(--yellow); outline-offset:2px; }
+#ch-mamba .claim-card { font-size:1rem; border:1px solid var(--rule); border-radius:10px; padding:.8rem 1rem; margin:1.4rem 0; }
+#ch-mamba .claim-card h4 { font:600 .98rem system-ui, sans-serif; margin:0 0 .4rem; }
+#ch-mamba .claim-card p:last-child { margin-bottom:0; }
+</style>
+<section id="ch-mamba" class="chapter">
+<h2>Mamba: input-dependent selection</h2>
+<p>The last chapter showed that a system whose <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span> never change weighs a token by where it sits, not by what it is. Mamba's fix is to let every token compute its own <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span>, so the token itself decides how far it moves the state.</p>
+
+<figure class="viz" id="viz-mamba-select" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="mamba-select-canvas" role="img" aria-label="A three-dimensional state space. The yellow path of the state jumps when a token marked important arrives and stays almost still across filler tokens. A dashed grey path shows the same system with one step size for every token, which wanders with every token. Below, blue bars are the tokens, white bars hanging below the axis are each token's step size, and a green line is the output."></canvas>
+  <div class="tok-row" role="group" aria-label="Mark tokens as important">
+    <span>important:</span>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-mamba-keys" aria-pressed="true">Mark the 3 key tokens</button>
+    <button type="button" id="btn-mamba-allfill" aria-pressed="false">All filler</button>
+    <button type="button" id="btn-mamba-allimp" aria-pressed="false">All important</button>
+    <button type="button" id="btn-mamba-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="mamba-select-readout" aria-live="polite"></p>
+  <figcaption>A toy with one channel and a state of three numbers, computed exactly with the zero-order hold of the last chapters. A is Mamba's default real initialization, A<sub>n</sub> = -(n+1), so diag(-1, -2, -3). Each token has a value and one feature you set, important or filler. As in Algorithm 2, its step is a softplus of a linear function of that feature: important tokens get &Delta; = 2.13, filler &Delta; = 0.049. B is selective too (filler writes at 30% strength); C is the same for every token here and chosen so the output reads back a stored value. The dashed path is the same system with &Delta; = 0.5 for every token. Drag the figure to turn it.</figcaption>
+</figure>
+
+<p>Mark a token important and its white bar grows: a large <span class="tex">\Delta</span>. The state then flows toward that token for a long stretch of continuous time, forgetting most of what it held, and lands on a point that stores the token's value. Filler tokens get a tiny <span class="tex">\Delta</span>; the state barely moves and keeps what it has. The green output therefore holds the last important value across the filler that follows. The dashed path is the time-invariant model with one <span class="tex">\Delta</span> for everyone: it is pushed by every token alike, so its output wanders. The paper puts it this way: a large <span class="tex">\Delta</span> "resets the state <span class="tex">h</span> and focuses on the current input", and a small one "persists the state and ignores the current input".</p>
+
+<p>Before you press <b>All important</b>: if every token gets the large step, what will the output remember at the last token? The answer is only the last token. A large <span class="tex">\Delta</span> is a reset, so selection is useful only when it is selective. <b>All filler</b> is the opposite failure: nothing gets in at all.</p>
+
+<p>Here is the change, line by line, as Mamba's Algorithm 2 writes it. Shapes are in brackets; the letter <span class="tex">\mathtt{B}</span> inside a shape is the batch size, not the matrix <span class="tex">B</span>, and <span class="tex">\mathtt{D}</span> is the number of channels.</p>
+
+<div class="eq" id="eq-mamba-s6" data-build data-viz="viz-mamba-select"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=write}{B : (\mathtt{B}, \mathtt{L}, \mathtt{N}) \gets s_B(\htmlClass{t-blue}{x}) = \mathrm{Linear}_N(\htmlClass{t-blue}{x})} \\
+&\htmlData{step=2, link=output}{C : (\mathtt{B}, \mathtt{L}, \mathtt{N}) \gets s_C(\htmlClass{t-blue}{x}) = \mathrm{Linear}_N(\htmlClass{t-blue}{x})} \\
+&\htmlData{step=3, link=delta}{\Delta : (\mathtt{B}, \mathtt{L}, \mathtt{D}) \gets \mathrm{softplus}\big(\mathrm{Parameter} + \mathrm{Broadcast}_D(\mathrm{Linear}_1(\htmlClass{t-blue}{x}))\big)} \\
+&\htmlData{step=4, link=state}{\overline{A}, \overline{B} : (\mathtt{B}, \mathtt{L}, \mathtt{D}, \mathtt{N}) \gets \mathrm{discretize}(\Delta, A, B)} \\
+&\htmlData{step=5, link=lti}{\htmlClass{t-green}{y} \gets \mathrm{SSM}(\overline{A}, \overline{B}, C)(\htmlClass{t-blue}{x}) \quad \text{time-varying: recurrence (scan) only}}
+\end{aligned}
+</div></div>
+<p class="eqno">Algorithm 2 in Mamba (the selective SSM, "S6"), lines 2 to 6; selection functions from Sec. 3.2.</p>
+<ul class="gloss">
+  <li>In S4 (Algorithm 1) the same lines read <span class="tex">B : (\mathtt{D}, \mathtt{N})</span>, <span class="tex">C : (\mathtt{D}, \mathtt{N})</span>, <span class="tex">\Delta : (\mathtt{D})</span>: parameters, one set for the whole sequence. Selection adds the length axis <span class="tex">\mathtt{L}</span>: one set per token.</li>
+  <li><span class="tex">B</span> and <span class="tex">C</span> have no channel axis: one write vector and one read vector per token, shared by all <span class="tex">\mathtt{D}</span> channels. <span class="tex">\Delta</span> has one value per channel per token.</li>
+  <li>The softplus, <span class="tex">\log(1 + e^z)</span>, keeps <span class="tex">\Delta</span> positive. The Parameter is a bias per channel. <span class="tex">\Delta</span> starts from a single number per token, broadcast to all channels, because "if a given input <span class="tex">x_t</span> should be completely ignored ... all <span class="tex">D</span> channels should ignore it" (Sec. 3.5). Sec. 3.6 widens that number to a small rank <span class="tex">R</span>.</li>
+  <li><span class="tex">A</span> stays a parameter. It acts only through <span class="tex">\overline{A} = \exp(\Delta A)</span>, so a selective <span class="tex">\Delta</span> already makes <span class="tex">\overline{A}</span> selective.</li>
+  <li>Discretization is the zero-order hold of <a href="#ch-continuous">chapter 3</a>, now done per token. The price is the last line: with parameters that change at every step, the long convolution of <a href="#ch-s4">chapter 5</a> no longer exists, and only the recurrence is left.</li>
+</ul>
+
+<p>Why a softplus, and why call it a gate? Take the smallest case: one state number, <span class="tex">A = -1</span>, <span class="tex">B = 1</span>, and <span class="tex">\Delta = \mathrm{softplus}(z)</span> with <span class="tex">z</span> a linear function of the token. The zero-order hold gives <span class="tex">\overline{A} = e^{-\Delta} = 1/(1 + e^{z}) = 1 - \sigma(z)</span> and <span class="tex">\overline{B} = 1 - \overline{A} = \sigma(z)</span>, where <span class="tex">\sigma</span> is the logistic sigmoid. The recurrence becomes:</p>
+
+<div class="eq" id="eq-mamba-gate" data-build data-viz="viz-mamba-select"><div class="tex tex-display">
+\htmlData{step=1, link=delta}{g_t = \sigma\big(\mathrm{Linear}(\htmlClass{t-blue}{x_t})\big)}
+\qquad
+\htmlData{step=2, link=state}{\htmlClass{t-yellow}{h_t} = (1 - g_t)\,\htmlClass{t-yellow}{h_{t-1}} + g_t\,\htmlClass{t-blue}{x_t}}
+</div></div>
+<p class="eqno">Theorem 1, Eq. 5 in Mamba (proof in App. C).</p>
+<ul class="gloss">
+  <li><span class="tex">g_t</span> is a gate between 0 and 1, computed from the token. Near 1 the state is replaced by the token; near 0 the token is ignored.</li>
+  <li>This is the gated recurrent network of <a href="#ch-recurrence">chapter 2</a>, with one difference that matters: there is no nonlinearity on the state, so the whole sequence can still be computed with a parallel scan.</li>
+</ul>
+<p>So the gates that made LSTMs and GRUs trainable were a discretization all along. LSSL had shown it first, as <span data-claim="lssl-lemma-gates">Lemma 3.1</span>: a gated recurrence is the backward-Euler discretization of the same one-number ODE, with <span class="tex">\Delta = e^{z}</span>. Mamba's Theorem 1 is the zero-order-hold version with a softplus step, and HiPPO Sec. 2.5 made the same remark for an input-dependent step. In the figure the slowest state number has exactly <span class="tex">A = -1</span>, so its gate per token is <span class="tex">1 - e^{-\Delta}</span>: <span data-claim="sel-toy-gate-imp">0.88</span> for an important token (<span class="tex">\Delta</span> = <span data-claim="sel-toy-dt-imp">2.13</span>) and <span data-claim="sel-toy-gate-fill">0.047</span> for filler (<span class="tex">\Delta</span> = <span data-claim="sel-toy-dt-fill">0.049</span>).</p>
+
+<p>The ablations at about 350M parameters (Table 7) say which selective part matters most. With no selective parameter the model reaches a perplexity of <span data-claim="mamba-abl-sel-none">10.93</span>; with only a selective <span class="tex">\Delta</span>, <span data-claim="mamba-abl-sel-dt">9.81</span>; with <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span> all selective, <span data-claim="mamba-abl-sel-all">8.71</span>. Lower is better.</p>
+
+<div class="claim-card">
+  <h4>Claim: a bigger state helps only when B and C are selective</h4>
+  <p><b>Measured how.</b> Mamba models of about 350M parameters trained on the Pile, the state size <span class="tex">N</span> swept from 1 to 16, once with constant <span class="tex">B</span> and <span class="tex">C</span> and once with selective ones; <span class="tex">\Delta</span> selective in both (Table 10).</p>
+  <p><b>Result.</b> Constant <span class="tex">B</span>, <span class="tex">C</span>: perplexity <span data-claim="mamba-abl-n1-const">9.88</span> at <span class="tex">N = 1</span>, <span data-claim="mamba-abl-n16-const">9.81</span> at <span class="tex">N = 16</span>. Selective: <span data-claim="mamba-abl-n1-sel">9.73</span> to <span data-claim="mamba-abl-n16-sel">8.71</span>, for parameters growing from <span data-claim="mamba-abl-n1-params">367.1</span>M to <span data-claim="mamba-abl-n16-params">371.5</span>M. The paper calls it "over a <span data-claim="mamba-abl-n-ppl-gain">1.0</span> perplexity improvement for a cost of only <span data-claim="mamba-abl-n-param-cost">1%</span> additional parameters".</p>
+  <p><b>Our reading of why.</b> With fixed <span class="tex">B</span> and <span class="tex">C</span>, extra state numbers are only more filters of the same input at different decay rates. With selective ones, each token can choose where to write and where to read, so the extra room holds different content.</p>
+  <p><b>What would have falsified it.</b> A constant-<span class="tex">B</span>, <span class="tex">C</span> row that improved as much with <span class="tex">N</span> as the selective row.</p>
+</div>
+
+<p>What it bought. On zero-shot benchmarks Mamba-2.8B averages <span data-claim="mamba-zs-mamba-2p8b-avg">63.3</span>, against <span data-claim="mamba-zs-pythia-2p8b-avg">59.1</span> for Pythia-2.8B and <span data-claim="mamba-zs-pythia-6p9b-avg">61.7</span> for Pythia-6.9B, trained on the same <span data-claim="mamba-train-tokens">300B</span> tokens (Table 3). Its scaling curves (Fig. 4, about <span data-claim="mamba-scaling-min">125M</span> to <span data-claim="mamba-scaling-max">1.3B</span> parameters) are, in the paper's words, the first of an attention-free model to match a strong Transformer recipe; the plot gives no readable numbers, so we leave it there. The cost against attention is the one this whole page is about: generation keeps a fixed state, no KV cache, so a GPU can serve far larger batches. Measured in generated tokens per second, Mamba-1.4B reaches <span data-claim="mamba-tput-bs128-mamba1p4b">1814</span> at batch 128, while a 1.3B Transformer peaks at <span data-claim="mamba-tput-bs32-tf1p3b">364</span> at batch 32 and runs out of memory at <span data-claim="mamba-tput-tf1p3b-oom-bs">64</span>: the headline <span data-claim="mamba-throughput-5x">5x</span> is that peak against peak, at large batch (Fig. 8, an A100, prompt <span data-claim="mamba-tput-prompt">2048</span>). The paper is also clear about the limits: the largest models are below <span data-claim="mamba-limit-scale">7B</span> parameters, and on raw audio, a smooth signal, selection hurts.</p>
+
+<h3>Inside Mamba: forward, then backward</h3>
+<p>One Mamba block replaces both the attention block and the MLP block of a Transformer; the model is that block repeated, with a normalization and a residual connection around each. Press through the stages. Before stage 8, guess: which boxes will the gradient update?</p>
+<figure class="viz archflow" id="viz-mambaflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-mambaflow-tokens" aria-pressed="false">1 Tokens</button>
+    <button type="button" id="btn-mambaflow-expand" aria-pressed="false">2 Expand</button>
+    <button type="button" id="btn-mambaflow-conv" aria-pressed="false">3 Conv</button>
+    <button type="button" id="btn-mambaflow-select" aria-pressed="false">4 Select</button>
+    <button type="button" id="btn-mambaflow-scan" aria-pressed="false">5 Scan</button>
+    <button type="button" id="btn-mambaflow-gate" aria-pressed="false">6 Gate, project</button>
+    <button type="button" id="btn-mambaflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-mambaflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-mambaflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-mambaflow-m130" aria-pressed="false">130M</button>
+    <button type="button" id="btn-mambaflow-m370" aria-pressed="false">370M</button>
+    <button type="button" id="btn-mambaflow-m790" aria-pressed="false">790M</button>
+    <button type="button" id="btn-mambaflow-m1p4" aria-pressed="false">1.4B</button>
+    <button type="button" id="btn-mambaflow-m2p8" aria-pressed="true">2.8B</button>
+  </div>
+  <canvas id="mambaflow-canvas" role="img" aria-label="One Mamba block as a diagram: tokens are normalized and projected into two branches of twice the width; the main branch passes a short causal convolution and SiLU, computes Delta, B and C, and runs the selective scan; the other branch passes SiLU and gates the scan output; an output projection returns to the model width; after the last block a language-model head and a red cross-entropy loss. In the backward stages red arrows reach every box with weights."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-mambaflow-prev">Previous</button>
+    <button type="button" id="btn-mambaflow-next">Next</button>
+    <button type="button" id="btn-mambaflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="mambaflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Two branches inside one block. The <b class="c-blue">main branch</b> carries the tokens through a short convolution into the <b class="c-yellow">selective scan</b>; the <b class="c-green">gate branch</b> multiplies the result; the <b class="c-red">loss</b> at the end grades next-token predictions. Press <b>1 Tokens</b>, then <b>Next</b>.</p></div>
+    <div data-stage="tokens" hidden><h4>1. Tokens in, normalized</h4><p>A batch of token sequences of length <span data-claim="mamba-train-ctx">2048</span> (the pretraining context), embedded to the model width <span class="tex">D</span>. Each block starts with a normalization on the residual stream; the paper's improved recipe uses RMSNorm. Layer counts and widths for the released sizes come from the official README (code-only): <span data-claim="mamba-cfg-130m-layers">24</span> layers of width <span data-claim="mamba-cfg-130m-dmodel">768</span> at 130M up to <span data-claim="mamba-cfg-2p8b-layers">64</span> of width <span data-claim="mamba-cfg-2p8b-dmodel">2560</span> at 2.8B.</p></div>
+    <div data-stage="expand" hidden><h4>2. Two projections, twice the width</h4><p>Two input projections expand the width by <span class="tex">E</span> = <span data-claim="mamba-expand-e">2</span> ("We always fix to E=2"), one for each branch. Together they hold <span data-claim="mamba-params-in-proj">2ED^2</span> of the block's roughly <span data-claim="mamba-params-per-block">3ED^2</span> weights; two blocks match the <span data-claim="mamba-params-transformer-layer">12D^2</span> of a Transformer's attention plus MLP.</p></div>
+    <div data-stage="conv" hidden><h4>3. A short causal convolution, then SiLU</h4><p>The main branch mixes each channel with its few predecessors through a causal 1-D convolution of width <span data-claim="mamba-conv-width">4</span> (the width is from the README, code-only), then applies the <span data-claim="mamba-activation">SiLU</span> activation. In generation the block keeps the last 3 inputs of this convolution next to its state.</p></div>
+    <div data-stage="select" hidden><h4>4. Each token computes its Delta, B and C</h4><p>Linear maps of the branch output give <span class="tex">B</span> and <span class="tex">C</span>, one vector of <span class="tex">N</span> numbers each per token, and <span class="tex">\Delta</span>, through a rank-<span class="tex">R</span> projection, a per-channel bias and a softplus. <span class="tex">N</span> = <span data-claim="mamba-state-n">16</span> is the paper's setting for ablations and benchmarks and the README's default; that the released checkpoints use it is our reading. The paper gives <span class="tex">R</span> only as "a small fraction of D", so the figure leaves it unnamed.</p></div>
+    <div data-stage="scan" hidden><h4>5. The selective scan</h4><p>Per token and channel: <span class="tex">\overline{A} = \exp(\Delta A)</span>, <span class="tex">\overline{B}</span> by the zero-order hold, then <span class="tex">h_t = \overline{A} h_{t-1} + \overline{B} x_t</span> and <span class="tex">y_t = C h_t</span>. The expanded <span class="tex">(\mathtt{B}, \mathtt{L}, \mathtt{D}, \mathtt{N})</span> tensor is never written to GPU memory; how the kernel avoids it is <a href="#ch-scan">the next chapter</a>.</p></div>
+    <div data-stage="gate" hidden><h4>6. Gate, project back, add</h4><p>The gate branch passes through SiLU and multiplies the scan output element by element, as in a gated MLP. An output projection (<span data-claim="mamba-params-out-proj">ED^2</span> weights) returns to width <span class="tex">D</span>, and the result is added to the residual stream. Then the next block.</p></div>
+    <div data-stage="loss" hidden><h4>7. One loss over every position</h4><p>After the last block, a final normalization and the language-model head give a distribution over the vocabulary at every position. The loss is next-token prediction: the cross-entropy of the true next token, averaged over all positions of all sequences (cross-entropy is our reading of "next token prediction", the standard form).</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>Everywhere. No part of Mamba is frozen: from the loss back through the head, every block's output projection, gate, scan, selection maps, convolution and input projections, down to the embedding. <span class="tex">A</span> receives its gradient only through <span class="tex">\overline{A} = \exp(\Delta A)</span>, and the selection maps receive theirs through <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span>.</p></div>
+    <div data-stage="update" hidden><h4>9. The update</h4><p>AdamW with betas <span data-claim="mamba-train-betas">(.9, .95)</span>, weight decay <span data-claim="mamba-train-wd">0.1</span>, gradient clipping at <span data-claim="mamba-train-clip">1.0</span>, a linear warmup and a cosine decay to <span data-claim="mamba-train-lr-final">1e-5</span>. At initialization <span class="tex">A</span> is S4D-Real, <span class="tex">A_n = -(n+1)</span>, and the <span class="tex">\Delta</span> bias is set so that <span class="tex">\Delta</span> starts uniform in [<span data-claim="mamba-dt-init-min">0.001</span>, <span data-claim="mamba-dt-init-max">0.1</span>]. How <span class="tex">A</span> is stored internally is not stated in the paper or README, so it is not shown.</p></div>
+  </div>
+  <figcaption>Computed: shapes from <span class="tex">E</span> = 2 (paper) and the README's layer counts and widths (code-only); <span class="tex">N</span> = 16 and convolution width 4 are README defaults (code-only). <span class="tex">\mathtt{B}</span> is the batch size, <span class="tex">\mathtt{L}</span> the sequence length. The vocabulary size is in neither source and is left as V.</figcaption>
+</figure>
+
+<p>One problem is left, and the last line of Algorithm 2 states it. Without the convolution, training must run the recurrence over the whole sequence, and the state it carries is <span class="tex">\mathtt{N}</span> times larger than the input. The next chapter shows how a parallel scan and a kernel that keeps that state in fast on-chip memory make it fast anyway.</p>
+</section>

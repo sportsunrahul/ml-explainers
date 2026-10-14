@@ -1,0 +1,28 @@
+viz-sphere simulation (build/sim/sphere.js evals parts/kit/60-sphere.js), 2026-10-13
+Toy: 90 images = 6 hidden classes x 15. Input x in R^6 = [MU * class axis (+-e1, +-e2, +-e3) + WIN noise, INST * gauss (instance detail)].
+Views add noise AUG on the 3 class dims and AUGI on the 3 detail dims. Encoder z = normalize(W x + b), W 3x6 (init .3 gauss), b (init BI gauss).
+'align' = L_align (alpha 2) only; 'both' = InfoNCE over all 180 views (in-batch negatives, NT-Xent form) at tau. Adam lr .05, 300 steps; fresh views every step from a reseeded generator.
+Metrics: L_align on fresh views (rng 99), L_uniform with t = 2 over distinct pairs of clean embeddings, tolerance = mean same-class cosine (Wang & Liu Eq. 11).
+The figure offers tau = 0.1, 0.5, 1.0 (default 0.5); the readout prints these metrics, rounded to 2 decimals.
+
+settings {"C":6,"NPER":15,"MU":2.5,"WIN":0.25,"INST":1.5,"AUG":0.15,"AUGI":0.3,"LR":0.05,"STEPS":300,"SEED":6,"BI":1,"T":2}
+init         L_align 0.042 L_uniform -1.050 tolerance 0.686
+align        L_align 0.000 L_uniform -0.000 tolerance 1.000
+tau 0.05     L_align 0.044 L_uniform -2.115 tolerance 0.616
+tau 0.07     L_align 0.046 L_uniform -2.125 tolerance 0.601
+tau 0.1      L_align 0.048 L_uniform -2.132 tolerance 0.590
+tau 0.2      L_align 0.046 L_uniform -2.132 tolerance 0.618
+tau 0.3      L_align 0.040 L_uniform -2.124 tolerance 0.661
+tau 0.5      L_align 0.035 L_uniform -2.102 tolerance 0.728
+tau 0.7      L_align 0.019 L_uniform -1.995 tolerance 0.889
+tau 1        L_align 0.016 L_uniform -1.908 tolerance 0.948
+random-uniform reference L_uniform -2.080
+trajectory align 1 step:L_align/L_uniform 0:0.042/-1.050 50:0.000/-0.012 100:0.000/-0.000 150:0.000/-0.000 200:0.000/-0.000 250:0.000/-0.000 300:0.000/-0.000
+trajectory both 0.3 step:L_align/L_uniform 0:0.042/-1.050 50:0.047/-2.127 100:0.043/-2.127 150:0.040/-2.124 200:0.040/-2.123 250:0.038/-2.121 300:0.040/-2.124
+seed 1 A -0.00 | 0.07 -2.11/0.63 | 0.3 -2.13/0.63 | 1 -2.12/0.65
+seed 2 A -0.00 | 0.07 -2.11/0.62 | 0.3 -2.13/0.64 | 1 -1.99/0.90
+seed 3 A -0.00 | 0.07 -2.08/0.65 | 0.3 -2.12/0.70 | 1 -2.06/0.75
+seed 4 A -0.70 | 0.07 -2.13/0.60 | 0.3 -2.14/0.61 | 1 -1.93/0.94
+seed 5 A -0.00 | 0.07 -2.11/0.63 | 0.3 -2.12/0.75 | 1 -1.94/0.93
+seed 6 A -0.00 | 0.07 -2.12/0.60 | 0.3 -2.12/0.66 | 1 -1.91/0.95
+Seed 6 is used. Align-only collapses to one point for 5 of 6 seeds (seed 4: two antipodal points). tau = 1.0 keeps classes tight (tolerance >= 0.9) for 4 of 6 seeds; seed 1 gets stuck near 0.65 and seed 3 near 0.75. Below tau = 0.3 the toy barely changes; the visible trade-off is between 0.5 and 1.0. The toy has no downstream accuracy, so it shows the uniformity-tolerance trade-off, not the best tau.

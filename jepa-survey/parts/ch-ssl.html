@@ -1,0 +1,52 @@
+<p class="kicker"><span class="act-n">Act I</span>Learning without labels</p>
+
+<section id="ch-ssl" class="chapter">
+<h2>Three ways to fill in a blank</h2>
+<p>Cover part of a photo with your hand. You can still say what is under it: more sky, more leaves, the rest of the road. You learned that without anyone labelling photos for you. Self-supervised learning is the attempt to give a network the same teacher: the data itself. Hide part of an input, ask the network to predict it, and grade the guess. The whole question of this page is <em>where</em> to grade the guess.</p>
+
+<figure class="viz" id="viz-blank" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="blank-canvas" role="img" aria-label="A synthetic scene of sky, hill and a leafy tree with one square block hidden. On the right, the chosen learning route: a blurry pixel guess graded against the true pixels, two crops pulled to the same embedding, or four summary numbers of the hidden block predicted from its surroundings, with a loss bar."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-blank-pixels" data-mode="pixels" aria-pressed="true">Reconstruct the pixels</button>
+    <button type="button" id="btn-blank-views" data-mode="views" aria-pressed="false">Make two views agree</button>
+    <button type="button" id="btn-blank-embed" data-mode="embed" aria-pressed="false">Predict the embedding</button>
+    <span style="color:var(--muted)">target noise</span>
+    <button type="button" id="btn-blank-clean" data-noise="0" aria-pressed="true">none</button>
+    <button type="button" id="btn-blank-noisy" data-noise="0.25" aria-pressed="false">some</button>
+    <button type="button" id="btn-blank-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="blank-readout" aria-live="polite"></p>
+  <figcaption>Toy model. The scene is drawn by a formula, the "predictor" is the average of the patches around the hole, and the "embedding" is four hand-picked statistics of a patch (brightness, greenness, texture, edge direction). None of that is what a real network learns; the point is only where the error is measured. Before you press "some" noise, guess: which loss will move?</figcaption>
+</figure>
+
+<p>The first route is the obvious one. <b class="c-green">Guess the hidden pixels</b> and grade every one of them. This is what an autoencoder does, and what MAE (masked autoencoders, 2021) does at scale: it hides <span data-claim="mae-mask-ratio">75</span>% of an image's patches, lets a transformer see only the rest, and asks a small decoder to paint the missing pixels, with a mean squared error <em>on pixels</em>, counted only over the hidden patches. It works surprisingly well for fine-tuning: a huge model reaches <span data-claim="mae-vith-top1">87.8</span>% ImageNet accuracy after being tuned on the labels. But look at the toy. The best pixel guess for a leafy region is a blur, and the loss punishes every leaf the blur got wrong, even though no one could have known where that leaf was. The network must spend capacity on unpredictable detail.</p>
+
+<p>The second route refuses to predict anything. Take <b class="c-blue">two views</b> of the same image (two crops, two color jitters) and push their embeddings together. SimCLR, BYOL, SimSiam, DINO and VICReg all live here; they differ in how they stop the embeddings from becoming one constant vector, which is the trivial way to make two things agree. That failure mode has a name, <em>collapse</em>, and it gets its own chapter. The cost of this route is subtler: the model is told that the two views are <em>the same</em>, so whatever differs between them (position, crop, color) is explicitly thrown away. Someone has to hand-design the views so that what is thrown away is unimportant.</p>
+
+<p>The third route is the one this page is about. Hide part of the input, but <b class="c-green">predict its embedding</b>, not its pixels: a short vector that says what is there, produced by an encoder, graded against the encoder's own description of the hidden part. In the toy, four numbers are graded instead of <span data-toy>192</span> pixels, and when noise is added to the target the embedding loss barely moves while the pixel loss jumps. A real encoder is free to learn a description that keeps "leaves, this green, this texture" and drops "this exact leaf here". That freedom is the whole idea; the rest of the page is how to make it work without collapsing.</p>
+
+<h3>Why not just reconstruct?</h3>
+<div class="aside">
+  <h4>Claim card: reconstruction fits the wrong pixels first (Balestriero and LeCun, 2024, <span data-claim="recon-arxiv-version">2402.11337v1</span>)</h4>
+  <p><b>Claim.</b> A reconstruction loss is dominated by the directions of highest pixel variance, and those are the least useful for perception; a network trained to reconstruct learns the useful directions "exponentially slower". The paper does <em>not</em> train MAE; it is a theory paper with controlled experiments.</p>
+  <p><b>How it was measured.</b> In closed form for a linear encoder and decoder (<span data-claim="recon-theorem-linear">Theorem 1</span>, an alignment score, <span data-claim="recon-eq-alignment">Eq. (7)</span>), then by projecting images onto the top or the bottom principal directions of pixel variance and training a <span data-claim="recon-classifier">ResNet9</span> classifier on the projected images.</p>
+  <p><b>Result.</b> On TinyImagenet, keeping the top directions that explain <span data-claim="recon-top-variance">90</span>% of pixel variance gives <span data-claim="recon-top-acc">45</span>% test accuracy; keeping the bottom directions, only <span data-claim="recon-bottom-variance">20</span>% of the variance, gives <span data-claim="recon-bottom-acc">55</span>%. On Imagenet-10, autoencoders with the same reconstruction loss ranged from <span data-claim="recon-r3-low">50</span>% to <span data-claim="recon-r3-high">almost 90</span>% probe accuracy depending on whether a supervised signal was added (<span data-claim="recon-fig-r3">Fig. 5</span>): the pixel loss cannot tell good features from bad ones.</p>
+  <p><b>What would falsify it.</b> The top-variance projection beating the bottom one at matched variance on natural images, or a deep autoencoder fitting the low-variance directions first during training.</p>
+</div>
+
+<h3>The ancestors, in one table</h3>
+<p>The third route did not appear from nowhere. Each of these papers supplied a part that I-JEPA (next act) assembles: the slow-moving teacher, the predictor, the idea of regressing a teacher's hidden features instead of pixels, and masking inside a two-branch network.</p>
+<table class="data">
+  <thead><tr><th>Paper</th><th>First on arXiv</th><th>What it contributed</th></tr></thead>
+  <tbody>
+    <tr><td>BYOL</td><td><span data-claim="byol-published">2020-06-13</span></td><td>A target network that is a slow average of the online one (<span data-claim="byol-eq-ema">Eq. (1)</span>: <span class="tex">\xi \leftarrow \tau\xi + (1-\tau)\theta</span>, with <span class="tex">\tau</span> starting at <span data-claim="byol-tau-base">0.996</span>), and a predictor on the online side only. No negatives.</td></tr>
+    <tr><td>SimSiam</td><td><span data-claim="simsiam-published">2020-11-20</span></td><td>Showed the stop-gradient alone prevents collapse: <span data-claim="simsiam-acc-with-sg">67.7</span>% linear accuracy with it, <span data-claim="simsiam-acc-without-sg">0.1</span>% without (its Fig. 2).</td></tr>
+    <tr><td>VICReg</td><td><span data-claim="vicreg-published">2021-05-11</span></td><td>Replaces the tricks with explicit terms: keep each embedding dimension's variance up, decorrelate dimensions, and make the two views agree (its <span data-claim="vicreg-eq-variance">Eq. (1)</span>, <span data-claim="vicreg-eq-covariance">Eq. (4)</span> and <span data-claim="vicreg-eq-invariance">Eq. (5)</span>).</td></tr>
+    <tr><td>MAE</td><td><span data-claim="mae-published">2021-11-11</span></td><td>The pixel route at scale: encoder sees only visible patches, decoder paints the rest. The foil for everything that follows.</td></tr>
+    <tr><td>data2vec</td><td><span data-claim="data2vec-published">2022-02-07</span></td><td>Regress the teacher's hidden features (the average of its top <span data-claim="data2vec-k-vision">6</span> layers for vision) at the masked positions, instead of pixels or tokens. The closest predecessor of latent prediction.</td></tr>
+    <tr><td>MSN</td><td><span data-claim="msn-published">2022-04-14</span></td><td>A masked view inside a two-branch network with a slow-average target, matched through <span data-claim="msn-prototypes">1024</span> learned prototypes. Same first author as I-JEPA.</td></tr>
+  </tbody>
+</table>
+<p class="note">Names used from here on: an <b>encoder</b> turns an input into an embedding; a <b>target encoder</b> or <b>teacher</b> is a copy of it that produces the thing to predict and receives no gradient; a <b>predictor</b> maps one embedding to another; the <b>EMA</b> (exponential moving average) is the slow-averaging rule that updates the teacher from the student.</p>
+</section>

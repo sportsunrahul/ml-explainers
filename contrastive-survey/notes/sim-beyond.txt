@@ -1,0 +1,35 @@
+== viz-sinkhorn: K = 4 prototypes x B = 8 images, eps 0.05, tau 0.1 ==
+raw       rows 0.670 0.153 0.108 0.069 | cols 0.212 0.158 0.121 0.073 0.181 0.086 0.107 0.060 | top 11111123
+it1 rows   rows 0.250 0.250 0.250 0.250 | cols 0.120 0.121 0.112 0.089 0.145 0.060 0.209 0.144 | top 13234123
+it1 cols   rows 0.285 0.222 0.263 0.230 | cols 0.125 0.125 0.125 0.125 0.125 0.125 0.125 0.125 | top 13234123
+it2 rows   rows 0.250 0.250 0.250 0.250 | cols 0.120 0.118 0.130 0.123 0.125 0.123 0.138 0.123 | top 13234123
+it2 cols   rows 0.255 0.242 0.256 0.247 | cols 0.125 0.125 0.125 0.125 0.125 0.125 0.125 0.125 | top 13234123
+it3 rows   rows 0.250 0.250 0.250 0.250 | cols 0.125 0.123 0.126 0.124 0.125 0.125 0.128 0.123 | top 13234123
+it3 cols   rows 0.251 0.248 0.252 0.249 | cols 0.125 0.125 0.125 0.125 0.125 0.125 0.125 0.125 | top 13234123
+readout 0 : Before Sinkhorn: prototype 1 holds 67% of the mass and is the top choice for 6 of the 8 images. Only 3 of 4 prototypes are anyone's top choice. Image 1's code puts 88% on prototype 1; the loss for predicting it from view 2 is 0.82.
+readout 1 : After 1 iteration: every column sums to 0.125; row sums run from 0.222 to 0.285 (target 0.250). 4 of 4 prototypes are now someone's top choice. Image 1's code puts 58% on prototype 1; the loss for predicting it from view 2 is 1.11.
+readout 2 : After 2 iterations: every column sums to 0.125; row sums run from 0.242 to 0.256 (target 0.250). 4 of 4 prototypes are now someone's top choice. Image 1's code puts 53% on prototype 1; the loss for predicting it from view 2 is 1.15.
+readout 3 : After 3 iterations: every column sums to 0.125; row sums run from 0.248 to 0.252 (target 0.250). 4 of 4 prototypes are now someone's top choice. Image 1's code puts 52% on prototype 1; the loss for predicting it from view 2 is 1.16.
+
+== viz-barlow: gradient check (central differences, lambda_toy 3) ==
+max |fd - analytic| over 19 weights: 4.56e-10
+settings {"N":256,"DI":16,"D":8,"LR":0.06,"STEPS":600,"SEED":5,"SNAP":10,"SCALE":1170.142857142857}
+readout init: Before training: the 8 features are near-copies of one mix of the inputs. Mean diagonal 0.34, off-diagonal size 0.30.
+lambda_paper 0 toy 0.000 | final L 0.007 diag 0.971 offRMS 0.768 | ms 169
+  readout: lambda = 0, after 600 steps: mean diagonal 0.971, off-diagonal size 0.768. Each feature is invariant, but most of them chase the same input directions: redundant.
+lambda_paper 0.002 toy 2.340 | final L 0.099 diag 0.898 offRMS 0.010 | ms 165
+  readout: lambda = 0.002 (toy 2.34), after 600 steps: mean diagonal 0.898, off-diagonal size 0.010. C is close to the identity: invariant and decorrelated.
+lambda_paper 0.005 toy 5.851 | final L 0.117 diag 0.890 offRMS 0.007 | ms 166
+  readout: lambda = 0.005 (toy 5.85), after 600 steps: mean diagonal 0.890, off-diagonal size 0.007. C is close to the identity: invariant and decorrelated.
+lambda_paper 0.02 toy 23.403 | final L 0.398 diag 0.802 offRMS 0.004 | ms 164
+  readout: lambda = 0.020 (toy 23.40), after 600 steps: mean diagonal 0.802, off-diagonal size 0.004. C is close to the identity: invariant and decorrelated.
+
+== viz-dimcollapse ==
+settings {"N":64,"LR":0.1,"STEPS":300,"SEED":3,"KB":0.1,"SNAP":5,"SHOW":160,"PAIRS":10,"FLOOR":0.000001,"MODES":{"healthy":{"k":0.1,"loss":"nce"},"dimensional":{"k":2,"loss":"nce"},"complete":{"k":0.1,"loss":"pull"}}}
+readout init: Before training: a random linear layer. Singular values 3.38, 2.54, 2.05. The cloud uses all three axes.
+healthy spectrum at steps 0/100/300: 3.38e+0 2.54e+0 2.05e+0 | 7.41e+0 5.72e+0 4.30e+0 | 7.84e+0 6.36e+0 4.41e+0 | ms 365
+  readout: Healthy (InfoNCE, augmentation variance 0.1 on every axis), after 300 steps: singular values 7.84, 6.36, 4.41. All three directions are used.
+dimensional spectrum at steps 0/100/300: 3.38e+0 2.54e+0 2.05e+0 | 6.54e+0 5.54e+0 1.98e-1 | 7.10e+0 5.71e+0 1.99e-1 | ms 307
+  readout: Dimensional collapse (InfoNCE, augmentation variance 2 on axis 3, data variance 1), after 300 steps: singular values 7.10, 5.71, 0.199. The smallest is 29 times below the next, yet not zero: the cloud is a flat pancake, not a point.
+complete spectrum at steps 0/100/300: 3.38e+0 2.54e+0 2.05e+0 | 2.29e-1 1.04e-1 3.62e-2 | 1.40e-3 1.53e-4 9.63e-6 | ms 7
+  readout: Complete collapse (pull term only, no negatives), after 300 steps: singular values 0.001, 1.5e-4, 9.6e-6. Every direction shrinks toward a single point.

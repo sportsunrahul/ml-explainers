@@ -1,0 +1,145 @@
+<p class="kicker"><span class="act-n">Act IV</span>Fewer weights</p>
+<section id="ch-prune" class="chapter">
+<h2>Pruning and Deep Compression</h2>
+<p>Most weights in a trained network are close to zero, and many of them can be set to exactly zero with little loss, especially if the network is trained a little more afterwards. Whether the zeros make the network faster is a separate question: a GPU kernel can skip only zeros that come in a shape it was built for.</p>
+
+<figure class="viz" id="viz-sparse" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Sparsity pattern">
+    <span class="lbl">Pattern</span>
+    <button type="button" id="btn-sparse-unstructured" aria-pressed="true">Unstructured</button>
+    <button type="button" id="btn-sparse-24" aria-pressed="false">2:4</button>
+    <button type="button" id="btn-sparse-chan" aria-pressed="false">Whole channels</button>
+    <label>zeros <input type="range" id="sparse-s" min="0" max="87.5" step="12.5" value="50" aria-label="Share of weights set to zero"><output id="sparse-s-out">50%</output></label>
+  </div>
+  <canvas id="sparse-canvas" role="img" aria-label="Left: a heat map of one layer's weights, 8 output channels by 16 inputs. Kept weights are green, brighter for larger magnitude; pruned weights are brown. Right, top: a histogram of weight magnitudes, kept in green and pruned in brown, with the pruning threshold for the unstructured pattern. Right, bottom: the matrix the GPU actually multiplies, and a bar for the share of multiplies it performs."></canvas>
+  <div class="controls" role="group" aria-label="Reset">
+    <button type="button" id="btn-sparse-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="sparse-readout" aria-live="polite"></p>
+  <figcaption>Computed on toy weights (one layer, 8 output channels by 16 inputs, seeded random values with a different spread per channel). Each pattern is exact magnitude pruning: unstructured removes the smallest weights anywhere; 2:4 removes the two smallest of every group of four inputs; whole channels removes the rows with the smallest sum of magnitudes. The tensor-core claim and the 2-bit index are from Mishra et al. (arXiv 2104.08378v1); everything else is computed here.</figcaption>
+</figure>
+
+<p>Each cell is one weight. A row is one output channel: the weights that produce one output feature map. A column is one input. A GPU computes this layer as a matrix multiply, and the inputs are the dimension it sums over. The <em>sparsity</em> of the layer is the share of its weights that are zero.</p>
+<p><em>Magnitude pruning</em> is the simplest rule: weights with a small absolute value contribute little to the output, so set them to zero. Han et al. (<span data-claim="han2015-venue">NIPS 2015</span>) made this work on large networks with three steps. Train the network, remove every connection whose weight is below a threshold, then train the survivors again so they make up for the loss. Repeating prune and retrain does better than pruning once: AlexNet went from <span data-claim="han2015-iter-from">5</span>x fewer weights in one aggressive step to <span data-claim="han2015-iter-to">9</span>x with iterations.</p>
+
+<div class="eq" id="eq-magprune" data-build data-viz="viz-sparse"><div class="tex tex-display">
+\htmlData{step=1, link=kept}{\htmlClass{t-green}{m_{ij}}} = \mathbf{1}\big[\, \htmlData{step=2, link=mag}{|w_{ij}|} > \htmlData{step=3, link=thr}{t} \,\big], \qquad \htmlData{step=4, link=pruned}{\htmlClass{t-brown}{w_{ij} \leftarrow 0 \ \text{where}\ m_{ij}=0}}, \qquad \htmlData{step=3, link=thr}{t = q \cdot \sigma_{\text{layer}}}
+</div></div>
+<p class="eqno">Our transcription of Han et al., arXiv 1506.02626v3, Sec. 4, which gives the rule in words: the threshold is "a quality parameter multiplied by the standard deviation of a layer's weights". Deep Compression (arXiv 1510.00149v5, Sec. 2) builds on this method and removes "all connections with weights below a threshold"; it does not restate the rule.</p>
+<ul class="gloss">
+  <li><span class="tex">m_{ij}</span>: the mask, 1 if weight <span class="tex">(i, j)</span> is kept and 0 if it is pruned. <span class="tex">\mathbf{1}[\cdot]</span> is 1 when the condition holds.</li>
+  <li><span class="tex">|w_{ij}|</span>: the weight's magnitude, its absolute value. The sign does not matter, only the size.</li>
+  <li><span class="tex">t</span>: the threshold. <span class="tex">\sigma_{\text{layer}}</span> is the standard deviation of the layer's weights, and <span class="tex">q</span> is a hand-set quality parameter: larger <span class="tex">q</span>, more zeros.</li>
+</ul>
+
+<p>The results were large. AlexNet on ImageNet went from <span data-claim="han2015-alexnet-params-ref">61M</span> to <span data-claim="han2015-alexnet-params-pruned">6.7M</span> weights, and its top-1 error moved from <span data-claim="han2015-alexnet-top1-ref">42.78</span>% to <span data-claim="han2015-alexnet-top1-pruned">42.77</span>%. VGG-16 kept one weight in <span data-claim="han2015-vgg16-ratio">13</span>, with top-1 error <span data-claim="han2015-vgg16-top1-ref">31.50</span>% before and <span data-claim="han2015-vgg16-top1-pruned">31.34</span>% after. The cost was training time: the pruned AlexNet took <span data-claim="han2015-alexnet-retrain-h">173</span> hours to retrain, against <span data-claim="han2015-alexnet-train-h">75</span> hours for the original.</p>
+
+<p><b>Make a guess before you press "2:4".</b> Both the unstructured pattern and 2:4 set half of the weights to zero. Which one keeps more of the total weight magnitude, and which one can a GPU turn into speed? Unstructured pruning keeps the most magnitude, because it removes exactly the smallest weights. The 2:4 pattern must remove two of every four inputs, even in a group where three weights are large, so the histogram shows some large weights removed. Whole channels lose the most. For speed the order reverses. A dense kernel multiplies the scattered zeros like any other number; sparse tensor cores skip half of the multiplies in a 2:4 layer; removing channels leaves a smaller dense layer that any kernel runs faster.</p>
+
+<h3>Why scattered zeros are not free</h3>
+<p>To skip unstructured zeros, a kernel must store where the survivors are, for example in compressed sparse row (CSR) format, and look each one up. Han et al. timed this for the fully connected (FC) layers of AlexNet and VGG-16 on a <span data-claim="han2016dc-bench-gpu">Titan X</span>, with NVIDIA's dense library (cuBLAS) against its sparse library (cuSPARSE).</p>
+<table class="data" aria-label="Dense versus pruned fully connected layers, time per sample">
+  <thead><tr><th>Layer (ImageNet model)</th><th>dense, batch 1</th><th>pruned, batch 1</th><th>dense, batch 64</th><th>pruned, batch 64</th></tr></thead>
+  <tbody>
+    <tr><td>AlexNet FC6</td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc6-dense-b1">541.5</span></td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc6-sparse-b1">134.8</span></td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc6-dense-b64">19.8</span></td><td class="c-brown"><span data-claim="han2016dc-t8-titanx-alexnet-fc6-sparse-b64">94.6</span></td></tr>
+    <tr><td>AlexNet FC7</td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc7-dense-b1">243.0</span></td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc7-sparse-b1">65.8</span></td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc7-dense-b64">8.9</span></td><td class="c-brown"><span data-claim="han2016dc-t8-titanx-alexnet-fc7-sparse-b64">51.5</span></td></tr>
+    <tr><td>AlexNet FC8</td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc8-dense-b1">80.5</span></td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc8-sparse-b1">54.6</span></td><td><span data-claim="han2016dc-t8-titanx-alexnet-fc8-dense-b64">5.9</span></td><td class="c-brown"><span data-claim="han2016dc-t8-titanx-alexnet-fc8-sparse-b64">23.2</span></td></tr>
+    <tr><td>VGG-16 FC6</td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc6-dense-b1">1467.8</span></td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc6-sparse-b1">167.0</span></td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc6-dense-b64">53.6</span></td><td class="c-brown"><span data-claim="han2016dc-t8-titanx-vgg16-fc6-sparse-b64">121.5</span></td></tr>
+    <tr><td>VGG-16 FC7</td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc7-dense-b1">243.0</span></td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc7-sparse-b1">39.8</span></td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc7-dense-b64">8.9</span></td><td class="c-brown"><span data-claim="han2016dc-t8-titanx-vgg16-fc7-sparse-b64">24.4</span></td></tr>
+    <tr><td>VGG-16 FC8</td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc8-dense-b1">80.5</span></td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc8-sparse-b1">48.0</span></td><td><span data-claim="han2016dc-t8-titanx-vgg16-fc8-dense-b64">5.9</span></td><td class="c-brown"><span data-claim="han2016dc-t8-titanx-vgg16-fc8-sparse-b64">22.0</span></td></tr>
+  </tbody>
+  <caption>Han et al., Deep Compression, Table 8 (Appendix A), arXiv 1510.00149v5. Time per sample in microseconds on an NVIDIA GeForce GTX Titan X, averaged over <span data-claim="han2016dc-bench-samples">4096</span> inputs; memory allocation and copies are not timed. Dense: cuBLAS matrix-vector (batch 1) and matrix-matrix (batch 64) products. Pruned: cuSPARSE CSR kernels on the pruned weights. Brown: the pruned layer is slower.</caption>
+</table>
+<p>At batch 1 the pruned layers win, by <span data-claim="han2016dc-speedup-gpu">3.5</span>x on average on the GPU. An FC layer on one input reads every weight once and does one multiply-add with it, so it waits on memory (see the roofline in <a href="#ch-cost">chapter 1</a>), and fewer weights means fewer bytes. At batch 64 the dense kernel reuses each weight for all 64 inputs and waits on arithmetic instead. Now the pruned layer is slower in every Titan X row, and in most of the paper's CPU and mobile rows too: the paper says "pruned network no longer shows its advantage". Li et al. say the same for convolutions: weight pruning "generates sparse convolutional kernels which can be hard to accelerate". Mishra et al. put a number on the bookkeeping: CSR indices can cost up to <span data-claim="mishra2021-csr-overhead">200</span>% of the values they describe.</p>
+
+<h3>Deep Compression: prune, share, Huffman-code</h3>
+<p>Deep Compression (Han, Mao and Dally, <span data-claim="han2016dc-venue">ICLR 2016</span>) aims at storage, not speed: shrink a model until its weights fit in on-chip memory. It adds two steps after pruning, and their savings multiply.</p>
+
+<figure class="viz" id="viz-dc" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Deep Compression stage">
+    <span class="lbl">Stage</span>
+    <button type="button" id="btn-dc-dense" aria-pressed="true">Dense</button>
+    <button type="button" id="btn-dc-prune" aria-pressed="false">1. Prune</button>
+    <button type="button" id="btn-dc-share" aria-pressed="false">2. Share weights (k-means)</button>
+    <button type="button" id="btn-dc-huff" aria-pressed="false">3. Huffman</button>
+  </div>
+  <canvas id="dc-canvas" role="img" aria-label="Top: 256 toy weights as dots placed by value. Pruning fades the small ones to brown between the two threshold lines. Weight sharing moves each surviving dot onto one of 8 yellow centroid lines found by k-means. Bottom: a bar for each stage showing bits per original weight, split into value or code bits, index bits and codebook bits, with the compression ratio. After Huffman coding, a table lists each 3-bit code, its member count and its Huffman bit string."></canvas>
+  <div class="controls" role="group" aria-label="Centroids">
+    <span class="lbl">Centroids</span>
+    <button type="button" id="btn-dc-km" aria-pressed="true">k-means result</button>
+    <button type="button" id="btn-dc-tuned" aria-pressed="false">after one fine-tuning step</button>
+    <button type="button" id="btn-dc-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="dc-readout" aria-live="polite"></p>
+  <figcaption>Computed on 256 toy weights (seeded normal values, standard deviation 0.1). Every step is the paper's algorithm: the threshold rule with q = 1, relative indices of 5 bits, 1-D k-means with linear initialization and 8 clusters, centroid gradients summed per cluster (toy random gradients, learning rate 0.1), and real Huffman codes for the cluster codes and the gaps. Code tables are not counted. The sourced totals for AlexNet and VGG-16 are in the table below.</figcaption>
+</figure>
+
+<p><b>Prune.</b> The survivors are stored with their position. Deep Compression stores the gap to the previous survivor in a few bits instead of a full column index; if a gap is too long for those bits, it inserts a filler zero.</p>
+<p><b>Share weights.</b> Many surviving weights have nearly the same value, so give them exactly the same value. Within one layer, k-means clustering groups the weights into <span class="tex">k</span> clusters, and each weight stores only the index of its cluster: <span class="tex">\log_2 k</span> bits. A table of <span class="tex">k</span> full-precision centroids, the <em>codebook</em>, holds the shared values. This is quantization with a learned, uneven grid, unlike the evenly spaced integer grid of <a href="#ch-grid">chapter 4</a>. The paper initializes the centroids evenly between the smallest and largest weight, because that keeps a few centroids for the rare large weights. In the toy, one of those even starting points lands in the gap that pruning left, and it never gets a member.</p>
+<p>The centroids are then trained. Every weight in a cluster is the same number, so the loss gradient for that number is the sum of the gradients of all its members:</p>
+
+<div class="eq" id="eq-dcgrad" data-build data-viz="viz-dc"><div class="tex tex-display">
+\htmlData{step=1, link=centroid}{\frac{\partial \mathcal{L}}{\partial \htmlClass{t-yellow}{C_k}}} = \sum_{i,j} \htmlData{step=2, link=grad}{\htmlClass{t-red}{\frac{\partial \mathcal{L}}{\partial W_{ij}}}} \frac{\partial W_{ij}}{\partial C_k} = \sum_{i,j} \htmlData{step=2, link=grad}{\htmlClass{t-red}{\frac{\partial \mathcal{L}}{\partial W_{ij}}}} \, \htmlData{step=3, link=member}{\mathbf{1}(I_{ij} = k)}
+</div></div>
+<p class="eqno">Eq. 3 in Han, Mao and Dally, arXiv 1510.00149v5 (the indicator, a double-struck 1 in the paper, is written in bold).</p>
+<ul class="gloss">
+  <li><span class="tex">C_k</span>: the shared value (centroid) of cluster <span class="tex">k</span>, one codebook entry.</li>
+  <li><span class="tex">W_{ij}</span>: the weight at position <span class="tex">(i, j)</span>; its ordinary gradient <span class="tex">\partial \mathcal{L} / \partial W_{ij}</span> comes from normal backpropagation.</li>
+  <li><span class="tex">I_{ij}</span>: the cluster index that weight <span class="tex">(i, j)</span> stores. <span class="tex">\mathbf{1}(I_{ij} = k)</span> is 1 for the members of cluster <span class="tex">k</span> and 0 otherwise, so the sum runs over the members only. The index assignment stays fixed; only the centroids move.</li>
+</ul>
+<p>The storage gain of sharing alone is <span class="tex">r = nb / (n \log_2 k + kb)</span> (Eq. 1): <span class="tex">n</span> weights of <span class="tex">b</span> bits become <span class="tex">n</span> indices plus a codebook of <span class="tex">k</span> values. The paper uses <span data-claim="han2016dc-conv-bits">8</span>-bit indices for convolutions and <span data-claim="han2016dc-fc-bits">5</span>-bit indices for FC layers.</p>
+<p><b>Huffman-code.</b> Some clusters and some gap lengths are far more common than others. A Huffman code gives the common symbols short bit strings and the rare ones long strings, with no loss and no retraining. The paper reports a <span data-claim="han2016dc-huffman-save-low">20</span>% to <span data-claim="han2016dc-huffman-save-high">30</span>% saving from this step.</p>
+
+<table class="data" aria-label="Deep Compression ratios per stage">
+  <thead><tr><th>Network (ImageNet)</th><th>pruned</th><th>+ shared weights</th><th>+ Huffman</th><th>size</th><th>top-1 error</th></tr></thead>
+  <tbody>
+    <tr><td>AlexNet</td><td><span data-claim="han2016dc-alexnet-p-ratio">9</span>x (<span data-claim="han2016dc-alexnet-p-kept">11</span>% kept)</td><td><span data-claim="han2016dc-alexnet-pq-ratio">27</span>x</td><td><b><span data-claim="han2016dc-alexnet-ratio">35</span>x</b></td><td><span data-claim="han2016dc-alexnet-ref-size">240</span> MB to <span data-claim="han2016dc-alexnet-comp-size">6.9</span> MB</td><td><span data-claim="han2016dc-alexnet-ref-top1err">42.78</span>% to <span data-claim="han2016dc-alexnet-comp-top1err">42.78</span>%</td></tr>
+    <tr><td>VGG-16</td><td><span data-claim="han2016dc-vgg16-p-ratio">13</span>x (<span data-claim="han2016dc-vgg16-p-kept">7.5</span>% kept)</td><td><span data-claim="han2016dc-vgg16-pq-ratio">31</span>x</td><td><b><span data-claim="han2016dc-vgg16-ratio">49</span>x</b></td><td><span data-claim="han2016dc-vgg16-ref-size">552</span> MB to <span data-claim="han2016dc-vgg16-comp-size">11.3</span> MB</td><td><span data-claim="han2016dc-vgg16-ref-top1err">31.50</span>% to <span data-claim="han2016dc-vgg16-comp-top1err">31.17</span>%</td></tr>
+  </tbody>
+  <caption>Han, Mao and Dally, Tables 1, 4 and 5, arXiv 1510.00149v5. Compression of the stored parameters, cumulative from left to right; Caffe reference models, error without data augmentation.</caption>
+</table>
+<p>The toy reaches a smaller ratio than the paper, mostly because it keeps a third of its weights while AlexNet keeps a ninth. Fewer bits per code has a limit: with 4-bit convolution codes and 2-bit FC codes, AlexNet's top-1 error rose to <span data-claim="han2016dc-t6-4-2-top1err">44.77</span>%, <span data-claim="han2016dc-t6-4-2-top1inc">1.99</span> points worse (Table 6). And the shared-weight model was never timed, because the standard sparse libraries cannot look up a codebook. The speed table above is for pruning alone.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>Deep Compression's speed case is FC layers at batch 1. FC layers once took up to <span data-claim="han2016dc-fastrcnn-fc-time">38</span>% of Fast R-CNN's time, but a modern detector with a feature pyramid is mostly convolutions, and a convolution reuses each weight at every pixel, like the batch-64 column above. So on a GPU, unstructured pruning makes a detector's file smaller, not its inference faster (our reading). For speed, the zeros need a structure the hardware skips: <a href="#ch-lottery">chapter 9</a> shows which ones, and the <a href="#ch-guide">decision guide</a> says when to use them.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-sparse'), out = document.getElementById('sparse-readout');
+  const kit = KIT.sparse(document.getElementById('sparse-canvas'), { fig });
+  const pats = ['unstructured', '24', 'chan'], btns = pats.map(p => document.getElementById('btn-sparse-' + p));
+  const sl = document.getElementById('sparse-s'), so = document.getElementById('sparse-s-out');
+  const sync = () => {
+    btns.forEach((b, i) => b.setAttribute('aria-pressed', String(pats[i] === kit.state.pattern)));
+    sl.value = String(kit.state.s * 100); sl.disabled = kit.state.pattern === '24';
+    so.textContent = (kit.state.pattern === '24' ? 50 : kit.state.s * 100) + '%';
+    out.innerHTML = KIT.sparseText(kit.info());
+  };
+  btns.forEach((b, i) => b.addEventListener('click', () => { kit.set({ pattern: pats[i] }); sync(); }));
+  sl.addEventListener('input', () => { kit.set({ s: +sl.value / 100 }); so.textContent = sl.value + '%'; });
+  sl.addEventListener('change', () => sync());
+  document.getElementById('btn-sparse-reset').addEventListener('click', () => { kit.set({ pattern: 'unstructured', s: .5 }); sync(); });
+  sync();
+})();
+(() => {
+  const fig = document.getElementById('viz-dc'), out = document.getElementById('dc-readout');
+  const kit = KIT.dc(document.getElementById('dc-canvas'), { fig });
+  const st = KIT.DC_STAGES.map(s => document.getElementById('btn-dc-' + s));
+  const km = document.getElementById('btn-dc-km'), tu = document.getElementById('btn-dc-tuned');
+  const sync = () => {
+    st.forEach((b, i) => b.setAttribute('aria-pressed', String(KIT.DC_STAGES[i] === kit.state.stage)));
+    km.setAttribute('aria-pressed', String(!kit.state.tuned)); tu.setAttribute('aria-pressed', String(kit.state.tuned));
+    out.innerHTML = kit.text();
+  };
+  st.forEach((b, i) => b.addEventListener('click', () => { kit.set({ stage: KIT.DC_STAGES[i] }); sync(); }));
+  km.addEventListener('click', () => { kit.set({ tuned: false }); sync(); });
+  tu.addEventListener('click', () => { kit.set({ tuned: true }); sync(); });
+  document.getElementById('btn-dc-reset').addEventListener('click', () => { kit.set({ stage: 'dense', tuned: false }); sync(); });
+  sync();
+})();
+</script>
+</section>

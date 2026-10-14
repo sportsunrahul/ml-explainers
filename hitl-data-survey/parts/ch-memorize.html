@@ -1,0 +1,57 @@
+<p class="kicker"><span class="act-n">Part two</span>Training when labels are wrong</p>
+
+<section id="ch-memorize" class="chapter">
+<h2>Clean first, wrong later</h2>
+<p>A network trained on a mix of right and wrong labels learns the consistent pattern first and memorizes the exceptions later. For a while, its own loss tells you which labels are wrong; after that window closes, it cannot.</p>
+
+<figure class="viz" id="viz-ridge" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="ridge-canvas" tabindex="0" role="img" aria-label="A three-dimensional ridge plot: for each training epoch, the histogram of per-image training loss on a log scale, green for images with a correct label and red for images whose label was flipped. Early epochs show the red histogram far to the right of the green one; later the red histogram slides left onto the green one."></canvas>
+  <canvas id="ridge-series" role="img" aria-label="Lines against epoch on a log scale: test accuracy rises to a peak and falls; the share of flipped images predicted as their wrong label rises from near zero to one; the share predicted as their true class rises, then falls to zero."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ridge-early" aria-pressed="false">Epoch 5</button>
+    <button type="button" id="btn-ridge-peak" aria-pressed="true">Epoch 12 (peak)</button>
+    <button type="button" id="btn-ridge-turn" aria-pressed="false">Epoch 20</button>
+    <button type="button" id="btn-ridge-late" aria-pressed="false">Epoch 200</button>
+    <label>epoch <input type="range" id="ridge-epoch" min="1" max="200" step="1" value="12"></label>
+    <button type="button" id="btn-ridge-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ridge-readout" aria-live="polite"></p>
+  <figcaption>Computed from our run A: CIFAR-10 with <span data-claim="run-a-noise-frac">39.69%</span> of training labels flipped to another class at random, the 9-layer CNN and schedule of the Co-teaching paper, plain cross-entropy for 200 epochs. Every epoch the loss of all 50,000 training images was recorded. The ridge shows every second epoch up to 60 and every tenth after. Drag to turn it. Guess first: at which epoch would you read the losses to find the wrong labels?</figcaption>
+</figure>
+
+<p>Start with how bad it can get. Zhang et al. (2017) replaced every CIFAR-10 label with a random one and trained standard networks anyway: "<span data-claim="zhang-zero-train">when trained on a completely random labeling of the true data, neural networks achieve 0 training error.</span>" An Inception network fit the random labels to <span data-claim="zhang-t1-inception-random-train">100.0</span>% training accuracy, with <span data-claim="zhang-t1-inception-random-test">9.78</span>% test accuracy: chance. A big network has room for any labeling, so training accuracy says nothing about whether the labels are right.</p>
+
+<p>Arpit et al. (2017) asked what happens on the way there. With part of the labels randomized, validation accuracy peaks early and then falls: "<span data-claim="arpit-s42-patterns">Thus the model first learns the simple and general patterns of the real data before fitting the noise (which results in decreasing validation accuracy).</span>" The images that share a pattern pull the weights the same way; each wrong label pulls alone, so it is learned last.</p>
+
+<p>Our run shows the same thing in detail. Test accuracy peaks at <span data-claim="run-a-peak-acc">77.14%</span> at <span data-claim="run-a-peak-epoch">epoch 12</span>, then falls to a mean of <span data-claim="run-a-last10">60.58%</span> over the last ten epochs. At epoch 10, the network predicts <span data-claim="run-a-e10-astrue">75.9%</span> of the mislabeled training images as their <em>true</em> class: it disagrees with the label it is trained on. Only <span data-claim="run-a-e10-fitwrong">4.8%</span> are fit to the wrong label. By epoch 30 that share is <span data-claim="run-a-e30-fitwrong">98.2%</span>. In the ridge, the red histogram sits far to the right of the green one early, then slides on top of it.</p>
+
+<p>That window is the signal every method in part two uses. Keep the 60% of images with the smallest loss at epoch 10 and <span data-claim="run-a-e10-prec60">93.3%</span> of what you keep has a correct label; do the same at epoch 200 and you keep <span data-claim="run-a-e200-prec60">59.0%</span>, no better than the labels themselves.</p>
+
+<div class="claim-card">
+<h4>Claim card: Arpit et al. (2017)</h4>
+<dl>
+<dt>Claim</dt><dd>Networks fit simple, shared patterns before they memorize noise; regularization slows the memorization.</dd>
+<dt>How measured</dt><dd>MNIST and CIFAR-10 with 20 to 80% of labels or inputs randomized; training and validation curves per epoch, per-example difficulty, and the density of the decision boundary.</dd>
+<dt>Result</dt><dd>Validation accuracy peaks before training accuracy saturates; "<span data-claim="arpit-s5-dropout-adv">dropout, especially coupled with adversarial training, is best at hindering memorization without reducing the model's ability to learn.</span>"</dd>
+<dt>Would have falsified it</dt><dd>Validation accuracy that does not peak before the noise is fit, or clean and noisy examples learned at the same rate.</dd>
+</dl></div>
+
+<p>One caution from real data. Labels flipped by a random number generator are the easy case. Wei et al. collected real human labels for CIFAR-10 and found that "<span data-claim="cifarn-memorize-quote">deep neural nets memorize features more easily when learning with real-world human annotations than synthetic ones.</span>" Human mistakes cluster on images that genuinely look like the other class, so they sit closer to the clean distribution and the window is narrower.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Never read training accuracy as a sign of label quality. If you want the model to point at suspect labels, read the per-image loss early in training (around the validation peak), or from a model that never trained on those labels (chapter 9), not from the final model.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('ridge-readout'), sl = document.getElementById('ridge-epoch');
+  const f = FIG.ridge(document.getElementById('ridge-canvas'), document.getElementById('ridge-series'), { say: t => out.textContent = t });
+  const E = { early: 5, peak: 12, turn: 20, late: 200 }, bs = Object.keys(E).map(k => document.getElementById('btn-ridge-' + k));
+  bs.forEach(b => b.addEventListener('click', () => { KIT.press(bs, b); const e = E[b.id.replace('btn-ridge-', '')]; sl.value = e; f.epoch(e); }));
+  sl.addEventListener('input', () => { KIT.press(bs, null); f.epoch(+sl.value); });
+  document.getElementById('btn-ridge-reset').addEventListener('click', () => { KIT.press(bs, bs[1]); sl.value = 12; f.reset(); });
+})();
+</script>
+</section>

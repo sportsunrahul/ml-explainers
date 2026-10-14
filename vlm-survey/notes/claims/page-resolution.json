@@ -1,0 +1,200 @@
+[
+ {
+  "id": "page-resolution-llava336",
+  "claim": "Why LLaVA-1.5 uses CLIP-ViT-L-336px",
+  "value": "the highest resolution available for CLIP",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3, paragraph \"Additional scaling\"",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-llava15-res",
+  "claim": "LLaVA-1.5 input resolution",
+  "value": "336",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3, paragraph \"Additional scaling\" (336^2)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-res",
+  "claim": "Qwen-VL input resolution after stage 1",
+  "value": "448",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-448",
+  "claim": "Qwen-VL stage 2 resolution change",
+  "value": "increase the input resolution of the visual encoder from 224 x 224 to 448 x 448, reducing the information loss caused by image down-sampling",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.2 (TeX: $224\\times 224$ to $448\\times 448$)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-adapter",
+  "claim": "Qwen-VL adapter structure",
+  "value": "single-layer cross-attention module initialized randomly",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1, Position-aware Vision-Language Adapter",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-256",
+  "claim": "Qwen-VL adapter output length",
+  "value": "compresses the visual feature sequence to a fixed length of 256",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1, Position-aware Vision-Language Adapter",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-2dabs",
+  "claim": "Positional information in the Qwen-VL adapter",
+  "value": "2D absolute positional encodings",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1, Position-aware Vision-Language Adapter",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-docvqa",
+  "claim": "Qwen-VL DocVQA score",
+  "value": "65.1",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Text-oriented VQA table, row Qwen-VL (Qwen-7B)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-hd-split",
+  "claim": "LLaVA-1.5-HD tiling",
+  "value": "dividing the image into smaller image patches of the resolution that the vision encoder is originally trained for",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.4 Scaling to Higher Resolutions",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-hd-global",
+  "claim": "Why LLaVA-1.5-HD adds a downsampled image",
+  "value": "to provide the LLM with the global context and to reduce the artifact of the split-encode-merge operation",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.4 Scaling to Higher Resolutions",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-idefics2-crops",
+  "claim": "Idefics2 image splitting",
+  "value": "4 crops and the original image",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. \"How can one trade compute for performance?\" (image splitting paragraph)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-molmo-grid",
+  "claim": "Molmo crop grid selection",
+  "value": "the grid is chosen to require the least amount of up-scaling",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix, Image Encoding",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-any",
+  "claim": "Naive dynamic resolution",
+  "value": "process images of any resolution, dynamically converting them into a variable number of visual tokens",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1, Naive Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-2drope",
+  "claim": "ViT change in Qwen2-VL",
+  "value": "removing the original absolute position embeddings and introducing 2D-RoPE",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1, Naive Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-merge",
+  "claim": "Token merge after the ViT",
+  "value": "compress adjacent 2x2 tokens into a single token",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1, Naive Dynamic Resolution (TeX: $2\\times2$)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-66",
+  "claim": "Worked token count",
+  "value": "will be compressed to 66 tokens",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1, Naive Dynamic Resolution (224x224 image, patch_size=14)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-qwenvl-markers",
+  "claim": "Qwen-VL brackets the image feature sequence with two special tokens (these are the two extra tokens counted on top of the 256 adapter outputs)",
+  "value": "<img> and </img>",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.2 Inputs and Outputs, Image Input (TeX: $<$img$>$ and $<$/img$>$, appended to the beginning and end of the image feature sequence)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-224",
+  "claim": "Input size of the paper's own token-count example",
+  "value": "224x224",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1, Naive Dynamic Resolution (TeX: $224\\times224$, patch_size=14, 66 tokens)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-pack",
+  "claim": "Packing at inference",
+  "value": "images of varying resolutions are packed into a single sequence",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1, Naive Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-noaspect",
+  "claim": "How the fixed-token baseline resizes",
+  "value": "rather than resizing to a specific height and width, as this would distort the original aspect ratio",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.1 Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-fixed-budgets",
+  "claim": "Fixed image-token budgets in the ablation",
+  "value": "64 / 576 / 1600 / 3136",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.1, Table (fixed/dynamic image tokens)",
+  "uncertain": false
+ },
+ {
+  "id": "page-resolution-q2-dyn-avg",
+  "claim": "Average image tokens with dynamic resolution",
+  "value": "1924",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.1, Table (fixed/dynamic image tokens)",
+  "uncertain": false
+ }
+]

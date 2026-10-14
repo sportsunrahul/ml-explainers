@@ -1,0 +1,148 @@
+<style>
+#ch-vision #vision-canvas { touch-action: pan-y; cursor: pointer; }
+#ch-vision .claimcard { border-left-color: var(--green); }
+#ch-vision .controls + .controls { margin-top: .35rem; }
+</style>
+<p class="kicker"><span class="act-n">Act IV</span>Beyond text, and honesty</p>
+<section id="ch-vision" class="chapter">
+<h2>Vision Mamba, VMamba, and a counterpoint</h2>
+<p>A vision Transformer (ViT) reads an image as a sequence: it cuts the picture into square patches, turns each patch into a token, and lets attention compare every patch with every other. An SSM can read the same sequence, but its scan runs in one direction, and a picture has no natural first patch.</p>
+
+<figure class="viz" id="viz-vision" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="vision-canvas" tabindex="0" role="img" aria-label="A 14 by 14 grid of image patches. One patch is outlined in green. Every other patch is shaded blue by how strongly it can influence the green patch's output after one scan layer; patches that cannot reach it stay empty. Beside the grid, small diagrams show the scan routes, and a log-scale gauge marks the sequence length against MambaOut's threshold 6D."></canvas>
+  <div class="controls" role="group" aria-label="Scan">
+    <button type="button" id="btn-vision-raster" aria-pressed="true">Causal raster scan</button>
+    <button type="button" id="btn-vision-vim" aria-pressed="false">Vim: forward + backward</button>
+    <button type="button" id="btn-vision-vmamba" aria-pressed="false">VMamba: four routes</button>
+    <label for="vision-decay">Decay per step <input type="range" id="vision-decay" min="50" max="99" step="1" value="85"></label>
+  </div>
+  <div class="controls" role="group" aria-label="Sequence length">
+    <label for="vision-res">Resolution <input type="range" id="vision-res" min="0" max="32" step="1" value="0"></label>
+    <button type="button" id="btn-vision-r224" aria-pressed="true">224 px</button>
+    <button type="button" id="btn-vision-r1248" aria-pressed="false">1248 px</button>
+    <button type="button" id="btn-vision-p8" aria-pressed="false">8 px patches</button>
+    <button type="button" id="btn-vision-p16" aria-pressed="true">16 px</button>
+    <button type="button" id="btn-vision-p32" aria-pressed="false">32 px</button>
+    <button type="button" id="btn-vision-d192" aria-pressed="false">D = 192</button>
+    <button type="button" id="btn-vision-d384" aria-pressed="true">D = 384</button>
+    <button type="button" id="btn-vision-d768" aria-pressed="false">D = 768</button>
+    <button type="button" id="btn-vision-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vision-readout" aria-live="polite"></p>
+  <figcaption>Click a patch, or focus the grid and use the arrow keys, to make it the green one. Toy: the blue heat is one scan layer with one constant decay per step, and where several routes reach a patch it shows the strongest. The real models stack <span data-claim="vim-depth">24</span> layers, pick the decay per token from the input, and combine routes differently: Vim adds its two gated outputs; VMamba's text does not say how its four are merged. Exact: the token count (resolution over patch size, squared) and MambaOut's threshold 6D (<span data-claim="mambaout-tau-small">2304</span> at D = 384, <span data-claim="mambaout-tau-base">4608</span> at D = 768). Sourced: the reference lengths on the gauge (<span data-claim="mambaout-in-tokens">196</span> for ImageNet, about <span data-claim="mambaout-det-tokens">4K</span> for COCO and ADE20K, <span data-claim="vim-hr-tokens">6084</span> at <span data-claim="vim-hr-res">1248</span> px) and Vim's measurement at that size, <span data-claim="vim-hr-speed">2.8x</span> faster with <span data-claim="vim-hr-mem">86.8%</span> less memory than DeiT-Ti.</figcaption>
+</figure>
+
+<p>Start with the causal raster scan: patches are read row by row, left to right, the way you read text. The green patch's output can only use patches the scan has already passed, so everything to its right and below is empty. Those patches come later, and they cannot reach it at all.</p>
+
+<p>Even the patches it can see are reached unevenly. The patch to its left is one step back in the sequence. The patch directly above is a whole row back, <span data-claim="page-vision-grid-side">14</span> steps, so with a decay of <span data-toy>0.85</span> per step it arrives with weight <span data-toy>0.85<sup>14</sup> = 0.10</span>. Meanwhile the last patch of the row above, at the far edge of the image, is only seven steps back and counts three times as much. Flattening keeps some neighbours close and pushes others far away.</p>
+
+<p><b>Vim</b> (Vision Mamba) scans the same row-order sequence twice, once forward and once backward, with separate SSM weights, and adds the two gated outputs. Press <b>Vim: forward + backward</b>: now every patch can reach every other, and the right side lights up. But the patch below is still a row away in either direction, so vertical neighbours stay faint. <b>VMamba</b> (Visual State Space Model) adds two column-order routes, down the columns and back up, each with its own SSM; its authors call this SS2D, a 2D selective scan. In a column route the patch above is one step away. Press <b>VMamba: four routes</b>: the heat becomes a cross, strong along the row and along the column.</p>
+
+<div class="eq" id="eq-vision" data-build data-viz="viz-vision"><div class="tex tex-display">
+\htmlData{step=1, link=target}{\htmlClass{t-green}{y^{(r)}_p}} = \htmlData{step=2, link=before}{\sum_{q \,\preceq_r\, p}} \htmlData{step=3, link=decay}{C_p \Big(\prod_{k \,\in\, (q,\, p]_r} \htmlClass{t-yellow}{\bar A_k}\Big)} \htmlData{step=4, link=patches}{\bar B_q\, \htmlClass{t-blue}{x_q}}
+\qquad
+\htmlData{step=5, link=routes}{\htmlClass{t-green}{y_p} = \mathrm{Linear}\big((\htmlClass{t-green}{y^{\rightarrow}_p} + \htmlClass{t-green}{y^{\leftarrow}_p}) \odot \mathrm{SiLU}(z_p)\big)}
+</div></div>
+<p class="eqno">Left: Vim Eq. 2 (the recurrence) unrolled along one route r; Mamba-2's Eq. 3 is the same sum for one sequence. Right: Vim Algorithm 1, the two gated directions added and projected.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{y^{(r)}_p}</span>: the output of route <span class="tex">r</span>'s scan at patch <span class="tex">p</span>, the green patch.</li>
+  <li><span class="tex">q \preceq_r p</span>: the sum runs only over patches that come no later than <span class="tex">p</span> on this route. That is the causal mask; every other patch contributes nothing.</li>
+  <li><span class="tex">\prod \htmlClass{t-yellow}{\bar A_k}</span>: the state's decay, one factor for every step between <span class="tex">q</span> and <span class="tex">p</span> along the route. Mamba computes each factor from the token (selection, chapter 7). The toy sets every factor to the slider's value <span class="tex">a</span>, so the product is <span class="tex">a^{d}</span> for a patch <span class="tex">d</span> steps back. That is the blue heat.</li>
+  <li><span class="tex">\bar B_q \htmlClass{t-blue}{x_q}</span>: what patch <span class="tex">q</span> writes into the state when the scan passes it; <span class="tex">C_p</span> reads the state out at <span class="tex">p</span>.</li>
+  <li>Right: Vim gates both directions with the same <span class="tex">\mathrm{SiLU}(z)</span>, adds them, and projects back to width <span class="tex">D</span>. VMamba runs four such routes, each with its own <span class="tex">\bar A, \bar B, C</span>; its text says the four outputs are reshaped and merged, without saying how, so this page does not guess.</li>
+</ul>
+
+<p>Before you press <b>VMamba</b>: with Vim's two scans, the patch diagonally below and to the right of the green one is fifteen steps away and arrives at <span data-toy>0.09</span>. Will VMamba's column routes make it stronger? They do not. On a column route that patch is also fifteen steps away, so in one layer its weight stays the same. Diagonal context arrives only through a second layer, by way of a patch that shares a row with one and a column with the other.</p>
+
+<p>How much of this survives in a trained network is an empirical question, and the papers answer it in parts. Vim's ablation is the evidence that the backward scan matters. With the forward scan only, ImageNet top-1 is <span data-claim="vim-abl-none-top1">73.2</span> and the ADE20K segmentation score is <span data-claim="vim-abl-none-miou">32.3</span> mIoU (mean intersection over union); with a backward SSM and its own convolution, <span data-claim="vim-abl-ssmconv-top1">73.9</span> and <span data-claim="vim-abl-ssmconv-miou">35.9</span> (Table 4, no class token). The gain is much larger for segmentation, where every pixel needs context from all sides, than for classification.</p>
+
+<p>Where to put the class token, the extra token whose final output the classifier reads? In a scan, position matters. Vim tried five designs, and the middle won: <span data-claim="vim-cls-middle">76.1</span> against <span data-claim="vim-cls-head">75.2</span> with the token at the head (Table 5). The paper credits the recurrence and the fact that ImageNet objects tend to sit near the centre. Our reading adds the decay: from the middle, every patch is at most about half the sequence away in one of the two scans, while a token at the head is up to <span data-claim="vim-tokens-224">196</span> steps from the far corner.</p>
+
+<p>The results: Vim-Ti reaches <span data-claim="vim-in1k-top1-vimti">76.1</span> top-1 with <span data-claim="vim-ti-params">7M</span> parameters, against <span data-claim="vim-deitti-top1">72.2</span> for DeiT-Ti, a ViT of the same size. Vim-S reaches <span data-claim="vim-in1k-top1-vims">80.3</span> against <span data-claim="vim-deits-top1">79.8</span>. (That is the value in v3 of the paper, the version read for this page; the README and later papers cite <span data-claim="vim-in1k-top1-vims-readme">80.5</span>.) The headline claim is about cost, and it is this chapter's cost against attention. On square images <span data-claim="vim-hr-res">1248</span> pixels wide, <span data-claim="vim-hr-tokens">6084</span> tokens, Vim-Ti runs <span data-claim="vim-hr-speed">2.8x</span> faster than DeiT-Ti and uses <span data-claim="vim-hr-mem">86.8%</span> less GPU memory, measured on the backbone alone. Attention's score matrix grows with the square of those tokens; the scan's state does not grow at all. In the paper's memory chart DeiT-Ti's point at that size is marked <span data-claim="vim-fig1-mem-deit-1248">OOM</span>, out of memory. At <span data-claim="vim-hr-similar-res">512</span> pixels the two are similar, and at the <span data-claim="vim-res">224</span> pixels of ImageNet training the paper makes no speed claim. Press <b>1248 px</b> to see that point on the gauge.</p>
+
+<p>VMamba is built differently. It is hierarchical, like a convolutional network: for a 224-pixel input its four stages work on grids of <span data-claim="vmamba-stage-res">56, 28, 14, 7</span> patches per side (<span data-claim="vmamba-t-tokens-s1">3136</span> tokens in the first stage), with no class token and no position embeddings. Does scanning four ways beat one? VMamba's Table 10 says yes, by a little: <span data-claim="vmamba-scan-unidi">82.26</span> top-1 with one route, <span data-claim="vmamba-scan-cross">82.60</span> with four. Remove the small depthwise convolution in front of the scan and the gap grows, <span data-claim="vmamba-scan-unidi-nodw">80.88</span> against <span data-claim="vmamba-scan-cross-nodw">82.25</span>. Our reading: that convolution already mixes each patch with its two-dimensional neighbours, which is much of what the extra routes add.</p>
+
+<p>One detail points ahead to chapter 11. VMamba's final models keep a state of size N = <span data-claim="vmamba-t-dstate">1</span> per channel, against <span data-claim="vmamba-vanilla-dstate">16</span> in its first version and in Mamba. Cutting it (Table 5, step e.2) raised throughput to <span data-claim="vmamba-step-e2-tp">1942</span> images per second at <span data-claim="vmamba-step-e2-top1">81.87</span>% top-1, and later steps won the accuracy back. The whole redesign in that table runs from <span data-claim="vmamba-vanilla-t-top1">82.17</span>% at <span data-claim="vmamba-vanilla-t-tp">426</span> images per second to <span data-claim="vmamba-final-t-top1-2dp">82.60</span>% at <span data-claim="vmamba-tp-t">1686</span>. For ImageNet-sized inputs, the state hardly needs to hold anything. What a state of fixed size can and cannot hold is the question of the next chapter.</p>
+
+<h3>Inside Vision Mamba: forward, then backward</h3>
+<p>Vim is the cleaner of the two to trace, because it keeps one sequence length from the first block to the last. Notation: Vim calls the depth L, the sequence length M, and the expanded width E = 2D. That E is a width, while Mamba's E = <span data-claim="mamba-expand-e">2</span> is a ratio. On this page L stays the sequence length, as in MambaOut below. Predict before you step: the loss reads only the class token. Which boxes will the gradient reach, and how does it get to a patch in the corner?</p>
+
+<figure class="viz archflow" id="viz-vimflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-vimflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-vimflow-tokens" aria-pressed="false">2 Tokens</button>
+    <button type="button" id="btn-vimflow-inproj" aria-pressed="false">3 x and z</button>
+    <button type="button" id="btn-vimflow-scans" aria-pressed="false">4 Two scans</button>
+    <button type="button" id="btn-vimflow-gate" aria-pressed="false">5 Gate and sum</button>
+    <button type="button" id="btn-vimflow-head" aria-pressed="false">6 Head</button>
+    <button type="button" id="btn-vimflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-vimflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-vimflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-vimflow-ti" aria-pressed="true">Vim-Ti</button>
+    <button type="button" id="btn-vimflow-s" aria-pressed="false">Vim-S</button>
+  </div>
+  <canvas id="vimflow-canvas" role="img" aria-label="Vim's training step as a diagram: the image becomes a sequence of patch tokens with a class token in the middle; a norm and two projections give x and z; x goes through a forward scan and a backward scan; both are gated by z, added and projected, and the block repeats; a head reads the class token and a cross-entropy loss grades it. In the backward stages red arrows run from the loss back through every box."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-vimflow-prev">Previous</button>
+    <button type="button" id="btn-vimflow-next">Next</button>
+    <button type="button" id="btn-vimflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vimflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One image becomes one sequence of tokens; <span data-claim="vim-depth">24</span> identical blocks each scan it forward and backward; a small head reads the <b class="c-green">class token</b> and the <b class="c-red">loss</b> grades it. The scans carry the <b class="c-yellow">state</b>. Press <b>1 Image</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. One image</h4><p>A batch of training images at <span data-claim="vim-res">224</span> by 224 pixels, augmented as in DeiT: random crops, horizontal flips, mixup, random erasing, and label smoothing on the targets. At test time the image is centre-cropped to the same size.</p></div>
+    <div data-stage="tokens" hidden><h4>2. Patches, a class token, positions</h4><p>A <span data-claim="vim-patch">16</span> by 16 projection cuts the image into <span data-claim="vim-tokens-224">196</span> non-overlapping patches of <span data-claim="vim-patchvec">768</span> numbers each (16 x 16 x 3) and maps each to width D (Eq. 4). One learned class token is inserted in the middle of the sequence (the paper says "middle" without giving an exact index). Learned position embeddings are added to all <span data-claim="vim-seqlen-224">197</span> tokens, which is how the model knows where each patch came from, since a scan alone only knows the order.</p></div>
+    <div data-stage="inproj" hidden><h4>3. Norm, then x and z</h4><p>Each block normalizes its input and projects it twice to width E: <span class="tex">x</span>, which will be scanned, and <span class="tex">z</span>, which will gate the result. For Vim-Ti, D = <span data-claim="vim-ti-d">192</span> and E = <span data-claim="vim-ti-e">384</span>; for Vim-S, D = <span data-claim="vim-s-d">384</span> and E = <span data-claim="vim-s-e">768</span>.</p></div>
+    <div data-stage="scans" hidden><h4>4. Two scans with separate weights</h4><p>Each direction has its own 1-D convolution and SiLU, its own projections to <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span>, and its own <span class="tex">A</span>; then a selective scan, exactly Mamba's (chapter 7). The forward branch runs from the first token to the last, the backward branch from the last to the first. Each carries a state of E x N numbers per image, with N = <span data-claim="vim-n">16</span>: <span data-claim="vim-ti-state">6144</span> for Vim-Ti, <span data-claim="page-vision-vims-state">12,288</span> for Vim-S (our reading of Algorithm 1's shapes). Its size does not depend on the number of tokens.</p></div>
+    <div data-stage="gate" hidden><h4>5. Gate, add, project, repeat</h4><p>Both outputs are multiplied by <span class="tex">\mathrm{SiLU}(z)</span>, added, projected back to width D, and added to the block's input (the residual). The same block, with its own weights, repeats <span data-claim="vim-depth">24</span> times. After a few blocks the one-layer heat of the figure above no longer applies: information can hop from patch to patch through intermediate tokens.</p></div>
+    <div data-stage="head" hidden><h4>6. Read the class token</h4><p>The head takes only the final output at the class token's position, normalizes it, and an MLP maps it to the 1,000 ImageNet classes. The other 196 outputs are not used.</p></div>
+    <div data-stage="loss" hidden><h4>7. What the loss grades</h4><p>Cross-entropy between the predicted class scores and the (smoothed, mixed-up) label. One position is graded: the class token. No patch has a target of its own.</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>From the loss into the head, then to the class token's position in the last block, and from there backward through both scans. In the last block a patch reaches the class token only through a scan: patches before the middle through the forward branch, patches after it through the backward branch (our reading). Every box is trainable, so the gradient updates everything it reaches: the projections, the convolutions, <span class="tex">A</span> and the bias of <span class="tex">\Delta</span> in each direction, the class token, the position embeddings and the patch projection. Nothing is frozen.</p></div>
+    <div data-stage="update" hidden><h4>9. The recipe</h4><p>AdamW with momentum 0.9 and weight decay <span data-claim="vim-wd">0.05</span>, batch <span data-claim="vim-batch">1024</span>, <span data-claim="vim-epochs">300</span> epochs, learning rate <span data-claim="vim-lr">1e-3</span> with a cosine schedule, and an exponential moving average (EMA) of the weights, on <span data-claim="vim-gpus">8 A800 GPUs</span>. The rows marked with a dagger in Vim's Table 1 are then fine-tuned on longer sequences: patches taken with stride <span data-claim="vim-ft-stride">8</span> instead of 16, for <span data-claim="vim-ft-epochs">30</span> epochs.</p></div>
+  </div>
+  <figcaption>Computed: token counts from the image and patch size, widths from Vim's Sec. 3.4, state sizes from Algorithm 1's shapes. Vim-B is left out because its D and E appear in neither the paper nor the README. The convolution width and the initialization of A and Delta are not stated in the paper, so they are not shown.</figcaption>
+</figure>
+
+<h3>The counterpoint: is an image a long sequence?</h3>
+<p>MambaOut (Yu and Wang, 2024) asks the blunt question: do we need the SSM for vision at all? Its argument starts from cost. An SSM's advantage over attention is that its cost stays linear in the sequence length L, so the question is when attention's quadratic part actually dominates. Count the operations of one Transformer block with an MLP four times as wide as the model:</p>
+
+<div class="eq" id="eq-vision-long" data-build data-viz="viz-vision"><div class="tex tex-display">
+\text{FLOPs} = \htmlData{step=1, link=linear}{24D^2L} + \htmlData{step=2, link=quad}{\htmlClass{t-brown}{4DL^2}},
+\qquad
+\htmlData{step=3, link=threshold}{r_L = \frac{\htmlClass{t-brown}{4DL^2}}{24D^2L} = \frac{L}{6D}}
+</div></div>
+<p class="eqno">MambaOut Eq. 6 and Eq. 7.</p>
+<ul class="gloss">
+  <li><span class="tex">24D^2L</span>: the projections and the MLP, applied to each of the L tokens separately. Linear in L.</li>
+  <li><span class="tex">\htmlClass{t-brown}{4DL^2}</span>: attention's scores and weighted sum, every token against every token. Quadratic in L.</li>
+  <li><span class="tex">r_L = L / 6D</span>: the quadratic part wins only when the sequence is longer than six times the width. For ViT-S (D = <span data-claim="page-vision-vits-d">384</span>) the threshold is <span data-claim="mambaout-tau-small">2304</span> tokens; for ViT-B (D = <span data-claim="page-vision-vitb-d">768</span>), <span data-claim="mambaout-tau-base">4608</span>; for Vim-Ti's width of <span data-claim="vim-ti-d">192</span> it would be <span data-claim="page-vision-tau-ti">1,152</span>.</li>
+</ul>
+<p>ImageNet at 224 pixels with 16-pixel patches is <span data-claim="mambaout-in-tokens">196</span> tokens, so at ViT-S width the ratio is <span data-claim="page-vision-r-imagenet-s">0.09</span>: short. Detection on COCO at <span data-claim="page-vision-coco-size">800 by 1280</span> pixels and segmentation on ADE20K at <span data-claim="page-vision-ade-size">512 by 2048</span> give about <span data-claim="mambaout-det-tokens">4K</span> tokens: long. Move the figure's resolution and width to watch the verdict flip. The second half of the argument is about direction. An SSM mixes tokens causally, and MambaOut shows that causal mixing hurts image understanding: making ViT-S's attention causal and retraining drops it from <span data-claim="mambaout-causal-vits-full">79.8</span> to <span data-claim="mambaout-causal-vits-causal">78.9</span>. Two scans soften this, but each branch on its own is still causal.</p>
+
+<div class="aside claimcard">
+  <h4>Claim card: ImageNet classification does not need the SSM, detection and segmentation may (MambaOut)</h4>
+  <p><b>Claim.</b> An SSM is worth having for long sequences; ImageNet classification is short, so it does not need one, while detection and segmentation are long enough to benefit.</p>
+  <p><b>How it was measured.</b> MambaOut stacks Gated CNN blocks: Mamba's block with the SSM removed, so the only token mixer is a <span data-claim="mambaout-kernel">7x7 depthwise conv</span>. It is trained with its own depths, widths and recipe (batch <span data-claim="mambaout-batch">4096</span>) and compared with the published rows of visual Mamba models: ImageNet top-1, COCO with Mask R-CNN, ADE20K with UperNet. Not held fixed: everything except the token mixer differs between rows. It is a comparison across models, not a same-model ablation (our reading).</p>
+  <p><b>Result.</b> ImageNet: MambaOut-Tiny <span data-claim="mambaout-in-tiny">82.7</span> against <span data-claim="mambaout-in-vmambav9t">82.5</span> for VMamba's final tiny model (MambaOut calls it VMambaV9-T; VMamba's own table gives <span data-claim="vmamba-in1k-top1-t">82.6</span>), tied with LocalVMamba-T at <span data-claim="mambaout-in-localvmambat">82.7</span>. COCO box AP: <span data-claim="mambaout-coco-t-apb">45.1</span> against <span data-claim="mambaout-coco-vmambav9t-apb">47.4</span>. ADE20K mIoU: <span data-claim="mambaout-ade-t-ss">47.4</span> against <span data-claim="mambaout-ade-vmambav9t-ss">48.3</span>. Without the SSM it ties on the short task and trails on the long ones, as the hypothesis predicts. (These detection rows use Mask R-CNN; Vim's use Cascade Mask R-CNN, so the two papers' detection numbers are not comparable.)</p>
+  <p><b>What would have falsified it.</b> MambaOut matching VMamba on COCO and ADE20K too, or falling clearly behind on ImageNet. The cleaner test, which the paper does not run, removes the SSM from one visual Mamba at matched compute and recipe; a drop on ImageNet there would refute the first half.</p>
+</div>
+
+<p>A second paper explains why Mamba does well on images in the first place, using the lens of chapter 9. MLLA (Mamba-Like Linear Attention; the final manuscript renames its model <span data-claim="mlla-rename">MILA</span>) writes the selective scan beside causal linear attention and lines up the terms: <span class="tex">C</span> plays the query, <span class="tex">B</span> the key, the input the value, and the state is linear attention's running sum of keys times values. It finds <span data-claim="mlla-distinctions">six</span> differences.</p>
+
+<div class="aside claimcard">
+  <h4>Claim card: the forget gate and the block design carry Mamba's gain in vision (MLLA)</h4>
+  <p><b>Claim.</b> In vision, Mamba behaves like single-head linear attention with an input gate (<span class="tex">\Delta</span>), a forget gate (<span class="tex">\bar A</span>), a skip connection (<span class="tex">D</span>) and no normalization, inside Mamba's block design. Of these, the forget gate and the block design do most of the work.</p>
+  <p><b>How it was measured.</b> Start from Swin-T with its softmax attention replaced by linear attention. Add or remove one difference at a time and report ImageNet top-1 and throughput (Table 1). Then remove the forget gate and try position encodings in its place (Table 2).</p>
+  <p><b>Result.</b> The baseline scores <span data-claim="mlla-baseline-top1">77.6</span> at <span data-claim="mlla-baseline-tp">1152</span> images per second. Adding the forget gate gives <span data-claim="mlla-forgetgate-top1">78.4</span>, but throughput falls to <span data-claim="mlla-forgetgate-tp">743</span>, because the gate turns the computation back into a recurrence. Adopting Mamba's block design gives <span data-claim="mlla-blocksub-top1">80.9</span>. Position encodings can take the forget gate's place at no recurrent cost: <span data-claim="mlla-lepe-top1">81.6</span> with LePE, <span data-claim="mlla-cpe-top1">81.7</span> with CPE. The paper's reading is that images need local bias and positional information more than a causal decay.</p>
+  <p><b>What would have falsified it.</b> The forget gate adding nothing on its own, or position encodings failing to replace it. Both are tested directly, one change at a time, on one architecture.</p>
+</div>
+
+<p>Put together, the vision papers draw a line through this survey's argument. Where sequences are short and every patch can be seen at once, the scan's direction is a cost and attention or a convolution does as well; where sequences grow to thousands of tokens, the fixed-size state pays for itself. But a fixed state has a price of its own. The next chapter measures what an SSM forgets that attention does not.</p>
+</section>

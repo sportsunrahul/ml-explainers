@@ -1,0 +1,182 @@
+[
+ {
+  "id": "dit-latent-shape",
+  "claim": "A 256x256x3 image is encoded by the Stable Diffusion VAE (downsample factor 8) to a latent of shape",
+  "value": "32x32x4",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 3.2 Patchify; Sec. 4 Diffusion paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-token-count",
+  "claim": "Patchify with patch size p on an I x I x C latent gives token count T",
+  "value": "T = (I/p)^2",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Fig. 4 caption",
+  "uncertain": false
+ },
+ {
+  "id": "dit-patch-sizes",
+  "claim": "Patch sizes in the design space",
+  "value": "p = 2, 4, 8",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 3.2 Patchify",
+  "uncertain": false
+ },
+ {
+  "id": "dit-configs",
+  "claim": "Model configs (layers / hidden size / heads / Gflops at I=32, p=4)",
+  "value": "S 12/384/6/1.4; B 12/768/12/5.6; L 24/1024/16/19.7; XL 28/1152/16/29.1",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "dit-xl2-gflops-params",
+  "claim": "DiT-XL/2 at 256x256 forward-pass Gflops and parameters (excluding 84M-param VAE)",
+  "value": "118.64 Gflops, 675M params",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4, row DiT-XL/2 256x256 adaLN-Zero",
+  "uncertain": false
+ },
+ {
+  "id": "dit-block-ablation",
+  "claim": "DiT-XL/2 FID-50K at 400K steps by block design (no guidance)",
+  "value": "adaLN-Zero 19.47; adaLN 25.21; cross-attention 26.14; in-context 35.24",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4, DiT-XL/2 rows at 400K steps; Fig. 5",
+  "uncertain": false
+ },
+ {
+  "id": "dit-block-gflops",
+  "claim": "Gflops of DiT-XL/2 by block design",
+  "value": "in-context 119.4; cross-attention 137.6; adaLN 118.6; adaLN-Zero 118.6",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5, DiT block design paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-crossattn-overhead",
+  "claim": "Cross-attention conditioning adds the most Gflops",
+  "value": "roughly 15% overhead",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 3.2, Cross-attention block bullet",
+  "uncertain": false
+ },
+ {
+  "id": "dit-gflops-not-params",
+  "claim": "Similar Gflops give similar FID despite 4x different params: DiT-S/2 vs DiT-B/4 at 400K steps",
+  "value": "S/2: 6.06 Gflops, 33M, FID 68.40; B/4: 5.56 Gflops, 130M, FID 68.38",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4, rows DiT-S/2 and DiT-B/4; Sec. 5 Gflops paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-fid-256-cfg",
+  "claim": "ImageNet 256x256 class-conditional FID-50K, DiT-XL/2-G, cfg=1.50, 7M steps, 250 DDPM steps",
+  "value": "2.27",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 2, row DiT-XL/2-G (cfg=1.50)",
+  "uncertain": false
+ },
+ {
+  "id": "dit-fid-256-noguide",
+  "claim": "ImageNet 256x256 FID-50K, DiT-XL/2 without guidance",
+  "value": "9.62",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 2, row DiT-XL/2",
+  "uncertain": false
+ },
+ {
+  "id": "dit-prev-best-256",
+  "claim": "Previous best diffusion FID at 256x256 (LDM-4-G cfg=1.50) and previous best overall (StyleGAN-XL)",
+  "value": "3.60 and 2.30",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 2, rows LDM-4-G (cfg=1.50) and StyleGAN-XL",
+  "uncertain": false
+ },
+ {
+  "id": "dit-fid-512-cfg",
+  "claim": "ImageNet 512x512 FID-50K, DiT-XL/2-G cfg=1.50, 3M steps (previous best ADM-G, ADM-U 3.85)",
+  "value": "3.04",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 3, row DiT-XL/2-G (cfg=1.50)",
+  "uncertain": false
+ },
+ {
+  "id": "dit-512-tokens-gflops",
+  "claim": "DiT-XL/2 at 512x512 processes 1024 tokens from a 64x64x4 latent",
+  "value": "1024 tokens, 524.6 Gflops",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5.1, 512x512 ImageNet paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-baseline-gflops",
+  "claim": "U-Net baseline Gflops at 256x256 (DDPM part only)",
+  "value": "ADM 1120; ADM-U 742; LDM-4 104; LDM-8 57",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "dit-baseline-gflops-512",
+  "claim": "U-Net baseline Gflops at 512x512",
+  "value": "ADM 1983; ADM-U 2813 (vs DiT-XL/2 524.6)",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 6; Sec. 5.1",
+  "uncertain": false
+ },
+ {
+  "id": "dit-sampling-vs-model-compute",
+  "claim": "More sampling steps cannot replace model compute: L/2 at 1000 steps vs XL/2 at 128 steps",
+  "value": "L/2 80.7 Tflops/image FID-10K 25.9; XL/2 15.2 Tflops/image FID-10K 23.7",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5.2; Fig. 10",
+  "uncertain": false
+ },
+ {
+  "id": "dit-2p35m-steps",
+  "claim": "DiT-XL/2 FID after only 2.35M training steps (similar to ADM); guidance setting not stated in the sentence, implied guided since the no-guidance FID at 2352K steps is 10.67 (Table 4)",
+  "value": "2.55",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5.1, 256x256 ImageNet paragraph",
+  "uncertain": true
+ },
+ {
+  "id": "dit-training-recipe",
+  "claim": "Training recipe used for all DiTs",
+  "value": "AdamW, constant lr 1e-4, no weight decay, batch 256, EMA 0.9999, flips only, no warmup",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 4, Training paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-cfg-three-channels",
+  "claim": "Guidance applied to only the first 3 of 4 latent channels; 4-channel guidance at scale 1.375 gives a similar FID",
+  "value": "3-channel s=1.5: 2.27; 4-channel s=1.375: 2.20",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Appendix A, Classifier-free guidance on a subset of channels",
+  "uncertain": false
+ }
+]

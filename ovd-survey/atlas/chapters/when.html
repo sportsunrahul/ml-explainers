@@ -1,0 +1,27 @@
+  <article data-chapter="when" data-chip="Prompt or train?">
+    <header class="ch-head"><span class="num"></span><h2>When can a prompt replace training?</h2><p class="subhead">Four measurements, one answer</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Evidence">
+        <button type="button" role="tab" data-step="0">Label budget</button>
+        <button type="button" role="tab" data-step="1">The long tail</button>
+        <button type="button" role="tab" data-step="2">Worth in labels</button>
+      </div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>Ten boxes per class beat any prompt</h3>
+      <p>RF100-VL collects 100 datasets of things the web rarely shows. On its Industrial group, the best prompt-only detector scores 10.3 AP. The same detector fine-tuned on 10 boxes per class scores 37.8. Detectors trained on all labels reach 64.3 to 68.2.</p>
+      <p class="note">Each dot is one method's average <button class="inline-term" data-open="ap">AP</button> over the group's datasets (RF100-VL Tables 2 and 7). Yellow: prompt only; hollow: examples in the prompt; blue: trained on the labels. "Industrial" is a cluster of 22 datasets by CLIP similarity, not a curated factory set.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>The usual average hides the failures</h3>
+      <p>Papers report the mean over 13 ODinW datasets. On those, OWL-ST L/14 averages 53.0 AP. Over all 35 datasets its median is 16.2, and after fine-tuning on LVIS it falls to 6.3.</p>
+      <p class="note">One dot per dataset, zero-shot (OWLv2 Table A4; Grounding DINO Table 14). Filled dots are the usual 13.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>A prompt is worth a few labels</h3>
+      <p>GLIP-T with only a prompt scores 46.5 on ODinW-13: as much as a closed-set DyHead-T fine-tuned on 5 examples per class (46.4). Labels still add a lot: GLIP-T reaches 64.9 with all data.</p>
+      <p class="note">GLIP Table 11, full fine-tuning, mean of 3 runs.</p>
+      <p class="inscription">Use the prompt to start, a labelled test set to judge, and ten boxes per class when the prompt falls short.</p>
+    </div>
+    <button type="button" class="continue" data-go="failures">Continue</button>
+  </article>

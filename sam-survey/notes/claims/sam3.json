@@ -1,0 +1,1381 @@
+[
+ {
+  "id": "sam3-v1-date",
+  "claim": "SAM 3 arXiv v1 submission date",
+  "value": "2025-11-20",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "abs.html Submission history [v1]"
+ },
+ {
+  "id": "sam3-v2-date",
+  "claim": "SAM 3 arXiv v2 submission date (our reading: v2 carries the Object Multiplex appendix; README dates SAM 3.1 Object Multiplex 2026-03-27)",
+  "value": "2026-03-28",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "abs.html Submission history [v2]"
+ },
+ {
+  "id": "sam3-params-total",
+  "claim": "Total parameters of SAM 3",
+  "value": "850M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.1 Model Architecture, para 2"
+ },
+ {
+  "id": "sam3-params-readme",
+  "claim": "Total parameters per README",
+  "value": "848M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "README, Model section",
+  "code_only": true
+ },
+ {
+  "id": "sam3-params-vision",
+  "claim": "Vision encoder parameters",
+  "value": "450M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.1; App. C.4 Stage 1"
+ },
+ {
+  "id": "sam3-params-text",
+  "claim": "Text encoder parameters",
+  "value": "300M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.1; App. C.4 Stage 1"
+ },
+ {
+  "id": "sam3-params-heads",
+  "claim": "Detector + tracker parameters",
+  "value": "100M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.1"
+ },
+ {
+  "id": "sam3-pe-pairs",
+  "claim": "Image-text pairs used for PE pretraining (Stage 1)",
+  "value": "5.4 billion",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Image and Text Encoders; App. C.4 Stage 1"
+ },
+ {
+  "id": "sam3-res",
+  "claim": "Input image resolution (square)",
+  "value": "1008",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Image and Text Encoders; App. C.4 Data augmentation"
+ },
+ {
+  "id": "sam3-patch",
+  "claim": "Vision encoder patch size (PE-L+)",
+  "value": "14",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 11 'PE-L+ (14)'"
+ },
+ {
+  "id": "sam3-grid",
+  "claim": "Token grid 1008/14 per side (our reading, arithmetic)",
+  "value": "72x72",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "our reading from App. C.2 (1008 px) and Table 11 (patch 14); A.2 'stride-28 (instead of 14)'",
+  "uncertain": true
+ },
+ {
+  "id": "sam3-tokens-ablation",
+  "claim": "Detector tokens in ablation runs (2x2 downsampled, stride-28 equivalent)",
+  "value": "1296",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. A.1 Implementation Details (ablation setting; not stated for released model)"
+ },
+ {
+  "id": "sam3-window",
+  "claim": "Window size of windowed attention (pixels), 3x3 windows",
+  "value": "336",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Image and Text Encoders"
+ },
+ {
+  "id": "sam3-window-tokens",
+  "claim": "Window size in tokens (our reading: derived from 336 px windows at patch 14, App. C.2, main.tex:1414)",
+  "value": "24x24",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "derived from App. C.2 (main.tex:1414); main.tex:1133 is a backbone-ablation setup"
+ },
+ {
+  "id": "sam3-layers",
+  "claim": "Vision encoder layers",
+  "value": "32",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 '(4 out of 32)'"
+ },
+ {
+  "id": "sam3-global-layers",
+  "claim": "Global-attention layers in vision encoder",
+  "value": "4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 '(4 out of 32)'"
+ },
+ {
+  "id": "sam3-text-ctx",
+  "claim": "Text encoder max context length",
+  "value": "32",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Image and Text Encoders"
+ },
+ {
+  "id": "sam3-fusion-blocks",
+  "claim": "Fusion encoder transformer blocks",
+  "value": "6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Fusion Encoder"
+ },
+ {
+  "id": "sam3-decoder-blocks",
+  "claim": "Decoder transformer blocks",
+  "value": "6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Decoder"
+ },
+ {
+  "id": "sam3-queries",
+  "claim": "Default number of object queries Q",
+  "value": "200",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Decoder 'Q=200'"
+ },
+ {
+  "id": "sam3-geo-queries",
+  "claim": "Learned geometric queries for PVS",
+  "value": "4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Presence Head, last para"
+ },
+ {
+  "id": "sam3-amb-k",
+  "claim": "Ambiguity head experts K (best)",
+  "value": "2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Handling Ambiguity"
+ },
+ {
+  "id": "sam3-amb-overlap",
+  "claim": "Reduction in overlapping instances with ambiguity head",
+  "value": "15%",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.2 Handling Ambiguity, last para"
+ },
+ {
+  "id": "sam3-conf-thresh",
+  "claim": "Confidence threshold for evaluated predictions",
+  "value": "0.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 Metrics"
+ },
+ {
+  "id": "sam3-video-len",
+  "claim": "Max video length in PCS task definition",
+  "value": "30 secs",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 2 '(<=30 secs)'"
+ },
+ {
+  "id": "sam3-confirm-T",
+  "claim": "Track confirmation delay T (frames)",
+  "value": "15",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.3 Track Confirmation Delay"
+ },
+ {
+  "id": "sam3-confirm-V",
+  "claim": "MDS threshold V for unconfirmed masklets",
+  "value": "0",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.3 Removal of Unconfirmed Masklets"
+ },
+ {
+  "id": "sam3-dup-iou",
+  "claim": "iou_threshold for duplicate masklets",
+  "value": "0.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.3 Removal of Duplicate Masklets"
+ },
+ {
+  "id": "sam3-reprompt-N",
+  "claim": "Periodic re-prompt interval N (frames)",
+  "value": "16",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.3 Periodic Re-Prompting"
+ },
+ {
+  "id": "sam3-reprompt-iou",
+  "claim": "Re-prompt IoU and confidence threshold",
+  "value": "0.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.3 Periodic Re-Prompting"
+ },
+ {
+  "id": "sam3-detguide-iou",
+  "claim": "Detection-guided re-prompt box IoU threshold",
+  "value": "0.85",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.3 Detection-Guided Re-Prompting"
+ },
+ {
+  "id": "sam3-s2-iters",
+  "claim": "Stage 2 iterations",
+  "value": "95k",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-s2-batch",
+  "claim": "Stage 2 batch size",
+  "value": "896",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-s2-lr-vision",
+  "claim": "Stage 2 initial LR for vision encoder",
+  "value": "5e-4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-s2-lr-text",
+  "claim": "Stage 2 initial LR for text encoder",
+  "value": "1e-4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-s2-lr-rest",
+  "claim": "Stage 2 initial LR for other components",
+  "value": "1e-3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-s2-lld",
+  "claim": "Layer-wise LR decay on vision encoder",
+  "value": "0.9",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-s2-wd",
+  "claim": "Weight decay",
+  "value": "0.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-loss-l1",
+  "claim": "Box L1 loss weight",
+  "value": "5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-loss-giou",
+  "claim": "Box gIoU loss weight",
+  "value": "2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-loss-cls",
+  "claim": "Classification loss weight",
+  "value": "100",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-loss-focal",
+  "claim": "Mask focal loss weight",
+  "value": "200",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-loss-dice",
+  "claim": "Mask dice loss weight",
+  "value": "10",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 2"
+ },
+ {
+  "id": "sam3-loss-presence",
+  "claim": "Presence BCE loss weight (Stage 3)",
+  "value": "20",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 3"
+ },
+ {
+  "id": "sam3-s3-iters",
+  "claim": "Stage 3 iterations",
+  "value": "5k",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 3"
+ },
+ {
+  "id": "sam3-s3-batch",
+  "claim": "Stage 3 batch size",
+  "value": "512",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 3"
+ },
+ {
+  "id": "sam3-s3-lr",
+  "claim": "Stage 3 LR scale factor",
+  "value": "0.025",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 3"
+ },
+ {
+  "id": "sam3-s3-pcs-iters",
+  "claim": "Stage 3 PCS exemplar interactivity iterations",
+  "value": "5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 3"
+ },
+ {
+  "id": "sam3-s3-pvs-steps",
+  "claim": "Stage 3 PVS interactivity steps (Stage 2: 4)",
+  "value": "7",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 3; Stage 2"
+ },
+ {
+  "id": "sam3-s4-iters",
+  "claim": "Stage 4 iterations",
+  "value": "190k",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 4"
+ },
+ {
+  "id": "sam3-s4-batch",
+  "claim": "Stage 4 batch size",
+  "value": "512",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 4"
+ },
+ {
+  "id": "sam3-s4-lr",
+  "claim": "Stage 4 peak LR",
+  "value": "5.0e-4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 4"
+ },
+ {
+  "id": "sam3-s4-weights",
+  "claim": "Stage 4 loss weights focal:dice:IoU-MAE:occlusion-CE",
+  "value": "20:1:1:1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 4"
+ },
+ {
+  "id": "sam3-s4-long",
+  "claim": "Stage 4 long-context fine-tune iterations (16/32-frame clips)",
+  "value": "60k",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. C.4 Stage 4"
+ },
+ {
+  "id": "sam3-gpu-a100",
+  "claim": "Training compute, A100 GPU hours",
+  "value": "172k",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. I Model card, Cost and impact of compute"
+ },
+ {
+  "id": "sam3-gpu-h200",
+  "claim": "Training compute, H200 GPU hours",
+  "value": "86k",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. I Model card, Cost and impact of compute"
+ },
+ {
+  "id": "sam3-latency",
+  "claim": "Image inference latency on one H200 with 100+ objects",
+  "value": "30 ms",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1, last para"
+ },
+ {
+  "id": "sam3-rt-2gpu",
+  "claim": "Objects at 30 FPS on 2 H200s",
+  "value": "10",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. B Limitations"
+ },
+ {
+  "id": "sam3-rt-8gpu",
+  "claim": "Objects at 30 FPS on 8 H200s",
+  "value": "64",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. B Limitations"
+ },
+ {
+  "id": "sam3-mux-M",
+  "claim": "Object Multiplex bucket size M",
+  "value": "16",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. H.1 Overview"
+ },
+ {
+  "id": "sam3-mux-tokens",
+  "claim": "Decoder tokens per bucket (5 per slot x 16)",
+  "value": "80",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. H.1 Mux/Demux"
+ },
+ {
+  "id": "sam3-mux-speedup",
+  "claim": "Multiplex speedup at 128 objects on one H100",
+  "value": "5.2x",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. H.2 Inference Efficiency; Fig. 30"
+ },
+ {
+  "id": "sam3-mux-overhead",
+  "claim": "Multiplex single-object latency overhead",
+  "value": "7%",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. H.2 Inference Efficiency"
+ },
+ {
+  "id": "sam3-mux-yt-cgf",
+  "claim": "Multiplex VEval YT-Temporal-1B cgF1 (SAM 3: 50.8)",
+  "value": "53.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 43, row SAM 3 Multiplex"
+ },
+ {
+  "id": "sam3-mux-mosev2",
+  "claim": "Multiplex MOSEv2 J&F (SAM 3: 60.3)",
+  "value": "62.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 44"
+ },
+ {
+  "id": "sam3-gold-cgf",
+  "claim": "SAM 3 SA-Co/Gold instance cgF1",
+  "value": "54.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1, SAM 3 row, Instance Seg SA-Co Gold"
+ },
+ {
+  "id": "sam3-gold-human",
+  "claim": "Human SA-Co/Gold instance cgF1",
+  "value": "72.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1, Human row"
+ },
+ {
+  "id": "sam3-gold-owl",
+  "claim": "OWLv2* SA-Co/Gold instance cgF1 (strongest baseline)",
+  "value": "24.6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1, OWLv2* row"
+ },
+ {
+  "id": "sam3-gold-dinox",
+  "claim": "DINO-X SA-Co/Gold instance cgF1",
+  "value": "21.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1, DINO-X row"
+ },
+ {
+  "id": "sam3-gold-gemini",
+  "claim": "Gemini 2.5 SA-Co/Gold instance cgF1",
+  "value": "13.0",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1, Gemini 2.5 row"
+ },
+ {
+  "id": "sam3-gold-pct-human",
+  "claim": "SAM 3 fraction of estimated human performance on Gold",
+  "value": "74%",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 Image PCS with Text"
+ },
+ {
+  "id": "sam3-silver-cgf",
+  "claim": "SAM 3 SA-Co/Silver instance cgF1",
+  "value": "49.6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam3-bronze-cgf",
+  "claim": "SAM 3 SA-Co/Bronze instance cgF1",
+  "value": "42.6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam3-lvis-mask-ap",
+  "claim": "SAM 3 LVIS zero-shot mask AP (Table 1)",
+  "value": "48.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1, Instance Seg LVIS AP"
+ },
+ {
+  "id": "sam3-lvis-mask-ap-intro",
+  "claim": "SAM 3 LVIS zero-shot mask AP as stated in intro (inconsistent with Table 1)",
+  "value": "48.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1, para 'Our experiments'"
+ },
+ {
+  "id": "sam3-lvis-prev-best",
+  "claim": "Previous best LVIS mask AP (DINO-X)",
+  "value": "38.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1; Table 1 DINO-X row"
+ },
+ {
+  "id": "sam3-lvis-box-ap",
+  "claim": "SAM 3 LVIS box AP",
+  "value": "53.6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam3-coco-box-ap",
+  "claim": "SAM 3 COCO box AP",
+  "value": "56.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam3-cocoo-ap",
+  "claim": "SAM 3 COCO-O AP",
+  "value": "55.7",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam3-ade-miou",
+  "claim": "SAM 3 ADE-847 semantic mIoU",
+  "value": "13.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam3-odinw-10shot",
+  "claim": "SAM 3 ODinW13 10-shot AP",
+  "value": "71.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 2"
+ },
+ {
+  "id": "sam3-rf100-10shot",
+  "claim": "SAM 3 RF-100VL 10-shot AP",
+  "value": "36.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 2"
+ },
+ {
+  "id": "sam3-exemplar-coco",
+  "claim": "SAM 3 1-exemplar image-only AP+ on COCO (T-Rex2 58.5)",
+  "value": "76.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 3"
+ },
+ {
+  "id": "sam3-exemplar-gain-coco",
+  "claim": "SAM 3 over T-Rex2 with 1 exemplar on COCO",
+  "value": "+18.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 PCS with 1 Exemplar"
+ },
+ {
+  "id": "sam3-kex-gain-text",
+  "claim": "Interactive PCS gain over text-only after 3 clicks (cgF1)",
+  "value": "+21.6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 PCS with K Exemplars; Fig. 7"
+ },
+ {
+  "id": "sam3-kex-gain-pvs",
+  "claim": "Interactive PCS gain over PVS refinement after 3 clicks",
+  "value": "+2.0",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 PCS with K Exemplars; Fig. 7"
+ },
+ {
+  "id": "sam3-count-mae",
+  "claim": "SAM 3 CountBench MAE",
+  "value": "0.12",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam3-count-acc",
+  "claim": "SAM 3 CountBench accuracy",
+  "value": "93.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam3-veval-sav-cgf",
+  "claim": "SAM 3 VEval SA-V test cgF1",
+  "value": "30.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 5"
+ },
+ {
+  "id": "sam3-veval-sav-phota",
+  "claim": "SAM 3 VEval SA-V test pHOTA (human 70.5)",
+  "value": "58.0",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 5"
+ },
+ {
+  "id": "sam3-veval-yt-cgf",
+  "claim": "SAM 3 VEval YT-Temporal-1B cgF1",
+  "value": "50.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 5"
+ },
+ {
+  "id": "sam3-veval-pct-human",
+  "claim": "Share of human pHOTA reached on VEval",
+  "value": "80%",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 Video PCS with Text 'over 80% of human pHOTA'"
+ },
+ {
+  "id": "sam3-nodisamb-sav",
+  "claim": "SAM 3 w/o temporal disambiguation, VEval SA-V test cgF1",
+  "value": "27.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 39a"
+ },
+ {
+  "id": "sam3-mosev2",
+  "claim": "SAM 3 MOSEv2 J&F",
+  "value": "60.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 6"
+ },
+ {
+  "id": "sam3-mosev2-sam21",
+  "claim": "SAM 2.1 L MOSEv2 J&F (zero-shot)",
+  "value": "47.9",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 6"
+ },
+ {
+  "id": "sam3-mosev2-margin",
+  "claim": "Margin over prior work on MOSEv2",
+  "value": "6.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 PVS"
+ },
+ {
+  "id": "sam3-sa37-1click",
+  "claim": "SAM 3 SA-37 1-click mIoU (SAM 2.1 L 66.4)",
+  "value": "66.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 7"
+ },
+ {
+  "id": "sam3-sa37-1click-sam21",
+  "claim": "SAM 2.1 L SA-37 1-click mIoU",
+  "value": "66.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 7"
+ },
+ {
+  "id": "sam3-sa37-5click",
+  "claim": "SAM 3 SA-37 5-click mIoU",
+  "value": "85.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 7"
+ },
+ {
+  "id": "sam3-sa37-fps",
+  "claim": "SAM 3 FPS on SA-37 (SAM 2.1 L 93.0)",
+  "value": "43.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 7"
+ },
+ {
+  "id": "sam3-pres-off-cgf",
+  "claim": "Ablation without presence head, Gold cgF1",
+  "value": "50.7",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9a row x"
+ },
+ {
+  "id": "sam3-pres-on-cgf",
+  "claim": "Ablation with presence head, Gold cgF1",
+  "value": "52.2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9a row check"
+ },
+ {
+  "id": "sam3-pres-gain",
+  "claim": "Presence head cgF1 gain",
+  "value": "+1.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 6 Selected Ablations"
+ },
+ {
+  "id": "sam3-pres-off-mcc",
+  "claim": "IL_MCC without presence",
+  "value": "0.77",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9a"
+ },
+ {
+  "id": "sam3-pres-on-mcc",
+  "claim": "IL_MCC with presence",
+  "value": "0.82",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9a"
+ },
+ {
+  "id": "sam3-pres-off-pmf",
+  "claim": "pmF1 without presence",
+  "value": "65.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9a"
+ },
+ {
+  "id": "sam3-pres-on-pmf",
+  "claim": "pmF1 with presence",
+  "value": "63.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9a"
+ },
+ {
+  "id": "sam3-pres-sup-b",
+  "claim": "DETR-style supervision (always supervise query scores) Gold cgF1",
+  "value": "52.2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 10 row b"
+ },
+ {
+  "id": "sam3-pres-sup-a",
+  "claim": "Supervise query scores only when concept present, Gold cgF1",
+  "value": "54.0",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 10 row a"
+ },
+ {
+  "id": "sam3-hn-0-cgf",
+  "claim": "0 hard negatives per image, cgF1",
+  "value": "28.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9b"
+ },
+ {
+  "id": "sam3-hn-30-cgf",
+  "claim": "30 hard negatives per image, cgF1",
+  "value": "43.0",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9b"
+ },
+ {
+  "id": "sam3-hn-0-mcc",
+  "claim": "0 hard negatives, IL_MCC",
+  "value": "0.44",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9b"
+ },
+ {
+  "id": "sam3-hn-30-mcc",
+  "claim": "30 hard negatives, IL_MCC",
+  "value": "0.68",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9b"
+ },
+ {
+  "id": "sam3-enc-pe",
+  "claim": "PE-L+ encoder ablation Gold cgF1",
+  "value": "43.2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 11"
+ },
+ {
+  "id": "sam3-enc-hiera",
+  "claim": "Hiera-L encoder ablation Gold cgF1",
+  "value": "32.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 11"
+ },
+ {
+  "id": "sam3-data-ext",
+  "claim": "Training data ablation EXT only cgF1",
+  "value": "23.7",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9c"
+ },
+ {
+  "id": "sam3-data-all",
+  "claim": "Training data ablation EXT+SYN+HQ cgF1",
+  "value": "47.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9c"
+ },
+ {
+  "id": "sam3-ev-gain",
+  "claim": "cgF1 gain from EV AI verifier presence score",
+  "value": "+7.2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9d; Sec. 6"
+ },
+ {
+  "id": "sam3-ev-mv",
+  "claim": "SAM 3 + EV + MV AI verifiers Gold cgF1",
+  "value": "62.3",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 9d"
+ },
+ {
+  "id": "sam3-p1-pairs",
+  "claim": "Phase 1 image-NP pairs",
+  "value": "4.3M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 1; Table 19"
+ },
+ {
+  "id": "sam3-p2-pairs",
+  "claim": "Phase 2 image-NP pairs",
+  "value": "122.2M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 19"
+ },
+ {
+  "id": "sam3-p3-pairs",
+  "claim": "Phase 3 image-NP pairs added to HQ",
+  "value": "19.5M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 3; Table 19"
+ },
+ {
+  "id": "sam3-p2-retrain",
+  "claim": "SAM 3 retrains in Phase 2",
+  "value": "6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 2"
+ },
+ {
+  "id": "sam3-p3-retrain",
+  "claim": "SAM 3 iterations in Phase 3",
+  "value": "7",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 3"
+ },
+ {
+  "id": "sam3-p3-domains",
+  "claim": "HQ domains after Phase 3",
+  "value": "15",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 3; Table 19"
+ },
+ {
+  "id": "sam3-p2-gold",
+  "claim": "Gold cgF1 after Phase 2",
+  "value": "21.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 19"
+ },
+ {
+  "id": "sam3-p3-gold",
+  "claim": "Gold cgF1 after Phase 3",
+  "value": "54.4",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 19"
+ },
+ {
+  "id": "sam3-ontology-nodes",
+  "claim": "SA-Co ontology nodes (Wikidata)",
+  "value": "22.4M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 3; App. D.2"
+ },
+ {
+  "id": "sam3-ontology-top",
+  "claim": "Ontology top-level categories",
+  "value": "17",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. D.2"
+ },
+ {
+  "id": "sam3-verifier-mv-ai",
+  "claim": "AI verifier MV accuracy (average; human 75)",
+  "value": "77.7",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 23, Average MV"
+ },
+ {
+  "id": "sam3-verifier-ev-ai",
+  "claim": "AI verifier EV accuracy (average; human 81.8)",
+  "value": "81.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 23, Average EV"
+ },
+ {
+  "id": "sam3-thru-neg",
+  "claim": "Time per negative NP, human from NP (s)",
+  "value": "71",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 15"
+ },
+ {
+  "id": "sam3-thru-neg-engine",
+  "claim": "Time per negative NP, engine full (s)",
+  "value": "6",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 15"
+ },
+ {
+  "id": "sam3-thru-datamix",
+  "claim": "Time per datamix item, engine full (s; human from NP 90)",
+  "value": "23",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 15"
+ },
+ {
+  "id": "sam3-thru-pos-gain",
+  "claim": "Speed-up on positive phrases with AI verifiers",
+  "value": "36%",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 15 caption"
+ },
+ {
+  "id": "sam3-thru-neg-gain",
+  "claim": "Speed-up on negative phrases with AI verifiers",
+  "value": "5x",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 15 caption"
+ },
+ {
+  "id": "sam3-hq-nps",
+  "claim": "SA-Co/HQ unique NPs",
+  "value": "4M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 Training Data; Table 24 (4.0M)"
+ },
+ {
+  "id": "sam3-hq-imgs",
+  "claim": "SA-Co/HQ images",
+  "value": "5.2M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5; Table 24"
+ },
+ {
+  "id": "sam3-hq-masks",
+  "claim": "SA-Co/HQ masks",
+  "value": "52M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1; Table 24 (52.3M)"
+ },
+ {
+  "id": "sam3-hq-pairs",
+  "claim": "SA-Co/HQ image-NP pairs",
+  "value": "146.1M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-hq-neg",
+  "claim": "SA-Co/HQ % negative image-NPs",
+  "value": "88.5%",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-syn-nps",
+  "claim": "SA-Co/SYN unique NPs",
+  "value": "38M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1; Table 24 (38.0M)"
+ },
+ {
+  "id": "sam3-syn-imgs",
+  "claim": "SA-Co/SYN images",
+  "value": "39.4M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-syn-masks",
+  "claim": "SA-Co/SYN masks",
+  "value": "1.4B",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1; Table 24"
+ },
+ {
+  "id": "sam3-syn-pairs",
+  "claim": "SA-Co/SYN image-NP pairs",
+  "value": "1.7B",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-ext-nps",
+  "claim": "SA-Co/EXT unique NPs",
+  "value": "497.4K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-ext-imgs",
+  "claim": "SA-Co/EXT images",
+  "value": "9.3M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-ext-masks",
+  "claim": "SA-Co/EXT masks",
+  "value": "70.5M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 24"
+ },
+ {
+  "id": "sam3-ext-count-main",
+  "claim": "Number of external datasets in SA-Co/EXT per Sec. 5 (App. E.1 says eighteen)",
+  "value": "15",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 Training Data"
+ },
+ {
+  "id": "sam3-ext-count-app",
+  "claim": "Number of external datasets in SA-Co/EXT per App. E.1 / Table 26",
+  "value": "eighteen",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. E.1 SA-Co/EXT; Table 26"
+ },
+ {
+  "id": "sam3-vid-videos",
+  "claim": "SA-Co/VIDEO videos",
+  "value": "52.5K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5; Table 25"
+ },
+ {
+  "id": "sam3-vid-nps",
+  "claim": "SA-Co/VIDEO unique NPs",
+  "value": "24.8K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5; Table 25"
+ },
+ {
+  "id": "sam3-vid-masklets",
+  "claim": "SA-Co/VIDEO masklets",
+  "value": "467K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 4 Phase 4; Table 25 (467.1K)"
+ },
+ {
+  "id": "sam3-vid-pairs",
+  "claim": "SA-Co/VIDEO video-NP pairs",
+  "value": "134K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5; Table 25 (134.3K)"
+ },
+ {
+  "id": "sam3-vid-frames",
+  "claim": "SA-Co/VIDEO average frames per video (6 fps)",
+  "value": "84.1",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5"
+ },
+ {
+  "id": "sam3-bench-nps",
+  "claim": "SA-Co benchmark unique phrases",
+  "value": "207K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 SA-Co Benchmark"
+ },
+ {
+  "id": "sam3-bench-nps-readme",
+  "claim": "SA-Co benchmark unique concepts per README (paper says 207K)",
+  "value": "270K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "README intro",
+  "code_only": true
+ },
+ {
+  "id": "sam3-bench-media",
+  "claim": "SA-Co benchmark images and videos",
+  "value": "121K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 SA-Co Benchmark"
+ },
+ {
+  "id": "sam3-bench-pairs",
+  "claim": "SA-Co benchmark media-phrase pairs",
+  "value": "3M",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 'over 3M'"
+ },
+ {
+  "id": "sam3-bench-x",
+  "claim": "Concept multiple over existing benchmarks",
+  "value": "50x",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 1 '>50x'; App. E.2 '~50x'"
+ },
+ {
+  "id": "sam3-gold-nps",
+  "claim": "SA-Co/Gold NPs",
+  "value": "51.8K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 28a"
+ },
+ {
+  "id": "sam3-gold-imgs",
+  "claim": "SA-Co/Gold images",
+  "value": "15.8K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 28a"
+ },
+ {
+  "id": "sam3-gold-domains",
+  "claim": "SA-Co/Gold domains",
+  "value": "seven",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 SA-Co Benchmark"
+ },
+ {
+  "id": "sam3-gold-annot",
+  "claim": "Annotators per Gold image-NP pair",
+  "value": "three",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5 SA-Co Benchmark"
+ },
+ {
+  "id": "sam3-silver-domains",
+  "claim": "SA-Co/Silver domains",
+  "value": "ten",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5"
+ },
+ {
+  "id": "sam3-silver-imgs",
+  "claim": "SA-Co/Silver images",
+  "value": "66.1K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 28a"
+ },
+ {
+  "id": "sam3-veval-nps",
+  "claim": "SA-Co/VEval NPs",
+  "value": "5.2K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 28b"
+ },
+ {
+  "id": "sam3-veval-videos",
+  "claim": "SA-Co/VEval videos",
+  "value": "1.7K",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 28b"
+ },
+ {
+  "id": "sam3-veval-domains",
+  "claim": "SA-Co/VEval domains",
+  "value": "three",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Sec. 5"
+ },
+ {
+  "id": "sam3-human-oracle",
+  "claim": "Human oracle cgF1 on Gold 3-reviewed subset",
+  "value": "76.2",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 29, Oracle row"
+ },
+ {
+  "id": "sam3-human-random",
+  "claim": "Human random-pair cgF1 on Gold 3-reviewed subset",
+  "value": "55.5",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "Table 29, Random Pair row"
+ },
+ {
+  "id": "sam3-human-internal",
+  "claim": "Human cgF1 on internal Gold version used in ablations",
+  "value": "70.8",
+  "paper": "SAM 3",
+  "arxiv": "2511.16719v2",
+  "loc": "App. A.2 Setup"
+ }
+]

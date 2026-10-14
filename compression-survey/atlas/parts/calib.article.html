@@ -1,0 +1,17 @@
+  <article data-chapter="calib">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Calibration</h2><p class="subhead">Choosing the clip value for an activation tensor</p></header>
+    <div class="controls">
+      <div class="row"><span>Calibrator</span><button type="button" class="tool" data-method="max">max</button><button type="button" class="tool" data-method="p9999">percentile 99.99</button><button type="button" class="tool" data-method="entropy">entropy (KL)</button><button type="button" class="tool" data-method="mse">MSE</button></div>
+    </div>
+    <p>Activations depend on the input image, so their range comes from data. <button type="button" class="inline-term" data-open="calibration">Calibration</button> runs a few hundred representative images through the float network, records a histogram per tensor, and picks one clip value.</p>
+    <p>Max keeps every value, so one outlier sets the spacing for all. A <button type="button" class="inline-term" data-open="percentile">percentile</button> clips a fixed share of the tail. Entropy picks the clip whose quantized histogram differs least from the original by <button type="button" class="inline-term" data-open="kl-calib">KL divergence</button>. MSE picks the clip with the smallest squared error.</p>
+    <p>Guess before you press "entropy (KL)": will it clip more values than the percentile, or fewer? Here it clips fewer, because it looks at the tail's shape rather than a fixed count.</p>
+    <table class="data"><thead><tr><th>COCO val, mAP</th><th class="n">FP32</th><th class="n">max</th><th class="n">entropy</th><th class="n">99.99%</th></tr></thead><tbody>
+      <tr><td>Faster R-CNN, resnet50-fpn</td><td class="n">36.95</td><td class="n">36.38</td><td class="n">36.82</td><td class="n">36.69</td></tr>
+      <tr><td>Mask R-CNN, resnet50-fpn</td><td class="n">37.89</td><td class="n">37.51</td><td class="n">37.75</td><td class="n">37.55</td></tr>
+      <tr><td>RetinaNet, resnext101-32x4d-fpn</td><td class="n">39.30</td><td class="n">38.90</td><td class="n">38.97</td><td class="n">38.55</td></tr>
+    </tbody></table>
+    <p class="note">The histogram is a toy of 100,000 ReLU outputs; each calibrator runs its real algorithm on it (entropy is our reading of Wu Sec. 3.4). The table is Wu et al. 2020, Table 5: INT8, per-channel max weights, per-tensor activations, absolute mAP as printed.</p>
+    <p class="inscription">Clipping a few outliers buys finer marks for everything else. Try more than one calibrator and measure on your own validation set.</p>
+    {{CONTINUE}}
+  </article>

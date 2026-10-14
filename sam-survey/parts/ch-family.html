@@ -1,0 +1,27 @@
+<section id="ch-family" class="chapter">
+<h2>Compose, adapt, track</h2>
+<p>SAM answers one narrow question, "which pixels go with this prompt?", and that makes it easy to plug into other systems. Most of its descendants either feed it better prompts, teach it a new domain, or carry its masks through time.</p>
+
+<figure class="viz" id="viz-tree" data-scene="tree">
+  <div class="controls"><div class="seg" role="tablist" aria-label="Span">
+    <button type="button" role="tab" data-step="0" id="btn-tree-all">2014 to 2026</button>
+    <button type="button" role="tab" data-step="1" id="btn-tree-before">Before SAM</button>
+    <button type="button" role="tab" data-step="2" id="btn-tree-after">After SAM</button>
+  </div></div>
+  <div class="stage tall"></div>
+  <div class="controls"><button type="button" data-cue-reset id="btn-tree-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Each dot is a paper at its arXiv v1 date. The lines are our reading of what each paper builds on.</figcaption>
+</figure>
+
+<p>Look at the green line first: SAM, SAM 2 and SAM 3, each built on its predecessor, and SAM 3D, which takes a mask from any SAM model as its input (it appeared the same day as SAM 3 and builds on a separate 3D generator). Then switch to "After SAM" and predict which lane fills fastest.</p>
+
+<h3>Compose: give SAM a better prompt</h3>
+<p>SAM knows no words. <b>Grounded SAM</b> adds them by chaining two models: Grounding DINO, an open-vocabulary detector, turns a text phrase into boxes (its large Swin-L model reaches <span data-claim="groundingdino-coco-zs-ap">52.5</span> AP on COCO without COCO training; the chain below uses the base model), and SAM turns each box into a mask. On the <span data-claim="groundedsam-sginw-n">25</span> datasets of the Segmentation in the Wild benchmark, the chain scores <span data-claim="groundedsam-sginw">48.7</span> mean AP zero-shot, and <span data-claim="groundedsam-hq-sginw">49.6</span> with HQ-SAM. The paper is dated <span data-claim="groundedsam-published">2024-01-25</span>, but its code came out in 2023: MobileSAM already cites it by July 2023. <b>SEEM</b> (April 2023) went the other way: one model trained on far less data, <span data-claim="seem-train-images">0.12M</span> images against SAM's <span data-claim="seem-sam-images">11M</span>, that accepts clicks, boxes, scribbles, text and reference images. SAM 3 later absorbed the text half of this idea into one model.</p>
+
+<h3>Adapt: teach SAM a new domain</h3>
+<p>SAM's training images are mostly photographs, so it is weakest where pictures look different. <b>MedSAM</b> fine-tuned SAM on <span data-claim="medsam-pairs">1,570,263</span> medical image-mask pairs from <span data-claim="medsam-modalities">10</span> imaging modalities, with box prompts; on an external nasopharynx-cancer task its median Dice score is <span data-claim="medsam-npc-dsc">87.8%</span>. <b>SAM-Adapter</b> keeps SAM's image encoder frozen, inserts small trainable adapters into it, and fine-tunes the mask decoder; on camouflaged objects (COD10K) the structure score S-alpha rises from <span data-claim="samadapter-cod10k-sam">0.783</span> to <span data-claim="samadapter-cod10k">0.883</span>. The paper does not say how its SAM baseline was prompted; SAM-Adapter itself uses no prompts. The map chapter shows how much of the field this is: medical imaging alone is the largest named topic.</p>
+
+<h3>Track: carry masks through time</h3>
+<p>Before SAM 2, <b>Track Anything</b> (April 2023) joined SAM to XMem: SAM makes the first mask from a click, XMem propagates it, and SAM refines it when the track drifts. It reached <span data-claim="trackanything-davis17">73.1</span> J&amp;F on DAVIS-2017 test-dev from clicks alone. SAM 2 made this one model. Its descendants then patch its weak spots: <b>SAM2Long</b> keeps several memory pathways and picks the best, adding up to <span data-claim="sam2long-savtest-gain">5.3</span> J&amp;F on SA-V test without retraining (on SAM 2-L; <span data-claim="sam2long-savtest-gain-21l">1.6</span> on SAM 2.1-L), and <b>SAMURAI</b> adds a motion model for visual tracking, raising LaSOT AUC from <span data-claim="samurai-sam21-lasot-auc">68.54</span> to <span data-claim="samurai-lasot-auc">74.23</span>.</p>
+</section>

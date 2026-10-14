@@ -1,0 +1,104 @@
+<style>
+#ch-recall .claim-card, #ch-hybrid .claim-card { font-size:1rem; border:1px solid var(--rule); border-radius:12px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+#ch-recall .claim-card h4, #ch-hybrid .claim-card h4 { font:600 1rem system-ui, sans-serif; margin:0 0 .5rem; }
+#ch-recall .claim-card dl, #ch-hybrid .claim-card dl { margin:0; display:grid; grid-template-columns:8.5rem 1fr; gap:.35rem .9rem; }
+#ch-recall .claim-card dt, #ch-hybrid .claim-card dt { font:600 .86rem/1.6 system-ui, sans-serif; color:var(--muted); }
+#ch-recall .claim-card dd, #ch-hybrid .claim-card dd { margin:0; }
+#ch-recall .claim-card.one p, #ch-hybrid .claim-card.one p { margin:0; }
+#ch-recall .controls output, #ch-hybrid .controls output { font-variant-numeric:tabular-nums; color:var(--fg); min-width:1.6em; }
+@media (max-width: 520px) { #ch-recall .claim-card dl, #ch-hybrid .claim-card dl { grid-template-columns:1fr; } #ch-recall .claim-card dd, #ch-hybrid .claim-card dd { margin-bottom:.4rem; } }
+</style>
+<section id="ch-recall" class="chapter">
+<h2>Where SSMs still lose</h2>
+<p>Every model since Mamba keeps its memory at a fixed size, and that is where its speed comes from. The price is just as simple: a fixed state cannot hold more facts than it has room for, while attention's cache keeps every one of them.</p>
+
+<figure class="viz" id="viz-recall" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="recall-canvas" role="img" aria-label="Left: a yellow square grid, the state, which keeps its size, and below it a brown strip of key and value columns, the cache, which gains a column for every stored pair. Right: the share of keys answered correctly against the number of pairs stored, on a log scale. The cache stays at one hundred percent; the state's yellow curve falls once the number of pairs passes the state size N."></canvas>
+  <div class="controls">
+    <label for="recall-N">State size N <input type="range" id="recall-N" min="2" max="5" step="1" value="4"> <output id="recall-N-val">16</output></label>
+    <label for="recall-K">Pairs stored K <input type="range" id="recall-K" min="0" max="1000" step="1" value="625"> <output id="recall-K-val">32</output></label>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-recall-half">K = N/2</button>
+    <button type="button" id="btn-recall-n">K = N</button>
+    <button type="button" id="btn-recall-4n">K = 4N</button>
+    <button type="button" id="btn-recall-random" aria-pressed="true">Random keys</button>
+    <button type="button" id="btn-recall-ortho" aria-pressed="false">Orthogonal keys</button>
+    <button type="button" id="btn-recall-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="recall-readout" aria-live="polite"></p>
+  <figcaption>Our illustration, not a paper's experiment; the arithmetic is exact. K random key-value pairs (unit vectors in N dimensions) are written into an N x N state by adding outer products, with no forgetting. Then every stored key is used as a query, and the answer counts as right if the stored value closest to the state's output is the one written with that key. The cache keeps all K pairs and answers by finding the matching key. "Orthogonal keys" picks the first N keys at right angles to each other, the best case for the state. One fixed random draw per setting; a different draw moves the curve a little but not its shape.</figcaption>
+</figure>
+
+<p>The state in the figure is the simplest fixed-size memory there is, the one linear attention builds. Each pair is written as an outer product <span class="tex">\htmlClass{t-blue}{v}\,\htmlClass{t-blue}{k}^{\top}</span> and added on top of everything written before. To read, multiply the state by a key. If that key were at right angles to every other stored key, the product would be exactly its own value. An <span class="tex">N</span>-dimensional space has room for only <span class="tex">N</span> keys at right angles, so from pair <span class="tex">N+1</span> on, every read also picks up a little of every other value. That leak is called crosstalk, and it grows with every pair added. Random keys overlap a little from the start, so they fail earlier.</p>
+
+<div class="eq" id="eq-recall" data-build data-viz="viz-recall"><div class="tex tex-display">
+\htmlData{step=1, link=write}{\htmlClass{t-yellow}{h_t} = \htmlClass{t-yellow}{h_{t-1}} + \htmlClass{t-blue}{v_t}\,\htmlClass{t-blue}{k_t}^{\top}}
+\qquad
+\htmlData{step=2, link=read}{\htmlClass{t-green}{y} = \htmlClass{t-yellow}{h}\,\htmlClass{t-blue}{k_j}}
+\htmlData{step=3, link=signal}{\;=\; \htmlClass{t-blue}{v_j}}
+\htmlData{step=4, link=crosstalk}{\;+\; \htmlClass{t-red}{\textstyle\sum_{i \ne j} v_i\,(k_i^{\top} k_j)}}
+</div></div>
+<p class="eqno">Write rule: Eq. 10 in the linear attention paper, without its feature map; it is also RetNet's recurrence (Zoology App E.2) with the decay set to 1. Read: Eq. 12 there, without the normalizer. The split into signal and crosstalk is ours, for keys of length 1. Linear attention writes the state as keys by values; we write the transpose so it reads like the page's <span class="tex">h</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{h_t}</span>: the state, <span class="tex">N \times N</span> numbers. Each pair adds one outer product. Nothing is ever removed in this toy; RetNet and Mamba also decay old content, which frees room but forgets.</li>
+  <li><span class="tex">\htmlClass{t-blue}{k_t}, \htmlClass{t-blue}{v_t}</span>: the key and value a token writes. In a real layer they are learned projections of <span class="tex">\htmlClass{t-blue}{x_t}</span>, as in attention; here they are random unit vectors.</li>
+  <li><span class="tex">\htmlClass{t-green}{y} = \htmlClass{t-yellow}{h}\,\htmlClass{t-blue}{k_j}</span>: a read with a stored key. Its first part is exactly the wanted value <span class="tex">\htmlClass{t-blue}{v_j}</span>.</li>
+  <li><span class="tex">\htmlClass{t-red}{\sum_{i \ne j} v_i (k_i^{\top} k_j)}</span>: every other value, weighted by how much its key overlaps the query. It is zero only when <span class="tex">k_j</span> is at right angles to all other keys, which at most <span class="tex">N</span> keys can be.</li>
+</ul>
+
+<p data-toy>Before you drag K: the 16 x 16 state holds 256 numbers, and one pair is 32 numbers. At how many pairs does it first return a wrong value? With random keys, at <span data-claim="page-recall-toy-first-error">11</span> pairs; at 16 pairs it still answers <span data-claim="page-recall-toy-k16">94</span>% of keys, at 32 only <span data-claim="page-recall-toy-k32">47</span>%, and at 64 it answers <span data-claim="page-recall-toy-k64">27</span>%. Press "Orthogonal keys": now every answer is right up to 16 pairs, the first wrong one comes at <span data-claim="page-recall-toy-ortho-first-error">19</span>, and at 32 pairs the state answers <span data-claim="page-recall-toy-ortho-k32">84</span>%. The cache answers every key at every K. It pays for that with memory: two vectors per pair, so it passes the state's size at K = N/2 and keeps growing. That is chapter 1's trade seen from the other side. One lookup in the cache costs about 2NK multiply-adds and grows with the context; one read of the state costs N x N at any length.</p>
+
+<p>That is the whole argument of this chapter in one picture. A fixed-size state is lossy compression. Exact recall of many key-value pairs, copying a long string token for token, and looking up one line in a long document all need memory that grows with what must be recalled. How much is lost depends on how big the state is next to what must be recalled, so a pure SSM does not always lose; the last box in this chapter shows one that wins.</p>
+
+<div class="aside">
+  <h4>No paper gives this curve</h4>
+  <p>The toy is our own. No paper in this survey gives a formula for how many pairs a state of size <span class="tex">N</span> can hold. The closest statements are bounds. Repeat After Me, Corollary 2.8: a fixed-state model that copies strings of <span class="tex">L</span> tokens from an alphabet of <span class="tex">D</span> needs about <span class="tex">L \log_2 D</span> bits of state; with fewer, it gets more than half of random strings wrong. Based, Theorem 3.1 and Corollary F.13, and Zoology, Corollary H.24 (for RetNet): to solve associative recall, a recurrent model needs a state whose size grows in proportion to the sequence length.</p>
+</div>
+
+<h3>What the papers measured</h3>
+<p>Four papers test this limit on real models. Each card says what was claimed, how it was measured, what came out, and what result would have proved it wrong. One translation first: Zoology and Based write <span class="tex">N</span> for the sequence length, while this page uses <span class="tex">N</span> for the state size.</p>
+
+<div class="claim-card">
+  <h4>Zoology: recall explains most of the gap</h4>
+  <dl>
+    <dt>Claim</dt><dd>Most of the quality gap between gated-convolution language models and attention comes from one skill: recalling a token that appeared earlier in the same context.</dd>
+    <dt>How measured</dt><dd><span data-claim="zoology-num-models">17</span> language models (the appendix counts <span data-claim="zoology-num-runs-appc">14</span> training runs) trained on the Pile with the same data and recipe, <span data-claim="zoology-pretrain-tokens">10B</span> tokens for the smaller ones, changing only the layer that mixes the sequence: attention against the gated convolutions H3, Hyena and RWKV. Test tokens were split into "AR hits", the end of a word pair seen earlier in the context (<span data-claim="zoology-ar-hits-frac">6.4%</span> of tokens), and the rest. Then a synthetic task, multi-query associative recall (MQAR): many key-value pairs, then many queries, in two-layer models.</dd>
+    <dt>Result</dt><dd>The text says the AR hits account for <span data-claim="zoology-ar-gap-share">82%</span> of the average gap. No table shows that average; the mean of the nine cells for H3, Hyena and RWKV in its Table 4 is <span data-claim="zoology-ar-gap-share-recomputed">81.6</span>% (our arithmetic). Their smallest attention model beats a Hyena model <span data-claim="zoology-size-ratio">20</span> times its size on AR hits (perplexity <span data-claim="zoology-70m-attn-ar-ppl">2.41</span> against <span data-claim="zoology-1b4-hyena-ar-ppl">3.43</span>). On MQAR, attention solves every sequence length with model width <span data-claim="zoology-mqar-attn-dim">64</span>, while the gated convolutions stay below <span data-claim="zoology-mqar-acc-threshold">0.9</span> accuracy unless the width is at least the sequence length. That result is about gated convolutions (H3, Hyena, RWKV, BaseConv). Zoology never trains Mamba. Its result for a fixed state is about RetNet, whose state is an outer-product memory like the toy's: Corollary H.24 proves it needs a state that grows with the sequence, and in its Fig. 6 RetNet needs more width as the pairs grow to <span data-claim="zoology-kv-max">64</span>.</dd>
+    <dt>Would have falsified it</dt><dd>AR hits matching attention while the overall gap stayed, which would put the share near zero; or a gated convolution passing <span data-claim="zoology-mqar-acc-threshold">0.9</span> on MQAR with width below the sequence length at length <span data-claim="zoology-mqar-seq-max">512</span>.</dd>
+  </dl>
+</div>
+
+<div class="claim-card">
+  <h4>Repeat After Me: copying and the phone book</h4>
+  <dl>
+    <dt>Claim</dt><dd>Transformers copy and retrieve from their context better than models with a fixed state (the paper's class includes S4, Mamba, LSTMs and linear attention), in theory and in practice.</dd>
+    <dt>How measured</dt><dd>Theory: the bound above, and a transformer of depth <span data-claim="repeat-thm-depth">2</span> that copies strings exponentially long in its number of heads (Theorem 2.3). Experiments: models of about <span data-claim="repeat-synth-params">160M</span> parameters trained from scratch to copy random strings. Then pretrained Pythia transformers (<span data-claim="repeat-pythia-sizes">410M</span> to <span data-claim="repeat-largest">2.8B</span>) against Mamba (<span data-claim="repeat-mamba-small">360M</span> to <span data-claim="repeat-largest">2.8B</span>), all trained on the Pile with the same tokenizer, on a phone book: up to <span data-claim="repeat-phonebook-max">200</span> lines of names and numbers, <span data-claim="repeat-phonebook-shots">2</span> worked examples (Sec. 4.3; the Fig. 1 caption says one), then one name to look up.</dd>
+    <dt>Result</dt><dd>Transformers needed <span data-claim="repeat-copy-samples">100x</span> fewer training examples to learn to copy strings of up to <span data-claim="repeat-copy-trainlen">300</span> tokens. On the phone book, the smallest Pythia beats the largest Mamba whenever the book has <span data-claim="repeat-phonebook-threshold">70</span> or more entries, the paper's stated condition; its plot shows Pythia ahead from <span data-approx>about 40</span> entries. More state did not simply fix it: in the from-scratch runs, a sweep of Mamba's state size up to <span data-claim="repeat-mamba-state-max">256</span> found <span data-claim="repeat-mamba-state-best">32</span> best for copying.</dd>
+    <dt>Would have falsified it</dt><dd>A Mamba matching Pythia on phone books of <span data-claim="repeat-phonebook-threshold">70</span> or more entries, or any fixed-state model copying random strings with fewer bits of state than the bound allows.</dd>
+  </dl>
+</div>
+
+<div class="claim-card">
+  <h4>NVIDIA's <span data-claim="nvidia-params-scale">8B</span> study: same data, same recipe</h4>
+  <dl>
+    <dt>Claim</dt><dd>At equal data and training recipe, 8-billion-parameter pure SSMs match a Transformer on most tasks, but fail at copying from the context and lag on 5-shot MMLU until trained much longer.</dd>
+    <dt>How measured</dt><dd>A Transformer, a Mamba and a Mamba-2, each with about <span data-claim="nvidia-params-scale">8B</span> parameters, trained on the same <span data-claim="nvidia-tokens-small">1.1T</span> tokens with the same hyperparameters; the Transformer and Mamba-2 again on <span data-claim="nvidia-tokens-max">3.5T</span>. Twelve standard tasks, long-context tests, and the phone book, averaged over <span data-claim="nvidia-phonebook-seeds">20</span> random phone books per length.</dd>
+    <dt>Result</dt><dd>Pure Mamba and Mamba-2 start giving wrong numbers once the phone book is longer than about <span data-claim="nvidia-phonebook-fail-1t">500</span> tokens (<span data-claim="nvidia-tokens-small">1.1T</span> training tokens); Mamba-2 at <span data-claim="nvidia-tokens-max">3.5T</span> fails beyond about <span data-claim="nvidia-phonebook-fail-3t">1000</span>. The Transformer stays near perfect up to its <span data-claim="nvidia-phonebook-tf-ctx">4096</span>-token context. On 5-shot MMLU at <span data-claim="nvidia-tokens-small">1.1T</span>, Table 2 gives <span data-claim="nvidia-1t-tf-mmlu5">46.28</span> for the Transformer and <span data-claim="nvidia-1t-mamba2-mmlu5">29.19</span> for Mamba-2, a gap of <span data-claim="nvidia-1t-mmlu5-gap-calc">17.09</span> points (our arithmetic). The prose states it twice, differently: <span data-claim="nvidia-1t-mmlu5-gap-text">17</span> points in Sec. 3.3.1, "nearly <span data-claim="nvidia-1t-mmlu5-gap-intro">15</span> points" in Sec. 1. At <span data-claim="nvidia-tokens-max">3.5T</span> the gap shrinks to <span data-claim="nvidia-3t-mmlu5-gap">1.37</span>, and on a fill-in version of MMLU Mamba-2 already matched at <span data-claim="nvidia-tokens-small">1.1T</span> (<span data-claim="nvidia-cloze-mamba2">37.68</span> against <span data-claim="nvidia-cloze-tf">37.26</span>): the knowledge was there, the multiple-choice format in context was the problem. On the hardest multi-key needle search, Mamba-2 scores <span data-claim="nvidia-ruler-mamba2-mkniah3">5.5</span> to the Transformer's <span data-claim="nvidia-ruler-tf4k-mkniah3">58</span>.</dd>
+    <dt>Would have falsified it</dt><dd>A pure Mamba-2 at <span data-claim="nvidia-tokens-max">3.5T</span> tokens answering the phone book correctly up to <span data-claim="nvidia-phonebook-tf-ctx">4096</span> tokens.</dd>
+  </dl>
+</div>
+
+<div class="claim-card one">
+  <h4>Illusion of State: a different limit</h4>
+  <p>State tracking, following a quantity that changes step by step, is a separate question from recall. Illusion of State proves that log-precision S4 and Mamba, like transformers, fall in the circuit class <span data-claim="illusion-class">TC0</span>, so, unless TC0 equals NC1, at a fixed depth neither can track compositions of permutations of five objects (the <span data-claim="illusion-hard-problem">S5</span> word problem). In the same experiment, Mamba needs no more layers than the transformer for approximate state tracking.</p>
+</div>
+
+<div class="aside">
+  <h4>A big enough state wins</h4>
+  <p>Mamba-2 ran a harder version of MQAR (<span data-claim="mamba2-mqar-layers">2</span> layers, sequences up to <span data-claim="mamba2-mqar-max-len">1024</span> tokens, with T/4 key-value pairs for a sequence of length T). At the smallest model width, <span data-claim="page-recall-mqar-width">32</span>, Mamba-2 with state size <span data-claim="mamba2-mqar-n-max">N=256</span> reached <span data-approx>about 0.95</span> accuracy at length <span data-claim="page-recall-mqar-len-min">256</span>, where softmax attention reached <span data-approx>about 0.50</span>; at length <span data-claim="mamba2-mqar-max-len">1024</span> it still reached <span data-approx>about 0.52</span>, with attention near zero (values read from the plot, Fig. 8). Growing the state from <span data-claim="mamba2-mqar-n-min">N=16</span> to <span data-claim="mamba2-mqar-n-mid">N=64</span> to <span data-claim="mamba2-mqar-n-max">N=256</span> helped in most panels (the paper says accuracy improves consistently; one small-width panel at length 256 is an exception in Fig. 8). Based found the same inside every architecture it tested: recall rises with state size. So "SSMs lose at recall" is too strong. What loses is a state that is small next to what must be recalled.</p>
+</div>
+
+<p>The loss is real but narrow: it shows up when the context holds more exact facts than the state has room for. The next chapter keeps the state and adds back a cache only where those facts are needed.</p>
+</section>

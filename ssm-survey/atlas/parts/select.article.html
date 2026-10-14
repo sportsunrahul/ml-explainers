@@ -1,0 +1,26 @@
+  <article data-chapter="select">
+    <header class="ch-head"><span class="num">6 of 10</span><h2>Mamba: input-dependent selection</h2><p class="subhead">Each token sets its own step size</p></header>
+    <div class="controls">
+      <button type="button" class="tool" data-preset="keys" aria-pressed="true">Mark the 3 key tokens</button><button type="button" class="tool" data-preset="allfill" aria-pressed="false">All filler</button><button type="button" class="tool" data-preset="allimp" aria-pressed="false">All important</button>
+    </div>
+    <div class="controls" role="group" aria-label="Mark tokens as important" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:.35rem;align-items:center"><span style="width:100%;font-size:.9rem">Important tokens:</span>
+      <button type="button" class="tool" data-tok="0" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">1</button>
+      <button type="button" class="tool" data-tok="1" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">2</button>
+      <button type="button" class="tool" data-tok="2" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">3</button>
+      <button type="button" class="tool" data-tok="3" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">4</button>
+      <button type="button" class="tool" data-tok="4" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">5</button>
+      <button type="button" class="tool" data-tok="5" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">6</button>
+      <button type="button" class="tool" data-tok="6" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">7</button>
+      <button type="button" class="tool" data-tok="7" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">8</button>
+      <button type="button" class="tool" data-tok="8" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">9</button>
+      <button type="button" class="tool" data-tok="9" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">10</button>
+      <button type="button" class="tool" data-tok="10" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">11</button>
+      <button type="button" class="tool" data-tok="11" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">12</button>
+    </div>
+    <p>In S4 the step size &Delta; and the matrices B and C are the same for every token, so the model cannot tell a key word from filler. Mamba makes them depend on the token. This is <button class="inline-term" data-open="selection">selection</button>: each token computes its own <button class="inline-term" data-open="delta">step size &Delta;</button>.</p>
+    <p>Mark a token important and it gets a large &Delta;: the yellow state flows toward it, forgets most of what it held, and stores the new value. Filler gets a tiny &Delta;, and the state barely moves. The green output keeps the last important value across the filler. The dashed path uses one &Delta; for every token and wanders with each of them.</p>
+    <p>With one state number this is exactly a <button class="inline-term" data-open="gate">gate</button>: h_t = (1 - g_t) h_(t-1) + g_t x_t, with g_t computed from the token (Mamba's Theorem 1). Press <b>All important</b>: the state copies every token and remembers none. Selection only helps when it is selective.</p>
+    <p class="note">A toy, computed exactly: one channel, three state numbers, A = diag(-1, -2, -3) (Mamba's default real initialization), &Delta; = softplus of a linear function of the important flag (2.13 or 0.049), zero-order hold per token. B is selective too; C is fixed. In the paper's ablations at about 350M parameters, a bigger state helps only when B and C are selective: perplexity 9.73 to 8.71 as N goes from 1 to 16, against 9.88 to 9.81 with constant B and C (Table 10).</p>
+    <p class="inscription">A large step resets the memory and stores the token; a small step keeps the memory and skips it. Mamba lets each token choose.</p>
+    <button type="button" class="continue" data-go="scan">Continue with the parallel scan</button>
+  </article>

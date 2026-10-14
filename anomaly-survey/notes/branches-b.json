@@ -1,0 +1,242 @@
+[
+ {
+  "name": "hvq-trans",
+  "arxiv": "2310.14228v1",
+  "date": "2023-10-22",
+  "venue": "NeurIPS 2023",
+  "family": "unified",
+  "parent_chapter": "ch-uniad",
+  "one_line": "Replaces continuous features with a hierarchy of learned discrete normal prototypes (vector quantization), so defects cannot be copied through.",
+  "key": {
+   "claim_id": "hvq-trans-mvtec-mc-img-auroc",
+   "label": "HVQ-Trans, MVTec AD mean image AUROC (printed 98.0 +- 0.11)",
+   "value": "98.0",
+   "loc": "Table 1 (label Table:MVTec-AD), row Mean, column Ours (image / pixel)",
+   "protocol": "multi-class (one model for all 15 categories), full-shot"
+  }
+ },
+ {
+  "name": "diad",
+  "arxiv": "2312.06607v1",
+  "date": "2023-12-11",
+  "venue": "AAAI 2024",
+  "family": "unified",
+  "parent_chapter": "ch-uniad",
+  "one_line": "Reconstructs images with a semantically guided Stable Diffusion denoiser, then compares pretrained features of input and reconstruction.",
+  "key": {
+   "claim_id": "diad-mvtec-mc-img-auroc",
+   "label": "DiAD, MVTec AD mean image AUROC (AUROC_cls/AP_cls/F1max_cls = 97.2/99.0/96.5)",
+   "value": "97.2",
+   "loc": "Table 1 (tab:mvtecsp), row Mean, column Ours",
+   "protocol": "multi-class (one model for all 15 categories), full-shot"
+  }
+ },
+ {
+  "name": "mambaad",
+  "arxiv": "2404.06564v4",
+  "date": "2024-04-09",
+  "venue": "NeurIPS 2024",
+  "family": "unified",
+  "parent_chapter": "ch-uniad",
+  "one_line": "Reconstructs pretrained ResNet features with a Mamba (state-space) decoder that scans in eight directions: global context at linear cost.",
+  "key": {
+   "claim_id": "mambaad-mvtec-mc-img-auroc",
+   "label": "MambaAD, MVTec AD image AU-ROC (printed 98.6 +- 0.3)",
+   "value": "98.6",
+   "loc": "Table 1 (tab:results), MVTec-AD block, row MambaAD (Ours), Image-level AU-ROC",
+   "protocol": "multi-class (one model for all 15 categories), full-shot, 256x256, pretrained ResNet34 encoder; mean +- std printed"
+  }
+ },
+ {
+  "name": "april-gan",
+  "arxiv": "2305.17382v3",
+  "date": "2023-05-27",
+  "venue": "technical report, CVPR 2023 VAND workshop challenge (per title)",
+  "family": "zero/few-shot",
+  "parent_chapter": "ch-winclip",
+  "one_line": "Adds trained linear layers mapping CLIP patch features into text space for zero-shot maps; few-shot adds a patch memory bank.",
+  "key": {
+   "claim_id": "april-gan-mvtec-zs-img-auroc",
+   "label": "APRIL-GAN zero-shot, MVTec AD AUROC-cls",
+   "value": "86.1",
+   "loc": "Table 3 (tab:comp_mvtec), zero-shot block, row Ours, column AUROC-cls",
+   "protocol": "zero-shot on MVTec AD; linear layers trained on the VisA test set (Sec. 3.1 Setup, Datasets); CLIP frozen"
+  }
+ },
+ {
+  "name": "anomalygpt",
+  "arxiv": "2308.15366v4",
+  "date": "2023-08-29",
+  "venue": "AAAI 2024",
+  "family": "zero/few-shot",
+  "parent_chapter": "ch-winclip",
+  "one_line": "Feeds a text-matched anomaly map to a large vision-language model via learned prompts; it answers whether and where, no threshold.",
+  "key": {
+   "claim_id": "anomalygpt-mvtec-1shot-img-auroc",
+   "label": "AnomalyGPT 1-shot, MVTec-AD Image-AUC (printed 94.1 +- 1.1)",
+   "value": "94.1",
+   "loc": "Table 2 (tab:few-shot), 1-shot block, row AnomalyGPT (ours), MVTec-AD Image-AUC; also Abstract",
+   "protocol": "1-shot on MVTec AD; model trained unsupervised on VisA, then 1-shot transferred (Sec. 1); average of 5 runs"
+  }
+ },
+ {
+  "name": "musc",
+  "arxiv": "2401.16753v1",
+  "date": "2024-01-30",
+  "venue": "ICLR 2024",
+  "family": "zero-shot",
+  "parent_chapter": "ch-winclip",
+  "one_line": "Training-free: scores each test patch by how few similar patches it finds in the other unlabeled test images.",
+  "key": {
+   "claim_id": "musc-mvtec-zs-img-auroc",
+   "label": "MuSc zero-shot, MVTec AD AUROC-cls (printed 97.8(+6.0))",
+   "value": "97.8",
+   "loc": "Table 1 (tab:comp_datasets), MVTec AD 0-shot block, row MuSc (ours), AUROC-cls",
+   "protocol": "zero-shot, training-free (no training data, no prompts); scores the unlabeled MVTec AD test images against each other; CLIP ViT-L/14-336, 518x518"
+  }
+ },
+ {
+  "name": "inctrl",
+  "arxiv": "2403.06495v3",
+  "date": "2024-03-11",
+  "venue": "CVPR 2024",
+  "family": "few-shot generalist",
+  "parent_chapter": "ch-winclip",
+  "one_line": "Trains one CLIP-based model on an auxiliary dataset to score residuals between a query and a few normal sample prompts.",
+  "key": {
+   "claim_id": "inctrl-mvtec-2shot-img-auroc",
+   "label": "InCTRL 2-shot, MVTec AD image AUROC (printed 0.940 +- 0.015)",
+   "value": "0.940",
+   "loc": "Table 1 (label auroc), 2-shot block, row Ours (InCTRL), column MVTec AD",
+   "protocol": "2-shot normal sample prompts on MVTec AD; model trained on VisA (Experimental Setup); image-level only, no pixel AUROC reported; printed as a fraction, mean of runs; no k is headlined, 2-shot is the smallest tabulated k and the ablation setting (Table 3)"
+  }
+ },
+ {
+  "name": "promptad",
+  "arxiv": "2404.05231v2",
+  "date": "2024-04-08",
+  "venue": "CVPR 2024",
+  "family": "few-shot",
+  "parent_chapter": "ch-winclip",
+  "one_line": "Learns CLIP prompts from a few normal images only, making anomaly prompts by appending anomaly suffixes, with an explicit margin.",
+  "key": {
+   "claim_id": "promptad-mvtec-1shot-img-auroc",
+   "label": "PromptAD 1-shot, MVTec image AUROC (printed 94.6 +- 1.7)",
+   "value": "94.6",
+   "loc": "Table 1, row PromptAD, MVTec 1-shot column",
+   "protocol": "1-shot on MVTec AD; prompts learned per class from the k normal images only, no auxiliary dataset; CLIP-based; mean +- std printed"
+  }
+ },
+ {
+  "name": "adaclip",
+  "arxiv": "2407.15795v1",
+  "date": "2024-07-22",
+  "venue": "ECCV 2024",
+  "family": "zero-shot",
+  "parent_chapter": "ch-anomalyclip",
+  "one_line": "Adds static (shared) and dynamic (per-image) learnable prompts inside CLIP layers, trained on auxiliary annotated anomaly data.",
+  "key": {
+   "claim_id": "adaclip-mvtec-zs-img-auroc",
+   "label": "AdaCLIP zero-shot, MVTec AD image-level AUROC (AUROC, max-F1 = 89.2, 90.6)",
+   "value": "89.2",
+   "loc": "Table 1 (tab:industrial), Image-level block, row MVTec AD, column AdaCLIP",
+   "protocol": "zero-shot on MVTec AD; trained on VisA and ColonDB (Experimental Setup, Implementation Details); CLIP ViT-L/14@336px, 518x518"
+  }
+ },
+ {
+  "name": "univad",
+  "arxiv": "2412.03342v3",
+  "date": "2024-12-04",
+  "venue": "CVPR 2025",
+  "family": "few-shot unified",
+  "parent_chapter": "ch-anomalyclip",
+  "one_line": "Training-free few-shot: segments components with clustering and foundation models, then matches patches and component graphs against normal references.",
+  "key": {
+   "claim_id": "univad-mvtec-1shot-img-auroc",
+   "label": "UniVAD 1-normal-shot, MVTec-AD image-level AUC",
+   "value": "97.8",
+   "loc": "Table 1 (tab:few-normal-shot), Image-level block, row MVTec-AD, column UniVAD (ours)",
+   "protocol": "1-normal-shot, training-free, one model across industrial, logical and medical datasets"
+  }
+ },
+ {
+  "name": "mvtec-3d",
+  "arxiv": "2112.09045v1",
+  "date": "2021-12-16",
+  "venue": "VISAPP 2022",
+  "family": "benchmark",
+  "parent_chapter": "ch-benchmark",
+  "one_line": "First comprehensive 3D anomaly dataset: 4147 industrial-sensor scans (xyz plus RGB) of 10 object categories with precise defect masks.",
+  "key": {
+   "claim_id": "mvtec-3d-scans",
+   "label": "MVTec 3D-AD total number of scans",
+   "value": "4147",
+   "loc": "Sec. 1 contributions; Sec. 3 first sentence",
+   "protocol": ""
+  }
+ },
+ {
+  "name": "real-iad",
+  "arxiv": "2403.12580v1",
+  "date": "2024-03-19",
+  "venue": "CVPR 2024",
+  "family": "benchmark",
+  "parent_chapter": "ch-benchmark",
+  "one_line": "151,050 real images of 30 objects from five camera views, an order of magnitude larger than MVTec AD or VisA.",
+  "key": {
+   "claim_id": "real-iad-images",
+   "label": "Real-IAD total images (row printed as 'Read-IAD' in source and PDF)",
+   "value": "151,050",
+   "loc": "Table 1 (tab:dataset), row Read-IAD, column Image Number All",
+   "protocol": ""
+  }
+ },
+ {
+  "name": "im-iad",
+  "arxiv": "2301.13359v5",
+  "date": "2023-01-31",
+  "venue": null,
+  "family": "benchmark",
+  "parent_chapter": "ch-benchmark",
+  "one_line": "Re-runs 19 algorithms on seven datasets under one uniform setting: supervision levels, few-shot, continual, noisy labels, efficiency.",
+  "key": {
+   "claim_id": "im-iad-experiments",
+   "label": "experiments in the benchmark",
+   "value": "17,017",
+   "loc": "Abstract (PDF p.1)",
+   "protocol": ""
+  }
+ },
+ {
+  "name": "survey-liu",
+  "arxiv": "2301.11514v5",
+  "date": "2023-01-27",
+  "venue": "Machine Intelligence Research vol. 21, no. 1, pp. 104-135, 2024",
+  "family": "survey",
+  "parent_chapter": "ch-map",
+  "one_line": "Survey splitting unsupervised industrial methods into feature-embedding and reconstruction families; also reviews supervision levels, metrics, datasets.",
+  "key": {
+   "claim_id": "survey-liu-families",
+   "label": "Survey: unsupervised industrial methods divided into two categories, feature-embedding and reconstruction-based",
+   "value": "two",
+   "loc": "Sec. 2 Unsupervised Anomaly Detection, opening paragraph (mir-article.tex line 339)",
+   "protocol": ""
+  }
+ },
+ {
+  "name": "ast",
+  "arxiv": "2210.07829v2",
+  "date": "2022-10-14",
+  "venue": "WACV 2023",
+  "family": "student-teacher",
+  "parent_chapter": "ch-efficientad",
+  "one_line": "Makes student and teacher asymmetric: a normalizing-flow teacher and a plain CNN student, so their outputs diverge on anomalies.",
+  "key": {
+   "claim_id": "ast-mvtec-img-auroc",
+   "label": "AST, MVTec AD (MVT2D) mean image AUROC (printed 99.2 +- 0.04)",
+   "value": "99.2",
+   "loc": "Table 2 (table:mvtec), row Average, column AST (ours)",
+   "protocol": "one-class, full-shot, 768x768, frozen EfficientNet-B5 features; one model per category (our reading, not stated explicitly); mean of 5 runs"
+  }
+ }
+]

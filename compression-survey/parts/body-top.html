@@ -1,0 +1,63 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="A 16 by 16 tile of blue full-precision weights is copied four times. First its cells snap to a few yellow levels (quantization, 1024 bytes down to 256). Then half the cells in every group of four turn into brown outlines (2:4 pruning). Then the tile shrinks into a smaller yellow student tile (distillation). Last, three kernel boxes that each make a trip to memory merge into one green fused kernel (compilation)."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge toy" style="top:.6rem;right:.75rem">Toy model</span>
+  </div>
+  <h1>Compressing vision models for GPU inference</h1>
+  <p class="hook">A trained detector is a pile of 32-bit numbers and a chain of GPU kernels. Make the model smaller, the numbers shorter, the pile sparser and the chain shorter, and the same network runs faster on the same GPU. This page builds each of those four levers from first principles, shows what each one costs in accuracy, and ends with which one to pull first.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against, plus the TensorRT documentation:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/1503.02531v1" title="arXiv 1503.02531v1">Knowledge distillation (Hinton et al.)</a></li>
+    <li><a href="https://arxiv.org/abs/1510.00149v5" title="arXiv 1510.00149v5">Deep Compression</a></li>
+    <li><a href="https://arxiv.org/abs/1712.05877v1" title="arXiv 1712.05877v1">Integer-arithmetic-only inference (Jacob et al.)</a></li>
+    <li><a href="https://arxiv.org/abs/1803.03635v5" title="arXiv 1803.03635v5">Lottery ticket hypothesis</a></li>
+    <li><a href="https://arxiv.org/abs/2004.09602v1" title="arXiv 2004.09602v1">Integer quantization, NVIDIA (Wu et al.)</a></li>
+    <li><a href="https://arxiv.org/abs/2106.08295v1" title="arXiv 2106.08295v1">White paper on quantization (Nagel et al.)</a></li>
+    <li><a href="https://arxiv.org/abs/2208.07339v2" title="arXiv 2208.07339v2">LLM.int8()</a></li>
+    <li><a href="https://arxiv.org/abs/2209.05433v2" title="arXiv 2209.05433v2">FP8 formats</a></li>
+    <li><a href="https://arxiv.org/abs/2211.10438v7" title="arXiv 2211.10438v7">SmoothQuant</a></li>
+    <li><a href="https://arxiv.org/abs/2210.17323v2" title="arXiv 2210.17323v2">GPTQ</a></li>
+    <li><a href="https://arxiv.org/abs/2306.00978v6" title="arXiv 2306.00978v6">AWQ</a></li>
+    <li><a href="https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html" title="NVIDIA TensorRT documentation, version 11.4.0, read 2026-10-09">TensorRT documentation</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: what costs time</li>
+    <li value="1"><a href="#ch-cost" data-rail="Where time goes">Where the time goes</a></li>
+    <li><a href="#ch-map" data-rail="The field">The field at a glance</a></li>
+    <li class="act">Act II: a smaller student</li>
+    <li value="3"><a href="#ch-distill" data-rail="Distillation">Knowledge distillation</a></li>
+    <li class="act">Act III: fewer bits</li>
+    <li value="4"><a href="#ch-grid" data-rail="Scale, zero-point">Numbers on a grid: scale and zero-point</a></li>
+    <li><a href="#ch-granularity" data-rail="Calibration">One scale or many? Calibration</a></li>
+    <li><a href="#ch-ptq" data-rail="PTQ toolkit">The post-training toolkit</a></li>
+    <li><a href="#ch-qat" data-rail="QAT and STE">Training through the rounding</a></li>
+    <li class="act">Act IV: fewer weights</li>
+    <li value="8"><a href="#ch-prune" data-rail="Pruning">Pruning and Deep Compression</a></li>
+    <li><a href="#ch-lottery" data-rail="Tickets, 2:4">Lottery tickets and structure a GPU can use</a></li>
+    <li class="act">Act V: the LLM era</li>
+    <li value="10"><a href="#ch-outliers" data-rail="Outliers">Outliers: LLM.int8() and SmoothQuant</a></li>
+    <li><a href="#ch-gptq-awq" data-rail="GPTQ, AWQ">Four-bit weights: GPTQ and AWQ</a></li>
+    <li><a href="#ch-fp8" data-rail="FP8">FP8: floating point in eight bits</a></li>
+    <li class="act">Act VI: deployment</li>
+    <li value="13"><a href="#ch-tensorrt" data-rail="TensorRT">What an inference compiler does</a></li>
+    <li><a href="#ch-guide" data-rail="Decision guide">A decision guide for detection and segmentation</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Every figure on this page uses the same five colors, and each color means one thing everywhere:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">full precision: FP32 or FP16 values, the teacher</span>
+  <span class="c-yellow">the integer grid: quantized values, the student</span>
+  <span class="c-green">what a method keeps or protects</span>
+  <span class="c-red">error and loss: rounding, clipping, gradients</span>
+  <span class="c-brown">removed or frozen: pruned weights, a frozen teacher</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means the figure runs a real formula or algorithm from a paper, often on small made-up inputs. <b>Toy model</b> means an illustration of the mechanism, not a paper's numbers. <b>Sourced</b> means what is drawn comes from the papers. The three-dimensional figures turn when you drag them (or with the arrow keys once focused). In an equation, hover over or tap a term that names part of a figure, and that part lights up. Each chapter ends with an "On a detector" note that says what the chapter means for a deployed detection or segmentation model.</p>

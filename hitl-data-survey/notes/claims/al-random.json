@@ -1,0 +1,2392 @@
+[
+ {
+  "id": "munjal-cite-title",
+  "claim": "title",
+  "value": "Towards Robust and Reproducible Active Learning Using Neural Networks",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abs.html title; paper header",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-cite-authors",
+  "claim": "authors",
+  "value": "Prateek Munjal, Nasir Hayat, Munawar Hayat, Jamshid Sourati, Shadab Khan",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2002.09564v3",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-cite-date",
+  "claim": "arXiv first submission date (v1); use this date on the timeline",
+  "value": "21 Feb 2020",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abs.html 'Submitted on 21 Feb 2020'",
+  "source": "paper",
+  "note": "Timeline rule: first-submission date. This version (v3) is dated separately in munjal-cite-date-version."
+ },
+ {
+  "id": "munjal-cite-date-version",
+  "claim": "date of the version used (v3)",
+  "value": "15 Jun 2022",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abs.html 'last revised 15 Jun 2022 (this version, v3)'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-cite-venue",
+  "claim": "venue",
+  "value": "CVPR 2022",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abs.html Comments: 'Accepted at CVPR 2022; Improved figures and plots for better readability'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-cite-code",
+  "claim": "code toolkit",
+  "value": "TorchAL (https://github.com/PrateekMunjal/TorchAL)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "abstract (abs.html)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-initial",
+  "claim": "size of the initial labeled set",
+  "value": "10%",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 4 (Tuning Hyper-parameters): 'initial data of 10% is increased to 40% with a budget size of 10%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-budget",
+  "claim": "labels added per AL iteration (budget) on CIFAR",
+  "value": "10%",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 4: 'budget size of 10%'",
+  "source": "paper",
+  "note": "A second setting with b = 5% appears in Fig 3 and Supp. Table 6."
+ },
+ {
+  "id": "munjal-protocol-final",
+  "claim": "labeled fraction reached after the last AL iteration",
+  "value": "40%",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 4: 'increased to 40%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-initsets",
+  "claim": "number of random initial labeled sets",
+  "value": "5",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.1: 'we draw five random initial labeled sets (L_0 ... L_4) with replacement'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-seeds",
+  "claim": "random weight initializations per initial set",
+  "value": "5",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.1: 'Each of these five sets were used to train the base model, initialized with random weights, 5 times'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-runs",
+  "claim": "models trained per AL method (5 initial sets x 5 seeds)",
+  "value": "25",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.1: 'a total of 25 models were trained for each AL method'; Fig 1 caption 'The mean of 25 runs'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-hp-reuse",
+  "claim": "how the 5 seeds share hyperparameters",
+  "value": "for the first seed we use AutoML to tune hyper-parameters and re-use these hyper-parameters for the other 4 seeds",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Fig 1 caption; Sec 4 last paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-automl",
+  "claim": "AutoML random-search trials at each AL iteration",
+  "value": "50",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 4: 'we use AutoML at each AL iteration in our implementation, which does 50 trials of random search'; Sec 5: Optuna",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-models-per-run",
+  "claim": "models trained for 4 AL iterations of one method and one initial set",
+  "value": "200",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 4: 'we train a total of 200 models and choose the best 4'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-optuna",
+  "claim": "AutoML library",
+  "value": "Optuna",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 5 (Implementation Details)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-arch",
+  "claim": "classifier for all experiments unless stated",
+  "value": "VGG16 with batchnorm",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 5, 'Architecture & Hyper-parameters'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-retrain",
+  "claim": "CIFAR models retrained from scratch each iteration",
+  "value": "Models were trained from random initialization in each AL iteration for experiments that used CIFAR 10 and CIFAR 100 datasets.",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 5",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-protocol-sr",
+  "claim": "what 'strongly regularized' (SR) means in the main runs",
+  "value": "RA (RandAugment) + SWA (stochastic weight averaging)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 3; Sec 6.4 ('advanced regularization techniques (RA and SWA)')",
+  "source": "paper",
+  "note": "Shake-Shake is tried only in the Table 3 ablation and rejected (Sec 6.4)."
+ },
+ {
+  "id": "munjal-automl-ranges",
+  "claim": "AutoML search ranges",
+  "value": "lr log [1e-5, 1e-2); wd log [1e-8, 1e-3); batch size {8,16,32,...,1024}; optimizer {SGD, ADAM}; RA_N {1..15}; RA_M {1..8}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Sec 1.3 (Auto-ML Hyper-parameters)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-std-quote",
+  "claim": "seed-to-seed spread quote",
+  "value": "A standard deviation of 1-2% in accuracy among different AL methods, indicating that out of chance, it is possible to achieve seemingly better results",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.1, observation (i)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-no-consistent-winner",
+  "claim": "main finding of Sec 6.1",
+  "value": "no AL method performs consistently better, and random sampling baseline performs competitively",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.1, observation (ii)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-stats-ks",
+  "claim": "normality test result",
+  "value": "normality could not be assumed for any of the six experiments",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2 (Kolmogorov-Smirnov test)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-stats-levene",
+  "claim": "equal-variance test result",
+  "value": "rejected at alpha=0.05 in 4 out of 6 experiments",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2 (Levene's test)",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-stats-tests",
+  "claim": "statistical tests used to compare methods",
+  "value": "Kruskal-Wallis one-way ANOVA for all 6 experiments, then Games-Howell post-hoc pairwise comparison at alpha=0.05",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-stats-kw-result",
+  "claim": "Kruskal-Wallis outcome",
+  "value": "at least one method stochastically dominated one other method in all 6 experiments",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-stats-gh-result",
+  "claim": "Games-Howell outcome",
+  "value": "no AL method consistently outperforms random baseline",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-beats-rsb-qbc",
+  "claim": "number of the 6 settings (CIFAR10/100 x 20/30/40%) where QBC was superior to RSB",
+  "value": "4 out of 6",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2 last paragraph; matches Table 1 '> RSB' column",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-beats-rsb-coreset",
+  "claim": "number of the 6 settings (CIFAR10/100 x 20/30/40%) where Coreset was superior to RSB",
+  "value": "2/6",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2 last paragraph; matches Table 1 '> RSB' column",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-beats-rsb-dbal",
+  "claim": "number of the 6 settings (CIFAR10/100 x 20/30/40%) where DBAL was superior to RSB",
+  "value": "2/6",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2 last paragraph; matches Table 1 '> RSB' column",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-beats-rsb-bald",
+  "claim": "number of the 6 settings (CIFAR10/100 x 20/30/40%) where BALD was superior to RSB",
+  "value": "1/6",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.2 last paragraph; matches Table 1 '> RSB' column",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-below-rsb",
+  "claim": "settings where a method was significantly below RSB",
+  "value": "VAAL at C10 (30%); UC at C10 (40%); VAAL at C100 (30%)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, column '< RSB'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-kw-c10-20",
+  "claim": "Kruskal-Wallis p-value, C10 at 20% labels",
+  "value": "9.35\\times10^{-4}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, row 'C10 (20%)', column 'Kruskal-Wallis P-Value'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-kw-c10-30",
+  "claim": "Kruskal-Wallis p-value, C10 at 30% labels",
+  "value": "2.67\\times10^{-9}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, row 'C10 (30%)', column 'Kruskal-Wallis P-Value'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-kw-c10-40",
+  "claim": "Kruskal-Wallis p-value, C10 at 40% labels",
+  "value": "8.54\\times10^{-19}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, row 'C10 (40%)', column 'Kruskal-Wallis P-Value'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-kw-c100-20",
+  "claim": "Kruskal-Wallis p-value, C100 at 20% labels",
+  "value": "1.13\\times10^{-8}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, row 'C100 (20%)', column 'Kruskal-Wallis P-Value'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-kw-c100-30",
+  "claim": "Kruskal-Wallis p-value, C100 at 30% labels",
+  "value": "1.84\\times10^{-12}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, row 'C100 (30%)', column 'Kruskal-Wallis P-Value'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t1-kw-c100-40",
+  "claim": "Kruskal-Wallis p-value, C100 at 40% labels",
+  "value": "5.63\\times10^{-16}",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 1, row 'C100 (40%)', column 'Kruskal-Wallis P-Value'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-t3-rsb-c10",
+  "claim": "test accuracy with 10% labels, regularization 'RSB', CIFAR10",
+  "value": "69.16",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row 'RSB', column 'CIFAR10'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-rsb-c100",
+  "claim": "test accuracy with 10% labels, regularization 'RSB', CIFAR100",
+  "value": "34.73",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row 'RSB', column 'CIFAR100'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-swa-c10",
+  "claim": "test accuracy with 10% labels, regularization '+ SWA', CIFAR10",
+  "value": "74.6",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ SWA', column 'CIFAR10'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-swa-c100",
+  "claim": "test accuracy with 10% labels, regularization '+ SWA', CIFAR100",
+  "value": "38.06",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ SWA', column 'CIFAR100'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-ra-c10",
+  "claim": "test accuracy with 10% labels, regularization '+ RA', CIFAR10",
+  "value": "76.36",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ RA', column 'CIFAR10'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-ra-c100",
+  "claim": "test accuracy with 10% labels, regularization '+ RA', CIFAR100",
+  "value": "38.01",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ RA', column 'CIFAR100'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-ss-c10",
+  "claim": "test accuracy with 10% labels, regularization '+ Shake-Shake(SS)', CIFAR10",
+  "value": "73.93",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ Shake-Shake(SS)', column 'CIFAR10'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-ss-c100",
+  "claim": "test accuracy with 10% labels, regularization '+ Shake-Shake(SS)', CIFAR100",
+  "value": "39.23",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ Shake-Shake(SS)', column 'CIFAR100'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-swa-ra-c10",
+  "claim": "test accuracy with 10% labels, regularization '+ SWA + RA', CIFAR10",
+  "value": "82.16",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ SWA + RA', column 'CIFAR10'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-swa-ra-c100",
+  "claim": "test accuracy with 10% labels, regularization '+ SWA + RA', CIFAR100",
+  "value": "39.44",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ SWA + RA', column 'CIFAR100'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-ss-swa-ra-c10",
+  "claim": "test accuracy with 10% labels, regularization '+ SS + SWA + RA', CIFAR10",
+  "value": "84.45",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ SS + SWA + RA', column 'CIFAR10'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-ss-swa-ra-c100",
+  "claim": "test accuracy with 10% labels, regularization '+ SS + SWA + RA', CIFAR100",
+  "value": "48.92",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 3, row '+ SS + SWA + RA', column 'CIFAR100'",
+  "source": "paper",
+  "note": "Best of 50 AutoML trials; VGG16 except Shake-Shake rows (ResNeXt family), per Table 3 caption."
+ },
+ {
+  "id": "munjal-t3-gain-quote",
+  "claim": "combined RA + SWA gain in Table 3",
+  "value": "a significant combined gain of \u224812% and \u22485% on CIFAR10 and CIFAR100 respectively",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.4, paragraph after Table 3",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Table 3 itself gives 82.16 - 69.16 = 13.00 (CIFAR10) and 39.44 - 34.73 = 4.71 (CIFAR100); the text rounds to about 12% and 5%."
+ },
+ {
+  "id": "munjal-t4-vgg16-rsb-20",
+  "claim": "CIFAR10 test accuracy, RSB, VGG16, 20% labeled",
+  "value": "77.34",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'VGG16 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-rsb-30",
+  "claim": "CIFAR10 test accuracy, RSB, VGG16, 30% labeled",
+  "value": "80.91",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'VGG16 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-rsb-40",
+  "claim": "CIFAR10 test accuracy, RSB, VGG16, 40% labeled",
+  "value": "82.05",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'VGG16 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-rsb-20",
+  "claim": "CIFAR10 test accuracy, RSB, WRN-28-2, 20% labeled",
+  "value": "81.3",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'WRN-28-2 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-rsb-30",
+  "claim": "CIFAR10 test accuracy, RSB, WRN-28-2, 30% labeled",
+  "value": "81.98",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'WRN-28-2 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-rsb-40",
+  "claim": "CIFAR10 test accuracy, RSB, WRN-28-2, 40% labeled",
+  "value": "85.68",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'WRN-28-2 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-rsb-20",
+  "claim": "CIFAR10 test accuracy, RSB, R18, 20% labeled",
+  "value": "75.73",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'R18 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-rsb-30",
+  "claim": "CIFAR10 test accuracy, RSB, R18, 30% labeled",
+  "value": "79.69",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'R18 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-rsb-40",
+  "claim": "CIFAR10 test accuracy, RSB, R18, 40% labeled",
+  "value": "80.69",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'R18 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-rsb-20",
+  "claim": "CIFAR10 test accuracy, RSB, R18-SR, 20% labeled",
+  "value": "88.69",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'R18-SR 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-rsb-30",
+  "claim": "CIFAR10 test accuracy, RSB, R18-SR, 30% labeled",
+  "value": "90.44",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'R18-SR 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-rsb-40",
+  "claim": "CIFAR10 test accuracy, RSB, R18-SR, 40% labeled",
+  "value": "91.8",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'RSB', column 'R18-SR 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-coreset-20",
+  "claim": "CIFAR10 test accuracy, Coreset, VGG16, 20% labeled",
+  "value": "76.18",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'VGG16 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-coreset-30",
+  "claim": "CIFAR10 test accuracy, Coreset, VGG16, 30% labeled",
+  "value": "82.24",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'VGG16 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-coreset-40",
+  "claim": "CIFAR10 test accuracy, Coreset, VGG16, 40% labeled",
+  "value": "85.11",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'VGG16 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-coreset-20",
+  "claim": "CIFAR10 test accuracy, Coreset, WRN-28-2, 20% labeled",
+  "value": "82.32",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'WRN-28-2 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-coreset-30",
+  "claim": "CIFAR10 test accuracy, Coreset, WRN-28-2, 30% labeled",
+  "value": "84.29",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'WRN-28-2 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-coreset-40",
+  "claim": "CIFAR10 test accuracy, Coreset, WRN-28-2, 40% labeled",
+  "value": "86.72",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'WRN-28-2 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-coreset-20",
+  "claim": "CIFAR10 test accuracy, Coreset, R18, 20% labeled",
+  "value": "79.27",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'R18 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-coreset-30",
+  "claim": "CIFAR10 test accuracy, Coreset, R18, 30% labeled",
+  "value": "82.13",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'R18 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-coreset-40",
+  "claim": "CIFAR10 test accuracy, Coreset, R18, 40% labeled",
+  "value": "85.09",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'R18 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-coreset-20",
+  "claim": "CIFAR10 test accuracy, Coreset, R18-SR, 20% labeled",
+  "value": "88.48",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'R18-SR 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-coreset-30",
+  "claim": "CIFAR10 test accuracy, Coreset, R18-SR, 30% labeled",
+  "value": "91.72",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'R18-SR 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-coreset-40",
+  "claim": "CIFAR10 test accuracy, Coreset, R18-SR, 40% labeled",
+  "value": "92.94",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'Coreset', column 'R18-SR 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-dbal-20",
+  "claim": "CIFAR10 test accuracy, DBAL, VGG16, 20% labeled",
+  "value": "78.08",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'VGG16 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-dbal-30",
+  "claim": "CIFAR10 test accuracy, DBAL, VGG16, 30% labeled",
+  "value": "82.42",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'VGG16 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-dbal-40",
+  "claim": "CIFAR10 test accuracy, DBAL, VGG16, 40% labeled",
+  "value": "85.17",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'VGG16 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-dbal-20",
+  "claim": "CIFAR10 test accuracy, DBAL, WRN-28-2, 20% labeled",
+  "value": "80.79",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'WRN-28-2 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-dbal-30",
+  "claim": "CIFAR10 test accuracy, DBAL, WRN-28-2, 30% labeled",
+  "value": "84.54",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'WRN-28-2 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-dbal-40",
+  "claim": "CIFAR10 test accuracy, DBAL, WRN-28-2, 40% labeled",
+  "value": "87.87",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'WRN-28-2 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-dbal-20",
+  "claim": "CIFAR10 test accuracy, DBAL, R18, 20% labeled",
+  "value": "75.05",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'R18 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-dbal-30",
+  "claim": "CIFAR10 test accuracy, DBAL, R18, 30% labeled",
+  "value": "80.69",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'R18 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-dbal-40",
+  "claim": "CIFAR10 test accuracy, DBAL, R18, 40% labeled",
+  "value": "82.95",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'R18 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-dbal-20",
+  "claim": "CIFAR10 test accuracy, DBAL, R18-SR, 20% labeled",
+  "value": "89.41",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'R18-SR 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-dbal-30",
+  "claim": "CIFAR10 test accuracy, DBAL, R18-SR, 30% labeled",
+  "value": "92.23",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'R18-SR 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-dbal-40",
+  "claim": "CIFAR10 test accuracy, DBAL, R18-SR, 40% labeled",
+  "value": "93.34",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'DBAL', column 'R18-SR 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-vaal-20",
+  "claim": "CIFAR10 test accuracy, VAAL, VGG16, 20% labeled",
+  "value": "77.13",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'VGG16 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-vaal-30",
+  "claim": "CIFAR10 test accuracy, VAAL, VGG16, 30% labeled",
+  "value": "79.97",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'VGG16 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-vaal-40",
+  "claim": "CIFAR10 test accuracy, VAAL, VGG16, 40% labeled",
+  "value": "80.55",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'VGG16 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-vaal-20",
+  "claim": "CIFAR10 test accuracy, VAAL, WRN-28-2, 20% labeled",
+  "value": "78.42",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'WRN-28-2 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-vaal-30",
+  "claim": "CIFAR10 test accuracy, VAAL, WRN-28-2, 30% labeled",
+  "value": "83.79",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'WRN-28-2 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-vaal-40",
+  "claim": "CIFAR10 test accuracy, VAAL, WRN-28-2, 40% labeled",
+  "value": "86.58",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'WRN-28-2 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-vaal-20",
+  "claim": "CIFAR10 test accuracy, VAAL, R18, 20% labeled",
+  "value": "74.87",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'R18 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-vaal-30",
+  "claim": "CIFAR10 test accuracy, VAAL, R18, 30% labeled",
+  "value": "79.96",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'R18 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-vaal-40",
+  "claim": "CIFAR10 test accuracy, VAAL, R18, 40% labeled",
+  "value": "82.24",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'R18 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-vaal-20",
+  "claim": "CIFAR10 test accuracy, VAAL, R18-SR, 20% labeled",
+  "value": "87.11",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'R18-SR 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-vaal-30",
+  "claim": "CIFAR10 test accuracy, VAAL, R18-SR, 30% labeled",
+  "value": "90.43",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'R18-SR 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-vaal-40",
+  "claim": "CIFAR10 test accuracy, VAAL, R18-SR, 40% labeled",
+  "value": "92.19",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'VAAL', column 'R18-SR 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-qbc-20",
+  "claim": "CIFAR10 test accuracy, QBC, VGG16, 20% labeled",
+  "value": "78.63",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'VGG16 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-qbc-30",
+  "claim": "CIFAR10 test accuracy, QBC, VGG16, 30% labeled",
+  "value": "82.66",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'VGG16 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-vgg16-qbc-40",
+  "claim": "CIFAR10 test accuracy, QBC, VGG16, 40% labeled",
+  "value": "85.24",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'VGG16 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-qbc-20",
+  "claim": "CIFAR10 test accuracy, QBC, WRN-28-2, 20% labeled",
+  "value": "81.85",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'WRN-28-2 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-qbc-30",
+  "claim": "CIFAR10 test accuracy, QBC, WRN-28-2, 30% labeled",
+  "value": "85.06",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'WRN-28-2 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-wrn-qbc-40",
+  "claim": "CIFAR10 test accuracy, QBC, WRN-28-2, 40% labeled",
+  "value": "87.94",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'WRN-28-2 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-qbc-20",
+  "claim": "CIFAR10 test accuracy, QBC, R18, 20% labeled",
+  "value": "76.61",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'R18 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-qbc-30",
+  "claim": "CIFAR10 test accuracy, QBC, R18, 30% labeled",
+  "value": "81.77",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'R18 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18-qbc-40",
+  "claim": "CIFAR10 test accuracy, QBC, R18, 40% labeled",
+  "value": "84.41",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'R18 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-qbc-20",
+  "claim": "CIFAR10 test accuracy, QBC, R18-SR, 20% labeled",
+  "value": "88.34",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'R18-SR 20%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-qbc-30",
+  "claim": "CIFAR10 test accuracy, QBC, R18-SR, 30% labeled",
+  "value": "91.37",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'R18-SR 30%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-r18sr-qbc-40",
+  "claim": "CIFAR10 test accuracy, QBC, R18-SR, 40% labeled",
+  "value": "92.62",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Table 4, row 'QBC', column 'R18-SR 40%'",
+  "source": "paper",
+  "note": "Caption: accuracies of 'the best model', hyperparameters from a random search over 50 trials; no mean over runs or spread is reported. Sets chosen on VGG16 (source), then trained on the target net."
+ },
+ {
+  "id": "munjal-t4-gap-r18-20",
+  "claim": "best AL method minus RSB, R18, 20% labeled",
+  "value": "+3.54 (Coreset)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "derived from Table 4, column 'R18 20%'",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Coreset 79.27 - RSB 75.73 = 3.54. Our arithmetic on best-model values; Table 4 reports no spread, so the gap cannot be compared with the 1-2% seed spread directly."
+ },
+ {
+  "id": "munjal-t4-gap-r18-30",
+  "claim": "best AL method minus RSB, R18, 30% labeled",
+  "value": "+2.44 (Coreset)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "derived from Table 4, column 'R18 30%'",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Coreset 82.13 - RSB 79.69 = 2.44. Our arithmetic on best-model values; Table 4 reports no spread, so the gap cannot be compared with the 1-2% seed spread directly."
+ },
+ {
+  "id": "munjal-t4-gap-r18-40",
+  "claim": "best AL method minus RSB, R18, 40% labeled",
+  "value": "+4.40 (Coreset)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "derived from Table 4, column 'R18 40%'",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Coreset 85.09 - RSB 80.69 = 4.40. Our arithmetic on best-model values; Table 4 reports no spread, so the gap cannot be compared with the 1-2% seed spread directly."
+ },
+ {
+  "id": "munjal-t4-gap-r18sr-20",
+  "claim": "best AL method minus RSB, R18-SR, 20% labeled",
+  "value": "+0.72 (DBAL)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "derived from Table 4, column 'R18-SR 20%'",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "DBAL 89.41 - RSB 88.69 = 0.72. Our arithmetic on best-model values; Table 4 reports no spread, so the gap cannot be compared with the 1-2% seed spread directly."
+ },
+ {
+  "id": "munjal-t4-gap-r18sr-30",
+  "claim": "best AL method minus RSB, R18-SR, 30% labeled",
+  "value": "+1.79 (DBAL)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "derived from Table 4, column 'R18-SR 30%'",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "DBAL 92.23 - RSB 90.44 = 1.79. Our arithmetic on best-model values; Table 4 reports no spread, so the gap cannot be compared with the 1-2% seed spread directly."
+ },
+ {
+  "id": "munjal-t4-gap-r18sr-40",
+  "claim": "best AL method minus RSB, R18-SR, 40% labeled",
+  "value": "+1.54 (DBAL)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "derived from Table 4, column 'R18-SR 40%'",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "DBAL 93.34 - RSB 91.8 = 1.54. Our arithmetic on best-model values; Table 4 reports no spread, so the gap cannot be compared with the 1-2% seed spread directly."
+ },
+ {
+  "id": "munjal-t4-quote",
+  "claim": "transferability finding on ResNet18",
+  "value": "for ResNet18 target architecture, the RSB-SR model outperforms the best AL approach (coreset with ResNet18) in all the AL iterations, though DBAL-SR appears at the top with an accuracy of 93.34% at 40% labeled data",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.6 (Transferability Settings)",
+  "source": "paper",
+  "note": "Compares RSB-SR against non-SR Coreset; within R18-SR the AL methods still lead RSB-SR by up to 1.79 points."
+ },
+ {
+  "id": "munjal-par-quote",
+  "claim": "Discussion wording on strong RSB vs AL (direction: AL slightly ahead or equal)",
+  "value": "In contrast to previous findings, well-regularized random baseline in our study was either at par with or marginally inferior to the state-of-the-art AL methods.",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 8 (Discussion), paragraph 'AL Methods Compared To Strong RSB'",
+  "source": "paper",
+  "note": "Subject is the random baseline: random is equal to or slightly worse than AL, never better on average."
+ },
+ {
+  "id": "munjal-sr-variance-quote",
+  "claim": "effect of SR on run-to-run variance",
+  "value": "strongly-regularized models consistently achieve significant performance gains across all AL iterations and exhibit appreciably-smaller variance across multiple runs of the experiments",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.4, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-sr-20-vs-40",
+  "claim": "RSB-SR at 20% vs RSB at 40%, CIFAR10",
+  "value": "the RSB-SR model with 20% of training data achieves 3% higher accuracy compared to RSB model trained using 40% of the training data",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.4, second paragraph",
+  "source": "paper",
+  "note": "Consistent with Supp. Table 1: 85.09 - 82.05 = 3.04."
+ },
+ {
+  "id": "munjal-rsbsr-40-conflict",
+  "claim": "RSB-SR mean accuracy at 40% labels, CIFAR10 (two values in the paper)",
+  "value": "90.87% (Sec 6.4 text) vs 91.16 (Supp. Table 1)",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.4 second paragraph ('mean accuracy of 90.87% and 59.36%'); Supp. Table 1, row 'RSB-SR(ours)' VGG16, column '40%'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper. Neither location says which aggregation produced which number. Show both or round to 'about 91%'."
+ },
+ {
+  "id": "munjal-rsbsr-40-c100",
+  "claim": "RSB-SR mean accuracy at 40% labels, CIFAR100",
+  "value": "59.36%",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 6.4, second paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsb-vgg-10",
+  "claim": "RSB (ours), VGG16, CIFAR10, 10% labeled",
+  "value": "69.16",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB(ours)' (VGG16), column '10%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-vgg-10",
+  "claim": "RSB-SR (ours), VGG16, CIFAR10, 10% labeled",
+  "value": "82.16",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (VGG16), column '10%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-r18-10",
+  "claim": "RSB-SR (ours), ResNet18, CIFAR10, 10% labeled",
+  "value": "84.69",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (ResNet18), column '10%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-coreset-rand-10",
+  "claim": "random baseline reported by the Core-set paper, VGG16, CIFAR10, 10% labeled",
+  "value": "60",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'Coreset' (VGG16), column '10%'",
+  "source": "paper",
+  "note": "Supp. Table 1 lists random baselines as reported by other papers; the Coreset row is the Core-set paper's random baseline."
+ },
+ {
+  "id": "munjal-st1-rsb-vgg-20",
+  "claim": "RSB (ours), VGG16, CIFAR10, 20% labeled",
+  "value": "77.34",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB(ours)' (VGG16), column '20%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-vgg-20",
+  "claim": "RSB-SR (ours), VGG16, CIFAR10, 20% labeled",
+  "value": "85.09",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (VGG16), column '20%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-r18-20",
+  "claim": "RSB-SR (ours), ResNet18, CIFAR10, 20% labeled",
+  "value": "88.45",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (ResNet18), column '20%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-coreset-rand-20",
+  "claim": "random baseline reported by the Core-set paper, VGG16, CIFAR10, 20% labeled",
+  "value": "68",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'Coreset' (VGG16), column '20%'",
+  "source": "paper",
+  "note": "Supp. Table 1 lists random baselines as reported by other papers; the Coreset row is the Core-set paper's random baseline."
+ },
+ {
+  "id": "munjal-st1-rsb-vgg-30",
+  "claim": "RSB (ours), VGG16, CIFAR10, 30% labeled",
+  "value": "80.91",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB(ours)' (VGG16), column '30%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-vgg-30",
+  "claim": "RSB-SR (ours), VGG16, CIFAR10, 30% labeled",
+  "value": "89.43",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (VGG16), column '30%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-r18-30",
+  "claim": "RSB-SR (ours), ResNet18, CIFAR10, 30% labeled",
+  "value": "89.98",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (ResNet18), column '30%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-coreset-rand-30",
+  "claim": "random baseline reported by the Core-set paper, VGG16, CIFAR10, 30% labeled",
+  "value": "71",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'Coreset' (VGG16), column '30%'",
+  "source": "paper",
+  "note": "Supp. Table 1 lists random baselines as reported by other papers; the Coreset row is the Core-set paper's random baseline."
+ },
+ {
+  "id": "munjal-st1-rsb-vgg-40",
+  "claim": "RSB (ours), VGG16, CIFAR10, 40% labeled",
+  "value": "82.05",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB(ours)' (VGG16), column '40%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-vgg-40",
+  "claim": "RSB-SR (ours), VGG16, CIFAR10, 40% labeled",
+  "value": "91.16",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (VGG16), column '40%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-rsbsr-r18-40",
+  "claim": "RSB-SR (ours), ResNet18, CIFAR10, 40% labeled",
+  "value": "92.29",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'RSB-SR(ours)' (ResNet18), column '40%'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-st1-coreset-rand-40",
+  "claim": "random baseline reported by the Core-set paper, VGG16, CIFAR10, 40% labeled",
+  "value": "74",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Supp. Table 1, row 'Coreset' (VGG16), column '40%'",
+  "source": "paper",
+  "note": "Supp. Table 1 lists random baselines as reported by other papers; the Coreset row is the Core-set paper's random baseline."
+ },
+ {
+  "id": "munjal-noise-def",
+  "claim": "Munjal's noisy-oracle definition",
+  "value": "randomly permuting labels of 10% and 20% of samples in the set drawn by random sampling baseline at each iteration",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 7 (Additional Experiments), 'Noisy Oracle'",
+  "source": "paper"
+ },
+ {
+  "id": "munjal-limit-task",
+  "claim": "scope limit stated by the authors",
+  "value": "all our experiments are conducted for image classification",
+  "paper": "munjal",
+  "version": "2002.09564v3",
+  "loc": "Sec 9, 'Societal impact and Limitations'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cite-title",
+  "claim": "title",
+  "value": "Active Learning on a Budget: Opposite Strategies Suit High and Low Budgets",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "abs.html; paper header",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cite-authors",
+  "claim": "authors",
+  "value": "Guy Hacohen, Avihu Dekel, Daphna Weinshall",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2202.02794v4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cite-date",
+  "claim": "arXiv first submission date (v1); use this date on the timeline",
+  "value": "6 Feb 2022",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "abs.html 'Submitted on 6 Feb 2022'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cite-date-version",
+  "claim": "date of the version used (v4)",
+  "value": "16 Jun 2022",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "abs.html 'last revised 16 Jun 2022 (this version, v4)'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cite-venue",
+  "claim": "venue",
+  "value": "ICML 2022 (PMLR 162)",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "abs.html Comments 'ICML 2022'; PDF p.1 footer 'Proceedings of the 39th International Conference on Machine Learning, Baltimore, Maryland, USA, PMLR 162, 2022'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-def1",
+  "claim": "Definition 1 (Error score): expected error of a learner over all training sets of size m",
+  "value": "E_{\\mathcal{D}}(m) = \\mathbb{E}_{\\mathbb{X}^{m}\\sim\\mathcal{D}^m}\\left[\\mathbb{E}_{h(\\mathbb{X}^{m})\\sim\\mathcal{D}_h}\\left[Er\\left(h\\left(\\mathbb{X}^{m}\\right)\\right)\\right]\\right]",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.1, Definition 1 (unnumbered display)",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-assumptions",
+  "claim": "two assumptions on the error score",
+  "value": "Efficiency: $E_{\\mathcal{D}}(m)$ is strictly monotonically decreasing. Realizability: $\\lim_{m \\rightarrow\\infty}E_{\\mathcal{D}}(m) =0$.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.1, after Definition 1",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-eq1",
+  "claim": "Eq 1: error score of the mixture of two independent learners",
+  "value": "E_{\\mathcal{D}}(m) = p\\cdot E_{\\mathcal{D}_1}(m_1) + (1-p)\\cdot E_{\\mathcal{D}_2}(m_2).",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.1, Eq (1)",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-def2",
+  "claim": "Definition 2: R1 is easier to learn than R2",
+  "value": "E_{\\mathcal{D}_1}(m) = E(m),\\quad E_{\\mathcal{D}_2}(m) = E(\\alpha m),\\quad \\alpha<\\frac{p}{1-p}",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.1, Definition 2 (Order R_1 \\prec R_2)",
+  "source": "paper",
+  "note": "Assembled from the definition's prose into one display; alpha > 0."
+ },
+ {
+  "id": "typiclust-eq2",
+  "claim": "Eq 2: mixture error score with one shared error function E and relative efficiency alpha",
+  "value": "E_\\mathcal{D}(m)= p \\cdot E(m_1) + (1-p) \\cdot E(\\alpha m_2).",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.1, Eq (2)",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-biased",
+  "claim": "biased sampling strategy (Delta > 0 oversamples R1; Delta = 0 is random sampling)",
+  "value": "m_1 =p\\cdot m+\\Delta, \\qquad m_2 =\\left(1-p\\right)\\cdot m-\\Delta.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, unnumbered display",
+  "source": "paper",
+  "note": "Text: 'Delta=0 is essentially equivalent to random sampling from D. Delta>0 implies that more training points are sampled from R_1 than R_2, and vice versa.'"
+ },
+ {
+  "id": "typiclust-thm1",
+  "claim": "Theorem 1 (threshold test) for p = Prob(R1) and 0 < alpha < p/(1-p)",
+  "value": "\\boxed{\\frac{E'\\left(pm\\right)}{E'\\left(\\alpha\\left(1-p\\right)m\\right)} \\begin{cases} > \\frac{\\alpha\\left(1-p\\right)}{p} & \\implies \\text{over sample region } R_1 \\\\ < \\frac{\\alpha\\left(1-p\\right)}{p} & \\implies \\text{over sample region } R_2 \\end{cases}}",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, Theorem 1 (boxed unnumbered display)",
+  "source": "paper",
+  "note": "Source macros \\texq/\\hlt, an inner array and \\vspace replaced by \\text{...}; mathematics unchanged."
+ },
+ {
+  "id": "typiclust-lowbudget-def",
+  "claim": "definition of low and high budget regimes",
+  "value": "low budget regime denote budgets with $m\\leq m_0$, and high budget regime denote budgets with $m>m_0$",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2, introductory paragraphs",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-cor2",
+  "claim": "Corollary 2: error scores of this form (constants k, nu > 0) are SP-undulating, i.e. switch exactly once",
+  "value": "E(x) = k e^{-\\nu x}",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.3, Corollary 2",
+  "source": "paper",
+  "note": "Text after it: 'a single transition from favoring R_1 to favoring R_2'."
+ },
+ {
+  "id": "typiclust-toy-E",
+  "claim": "error function of the toy example",
+  "value": "E(m)=e^{-m}",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, paragraph 'Example: exponentially decreasing function' (describes Fig 1a)",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-toy-p",
+  "claim": "probability of the easy region R1 in the toy example",
+  "value": "p=0.8",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, paragraph 'Example: exponentially decreasing function'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-toy-alpha",
+  "claim": "relative learning efficiency of R2 in the toy example",
+  "value": "\\alpha=0.1",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, paragraph 'Example: exponentially decreasing function'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-toy-delta",
+  "claim": "bias used in the toy simulation",
+  "value": "\\Delta=\\pm 0.01",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, paragraph 'Example: exponentially decreasing function'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-toy-m0",
+  "claim": "budget m where oversampling R1 stops helping in the toy (E=e^{-m}, p=0.8, alpha=0.1)",
+  "value": "4.73",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "derived from Theorem 1 with the Sec 2.2 toy settings",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "E'(x)=-e^{-x}; ratio = e^{-pm}/e^{-alpha(1-p)m} = e^{-0.78m}; threshold alpha(1-p)/p = 0.02/0.8 = 0.025; oversample R1 iff e^{-0.78m} > 0.025 iff m < ln(40)/0.78 = 3.6889/0.78 = 4.729. Direct simulation of Eq 2 with Delta=+0.01 flips sign at m = 4.725. Fig 1a has no axis numbers, so the paper does not state this value."
+ },
+ {
+  "id": "typiclust-toy-precondition",
+  "claim": "the toy satisfies Theorem 1's precondition",
+  "value": "\\alpha = 0.1 < p/(1-p) = 4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "derived from Definition 2 with the Sec 2.2 toy settings",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "0.8/0.2 = 4."
+ },
+ {
+  "id": "typiclust-toy-text",
+  "claim": "what the toy shows",
+  "value": "For small $m$ it is beneficial to favorably bias region $R_1$, while for large $m$ it is beneficial to favorably bias $R_2$.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 2.2, paragraph 'Example: exponentially decreasing function'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-eq4",
+  "claim": "Eq 4: typicality = inverse mean distance to the K nearest neighbors in embedding space",
+  "value": "Typicality(x)=\\bigg(\\frac{1}{K}\\sum_{x_i\\in K\\text{-NN}(x)}||x-x_i||_2\\bigg)^{-1}.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 3.1, Eq (4)",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-K",
+  "claim": "K used in typicality",
+  "value": "K=20",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 3.1, footnote 1: 'We use K=20, but other choices yield similar results.'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-step1",
+  "claim": "TypiClust step 1",
+  "value": "Representation learning: first train a deep self-supervised task on $U_0 \\cup L_0$, then use the penultimate layer of the resulting model as feature space.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 3.2, 'Step 1: Representation learning.'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-step2",
+  "claim": "TypiClust step 2",
+  "value": "Clustering for diversity: at each AL iteration $i$, we partition the data into $|L_{i-1}|+B$ clusters. This choice guarantees that there are at least $B$ clusters that do not intersect with the existing labeled examples (uncovered clusters).",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 3.2, 'Step 2: Clustering for diversity.'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-step3",
+  "claim": "TypiClust step 3",
+  "value": "Querying typical examples: we select the most typical examples from the $B$ largest uncovered clusters.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 3.2, 'Step 3: Querying typical examples.'",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-variants",
+  "claim": "the two TypiClust variants",
+  "value": "TPC_DC: SCAN deep clustering. TPC_RP: SimCLR (DINO for ImageNet) + K-means.",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 3.2, numbered list",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-budget-range",
+  "claim": "per-class labeling rate the low-budget experiments target",
+  "value": "only 1-10 examples per class are labeled each round",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 4.2, first paragraph",
+  "source": "paper",
+  "note": "The paper's range is 1-10, not 1-5. Fig 4 (Sec 4.2.1) uses B = M and B = 5M (M = number of classes), i.e. 1 and 5 labels per class per round; App. adds 2 and 10."
+ },
+ {
+  "id": "typiclust-fig4-budgets",
+  "claim": "budgets in the fully supervised main figure",
+  "value": "B=M \\text{ or } B=5M,\\quad L_0=\\emptyset",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 4.2.1; Fig 4 caption",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-baselines-quote",
+  "claim": "baselines at 1-5 labels per class per round (Fig 4)",
+  "value": "all other baseline AL methods perform on par with random selection or worse",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 4.2.1, paragraph after Fig 4",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-ssl-regime",
+  "claim": "labeled fraction in the semi-supervised experiments",
+  "value": "only 0.02%~1% of the data is labeled",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 4.2.3",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-abstract-932",
+  "claim": "FlexMatch accuracy on CIFAR-10 with 10 TypiClust labels",
+  "value": "93.2%",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Abstract",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-abstract-394",
+  "claim": "gain over random selection, same setting",
+  "value": "39.4%",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Abstract ('an improvement of 39.4% over random selection')",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-f6a-random",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, Random (3 reps)",
+  "value": "53.8",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 6a, bar 'Random'",
+  "source": "paper",
+  "note": "Printed bar label; 93.2 - 39.4 = 53.8 matches the abstract."
+ },
+ {
+  "id": "typiclust-f6a-balanced",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, Balanced (3 reps)",
+  "value": "55.9",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 6a, bar 'Balanced'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in the figure image (graphs/semi_supervised/cifar10_10samples_ssl_comparison.png), not in body text."
+ },
+ {
+  "id": "typiclust-f6a-coreset",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, Coreset (3 reps)",
+  "value": "56.6",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 6a, bar 'Coreset'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in the figure image (graphs/semi_supervised/cifar10_10samples_ssl_comparison.png), not in body text."
+ },
+ {
+  "id": "typiclust-f6a-tpcrp",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, TPC_RP (3 reps)",
+  "value": "80.5",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 6a, bar 'TPC_RP'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in the figure image (graphs/semi_supervised/cifar10_10samples_ssl_comparison.png), not in body text."
+ },
+ {
+  "id": "typiclust-f6a-tpcdc",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, TPC_DC (3 reps)",
+  "value": "93.2",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 6a, bar 'TPC_DC'",
+  "source": "paper",
+  "note": "Printed bar label; matches the abstract's 93.2%."
+ },
+ {
+  "id": "typiclust-f9-cifar10-semi",
+  "claim": "TypiClust accuracy gain over random (points), CIFAR-10 (10 labels), Semi supervised",
+  "value": "39.4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'CIFAR-10', bar 'Semi supervised'",
+  "source": "paper",
+  "note": "Printed bar label; matches the abstract's 39.4%."
+ },
+ {
+  "id": "typiclust-f9-cifar10-selfemb",
+  "claim": "TypiClust accuracy gain over random (points), CIFAR-10 (10 labels), Self supervised embedding",
+  "value": "27.5",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'CIFAR-10', bar 'Self supervised embedding'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-cifar10-fully",
+  "claim": "TypiClust accuracy gain over random (points), CIFAR-10 (10 labels), Fully supervised",
+  "value": "6.4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'CIFAR-10', bar 'Fully supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-cifar100-semi",
+  "claim": "TypiClust accuracy gain over random (points), CIFAR-100 (300 labels), Semi supervised",
+  "value": "20.3",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'CIFAR-100', bar 'Semi supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text. Cross-check: Fig 6b TPC_RP 58.6 - Random 38.3 = 20.3.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-cifar100-selfemb",
+  "claim": "TypiClust accuracy gain over random (points), CIFAR-100 (300 labels), Self supervised embedding",
+  "value": "5.7",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'CIFAR-100', bar 'Self supervised embedding'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-cifar100-fully",
+  "claim": "TypiClust accuracy gain over random (points), CIFAR-100 (300 labels), Fully supervised",
+  "value": "3.6",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'CIFAR-100', bar 'Fully supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-tiny-semi",
+  "claim": "TypiClust accuracy gain over random (points), TinyImageNet (1000 labels), Semi supervised",
+  "value": "6.4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'TinyImageNet', bar 'Semi supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text. Cross-check: Fig 6c TPC_RP 18.9 - Random 12.5 = 6.4.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-tiny-selfemb",
+  "claim": "TypiClust accuracy gain over random (points), TinyImageNet (1000 labels), Self supervised embedding",
+  "value": "2.4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'TinyImageNet', bar 'Self supervised embedding'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-tiny-fully",
+  "claim": "TypiClust accuracy gain over random (points), TinyImageNet (1000 labels), Fully supervised",
+  "value": "1.7",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'TinyImageNet', bar 'Fully supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-in50-selfemb",
+  "claim": "TypiClust accuracy gain over random (points), ImageNet-50 (50 labels), Self supervised embedding",
+  "value": "18.4",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'ImageNet-50', bar 'Self supervised embedding'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-in50-fully",
+  "claim": "TypiClust accuracy gain over random (points), ImageNet-50 (50 labels), Fully supervised",
+  "value": "2.6",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'ImageNet-50', bar 'Fully supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-in100-selfemb",
+  "claim": "TypiClust accuracy gain over random (points), ImageNet-100 (100 labels), Self supervised embedding",
+  "value": "21.9",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'ImageNet-100', bar 'Self supervised embedding'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-in100-fully",
+  "claim": "TypiClust accuracy gain over random (points), ImageNet-100 (100 labels), Fully supervised",
+  "value": "2.2",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'ImageNet-100', bar 'Fully supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-in200-selfemb",
+  "claim": "TypiClust accuracy gain over random (points), ImageNet-200 (200 labels), Self supervised embedding",
+  "value": "18.7",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'ImageNet-200', bar 'Self supervised embedding'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-in200-fully",
+  "claim": "TypiClust accuracy gain over random (points), ImageNet-200 (200 labels), Fully supervised",
+  "value": "1.5",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9, group 'ImageNet-200', bar 'Fully supervised'",
+  "source": "paper",
+  "note": "Printed bar label in graphs/semi_supervised/ssl_vs_fully_combined.png, not in body text.",
+  "uncertain": true
+ },
+ {
+  "id": "typiclust-f9-reps",
+  "claim": "repetitions behind Fig 9",
+  "value": "fully-supervised (3 repetitions on ImageNet, 10 otherwise), semi-supervised (3 reps) and self-supervised embedding (5 reps)",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 9 caption",
+  "source": "paper"
+ },
+ {
+  "id": "typiclust-f1b-tpc-peak",
+  "claim": "TPC_DC gain over random at small budgets, CIFAR-10",
+  "value": "about +2.6 points at 20-40 labels",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 1b, read from plot",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from graphs/visulizations/all_budget_margin_scan_avihu_comparison_v2.png; log x-axis."
+ },
+ {
+  "id": "typiclust-f1b-crossover",
+  "claim": "budget where TPC_DC drops below random and Margin/BADGE rise above it, CIFAR-10",
+  "value": "roughly 1,000-2,000 labels",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Fig 1b, read from plot",
+  "source": "paper",
+  "uncertain": true,
+  "note": "TPC_DC falls to about -1.8 near 4,000-8,000 labels; Margin and BADGE reach about +1.5 to +1.7 near 20,000. Plot reading only."
+ },
+ {
+  "id": "typiclust-limit-transition",
+  "claim": "open problem stated by the authors",
+  "value": "the transition point depends on task and data; finding it is left open",
+  "paper": "typiclust",
+  "version": "2202.02794v4",
+  "loc": "Sec 5 (Summary and Discussion)",
+  "source": "paper",
+  "note": "Paraphrase of Sec 5; not a verbatim quote."
+ },
+ {
+  "id": "illusions-cite-title",
+  "claim": "title",
+  "value": "Parting with Illusions about Deep Active Learning",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "abs.html; paper header",
+  "source": "paper"
+ },
+ {
+  "id": "illusions-cite-authors",
+  "claim": "authors",
+  "value": "Sudhanshu Mittal, Maxim Tatarchenko, \u00d6zg\u00fcn \u00c7i\u00e7ek, Thomas Brox",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "paper header; abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "illusions-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "1912.05361v1",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "illusions-cite-date",
+  "claim": "arXiv submission date (only version); use on the timeline",
+  "value": "11 Dec 2019",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "abs.html 'Submitted on 11 Dec 2019'",
+  "source": "paper"
+ },
+ {
+  "id": "illusions-cite-venue",
+  "claim": "venue",
+  "value": "not stated (arXiv preprint)",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "abs.html has no Comments or journal-ref; PDF header shows no venue",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Source uses a CVPR style file, but no acceptance is stated. Do not print a venue."
+ },
+ {
+  "id": "illusions-aug-04",
+  "claim": "spread among AL methods on CIFAR-10 with augmentation",
+  "value": "all the AL methods show similar performance within a range of 0.4%",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "Sec 3.2.2 ('Do AL methods work consistently well together with data augmentation?'), Fig 2",
+  "source": "paper"
+ },
+ {
+  "id": "illusions-noaug-32",
+  "claim": "Learning Loss gain over random on CIFAR-10 without augmentation",
+  "value": "an overall improvement of 3.2% over the random baseline on the CIFAR-10 dataset",
+  "paper": "illusions",
+  "version": "1912.05361v1",
+  "loc": "Sec 3.2.2, Fig 2",
+  "source": "paper",
+  "note": "Method: LL (Learning Loss, Yoo 2019). Augmentation = AutoAugment + cutout + flip + crop."
+ },
+ {
+  "id": "beck-cite-title",
+  "claim": "title",
+  "value": "Effective Evaluation of Deep Active Learning on Image Classification Tasks",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "abs.html; paper header",
+  "source": "paper"
+ },
+ {
+  "id": "beck-cite-authors",
+  "claim": "authors",
+  "value": "Nathan Beck, Durga Sivasubramanian, Apurva Dani, Ganesh Ramakrishnan, Rishabh Iyer",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "beck-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2106.15324v3",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "beck-cite-date",
+  "claim": "arXiv first submission date (v1); use this date on the timeline",
+  "value": "16 Jun 2021",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "abs.html 'Submitted on 16 Jun 2021'",
+  "source": "paper"
+ },
+ {
+  "id": "beck-cite-date-version",
+  "claim": "date of the version used (v3)",
+  "value": "2 Nov 2021",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "abs.html 'last revised 2 Nov 2021 (this version, v3)'",
+  "source": "paper"
+ },
+ {
+  "id": "beck-cite-venue",
+  "claim": "venue",
+  "value": "not stated (PDF footer: 'Preprint. Under review.')",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "PDF p.1 footer; abs.html Comments give page counts only",
+  "source": "paper",
+  "uncertain": true
+ },
+ {
+  "id": "beck-2x-4x",
+  "claim": "label efficiency of AL over random sampling with data augmentation",
+  "value": "AL techniques are 2\u00d7 to 4\u00d7 more label-efficient compared to RS with the use of data augmentation",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "Abstract",
+  "source": "paper",
+  "note": "Source LaTeX: '$2\\times$ to $4\\times$'. RS = random sampling."
+ },
+ {
+  "id": "beck-c10-c100",
+  "claim": "label efficiency on CIFAR-10 vs CIFAR-100",
+  "value": "AL achieves a labeling efficiency of 1.8\u00d7 to 2\u00d7 on CIFAR-10 but only 1.3\u00d7 on CIFAR-100",
+  "paper": "beck",
+  "version": "2106.15324v3",
+  "loc": "Sec 2, facet 'P6: When does AL offer benefit compared to random sampling?'",
+  "source": "paper",
+  "note": "Sec 4.5 attributes the gap to fewer examples per class in CIFAR-100."
+ },
+ {
+  "id": "luth-cite-title",
+  "claim": "title",
+  "value": "Navigating the Pitfalls of Active Learning Evaluation: A Systematic Framework for Meaningful Performance Assessment",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "abs.html; paper header",
+  "source": "paper"
+ },
+ {
+  "id": "luth-cite-authors",
+  "claim": "authors",
+  "value": "Carsten T. L\u00fcth, Till J. Bungert, Lukas Klein, Paul F. Jaeger",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "luth-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2301.10625v3",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "luth-cite-date",
+  "claim": "arXiv first submission date (v1); use this date on the timeline",
+  "value": "25 Jan 2023",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "abs.html 'Submitted on 25 Jan 2023'",
+  "source": "paper"
+ },
+ {
+  "id": "luth-cite-date-version",
+  "claim": "date of the version used (v3)",
+  "value": "3 Nov 2023",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "abs.html 'last revised 3 Nov 2023 (this version, v3)'",
+  "source": "paper"
+ },
+ {
+  "id": "luth-cite-venue",
+  "claim": "venue",
+  "value": "NeurIPS 2023",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "abs.html Comments 'Accepted at NeurIPS 2023'",
+  "source": "paper"
+ },
+ {
+  "id": "luth-p1",
+  "claim": "pitfall P1 name",
+  "value": "P1: Lack of evaluated data distribution settings.",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "Sec 2.3 ('Current pitfalls of Active Learning evaluation'), bold paragraph head P1",
+  "source": "paper"
+ },
+ {
+  "id": "luth-p2",
+  "claim": "pitfall P2 name",
+  "value": "P2: Lack of evaluated starting budgets.",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "Sec 2.3 ('Current pitfalls of Active Learning evaluation'), bold paragraph head P2",
+  "source": "paper"
+ },
+ {
+  "id": "luth-p3",
+  "claim": "pitfall P3 name",
+  "value": "P3: Lack of evaluated query sizes.",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "Sec 2.3 ('Current pitfalls of Active Learning evaluation'), bold paragraph head P3",
+  "source": "paper"
+ },
+ {
+  "id": "luth-p4",
+  "claim": "pitfall P4 name",
+  "value": "P4: Neglection of the classifier configuration.",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "Sec 2.3 ('Current pitfalls of Active Learning evaluation'), bold paragraph head P4",
+  "source": "paper"
+ },
+ {
+  "id": "luth-p5",
+  "claim": "pitfall P5 name",
+  "value": "P5: Neglection of alternative training paradigms.",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "Sec 2.3 ('Current pitfalls of Active Learning evaluation'), bold paragraph head P5",
+  "source": "paper"
+ },
+ {
+  "id": "luth-badge-norandom",
+  "claim": "BADGE never falls below random (exact wording)",
+  "value": "BADGE is the best-performing QM across a realistic range of datasets, starting budgets, and query sizes and exhibits no failure modes (i.e. sub-Random performance).",
+  "paper": "luth",
+  "version": "2301.10625v3",
+  "loc": "Sec 5 (Conclusion & Take-Aways), 'Main empirical insights' bullet 3",
+  "source": "paper",
+  "note": "Also Sec 4, P3 paragraph: 'BADGE is the overall most reliable of all compared QMs and exhibits no sub-Random performance.' The paper never uses the word 'never'."
+ },
+ {
+  "id": "probcover-cite-title",
+  "claim": "title",
+  "value": "Active Learning Through a Covering Lens",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "abs.html; paper header",
+  "source": "paper"
+ },
+ {
+  "id": "probcover-cite-authors",
+  "claim": "authors",
+  "value": "Ofer Yehuda, Avihu Dekel, Guy Hacohen, Daphna Weinshall",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "probcover-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2205.11320v3",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "probcover-cite-date",
+  "claim": "arXiv first submission date (v1); use this date on the timeline",
+  "value": "23 May 2022",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "abs.html 'Submitted on 23 May 2022'",
+  "source": "paper"
+ },
+ {
+  "id": "probcover-cite-date-version",
+  "claim": "date of the version used (v3)",
+  "value": "29 Dec 2022",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "abs.html 'last revised 29 Dec 2022 (this version, v3)'",
+  "source": "paper"
+ },
+ {
+  "id": "probcover-cite-venue",
+  "claim": "venue",
+  "value": "NeurIPS 2022",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "PDF p.1 footer '36th Conference on Neural Information Processing Systems (NeurIPS 2022)'",
+  "source": "paper"
+ },
+ {
+  "id": "probcover-role",
+  "claim": "one-line role",
+  "value": "Successor to TypiClust from the same group: replaces 'cluster, then pick the most typical point' with greedy maximum coverage of delta-balls in a self-supervised embedding.",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "Sec 1 and Sec 3 (method); our one-line summary",
+  "source": "paper",
+  "note": "Summary in our words, not a quote."
+ },
+ {
+  "id": "probcover-f6a-random",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, Random (3 reps)",
+  "value": "53.80",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "Fig 6a, bar 'Random'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in figures/empirical/flexmatch/cifar10_flexmatch_10_examples.png, not in body text. Matches TypiClust Fig 6a Random 53.8."
+ },
+ {
+  "id": "probcover-f6a-coreset",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, Coreset (3 reps)",
+  "value": "56.57",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "Fig 6a, bar 'Coreset'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in figures/empirical/flexmatch/cifar10_flexmatch_10_examples.png, not in body text."
+ },
+ {
+  "id": "probcover-f6a-typiclust",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, TypiClust (3 reps)",
+  "value": "93.19",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "Fig 6a, bar 'TypiClust'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in figures/empirical/flexmatch/cifar10_flexmatch_10_examples.png, not in body text. Matches TypiClust's own 93.2."
+ },
+ {
+  "id": "probcover-f6a-probcover",
+  "claim": "FlexMatch test accuracy, CIFAR-10, 10 labels, ProbCover (3 reps)",
+  "value": "94.10",
+  "paper": "probcover",
+  "version": "2205.11320v3",
+  "loc": "Fig 6a, bar 'ProbCover'",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Printed bar label in figures/empirical/flexmatch/cifar10_flexmatch_10_examples.png, not in body text."
+ },
+ {
+  "id": "rensurvey-cite-title",
+  "claim": "title",
+  "value": "A Survey of Deep Active Learning",
+  "paper": "rensurvey",
+  "version": "2009.00236v2",
+  "loc": "abs.html citation_title",
+  "source": "paper"
+ },
+ {
+  "id": "rensurvey-cite-authors",
+  "claim": "authors",
+  "value": "Pengzhen Ren, Yun Xiao, Xiaojun Chang, Po-Yao Huang, Zhihui Li, Brij B. Gupta, Xiaojiang Chen, Xin Wang",
+  "paper": "rensurvey",
+  "version": "2009.00236v2",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "rensurvey-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2009.00236v2",
+  "paper": "rensurvey",
+  "version": "2009.00236v2",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "rensurvey-cite-date",
+  "claim": "arXiv first submission date (v1); use this date on the timeline",
+  "value": "30 Aug 2020",
+  "paper": "rensurvey",
+  "version": "2009.00236v2",
+  "loc": "abs.html 'Submitted on 30 Aug 2020'",
+  "source": "paper"
+ },
+ {
+  "id": "rensurvey-cite-date-version",
+  "claim": "date of the version used (v2)",
+  "value": "5 Dec 2021",
+  "paper": "rensurvey",
+  "version": "2009.00236v2",
+  "loc": "abs.html 'last revised 5 Dec 2021 (this version, v2)'",
+  "source": "paper"
+ },
+ {
+  "id": "rensurvey-cite-venue",
+  "claim": "venue",
+  "value": "not stated in source (ACM template; journal fields commented out)",
+  "paper": "rensurvey",
+  "version": "2009.00236v2",
+  "loc": "abs.html has no journal-ref; main.tex lines 16-23 comment out \\acmJournal",
+  "source": "paper",
+  "uncertain": true
+ },
+ {
+  "id": "settles-biased-quote",
+  "claim": "AL-built labeled set is not an i.i.d. sample",
+  "value": "the labeled instances are a biased distribution, not drawn i.i.d. from the underlying natural density",
+  "paper": "settles",
+  "version": "UW-Madison CS TR 1648, updated 2010-01-26",
+  "loc": "Sec 4.1 (Empirical Analysis), p. 27, second paragraph",
+  "source": "paper",
+  "note": "Same paragraph: the set 'is inherently tied to the model that was used to generate it'. The exact phrase 'sampling bias' does not appear."
+ },
+ {
+  "id": "settles-pilot-quote",
+  "claim": "random sampling for pilot studies",
+  "value": "random sampling (at least for pilot studies, until the task can be better understood) may be more advisable than taking one's chances on active learning with an inappropriate learning model",
+  "paper": "settles",
+  "version": "UW-Madison CS TR 1648, updated 2010-01-26",
+  "loc": "Sec 6.6 (Changing (or Unknown) Model Classes), p. 43, last paragraph",
+  "source": "paper",
+  "note": "Source uses a typographic apostrophe in one's; ASCII here."
+ }
+]

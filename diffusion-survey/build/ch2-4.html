@@ -1,0 +1,369 @@
+
+<!-- ============================ ACT II ============================ -->
+<p class="kicker">Act II: DDPM, the full arc</p>
+<section id="ch-forward" class="chapter">
+<h2>The forward process: adding noise on a schedule</h2>
+<p>The forward process is the half of a diffusion model that nobody has to learn. Pick one data point, slide <span class="tex">t</span>, and watch where it can end up; the left panel shows how much of the point survives at each step under two different schedules.</p>
+
+<figure class="viz" id="viz-schedule" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="schedule-canvas" aria-label="Left: signal and noise weights over the thousand steps for the linear and cosine schedules. Right: one data point and the cloud of places it can be after t steps." role="img"></canvas>
+  <div class="controls">
+    <label for="rng-schedule-t">step t <input type="range" id="rng-schedule-t" min="0" max="1000" step="1" value="0"></label>
+    <button type="button" id="btn-schedule-linear" aria-pressed="true">Linear schedule (DDPM)</button>
+    <button type="button" id="btn-schedule-cosine" aria-pressed="false">Cosine schedule (Improved DDPM)</button>
+    <button type="button" id="btn-schedule-walk">Walk there step by step</button>
+    <button type="button" id="btn-schedule-jump">Jump there in one shot</button>
+    <button type="button" id="btn-schedule-late">Go to step 750</button>
+    <button type="button" id="btn-schedule-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="schedule-readout" aria-live="polite"></p>
+  <figcaption>Both schedules are the papers' real formulas on <span data-claim="page-ddpm-T">1000</span> steps (Improved DDPM itself trained with <span data-claim="improved-ddpm-T">T = 4000</span>; its cosine formula depends only on <span class="tex">t/T</span>, so the curve has the same shape). The dashed circles on the right are one and two standard deviations of <span class="tex">q(x_t \mid x_0)</span>; "walk" simulates the chain of small steps, "jump" samples the closed form. They land in the same cloud.</figcaption>
+</figure>
+
+<h3>A Gaussian in one paragraph</h3>
+<p>Nearly every formula on this page is built from the <b>Gaussian</b>, or normal distribution: the bell curve. It has a center (the <em>mean</em>) and a spread (the <em>variance</em>, or its square root, the <em>standard deviation</em>). In two dimensions with equal spread in every direction it is a round cloud, densest in the middle. The notation <span class="tex">\mathcal{N}(x;\, m,\, v\,I)</span> reads "<span class="tex">x</span> is Gaussian with mean <span class="tex">m</span> and variance <span class="tex">v</span> in every coordinate"; the <span class="tex">I</span> (identity matrix) just says each coordinate gets its own independent noise. Two facts carry the whole chapter: shrink a Gaussian and it stays Gaussian, and add two independent Gaussians and you get a Gaussian whose variances add.</p>
+
+<h3>One step</h3>
+<p>Each forward step does two things to the current point: shrink it a little toward the origin, and add a little fresh noise.</p>
+<div class="eq" id="eq-forward-step" data-build data-viz="viz-schedule"><div class="tex tex-display">
+\htmlData{step=1, link=noisy}{q(x_t \mid x_{t-1})} = \mathcal{N}\big(x_t;\; \htmlData{step=2, link=shrink}{\htmlClass{t-yellow}{\sqrt{1-\beta_t}\, x_{t-1}}},\; \htmlData{step=3, link=noise}{\htmlClass{t-brown}{\beta_t\, I}}\big)
+</div></div>
+<p class="eqno">Eq. 2 in DDPM v2</p>
+<ul class="gloss">
+  <li><span class="tex">q(x_t \mid x_{t-1})</span>: the distribution of the next, noisier point given the current one. The letter <span class="tex">q</span> is reserved for this fixed, unlearned process.</li>
+  <li><span class="tex">\beta_t</span>: a small number, the variance of the noise added at step <span class="tex">t</span>. The list <span class="tex">\beta_1, \dots, \beta_T</span> is the <b>schedule</b>.</li>
+  <li><span class="tex">\sqrt{1-\beta_t}</span>: the shrink factor, slightly below one.</li>
+</ul>
+<p>Why shrink at all? Bookkeeping on the variance. If the current point has variance 1, shrinking by <span class="tex">\sqrt{1-\beta_t}</span> leaves variance <span class="tex">1-\beta_t</span>, and adding noise of variance <span class="tex">\beta_t</span> brings it back to exactly 1. The cloud never explodes, it only forgets. Score SDE (Chapter 5) later names this family <em>variance preserving</em>.</p>
+
+<h3>Jump to any step in one shot</h3>
+<p>Because every step is "shrink, then add Gaussian noise", a thousand steps compose into a single shrink and a single Gaussian. Write <span class="tex">\alpha_t = 1-\beta_t</span> for the fraction of variance each step keeps and <span class="tex">\bar\alpha_t = \alpha_1 \alpha_2 \cdots \alpha_t</span> for the fraction that survives all the way to step <span class="tex">t</span>. Then:</p>
+<div class="eq" id="eq-marginal" data-build data-viz="viz-schedule"><div class="tex tex-display">
+\htmlData{step=1, link=noisy}{q(x_t \mid x_0)} = \mathcal{N}\big(x_t;\; \htmlData{step=2, link=shrink}{\htmlClass{t-yellow}{\sqrt{\bar\alpha_t}\, x_0}},\; \htmlData{step=3, link=noise}{\htmlClass{t-brown}{(1-\bar\alpha_t)\, I}}\big)
+</div></div>
+<p class="eqno">Eq. 4 in DDPM v2</p>
+<p>This is the formula from Chapter 1 in distribution form: <span class="tex">x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon</span>. Its practical meaning is enormous. To make a training example at step 700 you do not simulate 700 steps; you draw one noise vector and mix. Press <b>Walk there step by step</b> and then <b>Jump there in one shot</b>: the walk wanders, the jump is instant, and both land in the same dashed cloud.</p>
+
+<h3>The schedule matters</h3>
+<p>DDPM used <span class="tex">\beta_t</span> growing linearly from <span data-claim="page-ddpm-beta1">10^-4</span> to <span data-claim="page-ddpm-betaT">0.02</span>. Before you look at the left panel, guess: at which step does the linear schedule leave less than a tenth of the original signal? Then press <b>Go to step 750</b>.</p>
+<p>The <b class="c-yellow">signal curve</b> of the linear schedule collapses early and then crawls along the floor, so the last few hundred steps turn pure noise into slightly different pure noise. Improved DDPM noticed this at low resolution (<span data-claim="page-iddpm-linear-hires">64x64 and 32x32</span>): a linear-schedule model barely gets worse when you skip up to <span data-claim="page-iddpm-skip">20%</span> of the reverse process, which means those steps were not doing much. Their fix defines <span class="tex">\bar\alpha_t</span> directly with a squared cosine, which falls gently at both ends:</p>
+<div class="eq" id="eq-cosine" data-build data-viz="viz-schedule"><div class="tex tex-display">
+\htmlData{step=1, link=shrink}{\htmlClass{t-yellow}{\bar\alpha_t}} = \frac{f(t)}{f(0)}, \qquad \htmlData{step=2, link=cosine}{f(t) = \cos^2\!\left(\frac{t/T + s}{1+s}\cdot\frac{\pi}{2}\right)}
+</div></div>
+<p class="eqno">Eq. 17 in Improved DDPM v1 (written there as <span class="tex">\cos(\cdot)^2</span>)</p>
+<ul class="gloss">
+  <li><span class="tex">t/T</span>: progress through the chain, from 0 to 1.</li>
+  <li><span class="tex">s</span>: a small offset, <span data-claim="page-iddpm-s">0.008</span>, so the first steps still add a little noise.</li>
+  <li>Dividing by <span class="tex">f(0)</span> makes <span class="tex">\bar\alpha_0 = 1</span>. The per-step <span class="tex">\beta_t = 1 - \bar\alpha_t / \bar\alpha_{t-1}</span> is clipped at 0.999 near the end.</li>
+</ul>
+<p>A useful way to compare schedules is the <b>signal-to-noise ratio</b>, <span class="tex">\mathrm{SNR}(t) = \bar\alpha_t / (1-\bar\alpha_t)</span>: signal variance over noise variance. A schedule is really a choice of how quickly SNR falls, and so of how many steps the model spends at each noise level. That framing comes back in EDM (Chapter 6) and SD3 (Chapter 12), which both argue about where on the noise axis the effort should go.</p>
+</section>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-schedule'), el = document.getElementById('schedule-canvas');
+  const slider = document.getElementById('rng-schedule-t'), out = document.getElementById('schedule-readout');
+  const bLin = document.getElementById('btn-schedule-linear'), bCos = document.getElementById('btn-schedule-cosine');
+  const data = PE.swissRoll(240, 11), x0 = [1.05, -.62], g = PE.gauss(PE.rng(21)), cloud = Array.from({ length: 90 }, () => [g(), g()]);
+  const S = { t: 0, cos: false, walk: null, walkU: 0, jump: null };
+  let stop = () => {};
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  const A = () => S.cos ? PE.cosineAbar : PE.linearAbar;
+  const narrow = w => w < 560;
+  const cv = PE.canvas(el, w => narrow(w) ? 1.25 : .5, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), B = PE.css('--brown'), F = PE.css('--fg'), M = PE.css('--muted');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const pb = narrow(W) ? { x: 44, y: 14, w: W - 60, h: H * .38 } : { x: 48, y: 16, w: W * .42 - 56, h: H - 60 };
+    const ax = PE.axes(ctx, pb, [0, 1000], [0, 1], { xt: [0, 250, 500, 750, 1000], yt: [0, .5, 1], xl: 'step t', yl: 'weight' });
+    const gs = glow('shrink'), gn = glow('noise'), gc = glow('cosine');
+    [[PE.linearAbar, false], [PE.cosineAbar, true]].forEach(([a, isCos]) => {
+      const on = isCos === S.cos, dash = isCos ? [6, 4] : null, al = on ? 1 : .35;
+      const sig = [], noi = [];
+      for (let t = 0; t <= 1000; t += 5) { sig.push([ax.X(t), ax.Y(Math.sqrt(a[t]))]); noi.push([ax.X(t), ax.Y(Math.sqrt(1 - a[t]))]); }
+      PE.polyline(ctx, sig, Y, (on ? 2.4 : 1.4) + 2 * gs + (isCos ? 2 * gc : 0), dash, al);
+      PE.polyline(ctx, noi, B, (on ? 2.4 : 1.4) + 2 * gn, dash, al);
+    });
+    ctx.save(); ctx.strokeStyle = F; ctx.globalAlpha = .6; ctx.beginPath(); ctx.moveTo(ax.X(S.t), pb.y); ctx.lineTo(ax.X(S.t), pb.y + pb.h); ctx.stroke(); ctx.restore();
+    PE.label(ctx, 'signal kept', pb.x + 6, pb.y + 12, Y, 11); PE.label(ctx, 'noise added', pb.x + pb.w - 6, pb.y + 12, B, 11, 'right');
+    PE.label(ctx, 'solid: linear   dashed: cosine', pb.x + pb.w / 2, pb.y + pb.h - 8, M, 10.5, 'center');
+    // Right: the point and its q(x_t | x_0) cloud.
+    const rb = narrow(W) ? { x: 0, y: pb.y + pb.h + 44, w: W, h: H - pb.h - 58 } : { x: W * .42, y: 0, w: W * .58, h: H };
+    ctx.save(); ctx.beginPath(); ctx.rect(rb.x, rb.y, rb.w, rb.h); ctx.clip(); ctx.translate(rb.x, rb.y);
+    const V = PE.view(rb.w, rb.h, 5.4), a = A()[Math.round(S.t)], sa = Math.sqrt(a), sn = Math.sqrt(1 - a), rs = W < 500 ? 1.4 : 1.8;
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .22));
+    const mx = sa * x0[0], my = sa * x0[1];
+    ctx.save(); ctx.strokeStyle = B; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.3 + 2 * gn; ctx.globalAlpha = .8;
+    [1, 2].forEach(k => { ctx.beginPath(); ctx.arc(V.X(mx), V.Y(my), Math.max(.5, k * sn * V.s), 0, 7); ctx.stroke(); }); ctx.restore();
+    cloud.forEach(e => PE.dot(ctx, V.X(mx + sn * e[0]), V.Y(my + sn * e[1]), rs + .4, PE.mix(Y, B, Math.min(1, sn * 1.5)), .75));
+    PE.arrow(ctx, V.X(x0[0]), V.Y(x0[1]), V.X(mx), V.Y(my), Y, 1.6 + 2 * gs, 7, .9);
+    PE.dot(ctx, V.X(x0[0]), V.Y(x0[1]), 5, Y); PE.label(ctx, 'x0', V.X(x0[0]) + 8, V.Y(x0[1]) + 4, Y, 12);
+    if (S.walk) { const n = Math.max(1, Math.round(S.walkU * S.walk.length)); PE.polyline(ctx, S.walk.slice(0, n).map(p => [V.X(p[0]), V.Y(p[1])]), F, 1.2, null, .8);
+      const q = S.walk[n - 1]; PE.dot(ctx, V.X(q[0]), V.Y(q[1]), 4, F); }
+    if (S.jump) { ctx.save(); ctx.setLineDash([3, 4]); PE.arrow(ctx, V.X(x0[0]), V.Y(x0[1]), V.X(S.jump[0]), V.Y(S.jump[1]), F, 1.4, 8, .9); ctx.restore();
+      PE.dot(ctx, V.X(S.jump[0]), V.Y(S.jump[1]), 4.5, F); }
+    const glN = glow('noisy'); if (glN) PE.dot(ctx, V.X(mx), V.Y(my), 6 + 10 * glN, F, .25 * glN);
+    ctx.restore();
+  });
+  function readout() {
+    const t = Math.round(S.t), la = PE.linearAbar[t], ca = PE.cosineAbar[t];
+    const cross = a => { for (let k = 0; k <= 1000; k++) if (Math.sqrt(a[k]) < .1) return k; return 1000; };
+    out.textContent = `Step ${t}: the point is scaled by ${Math.sqrt(la).toFixed(3)} (linear) or ${Math.sqrt(ca).toFixed(3)} (cosine). `
+      + `Signal falls below a tenth at step ${cross(PE.linearAbar)} with the linear schedule and step ${cross(PE.cosineAbar)} with the cosine one.`
+      + (S.walk && S.walkU >= 1 ? ` The walk took ${t} small steps.` : '') + (S.jump ? ' The jump used one draw of noise.' : '');
+  }
+  function setT(t, ms = 800) { stop(); S.walk = null; S.jump = null; const t0 = S.t;
+    stop = PE.animate(ms, u => { S.t = PE.lerp(t0, t, u); slider.value = Math.round(S.t); cv.redraw(); readout(); }); }
+  function setCos(c) { S.cos = c; bLin.setAttribute('aria-pressed', !c); bCos.setAttribute('aria-pressed', c); cv.redraw(); readout(); }
+  slider.addEventListener('input', () => { stop(); S.walk = null; S.jump = null; S.t = +slider.value; cv.redraw(); readout(); });
+  bLin.addEventListener('click', () => setCos(false)); bCos.addEventListener('click', () => setCos(true));
+  document.getElementById('btn-schedule-late').addEventListener('click', () => setT(750));
+  document.getElementById('btn-schedule-walk').addEventListener('click', () => {
+    stop(); if (S.t < 20) { S.t = 300; slider.value = 300; }
+    const t = Math.round(S.t), a = A(), w = PE.gauss(PE.rng(4)); let p = x0.slice(); const path = [p];
+    for (let k = 1; k <= t; k++) { const b = 1 - a[k] / a[k - 1]; p = [Math.sqrt(1 - b) * p[0] + Math.sqrt(b) * w(), Math.sqrt(1 - b) * p[1] + Math.sqrt(b) * w()]; path.push(p); }
+    S.walk = path; S.jump = null; stop = PE.animate(1800, u => { S.walkU = u; cv.redraw(); readout(); });
+  });
+  document.getElementById('btn-schedule-jump').addEventListener('click', () => {
+    stop(); if (S.t < 20) { S.t = 300; slider.value = 300; }
+    const a = A()[Math.round(S.t)], w = PE.gauss(PE.rng(8)); S.jump = [Math.sqrt(a) * x0[0] + Math.sqrt(1 - a) * w(), Math.sqrt(a) * x0[1] + Math.sqrt(1 - a) * w()];
+    cv.redraw(); readout();
+  });
+  document.getElementById('btn-schedule-reset').addEventListener('click', () => { stop(); S.walk = null; S.jump = null; S.t = 0; slider.value = 0; setCos(false); });
+  readout();
+})();
+</script>
+
+<section id="ch-denoise" class="chapter">
+<h2>Learning to undo it: predict the noise</h2>
+<p>DDPM's network gets a noisy point and the step number, and has one job: say which noise was added. Draw a training example below and compare the <b class="c-brown">true noise</b> with the best possible <b class="c-blue">prediction</b>; the <b class="c-red">red</b> gap is what training penalizes.</p>
+
+<figure class="viz" id="viz-predict-noise" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="predict-canvas" tabindex="0" aria-label="A noisy point with the true noise arrow, the ideal model's predicted noise arrow, and faint lines to the clean data points it could have come from. Drag to move the noisy point." role="img"></canvas>
+  <div class="controls">
+    <label for="rng-predict-t">noise step t <input type="range" id="rng-predict-t" min="1" max="1000" step="1" value="120"></label>
+    <button type="button" id="btn-predict-sample">New training example</button>
+    <button type="button" id="btn-predict-low">Little noise</button>
+    <button type="button" id="btn-predict-mid">Some noise</button>
+    <button type="button" id="btn-predict-high">Lots of noise</button>
+    <button type="button" id="btn-predict-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="predict-readout" aria-live="polite"></p>
+  <figcaption>The <b class="c-blue">blue</b> prediction is the <em>exact</em> optimum for this toy dataset (formula below), what a network with unlimited capacity would converge to; real networks approximate it. Faint blue lines run from the noisy point to the clean points it could have come from, thicker for more likely ones. Drag the white point (or use arrow keys) to explore without a known answer.</figcaption>
+</figure>
+
+<h3>Predicting the noise is predicting the image</h3>
+<p>If you know the noisy point <span class="tex">x_t</span> and the noise <span class="tex">\epsilon</span> that went into it, you can solve Chapter 1's recipe backwards for the clean point. So a noise guess <span class="tex">\htmlClass{t-blue}{\epsilon_\theta}</span> is also a guess of the image:</p>
+<div class="eq" id="eq-x0hat" data-build data-viz="viz-predict-noise"><div class="tex tex-display">
+\htmlData{step=1, link=xhat}{\htmlClass{t-blue}{\hat x_0}} = \frac{\htmlData{step=2, link=noisy}{x_t} - \htmlData{step=3, link=pred}{\sqrt{1-\bar\alpha_t}\;\htmlClass{t-blue}{\epsilon_\theta(x_t, t)}}}{\sqrt{\bar\alpha_t}}
+</div></div>
+<p class="eqno">Rearranged from DDPM v2 Sec. 3.2 (the argument inside Eq. 11)</p>
+<p>The subscript <span class="tex">\theta</span> ("theta") stands for the network's weights. The network is a U-Net, an image-to-image convolutional network with a few attention layers, told the step <span class="tex">t</span> through a sinusoidal embedding, but nothing here depends on its internals.</p>
+
+<h3>The best guess is an average</h3>
+<p>Slide to <b>Lots of noise</b>. The noisy point could have come from almost anywhere on the spiral, and the lines fan out to all of it. When the answer is ambiguous, the guess that minimizes squared error is the <em>average</em> of the possibilities, weighted by how likely each is. So at high noise the <b class="c-blue">predicted clean point</b> sits near the center of the data, on no arm at all; at low noise the weight concentrates on one nearby point and the guess is sharp. This is why a single denoising step from heavy noise would give a blurry mush, and why diffusion takes many small steps: each step only has to be right about the next, slightly less ambiguous, noise level.</p>
+<p>For a finite dataset <span class="tex">\{x^{(1)}, \dots, x^{(N)}\}</span> this optimal guess has a closed form, which is what the plot computes. It is Bayes' rule, not a formula from the papers:</p>
+<div class="tex tex-display">\htmlClass{t-blue}{\hat x_0^{\star}(x_t)} = \sum_i w_i\, \htmlClass{t-yellow}{x^{(i)}}, \qquad w_i \propto \exp\!\left(-\frac{\lVert x_t - \sqrt{\bar\alpha_t}\, x^{(i)} \rVert^2}{2(1-\bar\alpha_t)}\right)</div>
+<p>Each weight asks "if the clean point were <span class="tex">x^{(i)}</span>, how likely is this noisy point?" and the weights sum to one.</p>
+
+<h3>Where the loss comes from: the variational bound, gently</h3>
+<p>The principled way to train a probabilistic model is maximum likelihood: make the training images as probable as possible under the model. For a diffusion model that probability is an integral over every possible noisy path that could have led to the image, which is hopeless to compute. The standard workaround, used by VAEs too, is a <b>variational bound</b> (also called the ELBO): a quantity you <em>can</em> compute that is always below the true log-likelihood, so pushing it up pushes the likelihood up.</p>
+<p>For diffusion the bound breaks into one term per step. Term <span class="tex">t</span> compares the model's reverse step <span class="tex">p_\theta(x_{t-1} \mid x_t)</span> with the <em>true</em> reverse step you could compute if you were also told the clean image. That cheat sheet is a plain Gaussian (Eqs. 6 and 7 in DDPM v2):</p>
+<div class="tex tex-display">q(x_{t-1} \mid x_t, \htmlClass{t-yellow}{x_0}) = \mathcal{N}\big(x_{t-1};\; \tilde\mu_t(x_t, \htmlClass{t-yellow}{x_0}),\; \tilde\beta_t I\big), \quad \tilde\mu_t = \frac{\sqrt{\bar\alpha_{t-1}}\,\beta_t}{1-\bar\alpha_t}\htmlClass{t-yellow}{x_0} + \frac{\sqrt{\alpha_t}(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}x_t</div>
+<p>In words: the best previous point is a blend of where you are and where the clean image is. The model does not know <span class="tex">x_0</span>, so it plugs in its own guess <span class="tex">\hat x_0</span>. Comparing two Gaussians with the same spread reduces to the squared distance between their centers, and after substituting the formula for <span class="tex">\hat x_0</span> that distance is a squared error on the noise, times a weight that depends on <span class="tex">t</span> (Eq. 12 in DDPM v2). DDPM's key empirical move was to drop that weight:</p>
+<div class="eq" id="eq-lsimple" data-build data-viz="viz-predict-noise"><div class="tex tex-display">
+L_{\text{simple}}(\theta) = \htmlData{step=1, link=sample}{\mathbb{E}_{t,\, x_0,\, \epsilon}}\Big[\big\lVert \htmlData{step=2, link=noise}{\htmlClass{t-brown}{\epsilon}} - \htmlData{step=3, link=pred}{\htmlClass{t-blue}{\epsilon_\theta\big(\sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon,\; t\big)}} \big\rVert^2\Big]
+</div></div>
+<p class="eqno">Eq. 14 in DDPM v2</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbb{E}_{t, x_0, \epsilon}</span>: average over a random step <span class="tex">t</span> (uniform from 1 to <span class="tex">T</span>), a random training image, and random noise. Each training iteration draws one of each.</li>
+  <li><span class="tex">\htmlClass{t-brown}{\epsilon}</span>: the noise actually added. <span class="tex">\htmlClass{t-blue}{\epsilon_\theta(\cdot)}</span>: the network's guess from the noisy input.</li>
+  <li><span class="tex">\lVert\cdot\rVert^2</span>: squared length of the <b class="c-red">difference</b>. That is the whole training loop: add noise, predict it, take a gradient step on the error.</li>
+</ul>
+<p>Dropping the weight is not free. It is no longer the exact bound, and it spends relatively less effort on the easiest, lowest-noise steps. It traded likelihood for looks: on CIFAR-10, training on the true bound gave FID <span data-claim="page-ddpm-bound-fid">13.51</span> and <span data-claim="page-ddpm-bound-nll">3.70</span> bits per dimension, while <span class="tex">L_{\text{simple}}</span> gave FID <span data-claim="ddpm-cifar-fid">3.17</span> at <span data-claim="page-ddpm-simple-nll">3.75</span> bits per dimension (lower is better for both; FID is explained in the next chapter). DDPM also noticed the loss "resembles denoising score matching over multiple noise scales", a thread Chapter 5 pulls on.</p>
+
+<div class="aside">
+<h4>Improved DDPM: also learn how much noise to add back</h4>
+<p>DDPM fixed the variance of each reverse step to one of two hand-picked values, <span class="tex">\beta_t</span> or <span class="tex">\tilde\beta_t</span>. Improved DDPM lets the network output a number <span class="tex">v</span> per pixel and interpolates between them, <span class="tex">\Sigma_\theta = \exp(v \log\beta_t + (1-v)\log\tilde\beta_t)</span> (Eq. 15), trained with a small dose of the true bound: <span class="tex">L_{\text{hybrid}} = L_{\text{simple}} + \lambda L_{\text{vlb}}</span> with <span class="tex">\lambda</span> = <span data-claim="page-iddpm-lambda">0.001</span> (Eq. 16). With the cosine schedule and importance-sampled bound this reached <span data-claim="page-iddpm-nll-cifar">2.94</span> bits per dimension on CIFAR-10, and, as the next chapter shows, the learned variance is what let it sample in far fewer steps.</p>
+</div>
+</section>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-predict-noise'), el = document.getElementById('predict-canvas');
+  const slider = document.getElementById('rng-predict-t'), out = document.getElementById('predict-readout');
+  const data = PE.swissRoll(300, 11), A = PE.linearAbar, R = PE.rng(31), g = PE.gauss(PE.rng(32));
+  const S = { t: 120, i: 250, eps: [.7, .5], xt: null, drag: false };
+  let stop = () => {};
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  const xtOf = () => { if (S.drag) return S.xt; const a = A[Math.round(S.t)], sa = Math.sqrt(a), sn = Math.sqrt(1 - a);
+    return [sa * data[S.i][0] + sn * S.eps[0], sa * data[S.i][1] + sn * S.eps[1]]; };
+  // Average squared noise error of the ideal model at this t (Monte Carlo over fresh examples).
+  const avgLoss = (() => { const cache = {}; return t => { if (cache[t] !== undefined) return cache[t];
+    const r = PE.rng(t + 7), gg = PE.gauss(r), a = A[t], sa = Math.sqrt(a), sn = Math.sqrt(1 - a); let L = 0, n = 150;
+    for (let k = 0; k < n; k++) { const d = data[Math.floor(r() * data.length)], e = [gg(), gg()], x = [sa * d[0] + sn * e[0], sa * d[1] + sn * e[1]];
+      const h = PE.idealX0(x[0], x[1], sa, 1 - a, data), ex = (x[0] - sa * h[0]) / sn, ey = (x[1] - sa * h[1]) / sn; L += (e[0] - ex) ** 2 + (e[1] - ey) ** 2; }
+    return (cache[t] = L / n); }; })();
+  const cv = PE.canvas(el, w => w < 560 ? .9 : .6, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), B = PE.css('--brown'), Bl = PE.css('--blue'), Rd = PE.css('--red'), F = PE.css('--fg');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 5.2), t = Math.round(S.t), a = A[t], sa = Math.sqrt(a), sn = Math.sqrt(1 - a), rs = W < 500 ? 1.5 : 2;
+    const [x, y] = xtOf();
+    // Posterior weights over the clean data.
+    let m = -Infinity; const lw = data.map(p => { const v = -((x - sa * p[0]) ** 2 + (y - sa * p[1]) ** 2) / (2 * (1 - a)); if (v > m) m = v; return v; });
+    const w = lw.map(v => Math.exp(v - m)), Wt = w.reduce((s, v) => s + v, 0), wmax = Math.max(...w);
+    ctx.save(); ctx.strokeStyle = Bl;
+    data.forEach((p, i) => { const q = w[i] / wmax; if (q < .02) return; ctx.globalAlpha = .08 + .5 * q; ctx.lineWidth = .5 + 1.5 * q;
+      ctx.beginPath(); ctx.moveTo(V.X(x), V.Y(y)); ctx.lineTo(V.X(p[0]), V.Y(p[1])); ctx.stroke(); }); ctx.restore();
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .45));
+    const h = [w.reduce((s, v, i) => s + v * data[i][0], 0) / Wt, w.reduce((s, v, i) => s + v * data[i][1], 0) / Wt];
+    const gp = glow('pred'), gnz = glow('noise'), gx = glow('xhat');
+    // Noise displacement arrows end at x_t: true from sqrt(abar) x0, predicted from sqrt(abar) x0hat.
+    if (!S.drag) { const x0 = data[S.i], tx = sa * x0[0], ty = sa * x0[1];
+      PE.dot(ctx, V.X(x0[0]), V.Y(x0[1]), 5.5, Y); PE.label(ctx, 'true x0', V.X(x0[0]) + 8, V.Y(x0[1]) - 6, Y, 11);
+      PE.arrow(ctx, V.X(tx), V.Y(ty), V.X(x), V.Y(y), B, 2.4 + 2 * gnz, 9);
+      ctx.save(); ctx.strokeStyle = Rd; ctx.lineWidth = 2.5 + 2 * glow('loss'); ctx.beginPath(); ctx.moveTo(V.X(tx), V.Y(ty)); ctx.lineTo(V.X(sa * h[0]), V.Y(sa * h[1])); ctx.stroke(); ctx.restore(); }
+    PE.arrow(ctx, V.X(sa * h[0]), V.Y(sa * h[1]), V.X(x), V.Y(y), Bl, 2.2 + 2 * gp, 9, .95);
+    PE.dot(ctx, V.X(h[0]), V.Y(h[1]), 5.5 + 3 * gx, Bl); PE.label(ctx, 'best guess of x0', V.X(h[0]) + 8, V.Y(h[1]) + 14, Bl, 11);
+    ctx.save(); ctx.strokeStyle = F; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(V.X(x), V.Y(y), 6 + 3 * glow('noisy'), 0, 7); ctx.stroke(); ctx.restore();
+    PE.label(ctx, 'noisy x_t', V.X(x) + 9, V.Y(x < 9 ? y : y) - 8, F, 11);
+    S.h = h;
+  });
+  function readout() {
+    const t = Math.round(S.t), a = A[t], sa = Math.sqrt(a), sn = Math.sqrt(1 - a), [x, y] = xtOf();
+    const h = PE.idealX0(x, y, sa, 1 - a, data), ex = (x - sa * h[0]) / sn, ey = (y - sa * h[1]) / sn;
+    const amb = t < 60 ? 'the guess is sharp' : t < 300 ? 'the guess blends a few nearby arms' : 'the guess falls toward the middle of all the data';
+    out.textContent = S.drag ? `Step ${t}: ${amb}. No true answer is known for a dragged point, so only the prediction is shown.`
+      : `Step ${t}: squared noise error for this example ${((S.eps[0] - ex) ** 2 + (S.eps[1] - ey) ** 2).toFixed(3)}; averaged over fresh examples at this step, even the ideal model scores ${avgLoss(t).toFixed(3)} (out of a maximum near 2), and ${amb}.`;
+  }
+  function setT(t) { stop(); const t0 = S.t; stop = PE.animate(700, u => { S.t = PE.lerp(t0, t, u); slider.value = Math.round(S.t); cv.redraw(); if (u === 1) readout(); }); }
+  slider.addEventListener('input', () => { stop(); S.t = +slider.value; cv.redraw(); readout(); });
+  document.getElementById('btn-predict-low').addEventListener('click', () => setT(25));
+  document.getElementById('btn-predict-mid').addEventListener('click', () => setT(160));
+  document.getElementById('btn-predict-high').addEventListener('click', () => setT(700));
+  document.getElementById('btn-predict-sample').addEventListener('click', () => { S.drag = false; S.i = Math.floor(R() * data.length); S.eps = [g(), g()]; cv.redraw(); readout(); });
+  document.getElementById('btn-predict-reset').addEventListener('click', () => { stop(); S.drag = false; S.t = 120; S.i = 250; S.eps = [.7, .5]; slider.value = 120; cv.redraw(); readout(); });
+  const move = (px, py) => { const r = el.getBoundingClientRect(), V = PE.view(r.width, r.height, 5.2); S.drag = true; S.xt = [V.ix(px), V.iy(py)]; cv.redraw(); readout(); };
+  let down = false;
+  el.addEventListener('pointerdown', e => { down = true; el.setPointerCapture(e.pointerId); const r = el.getBoundingClientRect(); move(e.clientX - r.left, e.clientY - r.top); });
+  el.addEventListener('pointermove', e => { if (!down) return; const r = el.getBoundingClientRect(); move(e.clientX - r.left, e.clientY - r.top); });
+  el.addEventListener('pointerup', () => { down = false; });
+  el.addEventListener('keydown', e => { const d = { ArrowLeft: [-.08, 0], ArrowRight: [.08, 0], ArrowUp: [0, .08], ArrowDown: [0, -.08] }[e.key];
+    if (!d) return; e.preventDefault(); const p = xtOf(); S.drag = true; S.xt = [p[0] + d[0], p[1] + d[1]]; cv.redraw(); readout(); });
+  readout();
+})();
+</script>
+
+<section id="ch-sample" class="chapter">
+<h2>Sampling: walking back from noise</h2>
+<p>To generate, start from pure noise and apply the learned reverse step once per noise level, a thousand times. Press play and watch a cloud of noise condense; the <b class="c-blue">blue ghosts</b> show each particle's current guess of where it will end up.</p>
+
+<figure class="viz" id="viz-reverse" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="reverse-canvas" aria-label="Particles start as a Gaussian blob and follow DDPM's reverse steps into the swiss roll; blue ghosts show each particle's predicted clean point." role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-reverse-play">Play</button>
+    <button type="button" id="btn-reverse-k1000" aria-pressed="true">1000 steps</button>
+    <button type="button" id="btn-reverse-k100" aria-pressed="false">100 steps</button>
+    <button type="button" id="btn-reverse-k10" aria-pressed="false">10 steps</button>
+    <button type="button" id="btn-reverse-k3" aria-pressed="false">3 steps</button>
+    <button type="button" id="btn-reverse-ghosts-on" aria-pressed="true">Show guesses</button>
+    <button type="button" id="btn-reverse-ghosts-off" aria-pressed="false">Hide guesses</button>
+    <button type="button" id="btn-reverse-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="reverse-readout" aria-live="polite"></p>
+  <figcaption>DDPM's sampler (Algorithm 2, with <span class="tex">\sigma_t^2 = \beta_t</span>) driven by the exact ideal denoiser from the last chapter. Fewer steps use a strided subset of the <span data-claim="page-ddpm-T">1000</span> noise levels with rescaled variances (Improved DDPM Eq. 19). "Distance to data" is the mean distance from each final particle to the spiral.</figcaption>
+</figure>
+
+<h3>One reverse step</h3>
+<p>Each step removes the predicted noise, rescales, and then adds a little <em>fresh</em> noise back:</p>
+<div class="eq" id="eq-sample-step" data-build data-viz="viz-reverse"><div class="tex tex-display">
+\htmlData{step=1, link=particles}{\htmlClass{t-green}{x_{t-1}}} = \htmlData{step=2, link=rescale}{\frac{1}{\sqrt{\alpha_t}}}\Big(x_t - \htmlData{step=3, link=ghosts}{\frac{1-\alpha_t}{\sqrt{1-\bar\alpha_t}}\,\htmlClass{t-blue}{\epsilon_\theta(x_t, t)}}\Big) + \htmlData{step=4, link=fresh}{\htmlClass{t-brown}{\sigma_t z}}
+</div></div>
+<p class="eqno">Algorithm 2 (line 4) in DDPM v2; the same expression appears as Eq. 11 for the mean</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{\epsilon_\theta(x_t, t)}</span>: the network's noise guess; subtracting a scaled copy moves the particle toward its current <span class="tex">\hat x_0</span> guess.</li>
+  <li><span class="tex">1/\sqrt{\alpha_t}</span>: undoes the forward step's shrink.</li>
+  <li><span class="tex">\htmlClass{t-brown}{\sigma_t z}</span>: fresh Gaussian noise <span class="tex">z</span> with a fixed size <span class="tex">\sigma_t</span> (DDPM tried <span class="tex">\sigma_t^2 = \beta_t</span> and <span class="tex">\tilde\beta_t</span>; both worked). It is skipped on the very last step.</li>
+</ul>
+<p>Adding noise while trying to remove it sounds backwards. It is what makes each step a <em>sample</em> from the reverse distribution rather than a jump to its center: it keeps the particles spread over the whole spiral instead of piling onto the most typical spot, and it lets later steps correct earlier mistakes. DDPM pointed out that the update "resembles Langevin dynamics", a classic sampler that follows a density uphill while jittering, which is the bridge to Chapter 5.</p>
+
+<h3>Coarse first, details last</h3>
+<p>Watch the <b class="c-blue">ghosts</b> during play. Early on every particle's guess sits near the middle of the data (the average of everything); halfway through the guesses spread onto the arms; at the end each particle has committed to one spot. Real images behave the same way. DDPM tracked the quality of its <span class="tex">\hat x_0</span> guesses along the reverse chain on CIFAR-10, and those numbers are plotted below from the paper's own data.</p>
+
+<figure class="viz" id="viz-progressive" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="progressive-canvas" aria-label="FID of DDPM's predicted clean image against the number of reverse steps taken: flat and bad for the first few hundred steps, then falling steeply, then slowly to its final value." role="img"></canvas>
+  <p class="readout" id="progressive-readout" aria-live="polite">FID of the predicted clean image stays terrible for the first few hundred steps, drops steeply in the middle of the chain, and the last couple of hundred steps take it the rest of the way.</p>
+  <figcaption>Data: DDPM v2 appendix figure "Unconditional CIFAR10 progressive sampling quality over time", from the paper's source file <span data-claim="page-ddpm-progressive">cifar10_sample_quality.csv</span>. FID after <span data-claim="page-ddpm-prog-fid500">110</span> is at step 500 of 1000, <span data-claim="page-ddpm-prog-fid800">25.9</span> at step 800, and <span data-claim="ddpm-cifar-fid">3.17</span> at the end. Log scale.</figcaption>
+</figure>
+
+<div class="aside">
+<h4>How image quality is scored: FID and IS</h4>
+<p>You cannot compute the likelihood of a GAN's samples, so image generation settled on two scores computed from a pretrained image classifier (Inception). <b>FID</b> (Frechet Inception Distance) compares the statistics of the classifier's features on generated and real images: lower is better, zero means identical statistics. <b>IS</b> (Inception Score) rewards samples the classifier finds confidently recognizable and varied: higher is better. Both are imperfect and depend on sample count and reference set, so compare numbers only within one table.</p>
+</div>
+
+<h3>What it achieved, and what it cost</h3>
+<p>On unconditional CIFAR-10 (tiny <span data-computed>32x32</span> images), DDPM scored FID <span data-claim="ddpm-cifar-fid">3.17</span> and IS <span data-claim="page-ddpm-is">9.46</span>, better than the score-based NCSN before it (FID <span data-claim="ncsn-cifar10-fid">25.32</span>) and on par with the best GANs; on <span data-computed>256x256</span> LSUN scenes its samples matched ProgressiveGAN's quality. Diffusion was suddenly a serious contender.</p>
+<p>The cost is the loop. Every sample needs one network evaluation per step, one after another. DDPM's CIFAR model took <span data-claim="page-ddpm-sample-17s">17 seconds</span> for a batch of 256 images on a TPU v3-8; the DDIM authors later estimated around <span data-claim="page-ddim-20h">20 hours</span> to draw 50,000 small images on a single consumer GPU, versus under a minute for a GAN, and nearly <span data-claim="page-ddim-1000h">1000 hours</span> at <span data-computed>256x256</span>. The 50,000 figure matters because that is how many samples an FID evaluation usually uses.</p>
+<p>Try <b>10 steps</b> and <b>3 steps</b> above. With few, large steps the particles are pulled toward their blurry average guesses and cannot recover, so the spiral shrinks inward: the toy version of the blurry, washed-out samples a naively shortened DDPM produces. Improved DDPM's learned variances softened this a lot, giving good samples in <span data-claim="improved-ddpm-few-steps-50">50 steps</span> and near-optimal FID at <span data-claim="improved-ddpm-few-steps-100">100 steps</span>; below that, a different sampler, DDIM, did better (<span data-claim="page-iddpm-ddim-50">fewer than 50</span> steps). Understanding why takes a new point of view.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('reverse-canvas'), out = document.getElementById('reverse-readout');
+  const data = PE.swissRoll(240, 11), A = PE.linearAbar, N = 220, ref = PE.swissRoll(2000, 77);
+  const S = { K: 1000, k: 0, P: null, H: null, ghosts: true, trails: [], done: false };
+  let stop = () => {};
+  const kBtns = [1000, 100, 10, 3].map(k => [k, document.getElementById('btn-reverse-k' + k)]);
+  const gOn = document.getElementById('btn-reverse-ghosts-on'), gOff = document.getElementById('btn-reverse-ghosts-off');
+  let g;
+  function init() { g = PE.gauss(PE.rng(3)); S.P = Array.from({ length: N }, () => [g(), g()]); S.H = null; S.k = 0; S.done = false; S.trails = S.P.filter((_, i) => i % 22 === 0).map(p => [p]); }
+  const ts = () => Array.from({ length: S.K + 1 }, (_, k) => Math.round(PE.T * (1 - k / S.K)));
+  function step() { const T = ts(), r = PE.reverseStep(S.P, A, T[S.k], T[S.k + 1], data, true, g); S.P = r.P; S.H = r.H; S.k++;
+    S.trails.forEach((tr, j) => tr.push(S.P[j * 22])); if (S.k >= S.K) S.done = true; }
+  const dist = () => S.P.reduce((s, p) => s + Math.sqrt(Math.min(...ref.map(q => (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2))), 0) / S.P.length;
+  const cv = PE.canvas(el, w => w < 560 ? .95 : .6, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), B = PE.css('--brown'), G = PE.css('--green'), Bl = PE.css('--blue');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 6), rs = W < 500 ? 1.5 : 2, u = S.k / S.K;
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs * .8, Y, .16));
+    S.trails.forEach(tr => PE.polyline(ctx, tr.map(p => [V.X(p[0]), V.Y(p[1])]), G, 1.1, null, .5));
+    if (S.ghosts && S.H && !S.done) S.H.forEach(h => PE.dot(ctx, V.X(h[0]), V.Y(h[1]), rs, Bl, .55));
+    S.P.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs + .3, PE.mix(B, G, Math.min(1, u * 1.3)), .9));
+    PE.label(ctx, `step ${S.k} of ${S.K}`, 10, 18, PE.css('--muted'), 12);
+  });
+  function readout() {
+    out.textContent = S.done ? `Done in ${S.K} network calls. Mean distance to the data: ${dist().toFixed(3)} (the spread of the data itself is about 0.045).`
+      + (S.K <= 10 ? ' The cloud has shrunk inward toward the blurry average: too few steps.' : ' The particles sit on the spiral.')
+      : S.k === 0 ? `Ready: ${N} particles of pure noise, ${S.K} steps to go. Press Play.` : `Step ${S.k} of ${S.K}.`;
+  }
+  function play() {
+    stop(); init(); cv.redraw();
+    if (PE.instant()) { while (!S.done) step(); cv.redraw(); readout(); return; }
+    const ms = S.K >= 100 ? 4200 : 1800, t0 = performance.now(); let id = 0, dead = false;
+    const f = now => { if (dead) return; const target = Math.min(S.K, Math.ceil((now - t0) / ms * S.K)); while (S.k < target) step();
+      cv.redraw(); readout(); if (!S.done) id = requestAnimationFrame(f); };
+    id = requestAnimationFrame(f); stop = () => { dead = true; cancelAnimationFrame(id); };
+  }
+  function setK(k) { stop(); S.K = k; kBtns.forEach(([kk, b]) => b.setAttribute('aria-pressed', kk === k)); init(); cv.redraw(); readout(); }
+  document.getElementById('btn-reverse-play').addEventListener('click', play);
+  kBtns.forEach(([k, b]) => b.addEventListener('click', () => setK(k)));
+  gOn.addEventListener('click', () => { S.ghosts = true; gOn.setAttribute('aria-pressed', true); gOff.setAttribute('aria-pressed', false); cv.redraw(); });
+  gOff.addEventListener('click', () => { S.ghosts = false; gOn.setAttribute('aria-pressed', false); gOff.setAttribute('aria-pressed', true); cv.redraw(); });
+  document.getElementById('btn-reverse-reset').addEventListener('click', () => { S.ghosts = true; gOn.setAttribute('aria-pressed', true); gOff.setAttribute('aria-pressed', false); setK(1000); });
+  init(); readout();
+
+  // Sourced chart: DDPM plot_data/cifar10_sample_quality.csv (reverse steps T - t, FID).
+  const Q = [[50, 353.40], [100, 360.99], [150, 349.70], [200, 326.82], [250, 318.62], [300, 317.19], [350, 303.61], [400, 249.25], [450, 171.10], [500, 110.27],
+    [550, 77.77], [600, 57.93], [650, 45.40], [700, 37.49], [750, 31.41], [800, 25.85], [850, 20.75], [900, 15.47], [950, 10.14], [1000, 3.17]];
+  PE.canvas(document.getElementById('progressive-canvas'), w => w < 560 ? .7 : .42, (ctx, W, H) => {
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const b = { x: 54, y: 14, w: W - 70, h: H - 56 }, G = PE.css('--green');
+    const ax = PE.axes(ctx, b, [0, 1000], [2, 500], { logy: true, xt: [0, 250, 500, 750, 1000], yt: [3, 10, 30, 100, 300], xl: 'reverse steps taken (T - t)', yl: 'FID of the guess (log)', ylo: 40 });
+    PE.polyline(ctx, Q.map(([x, y]) => [ax.X(x), ax.Y(y)]), G, 2);
+    Q.forEach(([x, y]) => PE.dot(ctx, ax.X(x), ax.Y(y), 3.2, G));
+  });
+})();
+</script>

@@ -1,0 +1,62 @@
+<p class="kicker"><span class="act-n">Act II</span>Borrow CLIP's eyes (2020-2021)</p>
+
+<section id="ch-two-stage" class="chapter">
+<h2>How a two-stage detector finds boxes</h2>
+<p>The first open-vocabulary detectors were built on a two-stage detector, so this chapter builds one from scratch. The first stage finds boxes without asking what is in them; the second stage crops each box and names it.</p>
+
+<figure class="viz" id="viz-rpn" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="rpn-canvas" tabindex="0" role="img" aria-label="A drawn warehouse with a person, a pallet, a forklift and a traffic cone. Buttons step through a two-stage detector: a grid of feature cells over the image, the anchor boxes at one cell, an objectness heat map, anchors sliding onto objects, the top proposals after non-maximum suppression, a seven by seven crop of one proposal, and the region head's class scores. A panel beside the image shows the numbers for the selected cell or proposal."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-rpn-features" aria-pressed="false">1 Features</button>
+    <button type="button" id="btn-rpn-anchors" aria-pressed="false">2 Anchors</button>
+    <button type="button" id="btn-rpn-objectness" aria-pressed="false">3 Objectness</button>
+    <button type="button" id="btn-rpn-deltas" aria-pressed="false">4 Box deltas</button>
+    <button type="button" id="btn-rpn-topk" aria-pressed="false">5 Top-k</button>
+    <button type="button" id="btn-rpn-roialign" aria-pressed="false">6 RoIAlign</button>
+    <button type="button" id="btn-rpn-head" aria-pressed="false">7 Region head</button>
+    <button type="button" id="btn-rpn-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls">
+    <label for="rpn-k">Proposals kept</label><input type="range" id="rpn-k" min="1" max="12" step="1" value="5"><b id="rpn-k-value">5</b>
+  </div>
+  <p class="readout" id="rpn-readout" aria-live="polite"></p>
+  <figcaption>A toy detector on a 16 x 10 feature grid with 9 anchors per cell (3 sizes x 3 shapes). Its objectness is a stand-in for a trained network: a function of how well each anchor overlaps any object, with no names involved. Click a cell or a proposal, or focus the figure and use the arrow keys. The slider sets how many proposals survive; watch the count of objects covered in the readout.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> Suppose this network learned objectness from labelled boxes of people, pallets and cones. In its training images, forklifts were never labelled, so they counted as background. Before you press <em>3 Objectness</em>, decide: does the forklift light up?</p>
+
+<p>In the toy it does, a little dimmer than the others. The toy assumes that answer, so do not trust it yet; ViLD measured it, and the table at the end of this chapter has the real result. First, the machinery.</p>
+
+<h3>Stage one: a grid of features</h3>
+<p>A backbone network turns the image into a grid. Each cell holds a vector of numbers, its channels, that describes the patch of the image under it. The grid is coarse: one cell covers a square of many pixels, and the side of that square is the stride. ViLD uses a ResNet backbone with a feature pyramid network (FPN), which outputs several grids at different strides, so small objects get a fine grid and large objects a coarse one. The figure shows one grid.</p>
+
+<h3>Anchors: boxes fixed in advance</h3>
+<p>At every cell the detector places the same small set of reference boxes, called anchors: some small, some large, some tall, some wide. An anchor is not a prediction. It is a starting point that the network will score and correct.</p>
+
+<h3>The region proposal network: is there an object here?</h3>
+<p>The region proposal network (RPN) is a small convolutional head that slides over the grid. For every anchor at every cell it outputs two things. The first is an <strong>objectness</strong> score: the probability that the anchor covers some object, of any kind. The second is four <strong>box deltas</strong> that move and resize the anchor: <span class="tex">d_x, d_y</span> shift its centre by a fraction of its width and height, and <span class="tex">d_w, d_h</span> scale its width and height by <span class="tex">e^{d_w}</span> and <span class="tex">e^{d_h}</span>.</p>
+<p>In Faster R-CNN and Mask R-CNN, training labels each anchor by its overlap with the labelled boxes. An anchor that overlaps a labelled box well is a positive and gets that box as its regression target. An anchor that overlaps nothing is a negative. The class of the labelled box plays no part. This is the key fact for this act: the RPN learns what objects look like in general, not what they are called.</p>
+
+<h3>Top-k: from thousands of anchors to a short list</h3>
+<p>Most anchors score near zero. The detector applies the deltas, sorts all boxes by objectness, removes any box that overlaps a better-scoring box too much (non-maximum suppression, NMS), and keeps the top <span class="tex">k</span>. These survivors are the <strong>proposals</strong>. Move the slider in the figure: with too few proposals some objects are missed, and with many the list fills with fragments of background. The field grades this stage by <strong>recall</strong>: the share of real objects that at least one proposal covers.</p>
+
+<h3>Stage two: crop, then name</h3>
+<p>Each proposal now gets a small feature map of its own. <strong>RoIAlign</strong> cuts the proposal's rectangle out of the backbone grid and samples it on a fixed grid of bins, interpolating between cells, so the box edges need not fall on cell boundaries. The figure uses 7 x 7 bins; the size is a design choice of the detector. Every box, large or small, becomes a tensor of the same shape.</p>
+<p>A <strong>region head</strong>, a few fully connected layers, turns that tensor into one region feature. From it, the head computes refined box deltas, a mask in Mask R-CNN, and the class scores. The class scores are where the closed list lives: they come from the matrix <span class="tex">W</span> of chapter 1, one row per training class plus background. ViLD makes the box and mask outputs class-agnostic, one box and one mask per proposal for all classes (ViLD Sec. 3.1), so only the class scores depend on names.</p>
+
+<h3>Proposals do not need names</h3>
+<p>Back to the guess. An RPN trained on base classes treats an unlabelled forklift as background. Does it then miss forklifts at test time? ViLD measured this on LVIS with a ResNet-50 Mask R-CNN. It trained one RPN on the <span data-claim="vild-lvis-base">866</span> base classes and one on all classes, then measured how well each recovers objects of the <span data-claim="vild-lvis-novel">337</span> rare classes that the base-only RPN never saw labelled:</p>
+
+<table class="data">
+  <caption class="note" style="caption-side:bottom;text-align:left">ViLD Table 1 (2104.13921v3): box average recall on LVIS rare classes (ARr), with 100, 300 and 1000 proposals per image. Higher is better.</caption>
+  <thead><tr><th>RPN trained on</th><th>ARr@100</th><th>ARr@300</th><th>ARr@1000</th></tr></thead>
+  <tbody>
+    <tr><td>base classes only</td><td><span data-claim="vild-t1-base-ar100">39.3</span></td><td><span data-claim="vild-t1-base-ar300">48.3</span></td><td><span data-claim="vild-t1-base-ar1000">55.6</span></td></tr>
+    <tr><td>base and novel classes</td><td><span data-claim="vild-t1-basenovel-ar100">41.1</span></td><td><span data-claim="vild-t1-basenovel-ar300">50.9</span></td><td><span data-claim="vild-t1-basenovel-ar1000">57.0</span></td></tr>
+  </tbody>
+</table>
+
+<p>The base-only RPN is worse by about <span data-claim="vild-t1-gap">2</span> AR at every budget (Sec. 4.2): it boxes almost as many forklifts as an RPN that was shown them. Detic finds the same pattern with a different detector and a different recall measure: rare-class recall at IoU 0.5 with a thousand proposals is <span data-claim="detic-t8-rpn-base">78.5</span> for a base-only RPN and <span data-claim="detic-t8-rpn-all">79.7</span> for one trained on all classes (CenterNet2, Detic App. A, Table 8(a)). The two tables measure different things, so compare within each, never across.</p>
+<p>So the first stage already finds novel objects. They get lost in the second stage: the head has no row for them, and in training it learned to call them background. The next chapter fixes the second stage.</p>
+</section>

@@ -1,0 +1,272 @@
+[
+ {
+  "id": "llava15-connector",
+  "claim": "Connector change",
+  "value": "two-layer MLP replaces linear projection (activation and widths not stated in paper)",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3 (MLP vision-language connector)",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-resolution",
+  "claim": "Input resolution",
+  "value": "336x336 via CLIP-ViT-L-336px",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3 Additional scaling",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-tokens-336",
+  "claim": "Visual tokens per image at 336 px, patch 14 (COMPUTED)",
+  "value": "576 (24x24)",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "computed from 336/14",
+  "uncertain": true
+ },
+ {
+  "id": "llava15-format-prompt",
+  "claim": "Response formatting prompt for short answers",
+  "value": "Answer the question using a single word or phrase.",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.2 Response Format Prompting (plus Appendix data table)",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-format-prompt-mc",
+  "claim": "Response formatting prompt for multiple choice",
+  "value": "Answer with the option's letter from the given choices directly.",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-mixture-total",
+  "claim": "Instruction-tuning mixture size",
+  "value": "665K",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix Table Instruction-following Data Mixture, Total",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-pretrain-size",
+  "claim": "Pretraining sample size",
+  "value": "558K",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "academic comparison table, Pretrain column",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-total-data",
+  "claim": "Total training data",
+  "value": "1.2M publicly available",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-train-time",
+  "claim": "Training time",
+  "value": "~6 hours pretraining and ~20 hours instruction tuning on 8x A100 (~2x LLaVA); ~1 day per abstract",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3 Computational cost",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-hparams",
+  "claim": "Hyperparameters stage 1 / stage 2",
+  "value": "batch 256 / 128, lr 1e-3 / 2e-5, 1 epoch each",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix Hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-bench-count",
+  "claim": "Benchmarks: state-of-the-art claim",
+  "value": "SoTA across 11 benchmarks (abstract); 12 benchmarks evaluated (Sec. 4.1)",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Abstract; Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-academic-wins",
+  "claim": "Academic-task benchmarks: best on / second on",
+  "value": "best on 4/5, second on the other",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "academic comparison table caption",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-base",
+  "claim": "Ablation row 0: LLaVA 7B 224 (GQA / MME / MM-Vet)",
+  "value": "-- / 809.6 / 25.5",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 0",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-vqa",
+  "claim": "Ablation row 1: +VQA-v2",
+  "value": "47.0 / 1197.0 / 27.7",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 1",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-format",
+  "claim": "Ablation row 2: +Format prompt",
+  "value": "46.8 / 1323.8 / 26.3",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 2",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-mlp",
+  "claim": "Ablation row 3: +MLP VL connector",
+  "value": "47.3 / 1355.2 / 27.8",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 3",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-okvqa-ocr",
+  "claim": "Ablation row 4: +OKVQA/OCR",
+  "value": "50.0 / 1377.6 / 29.6",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 4",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-region",
+  "claim": "Ablation row 5: +Region-level VQA",
+  "value": "50.3 / 1426.5 / 30.8",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 5",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-res",
+  "claim": "Ablation row 6: +Scale up resolution (336)",
+  "value": "51.4 / 1450 / 30.3",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 6",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-gqa",
+  "claim": "Ablation row 7: +GQA (GQA train images seen)",
+  "value": "62.0 / 1469.2 / 30.7",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 7",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-sharegpt",
+  "claim": "Ablation row 8: +ShareGPT",
+  "value": "62.0 / 1510.7 / 31.1",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 8",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-abl-13b",
+  "claim": "Ablation row 9: +Scale up LLM to 13B",
+  "value": "63.3 / 1531.3 / 36.1",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table, row 9",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-instructblip-ref",
+  "claim": "InstructBLIP 14B reference row (GQA / MME / MM-Vet)",
+  "value": "49.5 / 1212.8 / 25.6",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Scaling results table",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-hd-grid",
+  "claim": "LLaVA-1.5-HD max resolution and grid set",
+  "value": "up to six grids (1x1..1x6, 2x2, 2x3 and transposes), max 672x448; base encoder CLIP-ViT-L-14 224; plus a downsampled global image",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix A.1 Target resolution selection",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-hd-res-table",
+  "claim": "HD resolution listed in results tables",
+  "value": "448^2",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "academic comparison table row LLaVA-1.5-HD",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-hd-vs-13b",
+  "claim": "13B vs 13B-HD MM-Vet",
+  "value": "36.1 vs 39.4",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "instruction-LMM comparison table",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-hd-mme",
+  "claim": "13B vs 13B-HD MME (HD is lower)",
+  "value": "1531.3 vs 1500.1",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "instruction-LMM comparison table",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-data-eff",
+  "claim": "Data efficiency: performance kept with 50% random subsample",
+  "value": "more than 98%",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 5.1",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-global-ctx",
+  "claim": "Global-context ablation 7B: MME patches-only vs +global",
+  "value": "1425.8 vs 1497.5",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "commented block in appendix source; not in published text",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-mixture-a-okvqa",
+  "claim": "Mixture example: A-OKVQA / VG / VQAv2 / GQA sizes",
+  "value": "66K / 86K / 83K / 72K",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix data mixture table",
+  "uncertain": false
+ }
+]

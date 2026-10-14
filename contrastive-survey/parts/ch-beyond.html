@@ -1,0 +1,258 @@
+<p class="kicker"><span class="act-n">Act IV</span>Beyond pairs</p>
+<section id="ch-beyond" class="chapter">
+<h2>Without negatives: clusters, redundancy, collapse</h2>
+<p>Negatives stop collapse, but they are expensive, and some of them are not really negatives. Can you stop collapse some other way? This chapter shows two ways that need no negatives at all, and then a quieter kind of collapse that even negatives do not prevent.</p>
+
+<h3>Why look for another way</h3>
+<p>Go back to the student from <a href="#ch-compare">chapter 1</a> who answers "same" to every question. Negatives fix the student by also asking "are these two different?". That fix has a price. MoCo keeps a queue of <span data-claim="swav-mocov2-queue">65,536</span> old embeddings (<a href="#ch-moco">chapter 4</a>). SimCLR's best results use a batch of <span data-claim="simclr-batch">4096</span> images (<a href="#ch-simclr">chapter 5</a>). And without labels, some "negatives" show the same kind of object as the anchor, so the loss pushes apart things that belong together (<a href="#ch-negatives">chapter 7</a>).</p>
+<p>So the real job of the negatives is to make collapse expensive. Any other rule that makes "everything is the same" a bad answer would do the same job. Here are two such rules.</p>
+
+<h3>First answer: sort the views into clusters</h3>
+<p>Give the network a small set of learnable vectors called <em>prototypes</em>. Think of them as bins. For each view, the network scores how well its embedding matches each prototype. A soft assignment of a view to the bins is its <em>code</em>: for example, "<span data-toy>70%</span> bin 1, <span data-toy>30%</span> bin 3".</p>
+<p>Now the game: compute the code of view 1, and ask the network to predict that code from view 2. Then swap the roles. This is <em>swapped prediction</em>. If the network can predict one view's bin from the other view, it must have kept what the two views share.</p>
+<p>You can probably see the trap. If every image goes into bin 1, every code is "100% bin 1", and the prediction is always right. That is collapse again, in a new form. So SwAV adds one rule: <em>within each batch, every bin must be used equally</em>. A batch of <span data-toy>8</span> images and <span data-toy>4</span> bins must put <span data-toy>2</span> images' worth of mass into each bin. Now "everything in bin 1" breaks the rule, so it is not allowed.</p>
+<p>How do you force equal use? The figure below starts from a score matrix where one prototype is winning almost everything. It has <span data-toy>4</span> prototypes as rows and <span data-toy>8</span> images as columns. Each cell is how much of an image's mass goes to a prototype; darker brown means more.</p>
+
+<figure class="viz" id="viz-sinkhorn" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Sinkhorn iterations">
+    <span class="lbl">Balance with</span>
+    <button type="button" id="btn-sinkhorn-0" aria-pressed="false">0 iterations</button>
+    <button type="button" id="btn-sinkhorn-1" aria-pressed="false">1 iteration</button>
+    <button type="button" id="btn-sinkhorn-2" aria-pressed="false">2 iterations</button>
+    <button type="button" id="btn-sinkhorn-3" aria-pressed="false">3 iterations</button>
+    <button type="button" id="btn-sinkhorn-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="sinkhorn-canvas" role="img" aria-label="A brown heatmap with 4 prototype rows and 8 image columns: the codes Q, which get no gradient. Row sums are printed to the right and column sums below, red when off target and green when on target. Before balancing, prototype 1 holds most of the mass. Each iteration rescales the rows to 0.25, then the columns to 0.125. A side panel compares image 1's code (brown bars) with the prediction from its second view (yellow bars) and prints the cross-entropy loss in red."></canvas>
+  <p class="readout" id="sinkhorn-readout" aria-live="polite"></p>
+  <figcaption>The scores are made up: 4 prototypes and 8 images instead of the paper's <span data-claim="swav-prototypes-k">3000</span> prototypes and a batch of <span data-claim="swav-batch">4096</span>. The arithmetic is SwAV's own (App. A.1 pseudocode): exponentiate the scores divided by eps = <span data-claim="swav-epsilon">0.05</span>, divide by the total, then in each iteration rescale every row to sum 1/K and every column to sum 1/B. The prediction uses a softmax with temperature <span data-claim="swav-tau">0.1</span> on image 1's second-view scores. Printed numbers are in <code>notes/sim-beyond.txt</code>.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "1 iteration".</b> One iteration rescales the rows, then the columns. Will every row then sum to exactly <span data-toy>0.250</span>?</p>
+<p>Press it. The columns are exact, because they were fixed last. The rows are close but not exact: fixing the columns undid a little of the row fix. Press "2 iterations" and "3 iterations": the row sums close in on <span data-toy>0.250</span> fast. Watch the top choices too. Before balancing, prototype 1 wins <span data-toy>6</span> of the <span data-toy>8</span> images. After balancing, all <span data-toy>4</span> prototypes are someone's top choice.</p>
+<p>You might expect the loss in the side panel to fall as the codes get balanced. In this toy it rises. Balancing changed the answer key: image 1's code no longer says "almost all prototype 1", but its second view still predicts prototype 1. Training then moves the network to match the new key. That is how the equal-use rule reaches the encoder.</p>
+
+<h3>The same idea as equations</h3>
+<p>First the loss. Each view <span class="tex">t</span> has a normalized embedding <span class="tex">\mathbf{z}_t</span>; its code is <span class="tex">\mathbf{q}_t</span>. The loss asks each view to predict the other view's code.</p>
+<div class="eq" id="eq-swav" data-build data-viz="viz-sinkhorn"><div class="tex tex-display">
+\begin{array}{l}
+\displaystyle L(\mathbf{z}_t, \mathbf{z}_s) = \htmlData{step=1, link=loss}{\htmlClass{t-red}{\ell(\mathbf{z}_t, \mathbf{q}_s) + \ell(\mathbf{z}_s, \mathbf{q}_t)}} \\[4pt]
+\displaystyle \ell(\mathbf{z}_t, \mathbf{q}_s) = - \sum_{k} \htmlData{step=2, link=code}{\htmlClass{t-brown}{\mathbf{q}_s^{(k)}}} \log \htmlData{step=3, link=pred}{\htmlClass{t-yellow}{\mathbf{p}_t^{(k)}}}, \quad \text{where} \quad \mathbf{p}_t^{(k)} = \frac{ \exp \left ( \frac{1}{\tau} \mathbf{z}_t^\top \mathbf{c}_k \right ) }{\sum_{k'} \exp \left ( \frac{1}{\tau} \mathbf{z}_t^\top \mathbf{c}_{k'} \right ) }
+\end{array}
+</div></div>
+<p class="eqno">Eq. 1 and Eq. 2 in Caron et al., "Unsupervised Learning of Visual Features by Contrasting Cluster Assignments" (SwAV), <a href="https://arxiv.org/abs/2006.09882v5">2006.09882v5</a>.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{c}_k</span>: prototype <span class="tex">k</span>, a learnable unit vector. SwAV uses <span data-claim="swav-prototypes-k">3000</span> of them, each <span data-claim="swav-feature-dim">128</span>-d.</li>
+  <li><span class="tex">\htmlClass{t-brown}{\mathbf{q}_s^{(k)}}</span>: the share of prototype <span class="tex">k</span> in the code of view <span class="tex">s</span>. Codes are computed with no gradient; the paper is careful to say it does not treat them as a target, only as a way to make the two views map consistently.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{\mathbf{p}_t^{(k)}}</span>: the softmax probability that view <span class="tex">t</span> belongs to prototype <span class="tex">k</span>, with temperature <span class="tex">\tau</span> = <span data-claim="swav-tau">0.1</span>.</li>
+  <li><span class="tex">\htmlClass{t-red}{\ell}</span>: the cross-entropy between a code and a prediction. Its gradient trains both the encoder and the prototypes.</li>
+</ul>
+<p>Try it with two prototypes. Say view <span class="tex">s</span> has code <span class="tex">\mathbf{q}_s = (0.8, 0.2)</span>, and view <span class="tex">t</span> scores <span class="tex">0.6</span> and <span class="tex">0.4</span> against the prototypes. Divide by <span class="tex">\tau = 0.1</span> to get <span class="tex">6</span> and <span class="tex">4</span>. The softmax gives <span class="tex">\mathbf{p}_t \approx (0.881, 0.119)</span>. The loss is <span class="tex">-(0.8 \ln 0.881 + 0.2 \ln 0.119) \approx 0.102 + 0.425 = 0.527</span>. Most of it comes from the second prototype: the code gives it <span class="tex">20\%</span>, but the prediction gives it only <span class="tex">12\%</span>.</p>
+
+<p>Next, the equal-use rule. Stack the codes of a batch into a matrix <span class="tex">\mathbf{Q}</span> with <span class="tex">K</span> rows (prototypes) and <span class="tex">B</span> columns (images), exactly as the figure draws it. <span class="tex">K</span> here is the number of prototypes, not MoCo's queue length (<a href="#ch-moco">chapter 4</a>). The rule says which matrices are allowed:</p>
+<div class="eq" id="eq-transport" data-build data-viz="viz-sinkhorn"><div class="tex tex-display">
+\mathcal{Q} = \left \{\mathbf{Q}\in\mathbb{R}_+^{K\times B} ~|~ \htmlData{step=1, link=rows}{\mathbf{Q} \mathbf{1}_B = \frac{1}{K} \mathbf{1}_K}, \htmlData{step=2, link=cols}{\mathbf{Q}^\top \mathbf{1}_K = \frac{1}{B} \mathbf{1}_B} \right \}
+</div></div>
+<p class="eqno">Eq. 4 in SwAV, <a href="https://arxiv.org/abs/2006.09882v5">2006.09882v5</a>.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{Q} \mathbf{1}_B = \frac{1}{K} \mathbf{1}_K</span>: every row sums to <span class="tex">1/K</span>. Each prototype gets an equal share of the batch. In the toy, that is the <span data-toy>0.250</span> target to the right of the matrix.</li>
+  <li><span class="tex">\mathbf{Q}^\top \mathbf{1}_K = \frac{1}{B} \mathbf{1}_B</span>: every column sums to <span class="tex">1/B</span>. Each image counts equally. In the toy, that is the <span data-toy>0.125</span> target below the matrix.</li>
+</ul>
+<p>Among the allowed matrices, SwAV wants the one that best agrees with the scores, kept a little soft. The answer has a closed form, which the figure computes:</p>
+<div class="eq" id="eq-sinkhorn" data-build data-viz="viz-sinkhorn"><div class="tex tex-display">
+\mathbf{Q}^*= \htmlData{step=3, link=rows}{\text{Diag}(\mathbf{u})} \htmlData{step=1, link=kernel}{\htmlClass{t-brown}{\exp\left(\frac{\mathbf{C}^\top \mathbf{Z}}{\htmlData{step=2, link=eps}{\varepsilon}} \right)}} \htmlData{step=4, link=cols}{\text{Diag}(\mathbf{v})}
+</div></div>
+<p class="eqno">Eq. 5 in SwAV, <a href="https://arxiv.org/abs/2006.09882v5">2006.09882v5</a>. It solves Eq. 3, <span class="tex">\max_{\mathbf{Q}\in\mathcal{Q}} \text{Tr}(\mathbf{Q}^\top \mathbf{C}^\top \mathbf{Z}) + \varepsilon H(\mathbf{Q})</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{C}^\top \mathbf{Z}</span>: the score of every image against every prototype (<span class="tex">K \times B</span>).</li>
+  <li><span class="tex">\varepsilon</span>: how soft the codes are. SwAV uses <span data-claim="swav-epsilon">0.05</span>. A small <span class="tex">\varepsilon</span> makes <span class="tex">\exp(\cdot / \varepsilon)</span> very peaked; the paper reports that a high <span class="tex">\varepsilon</span> leads to a trivial solution where all samples collapse.</li>
+  <li><span class="tex">\mathbf{u}, \mathbf{v}</span>: one scale per row and one per column. The Sinkhorn-Knopp algorithm finds them by the alternating rescaling you just watched.</li>
+</ul>
+<p>Try one iteration by hand with two prototypes and two images. Say <span class="tex">\exp(\cdot/\varepsilon)</span> gives rows <span class="tex">(6, 1)</span> and <span class="tex">(2, 1)</span>. Divide by the total, <span class="tex">10</span>: rows <span class="tex">(0.6, 0.1)</span> and <span class="tex">(0.2, 0.1)</span>. Both images prefer prototype 1.</p>
+<p>Rescale each row to sum <span class="tex">0.5</span>: <span class="tex">(0.429, 0.071)</span> and <span class="tex">(0.333, 0.167)</span>. Rescale each column to sum <span class="tex">0.5</span>: <span class="tex">(0.281, 0.150)</span> and <span class="tex">(0.219, 0.350)</span>. Image 2 now leans to prototype 2. The rows sum to <span class="tex">0.431</span> and <span class="tex">0.569</span>, so one iteration is not yet balanced.</p>
+
+<details class="check">
+  <summary>Check yourself: why does SwAV need the equal-use rule, if the loss already compares two views?</summary>
+  <p>Because comparing two views is exactly the pull from chapter 1, and pull alone collapses. Without the rule, sending every image to one prototype makes every code identical and every prediction perfect. The rule makes that answer illegal: within a batch, each prototype must take an equal share. So the rule plays the role that negatives play in InfoNCE.</p>
+</details>
+
+<h3>Second answer: make every feature say something different</h3>
+<p>Barlow Twins looks at the embedding from a different side. Do not compare images with images. Compare <em>features</em> with features.</p>
+<p>Imagine a committee of eight people, each watching both views of every photo. Each member must give the same answer for both views of a photo: that is invariance. But no two members may give answers that move together across photos: each must report something the others do not. A committee where everyone repeats the same thing is useless, even if each member is consistent.</p>
+<p>In numbers: take a batch, compute every feature for view A and view B, and measure how feature <span class="tex">i</span> of view A correlates with feature <span class="tex">j</span> of view B across the batch. That gives a square <em>cross-correlation matrix</em>. The goal is the identity matrix: 1 on the diagonal (each feature agrees across the views), 0 everywhere else (no two features carry the same information). The figure trains a small linear encoder toward that goal.</p>
+
+<figure class="viz" id="viz-barlow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Off-diagonal weight lambda">
+    <span class="lbl">Train with</span>
+    <button type="button" id="btn-barlow-l0" aria-pressed="false">lambda = 0</button>
+    <button type="button" id="btn-barlow-l002" aria-pressed="false">0.002</button>
+    <button type="button" id="btn-barlow-l005" aria-pressed="false">0.005</button>
+    <button type="button" id="btn-barlow-l020" aria-pressed="false">0.020</button>
+    <button type="button" id="btn-barlow-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="barlow-canvas" role="img" aria-label="An 8 by 8 heatmap of the cross-correlation between view A features (rows, blue labels) and view B features (columns, yellow labels). Diagonal cells fill green as they approach 1; off-diagonal cells fill red with their size. Two gauges show the mean diagonal and the off-diagonal size. With lambda 0 the diagonal turns green but the off-diagonal cells stay red. With lambda above 0 the matrix becomes the identity."></canvas>
+  <p class="readout" id="barlow-readout" aria-live="polite"></p>
+  <figcaption>A toy, trained live with the real Barlow Twins loss: 256 made-up inputs in 16 dimensions, two noisy views each, one shared linear layer to 8 features, 600 steps of Adam. Half the input dimensions are noisier between views than they are informative. The buttons give lambda on the paper's scale. The paper's lambda is tuned for <span data-claim="barlow-projector-dim">8192</span> features, with <span data-claim="barlow-offdiag-per-row">8191</span> off-diagonal entries in each row; the toy has 7, so it multiplies lambda by 8191 / 7 (our scaling, about 1170). Printed numbers are in <code>notes/sim-beyond.txt</code>.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "lambda = 0".</b> This trains with the diagonal term only. The diagonal will turn green. What will the off-diagonal cells do?</p>
+<p>Press it. The diagonal goes to almost 1, but the off-diagonal cells stay red. Every feature learned to ignore the view noise, and most of them did it the same way: they became near-copies of each other. Nothing collapsed to a point, yet the eight features hold far less than eight features' worth of information. Now press "0.005". The off-diagonal cells fade to almost 0, and the diagonal still rises. The matrix becomes the identity.</p>
+<p>The diagonal ends a little lower with a larger lambda. That is the trade the weight controls: the off-diagonal term is satisfied first, and the invariance term has less room. Try "0.020" to see the effect grow.</p>
+
+<h3>Barlow Twins as an equation</h3>
+<div class="eq" id="eq-barlow" data-build data-viz="viz-barlow"><div class="tex tex-display">
+\mathcal{L_{BT}} \triangleq \htmlData{step=1, link=diag}{\htmlClass{t-green}{\underbrace{\sum_i (1-\mathcal{C}_{ii})^2}_\text{invariance term}}} + ~~\htmlData{step=2, link=lambda}{\lambda} \htmlData{step=3, link=offdiag}{\htmlClass{t-red}{\underbrace{\sum_{i}\sum_{j \neq i} {\mathcal{C}_{ij}}^2}_\text{redundancy reduction term}}}
+</div></div>
+<p class="eqno">Eq. 1 in Zbontar et al., "Barlow Twins: Self-Supervised Learning via Redundancy Reduction", <a href="https://arxiv.org/abs/2103.03230v3">2103.03230v3</a>.</p>
+<div class="eq" id="eq-crosscorr" data-build data-viz="viz-barlow"><div class="tex tex-display">
+\htmlData{step=1, link=cell}{\mathcal{C}_{ij}} \triangleq \frac{\sum_b \htmlData{step=2, link=za}{\htmlClass{t-blue}{z^A_{b,i}}} \htmlData{step=3, link=zb}{\htmlClass{t-yellow}{z^B_{b,j}}}}{\sqrt{\sum_b {(z^A_{b,i})}^2} \sqrt{\sum_b {(z^B_{b,j})}^2}}
+</div></div>
+<p class="eqno">Eq. 2 in Barlow Twins, <a href="https://arxiv.org/abs/2103.03230v3">2103.03230v3</a>. The embeddings are mean-centered over the batch first.</p>
+<ul class="gloss">
+  <li><span class="tex">b</span>: indexes the images in the batch. <span class="tex">i, j</span>: index the features.</li>
+  <li><span class="tex">\htmlClass{t-blue}{z^A_{b,i}}</span>, <span class="tex">\htmlClass{t-yellow}{z^B_{b,j}}</span>: feature <span class="tex">i</span> of view A and feature <span class="tex">j</span> of view B, for image <span class="tex">b</span>.</li>
+  <li><span class="tex">\mathcal{C}_{ij}</span>: their correlation over the batch, between -1 and 1. The matrix is square, one row and one column per feature.</li>
+  <li><span class="tex">\htmlClass{t-green}{(1-\mathcal{C}_{ii})^2}</span>: zero when feature <span class="tex">i</span> agrees perfectly across the two views.</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{C}_{ij}^2}</span>, <span class="tex">i \neq j</span>: zero when two different features are uncorrelated. Note what is missing: no image is ever compared with another image, so there are no negatives.</li>
+  <li><span class="tex">\lambda</span>: the off-diagonal weight. The paper uses <span data-claim="barlow-lambda">0.005</span>, found by search.</li>
+</ul>
+<p>Try Eq. 2 on a batch of three images. Feature <span class="tex">i</span> of view A is <span class="tex">(1, 0, -1)</span> and feature <span class="tex">j</span> of view B is <span class="tex">(1, -1, 0)</span>; both already have mean zero. The top is <span class="tex">1 \cdot 1 + 0 \cdot (-1) + (-1) \cdot 0 = 1</span>. Each norm is <span class="tex">\sqrt{2}</span>, so <span class="tex">\mathcal{C}_{ij} = 1/2 = 0.5</span>: the two features move together half the time.</p>
+<p>Try it with two features. Say <span class="tex">\mathcal{C} = \begin{pmatrix} 0.9 &amp; 0.6 \\ 0.5 &amp; 0.8 \end{pmatrix}</span> and <span class="tex">\lambda = 0.005</span>. The invariance term is <span class="tex">(1-0.9)^2 + (1-0.8)^2 = 0.01 + 0.04 = 0.05</span>. The redundancy term is <span class="tex">0.6^2 + 0.5^2 = 0.61</span>, times <span class="tex">\lambda</span>: <span class="tex">0.00305</span>. Total: <span class="tex">0.05305</span>.</p>
+<p>Here the off-diagonal part barely counts. That looks wrong until you count entries. The paper's projector outputs <span data-claim="barlow-projector-dim">8192</span> features, so the matrix has <span data-claim="barlow-offdiag-count">67,100,672</span> off-diagonal entries against <span data-claim="barlow-projector-dim">8192</span> diagonal ones (our arithmetic). A small weight on a huge number of terms balances the two parts. That is why the toy, with only <span data-toy>56</span> off-diagonal entries, has to scale lambda up.</p>
+<p>Both terms are needed. In the paper's <span data-claim="barlow-ablation-epochs">300</span>-epoch ablation (ResNet-50, ImageNet linear probe, top-1), the full loss gives <span data-claim="barlow-ablation-baseline">71.4</span>. The invariance term alone gives <span data-claim="barlow-only-invariance">57.3</span>, and the redundancy term alone gives <span data-claim="barlow-only-redundancy">0.1</span> (Table 5). The paper sweeps lambda from <span data-claim="barlow-lambda-min">0.002</span> to <span data-claim="barlow-lambda-max">0.020</span> and calls the result not very sensitive (Fig. 5).</p>
+
+<details class="check">
+  <summary>Check yourself: why does the redundancy term alone score almost zero?</summary>
+  <p>Without the diagonal term, nothing asks the two views to agree. Features that are perfectly uncorrelated with each other are easy to get, for example from random noise, and they need not say anything about the image. Decorrelation stops the features from copying each other; invariance makes them about the image. You need both.</p>
+</details>
+
+<h3>A third answer: asymmetry and self-distillation</h3>
+<p>One more family uses no negatives and no balancing rule. It breaks the symmetry between the two branches instead. BYOL (<a href="https://arxiv.org/abs/2006.07733v3">2006.07733</a>) and SimSiam (<a href="https://arxiv.org/abs/2011.10566v1">2011.10566</a>) use two tools.</p>
+<ul>
+  <li>A <em>predictor</em>: a small extra network on one branch only. That branch must predict the other branch's embedding, instead of simply matching it.</li>
+  <li>A <b class="c-brown">stop-gradient</b> on the other branch: its output is used as the answer, but no gradient flows back through it. On this page brown always means "no gradient", like MoCo's key encoder in <a href="#ch-moco">chapter 4</a>.</li>
+</ul>
+<p>The intuition: without the stop-gradient, both branches are pulled toward each other, and the quickest way to agree is one shared constant. With it, the learning branch must predict an answer it cannot move. The constant is still a valid answer, yet in practice training does not fall into it. Why exactly is subtle; the <a href="../jepa-survey/explainer.html#ch-collapse">JEPA survey's collapse chapter</a> works it out with a live toy.</p>
+<p>BYOL also makes the answer branch a slow-moving average of the learning branch. That gives the idea its name. In <em>self-distillation</em>, a student network learns to match a slow-moving teacher copy of itself, as MoCo's key encoder does. DINO (<a href="https://arxiv.org/abs/2104.14294v2">2104.14294</a>) is self-distillation without negatives: the student matches the teacher's softmax output over many classes it invents, and two simple tricks on the teacher's output (centering and sharpening) stop collapse instead of a Sinkhorn step. VICReg (<a href="https://arxiv.org/abs/2105.04906v3">2105.04906</a>) goes back the other way and writes Barlow's idea as explicit variance, invariance and covariance terms.</p>
+
+<h3>A quieter failure: dimensional collapse</h3>
+<p>So far, collapse meant every image landing on one point. There is a milder version. The embeddings stay spread out, but only along a few directions. The other directions are flat: every image has almost the same value there. The embedding has many dimensions on paper and few in practice. This is <em>dimensional collapse</em>. You already saw a form of it: with lambda = 0, most of the eight Barlow features crowded into the same direction.</p>
+<p>Jing et al. found that contrastive methods with negatives suffer from it too, and they explained one cause. The figure shows it in three dimensions. Each blue point is one input passed through a trained linear layer. A few points also show their two views (blue and yellow, joined by a green line), so you can see how far apart the views land.</p>
+
+<figure class="viz" id="viz-dimcollapse" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Training setting">
+    <span class="lbl">Train</span>
+    <button type="button" id="btn-dim-healthy" aria-pressed="false">Healthy</button>
+    <button type="button" id="btn-dim-collapse" aria-pressed="false">Complete collapse</button>
+    <button type="button" id="btn-dim-dimensional" aria-pressed="false">Dimensional collapse</button>
+    <button type="button" id="btn-dim-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="dimcollapse-canvas" role="img" aria-label="A rotatable 3D cloud of blue embedding points with three labelled axes; axis 3 is vertical and is the one that gets strong augmentation. Ten points show their second view as a yellow dot joined by a green line. Healthy: the cloud stays round in all three directions. Complete collapse: the cloud shrinks to one point. Dimensional collapse: the cloud flattens into a horizontal pancake while staying wide in the other two directions."></canvas>
+  <canvas id="dimcollapse-bars-canvas" role="img" aria-label="Three bars on a log scale: the singular values of the embedding covariance. Healthy: three tall bars. Complete collapse: all three bars drop near the bottom. Dimensional collapse: two tall bars and one short bar marked collapsed."></canvas>
+  <p class="readout" id="dimcollapse-readout" aria-live="polite"></p>
+  <figcaption>A toy after Jing et al.'s single-layer model (their Sec. 4 and Fig. 3, which uses a <span data-claim="jing-toy1-size">16x16</span> layer). Inputs are standard Gaussian in 3-d; each view adds noise of variance 0.1 on axes 1 and 2 and of variance k on axis 3. A 3 x 3 linear layer, with no normalization, is trained for 300 steps of gradient descent. "Healthy" (k = 0.1) and "Dimensional collapse" (k = 2) use Jing's InfoNCE loss with squared distances (their Eq. 2; 64 inputs per batch). "Complete collapse" uses only the pull term from chapter 1, with no negatives. Unlike Jing's toy, axes 1 and 2 also get a little view noise, so the pull-only run has something to shrink. The bars are measured on 160 held-out inputs. Drag to rotate. Printed numbers are in <code>notes/sim-beyond.txt</code>.</figcaption>
+</figure>
+
+<p>Press "Healthy" first. The cloud stays round, and all three bars stay tall. Then press "Complete collapse": with the pull term alone, every direction shrinks and the cloud becomes a point, just as in chapter 1.</p>
+<p><b>Make a guess before you press "Dimensional collapse".</b> Now the views differ a lot along axis 3: the view noise there has variance <span data-toy>2</span>, twice the data's own variance of <span data-toy>1</span>. The loss rewards the network for making the two views agree. What is the cheapest thing it can do with axis 3?</p>
+<p>Press it. The network squashes axis 3. The cloud becomes a flat pancake. Two bars stay tall; the third drops about <span data-toy>30</span> times below them, but not to zero. The negatives still keep the cloud wide along axes 1 and 2, so this is not complete collapse. It is a dimension thrown away.</p>
+<p>Why does that happen? Along axis 3, most of the difference between two views is augmentation noise, not a difference between images. Squashing axis 3 removes more view disagreement than it removes useful spread. Along axes 1 and 2 the opposite holds, so those axes grow.</p>
+
+<h3>The same idea as equations</h3>
+<p>To see dimensional collapse in a real model, measure how spread out the embeddings are in each direction. Take the covariance matrix of the embeddings of many images, and look at its singular values in sorted order. That sorted list is the <em>spectrum</em>.</p>
+<div class="eq" id="eq-dimcov" data-build data-viz="viz-dimcollapse"><div class="tex tex-display">
+\htmlData{step=1, link=cov}{C = \frac{1}{N}\sum_{i=1}^N (\textbf{z}_i-\bar{\textbf{z}})(\textbf{z}_i-\bar{\textbf{z}})^T}, \qquad C = U \htmlData{step=2, link=sv}{\htmlClass{t-green}{S}} V^T
+</div></div>
+<p class="eqno">Eq. 1 in Jing et al., "Understanding Dimensional Collapse in Contrastive Self-supervised Learning", <a href="https://arxiv.org/abs/2110.09348v3">2110.09348v3</a>; the singular value decomposition is from the same paragraph (Sec. 3).</p>
+<ul class="gloss">
+  <li><span class="tex">\textbf{z}_i</span>: the embedding of image <span class="tex">i</span>; <span class="tex">\bar{\textbf{z}}</span>: the mean embedding; <span class="tex">N</span>: the number of images.</li>
+  <li><span class="tex">\htmlClass{t-green}{S}</span>: a diagonal matrix of singular values, one per direction. A singular value near zero is a direction in which every image looks the same: a collapsed dimension. The bars in the figure are these values.</li>
+</ul>
+<p>Try it with three 2-d embeddings: <span class="tex">(1, 0)</span>, <span class="tex">(-1, 0)</span> and <span class="tex">(0, 0)</span>. The mean is <span class="tex">(0, 0)</span>. The covariance is <span class="tex">\tfrac13 \begin{pmatrix} 2 &amp; 0 \\ 0 &amp; 0 \end{pmatrix}</span>, so the singular values are <span class="tex">2/3</span> and <span class="tex">0</span>. The second direction is collapsed: every image has the same second coordinate.</p>
+<p>The cause is a matrix Jing et al. call <span class="tex">X</span>. In a single linear layer trained with InfoNCE, the weights evolve as <span class="tex">\dot W = W X</span> (their Eq. 5 with Lemma 1), and <span class="tex">X</span> splits into two parts:</p>
+<div class="eq" id="eq-jingx" data-build data-viz="viz-dimcollapse"><div class="tex tex-display">
+X = \htmlData{step=1, link=cov}{\htmlClass{t-blue}{\hat{\Sigma}_0}} - \htmlData{step=2, link=aug}{\htmlClass{t-yellow}{\hat{\Sigma}_1}}
+</div></div>
+<p class="eqno">Eq. 7 (Lemma 2), Sec. 4.2 in Jing et al., <a href="https://arxiv.org/abs/2110.09348v3">2110.09348v3</a>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{\hat{\Sigma}_0}</span>: a weighted covariance of the differences between <em>different</em> images. The data's spread.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{\hat{\Sigma}_1}</span>: a weighted covariance of the differences between the two views of the <em>same</em> image. The augmentation's spread.</li>
+  <li>Where <span class="tex">X</span> has a negative eigenvalue (a direction in which <span class="tex">X</span> shrinks vectors instead of growing them), the weights shrink along that direction. Their Theorem 1: "With fixed matrix X ... and strong augmentation such that X has negative eigenvalues, the weight matrix W has vanishing singular values."</li>
+</ul>
+<p>Check it against the toy, ignoring the weights inside the two sums (our simplification). Along axis 1, the data spread is <span data-toy>1</span> and the view noise is <span data-toy>0.1</span>: <span class="tex">1 - 0.1 &gt; 0</span>, so the axis grows. Along axis 3 in the "dimensional" run, it is <span class="tex">1 - 2 &lt; 0</span>, so the axis shrinks. Jing's own toy sweeps the augmentation strength from <span data-claim="jing-toy1-k-min">0.1</span> to <span data-claim="jing-toy1-k-max">2</span> on a <span data-claim="jing-toy1-size">16x16</span> layer. Its augmented singular values drop sharply but stay above zero, like the third bar here. The theorem's "vanishing" is the limit.</p>
+<p>Strong augmentation is not the only cause. With two or more linear layers, small singular values also grow more slowly than large ones, so weak directions fall behind even with mild augmentation. The paper calls this <em>implicit regularization</em> (Sec. 5).</p>
+
+<h3>Where the collapse lives: the throwaway head</h3>
+<p>Jing et al. measured SimCLR on ImageNet after <span data-claim="jing-spectrum-epochs">100</span> epochs. In the <span data-claim="jing-spectrum-dim">128</span>-d embedding that the loss sees, a number of singular values drop to zero; the cliff sits near rank <span data-approx>about 95, read off their Fig. 2</span>. But the <span data-claim="jing-rep-dim">2048</span>-d representation before the projector stays healthy (their Fig. 7b). The projector takes the collapse, and the layer below keeps its dimensions.</p>
+<p>This is one explanation of a finding from <a href="#ch-simclr">chapter 5</a>: a small head used only for the loss, and thrown away after training, makes the features under it better. Jing et al. test it with ResNet-50, 100 epochs, linear probe top-1. SimCLR without a projector gets <span data-claim="jing-simclr-noproj">51.5</span>; with its usual two-layer projector, <span data-claim="jing-simclr-2layer">66.5</span>. Their DirectCLR drops the projector and applies the loss to a fixed slice of the representation instead, and gets <span data-claim="jing-directclr-top1">62.7</span> (Table 1).</p>
+
+<h3>How the methods compare, and why this table cannot rank them</h3>
+<p>Here is how the no-negative methods and two contrastive baselines report themselves on the standard benchmark. Read each row as "this paper's best recipe", not as one race.</p>
+<table class="data">
+  <thead><tr><th>Method</th><th>Linear top-1</th><th>Epochs</th><th>Batch</th><th>Multi-crop</th><th>Where</th></tr></thead>
+  <tbody>
+    <tr><td>SimCLR</td><td><span data-claim="simclr-own-r50-linear">69.3</span></td><td><span data-claim="simclr-sota-epochs">1000</span></td><td><span data-claim="simclr-batch">4096</span></td><td>no</td><td>SimCLR Table 6</td></tr>
+    <tr><td>MoCo v2</td><td><span data-claim="mocov2-own-r50-linear">71.1</span></td><td><span data-claim="mocov2-epochs-800">800</span></td><td><span data-claim="mocov2-batch-256">256</span></td><td>no</td><td>MoCo v2 Table 2</td></tr>
+    <tr><td>SwAV</td><td><span data-claim="swav-r50-linear-top1">75.3</span></td><td><span data-claim="swav-epochs">800</span></td><td><span data-claim="swav-batch">4096</span></td><td>yes, <span data-claim="swav-best-crops">2x224 + 6x96</span></td><td>SwAV Fig. 2 (left table)</td></tr>
+    <tr><td>BYOL</td><td><span data-claim="byol-r50-linear-top1">74.3</span></td><td><span data-claim="byol-epochs">1000</span></td><td><span data-claim="byol-batch">4096</span></td><td>no</td><td>BYOL Table 1a</td></tr>
+    <tr><td>SimSiam</td><td><span data-claim="simsiam-r50-linear-top1">71.3</span></td><td><span data-claim="simsiam-epochs-800">800</span></td><td><span data-claim="simsiam-batch-256">256</span></td><td>no</td><td>SimSiam Table 4</td></tr>
+    <tr><td>Barlow Twins</td><td><span data-claim="barlow-r50-linear-top1">73.2</span></td><td><span data-claim="barlow-epochs">1000</span></td><td><span data-claim="barlow-batch">2048</span></td><td>no</td><td>Barlow Twins Table 1</td></tr>
+    <tr><td>VICReg</td><td><span data-claim="vicreg-r50-linear-top1">73.2</span></td><td><span data-claim="vicreg-epochs-1000">1000</span></td><td><span data-claim="vicreg-batch-2048">2048</span></td><td>no</td><td>VICReg Table 1</td></tr>
+  </tbody>
+  <caption>ResNet-50 pretrained on ImageNet-1k without labels; a linear classifier on the frozen features; top-1 on the ImageNet validation set. Each number is from the method's own paper. Epochs, batch, crops, optimizer and the linear-probe recipe all differ between rows. Papers also print different values for the same baseline: SimCLR is <span data-claim="swav-fig2-simclr">70.0</span> in SwAV's Fig. 2 and <span data-claim="dino-t2-simclr">69.1</span> in DINO's Table 2; the <span data-claim="barlow-t1-swav-nomc">71.8</span> that Barlow Twins prints for SwAV without multi-crop matches SimSiam's reproduction (our reading), and SwAV never reports <span data-claim="barlow-t1-swav-nomc">71.8</span> for itself.</caption>
+</table>
+<p>The recipes differ, so the table cannot rank the losses: SwAV alone uses multi-crop, and without it SwAV reports <span data-claim="swav-no-multicrop-400ep">70.1</span> at <span data-claim="swav-nomc-epochs-400">400</span> epochs, next to <span data-claim="swav-simclr-reimpl-2x224-400ep">68.2</span> for its own SimCLR reimplementation (SwAV Fig. 3).</p>
+
+<h3>Where this came from</h3>
+<p>SwAV is by Caron et al. (<span data-claim="swav-venue">NeurIPS 2020</span>). It learns the prototypes together with the encoder and computes codes only from the full-resolution crops. The paper reports that <span data-claim="swav-sinkhorn-iters">3</span> Sinkhorn iterations are "fast and sufficient", taking <span data-claim="swav-sinkhorn-time">35ms</span> to align 4K features to 3K codes. With 1 iteration, training does not work: Table 14 lists it as "<span data-claim="swav-sinkhorn-1iter-fails">fail</span>", against <span data-claim="swav-sinkhorn-3iter-acc">73.9</span> with <span data-claim="swav-sinkhorn-iters">3</span> iterations (an ablation run, ResNet-50, ImageNet linear probe). Barlow Twins is by Zbontar et al. (<span data-claim="barlow-venue">ICML 2021</span>); its subtitle names the principle, redundancy reduction. Jing et al.'s analysis appeared at <span data-claim="jing-venue">ICLR 2022</span>.</p>
+<p>The self-distillation line from the step above then took over image-only pretraining: iBOT, DINOv2 and DINOv3 scale it to large vision transformers and web-scale data (<a href="https://arxiv.org/abs/2304.07193v2">2304.07193</a>, <a href="https://arxiv.org/abs/2508.10104v1">2508.10104</a>).</p>
+
+<h3>Where we go next: labels</h3>
+<p>Every method on this page so far has guessed which pairs belong together from augmentation alone. That guess is why false negatives exist, and why codes and decorrelation were needed. If you have labels, you can simply tell the loss which images share a class. <a href="#ch-supcon">Chapter 9</a> does that with the same InfoNCE machinery.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>How SwAV stops collapse with an equal-use rule on cluster codes, and what the Sinkhorn iterations do to the rows and columns.</li>
+    <li>Why Barlow Twins drives the cross-correlation matrix to the identity, and why it needs both the diagonal and the off-diagonal term.</li>
+    <li>What dimensional collapse is, why augmentation noise larger than the data's spread in one direction causes it, and why it shows up in the projector's output rather than in the representation below it.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>Check the spectrum of your embeddings, not only the loss. Embed a few thousand held-out images, compute the covariance, and plot its sorted singular values on a log scale: a cliff means collapsed dimensions. If you fine-tune with a contrastive or no-negative loss, take features from below the projection head, and be careful with augmentations that change one property much more than the data itself varies. For pretrained general-purpose features today, the self-distillation descendants of this line (DINOv2 and later) are the usual starting point.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-sinkhorn'), out = document.getElementById('sinkhorn-readout');
+  const kit = KIT.sinkhorn(document.getElementById('sinkhorn-canvas'), { fig });
+  const btns = [0, 1, 2, 3].map(n => document.getElementById('btn-sinkhorn-' + n));
+  const go = n => { kit.set(n); btns.forEach((b, i) => b.setAttribute('aria-pressed', String(i === n))); out.textContent = KIT.sinkhornText(n); };
+  btns.forEach((b, i) => b.addEventListener('click', () => go(i)));
+  document.getElementById('btn-sinkhorn-reset').addEventListener('click', () => { go(0); btns[0].setAttribute('aria-pressed', 'false'); });
+  go(0); btns[0].setAttribute('aria-pressed', 'false');
+})();
+(() => {
+  const fig = document.getElementById('viz-barlow'), out = document.getElementById('barlow-readout');
+  const kit = KIT.barlow(document.getElementById('barlow-canvas'), { fig });
+  const btns = { l0: 0, l002: .002, l005: .005, l020: .02 };
+  const go = lam => { kit.set(lam); Object.entries(btns).forEach(([k, v]) => document.getElementById('btn-barlow-' + k).setAttribute('aria-pressed', String(v === lam))); out.textContent = KIT.barlowText(lam); };
+  Object.entries(btns).forEach(([k, v]) => document.getElementById('btn-barlow-' + k).addEventListener('click', () => go(v)));
+  document.getElementById('btn-barlow-reset').addEventListener('click', () => go(null));
+  go(null);
+})();
+(() => {
+  const fig = document.getElementById('viz-dimcollapse'), out = document.getElementById('dimcollapse-readout');
+  const kit = KIT.dimcollapse(document.getElementById('dimcollapse-canvas'), document.getElementById('dimcollapse-bars-canvas'), { fig });
+  const modes = { healthy: 'healthy', collapse: 'complete', dimensional: 'dimensional' };
+  const go = mode => { kit.set(mode); Object.entries(modes).forEach(([k, v]) => document.getElementById('btn-dim-' + k).setAttribute('aria-pressed', String(v === mode))); out.textContent = KIT.dimcollapseText(mode); };
+  Object.entries(modes).forEach(([k, v]) => document.getElementById('btn-dim-' + k).addEventListener('click', () => go(v)));
+  document.getElementById('btn-dim-reset').addEventListener('click', () => go(null));
+  go(null);
+})();
+</script>
+</section>

@@ -1,0 +1,143 @@
+<section id="ch-padim" class="chapter">
+<h2>One Gaussian per patch position</h2>
+<p>When parts sit in the same place in every image, the patch at a given position always shows the same thing: a bolt hole here, plain metal there. PaDiM fits one Gaussian per patch position, so each patch is judged against what normally appears at its own position.</p>
+
+<style>
+#viz-padim .padim-row { display:grid; grid-template-columns:minmax(150px, 32%) 1fr; gap:.9rem; align-items:start; }
+#viz-padim canvas.pick { display:block; width:100%; border-radius:9px; background:var(--bg); cursor:crosshair; touch-action:none; }
+#viz-padim .padim-stage { position:relative; min-width:0; }
+@media (max-width: 560px) { #viz-padim .padim-row { grid-template-columns:1fr; } #viz-padim canvas.pick { max-width:220px; } }
+</style>
+<figure class="viz" id="viz-padim" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="padim-row">
+    <canvas id="cv-padim-pick" class="pick" tabindex="0" aria-label="The camera view of the cap under inspection, with a red heat map of Mahalanobis distances. A yellow box marks the selected patch position. Click a patch, or use the arrow keys, to choose another position."></canvas>
+    <div class="padim-stage">
+      <canvas id="cv-padim" aria-label="A three-dimensional view of one patch position. The floor is a feature plane (diagonal edges by brightness); blue dots are the features of 20 good caps at this position; a blue bell is the Gaussian fitted to them, and rings on the floor mark equal distance. The yellow test patch sits on the floor with a stem up to the bell, and a red line joins it to the mean. Drag to turn the view; drag the yellow point to move the test patch."></canvas>
+    </div>
+  </div>
+  <div class="controls" role="group" aria-label="Cap under inspection">
+    <span>Inspect</span>
+    <button type="button" id="btn-padim-hole" aria-pressed="true">A cap with a hole</button>
+    <button type="button" id="btn-padim-good" aria-pressed="false">A good cap</button>
+  </div>
+  <div class="controls" role="group" aria-label="Patch position">
+    <span>Position</span>
+    <button type="button" id="btn-padim-poshole" aria-pressed="true">Where the hole is</button>
+    <button type="button" id="btn-padim-posrim" aria-pressed="false">On the rim</button>
+    <button type="button" id="btn-padim-fool" aria-pressed="false">A patch that fools Euclidean distance</button>
+  </div>
+  <div class="controls" role="group" aria-label="Distance">
+    <span>Rings show</span>
+    <button type="button" id="btn-padim-maha" aria-pressed="true">Mahalanobis distance</button>
+    <button type="button" id="btn-padim-euclid" aria-pressed="false">Euclidean distance</button>
+    <button type="button" id="btn-padim-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. Each patch position of the toy cap gets its own two-dimensional Gaussian, fitted to the features of 20 good caps at that position (the same two toy features as before, with the paper's covariance term, epsilon = 0.01). Heights are the Gaussian density; the floor is rescaled per position so the bell always fits, and the readout gives the true distances.</figcaption>
+</figure>
+
+<p>Start at the position where the hole is. Normal patches at this position are plain metal and look alike, so they form a tight cluster, and the dark hole lands far outside it, by either distance. Now predict: <em>what did chapter 4's nearest-neighbor search say about this same patch?</em> The readout gives it: a near-perfect match, because the patch looks like a bolt hole, and bolt holes are normal elsewhere on the cap. On the toy cap, judging each patch at its own position lifts the image AUROC for holes from <span data-toy>0.573</span> to <span data-toy>0.950</span> (toy numbers, 20 holed and 20 good test caps).</p>
+
+<h3>Distance in units of normal spread</h3>
+<p>Euclidean distance treats every direction alike. But normal variation is rarely round: at a rim position, the edge direction of a patch varies a lot from cap to cap while its brightness hardly varies. A patch that differs a little in brightness is then more surprising than one that differs a lot in edge direction. Press "A patch that fools Euclidean distance": the probe sits on the first Euclidean ring, no farther from the mean than many normal patches, yet it lies far outside the narrow side of the bell. The Mahalanobis distance measures distance in units of the normal spread along each direction:</p>
+<div class="eq" id="eq-padim-maha" data-build data-viz="viz-padim"><div class="tex tex-display">
+\htmlData{step=1, link=maha}{M(\htmlClass{t-yellow}{x_{ij}})} = \sqrt{\htmlData{step=2, link=test}{(\htmlClass{t-yellow}{x_{ij}} - \htmlClass{t-blue}{\mu_{ij}})^T}\, \htmlData{step=3, link=cov}{\htmlClass{t-blue}{\Sigma_{ij}}^{-1}}\, (\htmlClass{t-yellow}{x_{ij}} - \htmlClass{t-blue}{\mu_{ij}})}
+</div></div>
+<p class="eqno">Eq. <span data-claim="padim-eq-maha">2</span> in PaDiM v1.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{x_{ij}}</span> is the test patch's feature vector at position <span class="tex">(i, j)</span>.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mu_{ij}}</span> and <span class="tex">\htmlClass{t-blue}{\Sigma_{ij}}</span> are the mean and covariance of the normal features at that position.</li>
+  <li>Multiplying by <span class="tex">\htmlClass{t-blue}{\Sigma_{ij}}^{-1}</span> divides each direction by its normal variance, so directions where normal patches barely vary count the most.</li>
+  <li>The anomaly map is <span class="tex">M</span> at every position, resized and smoothed with a Gaussian of width <span data-claim="padim-sigma">4</span>. The image score is the maximum of the map.</li>
+</ul>
+
+<h3>Fitting: a mean and a covariance per position</h3>
+<p>PaDiM (Defard et al., first posted <span data-claim="padim-published">2020-11-17</span>, accepted at an <span data-claim="padim-venue">ICPR 2020</span> workshop) runs the <span class="tex">N</span> normal images through a pretrained CNN once. At every position <span class="tex">(i, j)</span> it computes the sample mean of the <span class="tex">N</span> feature vectors, and their covariance:</p>
+<div class="eq" id="eq-padim-cov" data-build data-viz="viz-padim"><div class="tex tex-display">
+\htmlData{step=1, link=cov}{\htmlClass{t-blue}{\Sigma_{ij}}} = \htmlData{step=2, link=normals}{\frac{1}{N-1}\sum_{k=1}^{N} (\htmlClass{t-blue}{x^k_{ij}} - \htmlClass{t-blue}{\mu_{ij}})(\htmlClass{t-blue}{x^k_{ij}} - \htmlClass{t-blue}{\mu_{ij}})^T} + \htmlData{step=3, link=eps}{\epsilon I}
+</div></div>
+<p class="eqno">Eq. <span data-claim="padim-eq-cov">1</span> in PaDiM v1.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{x^k_{ij}}</span> is the feature vector of normal image <span class="tex">k</span> at position <span class="tex">(i, j)</span>; <span class="tex">\htmlClass{t-blue}{\mu_{ij}}</span> is their mean.</li>
+  <li>The sum is the ordinary sample covariance: how the feature dimensions vary, and vary together, across normal images.</li>
+  <li><span class="tex">\epsilon I</span> adds a small constant, <span class="tex">\epsilon</span> = <span data-claim="padim-eps">0.01</span>, to every variance. The paper says it makes the covariance "full rank and invertible".</li>
+</ul>
+<p>That last term is not cosmetic. An MVTec AD category has about <span data-claim="padim-mvtec-images-per-class">240</span> training images, but PaDiM's features have hundreds of dimensions. A sample covariance from fewer samples than dimensions is singular and cannot be inverted (our reading of why the paper needs the term). Nothing here is learned by gradient descent: fitting is averaging.</p>
+
+<h3>Which features</h3>
+<p>Each position's vector joins the outputs of the first three layers of the CNN. Fine and coarse layers see different things, and a full covariance can also capture how they vary <em>together</em>. Modeling that correlation adds <span data-claim="padim-abl-corr-gain-auroc">1.1</span> points of pixel AUROC and <span data-claim="padim-abl-corr-gain-pro">1.8</span> points of PRO over adding up three separate layer scores (Table I, ResNet18). With ResNet18 the joined vector has <span data-claim="padim-r18-dim">448</span> dimensions. PaDiM then keeps a random subset of them, chosen once before fitting: <span data-claim="padim-rd-r18">100</span> for ResNet18 and <span data-claim="padim-rd-wr50">550</span> for Wide-ResNet-50-2 (out of 1792, our reading of the layer widths). Surprisingly, random dimensions beat the principal components:</p>
+<table class="data">
+  <thead><tr><th>Dimensions kept (ResNet18)</th><th>Pixel AUROC</th><th>PRO</th></tr></thead>
+  <tbody>
+    <tr><td>Random 100</td><td><span data-claim="padim-red-rd100-auroc">96.7</span></td><td><span data-claim="padim-red-rd100-pro">90.5</span></td></tr>
+    <tr><td>PCA 100</td><td><span data-claim="padim-red-pca100-auroc">93.5</span></td><td><span data-claim="padim-red-pca100-pro">85.7</span></td></tr>
+    <tr><td>Random 200</td><td><span data-claim="padim-red-rd200-auroc">97.0</span></td><td><span data-claim="padim-red-rd200-pro">90.5</span></td></tr>
+    <tr><td>PCA 200</td><td><span data-claim="padim-red-pca200-auroc">95.7</span></td><td><span data-claim="padim-red-pca200-pro">89.3</span></td></tr>
+    <tr><td>All 448</td><td><span data-claim="padim-mvtec-pix-auroc-r18-full">97.1</span></td><td><span data-claim="padim-mvtec-pro-r18-full">90.8</span></td></tr>
+  </tbody>
+</table>
+<p class="note">PaDiM, Table II, MVTec AD, all classes. Random rows are averages over <span data-claim="padim-red-seeds">10</span> random draws.</p>
+<p>The paper's explanation: PCA keeps the directions with the most variance in normal data, and those are not necessarily the directions that separate defects. Our gloss on that: a defect often shows up in a direction where normal data barely varies, which is exactly what PCA throws away and what the Mahalanobis distance weights most.</p>
+
+<h3>How well it works</h3>
+<p>With Wide-ResNet-50-2 and 550 random dimensions, PaDiM reaches a pixel AUROC of <span data-claim="padim-mvtec-pix-auroc-wr50-rd550">97.5</span>, a PRO of <span data-claim="padim-mvtec-pro-wr50-rd550">92.1</span> and an image AUROC of <span data-claim="padim-mvtec-img-auroc-wr50-rd550">95.3</span> on MVTec AD (Tables III and V). With an EfficientNet-B5 backbone (layers <span data-claim="padim-effb5-layers">7, 20, 26</span>) the image AUROC is <span data-claim="padim-mvtec-img-auroc-effb5">97.9</span>; the paper gives no localization numbers for that backbone. On the texture categories, PaDiM beats SPADE by <span data-claim="padim-tex-gain-auroc">4.0</span> points of pixel AUROC and <span data-claim="padim-tex-gain-pro">4.8</span> points of PRO.</p>
+
+<h3>Does it need perfectly aligned parts?</h3>
+<p>The model assumes that position <span class="tex">(i, j)</span> shows the same part of the object in every image. The paper tests this directly. It builds a shifted copy of MVTec AD, Rd-MVTec AD, with a random rotation of up to <span data-claim="padim-rdmvtec-rotation">10</span> degrees and a random crop applied to training and test images, and compares pixel AUROC:</p>
+<table class="data">
+  <thead><tr><th>Method</th><th>MVTec AD</th><th>Rd-MVTec AD</th><th>Drop</th></tr></thead>
+  <tbody>
+    <tr><td>PaDiM (WR50, 550 dims)</td><td><span data-claim="padim-mvtec-pix-auroc-wr50-rd550">97.5</span></td><td><span data-claim="padim-rdmvtec-auroc">92.2</span></td><td><span data-claim="padim-rdmvtec-drop-padim">5.3</span></td></tr>
+    <tr><td>SPADE</td><td><span data-claim="spade-mvtec-pix-auroc">96.0</span></td><td><span data-claim="padim-rdmvtec-spade-auroc">87.2</span></td><td><span data-claim="padim-rdmvtec-drop-spade">8.8</span></td></tr>
+    <tr><td>VAE baseline</td><td><span data-claim="padim-t3-vae-pix-auroc">74.4</span></td><td><span data-claim="padim-rdmvtec-vae-auroc">62.1</span></td><td><span data-claim="padim-rdmvtec-drop-vae">12.2</span></td></tr>
+  </tbody>
+</table>
+<p class="note">PaDiM, Tables III and VI (Rd-MVTec AD values are means over five random versions). SPADE's MVTec AD value is from SPADE's own Table 2; PaDiM's Table III prints <span data-claim="padim-t3-spade-pix-auroc-printed">96.5</span> for it, which disagrees with its own per-class values. The Drop column gives the drops stated in PaDiM's text (Sec. V-C). For the VAE, subtracting the two table values gives 12.3 (our computation), not the stated <span data-claim="padim-rdmvtec-drop-vae">12.2</span>.</p>
+<p>Misalignment hurts every method, and PaDiM less than SPADE. The position prior helps on aligned parts but is not a hard requirement: the features themselves are fairly tolerant of small shifts. The toy cannot show this effect: rotating the toy caps by up to 10 degrees leaves the per-position model's hole detection intact, because the toy's two features barely change under small rotations.</p>
+
+<h3>What it costs</h3>
+<p>The test cost no longer depends on the training set: one matrix product per position, whatever <span class="tex">N</span> is. PaDiM's measured inference time is <span data-claim="padim-time-wr50-rd550">0.95</span> seconds per image against SPADE's <span data-claim="padim-time-spade">7.10</span>, both on a CPU (Table VII; the paper reports no GPU timing). Fitting takes about <span data-claim="padim-fit-time-mvtec">150</span> seconds per MVTec AD category, on a different CPU (a 72-thread server processor, serial implementation). The price is memory: Table VIII gives <span data-claim="padim-mem-wr50-rd550-mvtec">3.8</span> GB for the Wide-ResNet model. Our computation explains the number: each position stores a 550-dimensional mean and a 550 by 550 covariance, 303,050 numbers or about 1.2 MB in 32-bit floats, and 3,136 positions (a 56 by 56 grid) make 3.80 GB. The memory grows with image resolution and feature size, not with the number of training images.</p>
+<p>An earlier paper in this branch, Gaussian AD (<a href="https://arxiv.org/abs/2005.14140v2">arXiv 2005.14140</a>), fitted a Gaussian to the pooled features of whole images at each level of the network and summed the Mahalanobis distances. It scores images well, an image AUROC of <span data-claim="gaussian-ad-mvtec-img-auroc">95.8</span> on MVTec AD with EfficientNet-B4 (its best configuration, Table V of that paper), but has no map. PaDiM's step is to fit the Gaussians per position.</p>
+
+<h3>Inside PaDiM: forward, then backward</h3>
+<figure class="viz archflow" id="viz-padimflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-padimflow-image" aria-pressed="false">1 Images</button>
+    <button type="button" id="btn-padimflow-features" aria-pressed="false">2 Features</button>
+    <button type="button" id="btn-padimflow-concat" aria-pressed="false">3 Join</button>
+    <button type="button" id="btn-padimflow-select" aria-pressed="false">4 Random dims</button>
+    <button type="button" id="btn-padimflow-fit" aria-pressed="false">5 Fit</button>
+    <button type="button" id="btn-padimflow-score" aria-pressed="false">6 Score</button>
+    <button type="button" id="btn-padimflow-map" aria-pressed="false">7 Map</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-padimflow-backward" aria-pressed="false">8 Gradients</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model">
+    <span>model</span>
+    <button type="button" id="btn-padimflow-r18" aria-pressed="false">ResNet18, 100 dims</button>
+    <button type="button" id="btn-padimflow-wr50" aria-pressed="true">Wide-ResNet-50-2, 550 dims</button>
+  </div>
+  <canvas id="padimflow-canvas" role="img" aria-label="PaDiM as a diagram: normal images and the test image pass through a frozen CNN; layers 1 to 3 are joined on the finest grid and a random subset of dimensions is kept. For normal images a mean and covariance are stored for every position; for the test image a Mahalanobis distance is computed at every position, giving the anomaly map and its maximum as the image score. In the backward stage no arrow appears: nothing is trained."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-padimflow-prev">Previous</button>
+    <button type="button" id="btn-padimflow-next">Next</button>
+    <button type="button" id="btn-padimflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="padimflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>A <b class="c-brown">frozen</b> CNN describes every position; normal images fill a table of <b class="c-blue">Gaussians</b>, one per position; a test image is scored position by position. Press <b>1 Images</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. Images</h4><p>Resize to <span data-claim="padim-resize">256</span>, center crop to <span data-claim="padim-crop">224</span> (Sec. IV-B). The normal images go through once, at fitting time.</p></div>
+    <div data-stage="features" hidden><h4>2. Three layers of a frozen CNN</h4><p>For a ResNet, the first three layers. The paper does not list their channel widths or grid sizes; the diagram uses the standard widths for each network (our reading), and SPADE states the 56, 28 and 14 grids for the same input size.</p></div>
+    <div data-stage="concat" hidden><h4>3. Join on the finest grid</h4><p>Each coarse vector is shared by the finer positions it covers, so every position of the 56 by 56 grid gets one joined vector: 448 dimensions for ResNet18 (stated), 1792 for Wide-ResNet-50-2 (our reading).</p></div>
+    <div data-stage="select" hidden><h4>4. Keep random dimensions</h4><p>One random index set, drawn before fitting: 100 dimensions for ResNet18, 550 for Wide-ResNet-50-2. Table II shows that random beats PCA.</p></div>
+    <div data-stage="fit" hidden><h4>5. Fit one Gaussian per position</h4><p>Mean and covariance of the <span class="tex">N</span> normal vectors at each position, plus <span class="tex">\epsilon I</span> (Eq. 1). This table of Gaussians is all PaDiM stores, besides the CNN.</p></div>
+    <div data-stage="score" hidden><h4>6. Score each position</h4><p>The test vector at each position, its Mahalanobis distance to that position's Gaussian (Eq. 2): one inverse-covariance product per position.</p></div>
+    <div data-stage="map" hidden><h4>7. The map and the image score</h4><p>The grid of distances is resized with bicubic interpolation and smoothed (Gaussian, width 4). The image score is the maximum of the map.</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>Nowhere. The CNN is frozen; the means and covariances are computed in closed form. "No deep learning training is required" (Sec. V-D).</p></div>
+  </div>
+  <figcaption>Computed from the paper's configuration: input size, layer choice, the 448-dimensional ResNet18 vector, the 100 and 550 kept dimensions and epsilon are stated; channel widths, the 56 by 56 grid, 1792 dimensions and the storage per position are our computation from standard network widths.</figcaption>
+</figure>
+</section>

@@ -1,0 +1,30 @@
+  <article data-chapter="vision">
+    <header class="ch-head"><span class="num">9 of 10</span><h2>Vision Mamba, VMamba, and a counterpoint</h2><p class="subhead">An image has no single order</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">One scan</button><button type="button" role="tab" data-step="1">More routes</button><button type="button" role="tab" data-step="2">Is it long?</button></div>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Scan</span><button type="button" class="tool" data-scan="raster" aria-pressed="true">Raster</button><button type="button" class="tool" data-scan="vim" aria-pressed="false">Vim</button><button type="button" class="tool" data-scan="vmamba" aria-pressed="false">VMamba</button></div>
+      <label class="slider">Decay per step <input type="range" id="vision-atlas-decay" min="50" max="99" step="1" value="85"></label>
+      <label class="slider">Image size, 224 to 1248 pixels <input type="range" id="vision-atlas-res" min="0" max="32" step="1" value="0"></label>
+      <div class="row"><span>Patch</span><button type="button" class="tool" data-patch="8" aria-pressed="false">8 px</button><button type="button" class="tool" data-patch="16" aria-pressed="true">16 px</button><button type="button" class="tool" data-patch="32" aria-pressed="false">32 px</button></div>
+      <div class="row"><span>Width D</span><button type="button" class="tool" data-d="192" aria-pressed="false">192</button><button type="button" class="tool" data-d="384" aria-pressed="true">384</button><button type="button" class="tool" data-d="768" aria-pressed="false">768</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>A <button class="inline-term" data-open="vit">vision Transformer</button> cuts an image into a grid of <button class="inline-term" data-open="patch">patches</button>: 14 x 14 = 196 of them for a 224-pixel image with 16-pixel patches. It treats them as a sequence of tokens, and attention lets every patch look at every other.</p>
+      <p>A <button class="inline-term" data-open="ssm">state-space model</button> can read the same sequence, but it reads in order. With a <button class="inline-term" data-open="raster">raster scan</button>, row by row like text, a patch's output can only use patches that came before it. Click a patch to make it the green one: everything after it stays empty. The patch directly above is a whole row (14 steps) back and arrives faint. The last patch of the row above, at the far edge of the image, is closer in the sequence and counts more.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p><b>Vim</b> scans the same sequence twice, forward and backward, with two separate SSMs, and adds the results. Now every patch can reach every other, but vertical neighbours are still 14 steps away. <b>VMamba</b> adds two column routes, each with its own SSM. The patch above becomes one step away, and the heat turns into a cross.</p>
+      <p>Vim puts its <button class="inline-term" data-open="cls-token">class token</button> in the middle of the sequence, which scored 76.1% top-1 on ImageNet against 75.2% at the start. On 1248-pixel images (6084 tokens), Vim-Ti is 2.8x faster than DeiT-Ti, a vision Transformer of the same size, and uses 86.8% less GPU memory. VMamba reports a <button class="inline-term" data-open="erf">receptive field</button> that is more even and more two-dimensional than Vim's.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <p>MambaOut asks whether images need the SSM at all. In a Transformer block, attention's cost overtakes everything else only when the sequence is longer than six times the width D. ImageNet's 196 tokens are far below that. The large images of <button class="inline-term" data-open="detseg">detection and segmentation</button> give about 4K tokens, which is above it. Move the image size and the width to watch the verdict.</p>
+      <p>A model with Mamba's block but no SSM matched VMamba on ImageNet and fell behind on COCO and ADE20K (table). A second paper, MLLA, reads Mamba as linear attention with a forget gate. In its tests the forget gate (77.6 to 78.4% top-1) and Mamba's block design (80.9%) carried the gain, and a position encoding could do the forget gate's job (81.7%).</p>
+    </div>
+    <p class="note">The heat is a toy: one scan layer, one fixed decay per step, and where several routes reach a patch it shows the strongest. Real models stack many layers and choose the decay from the input. Vim adds its two outputs; VMamba's paper does not say how it merges its four. The token count and the threshold 6D are exact; the table gives MambaOut's own numbers.</p>
+    <table class="data"><thead><tr><th>MambaOut Tables 1 to 3</th><th class="n">ImageNet top-1</th><th class="n">COCO box AP</th><th class="n">ADE20K mIoU</th></tr></thead>
+      <tbody><tr><td>VMamba-T (with SSM)</td><td class="n">82.5</td><td class="n">47.4</td><td class="n">48.3</td></tr><tr><td>MambaOut-Tiny (no SSM)</td><td class="n">82.7</td><td class="n">45.1</td><td class="n">47.4</td></tr></tbody></table>
+    <p class="inscription">Scan an image more than one way and every patch can reach every other. Whether the scan earns its place depends on length: at 196 tokens a convolution does as well, at 4K tokens the SSM still helps.</p>
+    <button type="button" class="continue" data-go="limits">Continue with where SSMs still lose</button>
+  </article>

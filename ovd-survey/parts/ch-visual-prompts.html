@@ -1,0 +1,125 @@
+<p class="kicker"><span class="act-n">Act VI</span>When words run out</p>
+
+<section id="ch-visual-prompts" class="chapter">
+<h2>Show, do not tell: visual prompts</h2>
+<p>Every detector so far needs a name. Some factory parts have no name that a web-trained text encoder knows, so this chapter draws a box around one example and uses the box as the prompt.</p>
+<p class="note">Where the prompt enters: T-Rex2, the main model of this chapter, is a late-fusion model. A name or a box picks the decoder's starting queries and becomes a classifier row; the image encoder never sees the prompt (T-Rex2 Sec. 3.4).</p>
+
+<figure class="viz" id="viz-vprompt" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="vprompt-canvas" tabindex="0" role="img" aria-label="A drawn inspection tray with eight parts: three copies of an odd bent part with no common name (the third one dark and turned on its side), an angle bracket, two washers (one dark), a hex nut and a bolt. A prompt band at the top shows the typed name and the example box. On the right, three small bar charts show the text vector, the box vector and their average, and a list shows every part's score with a line at 0.5."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-vprompt-text" aria-pressed="true">Text prompt</button>
+    <button type="button" id="btn-vprompt-box" aria-pressed="false">Box prompt</button>
+    <button type="button" id="btn-vprompt-both" aria-pressed="false">Both, averaged</button>
+    <button type="button" id="btn-vprompt-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vprompt-readout" aria-live="polite"></p>
+  <figcaption>The detector boxes every part (blue corners). The prompt is the name you would type (yellow pill), a box on one example (yellow dashed), or the average of their two vectors. Each part has a toy embedding of 7 numbers; its score is the sigmoid of (cosine with the prompt minus 0.82) divided by 0.05, and a score of 0.5 claims the box (green corners). Brown dashed corners mark a part you wanted and missed; a red tag marks a false hit. Click a part, or focus the figure and use the arrow keys, to make it the example; its everyday name becomes the text prompt.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> The name <span class="prompt">bracket</span> finds the angle bracket, which is what the word means on the web, and misses the odd parts. Before you press <em>Box prompt</em>, look at odd part 3: it is dark and turned on its side. Will one box on odd part 1 find it?</p>
+
+<p>It does not. The box finds odd part 2, which looks like the example, and odd part 3 stays below the line. One example shows one look. Press <em>Both, averaged</em>: the name adds what all brackets share, odd part 3 crosses the line, and the angle bracket rises a little. Now click washer 1 and try the three modes again. For a part with a good name, the name alone is best, and the box only narrows it.</p>
+
+<h3>The first box prompt: an image as the query</h3>
+<p>Chapter 5 met this idea already. OWL-ViT scores every image token against a query embedding, and the query does not have to come from text. Give it a reference image with a box, and it runs its image tower on that image. Among the predicted boxes that overlap the query box with an IoU above <span data-claim="owlvit-oneshot-iou">0.65</span>, it keeps the embedding that is most unlike the others, because one foreground embedding stands out from many similar background ones. In about <span data-claim="owlvit-oneshot-fallback">10%</span> of cases no predicted box overlaps enough, and it falls back to a generic text query (App. A1.7).</p>
+<p>On COCO classes held out from training, this one-shot query reached <span data-claim="owlvit-oneshot-unseen-mean">41.8</span> AP50, against <span data-claim="owlvit-oneshot-ait-unseen-mean">24.3</span> for AIT, the best earlier one-shot detector (Table 2: means over four class splits, each split averaged over three runs). That model is a hybrid of ResNet-50 and ViT-H/32 at <span data-claim="prompts-owl-oneshot-res">960</span> pixels, not the CLIP L/14 model of chapter 5. With ten example images averaged per class, it reached <span data-claim="owlvit-oneshot-unseen-k10-mean">46.8</span>. The paper's Fig. 2 shows why this matters: the text query "luna moth" finds nothing, and an image of the moth as the query finds it.</p>
+
+<h3>T-Rex2: names and boxes in one space</h3>
+<p>T-Rex2 (2024) builds both kinds of prompt into one detector. Its body is DINO, a DETR-style detector with deformable attention and denoising queries (recap in the <a href="../detr-family/explainer.html#ch-denoising">DETR family explainer</a>), plus the language-guided query selection of Grounding DINO from chapter 9. A Swin backbone and <span data-claim="trex2-enc-layers">6</span> encoder layers make multi-scale image features. Two prompt encoders feed one classifier.</p>
+<p>The text side is simple. A <span data-claim="trex2-text-encoder">CLIP-B</span> text encoder turns each category name or short phrase into one vector <span class="tex">\htmlClass{t-yellow}{T}</span>. T-Rex2 fine-tunes this encoder, at the learning rate of the backbone, <span data-claim="trex2-lr-backbone">1e-5</span>.</p>
+<p>The box side needs more work, because a box is four numbers, not a picture. T-Rex2 turns each of the <span class="tex">K</span> boxes (or points) into a fixed sine-cosine position code, and a linear layer maps the code to the model width <span class="tex">D</span> (Eq. 1 and 2). Each box also gets a learned content vector, and one extra global query stands for the whole class (Eq. 3). Then each query looks at the image around its own box:</p>
+
+<div class="eq" id="eq-vpe" data-build data-viz="viz-vprompt"><div class="tex tex-display">
+\htmlData{step=1, link=exemplar}{Q'_j = \operatorname{MSDeformAttn}(Q_j,\ \htmlClass{t-yellow}{b_j},} \htmlData{step=2, link=features}{\{\htmlClass{t-blue}{\boldsymbol{f}_i}\}_{i=1}^L)}, \qquad \htmlData{step=3, link=visual}{\htmlClass{t-blue}{V}=\operatorname{FFN}(\operatorname{SelfAttn}(Q'))[-1]}
+</div></div>
+<p class="eqno">Box case of Eq. 4, and Eq. 5, in T-Rex2 (2403.14610v1). The point case puts the point <span class="tex">p_j</span> in place of <span class="tex">b_j</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">Q_j</span>: the query of the <span class="tex">j</span>-th box, its position code joined with the learned content vector.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{b_j}</span>: the user's box, <span class="tex">(x, y, w, h)</span> normalized. It is the reference location, so the query reads features near it.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\boldsymbol{f}_i}</span>: the encoder's feature map at scale <span class="tex">i</span>, for <span class="tex">L</span> scales.</li>
+  <li><span class="tex">\operatorname{MSDeformAttn}</span>: multi-scale deformable attention. Each query reads a few learned sampling points near its box instead of the whole image. The encoder stacks <span data-claim="trex2-vpe-layers">3</span> such layers.</li>
+  <li><span class="tex">\htmlClass{t-blue}{V}</span>: after self-attention among the <span class="tex">K+1</span> queries and a feed-forward layer (hidden width <span data-claim="trex2-vpe-ffn">1024</span>), the output of the global query (index <span class="tex">-1</span>, the last one) is the visual prompt embedding: one vector per class per image.</li>
+</ul>
+
+<p>From here on, a box prompt and a name are the same kind of object. Both become a row of the classifier, which is the swap this page started with in chapter 1:</p>
+
+<div class="eq" id="eq-trexcls" data-build data-viz="viz-vprompt"><div class="tex tex-display">
+\htmlData{step=1, link=scores}{\htmlClass{t-green}{\operatorname{Label}}} = \htmlData{step=2, link=visual}{\htmlClass{t-blue}{V}} \cdot \htmlData{step=3, link=regions}{Q_{dec}^T} : \mathbb{R}^{C \times D} \times \mathbb{R}^{D \times N} \rightarrow \mathbb{R}^{C \times N}
+</div></div>
+<p class="eqno">Eq. 8 in T-Rex2 (2403.14610v1). A text prompt uses <span class="tex">\htmlClass{t-yellow}{T}</span> in place of <span class="tex">\htmlClass{t-blue}{V}</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{V}</span>: the prompt embeddings, one row per class, <span class="tex">C \times D</span>. The paper does not state <span class="tex">D</span>.</li>
+  <li><span class="tex">Q_{dec}</span>: the features of the decoder's <span class="tex">N</span> queries, one per candidate box. The top <span data-claim="trex2-queries">900</span> encoder tokens by similarity to the prompts set their starting boxes.</li>
+  <li><span class="tex">\htmlClass{t-green}{\operatorname{Label}}</span>: every candidate box scored against every prompt, <span class="tex">C \times N</span>. In the toy, these are the score bars.</li>
+</ul>
+
+<p>Training alternates between the two prompt types: one iteration uses names, the next uses boxes. In a box iteration the prompts come from the training image itself. For each category, the model takes one to all of its ground-truth boxes, and with a <span data-claim="trex2-point-prob">50%</span> chance it turns them into center points (Sec. 3.3). A contrastive loss ties the two prompt types together. For the <span class="tex">K</span> prompted regions of an image, it pulls each region's visual embedding toward the text embedding of its class and away from the other classes' text:</p>
+
+<div class="eq" id="eq-trexalign" data-build data-viz="viz-vprompt"><div class="tex tex-display">
+\htmlData{step=1, link=align}{\htmlClass{t-red}{\mathcal{L}_{align}} = -\frac{1}{K} \sum_{i=1}^K \log} \frac{\exp(\htmlData{step=2, link=visual}{\htmlClass{t-blue}{v_i}} \cdot \htmlData{step=3, link=text}{\htmlClass{t-yellow}{t_i}})}{\sum_{j=1}^K \exp(\htmlClass{t-blue}{v_i} \cdot \htmlClass{t-yellow}{t_j})}
+</div></div>
+<p class="eqno">Eq. 9 in T-Rex2 (2403.14610v1).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{v_i}</span>: the visual prompt embedding of region <span class="tex">i</span>.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{t_i}</span>: the text embedding of the class name of region <span class="tex">i</span>; the <span class="tex">\htmlClass{t-yellow}{t_j}</span> are the class names of the other regions in the same image.</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{align}}</span>: a softmax over the <span class="tex">K</span> text embeddings, in one direction (visual to text), with no temperature written. The paper calls it a mutual distillation (Sec. 3.2). Without it, the two embeddings of one class sit apart, and the name prompts score lower (Table 4).</li>
+</ul>
+
+<p>Once trained, a class can be prompted three ways: with the name only, with boxes only, or with both. With boxes only, the generic mode (Visual-G) averages the visual embeddings of <span class="tex">n</span> example boxes, each from a different image (Eq. 11). With both, it averages the two vectors (Eq. 12):</p>
+
+<div class="eq" id="eq-trexmix" data-build data-viz="viz-vprompt"><div class="tex tex-display">
+\htmlData{step=1, link=visual}{\htmlClass{t-blue}{V} = \frac{1}{n} \sum_{i=1}^{n} V_i}, \qquad \htmlData{step=2, link=mixed}{P_{\text{mixed}} = \frac{\htmlClass{t-yellow}{T} + \htmlClass{t-blue}{V}}{2}}
+</div></div>
+<p class="eqno">Eq. 11 and 12 in T-Rex2 (2403.14610v1).</p>
+<ul class="gloss">
+  <li><span class="tex">V_i</span>: the visual embedding from example image <span class="tex">i</span>, for <span class="tex">n</span> examples. The paper's default is <span data-claim="trex2-visualg-n">16</span>.</li>
+  <li><span class="tex">P_{\text{mixed}}</span>: the average of the name's vector and the box vector. It takes the place of <span class="tex">\htmlClass{t-blue}{V}</span> in Eq. 8, as in the toy's <em>Both</em> mode.</li>
+</ul>
+
+<h3>What the benchmarks say</h3>
+<p>Read T-Rex2's box-prompt numbers with their setting in mind. Visual-G takes <span data-claim="trex2-visualg-n">16</span> images per class from each benchmark's training split, with one labelled box each, and averages their embeddings (Sec. 4.3). The weights do not change, so the paper calls the result zero-shot. <span class="reading">our reading</span> It is zero-shot for the weights, but it uses <span data-claim="trex2-visualg-n">16</span> labelled examples per class that a name never sees, so it is closer to a few-shot method than to a text prompt. With one example instead, Visual-G scores <span data-claim="trex2-nprompts-1-coco">29.2</span> AP on COCO, against <span data-claim="trex2-swint-text-coco">45.8</span> for the names (Swin-T, Tables 5 and 1).</p>
+
+<figure class="viz" id="viz-vpbench">
+  <span class="badge sourced">Sourced</span>
+  <canvas id="vpbench-canvas" role="img" aria-label="Three bar-chart panels, each with its own axis. Each group of bars compares a name prompt (yellow) with a box or image prompt (blue), and optionally both averaged (outlined). Left, T-Rex2 Swin-T: LVIS val rare APr, LVIS minival rare APr, the original Roboflow100 AP and COCO AP. Middle, RF100-VL with MQ-GLIP: all datasets and industrial datasets. Right, FSOD-VLM on nuImages with MQ-GLIP: the rarest classes and all classes."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-vpbench-pair" aria-pressed="true">Name against box</button>
+    <button type="button" id="btn-vpbench-mixed" aria-pressed="false">Add name plus box</button>
+    <button type="button" id="btn-vpbench-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vpbench-readout" aria-live="polite"></p>
+  <figcaption>Each panel has its own axis and each group its own metric, so compare bars inside a group only. Left: T-Rex2 Swin-T, Table 1 (names against Visual-G) and Table 8 (both, reported for LVIS val and COCO only); its Roboflow100 is the original RF100, not RF100-VL. Middle: RF100-VL Table 2, MQ-GLIP on a frozen GLIP with a Swin-L backbone: names zero-shot, then images and names plus images with <span data-claim="rf100vl-kshot">10</span> examples per class, all in context with no training. Right: FSOD-VLM Table 3 on nuImages, the same three MQ-GLIP modes with <span data-claim="prompts-fsod-kshot">10</span> examples per class; the Few cohort holds the classes with the fewest examples. RF100-VL reports pycocotools AP; APr is AP on the LVIS rare classes.</figcaption>
+</figure>
+
+<p>The left panel holds T-Rex2's headline claim: names for common classes, boxes for rare ones. On LVIS val, Visual-G beats the names on the rare classes, <span data-claim="trex2-swint-visualg-lvisval-apr">32.4</span> against <span data-claim="trex2-swint-text-lvisval-apr">29.0</span> APr, and a per-class count agrees: the box wins on <span data-claim="trex2-fig4-rare-visual-wins">253</span> rare classes and the name on <span data-claim="trex2-fig4-rare-text-wins">84</span> (Fig. 4). On LVIS minival the same model flips: names <span data-claim="trex2-swint-text-lvismv-apr">37.4</span>, boxes <span data-claim="trex2-swint-visualg-lvismv-apr">29.9</span>. Swin-L flips the same way (val <span data-claim="trex2-swinl-visualg-lvisval-apr">43.8</span> for boxes against <span data-claim="trex2-swinl-text-lvisval-apr">42.7</span> for names; minival <span data-claim="trex2-swinl-visualg-lvismv-apr">45.4</span> against <span data-claim="trex2-swinl-text-lvismv-apr">49.2</span>). The two splits are not comparable: val has <span data-claim="trex2-lvis-val-rare-count">337</span> rare classes and minival only <span data-claim="trex2-lvis-minival-rare-count">70</span>.</p>
+<p>Part of the val gap comes from the names getting worse, not from the boxes getting better. A T-Rex2 trained on text alone scores <span data-claim="trex2-abl-textonly-text-lvis-apr">32.1</span> APr on LVIS val with names; joint training brings its names down to <span data-claim="trex2-abl-align-text-lvis-apr">29.0</span> (Table 4). So the text-only model's names nearly match the joint model's boxes.</p>
+<p>Away from LVIS, T-Rex2's boxes win clearly. On ODinW-35 the median dataset rises from <span data-claim="trex2-swint-text-odinw-med">4.7</span> AP with names to <span data-claim="trex2-swint-visualg-odinw-med">17.5</span> with boxes. On the original Roboflow100, the mean rises from <span data-claim="trex2-swint-text-rf100-avg">8.2</span> to <span data-claim="trex2-swint-visualg-rf100-avg">17.4</span> (Swin-L: <span data-claim="trex2-swinl-text-rf100-avg">10.5</span> to <span data-claim="trex2-swinl-visualg-rf100-avg">18.5</span>). <span class="reading">our reading</span> These collections are full of class names that a web-trained model does not know, so labelled examples help more there than on LVIS.</p>
+<p>The middle and right panels test a different visual-prompt model on different benchmarks; neither paper tests T-Rex2. Both use MQ-GLIP, which adds MQ-Det's image-prompt module to a frozen GLIP and takes <span data-claim="rf100vl-kshot">10</span> examples per class in context, with no training. In RF100-VL, images alone scored <span data-claim="rf100vl-mqglip-image-10shot-all">6.4</span> AP over <span data-claim="rf100vl-n-datasets">100</span> datasets, against <span data-claim="rf100vl-mqglip-text-zs-all">12.2</span> for the class names; on its <span data-claim="rf100vl-ndatasets-industrial">22</span> industrial datasets, <span data-claim="rf100vl-mqglip-image-10shot-industrial">3.9</span> against <span data-claim="rf100vl-mqglip-text-zs-industrial">7.8</span>. In FSOD-VLM on nuImages, the rarest classes (the Few cohort) scored <span data-claim="fsod-vlm-mqglip-image-few">3.34</span> AP with images and <span data-claim="fsod-vlm-mqglip-text-few">8.41</span> with names. For this model, the rarest classes are where images alone did worst.</p>
+<p>Adding the name back helps or changes nothing. Names plus images give <span data-claim="rf100vl-mqglip-mm-10shot-all">12.2</span> in RF100-VL, the same as names alone, and <span data-claim="fsod-vlm-mqglip-mm-few">10.26</span> on the nuImages Few cohort, above both single prompts (over all <span data-claim="fsod-vlm-nuimages-classes">18</span> classes: <span data-claim="fsod-vlm-mqglip-mm">21.42</span> against <span data-claim="fsod-vlm-mqglip-text">17.01</span> for names and <span data-claim="fsod-vlm-mqglip-image">14.07</span> for images). T-Rex2 shows the same gain on LVIS val rare classes (<span data-claim="trex2-mixed-lvis-apr">34.3</span> APr for both) and a loss on COCO, where both scores <span data-claim="trex2-mixed-coco">42.5</span> AP and names alone <span data-claim="trex2-swint-text-coco">45.8</span>. The paper says so itself: visual prompts "may sometimes interfere with text prompts, especially in scenarios involving common objects" (Sec. 5).</p>
+<p><span class="reading">our reading</span> "Box prompts help" is a property of a model and a benchmark, not of boxes. T-Rex2 trains its box encoder on <span data-claim="trex2-vis-data-labeled">2.4M</span> labelled images plus <span data-claim="trex2-vis-data-pseudo">0.65M</span> pseudo-labelled ones; MQ-GLIP adds a small module to a frozen detector. Before you trust box prompts for a factory part, test the model you will deploy on your own parts, against a name and against a short fine-tune.</p>
+
+<div class="claimcard">
+  <h4>Claim: box prompts beat names on rare classes (T-Rex2)</h4>
+  <dl>
+    <dt>Claim</dt><dd>Text prompts suit common classes and visual prompts suit rare ones (T-Rex2 Sec. 4.4, Fig. 4).</dd>
+    <dt>Measured</dt><dd>Same weights. LVIS rare-class APr with all class names as prompts, against Visual-G (<span data-claim="trex2-visualg-n">16</span> training-set boxes per class, averaged); Swin-T and Swin-L (Table 1).</dd>
+    <dt>Result</dt><dd>Holds on LVIS val (<span data-claim="trex2-swint-visualg-lvisval-apr">32.4</span> against <span data-claim="trex2-swint-text-lvisval-apr">29.0</span>); flips on LVIS minival (<span data-claim="trex2-swint-visualg-lvismv-apr">29.9</span> against <span data-claim="trex2-swint-text-lvismv-apr">37.4</span>). A different model, MQ-GLIP with image examples, loses to names on the rarest nuImages classes (<span data-claim="fsod-vlm-mqglip-image-few">3.34</span> against <span data-claim="fsod-vlm-mqglip-text-few">8.41</span>).</dd>
+    <dt>Would falsify</dt><dd>Box prompts at or below names on rare classes. Minival and MQ-GLIP both show this, so the claim holds for one split of one model.</dd>
+  </dl>
+</div>
+
+<div class="claimcard">
+  <h4>Claim: names and boxes complement each other</h4>
+  <dl>
+    <dt>Claim</dt><dd>Averaging the name vector and the box vector beats either prompt alone (T-Rex2 Sec. 5, Eq. 12).</dd>
+    <dt>Measured</dt><dd>T-Rex2 Swin-T, Table 8 (LVIS val and COCO); MQ-GLIP names plus image examples in RF100-VL Table 2 and FSOD-VLM Table 3.</dd>
+    <dt>Result</dt><dd>Better than names on LVIS val rare (<span data-claim="trex2-mixed-lvis-apr">34.3</span> against <span data-claim="trex2-swint-text-lvisval-apr">29.0</span>) and the nuImages Few cohort (<span data-claim="fsod-vlm-mqglip-mm-few">10.26</span> against <span data-claim="fsod-vlm-mqglip-text-few">8.41</span>); equal in RF100-VL (<span data-claim="rf100vl-mqglip-mm-10shot-all">12.2</span>); worse on COCO (<span data-claim="trex2-mixed-coco">42.5</span> against <span data-claim="trex2-swint-text-coco">45.8</span>).</dd>
+    <dt>Would falsify</dt><dd>The average below the better single prompt. COCO shows this: for common, well-named classes, the box narrows a name that already worked.</dd>
+  </dl>
+</div>
+
+<p>Box prompts now also reach real-time detectors. YOLOE (<span data-claim="yoloe-venue">ICCV 2025</span>), whose design roadmap starts from YOLO-World (chapter 10), keeps one classifier: a dot product between each anchor's object embedding and a prompt embedding. Only the way it makes the prompt changes. A name goes through a small network that folds into the last convolution after training. A box or mask goes through a light two-branch encoder (SAVPE). With no prompt at all, one learned embedding fires on every object, and a built-in list of <span data-claim="yoloe-vocab">4585</span> names labels it (LRPC). YOLOE also drops YOLO-World's text fusion in the neck, so names and boxes enter only at the classifier, as in T-Rex2.</p>
+<p>So a box is a real answer when a part has no name, with two conditions: the model's box encoder must be good, and you need more than one example to cover how the part varies. Chapter 12 asks the next question: once you have ten labelled examples, should you prompt with them or fine-tune on them?</p>
+</section>

@@ -1,0 +1,31 @@
+viz-gptq node simulation (parts/kit/71-gptq.js in node; run 2026-10-10).
+Toy: W 8 x 16 N(0, 0.5^2), seed 21; X 16 x 64, each channel = scale_i * (sum of 4 shared Gaussian signals with random weights + 0.35 noise) / 2 (correlated inputs).
+H = 2 X X^T + lambda I, lambda = 0.01 * mean diag(H) = 1.1896. U = upper Cholesky factor of H^-1. Grid per row asymmetric min-max (0 included), fixed before the loop. Block B = 4.
+Checks: codes identical for B = 1, 4, 16 (max diff 0). Sequential OBS form (GPTQ Eq. 2 with Eq. 3 inverse updates, plain inverse) gives identical codes to Algorithm 1 with U (max diff 0).
+Output error = ||W X - W' X||_F^2 (Eq. 1) with the first j columns quantized and the rest as updated (GPTQ) or original (RTN).
+GPTQ 4-bit lambda 1.1896 max code diff B=1/4/16: 0
+  GPTQ, 4-bit: nothing quantized yet. Both methods use the same per-row grid; GPTQ will end at an output error of 1.62, round to nearest at 8.79.
+  GPTQ, 4-bit, 1 of 16 columns quantized: output error so far 0.05 (the other method at this point: 0.851).
+  GPTQ, 4-bit, 2 of 16 columns quantized: output error so far 0.052 (the other method at this point: 0.911).
+  GPTQ, 4-bit, 4 of 16 columns quantized: output error so far 0.188 (the other method at this point: 3.03).
+  GPTQ, 4-bit, 8 of 16 columns quantized: output error so far 0.334 (the other method at this point: 4.27).
+  GPTQ, 4-bit, 16 of 16 columns quantized: output error so far 1.62 (the other method at this point: 8.79). Final: GPTQ 1.62 against 8.79, 5.4x lower on the same grid.
+  Round to nearest, 4-bit: nothing quantized yet. Both methods use the same per-row grid; GPTQ will end at an output error of 1.62, round to nearest at 8.79.
+  Round to nearest, 4-bit, 1 of 16 columns quantized: output error so far 0.851 (the other method at this point: 0.05).
+  Round to nearest, 4-bit, 2 of 16 columns quantized: output error so far 0.911 (the other method at this point: 0.052).
+  Round to nearest, 4-bit, 4 of 16 columns quantized: output error so far 3.03 (the other method at this point: 0.188).
+  Round to nearest, 4-bit, 8 of 16 columns quantized: output error so far 4.27 (the other method at this point: 0.334).
+  Round to nearest, 4-bit, 16 of 16 columns quantized: output error so far 8.79 (the other method at this point: 1.62). Final: GPTQ 1.62 against 8.79, 5.4x lower on the same grid.
+GPTQ 3-bit lambda 1.1896 max code diff B=1/4/16: 0
+  GPTQ, 3-bit: nothing quantized yet. Both methods use the same per-row grid; GPTQ will end at an output error of 9.89, round to nearest at 39.92.
+  GPTQ, 3-bit, 1 of 16 columns quantized: output error so far 0.181 (the other method at this point: 3.05).
+  GPTQ, 3-bit, 2 of 16 columns quantized: output error so far 0.208 (the other method at this point: 3.39).
+  GPTQ, 3-bit, 4 of 16 columns quantized: output error so far 0.447 (the other method at this point: 7.75).
+  GPTQ, 3-bit, 8 of 16 columns quantized: output error so far 1.38 (the other method at this point: 18.84).
+  GPTQ, 3-bit, 16 of 16 columns quantized: output error so far 9.89 (the other method at this point: 39.92). Final: GPTQ 9.89 against 39.92, 4.0x lower on the same grid.
+  Round to nearest, 3-bit: nothing quantized yet. Both methods use the same per-row grid; GPTQ will end at an output error of 9.89, round to nearest at 39.92.
+  Round to nearest, 3-bit, 1 of 16 columns quantized: output error so far 3.05 (the other method at this point: 0.181).
+  Round to nearest, 3-bit, 2 of 16 columns quantized: output error so far 3.39 (the other method at this point: 0.208).
+  Round to nearest, 3-bit, 4 of 16 columns quantized: output error so far 7.75 (the other method at this point: 0.447).
+  Round to nearest, 3-bit, 8 of 16 columns quantized: output error so far 18.84 (the other method at this point: 1.38).
+  Round to nearest, 3-bit, 16 of 16 columns quantized: output error so far 39.92 (the other method at this point: 9.89). Final: GPTQ 9.89 against 39.92, 4.0x lower on the same grid.

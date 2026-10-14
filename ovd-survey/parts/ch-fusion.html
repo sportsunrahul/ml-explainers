@@ -1,0 +1,143 @@
+<style>
+#ch-fusion table.data .prompt { white-space: normal; }
+#ch-fusion table.data td { vertical-align: top; }
+</style>
+<section id="ch-fusion" class="chapter">
+<h2>Deep fusion: words change what the image encoder sees</h2>
+<div class="tapstrip" data-model="glip" role="img" aria-label="The image pipeline from image to score, with the text lane above it. GLIP's text enters inside the encoder, where cross-attention runs in every upper layer, and again at the score."></div>
+<p class="note">Where text enters here: the cross-attention inside each DyHead module, before the score.</p>
+
+<p>In late fusion, the image encoder never sees the prompt. The box features are the same whatever you ask, and text meets image only in the final dot product. GLIP adds cross-attention between the image and text features in the last encoder layers, so the image features become a function of the prompt.</p>
+
+<figure class="viz" id="viz-fusion" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="fusion-canvas" tabindex="0" role="img" aria-label="Top: the text token and the image features at layers 0 to 6, text above, image below, with cross-attention arrows between them in deep fusion. Each image thumbnail is an aquarium grid with a stingray, two penguins and three fish, colored by how much of each region's score goes to the chosen word. Bottom left: the selected layer, enlarged, with green brackets on regions that pass one half. Bottom right: a chart of the share per layer for late and deep fusion."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-fusion-late" aria-pressed="true">Late fusion</button>
+    <button type="button" id="btn-fusion-deep" aria-pressed="false">Deep fusion</button>
+    <button type="button" id="btn-fusion-ray" aria-pressed="true">Show <span class="prompt">stingray</span></button>
+    <button type="button" id="btn-fusion-peng" aria-pressed="false">Show <span class="prompt">penguin</span></button>
+    <button type="button" id="btn-fusion-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="fusion-readout" aria-live="polite"></p>
+  <figcaption>The prompt is <span class="prompt">fish. penguin. stingray</span>. The toy runs Eq. 4 to 6 below on made-up five-number features: one attention head, a softmax over tokens for each region, a softmax over regions for each token, and the DyHead and BERT layers reduced to "add and renormalize". Each token's value is a class prototype, a stand-in for the learned projections. The color is the share of a region's score on the chosen word (a softmax over the prompt's tokens). Click a thumbnail, or focus the figure and use the arrow keys, to enlarge another layer.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> In late fusion, part of the "stingray" score leaks onto the fish, because the word alone does not say what a stingray looks like. Can a better dot product at the very end remove the leak, or must the image features themselves change? Decide, then press <em>Deep fusion</em>.</p>
+
+<p>The features must change. In deep mode, each region takes in the words that it matches best, and each word takes in the regions that match it. After a few layers, the stingray regions look more like "stingray" and the fish look more like "fish", and the leak shrinks layer by layer. In late mode nothing moves, because the image side never reads the prompt. The text side changes too: watch the five bars of the token vector in deep mode.</p>
+
+<h3>The fusion equations, term by term</h3>
+<p>GLIP's image encoder ends in <span class="tex">L</span> DyHead modules, and its text encoder BERT gets newly added layers on top, one per fusion step in Eq. 6, so <span class="tex">L</span> of them (<span class="reading">our reading</span>; the paper and config never state the count). Before each pair of modules, a cross-modal attention block (X-MHA) computes a context vector for each side from the other side. Each side adds its context and runs its own module (Sec. 3.2):</p>
+
+<div class="eq" id="eq-fusion" data-build data-viz="viz-fusion"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=xmha}{\htmlClass{t-yellow}{O^i_{\rm t2i}},\ \htmlClass{t-blue}{P^i_{\rm i2t}} = \text{X-MHA}(\htmlClass{t-blue}{O^i}, \htmlClass{t-yellow}{P^i}), \quad i \in \{0, 1, \dots, L-1\}} \\
+&\htmlData{step=2, link=image t2i}{\htmlClass{t-blue}{O^{i+1}} = \text{DyHeadModule}(\htmlClass{t-blue}{O^i} + \htmlClass{t-yellow}{O^i_{\rm t2i}}), \quad \htmlClass{t-blue}{O} = \htmlClass{t-blue}{O^{L}}} \\
+&\htmlData{step=3, link=text i2t}{\htmlClass{t-yellow}{P^{i+1}} = \text{BERTLayer}(\htmlClass{t-yellow}{P^i} + \htmlClass{t-blue}{P^i_{\rm i2t}}), \quad \htmlClass{t-yellow}{P} = \htmlClass{t-yellow}{P^{L}}}
+\end{aligned}
+</div></div>
+<p class="eqno">Eq. 4 to 6 in GLIP (2112.03857v2). The paper prints the two context terms in red; here each takes the color of the side it carries information from, because red means loss on this page.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{O^i}</span>: the image features entering module <span class="tex">i</span>; <span class="tex">\htmlClass{t-blue}{O^0}</span> comes from the vision backbone. <span class="tex">\htmlClass{t-yellow}{P^i}</span>: the token features; <span class="tex">\htmlClass{t-yellow}{P^0}</span> comes from BERT.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{O^i_{\rm t2i}}</span>: text-to-image context, what each region reads from the tokens. <span class="tex">\htmlClass{t-blue}{P^i_{\rm i2t}}</span>: image-to-text context, what each token reads from the regions.</li>
+  <li><span class="tex">L</span>: the number of DyHead modules. <span class="tex">\text{BERTLayer}</span>: the newly added BERT layers on top of the pre-trained BERT.</li>
+  <li>Delete the two context terms and the model is late fusion (the paper's words): the same encoders, scored only by <span class="tex">O P^{\top}</span> at the end. That is GLIP-T (A) in the table of chapter 7.</li>
+</ul>
+<p>Inside X-MHA, one score matrix serves both directions. Each head projects the image and text features, takes their scaled dot products, and normalizes them one way for the image side and the other way for the text side:</p>
+
+<div class="eq" id="eq-xmha" data-build data-viz="viz-fusion"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=attn}{O^{(q)} = O W^{(q,I)},\ \ P^{(q)} = P W^{(q,L)},\ \ Attn = O^{(q)} (P^{(q)})^{\top} / \sqrt{d}} \\
+&\htmlData{step=2, link=t2i}{P^{(v)} = P W^{(v,L)},\ \ \htmlClass{t-yellow}{O_{\rm t2i}} = \mathrm{SoftMax}(Attn)\, P^{(v)} W^{(out,I)}} \\
+&\htmlData{step=3, link=i2t}{O^{(v)} = O W^{(v,I)},\ \ \htmlClass{t-blue}{P_{\rm i2t}} = \mathrm{SoftMax}(Attn^{\top})\, O^{(v)} W^{(out,L)}}
+\end{aligned}
+</div></div>
+<p class="eqno">The X-MHA block of GLIP Sec. 3.2 (unnumbered in the paper).</p>
+<ul class="gloss">
+  <li><span class="tex">W^{(q,\cdot)}, W^{(v,\cdot)}, W^{(out,\cdot)}</span>: learned query, value and output projections, one set per side (<span class="tex">I</span> image, <span class="tex">L</span> language). There is no separate key projection.</li>
+  <li><span class="tex">Attn</span>: one region-by-token matrix. <span class="tex">\mathrm{SoftMax}(Attn)</span> normalizes over the tokens for each region, and <span class="tex">\mathrm{SoftMax}(Attn^{\top})</span> over the regions for each token (<span class="reading">our reading</span>: the paper does not state the axis). The yellow dots that light up in the figure are the first one for the chosen word.</li>
+  <li><span class="tex">d</span>: the feature width of the attention.</li>
+</ul>
+
+<h3>What fusion buys, and what it costs</h3>
+<p>GLIP trained GLIP-T with and without fusion on the same data and measured both (Table 8):</p>
+<table class="data">
+  <thead><tr><th>GLIP-T</th><th>Pre-training</th><th>COCO zero-shot AP</th><th>ODinW-13 zero-shot AP</th><th>ODinW-13 full tuning AP</th></tr></thead>
+  <tbody>
+    <tr><td>late fusion</td><td>Objects365</td><td><span data-claim="glip-t8-nofuse-o365-coco-zs">42.9</span></td><td><span data-claim="glip-t8-nofuse-o365-odinw-0">28.7</span></td><td><span data-claim="glip-t8-nofuse-o365-odinw-full">63.6</span></td></tr>
+    <tr><td>deep fusion</td><td>Objects365</td><td><span data-claim="glip-t8-fuse-o365-coco-zs">44.9</span></td><td><span data-claim="glip-t8-fuse-o365-odinw-0">33.2</span></td><td><span data-claim="glip-t8-fuse-o365-odinw-full">62.7</span></td></tr>
+    <tr><td>late fusion</td><td>Objects365 + GoldG</td><td><span data-claim="glip-t8-nofuse-goldg-coco-zs">41.6</span></td><td><span data-claim="glip-t8-nofuse-goldg-odinw-0">35.5</span></td><td><span data-claim="glip-t8-nofuse-goldg-odinw-full">65.1</span></td></tr>
+    <tr><td>deep fusion</td><td>Objects365 + GoldG</td><td><span data-claim="glip-t8-fuse-goldg-coco-zs">46.7</span></td><td><span data-claim="glip-t8-fuse-goldg-odinw-0">44.4</span></td><td><span data-claim="glip-t8-fuse-goldg-odinw-full">63.9</span></td></tr>
+  </tbody>
+</table>
+<p class="note">GLIP Table 8. COCO: box AP on 2017val (domain transfer, see chapter 7). ODinW-13: GLIP's average AP over its <span data-claim="glip-odinw-count">13</span> ODinW datasets, zero-shot or after full-model tuning on all the training data. Chapter 12 uses a larger ODinW average from other papers; the two are not comparable.</p>
+<p>With grounding data, deep fusion lifts zero-shot ODinW-13 from <span data-claim="glip-t8-nofuse-goldg-odinw-0">35.5</span> to <span data-claim="glip-t8-fuse-goldg-odinw-0">44.4</span>. The gain is a zero-shot gain. With all the downstream training data, the order flips a little: full tuning scores slightly higher without fusion in both pairs. On LVIS the effect is mixed (App. D.2).</p>
+<p>The price is speed. GLIP-T runs at <span data-claim="glip-cost-t-nofuse-inf-fps">4.84</span> frames per second without fusion and <span data-claim="glip-cost-t-fuse-inf-fps">2.52</span> with it, and inference memory grows from <span data-claim="glip-cost-t-nofuse-inf-mem">1.0</span> to <span data-claim="glip-cost-t-fuse-inf-mem">2.4</span> GB (Table 7: one P100 GPU, batch 1, one prompt per image). Without fusion, the text embeddings of a prompt can be cached, so the model costs the same as a plain DyHead (App. D.1). With fusion, the fusion layers must run again for every new pair of image and prompt; the backbone and BERT still run once each (<span class="reading">our reading</span>: neither depends on the other side before fusion). This is the argument OWL-ViT makes against fusion in chapter 5: a late-fusion model can score thousands of text queries against one image almost for free.</p>
+
+<div class="claimcard">
+  <h4>Prompt tuning works only with deep fusion</h4>
+  <dl>
+    <dt>Claim</dt><dd>Training only the prompt embedding <span class="tex">P^0</span> adapts a deep-fusion model almost as well as full training, but not a late-fusion model.</dd>
+    <dt>Measured</dt><dd>ODinW-13 average AP with all the training data. Prompt tuning computes <span class="tex">P^0</span> once with BERT, discards BERT, and trains only <span class="tex">P^0</span>; linear probing trains the box head and a projection; full tuning trains everything (GLIP Sec. 5.2, Tables 11 to 13).</dd>
+    <dt>Result</dt><dd>GLIP-T (A), late fusion: prompt tuning <span data-claim="glip-ptune-a-all">43.3</span>, linear probing <span data-claim="glip-linear-a-all">44.1</span>, full tuning <span data-claim="glip-odinw-a-full">63.6</span>. GLIP-T, deep fusion: prompt tuning <span data-claim="glip-ptune-t-all">62.4</span>, full tuning <span data-claim="glip-odinw-t-full">64.9</span>.</dd>
+    <dt>Would falsify</dt><dd>A late-fusion model whose prompt tuning came close to full tuning, or a deep-fusion model where it did not.</dd>
+  </dl>
+</div>
+<p>Why the difference? In late fusion, <span class="tex">P^0</span> only sets the classifier rows, so tuning it is about as strong as retraining a linear classifier, and that is what the numbers show. In deep fusion, <span class="tex">P^0</span> flows through every X-MHA into the image features, so tuning the prompt also changes what the image side computes (<span class="reading">our reading</span>; GLIPv2 says the same of its own prompt tuning).</p>
+
+<h3>Words matter: hand-written prompts</h3>
+<p>A model that reads the prompt this closely should respond to better wording. GLIP's appendix rewrote the class names of six ODinW datasets by hand, with no training, and measured zero-shot AP of GLIP-T (Table 10; its caption says "CLIP-T", a typo, since the values match the GLIP-T row of Table 14):</p>
+<table class="data">
+  <thead><tr><th>Dataset</th><th>Original prompt</th><th>AP</th><th>Hand-written prompt</th><th>AP</th></tr></thead>
+  <tbody>
+    <tr><td>Aquarium</td><td><span class="prompt">penguin</span> <span class="prompt">puffin</span> <span class="prompt">stingray</span></td><td><span data-claim="glip-prompt-aquarium-orig">17.7</span></td><td><span class="prompt">penguin, which is black and white</span> <span class="prompt">puffin with orange beaks</span> <span class="prompt">stingray which is flat and round</span></td><td><span data-claim="glip-prompt-aquarium-designed">18.4</span></td></tr>
+    <tr><td>Rabbits</td><td><span class="prompt">Cottontail-Rabbits</span></td><td><span data-claim="glip-prompt-rabbits-orig">68.0</span></td><td><span class="prompt">rabbit</span></td><td><span data-claim="glip-prompt-rabbits-designed">70.2</span></td></tr>
+    <tr><td>EgoHands</td><td><span class="prompt">hand</span></td><td><span data-claim="glip-prompt-egohands-orig">22.1</span></td><td><span class="prompt">hand of a person</span></td><td><span data-claim="glip-prompt-egohands-designed">50.0</span></td></tr>
+    <tr><td>Mushrooms</td><td><span class="prompt">Cow. Chanterelle</span></td><td><span data-claim="glip-prompt-mushrooms-orig">13.6</span></td><td><span class="prompt">flat mushroom. yellow mushroom</span></td><td><span data-claim="glip-prompt-mushrooms-designed">73.8</span></td></tr>
+    <tr><td>Packages</td><td><span class="prompt">package</span></td><td><span data-claim="glip-prompt-packages-orig">50.0</span></td><td><span class="prompt">there is a package on the porch</span></td><td><span data-claim="glip-prompt-packages-designed">72.3</span></td></tr>
+    <tr><td>Pothole</td><td><span class="prompt">pothole</span></td><td><span data-claim="glip-prompt-pothole-orig">17.8</span></td><td><span class="prompt">there are some holes on the road</span></td><td><span data-claim="glip-prompt-pothole-designed">17.7</span></td></tr>
+  </tbody>
+</table>
+<p class="note">GLIP Table 10 (App. E.2): zero-shot AP of GLIP-T per dataset. The Aquarium row lists three of its classes; the stingray rewrite alone moves stingray AP50 from <span data-claim="glip-stingray-ap50-orig">4.6</span> to <span data-claim="glip-stingray-ap50-designed">9.7</span> (Sec. 5.2).</p>
+<p>Two lessons. First, describing the look can matter more than any change to the model: Mushrooms goes from <span data-claim="glip-prompt-mushrooms-orig">13.6</span> to <span data-claim="glip-prompt-mushrooms-designed">73.8</span> when the variety names become plain descriptions. Second, it is not reliable: the Pothole sentence changed nothing. Chapter 13 returns to this: on rare industrial parts, the name is often where the detector fails.</p>
+
+<h3>Inside GLIP: forward, then backward</h3>
+<figure class="viz archflow" id="viz-glipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-glipflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-glipflow-encoders" aria-pressed="false">2 Encoders</button>
+    <button type="button" id="btn-glipflow-fusion" aria-pressed="false">3 Fusion</button>
+    <button type="button" id="btn-glipflow-heads" aria-pressed="false">4 Score and boxes</button>
+    <button type="button" id="btn-glipflow-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-glipflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-glipflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-glipflow-glipt" aria-pressed="true">GLIP-T</button>
+    <button type="button" id="btn-glipflow-glipl" aria-pressed="false">GLIP-L</button>
+  </div>
+  <canvas id="glipflow-canvas" role="img" aria-label="GLIP's training step as a diagram. Text lane on top: prompt, BERT-base, added BERT layers. Image lane at the bottom: image, Swin backbone, FPN, DyHead modules, box head. In the middle, the X-MHA bridge joins both lanes, and the alignment score O P transpose meets the box head in the loss. In the backward stages every box with weights gets a red outline: nothing is frozen."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-glipflow-prev">Previous</button>
+    <button type="button" id="btn-glipflow-next">Next</button>
+    <button type="button" id="btn-glipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="glipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Two encoders, one per modality, then <span class="tex">L</span> rounds of fusion, then the alignment score. <b class="c-blue">Blue</b> is the image side and <b class="c-yellow">yellow</b> the text side; X-MHA is the bridge, and the <b class="c-green">green</b> box is the region-token score. Press <b>1 Inputs</b>, then <b>Next</b>.</p></div>
+    <div data-stage="inputs" hidden><h4>1. One image, one prompt</h4><p>Training resizes each image so that its short side is a random size from <span data-claim="page-glip-code-multiscale">480 to 800</span> pixels; the test size is <span data-claim="glip-code-min-size">800</span> by <span data-claim="glip-code-max-size">1333</span> (official code). The prompt has at most <span data-claim="glip-max-tokens">256</span> tokens. For detection data it lists up to <span data-claim="glip-o365-prompt-cap">85</span> category names separated by periods; for grounding data it is the caption.</p></div>
+    <div data-stage="encoders" hidden><h4>2. Two encoders</h4><p>Swin-T (Swin-L in GLIP-L) turns the image into feature maps, and a feature pyramid (FPN) turns those into five levels with strides of <span data-claim="page-glip-code-strides">8, 16, 32, 64, 128</span> pixels and <span data-claim="glip-code-channels">256</span> channels each (official code). BERT turns the prompt into one vector per token, <span class="tex">P^0</span>. The official config names <span data-claim="glip-code-bert">bert-base-uncased</span>; the paper says only "pre-trained BERT".</p></div>
+    <div data-stage="fusion" hidden><h4>3. Fusion, L times</h4><p>For each <span class="tex">i = 0, \dots, L-1</span>: X-MHA exchanges context between <span class="tex">O^i</span> and <span class="tex">P^i</span>, a DyHead module updates the image side, and an added BERT layer updates the text side (Eq. 4 to 6 above). The official config uses <span data-claim="glip-code-dyhead-t">6</span> DyHead modules for GLIP-T and <span data-claim="glip-code-dyhead-l">8</span> for GLIP-L. Neither the paper nor the config states how many BERT layers are added, so the figure keeps that number symbolic.</p></div>
+    <div data-stage="heads" hidden><h4>4. Score and boxes</h4><p>Every location gets a score for every token: <span class="tex">S_{\rm ground} = O P^{\top}</span> (chapter 7). With one anchor per location and the strides above, an <span data-claim="glip-code-min-size">800</span> by <span data-claim="glip-code-max-size">1333</span> image, padded to a multiple of <span data-claim="page-glip-code-pad">32</span> pixels, has about <span data-claim="page-glip-n-locations">22,400</span> locations. So <span class="tex">S_{\rm ground}</span> has about that many rows and one column per token (<span class="reading">our reading</span>, computed from the official config). A box head regresses one box at each location.</p></div>
+    <div data-stage="loss" hidden><h4>5. Loss</h4><p>A focal sigmoid loss compares every cell of <span class="tex">S_{\rm ground}</span> with the token-level target <span class="tex">T'</span> from chapter 7, and the detector's localization loss grades the boxes: <span class="tex">\mathcal{L} = \mathcal{L}_{\rm cls} + \mathcal{L}_{\rm loc}</span> (Eq. 1). The detector's own assignment rule decides which locations count as positive.</p></div>
+    <div data-stage="backward" hidden><h4>6. Where the gradient goes</h4><p>Everywhere. The paper trains the image and language encoders end to end, and the official config sets BERT's freeze flag to false. The gradient reaches BERT by two routes: through the score and through every X-MHA. Compare ViLD in chapter 4, where CLIP's encoders sit outside the training graph.</p></div>
+    <div data-stage="update" hidden><h4>7. The update</h4><p><span data-claim="page-glip-code-optimizer">AdamW</span> (official code) steps every weight with a base learning rate of <span data-claim="glip-lr-main">1e-4</span>, and <span data-claim="glip-lr-lang">1e-5</span> for the language backbone. The batch is <span data-claim="glip-batch">64</span> images on <span data-claim="glip-gpus-t">32</span> GPUs for GLIP-T (<span data-claim="glip-gpus-l">64</span> for GLIP-L). Both rates drop by a factor of ten at <span data-claim="glip-lr-step1">67%</span> and <span data-claim="glip-lr-step2">89%</span> of training (App. C.1). Later, ODinW fine-tuning freezes the bottom <span data-claim="glip-odinw-frozen-layers">2</span> backbone layers, and prompt tuning freezes everything except <span class="tex">P^0</span>.</p></div>
+  </div>
+  <figcaption>Computed: the paper gives no input size, depth or width, so these come from the official configs and are labelled "official code"; the location count is our reading of that config at the test size. Multi-scale training changes the count from image to image. Nothing in GLIP's pre-training is frozen.</figcaption>
+</figure>
+</section>

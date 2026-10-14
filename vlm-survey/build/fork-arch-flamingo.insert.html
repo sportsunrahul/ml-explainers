@@ -1,0 +1,116 @@
+<h3>Inside Flamingo: forward, then backward</h3>
+<p>The two figures above showed one gated block and the resampler on their own. Here is one whole training step of the real model, stage by stage, with tensor shapes computed from the paper's architecture table; pick a model size to change them.</p>
+
+<figure class="viz archflow" id="viz-flamingoflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-flamingoflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-flamingoflow-vision" aria-pressed="false">2 Encoder</button>
+    <button type="button" id="btn-flamingoflow-resample" aria-pressed="false">3 Resampler</button>
+    <button type="button" id="btn-flamingoflow-tokens" aria-pressed="false">4 Text</button>
+    <button type="button" id="btn-flamingoflow-xattn" aria-pressed="false">5 Gated xattn</button>
+    <button type="button" id="btn-flamingoflow-lm" aria-pressed="false">6 Frozen LM</button>
+    <button type="button" id="btn-flamingoflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-flamingoflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-flamingoflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-flamingoflow-f3b" aria-pressed="false">Flamingo-3B</button>
+    <button type="button" id="btn-flamingoflow-f9b" aria-pressed="false">Flamingo-9B</button>
+    <button type="button" id="btn-flamingoflow-f80b" aria-pressed="true">Flamingo-80B</button>
+  </div>
+  <canvas id="flamingoflow-canvas" role="img" aria-label="Flamingo's training step as a diagram: an image lane (blue) through a frozen NFNet encoder (brown) and a Perceiver Resampler (green), and a text lane (yellow) through the frozen token embeddings (brown), meeting in the gated cross-attention layers (green), then the frozen language model blocks and head (brown) and the loss (red). In the backward stages red arrows run from the loss back through the frozen language model to the gated layers and the resampler, and stop at the encoder."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-flamingoflow-prev">Previous</button>
+    <button type="button" id="btn-flamingoflow-next">Next</button>
+    <button type="button" id="btn-flamingoflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="flamingoflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Pictures run along the top lane (<b class="c-blue">blue</b>), text along the bottom (<b class="c-yellow">yellow</b>), and the two meet only inside the <b class="c-green">green</b> gated layers. Every <b class="c-brown">brown</b> box is frozen. To keep the diagram readable, the real stack, in which green and brown layers alternate, is folded into one green box and one brown box; stage 6 unfolds it in words. Press <b>1 Inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>1. One interleaved example</h4>
+      <p>Take a web page from M3W, cut a random window of <span data-claim="flamingo-m3w-seq">L=256 tokens, up to first N=5 images</span> out of it, and keep the images in place. Pair datasets give the same format with one image (or one video) per example; videos are clipped to <span data-claim="flamingo-frames-train">8 frames at 1 fps</span>, and an image is just a video with one frame. Every picture is resized to <span data-claim="flamingo-arch-res">320 x 320</span>, keeping its aspect ratio and padding the rest.</p>
+    </div>
+    <div data-stage="vision" hidden>
+      <h4>2. A frozen convolutional encoder</h4>
+      <p>Flamingo's image encoder is not a ViT but a convolutional network, an <span data-claim="flamingo-arch-nfnet-f6">NFNet-F6</span>. Before Flamingo was built, the authors trained it themselves with the <span data-claim="flamingo-arch-nfnet-loss">two-term contrastive loss</span> of CLIP (the first chapter's matching game), paired with a <span data-claim="flamingo-arch-nfnet-bert">BERT</span> text encoder, on <span data-claim="flamingo-arch-nfnet-data">ALIGN and LTIP</span> at <span data-claim="flamingo-arch-res-pre">288 x 288</span> pixels. <span data-claim="flamingo-arch-nfnet-only-vision">We only use the weights from the contrastive vision encoder</span>: the BERT is thrown away. Flamingo reads <span data-claim="flamingo-arch-final-stage">the output of the final stage, a 2D spatial grid of features that is flattened to a 1D sequence</span>, one grid per frame. The paper gives neither the grid size nor the channel width, so the drawing writes them as <span class="tex">S</span> and <span class="tex">d_v</span>.</p>
+    </div>
+    <div data-stage="resample" hidden>
+      <h4>3. Any grid in, <span data-claim="flamingo-latents">64</span> tokens out</h4>
+      <p>The resampler from the figure above: add one learned embedding per frame, flatten all frames into one list, and let <span data-claim="flamingo-latents">64</span> learned latents attend to it through <span data-claim="flamingo-resampler-layers">6 / 1536 / 16</span> (layers / width / heads) of transformer layers. Out come <span data-computed>64 &times; 1536</span> numbers per image, the same for every model size. How the encoder's width <span class="tex">d_v</span> is mapped to 1536 is not spelled out in the paper (the pseudocode writes both as <span class="tex">d</span>).</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>4. The text enters the frozen language model</h4>
+      <p>The text is tokenized with <code>&lt;image&gt;</code> tags where pictures were and an end-of-chunk token <code>&lt;EOC&gt;</code> before each image and at the end, and each id looks up a row of the language model's own embedding table: <span class="tex">256 \times D</span>, where <span class="tex">D</span> is the model's width. The table is frozen, with one exception: <code>&lt;EOC&gt;</code> is new, <span data-claim="flamingo-arch-eoc">added to the vocabulary and learnt</span>. (The diagram draws the whole table brown.)</p>
+    </div>
+    <div data-stage="xattn" hidden>
+      <h4>5. Text asks the pictures</h4>
+      <p>Each gated layer is the block written out above: text vectors are the queries, the visual tokens are the keys and values, and the answer is multiplied by <span class="tex">\tanh(\alpha)</span> before it joins the residual stream. The layers have the <span data-claim="flamingo-arch-xattn-same">same width and head count</span> as the language model, with heads of width <span data-claim="flamingo-arch-kv-dim">96 / 128</span> (resampler / everything else), feed-forward layers <span data-claim="flamingo-arch-ffw-4d">4D</span> wide, and a <span data-claim="flamingo-arch-sqrelu">Sq. ReLU</span> activation. The mask from the lower half of the <a href="#viz-resampler">resampler figure</a> is applied here: although a sequence holds up to five images, each text token's keys and values are only the <span data-claim="flamingo-latents">64</span> tokens of the last image before it (in training, for half of the web pages, the next image instead, as described above).</p>
+    </div>
+    <div data-stage="lm" hidden>
+      <h4>6. Green and brown, interleaved</h4>
+      <p>Unfolded, the stack alternates: gated layer, frozen block(s), gated layer, and so on, starting before the very first block. The frozen language models are Chinchilla models with <span data-claim="flamingo-arch-lm-3b">24 / 2048 / 16</span>, <span data-claim="flamingo-arch-lm-9b">40 / 4096 / 32</span> and <span data-claim="flamingo-arch-lm-80b">80 / 8192 / 64</span> layers / width / heads. A gated layer goes <span data-claim="flamingo-freq-3b">before every LM block (24 layers)</span> in Flamingo-3B, <span data-claim="flamingo-freq-9b">every 4th block (10 layers over 40)</span> in Flamingo-9B and <span data-claim="flamingo-freq-80b">every 7th block (12 layers over 80)</span> in Flamingo-80B; the line under the drawing lists the positions. The shape never changes: <span class="tex">256 \times D</span> all the way up.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. Grade every next word</h4>
+      <p>The frozen head turns each position into next-token logits, and the loss is cross-entropy against the next token, summed over the window and weighted per dataset: Eq. 2 of the paper, which the training-step chapter builds as <a href="#eq-pipeline-mix">its first equation</a>. Unlike a chat model, Flamingo grades every text token of the window, not just an answer. The pictures are never targets: they are only ever read.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. Through the frozen giant and back</h4>
+      <p>The gradient starts at the loss and has to pass the frozen head and every frozen block (<b class="c-brown">brown</b>, "gradient passes, no update") on its way to the green layers: frozen weights still carry a gradient to whatever sits below them. At each gated layer it splits: part updates the layer's own weights and its two <span class="tex">\alpha</span>s, part flows into the keys and values, back into the resampler, which also learns. At the NFNet it stops. Nothing below the encoder is trainable, so there is no reason to compute it, and the paper says so: <span data-claim="page-pipeline-flamingo-nobp">no backpropagation is performed through the frozen Vision Encoder</span>. It is also what makes the larger training images cheap. The frozen embedding table gets no update either; the diagram marks it "gradient stops here" because nothing below it trains, with one small exception it cannot draw, the learnt <code>&lt;EOC&gt;</code> row.</p>
+      <p>One catch, which the next figure takes apart: on the very first step, with every gate at <span data-claim="flamingo-gate-alpha-init">0</span>, the gradient that reaches the green layers' weights and the resampler is exactly zero. Only the gates themselves move.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p>Only the red-outlined parameters change: the <span data-claim="flamingo-trainable-xattn">1.2B / 1.6B / 10B</span> parameters of gated layers (3B / 9B / 80B) and the <span data-claim="flamingo-resampler-params">194M</span>-parameter resampler. The optimizer is the <span data-claim="flamingo-arch-adamw">AdamW optimizer with global norm clipping of 1</span>, with <span data-claim="flamingo-arch-wd">no weight decay for the Perceiver Resampler and weight decay of 0.1 for the other trainable parameters</span>; the learning rate rises linearly from 0 to <span data-claim="flamingo-arch-lr">10^-4</span> over <span data-claim="flamingo-arch-warmup">5000 steps</span> and then stays constant, for <span data-claim="flamingo-arch-steps">500k steps</span>. Each update accumulates one batch from each of the four datasets, weighted by <span data-claim="flamingo-loss-weights">1.0 / 0.2 / 0.2 / 0.03</span> (how that works is <a href="#ch-training-step">the training-step chapter</a>'s subject). The final models' batch sizes are not given: the only per-dataset batches in the paper, <span data-claim="flamingo-arch-ablation-batch">256 / 512 / 512 / 64</span>, are for the ablations, which use <span data-claim="flamingo-arch-smaller-batch">smaller batch sizes and a shorter training schedule compared to the final models</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: widths, depths, heads and layer positions come from Flamingo's architecture table (App. A.1.4, Table 4) and model list (App. B.1.1); the encoder's grid size <span class="tex">S</span>, its width <span class="tex">d_v</span>, the vocabulary size <span class="tex">V</span> and the batch size stay symbolic because the paper does not give them. Before you open stage 8, guess: the language model sits between the loss and every trainable box. Does the gradient still reach them, and which box is the last one it reaches?</figcaption>
+</figure>
+
+<p>Put numbers on the split. In Flamingo-80B the trainable parts are the <span data-claim="flamingo-trainable-80b-sum">about 10.2B</span> parameters of gated layers and resampler, <span data-computed>about 13%</span> of the model's 80B parameters; the other <span data-computed>87%</span> is the frozen language model and encoder, which is also why the frozen weights are kept cheaper: <span data-claim="flamingo-arch-frozen-bf16">Frozen parameters are stored and applied in bfloat16</span>, while for the trained ones <span data-claim="flamingo-arch-precision">All trained parameters and optimizer accumulators are stored and updated in float32; all activations and gradients are computed in bfloat16</span>.</p>
+
+<h3>Backward: why the first step moves only the gates</h3>
+<p>Stage 8 ended on a claim: at step 0 the gradient reaches the gates but not the weights behind them. Here is that gradient, computed exactly for a toy block, one bar per group of parameters.</p>
+
+<figure class="viz" id="viz-flamingograd" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="flamingograd-canvas" role="img" aria-label="Six horizontal bars, one per parameter group of a gated block: the two gate scalars, the cross-attention weights, the feed-forward weights, the visual tokens and the text vector passed down to the frozen layer below. Each bar's length is the size of the loss gradient for that group; a brown tick marks the gradient the frozen language model alone would pass down."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-flamingograd-step0">Step 0: gates at 0</button>
+    <button type="button" id="btn-flamingograd-open">Gates opened (alpha = 0.5)</button>
+    <button type="button" id="btn-flamingograd-zerow">What if W also started at 0?</button>
+    <button type="button" id="btn-flamingograd-reset" data-cue-reset>Reset</button>
+    <label for="rng-flamingograd-alpha">both alphas <input type="range" id="rng-flamingograd-alpha" min="0" max="1.5" step="0.01" value="0"> <span id="flamingograd-alpha-val">0.00</span></label>
+  </div>
+  <p class="readout" id="flamingograd-readout" aria-live="polite"></p>
+  <figcaption>Predict before you press <b>What if W also started at 0?</b>: the gate would still start at zero; would it still get a gradient? The bars are exact gradients (central differences) of a next-word loss through one gated xattn-dense block followed by a frozen layer and a frozen head. What is toy: two-dimensional vectors, three visual tokens, four words, made-up weights (the same block as the first figure, with a different feed-forward layer), and both gates set to the same value by the slider.</figcaption>
+</figure>
+
+<p>Press <b>Step 0: gates at 0</b>. Three bars are exactly zero: the cross-attention weights, the feed-forward weights and the visual tokens. The last one matters most: the visual tokens are the resampler's output, so on the first step the resampler learns nothing either. The two gate bars are not zero. And the bottom bar, the gradient the block passes down to the frozen layers below it, lands exactly on the brown tick: at step 0 the block is invisible in the backward pass too. Drag the slider: as soon as the gates leave zero, every bar grows.</p>
+<p>The reason is one line of calculus. Write the first line of the block as <span class="tex">y_1 = y + \tanh(\alpha)\,A</span>, where <span class="tex">A = \mathrm{Attn}(q{=}y,\ kv{=}x;\ W)</span> is the new layer's output, and let <span class="tex">g = \partial\mathcal{L}/\partial y_1</span> be the gradient arriving from above. The chain rule then gives:</p>
+<div class="eq" id="eq-flamingograd" data-build data-viz="viz-flamingograd"><div class="tex tex-display">
+\begin{aligned}
+\htmlData{step=1, link=weights}{\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-green}{W}}} &= \htmlData{step=2, link=gate}{\htmlClass{t-green}{\tanh(\alpha)}}\, \Big(\frac{\partial A}{\partial \htmlClass{t-green}{W}}\Big)^{\!\top} g, \qquad
+\htmlData{step=3, link=visual}{\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-blue}{x}} = \htmlClass{t-green}{\tanh(\alpha)}\, \Big(\frac{\partial A}{\partial \htmlClass{t-blue}{x}}\Big)^{\!\top} g} \\
+\htmlData{step=4, link=alpha}{\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-green}{\alpha}} = \big(1 - \tanh^2\alpha\big)\; g^{\top} A} \qquad\quad
+\htmlData{step=5, link=down}{\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-yellow}{y}} = g + \htmlClass{t-green}{\tanh(\alpha)}\, \Big(\frac{\partial A}{\partial \htmlClass{t-yellow}{y}}\Big)^{\!\top} g}
+\end{aligned}
+</div></div>
+<p class="eqno">Derived here from the Fig. 4 pseudocode of Flamingo v2 (the paper prints no gradient). The feed-forward line, with <span class="tex">\alpha_{\text{dense}}</span> and <span class="tex">\mathrm{FFW}(y)</span> in place of <span class="tex">\alpha</span> and <span class="tex">A</span>, gives the same four formulas without the <span class="tex">x</span> term.</p>
+<ul class="gloss">
+  <li><span class="tex">\partial\mathcal{L}/\partial \htmlClass{t-green}{W}</span>: the new layer's weights. Every path from them to the loss goes through the multiplication by <span class="tex">\tanh(\alpha)</span>, so the whole gradient carries that factor; at <span class="tex">\alpha = 0</span> it is exactly zero.</li>
+  <li><span class="tex">\htmlClass{t-green}{\tanh(\alpha)}</span>: the gate, the common factor in the first, second and fourth formulas.</li>
+  <li><span class="tex">\partial\mathcal{L}/\partial \htmlClass{t-blue}{x}</span>: the visual tokens, and through them the resampler. Same factor, same zero.</li>
+  <li><span class="tex">\partial\mathcal{L}/\partial \htmlClass{t-green}{\alpha}</span>: the gate's own gradient. Its factor is the slope of tanh, which is 1 at zero, times <span class="tex">g^{\top}A</span>: how much the layer's current output, noise included, points along the direction that would lower the loss. The gate opens (or goes negative: tanh runs from -1 to 1) according to whether the new layer's output helps.</li>
+  <li><span class="tex">\partial\mathcal{L}/\partial \htmlClass{t-yellow}{y}</span>: what the block passes down to the frozen layers below. At <span class="tex">\alpha = 0</span> it is just <span class="tex">g</span>, the frozen model's own gradient.</li>
+</ul>
+<p>Now the prediction. Press <b>What if W also started at 0?</b> Then <span class="tex">A = 0</span>, so <span class="tex">g^{\top}A = 0</span> and the gate's gradient vanishes too: the gate waits for the weights and the weights wait for the gate, and the cross-attention can never start. (The feed-forward gate still moves, because its own layer is still random.) So the recipe needs both halves: a gate at zero so that the output starts as the language model's, and random weights behind it so that the gate has something to measure. That pairing is our reading of the design; the paper states only the zero gate and cites ReZero for it. One more practical note: with AdamW the step-0 argument holds too (a zero gradient gives a zero Adam step), and Flamingo's warm-up starts at a learning rate of 0 anyway, so read "step 0" as "the first few steps, while the gates are still near zero".</p>
+

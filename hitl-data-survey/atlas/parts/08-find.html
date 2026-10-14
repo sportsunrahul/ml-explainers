@@ -1,0 +1,14 @@
+  <article data-chapter="find">
+    <header class="ch-head"><span class="num">8 of 9</span><h2>Find the wrong labels</h2><p class="subhead">Confident learning</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-cell="0" aria-pressed="true">cat, likely dog</button>
+      <button type="button" class="tool" data-cell="1" aria-pressed="false">automobile, likely truck</button>
+      <button type="button" class="tool" data-cell="2" aria-pressed="false">horse, likely deer</button>
+      <button type="button" class="tool" data-cell="3" aria-pressed="false">truck, likely automobile</button>
+      <button type="button" class="tool" data-view="true" aria-pressed="false">Show true counts</button>
+    </div>
+    <p>Train on three quarters of the data, predict the fourth, four times over: now every image has a vote from a model that never saw its label. Count the images labeled <i>i</i> on which the model is at least as confident about class <i>j</i> as it usually is about <i>j</i>. That count matrix, the <button class="inline-term" data-open="joint">confident joint</button>, names the confused pairs and estimates how many labels are wrong.</p>
+    <p class="note">Computed on our run with five flipped class pairs: the matrix finds all five. Click a cell: the automobile-truck and horse-deer cells are 97.5-98.6% real errors, cat-dog 53.2% (both directions were flipped); the reverse truck-to-automobile cell is 0%, because the noise taught the model to doubt correct trucks.</p>
+    <p class="inscription">Flags are candidates for review, not verdicts, and they are only as good as the model that votes.</p>
+    <button type="button" class="continue" data-go="split">Continue with training through the noise</button>
+  </article>

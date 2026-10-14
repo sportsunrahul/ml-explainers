@@ -1,0 +1,216 @@
+<section id="ch-ptq" class="chapter">
+<h2>The post-training toolkit</h2>
+<p>Post-training quantization (PTQ) converts a trained network to integers without retraining it, using no data or a small set of unlabeled images (a few hundred to a few thousand). Before anything is rounded, three tools rearrange the network so that it rounds better: move scale between layers, correct the shift that rounding causes, and choose up or down for each weight.</p>
+
+<figure class="viz" id="viz-cle" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Channel scales">
+    <span class="lbl">Scales</span>
+    <button type="button" id="btn-cle-original" aria-pressed="true">Original</button>
+    <button type="button" id="btn-cle-equalize" aria-pressed="false">Equalize</button>
+    <label>part way <input type="range" id="cle-t" min="0" max="1" step="0.05" value="0" aria-label="How far each scale moves toward its equalizing value"><output id="cle-t-out">0</output></label>
+  </div>
+  <canvas id="cle-canvas" role="img" aria-label="Two panels of six rows. Left: the weights leaving each of six channels of layer 1. Right: the weights entering the same channels in layer 2. Each row shows a blue range bar, the weights as blue dots, and where they round to on one shared integer grid. Between the panels, the scale of each channel. At the bottom, the FP32 output for a test input and a red bar for the integer output error."></canvas>
+  <div class="controls" role="group" aria-label="Quantizer">
+    <span class="lbl">Weights</span>
+    <button type="button" id="btn-cle-int8" aria-pressed="true">8-bit</button>
+    <button type="button" id="btn-cle-int4" aria-pressed="false">4-bit</button>
+    <span class="lbl">Bias correction</span>
+    <button type="button" id="btn-cle-bcoff" aria-pressed="true">Off</button>
+    <button type="button" id="btn-cle-bcon" aria-pressed="false">On</button>
+    <button type="button" id="btn-cle-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="cle-readout" aria-live="polite"></p>
+  <figcaption>Computed on toy weights: 4 inputs, 6 ReLU channels, 3 outputs; channel ranges chosen with a 120-fold spread, like a depthwise layer after batch-norm folding. The rescaling is Nagel et al. Eq. 21-22, the quantizer is per-tensor symmetric, and the errors are measured on 256 random test inputs. Bias correction is the empirical form (Eq. 27), applied to the output bias from 256 separate calibration inputs. Activations stay in floating point.</figcaption>
+</figure>
+
+<p>Each row is one channel. In the left panel a channel's weights are the ones that produce it in layer 1; in the right panel they are the ones that read it in layer 2. A per-tensor quantizer lays one ruler over the whole weight tensor, and the ruler must reach the widest channel. A narrow channel then falls between a handful of marks. In the toy, one layer-1 channel uses only three of the 255 levels of an 8-bit grid, so most of its information is rounded away.</p>
+<p>The rescue rests on one property of ReLU: for any positive number <span class="tex">s</span>, <span class="tex">\mathrm{ReLU}(s z) = s\,\mathrm{ReLU}(z)</span>. Divide every weight and the bias of channel <span class="tex">i</span> in layer 1 by <span class="tex">s_i</span>, multiply the weights that read channel <span class="tex">i</span> in layer 2 by the same <span class="tex">s_i</span>, and the network computes exactly the same function. Cross-layer equalization (CLE) uses this freedom to shrink wide channels and stretch narrow ones until each channel has the same range in both layers.</p>
+<p><b>Make a guess before you press "Equalize".</b> Some weights grow and some shrink by large factors. Will the FP32 output for the test input change? It does not, to the last printed digit: the two lines at the bottom of the figure stay identical. The integer output error, though, drops in the toy from about thirteen percent to about one percent of the output's spread. Note what "equalized" means: each channel gets the same range in layer 1 and in layer 2, so the two panels match row by row. Different channels still have different ranges.</p>
+
+<div class="eq" id="eq-cle" data-build data-viz="viz-cle"><div class="tex tex-display">
+\htmlData{step=1, link=out}{\mathbf{y} = f(\mathbf{W}^{(2)} f(\mathbf{W}^{(1)}\mathbf{x}+\mathbf{b}^{(1)}) + \mathbf{b}^{(2)})} = f(\htmlData{step=2, link=w2}{\htmlClass{t-blue}{\mathbf{W}^{(2)}} \htmlClass{t-green}{\mathbf{S}}}\, \hat{f}(\htmlData{step=3, link=w1}{\htmlClass{t-green}{\mathbf{S}^{-1}}\htmlClass{t-blue}{\mathbf{W}^{(1)}}} \mathbf{x} + \mathbf{S}^{-1} \mathbf{b}^{(1)}) + \mathbf{b}^{(2)}), \qquad \htmlData{step=4, link=scale}{\htmlClass{t-green}{\mathbf{s}_i}} = \htmlData{step=5, link=ranges}{\frac{1}{\mathbf{r}_i^{(2)}}\sqrt{\mathbf{r}_i^{(1)} \mathbf{r}_i^{(2)}}}
+</div></div>
+<p class="eqno">Eq. 21 and Eq. 22 in Nagel et al. 2021, arXiv 2106.08295v1 (macros expanded); the same scale is Eq. 11 in DFQ, arXiv 1906.04721v3.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{W}^{(1)}, \mathbf{b}^{(1)}</span>: weights and bias of the first layer; <span class="tex">\mathbf{W}^{(2)}, \mathbf{b}^{(2)}</span>: the second layer, which reads the first layer's channels.</li>
+  <li><span class="tex">f</span>: a ReLU-like activation; <span class="tex">\hat f</span> is the same function, re-parameterized when it is only piecewise linear (ReLU6).</li>
+  <li><span class="tex">\mathbf{S} = \mathrm{diag}(\mathbf{s})</span>: one positive scale per channel. Layer 1 is divided by it and layer 2 is multiplied by it, so the product is unchanged.</li>
+  <li><span class="tex">\mathbf{r}_i^{(1)}, \mathbf{r}_i^{(2)}</span>: the range of channel <span class="tex">i</span> in each layer's weights. With this <span class="tex">s_i</span>, both ranges become <span class="tex">\sqrt{r_i^{(1)} r_i^{(2)}}</span>.</li>
+</ul>
+<p>Nagel et al. report that this choice is optimal for the combined precision of the two layers, and they apply it only inside residual blocks, because a skip connection breaks the equivalence. On MobileNetV2 (ImageNet top-1, 8-bit per-tensor weights and activations), the original model scores <span data-claim="nagel21-t3-original-model-int8">0.12</span>, near chance. CLE raises it to <span data-claim="nagel21-t3-plus-cle-int8">69.91</span>, and absorbing large biases into the next layer to <span data-claim="nagel21-t3-plus-absorbing-bias-int8">70.92</span>. That beats per-channel quantization at <span data-claim="nagel21-t3-per-channel-quantization-int8">70.65</span> (FP32 <span data-claim="nagel21-t3-original-model-fp32">71.72</span>). The DFQ paper, which introduced CLE, shows the same collapse and recovery on a detector and a segmenter:</p>
+<table class="data">
+  <caption>DFQ (Nagel et al. 2019, arXiv 1906.04721v3), Tables 3 and 4. 8-bit per-tensor weights and activations, no data and no training; the authors' own quantization simulation. Absolute points.</caption>
+  <thead><tr><th>Model (backbone), dataset, metric</th><th>FP32</th><th>INT8, original</th><th>INT8, DFQ</th><th>INT8, per-channel</th></tr></thead>
+  <tbody>
+    <tr><td>SSD-lite (MobileNetV2), Pascal VOC, mAP</td><td><span data-claim="dfq19-t4-original-model-fp32">68.47</span></td><td><span data-claim="dfq19-t4-original-model-int8">10.63</span></td><td><span data-claim="dfq19-t4-dfq-ours-int8">67.91</span></td><td><span data-claim="dfq19-t4-per-channel-quantization-int8">67.52</span></td></tr>
+    <tr><td>DeeplabV3+ (MobileNetV2), Pascal VOC, mIoU</td><td><span data-claim="dfq19-t3-original-model-fp32">72.94</span></td><td><span data-claim="dfq19-t3-original-model-int8">41.40</span></td><td><span data-claim="dfq19-t3-dfq-ours-int8">72.33</span></td><td><span data-claim="dfq19-t3-per-channel-quantization-int8">71.44</span></td></tr>
+  </tbody>
+</table>
+
+<h3>Bias correction</h3>
+<p>Rounding errors are not always zero on average. A layer's error on its output is <span class="tex">\Delta\mathbf{W}\mathbf{x}</span>, and its mean is <span class="tex">\Delta\mathbf{W}\,\mathbb{E}[\mathbf{x}]</span>. After a ReLU, the inputs <span class="tex">\mathbf{x}</span> are never negative, so their mean is not zero and the whole output distribution shifts. The shift is a fixed vector, so it can be subtracted through the bias at no cost at inference time.</p>
+<div class="eq" id="eq-bc" data-build data-viz="viz-cle"><div class="tex tex-display">
+\htmlData{step=1, link=out}{\mathbb{E}[\mathbf{y}_{\text{corr}}]} = \htmlData{step=2, link=out}{\mathbb{E}[\htmlClass{t-yellow}{\widehat{\mathbf{W}}}\mathbf{x}]} - \htmlData{step=3, link=shift}{\htmlClass{t-red}{\Delta\mathbf{W}}\,\mathbb{E}[\mathbf{x}]} = \htmlData{step=4, link=out}{\mathbb{E}[\mathbf{y}]}
+</div></div>
+<p class="eqno">Eq. 26 in Nagel et al. 2021, arXiv 2106.08295v1 (macros expanded).</p>
+<ul class="gloss">
+  <li><span class="tex">\widehat{\mathbf{W}}</span>: the quantized weights; <span class="tex">\Delta\mathbf{W} = \widehat{\mathbf{W}} - \mathbf{W}</span>, the rounding error.</li>
+  <li><span class="tex">\mathbb{E}[\mathbf{x}]</span>: the mean input to the layer. With calibration data it is measured (empirical bias correction, Eq. 27). Without data, DFQ computes it from the previous batch-norm layer's shift and scale (analytic bias correction, Eq. 28).</li>
+</ul>
+<p>Press "On" under bias correction in the figure: the lighter bar, the mean shift, nearly disappears, and the total error falls by the same part. On MobileNetV2, bias correction alone lifts per-tensor INT8 from <span data-claim="nagel21-t4-original-model-int8">0.12</span> to <span data-claim="nagel21-t4-original-plus-bias-correction-int8">52.02</span>; after CLE and bias absorption it adds a little more, <span data-claim="nagel21-t4-cle-plus-bias-absorption-int8">70.92</span> to <span data-claim="nagel21-t4-cle-plus-bias-absorption-plus-bias-correction-int8">71.19</span>, with no data at all (Nagel Table 4).</p>
+
+<h3>AdaRound: up or down?</h3>
+<p>Rounding each weight to its nearest grid point minimizes each weight's own error. It does not minimize the error of the layer's output, because the errors of different weights can add up or cancel, depending on how their inputs move together.</p>
+
+<figure class="viz" id="viz-adaround" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Layer inputs">
+    <span class="lbl">Inputs</span>
+    <button type="button" id="btn-adaround-indep" aria-pressed="false">independent</button>
+    <button type="button" id="btn-adaround-corr" aria-pressed="true">correlated</button>
+  </div>
+  <canvas id="adaround-canvas" role="img" aria-label="A plane of two weights measured in grid steps. A blue point is the full-precision pair; the four yellow points around it are the grid corners it can round to. Red ellipses are lines of equal output error. Each corner is labelled with its error, and bars on the right compare them."></canvas>
+  <div class="controls" role="group" aria-label="Rounding">
+    <span class="lbl">Round</span>
+    <button type="button" id="btn-adaround-nearest" aria-pressed="false">to nearest</button>
+    <button type="button" id="btn-adaround-best" aria-pressed="false">to the best corner</button>
+    <button type="button" id="btn-adaround-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="adaround-readout" aria-live="polite"></p>
+  <figcaption>Computed exactly. One output neuron with two weights, in units of the grid step. Rounding the pair to a corner adds the error vector <span class="tex">\Delta\mathbf{w}</span>, and the mean squared output error is <span class="tex">\Delta\mathbf{w}^T \mathbf{H} \Delta\mathbf{w}</span> with <span class="tex">\mathbf{H} = \mathbb{E}[\mathbf{x}\mathbf{x}^T]</span>. "Correlated" uses the 2 by 2 matrix of Example 1 in the AdaRound paper (Sec. 2), where it is a task-loss Hessian; here we read it as the input correlation of two inputs with unit variance and correlation 0.5. "Independent" uses the identity. Drag the blue point.</figcaption>
+</figure>
+
+<p>The red ellipses are lines of equal output error. When the two inputs are independent, they are circles, and the nearest corner is always the best one. When the inputs are correlated, the ellipses stretch along the diagonal: errors of opposite sign cancel, and errors of the same sign add. The nearest corner rounds both weights down, so both errors have the same sign.</p>
+<p><b>Make a guess before you press "to the best corner".</b> Which corner wins for the correlated inputs? It is <span class="tex">(1, 0)</span>: it rounds one weight up and one down, its errors partly cancel, and its output error is about 40 percent lower than that of the nearest corner. The nearest corner is only the third best of four.</p>
+<p>AdaRound turns this picture into an algorithm. Start from the change in the task loss <span class="tex">\mathcal{L}</span> when the weights move by <span class="tex">\Delta\mathbf{w}</span>, expand it to second order, drop the gradient term (the trained network sits at a minimum), and ignore interactions between layers:</p>
+<div class="eq" id="eq-adaround-taylor" data-build data-viz="viz-adaround"><div class="tex tex-display">
+\htmlData{step=1, link=delta}{\arg\min_{\htmlClass{t-red}{\Delta \mathbf{w}}}\ \mathbb{E}\left[\mathcal{L}(\mathbf{x},\mathbf{y},\mathbf{w} + \Delta\mathbf{w}) - \mathcal{L}(\mathbf{x},\mathbf{y},\mathbf{w})\right]} \;\approx\; \htmlData{step=2, link=hess}{\arg\min_{\Delta \mathbf{w}^{(\ell)}}\ \mathbb{E}\left[{\Delta \mathbf{w}^{(\ell)}}^T \htmlClass{t-red}{\mathbf{H}^{(\mathbf{w}^{(\ell)})}} \Delta \mathbf{w}^{(\ell)}\right]}
+</div></div>
+<p class="eqno">Eq. 29 and Eq. 30 in Nagel et al. 2021, arXiv 2106.08295v1 (macros expanded); AdaRound, arXiv 2004.10568v2, derives them in Sec. 2-3.</p>
+<p>The Hessian <span class="tex">\mathbf{H}</span> of a whole layer is too costly to compute, and choosing up or down for every weight is a hard combinatorial problem. AdaRound makes two more steps. It assumes the loss treats a layer's outputs independently, which turns the Hessian into the input correlation <span class="tex">\mathbb{E}[\mathbf{x}\mathbf{x}^T]</span>, as in the figure: minimize the error of the layer's output on calibration data. Then it relaxes the binary choice into a continuous variable that a regularizer pushes to 0 or 1:</p>
+<div class="eq" id="eq-adaround" data-build data-viz="viz-adaround"><div class="tex tex-display">
+\htmlData{step=1, link=loss}{\arg\min_{\mathbf{V}} \left\lVert f_a(\htmlClass{t-blue}{\mathbf{W}} \mathbf{x}) - f_a(\htmlClass{t-yellow}{\widetilde{\mathbf{W}}}\, \hat{\mathbf{x}}) \right\rVert^2_F} + \htmlData{step=3, link=corners}{\lambda f_{\text{reg}}(\mathbf{V})}, \qquad \htmlData{step=2, link=delta}{\htmlClass{t-yellow}{\widetilde{\mathbf{W}}} = s \cdot \mathrm{clamp}\left(\left\lfloor \frac{\mathbf{W}}{s} \right\rfloor + h(\mathbf{V}); n, p \right)}
+</div></div>
+<p class="eqno">Eq. 35 and Eq. 33 in Nagel et al. 2021, arXiv 2106.08295v1 (macros expanded); Eq. 25 and Eq. 22 in AdaRound, arXiv 2004.10568v2.</p>
+<ul class="gloss">
+  <li><span class="tex">\lfloor \mathbf{W}/s \rfloor</span>: every weight rounded down; <span class="tex">h(\mathbf{V}) \in [0, 1]</span> adds 0 (keep down) or 1 (round up). It is a rectified sigmoid of a learned variable <span class="tex">\mathbf{V}</span>, one per weight.</li>
+  <li><span class="tex">f_{\text{reg}}(\mathbf{V}) = \sum_{i,j} 1 - |2 h(\mathbf{V}_{i,j}) - 1|^\beta</span> (Eq. 34): zero only when every <span class="tex">h</span> is exactly 0 or 1; <span class="tex">\beta</span> is annealed so the choice hardens.</li>
+  <li><span class="tex">\hat{\mathbf{x}}</span>: the layer input with all earlier layers already quantized, so each layer also corrects its predecessors' errors; <span class="tex">f_a</span>: the activation function; <span class="tex">n, p</span>: the grid limits.</li>
+</ul>
+<p>The payoff is large at 4 bits. On ResNet18 with 4-bit weights in every layer, rounding to nearest gives <span data-claim="nagel21-t5-nearest-all-layers">23.99</span> top-1 and AdaRound <span data-claim="nagel21-t5-adaround-eqp-35-all-layers">68.60</span> (Nagel Table 5, ImageNet). On the segmenter DeeplabV3+ (MobileNetV2 backbone, Pascal VOC mIoU, FP32 <span data-claim="adaround20-t9-full-precision-32-32-miou">72.94</span>), 4-bit weights with 8-bit activations give <span data-claim="adaround20-t9-nearest-w4-a8-miou">6.09</span> with nearest rounding and <span data-claim="adaround20-t9-adaround-w-act-quant-w4-a8-miou">70.86</span> with AdaRound (AdaRound Table 9). The default setup optimizes on <span data-claim="adaround20-calib-images">1024</span> unlabeled images for <span data-claim="adaround20-iterations">10k</span> iterations; the ImageNet comparison in its Table 7 doubled both, and the DeeplabV3+ run used fewer images because they are larger.</p>
+<p>BRECQ (Li et al. 2021, arXiv 2102.05426v2) reconstructs one residual block at a time instead of one layer, which keeps the interactions between the layers inside a block. It is the only source here with 4-bit and 2-bit post-training rows for COCO detectors:</p>
+<table class="data">
+  <caption>BRECQ Table 5: COCO box mAP, 8-bit activations, <span data-claim="brecq21-calib-coco">256</span> COCO calibration images, block reconstruction in the backbone and layer-wise reconstruction in the rest, such as the FPN; each method as implemented by the BRECQ authors. Weight granularity is not stated. Absolute points.</caption>
+  <thead><tr><th>Faster R-CNN, backbone</th><th>FP32</th><th>Bias corr. W4A8</th><th>AdaRound W4A8</th><th>AdaRound W2A8</th><th>BRECQ W4A8</th><th>BRECQ W2A8</th></tr></thead>
+  <tbody>
+    <tr><td>ResNet-50</td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-fp">38.55</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-bc-w4a8">0.25</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-adaround-w4a8">37.58</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-adaround-w2a8">19.63</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-brecq-w4a8">38.29</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-brecq-w2a8">34.23</span></td></tr>
+    <tr><td>MobileNetV2</td><td><span data-claim="brecq21-t5-faster-rcnn-mobilenetv2-fp">33.44</span></td><td><span data-claim="brecq21-t5-faster-rcnn-mobilenetv2-bc-w4a8">18.39</span></td><td><span data-claim="brecq21-t5-faster-rcnn-mobilenetv2-adaround-w4a8">32.77</span></td><td><span data-claim="brecq21-t5-faster-rcnn-mobilenetv2-adaround-w2a8">16.35</span></td><td><span data-claim="brecq21-t5-faster-rcnn-mobilenetv2-brecq-w4a8">33.18</span></td><td><span data-claim="brecq21-t5-faster-rcnn-mobilenetv2-brecq-w2a8">27.54</span></td></tr>
+  </tbody>
+</table>
+<p>The pattern matters more than any one cell: at 4-bit weights, a method that only fixes the mean (bias correction) collapses on a ResNet-50 detector, and a method that chooses the rounding (AdaRound, BRECQ) stays within about a point.</p>
+
+<h3>The standard pipeline</h3>
+<p>Nagel et al. combine these tools into one recipe, in a fixed order. Step through it:</p>
+<figure class="viz" id="viz-ptqpipe">
+  <span class="badge sourced">Sourced</span>
+  <div class="controls fig-top" role="group" aria-label="Pipeline step">
+    <span class="lbl">Step</span>
+    <button type="button" id="btn-ptqpipe-1" aria-pressed="false">1</button>
+    <button type="button" id="btn-ptqpipe-2" aria-pressed="false">2</button>
+    <button type="button" id="btn-ptqpipe-3" aria-pressed="false">3</button>
+    <button type="button" id="btn-ptqpipe-4" aria-pressed="false">4</button>
+    <button type="button" id="btn-ptqpipe-5" aria-pressed="false">5</button>
+    <button type="button" id="btn-ptqpipe-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="ptqpipe-canvas" role="img" aria-label="The standard post-training pipeline as boxes: pre-trained FP32 model, cross-layer equalization, add quantizers, weight range, then a branch: AdaRound with data or bias correction without data, then activation range."></canvas>
+  <p class="readout" id="ptqpipe-readout" aria-live="polite"></p>
+  <figcaption>Redrawn from Nagel et al. 2021, Fig. 8 (Sec. 3.5). The step texts summarize the paper's recommendations.</figcaption>
+</figure>
+<p>With this pipeline, Nagel et al. measured the vision models below (Table 6, average of 5 runs). Read the rows, not the summary sentences: the paper's prose says 8-bit stays close to FP32 for all models, but its own EfficientDet-D1 row does not.</p>
+<table class="data">
+  <caption>Nagel et al. 2021, Table 6: the standard PTQ pipeline; the authors' own quantization simulation. Per-tensor or per-channel refers to the weights; activations are per-tensor. Absolute points.</caption>
+  <thead><tr><th>Model (backbone), dataset, metric</th><th>FP32</th><th>Per-tensor W8A8</th><th>Per-tensor W4A8</th><th>Per-channel W8A8</th><th>Per-channel W4A8</th></tr></thead>
+  <tbody>
+    <tr><td>EfficientDet-D1, COCO, mAP</td><td><span data-claim="nagel21-t6-efficientdet-d1-fp32">40.08</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pt-w8a8">38.29</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pt-w4a8">0.31</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w8a8">38.67</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w4a8">35.08</span></td></tr>
+    <tr><td>DeeplabV3 (MobileNetV2), Pascal VOC, mIoU</td><td><span data-claim="nagel21-t6-deeplabv3-fp32">72.94</span></td><td><span data-claim="nagel21-t6-deeplabv3-pt-w8a8">72.44</span></td><td><span data-claim="nagel21-t6-deeplabv3-pt-w4a8">70.80</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w8a8">72.27</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w4a8">71.67</span></td></tr>
+    <tr><td>ResNet50, ImageNet, top-1</td><td><span data-claim="nagel21-t6-resnet50-fp32">76.07</span></td><td><span data-claim="nagel21-t6-resnet50-pt-w8a8">75.87</span></td><td><span data-claim="nagel21-t6-resnet50-pt-w4a8">75.15</span></td><td><span data-claim="nagel21-t6-resnet50-pc-w8a8">75.88</span></td><td><span data-claim="nagel21-t6-resnet50-pc-w4a8">75.43</span></td></tr>
+    <tr><td>MobileNetV2, ImageNet, top-1</td><td><span data-claim="nagel21-t6-mobilenetv2-fp32">71.72</span></td><td><span data-claim="nagel21-t6-mobilenetv2-pt-w8a8">70.99</span></td><td><span data-claim="nagel21-t6-mobilenetv2-pt-w4a8">69.21</span></td><td><span data-claim="nagel21-t6-mobilenetv2-pc-w8a8">71.16</span></td><td><span data-claim="nagel21-t6-mobilenetv2-pc-w4a8">69.79</span></td></tr>
+  </tbody>
+</table>
+<p>EfficientDet-D1, a detector built from depthwise-separable convolutions, loses more than a point even at 8 bits. With 4-bit per-tensor weights it collapses to <span data-claim="nagel21-t6-efficientdet-d1-pt-w4a8">0.31</span> mAP, and per-channel weights bring it back to <span data-claim="nagel21-t6-efficientdet-d1-pc-w4a8">35.08</span>. The segmenter, with the same kind of backbone, holds up much better.</p>
+
+<h3>When PTQ falls short</h3>
+<p>Nagel et al. also give a debugging flow (Sec. 3.7, Fig. 9). The error is FP32 accuracy minus quantized accuracy, compared with the error you can accept:</p>
+<ol>
+  <li>Run the quantized model with every bit-width set to 32. If the error is not about zero, the simulation itself has a bug: fix it first.</li>
+  <li>Quantize only the activations, then only the weights. Whichever side fails, apply its fixes: for weights, AdaRound, per-channel scales, CLE and bias correction; for activations, better range setting, and a check that CLE did not unbalance the activation ranges.</li>
+  <li>If one side still fails, quantize one layer at a time. Plot the failing tensor per channel, then fix it with a custom range or a higher bit-width for that tensor.</li>
+  <li>Quantize the whole model again. If the error is still too large, go to quantization-aware training (<a href="#ch-qat">the next chapter</a>).</li>
+</ol>
+<p>Wu et al. (arXiv 2004.09602v1) make step 3 systematic with partial quantization. They quantize one layer at a time, sort layers by the accuracy each one costs, and leave the most sensitive layers in floating point. On EfficientNet b0 (ImageNet, classification only; Wu's Table 6 has no detection rows), skipping <span data-claim="wu20-t6-efficientnet-b0-skipped">10</span> of <span data-claim="wu20-t6-efficientnet-b0-total-layers">82</span> layers lifts INT8 top-1 from <span data-claim="wu20-t6-efficientnet-b0-full-acc">72.06</span> to <span data-claim="wu20-t6-efficientnet-b0-partial-acc">76.35</span> (FP32 <span data-claim="wu20-t6-efficientnet-b0-fp32">76.85</span>). <span data-claim="wu20-fig3-depthwise-count">7</span> of the ten most sensitive layers are depthwise convolutions, and the most sensitive is the <span data-claim="wu20-fig3-most-sensitive">block0 depthwise</span> layer (Fig. 3). The <a href="#ch-guide">decision guide</a> turns this flow into an ordered recipe for detectors.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>For a ResNet-FPN detector at 8 bits, per-channel weights and a good activation range are usually enough. For a detector with depthwise convolutions (EfficientDet, MobileNet-SSD), run CLE first or use per-channel weights; per-tensor alone can collapse. For 4-bit weights, choose the rounding with AdaRound or BRECQ on a few hundred calibration images from your own cameras. The <a href="#ch-guide">decision guide</a> puts these steps in order.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-cle'), out = document.getElementById('cle-readout'), rng = document.getElementById('cle-t'), rout = document.getElementById('cle-t-out');
+  const kit = KIT.cle(document.getElementById('cle-canvas'), { fig });
+  const B = id => document.getElementById('btn-cle-' + id);
+  let t = 0;
+  const sync = () => {
+    B('original').setAttribute('aria-pressed', String(t === 0)); B('equalize').setAttribute('aria-pressed', String(t === 1));
+    B('int8').setAttribute('aria-pressed', String(kit.state.bits === 8)); B('int4').setAttribute('aria-pressed', String(kit.state.bits === 4));
+    const bc = kit.info(t).bc; B('bcoff').setAttribute('aria-pressed', String(!bc)); B('bcon').setAttribute('aria-pressed', String(bc));
+    rng.value = t; rout.textContent = t.toFixed(2); out.innerHTML = KIT.cleText(kit.info(t));
+  };
+  const goT = v => { t = v; kit.set({ t: v }); sync(); };
+  B('original').addEventListener('click', () => goT(0));
+  B('equalize').addEventListener('click', () => goT(1));
+  rng.addEventListener('input', () => { t = +rng.value; kit.set({ t, instant: true }); rout.textContent = t.toFixed(2); });
+  rng.addEventListener('change', sync);
+  B('int8').addEventListener('click', () => { kit.set({ bits: 8 }); sync(); });
+  B('int4').addEventListener('click', () => { kit.set({ bits: 4 }); sync(); });
+  B('bcoff').addEventListener('click', () => { kit.set({ bc: 0 }); sync(); });
+  B('bcon').addEventListener('click', () => { kit.set({ bc: 1 }); sync(); });
+  B('reset').addEventListener('click', () => { t = 0; kit.set({ t: 0, bits: 8, bc: 0 }); sync(); });
+  sync();
+})();
+(() => {
+  const fig = document.getElementById('viz-adaround'), out = document.getElementById('adaround-readout');
+  const kit = KIT.adaround(document.getElementById('adaround-canvas'), { fig, onChange: () => sync() });
+  const B = id => document.getElementById('btn-adaround-' + id);
+  const sync = () => {
+    B('indep').setAttribute('aria-pressed', String(kit.state.H === KIT.ADA_H.indep)); B('corr').setAttribute('aria-pressed', String(kit.state.H === KIT.ADA_H.corr));
+    B('nearest').setAttribute('aria-pressed', String(kit.state.pick === 'nearest')); B('best').setAttribute('aria-pressed', String(kit.state.pick === 'best'));
+    out.innerHTML = KIT.adaroundText(kit.info());
+  };
+  B('indep').addEventListener('click', () => { kit.set({ H: KIT.ADA_H.indep }); sync(); });
+  B('corr').addEventListener('click', () => { kit.set({ H: KIT.ADA_H.corr }); sync(); });
+  B('nearest').addEventListener('click', () => { kit.set({ pick: 'nearest' }); sync(); });
+  B('best').addEventListener('click', () => { kit.set({ pick: 'best' }); sync(); });
+  B('reset').addEventListener('click', () => { kit.set({ H: KIT.ADA_H.corr, w: [.42, .35], pick: null }); sync(); });
+  sync();
+})();
+(() => {
+  const out = document.getElementById('ptqpipe-readout');
+  const kit = KIT.ptqpipe(document.getElementById('ptqpipe-canvas'));
+  const T = [
+    'The pipeline starts from a pre-trained FP32 model. Press a step.',
+    '<b>1. Cross-layer equalization.</b> Rescale channel pairs so that per-tensor weight ranges fit (the first figure in this chapter). Most important for depthwise-separable layers and for per-tensor quantization.',
+    '<b>2. Add quantizers.</b> Symmetric weights, asymmetric activations. Per-channel weights if the hardware and software stack supports them.',
+    '<b>3. Weight range.</b> Choose each weight range by minimizing the mean squared error between the weights and their quantized version (Eq. 16). Min-max ranges can be better for per-channel quantization.',
+    '<b>4. Rounding or bias.</b> With a calibration set (usually between <span data-claim="nagel21-calib-images">500 and 1000</span> unlabeled images), AdaRound; it is crucial for 4-bit weights. Without data, analytic bias correction from the batch-norm statistics.',
+    '<b>5. Activation range.</b> Mean squared error on a small calibration set, or ranges from the batch-norm statistics for a fully data-free pipeline.',
+  ];
+  const btns = [1, 2, 3, 4, 5].map(k => document.getElementById('btn-ptqpipe-' + k));
+  const go = k => { kit.set({ step: k }); btns.forEach((b, i) => b.setAttribute('aria-pressed', String(i + 1 === k))); out.innerHTML = T[k]; };
+  btns.forEach((b, i) => b.addEventListener('click', () => go(i + 1)));
+  document.getElementById('btn-ptqpipe-reset').addEventListener('click', () => go(0));
+  go(0);
+})();
+</script>
+</section>

@@ -1,0 +1,1683 @@
+[
+ {
+  "id": "sb-ve-eq",
+  "claim": "Mean square value error objective VE(w)",
+  "value": "Eq. 9.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.2, p.199 (PDF 221)"
+ },
+ {
+  "id": "sb-sgd-eq94",
+  "claim": "SGD update written as w - (1/2) alpha grad[v_pi(S_t) - v-hat(S_t,w_t)]^2",
+  "value": "Eq. 9.4",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.3, p.201 (PDF 223)"
+ },
+ {
+  "id": "sb-sgd-eq95",
+  "claim": "SGD update with the true value as target, expanded",
+  "value": "Eq. 9.5",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.3, p.201 (PDF 223)"
+ },
+ {
+  "id": "sb-general-sgd-eq97",
+  "claim": "General SGD prediction update with target U_t",
+  "value": "Eq. 9.7",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.3, p.202 (PDF 224)"
+ },
+ {
+  "id": "sb-semigrad-td0-section",
+  "claim": "Section whose pseudocode box (unnumbered) gives semi-gradient TD(0); update = Eq. 9.7 with U_t = R_{t+1} + gamma v-hat(S_{t+1},w)",
+  "value": "9.3",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.3, box p.203 (PDF 225); target defined p.203"
+ },
+ {
+  "id": "sb-semigrad-term",
+  "claim": "Name for bootstrapping methods that include only part of the gradient",
+  "value": "semi-gradient",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.3, p.202 (PDF 224), last paragraph"
+ },
+ {
+  "id": "sb-linear-vhat-eq98",
+  "claim": "Linear value function v-hat(s,w) = w^T x(s)",
+  "value": "Eq. 9.8",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, p.205 (PDF 227)"
+ },
+ {
+  "id": "sb-linear-td0-eq99",
+  "claim": "Linear semi-gradient TD(0) update (continuing case)",
+  "value": "Eq. 9.9",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, p.205 (PDF 227)"
+ },
+ {
+  "id": "sb-expected-update-eq910",
+  "claim": "Expected linear TD update E[w_{t+1}|w_t] = w_t + alpha(b - A w_t)",
+  "value": "Eq. 9.10",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, p.205 (PDF 227)"
+ },
+ {
+  "id": "sb-A-b-eq911",
+  "claim": "Definitions b = E[R_{t+1} x_t], A = E[x_t (x_t - gamma x_{t+1})^T]",
+  "value": "Eq. 9.11",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, p.206 (PDF 228)"
+ },
+ {
+  "id": "sb-td-fixed-point-eq912",
+  "claim": "TD fixed point w_TD = A^{-1} b",
+  "value": "Eq. 9.12",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, p.206 (PDF 228)"
+ },
+ {
+  "id": "sb-td-bound-eq914",
+  "claim": "Bound VE(w_TD) <= 1/(1-gamma) min_w VE(w) (continuing case)",
+  "value": "Eq. 9.14",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, p.207 (PDF 229)"
+ },
+ {
+  "id": "sb-td-bound-factor",
+  "claim": "Expansion factor in the TD fixed-point error bound (TeX)",
+  "value": "\\frac{1}{1-\\gamma}",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.4, Eq. 9.14, p.207 (PDF 229)"
+ },
+ {
+  "id": "sb-rbf-section",
+  "claim": "Section with the Gaussian radial basis feature x_i(s) = exp(-||s - c_i||^2 / (2 sigma_i^2)) (unnumbered)",
+  "value": "9.5.5",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 9.5.5, p.221 (PDF 243), Figure 9.13"
+ },
+ {
+  "id": "sb-semigrad-origin",
+  "claim": "Semi-gradient TD(0) first explored by Sutton (1984, 1988)",
+  "value": "1988",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 9.3, p.237 (PDF 259)"
+ },
+ {
+  "id": "sb-semigrad-name-origin",
+  "claim": "Name 'semi-gradient' is new to the 2nd edition; credited to Sutton (2015a)",
+  "value": "2015",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 9.3, p.237 (PDF 259); bib remarks 11.1, p.285 (PDF 307)"
+ },
+ {
+  "id": "sb-td-bound-origin",
+  "claim": "Asymptotic error bound of linear bootstrapping proved by Tsitsiklis and Van Roy",
+  "value": "1997",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 9.4, p.238 (PDF 260)"
+ },
+ {
+  "id": "sb-rho-eq111",
+  "claim": "Per-step importance sampling ratio rho_t = pi(A_t|S_t)/b(A_t|S_t)",
+  "value": "Eq. 11.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.1, p.258 (PDF 280)"
+ },
+ {
+  "id": "sb-offpolicy-td0-eq112",
+  "claim": "Semi-gradient off-policy TD(0) update w + alpha rho_t delta_t grad v-hat",
+  "value": "Eq. 11.2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.1, p.258 (PDF 280)"
+ },
+ {
+  "id": "sb-td-error-eq113",
+  "claim": "TD error delta_t (episodic, discounted)",
+  "value": "Eq. 11.3",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.1, p.258 (PDF 280)"
+ },
+ {
+  "id": "sb-w2w-section",
+  "claim": "Section with the w, 2w example and Baird's counterexample",
+  "value": "11.2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260-263 (PDF 282-285)"
+ },
+ {
+  "id": "sb-w2w-features",
+  "claim": "Feature values of the two states in the w, 2w example",
+  "value": "1 and 2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282), para 2"
+ },
+ {
+  "id": "sb-w2w-reward",
+  "claim": "Reward on the deterministic w -> 2w transition",
+  "value": "0",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282), para 2"
+ },
+ {
+  "id": "sb-w2w-start-w",
+  "claim": "Initial w in the worked w, 2w narrative",
+  "value": "10",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282), para 3"
+ },
+ {
+  "id": "sb-w2w-alpha",
+  "claim": "Step size in the worked w, 2w narrative",
+  "value": "0.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282), para 3"
+ },
+ {
+  "id": "sb-w2w-second-value",
+  "claim": "Approximate first-state value after the second update in the narrative",
+  "value": "12.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282), para 3"
+ },
+ {
+  "id": "sb-w2w-td-error",
+  "claim": "TD error on the w -> 2w transition (TeX; unnumbered)",
+  "value": "(2\\gamma - 1)w_t",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282), displayed equation"
+ },
+ {
+  "id": "sb-w2w-multiplier",
+  "claim": "Scalar that multiplies w at each off-policy update (TeX; unnumbered)",
+  "value": "1 + \\alpha(2\\gamma - 1)",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282)"
+ },
+ {
+  "id": "sb-w2w-gamma-threshold",
+  "claim": "w, 2w diverges whenever gamma exceeds this value (for any alpha > 0)",
+  "value": "0.5",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282): 'greater than 1 whenever gamma > 0.5'"
+ },
+ {
+  "id": "sb-w2w-rho",
+  "claim": "Importance sampling ratio on the w -> 2w transition",
+  "value": "1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.260 (PDF 282)"
+ },
+ {
+  "id": "sb-baird-states",
+  "claim": "Number of states in Baird's counterexample ('seven-state'; 'nonterminal states (7)')",
+  "value": "7",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261-262 (PDF 283-284)"
+ },
+ {
+  "id": "sb-baird-actions",
+  "claim": "Number of actions in Baird's counterexample ('two-action MDP')",
+  "value": "two",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261 (PDF 283)"
+ },
+ {
+  "id": "sb-baird-weights",
+  "claim": "Number of weights in Baird's counterexample (w in R^8)",
+  "value": "8",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.262 (PDF 284)"
+ },
+ {
+  "id": "sb-baird-b-dashed",
+  "claim": "Behavior policy probability of the dashed action",
+  "value": "6/7",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261 (PDF 283); Figure 11.1"
+ },
+ {
+  "id": "sb-baird-b-solid",
+  "claim": "Behavior policy probability of the solid action",
+  "value": "1/7",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261 (PDF 283); Figure 11.1"
+ },
+ {
+  "id": "sb-baird-pi-solid",
+  "claim": "Target policy probability of the solid action",
+  "value": "1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261 (PDF 283); Figure 11.1"
+ },
+ {
+  "id": "sb-baird-gamma",
+  "claim": "Discount rate in Baird's counterexample",
+  "value": "0.99",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261 (PDF 283); Figure 11.1"
+ },
+ {
+  "id": "sb-baird-reward",
+  "claim": "Reward on all transitions in Baird's counterexample",
+  "value": "0",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.261 (PDF 283)"
+ },
+ {
+  "id": "sb-baird-feature-x1",
+  "claim": "Feature vector of the first state x(1) (transposed in the book)",
+  "value": "(2, 0, 0, 0, 0, 0, 0, 1)",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.262 (PDF 284), line 2"
+ },
+ {
+  "id": "sb-baird-value-upper",
+  "claim": "Value form of upper state i (i = 1..6), TeX",
+  "value": "2w_i + w_8",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 11.1, p.261 (PDF 283)"
+ },
+ {
+  "id": "sb-baird-value-seventh",
+  "claim": "Value form of the seventh state, TeX",
+  "value": "w_7 + 2w_8",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 11.1, p.261 (PDF 283)"
+ },
+ {
+  "id": "sb-baird-alpha",
+  "claim": "Step size in Figure 11.2",
+  "value": "0.01",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 11.2 caption, p.262 (PDF 284)"
+ },
+ {
+  "id": "sb-baird-init",
+  "claim": "Initial weights in Figure 11.2 (transposed in the book)",
+  "value": "(1, 1, 1, 1, 1, 1, 10, 1)",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 11.2 caption, p.262 (PDF 284)"
+ },
+ {
+  "id": "sb-baird-horizon",
+  "claim": "Steps (TD panel) and sweeps (DP panel) shown in Figure 11.2",
+  "value": "1000",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 11.2 x-axis tick labels, p.262 (PDF 284)"
+ },
+ {
+  "id": "sb-baird-dp-eq119",
+  "claim": "Expected (DP-style) semi-gradient update over all states",
+  "value": "Eq. 11.9",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.262 (PDF 284)"
+ },
+ {
+  "id": "sb-tvr-example",
+  "claim": "Tsitsiklis and Van Roy's counterexample (w, 2w plus terminal; 2w self-loop 1 - epsilon)",
+  "value": "Example 11.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.2, p.263 (PDF 285)"
+ },
+ {
+  "id": "sb-tvr-eq1110",
+  "claim": "Least-squares DP recursion w_{k+1} = (6 - 4 epsilon)/5 gamma w_k",
+  "value": "Eq. 11.10",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 11.1, p.263 (PDF 285)"
+ },
+ {
+  "id": "sb-tvr-threshold",
+  "claim": "Example 11.1 diverges when gamma exceeds this (TeX), with w_0 != 0",
+  "value": "\\frac{5}{6-4\\varepsilon}",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 11.1, p.263 (PDF 285), last line"
+ },
+ {
+  "id": "sb-triad-section",
+  "claim": "The deadly triad section",
+  "value": "11.3",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.3, p.264 (PDF 286)"
+ },
+ {
+  "id": "sb-triad-element-fa",
+  "claim": "Deadly triad element 1 (bold heading)",
+  "value": "Function approximation",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.3, p.264 (PDF 286)"
+ },
+ {
+  "id": "sb-triad-element-boot",
+  "claim": "Deadly triad element 2 (bold heading)",
+  "value": "Bootstrapping",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.3, p.264 (PDF 286)"
+ },
+ {
+  "id": "sb-triad-element-offpolicy",
+  "claim": "Deadly triad element 3 (bold heading)",
+  "value": "Off-policy training",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.3, p.264 (PDF 286)"
+ },
+ {
+  "id": "sb-triad-any-two",
+  "claim": "With any two of the three elements but not all three",
+  "value": "instability can be avoided",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.3, p.264 (PDF 286), para after the list"
+ },
+ {
+  "id": "sb-triad-not-control",
+  "claim": "The danger is not due to control or to generalized policy iteration",
+  "value": "not due to control",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.3, p.264 (PDF 286)"
+ },
+ {
+  "id": "sb-naive-rg-eq1123",
+  "claim": "Naive residual-gradient update (full gradient of the squared TD error)",
+  "value": "Eq. 11.23",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.5, p.270 (PDF 292)"
+ },
+ {
+  "id": "sb-asplit-example",
+  "claim": "A-split example (naive residual-gradient converges to TDE minimizer)",
+  "value": "Example 11.2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 11.5, p.271 (PDF 293)"
+ },
+ {
+  "id": "sb-asplit-b",
+  "claim": "Naive residual-gradient value of state B (true value 1)",
+  "value": "3/4",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 11.2, p.271 (PDF 293)"
+ },
+ {
+  "id": "sb-asplit-c",
+  "claim": "Naive residual-gradient value of state C (true value 0)",
+  "value": "1/4",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 11.2, p.271 (PDF 293)"
+ },
+ {
+  "id": "sb-w2w-origin",
+  "claim": "Earliest w-to-2w example given by Tsitsiklis and Van Roy",
+  "value": "1996",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 11.2, p.285 (PDF 307)"
+ },
+ {
+  "id": "sb-baird-origin",
+  "claim": "Baird's counterexample is due to Baird (book version slightly modified)",
+  "value": "1995",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 11.2, p.285 (PDF 307)"
+ },
+ {
+  "id": "sb-triad-origin",
+  "claim": "Deadly triad first identified by Sutton (1995b); analyzed by Tsitsiklis and Van Roy (1997)",
+  "value": "1995",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 11.3, p.285 (PDF 307)"
+ },
+ {
+  "id": "sb-triad-name-origin",
+  "claim": "Name 'deadly triad' due to Sutton (2015a)",
+  "value": "2015",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 11.3, p.285 (PDF 307)"
+ },
+ {
+  "id": "sb-atari-frame",
+  "claim": "Atari frame size seen by a human player (book prints 210x160 with a times sign); outside group C chapters, cross-check for DQN Nature",
+  "value": "210x160",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 16.5, p.438 (PDF 460)"
+ },
+ {
+  "id": "sb-atari-colors",
+  "claim": "Number of colors in Atari frames; outside group C chapters, cross-check for DQN Nature",
+  "value": "128",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 16.5, p.438 (PDF 460)"
+ },
+ {
+  "id": "sb-nstep-return-eq121",
+  "claim": "n-step return with function approximation",
+  "value": "Eq. 12.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, p.288 (PDF 310)"
+ },
+ {
+  "id": "sb-lambda-return-eq122",
+  "claim": "lambda-return G^lambda_t = (1 - lambda) sum lambda^{n-1} G_{t:t+n}",
+  "value": "Eq. 12.2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, p.289 (PDF 311)"
+ },
+ {
+  "id": "sb-lambda-return-eq123",
+  "claim": "Episodic lambda-return with tail weight lambda^{T-t-1} on G_t",
+  "value": "Eq. 12.3",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, p.290 (PDF 312)"
+ },
+ {
+  "id": "sb-offline-lambda-eq124",
+  "claim": "Off-line lambda-return algorithm",
+  "value": "Eq. 12.4",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, p.290 (PDF 312)"
+ },
+ {
+  "id": "sb-lambda-weight-1",
+  "claim": "Weight on the one-step return (TeX)",
+  "value": "1 - \\lambda",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, p.289 (PDF 311)"
+ },
+ {
+  "id": "sb-lambda-weight-n",
+  "claim": "Weight on the n-step return (TeX)",
+  "value": "(1-\\lambda)\\lambda^{n-1}",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, Eq. 12.2, p.289 (PDF 311)"
+ },
+ {
+  "id": "sb-lambda-weight-tail",
+  "claim": "Weight on the actual final return in the episodic case (TeX)",
+  "value": "\\lambda^{T-t-1}",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, Eq. 12.3 and Figure 12.2, p.290 (PDF 312)"
+ },
+ {
+  "id": "sb-lambda-range-eq122",
+  "claim": "Range of lambda printed with Eq. 12.2",
+  "value": "[0, 1)",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 12.1, p.289 (PDF 311)"
+ },
+ {
+  "id": "sb-lambda-return-origin",
+  "claim": "lambda-return introduced by Watkins",
+  "value": "1989",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 12.1, p.319 (PDF 341)"
+ },
+ {
+  "id": "sb-pg-ascent-eq131",
+  "claim": "Stochastic gradient ascent on J(theta)",
+  "value": "Eq. 13.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Ch. 13 intro, p.321 (PDF 343)"
+ },
+ {
+  "id": "sb-softmax-pref-eq132",
+  "claim": "Soft-max in action preferences",
+  "value": "Eq. 13.2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.1, p.322 (PDF 344)"
+ },
+ {
+  "id": "sb-linear-pref-eq133",
+  "claim": "Linear action preferences h = theta^T x(s,a)",
+  "value": "Eq. 13.3",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.1, p.322 (PDF 344)"
+ },
+ {
+  "id": "sb-corridor-example",
+  "claim": "Short corridor with switched actions",
+  "value": "Example 13.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-reward",
+  "claim": "Reward per step in the short corridor",
+  "value": "-1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345), line 2"
+ },
+ {
+  "id": "sb-corridor-nonterminal",
+  "claim": "Number of nonterminal states in the short corridor",
+  "value": "three",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-feature-right",
+  "claim": "Feature vector x(s, right) for all s (transposed in the book)",
+  "value": "[1, 0]",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-feature-left",
+  "claim": "Feature vector x(s, left) for all s (transposed in the book)",
+  "value": "[0, 1]",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-eg-prob",
+  "claim": "Probability epsilon-greedy gives its favored action on all steps (TeX)",
+  "value": "1 - \\varepsilon/2",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-eps",
+  "claim": "Epsilon for the two epsilon-greedy policy values",
+  "value": "0.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-eg-right",
+  "claim": "Start-state value of epsilon-greedy right is less than this (ASCII hyphen-minus)",
+  "value": "-44",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-eg-left",
+  "claim": "Start-state value of epsilon-greedy left is less than this (ASCII hyphen-minus)",
+  "value": "-82",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-best-p",
+  "claim": "Best probability of selecting right ('about')",
+  "value": "0.59",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-corridor-best-value",
+  "claim": "Start-state value of the best stochastic policy ('about'; ASCII hyphen-minus)",
+  "value": "-11.6",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Example 13.1, p.323 (PDF 345)"
+ },
+ {
+  "id": "sb-pg-perf-eq134",
+  "claim": "Episodic performance J(theta) = v_{pi_theta}(s_0)",
+  "value": "Eq. 13.4",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.2, p.324 (PDF 346)"
+ },
+ {
+  "id": "sb-pgt-eq135",
+  "claim": "Policy gradient theorem (episodic), proportional form",
+  "value": "Eq. 13.5",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.2, p.326 (PDF 348)"
+ },
+ {
+  "id": "sb-pgt-constant-episodic",
+  "claim": "Constant of proportionality in Eq. 13.5 for the episodic case",
+  "value": "average length of an episode",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.2, p.326 (PDF 348), text below Eq. 13.5"
+ },
+ {
+  "id": "sb-pgt-constant-continuing",
+  "claim": "Constant of proportionality in Eq. 13.5 for the continuing case (an equality)",
+  "value": "1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.2, p.326 (PDF 348), text below Eq. 13.5"
+ },
+ {
+  "id": "sb-pg-expectation-eq136",
+  "claim": "Gradient as an expectation under pi over states",
+  "value": "Eq. 13.6",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.3, p.326 (PDF 348)"
+ },
+ {
+  "id": "sb-allactions-eq137",
+  "claim": "All-actions update",
+  "value": "Eq. 13.7",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.3, p.326 (PDF 348)"
+ },
+ {
+  "id": "sb-reinforce-eq138",
+  "claim": "REINFORCE update (gamma = 1 form, no gamma^t)",
+  "value": "Eq. 13.8",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.3, p.327 (PDF 349)"
+ },
+ {
+  "id": "sb-eligibility-vector",
+  "claim": "Book's name for grad ln pi(A_t|S_t, theta)",
+  "value": "eligibility vector",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.3, p.328 (PDF 350), first paragraph"
+ },
+ {
+  "id": "sb-reinforce-box-gamma-t",
+  "claim": "Factor in the boxed REINFORCE update that Eq. 13.8 lacks (TeX)",
+  "value": "\\gamma^t",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "REINFORCE box and text below, p.328 (PDF 350)"
+ },
+ {
+  "id": "sb-softmax-eligibility-eq139",
+  "claim": "Eligibility vector for linear soft-max preferences",
+  "value": "Eq. 13.9",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Exercise 13.3, p.329 (PDF 351)"
+ },
+ {
+  "id": "sb-baseline-pgt-eq1310",
+  "claim": "Policy gradient theorem with a baseline b(s)",
+  "value": "Eq. 13.10",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.4, p.329 (PDF 351)"
+ },
+ {
+  "id": "sb-reinforce-baseline-eq1311",
+  "claim": "REINFORCE with baseline update",
+  "value": "Eq. 13.11",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.4, p.329 (PDF 351)"
+ },
+ {
+  "id": "sb-fig131-alpha-best",
+  "claim": "REINFORCE step size that performs best on the short corridor (Figure 13.1 legend; used in Figure 13.2)",
+  "value": "2^-13",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.1 legend, p.328 (PDF 350); Figure 13.2 legend and caption, p.330 (PDF 352)"
+ },
+ {
+  "id": "sb-fig131-alpha-small",
+  "claim": "Smaller REINFORCE step size in Figure 13.1",
+  "value": "2^-14",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.1 legend, p.328 (PDF 350)"
+ },
+ {
+  "id": "sb-fig131-alpha-large",
+  "claim": "Larger REINFORCE step size in Figure 13.1",
+  "value": "2^-12",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.1 legend, p.328 (PDF 350)"
+ },
+ {
+  "id": "sb-fig13-runs",
+  "claim": "Runs averaged in Figures 13.1 and 13.2",
+  "value": "100",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.1 and 13.2 y-axis labels, p.328 and p.330 (PDF 350, 352)"
+ },
+ {
+  "id": "sb-fig13-episodes",
+  "claim": "Episodes shown in Figures 13.1 and 13.2",
+  "value": "1000",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.1 and 13.2 x-axis tick labels, p.328 and p.330"
+ },
+ {
+  "id": "sb-fig132-alpha-theta",
+  "claim": "Policy step size alpha^theta for REINFORCE with baseline",
+  "value": "2^-9",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.2 legend, p.330 (PDF 352)"
+ },
+ {
+  "id": "sb-fig132-alpha-w",
+  "claim": "Value step size alpha^w for REINFORCE with baseline",
+  "value": "2^-6",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Figure 13.2 legend, p.330 (PDF 352)"
+ },
+ {
+  "id": "sb-fig132-baseline-form",
+  "claim": "Baseline function in Figure 13.2 (one weight; TeX)",
+  "value": "\\hat v(s,\\mathbf{w}) = w",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.4, p.331 (PDF 353), first paragraph"
+ },
+ {
+  "id": "sb-alpha-w-rule",
+  "claim": "Numerator of the rule of thumb alpha^w = 0.1/E[||grad v-hat||^2]",
+  "value": "0.1",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.4, p.330 (PDF 352)"
+ },
+ {
+  "id": "sb-ac-eq1312",
+  "claim": "One-step actor-critic, one-step-return form",
+  "value": "Eq. 13.12",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.5, p.331 (PDF 353)"
+ },
+ {
+  "id": "sb-ac-eq1313",
+  "claim": "One-step actor-critic with R_{t+1} + gamma v-hat(S_{t+1}) - v-hat(S_t)",
+  "value": "Eq. 13.13",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.5, p.331 (PDF 353)"
+ },
+ {
+  "id": "sb-ac-eq1314",
+  "claim": "One-step actor-critic in TD-error form",
+  "value": "Eq. 13.14",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.5, p.331 (PDF 353)"
+ },
+ {
+  "id": "sb-ac-box-I",
+  "claim": "Discount accumulator update in the one-step actor-critic box (TeX)",
+  "value": "I \\leftarrow \\gamma I",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "One-step Actor-Critic box, p.332 (PDF 354)"
+ },
+ {
+  "id": "sb-normal-pdf-eq1318",
+  "claim": "Normal probability density",
+  "value": "Eq. 13.18",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.7, p.335 (PDF 357)"
+ },
+ {
+  "id": "sb-gauss-policy-eq1319",
+  "claim": "Gaussian policy pi(a|s,theta)",
+  "value": "Eq. 13.19",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.7, p.335 (PDF 357)"
+ },
+ {
+  "id": "sb-gauss-param-eq1320",
+  "claim": "Mean linear in features, standard deviation exp of linear",
+  "value": "Eq. 13.20",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.7, p.336 (PDF 358)"
+ },
+ {
+  "id": "sb-gauss-eligibility-ex134",
+  "claim": "Exercise giving the Gaussian policy eligibility vectors (unnumbered)",
+  "value": "Exercise 13.4",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Sec. 13.7, p.336 (PDF 358)"
+ },
+ {
+  "id": "sb-reinforce-origin",
+  "claim": "REINFORCE is due to Williams (1987, 1992)",
+  "value": "1992",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 13.3, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-baseline-origin",
+  "claim": "Baseline introduced in Williams's (1987, 1992) original work",
+  "value": "1992",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 13.4, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-pgt-origin-marbach",
+  "claim": "Policy gradient theorem first obtained by Marbach and Tsitsiklis (1998, 2001)",
+  "value": "1998",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 13.2, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-term-pg-methods",
+  "claim": "Sutton, McAllester, Singh, and Mansour introduced the term 'policy gradient methods'",
+  "value": "2000",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks ch. 13, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-gamma-t-origin",
+  "claim": "Thomas first realized the gamma^t factor is needed for discounted episodic problems",
+  "value": "2014",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks ch. 13, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-a2c-name",
+  "claim": "Name S&B say is sometimes used for actor-critic methods",
+  "value": "A2C",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 13.5-6, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-ac-degris",
+  "claim": "Actor-critic algorithms in 13.5-6 based on Degris, White, and Sutton",
+  "value": "2012",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 13.5-6, p.338 (PDF 360)"
+ },
+ {
+  "id": "sb-ac-earliest",
+  "claim": "Early actor-critic: Barto, Sutton, and Anderson",
+  "value": "1983",
+  "paper": "S&B 2nd ed.",
+  "arxiv": null,
+  "loc": "Bib remarks 13.5-6, p.338 (PDF 360)"
+ },
+ {
+  "id": "williams-journal",
+  "claim": "Journal of the REINFORCE paper",
+  "value": "Machine Learning",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Paper p.1 venue line: 'Appears in Machine Learning, 8, pp. 229-256, 1992.'"
+ },
+ {
+  "id": "williams-volume",
+  "claim": "Journal volume",
+  "value": "8",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Paper p.1 venue line"
+ },
+ {
+  "id": "williams-pages",
+  "claim": "Journal pages",
+  "value": "229-256",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Paper p.1 venue line; S&B reference list p.517 (PDF 539)"
+ },
+ {
+  "id": "williams-year",
+  "claim": "Publication year",
+  "value": "1992",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Paper p.1 venue line"
+ },
+ {
+  "id": "williams-issue",
+  "claim": "Journal issue (from S&B reference list, not printed in the paper file)",
+  "value": "3-4",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "S&B reference list p.517 (PDF 539)"
+ },
+ {
+  "id": "williams-acronym",
+  "claim": "Expansion of REINFORCE (quote)",
+  "value": "REward Increment = Nonnegative Factor times Offset Reinforcement times Characteristic Eligibility",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 4, p.5 of the paper file"
+ },
+ {
+  "id": "williams-theorem1",
+  "claim": "Main result: E{Delta W|W} has nonnegative inner product with grad_W E{r|W}; equals alpha grad_W E{r|W} for a shared alpha",
+  "value": "Theorem 1",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 4, p.5; restated and proved in Appendix A, p.21"
+ },
+ {
+  "id": "williams-theorem2",
+  "claim": "Same result for episodic REINFORCE",
+  "value": "Theorem 2",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 5, p.8; proof Appendix A, p.22"
+ },
+ {
+  "id": "williams-fact2",
+  "claim": "Sum over outputs of dg_i/dw_ij is zero; makes the baseline term vanish in Lemma 1",
+  "value": "Fact 2",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Appendix A, p.19-20"
+ },
+ {
+  "id": "williams-baseline-name",
+  "claim": "Williams's name for b_ij",
+  "value": "reinforcement baseline",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "williams-eligibility-name",
+  "claim": "Williams's name for e_ij = d ln g_i / d w_ij",
+  "value": "characteristic eligibility",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "williams-baseline-section",
+  "claim": "Section 'Choice of Reinforcement Baseline'",
+  "value": "8.3",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 8.3, p.16"
+ },
+ {
+  "id": "williams-rc-eq9",
+  "claim": "Reinforcement-comparison REINFORCE rule Delta w = alpha (r - r-bar)(y - p) x",
+  "value": "Eq. 9",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 4, p.7"
+ },
+ {
+  "id": "williams-rbar-eq10",
+  "claim": "Exponential average r-bar(t) = gamma r(t-1) + (1 - gamma) r-bar(t-1) (gamma is an averaging rate)",
+  "value": "Eq. 10",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 4, p.7"
+ },
+ {
+  "id": "williams-episodic-eq11",
+  "claim": "Episodic REINFORCE: (r - b) times the sum of eligibilities over the episode",
+  "value": "Eq. 11",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 5, p.8"
+ },
+ {
+  "id": "williams-gauss-mu-eq12",
+  "claim": "Characteristic eligibility of the Gaussian mean (y - mu)/sigma^2",
+  "value": "Eq. 12",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 6, p.9"
+ },
+ {
+  "id": "williams-gauss-mu-eq13",
+  "claim": "REINFORCE update for the Gaussian mean",
+  "value": "Eq. 13",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 6, p.10"
+ },
+ {
+  "id": "williams-gauss-sigma-eq14",
+  "claim": "REINFORCE update for the Gaussian standard deviation",
+  "value": "Eq. 14",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 6, p.10"
+ },
+ {
+  "id": "williams-log-sigma",
+  "claim": "Footnote 2: adapt lambda = ln sigma to keep sigma positive (TeX)",
+  "value": "\\ln\\sigma",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 6, footnote 2, p.10"
+ },
+ {
+  "id": "williams-reparam-section",
+  "claim": "Section on backpropagating through random number generators (y = mu + sigma z)",
+  "value": "7.2",
+  "paper": "Williams 1992, Machine Learning 8",
+  "arxiv": null,
+  "loc": "Sec. 7.2, p.12-13"
+ },
+ {
+  "id": "sutton2000-venue",
+  "claim": "Proceedings: Advances in Neural Information Processing Systems 12 (not printed in the file)",
+  "value": "NIPS 12",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "S&B reference list p.512 (PDF 534); PDF metadata Subject 'Neural Information Processing Systems'"
+ },
+ {
+  "id": "sutton2000-year",
+  "claim": "Publication year as cited by S&B",
+  "value": "2000",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "S&B reference list p.512 (PDF 534)"
+ },
+ {
+  "id": "sutton2000-pages",
+  "claim": "Proceedings pages",
+  "value": "1057-1063",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Printed page numbers of the file; S&B reference list p.512"
+ },
+ {
+  "id": "sutton2000-conf-year",
+  "claim": "Year the NIPS 12 conference was held; not printed in any file we have",
+  "value": "1999",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Not found in primary sources read",
+  "uncertain": true
+ },
+ {
+  "id": "sutton2000-first-author",
+  "claim": "First author",
+  "value": "Sutton",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Title block, p.1057"
+ },
+ {
+  "id": "sutton2000-last-author",
+  "claim": "Last author",
+  "value": "Mansour",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Title block, p.1057"
+ },
+ {
+  "id": "sutton2000-theorem1",
+  "claim": "Policy gradient theorem (average-reward and start-state), an equality with unnormalized d^pi",
+  "value": "Theorem 1",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 1, p.1059"
+ },
+ {
+  "id": "sutton2000-eq2",
+  "claim": "Equation stating Theorem 1",
+  "value": "Eq. 2",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 1, p.1059"
+ },
+ {
+  "id": "sutton2000-theorem2",
+  "claim": "Policy gradient with compatible function approximation",
+  "value": "Theorem 2",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 2, p.1060"
+ },
+ {
+  "id": "sutton2000-compat-eq4",
+  "claim": "Compatibility condition df_w/dw = (dpi/dtheta)(1/pi)",
+  "value": "Eq. 4",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 2, p.1060"
+ },
+ {
+  "id": "sutton2000-eq5",
+  "claim": "Gradient with f_w in place of Q^pi",
+  "value": "Eq. 5",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 2, p.1060"
+ },
+ {
+  "id": "sutton2000-theorem3",
+  "claim": "Policy iteration with compatible function approximation converges to a locally optimal policy",
+  "value": "Theorem 3",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 4, p.1061"
+ },
+ {
+  "id": "sutton2000-advantage",
+  "claim": "Compatible f_w is better thought of as an approximation of A^pi = Q^pi - V^pi",
+  "value": "advantage function",
+  "paper": "Sutton et al. 2000, NIPS 12",
+  "arxiv": null,
+  "loc": "Sec. 3, p.1061"
+ },
+ {
+  "id": "triad-arxiv",
+  "claim": "arXiv id and version read (only version)",
+  "value": "1812.02648v1",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "abs.html submission history; PDF p.1 stamp"
+ },
+ {
+  "id": "triad-date",
+  "claim": "Submission date of v1",
+  "value": "2018-12-06",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "abs.html: 'Thu, 6 Dec 2018 16:36:20 UTC'"
+ },
+ {
+  "id": "triad-first-author",
+  "claim": "First author",
+  "value": "van Hasselt",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Title block, p.1"
+ },
+ {
+  "id": "triad-last-author",
+  "claim": "Last author",
+  "value": "Modayil",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Title block, p.1"
+ },
+ {
+  "id": "triad-games",
+  "claim": "Number of Atari games",
+  "value": "57",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5; Appendix A, p.11"
+ },
+ {
+  "id": "triad-settings",
+  "claim": "Parameter settings per game",
+  "value": "336",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-replications",
+  "claim": "Replications (seeds) per configuration",
+  "value": "3",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5; Appendix A, p.11"
+ },
+ {
+  "id": "triad-frames",
+  "claim": "Frames per run (roughly)",
+  "value": "20M",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-n-max",
+  "claim": "Longest bootstrap length tested (n in {1, 3, 10})",
+  "value": "10",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-alpha-set",
+  "claim": "Prioritization exponents tested (TeX)",
+  "value": "\\{0, \\frac{1}{2}, 1, 2\\}",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-beta",
+  "claim": "Importance-sampling exponent when corrections are used",
+  "value": "0.4",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-network-sizes",
+  "claim": "Number of network sizes (small, medium, large, extra-large)",
+  "value": "four",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5; Appendix A, p.11"
+ },
+ {
+  "id": "triad-soft-threshold",
+  "claim": "Soft divergence: max |Q| above this bound 1/(1 - gamma)",
+  "value": "100",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-gamma",
+  "claim": "Discount factor",
+  "value": "0.99",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5; Appendix A, p.11"
+ },
+ {
+  "id": "triad-reward-clip",
+  "claim": "Reward clipping range (ASCII hyphen-minus)",
+  "value": "[-1, 1]",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5; Appendix A, p.11"
+ },
+ {
+  "id": "triad-nan",
+  "claim": "Values never became unbounded: no floating point NaNs in any run",
+  "value": "NaN",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.1, p.5"
+ },
+ {
+  "id": "triad-q-softdiv",
+  "claim": "Fraction of Q-learning runs with soft divergence",
+  "value": "61%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.2, p.6; Figure 2 left"
+ },
+ {
+  "id": "triad-invdq-softdiv",
+  "claim": "Fraction of inverse double Q-learning runs with soft divergence",
+  "value": "33%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.2, p.6; Figure 2 left"
+ },
+ {
+  "id": "triad-targetq-softdiv",
+  "claim": "Fraction of target Q-learning runs with soft divergence (printed label only, not in text)",
+  "value": "14%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Figure 2 left panel, printed label, p.6"
+ },
+ {
+  "id": "triad-dq-softdiv",
+  "claim": "Fraction of double Q-learning runs with soft divergence",
+  "value": "10%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Figure 2 left panel, printed label, p.6; Sec. 4.3 p.7 text: 'about 10% across network capacities'"
+ },
+ {
+  "id": "triad-q-n1",
+  "claim": "Soft-divergence rate of one-step (n = 1) Q-learning",
+  "value": "94%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3a"
+ },
+ {
+  "id": "triad-q-n10",
+  "claim": "Soft-divergence rate of Q-learning with n = 10",
+  "value": "21%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3a"
+ },
+ {
+  "id": "triad-q-small",
+  "claim": "Soft-divergence rate of Q-learning with small networks",
+  "value": "53%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3b"
+ },
+ {
+  "id": "triad-q-large",
+  "claim": "Soft-divergence rate of Q-learning with larger networks",
+  "value": "67%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3b"
+ },
+ {
+  "id": "triad-q-prio-low",
+  "claim": "Q-learning soft-divergence rate at the low end of prioritization",
+  "value": "52%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3c"
+ },
+ {
+  "id": "triad-q-prio-high",
+  "claim": "Q-learning soft-divergence rate at the high end of prioritization",
+  "value": "77%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3c"
+ },
+ {
+  "id": "triad-dq-prio-low",
+  "claim": "Double Q-learning soft-divergence rate at the low end of prioritization",
+  "value": "2%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3c"
+ },
+ {
+  "id": "triad-dq-prio-high",
+  "claim": "Double Q-learning soft-divergence rate at the high end of prioritization",
+  "value": "23%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7; Figure 3c"
+ },
+ {
+  "id": "triad-is-gap",
+  "claim": "Without IS correction the diverging fraction is up to this much higher",
+  "value": "10%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.3, p.7"
+ },
+ {
+  "id": "triad-million",
+  "claim": "Value estimates frequently grew to over this, then typically fell back below 100",
+  "value": "a million",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.2, p.6"
+ },
+ {
+  "id": "triad-q-1000",
+  "claim": "Some Q-learning runs had values around this and still performed reasonably",
+  "value": "1,000",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4.4, p.7"
+ },
+ {
+  "id": "triad-log-interval",
+  "claim": "Statistics logging interval in frames",
+  "value": "50K-100K",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 4, p.5"
+ },
+ {
+  "id": "triad-eps",
+  "claim": "epsilon of the epsilon-greedy behavior policy",
+  "value": "0.01",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-minibatch",
+  "claim": "Minibatch size",
+  "value": "32",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-replay",
+  "claim": "Replay capacity in transitions",
+  "value": "1M",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-replay-start",
+  "claim": "Replay fill level before sampling starts",
+  "value": "20%",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-sample-every",
+  "claim": "Replay sampling period (= 16 environment frames)",
+  "value": "4 agent steps",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-adam",
+  "claim": "Adam step size",
+  "value": "0.0001",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-target-period",
+  "claim": "Target network update period in agent steps (= 10,000 frames)",
+  "value": "2500",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-conv-layers",
+  "claim": "Number of convolutional layers in all study networks (kernels 8x8 and 4x4, strides 4 and 2)",
+  "value": "two",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A, p.11"
+ },
+ {
+  "id": "triad-net-small",
+  "claim": "small network: channels (1), channels (2), hidden units",
+  "value": "4, 8, 64",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A table, p.11"
+ },
+ {
+  "id": "triad-net-medium",
+  "claim": "medium network: channels (1), channels (2), hidden units",
+  "value": "8, 16, 128",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A table, p.11"
+ },
+ {
+  "id": "triad-net-large",
+  "claim": "large network: channels (1), channels (2), hidden units",
+  "value": "16, 32, 256",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A table, p.11"
+ },
+ {
+  "id": "triad-net-xl",
+  "claim": "extra-large network: channels (1), channels (2), hidden units",
+  "value": "32, 64, 512",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Appendix A table, p.11"
+ },
+ {
+  "id": "triad-best-config",
+  "claim": "Best configuration after 20M frames",
+  "value": "10-step return, large network, Q-learning bootstrapping and uniform replay",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Table 1 caption, p.13"
+ },
+ {
+  "id": "triad-target-net-toy",
+  "claim": "With target networks the Tsitsiklis-Van Roy example still diverges, slowed by the",
+  "value": "copying period",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, Hypothesis 2 discussion, p.4"
+ },
+ {
+  "id": "triad-eq1",
+  "claim": "TD update Delta w proportional to delta times grad v_w(S_t) (only numbered equation)",
+  "value": "Eq. 1",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 2, p.2"
+ },
+ {
+  "id": "triad-hyp1",
+  "claim": "Hypothesis 1 (Deep divergence): Unbounded divergence is uncommon when combining Q-learning and conventional deep reinforcement learning function spaces.",
+  "value": "Hypothesis 1",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, p.3"
+ },
+ {
+  "id": "triad-hyp2",
+  "claim": "Hypothesis 2 (Target networks): There is less divergence when bootstrapping on separate networks.",
+  "value": "Hypothesis 2",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, p.4"
+ },
+ {
+  "id": "triad-hyp3",
+  "claim": "Hypothesis 3 (Overestimation): There is less divergence when correcting for overestimation bias.",
+  "value": "Hypothesis 3",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, p.4"
+ },
+ {
+  "id": "triad-hyp4",
+  "claim": "Hypothesis 4 (Multi-step): Longer multi-step returns will diverge less easily.",
+  "value": "Hypothesis 4",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, p.4"
+ },
+ {
+  "id": "triad-hyp5",
+  "claim": "Hypothesis 5 (Capacity): Larger, more flexible networks will diverge less easily. (Results ran counter to it.)",
+  "value": "Hypothesis 5",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, p.5; Sec. 4.3, p.7"
+ },
+ {
+  "id": "triad-hyp6",
+  "claim": "Hypothesis 6 (prioritisation): Stronger prioritisation of updates will diverge more easily.",
+  "value": "Hypothesis 6",
+  "paper": "van Hasselt et al. 2018",
+  "arxiv": "1812.02648v1",
+  "loc": "Sec. 3, p.5"
+ }
+]

@@ -1,0 +1,1877 @@
+[
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 0,
+  "para": 0,
+  "text": "Look at a photo and tell me what's in it.",
+  "tts": "Look at a photo and tell me what's in it.",
+  "cues": [
+   "btn-nms-reset"
+  ]
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 1,
+  "para": 0,
+  "text": "You'd say something like: two people, a dog, a car.",
+  "tts": "You'd say something like: two people, a dog, a car.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 2,
+  "para": 0,
+  "text": "No order, and no repeats.",
+  "tts": "No order, and no repeats.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 3,
+  "para": 0,
+  "text": "That's a set, and it's exactly what an object detector is supposed to give us.",
+  "tts": "That's a set, and it's exactly what an object detector is supposed to give us.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 4,
+  "para": 1,
+  "text": "Here's the funny thing.",
+  "tts": "Here's the funny thing.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 5,
+  "para": 1,
+  "text": "Classic detectors never produce that set directly.",
+  "tts": "Classic detectors never produce that set directly.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 6,
+  "para": 1,
+  "text": "They throw down thousands of candidate boxes, score every one, and end up with a little cloud of guesses around each object.",
+  "tts": "They throw down thousands of candidate boxes, score every one, and end up with a little cloud of guesses around each object.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 7,
+  "para": 1,
+  "text": "That's what you're looking at: two people, and a swarm of blue boxes.",
+  "tts": "That's what you're looking at: two people, and a swarm of blue boxes.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 8,
+  "para": 2,
+  "text": "So how do you get down to one box per person?",
+  "tts": "So how do you get down to one box per person?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 9,
+  "para": 2,
+  "text": "With a cleanup step called non-maximum suppression.",
+  "tts": "With a cleanup step called non-maximum suppression.",
+  "cues": [
+   "btn-nms-run"
+  ]
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 10,
+  "para": 2,
+  "text": "Keep the most confident box, and delete anything that overlaps it too much.",
+  "tts": "Keep the most confident box, and delete anything that overlaps it too much.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 11,
+  "para": 2,
+  "text": "With the people standing apart, that works nicely.",
+  "tts": "With the people standing apart, that works nicely.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 12,
+  "para": 3,
+  "text": "Now push them together.",
+  "tts": "Now push them together.",
+  "cues": [
+   "btn-nms-close"
+  ]
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 13,
+  "para": 3,
+  "text": "Make the rule strict, and the second person simply vanishes.",
+  "tts": "Make the rule strict, and the second person simply vanishes.",
+  "cues": [
+   "btn-nms-low"
+  ]
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 14,
+  "para": 3,
+  "text": "NMS can't tell another person from the same person again.",
+  "tts": "N M S can't tell another person from the same person again.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 15,
+  "para": 3,
+  "text": "Loosen it, and now the duplicates pile up instead.",
+  "tts": "Loosen it, and now the duplicates pile up instead.",
+  "cues": [
+   "btn-nms-high"
+  ]
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 16,
+  "para": 3,
+  "text": "Try the slider yourself, and ask whether one setting could be right for every scene.",
+  "tts": "Try the slider yourself, and ask whether one setting could be right for every scene.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 17,
+  "para": 4,
+  "text": "Here's the real point.",
+  "tts": "Here's the real point.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 18,
+  "para": 4,
+  "text": "The network never learned to avoid duplicates.",
+  "tts": "The network never learned to avoid duplicates.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 19,
+  "para": 4,
+  "text": "A hand-tuned rule cleans up after it.",
+  "tts": "A hand-tuned rule cleans up after it.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-set-problem",
+  "n": 1,
+  "idx": 20,
+  "para": 4,
+  "text": "So DETR asks a simple question: can a network just output the final set, directly, with nothing to clean up?",
+  "tts": "So DEE-ter asks a simple question: can a network just output the final set, directly, with nothing to clean up?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 0,
+  "para": 0,
+  "text": "So how does DETR output a set?",
+  "tts": "So how does DEE-ter output a set?",
+  "cues": [
+   "btn-match-reset"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 1,
+  "para": 0,
+  "text": "It predicts a fixed number of slots, 100 of them, all at once.",
+  "tts": "It predicts a fixed number of slots, 100 of them, all at once.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 2,
+  "para": 0,
+  "text": "Each slot says a class and a box, and one of the classes is \"no object\".",
+  "tts": "Each slot says a class and a box, and one of the classes is \"no object\".",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 3,
+  "para": 0,
+  "text": "Most images have only a handful of things in them, so most slots should say exactly that.",
+  "tts": "Most images have only a handful of things in them, so most slots should say exactly that.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 4,
+  "para": 1,
+  "text": "But during training, there's a question we have to answer first.",
+  "tts": "But during training, there's a question we have to answer first.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 5,
+  "para": 1,
+  "text": "Which slot is responsible for which object?",
+  "tts": "Which slot is responsible for which object?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 6,
+  "para": 1,
+  "text": "Here's the trick.",
+  "tts": "Here's the trick.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 7,
+  "para": 1,
+  "text": "Pad the list of real objects with \"no object\" entries until it's as long as the list of slots.",
+  "tts": "Pad the list of real objects with \"no object\" entries until it's as long as the list of slots.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 8,
+  "para": 1,
+  "text": "Then find the one-to-one pairing that costs the least.",
+  "tts": "Then find the one-to-one pairing that costs the least.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 9,
+  "para": 2,
+  "text": "Look at the grid.",
+  "tts": "Look at the grid.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 10,
+  "para": 2,
+  "text": "Each row is a predicted slot, each column is a real object or a \"no object\" pad.",
+  "tts": "Each row is a predicted slot, each column is a real object or a \"no object\" pad.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 11,
+  "para": 2,
+  "text": "A cell is the cost of pairing that slot with that column: how unsure the slot is about the right class, plus how far its box is from the true box.",
+  "tts": "A cell is the cost of pairing that slot with that column: how unsure the slot is about the right class, plus how far its box is from the true box.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 12,
+  "para": 2,
+  "text": "Try picking one cell per row, and see if you can beat the optimum.",
+  "tts": "Try picking one cell per row, and see if you can beat the optimum.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 13,
+  "para": 3,
+  "text": "Here's the answer.",
+  "tts": "Here's the answer.",
+  "cues": [
+   "btn-match-optimal"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 14,
+  "para": 3,
+  "text": "Notice slot two.",
+  "tts": "Notice slot two.",
+  "cues": [
+   "btn-match-dup"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 15,
+  "para": 3,
+  "text": "It's a perfectly decent box on the car, but slot one fits the car better, and each object can only be claimed once.",
+  "tts": "It's a perfectly decent box on the car, but slot one fits the car better, and each object can only be claimed once.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 16,
+  "para": 3,
+  "text": "So slot two gets paired with \"no object\", and the loss trains it to stay silent.",
+  "tts": "So slot two gets paired with \"no object\", and the loss trains it to stay silent.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 17,
+  "para": 4,
+  "text": "That's the whole idea.",
+  "tts": "That's the whole idea.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 18,
+  "para": 4,
+  "text": "Duplicates become expensive during training, so you never need to clean them up afterwards.",
+  "tts": "Duplicates become expensive during training, so you never need to clean them up afterwards.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 19,
+  "para": 5,
+  "text": "Here's the same idea in symbols.",
+  "tts": "Here's the same idea in symbols.",
+  "cues": [
+   "eqstep-eq-assign-1"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 20,
+  "para": 5,
+  "text": "We search over every way of pairing slots with objects, and keep the cheapest.",
+  "tts": "We search over every way of pairing slots with objects, and keep the cheapest.",
+  "cues": [
+   "eqstep-eq-assign-2"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 21,
+  "para": 5,
+  "text": "Each pairing compares a real object, in yellow, with a slot's prediction, in blue.",
+  "tts": "Each pairing compares a real object, in yellow, with a slot's prediction, in blue.",
+  "cues": [
+   "eqstep-eq-assign-3"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 22,
+  "para": 5,
+  "text": "The cost has two parts: how unsure the slot is about the right class,",
+  "tts": "The cost has two parts: how unsure the slot is about the right class,",
+  "cues": [
+   "eqstep-eq-cost-1"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 23,
+  "para": 5,
+  "text": "and how far its box is from the true box.",
+  "tts": "and how far its box is from the true box.",
+  "cues": [
+   "eqstep-eq-cost-2"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 24,
+  "para": 5,
+  "text": "Once the pairing is fixed, every slot is trained toward its class,",
+  "tts": "Once the pairing is fixed, every slot is trained toward its class,",
+  "cues": [
+   "eqstep-eq-loss-1"
+  ]
+ },
+ {
+  "chapter": "ch-matching",
+  "n": 2,
+  "idx": 25,
+  "para": 5,
+  "text": "and the slots that found a real object are trained toward its box too.",
+  "tts": "and the slots that found a real object are trained toward its box too.",
+  "cues": [
+   "eqstep-eq-loss-2"
+  ]
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 0,
+  "para": 0,
+  "text": "Where do those 100 slots come from?",
+  "tts": "Where do those 100 slots come from?",
+  "cues": [
+   "btn-dec-reset"
+  ]
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 1,
+  "para": 0,
+  "text": "The architecture is almost boring, and that's the point.",
+  "tts": "The architecture is almost boring, and that's the point.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 2,
+  "para": 0,
+  "text": "A ResNet turns the image into a coarse grid of features.",
+  "tts": "A res-net turns the image into a coarse grid of features.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 3,
+  "para": 0,
+  "text": "A transformer encoder lets every grid cell look at every other cell.",
+  "tts": "A transformer encoder lets every grid cell look at every other cell.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 4,
+  "para": 0,
+  "text": "Then a decoder reads that grid through 100 learned vectors called object queries, and each query becomes one slot.",
+  "tts": "Then a decoder reads that grid through 100 learned vectors called object queries, and each query becomes one slot.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 5,
+  "para": 1,
+  "text": "The decoder has two kinds of attention.",
+  "tts": "The decoder has two kinds of attention.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 6,
+  "para": 1,
+  "text": "Cross-attention lets each query read the image.",
+  "tts": "Cross-attention lets each query read the image.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 7,
+  "para": 1,
+  "text": "Self-attention lets the queries read each other.",
+  "tts": "Self-attention lets the queries read each other.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 8,
+  "para": 1,
+  "text": "And that second one is how they coordinate.",
+  "tts": "And that second one is how they coordinate.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 9,
+  "para": 1,
+  "text": "If two queries drift toward the same car, self-attention gives them a way to notice, and the matching loss gives one of them a reason to back off.",
+  "tts": "If two queries drift toward the same car, self-attention gives them a way to notice, and the matching loss gives one of them a reason to back off.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 10,
+  "para": 2,
+  "text": "Here's a toy version of what happens, layer by layer.",
+  "tts": "Here's a toy version of what happens, layer by layer.",
+  "cues": [
+   "btn-dec-l1"
+  ]
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 11,
+  "para": 2,
+  "text": "In the first layer there are several confident boxes on each object.",
+  "tts": "In the first layer there are several confident boxes on each object.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 12,
+  "para": 2,
+  "text": "Now watch them settle.",
+  "tts": "Now watch them settle.",
+  "cues": [
+   "btn-dec-play"
+  ]
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 13,
+  "para": 2,
+  "text": "By the last layer, each object keeps one box, and the rest fade to \"no object\".",
+  "tts": "By the last layer, each object keeps one box, and the rest fade to \"no object\".",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 14,
+  "para": 3,
+  "text": "The paper checks this for real.",
+  "tts": "The paper checks this for real.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 15,
+  "para": 3,
+  "text": "It runs old-fashioned NMS on each layer's output.",
+  "tts": "It runs old-fashioned N M S on each layer's output.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 16,
+  "para": 3,
+  "text": "NMS helps the first layer, but by the last layers it stops helping, and even hurts a little.",
+  "tts": "N M S helps the first layer, but by the last layers it stops helping, and even hurts a little.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 17,
+  "para": 3,
+  "text": "From the first decoder layer to the last, accuracy goes up by 8.2 AP.",
+  "tts": "From the first decoder layer to the last, accuracy goes up by 8.2 A P.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 18,
+  "para": 4,
+  "text": "Hold on to one detail.",
+  "tts": "Hold on to one detail.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 19,
+  "para": 4,
+  "text": "These object queries are just learned vectors.",
+  "tts": "These object queries are just learned vectors.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 20,
+  "para": 4,
+  "text": "Nothing in them says \"I'm a box, over here\".",
+  "tts": "Nothing in them says \"I'm a box, over here\".",
+  "cues": []
+ },
+ {
+  "chapter": "ch-queries",
+  "n": 3,
+  "idx": 21,
+  "para": 4,
+  "text": "The next few papers are largely about what a query should really be.",
+  "tts": "The next few papers are largely about what a query should really be.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 0,
+  "para": 0,
+  "text": "So how did it do?",
+  "tts": "So how did it do?",
+  "cues": [
+   "btn-cost-s32"
+  ]
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 1,
+  "para": 0,
+  "text": "On paper, a clean tie.",
+  "tts": "On paper, a clean tie.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 2,
+  "para": 0,
+  "text": "DETR reached 42 AP on COCO, the same as a carefully tuned Faster R-CNN, with no anchors and no NMS.",
+  "tts": "DEE-ter reached 42 A P on coco, the same as a carefully tuned Faster R-CNN, with no anchors and no N M S.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 3,
+  "para": 1,
+  "text": "But the tie hides two very different detectors.",
+  "tts": "But the tie hides two very different detectors.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 4,
+  "para": 1,
+  "text": "On large objects, DETR was much better.",
+  "tts": "On large objects, DEE-ter was much better.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 5,
+  "para": 1,
+  "text": "On small objects, it was much worse, 20.5 against 26.6.",
+  "tts": "On small objects, it was much worse, 20.5 against 26.6.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 6,
+  "para": 1,
+  "text": "And it needed 500 epochs of training, where the baseline needed about 109.",
+  "tts": "And it needed 500 epochs of training, where the baseline needed about 109.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 7,
+  "para": 2,
+  "text": "Why small objects?",
+  "tts": "Why small objects?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 8,
+  "para": 2,
+  "text": "Look at the encoder.",
+  "tts": "Look at the encoder.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 9,
+  "para": 2,
+  "text": "Every cell of the feature map attends to every other cell, so the cost grows with the square of the number of cells.",
+  "tts": "Every cell of the feature map attends to every other cell, so the cost grows with the square of the number of cells.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 10,
+  "para": 2,
+  "text": "That's why DETR works on a coarse map, one cell for every 32 by 32 pixels, where a small object might be a single cell.",
+  "tts": "That's why DEE-ter works on a coarse map, one cell for every 32 by 32 pixels, where a small object might be a single cell.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 11,
+  "para": 3,
+  "text": "Let's make the map finer.",
+  "tts": "Let's make the map finer.",
+  "cues": [
+   "btn-cost-s16"
+  ]
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 12,
+  "para": 3,
+  "text": "Half the stride means four times the cells, and sixteen times the pairs.",
+  "tts": "Half the stride means four times the cells, and sixteen times the pairs.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 13,
+  "para": 3,
+  "text": "Go finer again, and it's hundreds of millions of pairs per layer.",
+  "tts": "Go finer again, and it's hundreds of millions of pairs per layer.",
+  "cues": [
+   "btn-cost-s8"
+  ]
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 14,
+  "para": 3,
+  "text": "The paper tried the stride sixteen version, and speed dropped from 28 to 12 frames per second.",
+  "tts": "The paper tried the stride sixteen version, and speed dropped from 28 to 12 frames per second.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 15,
+  "para": 4,
+  "text": "And the long training?",
+  "tts": "And the long training?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 16,
+  "para": 4,
+  "text": "That has more than one suspect.",
+  "tts": "That has more than one suspect.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 17,
+  "para": 4,
+  "text": "Attention that starts out spread almost evenly over thousands of pixels.",
+  "tts": "Attention that starts out spread almost evenly over thousands of pixels.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 18,
+  "para": 4,
+  "text": "And object queries with no clear idea of where they are.",
+  "tts": "And object queries with no clear idea of where they are.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-detr-limits",
+  "n": 4,
+  "idx": 19,
+  "para": 4,
+  "text": "The rest of the story is people tackling those suspects, one at a time.",
+  "tts": "The rest of the story is people tackling those suspects, one at a time.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 0,
+  "para": 0,
+  "text": "Here's the idea that fixed the attention.",
+  "tts": "Here's the idea that fixed the attention.",
+  "cues": [
+   "btn-deform-reset"
+  ]
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 1,
+  "para": 0,
+  "text": "Does a query really need to compare itself against every single pixel?",
+  "tts": "Does a query really need to compare itself against every single pixel?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 2,
+  "para": 0,
+  "text": "Deformable DETR says no.",
+  "tts": "deformable DEE-ter says no.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 3,
+  "para": 0,
+  "text": "Give the query a reference point, the yellow dot, and let it pick a handful of places nearby to look.",
+  "tts": "Give the query a reference point, the yellow dot, and let it pick a handful of places nearby to look.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 4,
+  "para": 1,
+  "text": "Each of eight heads samples four points.",
+  "tts": "Each of eight heads samples four points.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 5,
+  "para": 1,
+  "text": "And there are no query-key dot products at all.",
+  "tts": "And there are no query-key dot products at all.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 6,
+  "para": 1,
+  "text": "The query itself predicts where to look, and how much to trust each look.",
+  "tts": "The query itself predicts where to look, and how much to trust each look.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 7,
+  "para": 2,
+  "text": "This is how the points start out, straight from the paper's initialization.",
+  "tts": "This is how the points start out, straight from the paper's initialization.",
+  "cues": [
+   "btn-deform-init"
+  ]
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 8,
+  "para": 2,
+  "text": "Eight directions, like a compass, and each head's points march outward, one step at a time.",
+  "tts": "Eight directions, like a compass, and each head's points march outward, one step at a time.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 9,
+  "para": 2,
+  "text": "Try dragging the yellow dot around the image.",
+  "tts": "Try dragging the yellow dot around the image.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 10,
+  "para": 3,
+  "text": "Now add the other feature scales.",
+  "tts": "Now add the other feature scales.",
+  "cues": [
+   "btn-deform-multi"
+  ]
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 11,
+  "para": 3,
+  "text": "The same pattern lands on four maps, from fine to coarse, so the query sees both detail and context.",
+  "tts": "The same pattern lands on four maps, from fine to coarse, so the query sees both detail and context.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 12,
+  "para": 3,
+  "text": "That's 128 points per query, no matter how big the image is.",
+  "tts": "That's 128 points per query, no matter how big the image is.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 13,
+  "para": 4,
+  "text": "After training, the points move to where the information is.",
+  "tts": "After training, the points move to where the information is.",
+  "cues": [
+   "btn-deform-trained"
+  ]
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 14,
+  "para": 4,
+  "text": "This part is a toy, but it matches what the paper describes: the samples spread over the object and its edges.",
+  "tts": "This part is a toy, but it matches what the paper describes: the samples spread over the object and its edges.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 15,
+  "para": 5,
+  "text": "So the cost now grows in a straight line with the image, not with its square.",
+  "tts": "So the cost now grows in a straight line with the image, not with its square.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 16,
+  "para": 5,
+  "text": "And attention is focused from the very start, instead of smeared across thousands of pixels.",
+  "tts": "And attention is focused from the very start, instead of smeared across thousands of pixels.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 17,
+  "para": 5,
+  "text": "The result was dramatic.",
+  "tts": "The result was dramatic.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 18,
+  "para": 5,
+  "text": "43.8 AP in 50 epochs, against DETR's 42 in 500.",
+  "tts": "43.8 A P in 50 epochs, against DEE-ter's 42 in 500.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 19,
+  "para": 5,
+  "text": "And small objects jumped from 20.5 to 26.4.",
+  "tts": "And small objects jumped from 20.5 to 26.4.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-deformable",
+  "n": 5,
+  "idx": 20,
+  "para": 5,
+  "text": "Two extras mattered for what came next: refining the box layer by layer, and starting queries from the encoder's best guesses.",
+  "tts": "Two extras mattered for what came next: refining the box layer by layer, and starting queries from the encoder's best guesses.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 0,
+  "para": 0,
+  "text": "Remember that loose end?",
+  "tts": "Remember that loose end?",
+  "cues": [
+   "btn-anchor-reset"
+  ]
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 1,
+  "para": 0,
+  "text": "What is an object query, really?",
+  "tts": "What is an object query, really?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 2,
+  "para": 0,
+  "text": "DAB-DETR splits it in two.",
+  "tts": "dab DEE-ter splits it in two.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 3,
+  "para": 0,
+  "text": "There's a content part, what the query has seen so far.",
+  "tts": "There's a content part, what the query has seen so far.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 4,
+  "para": 0,
+  "text": "And there's a positional part, where it's looking.",
+  "tts": "And there's a positional part, where it's looking.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 5,
+  "para": 0,
+  "text": "In DETR, the positional part is an opaque learned vector, and its attention wanders over several unrelated places at once.",
+  "tts": "In DEE-ter, the positional part is an opaque learned vector, and its attention wanders over several unrelated places at once.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 6,
+  "para": 1,
+  "text": "So make the positional part literally a box.",
+  "tts": "So make the positional part literally a box.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 7,
+  "para": 1,
+  "text": "An x, a y, a width and a height.",
+  "tts": "An x, a y, a width and a height.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 8,
+  "para": 1,
+  "text": "The red glow is where this box's positional attention goes.",
+  "tts": "The red glow is where this box's positional attention goes.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 9,
+  "para": 1,
+  "text": "Its center decides where to look, and its size decides how wide to look.",
+  "tts": "Its center decides where to look, and its size decides how wide to look.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 10,
+  "para": 2,
+  "text": "Watch what happens without the size.",
+  "tts": "Watch what happens without the size.",
+  "cues": [
+   "btn-anchor-mod-off"
+  ]
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 11,
+  "para": 2,
+  "text": "The attention is the same shape, whatever the box.",
+  "tts": "The attention is the same shape, whatever the box.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 12,
+  "para": 2,
+  "text": "Now switch it back on.",
+  "tts": "Now switch it back on.",
+  "cues": [
+   "btn-anchor-mod-on"
+  ]
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 13,
+  "para": 2,
+  "text": "A wide box spreads the attention sideways, a tall box stretches it up and down.",
+  "tts": "A wide box spreads the attention sideways, a tall box stretches it up and down.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 14,
+  "para": 2,
+  "text": "Try the width and height sliders yourself.",
+  "tts": "Try the width and height sliders yourself.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 15,
+  "para": 3,
+  "text": "There's a small surprise in the encoding, too.",
+  "tts": "There's a small surprise in the encoding, too.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 16,
+  "para": 3,
+  "text": "The standard sine encoding uses a temperature of ten thousand, which was designed for word positions in a sentence.",
+  "tts": "The standard sine encoding uses a temperature of ten thousand, which was designed for word positions in a sentence.",
+  "cues": [
+   "btn-anchor-t10000"
+  ]
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 17,
+  "para": 3,
+  "text": "For box coordinates between zero and one, that makes attention almost flat.",
+  "tts": "For box coordinates between zero and one, that makes attention almost flat.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 18,
+  "para": 3,
+  "text": "DAB-DETR uses twenty instead.",
+  "tts": "dab DEE-ter uses twenty instead.",
+  "cues": [
+   "btn-anchor-t20"
+  ]
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 19,
+  "para": 4,
+  "text": "And after every decoder layer, the box gets nudged toward the object.",
+  "tts": "And after every decoder layer, the box gets nudged toward the object.",
+  "cues": [
+   "btn-anchor-refine"
+  ]
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 20,
+  "para": 4,
+  "text": "Six small corrections, and it lands.",
+  "tts": "Six small corrections, and it lands.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 21,
+  "para": 4,
+  "text": "In the paper, removing just that layer-by-layer update costs 1.7 AP.",
+  "tts": "In the paper, removing just that layer-by-layer update costs 1.7 A P.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-anchor-queries",
+  "n": 6,
+  "idx": 22,
+  "para": 4,
+  "text": "Because the query is a box, the decoder always knows where, and how big, to look.",
+  "tts": "Because the query is a box, the decoder always knows where, and how big, to look.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 0,
+  "para": 0,
+  "text": "There's still a quieter problem in training.",
+  "tts": "There's still a quieter problem in training.",
+  "cues": [
+   "btn-noise-reset"
+  ]
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 1,
+  "para": 0,
+  "text": "Early on, the matching is unstable.",
+  "tts": "Early on, the matching is unstable.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 2,
+  "para": 0,
+  "text": "A slot that's matched to the dog this epoch might be matched to the car the next.",
+  "tts": "A slot that's matched to the dog this epoch might be matched to the car the next.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 3,
+  "para": 0,
+  "text": "Its target keeps flipping, so it keeps unlearning.",
+  "tts": "Its target keeps flipping, so it keeps unlearning.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 4,
+  "para": 1,
+  "text": "DN-DETR's fix is a piece of teaching folklore.",
+  "tts": "D N DEE-ter's fix is a piece of teaching folklore.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 5,
+  "para": 1,
+  "text": "Give the student some problems where you already know the answer.",
+  "tts": "Give the student some problems where you already know the answer.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 6,
+  "para": 1,
+  "text": "Take the real box, shift it and resize it a little, and feed these noisy copies to the decoder as extra queries.",
+  "tts": "Take the real box, shift it and resize it a little, and feed these noisy copies to the decoder as extra queries.",
+  "cues": [
+   "btn-noise-dn"
+  ]
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 7,
+  "para": 1,
+  "text": "Each one has a fixed job: move back onto the true box.",
+  "tts": "Each one has a fixed job: move back onto the true box.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 8,
+  "para": 1,
+  "text": "No matching, no flipping.",
+  "tts": "No matching, no flipping.",
+  "cues": [
+   "btn-noise-sample"
+  ]
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 9,
+  "para": 2,
+  "text": "There's one catch.",
+  "tts": "There's one catch.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 10,
+  "para": 2,
+  "text": "The normal queries must not peek at these noisy copies, or they'd just copy near-perfect answers.",
+  "tts": "The normal queries must not peek at these noisy copies, or they'd just copy near-perfect answers.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 11,
+  "para": 2,
+  "text": "So an attention mask blocks that path.",
+  "tts": "So an attention mask blocks that path.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 12,
+  "para": 2,
+  "text": "And the mask really matters.",
+  "tts": "And the mask really matters.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 13,
+  "para": 2,
+  "text": "Without it, accuracy collapses to 24 AP, against 43.4 with it.",
+  "tts": "Without it, accuracy collapses to 24 A P, against 43.4 with it.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 14,
+  "para": 3,
+  "text": "DINO pushes the idea further.",
+  "tts": "DEE-no pushes the idea further.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 15,
+  "para": 3,
+  "text": "Plain denoising only teaches the model to fix a nearby box.",
+  "tts": "Plain denoising only teaches the model to fix a nearby box.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 16,
+  "para": 3,
+  "text": "DINO adds hard negatives: boxes a bit further out that must be answered with \"no object\".",
+  "tts": "DEE-no adds hard negatives: boxes a bit further out that must be answered with \"no object\".",
+  "cues": [
+   "btn-noise-cdn"
+  ]
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 17,
+  "para": 3,
+  "text": "Green ones get fixed, red ones get rejected.",
+  "tts": "Green ones get fixed, red ones get rejected.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 18,
+  "para": 3,
+  "text": "That teaches the model to turn down a near miss, which cuts duplicates.",
+  "tts": "That teaches the model to turn down a near miss, which cuts duplicates.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 19,
+  "para": 4,
+  "text": "DINO also starts its boxes from the encoder's best guesses for this image, and lets each layer learn from how much it helped the next one.",
+  "tts": "DEE-no also starts its boxes from the encoder's best guesses for this image, and lets each layer learn from how much it helped the next one.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 20,
+  "para": 4,
+  "text": "In the paper's ablation, those three ideas take a strong baseline from 46.5 to 47.9 AP.",
+  "tts": "In the paper's ablation, those three ideas take a strong baseline from 46.5 to 47.9 A P.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 21,
+  "para": 4,
+  "text": "And the four-scale DINO reaches 49 AP in only 12 epochs.",
+  "tts": "And the four-scale DEE-no reaches 49 A P in only 12 epochs.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-denoising",
+  "n": 7,
+  "idx": 22,
+  "para": 4,
+  "text": "Remember where we started: 500 epochs for 42.",
+  "tts": "Remember where we started: 500 epochs for 42.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 0,
+  "para": 0,
+  "text": "By now, DETRs trained fast.",
+  "tts": "By now, DEE-ters trained fast.",
+  "cues": [
+   "btn-thr-0"
+  ]
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 1,
+  "para": 0,
+  "text": "But real-time detection still belonged to YOLO.",
+  "tts": "But real-time detection still belonged to YO-lo.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 2,
+  "para": 0,
+  "text": "RT-DETR starts by pointing at something odd in the comparison.",
+  "tts": "R T DEE-ter starts by pointing at something odd in the comparison.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 3,
+  "para": 0,
+  "text": "YOLO speed numbers usually leave out NMS.",
+  "tts": "YO-lo speed numbers usually leave out N M S.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 4,
+  "para": 1,
+  "text": "And NMS time isn't a constant.",
+  "tts": "And N M S time isn't a constant.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 5,
+  "para": 1,
+  "text": "It depends on how many boxes survive the confidence threshold.",
+  "tts": "It depends on how many boxes survive the confidence threshold.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 6,
+  "para": 1,
+  "text": "Look at the lowest threshold.",
+  "tts": "Look at the lowest threshold.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 7,
+  "para": 1,
+  "text": "Thousands of boxes go into NMS, and for YOLOv8 the NMS step alone takes 2.36 milliseconds.",
+  "tts": "Thousands of boxes go into N M S, and for YO-lo vee eight the N M S step alone takes 2.36 milliseconds.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 8,
+  "para": 2,
+  "text": "Raise the threshold.",
+  "tts": "Raise the threshold.",
+  "cues": [
+   "btn-thr-2"
+  ]
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 9,
+  "para": 2,
+  "text": "Fewer boxes, less NMS time.",
+  "tts": "Fewer boxes, less N M S time.",
+  "cues": [
+   "btn-thr-3"
+  ]
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 10,
+  "para": 2,
+  "text": "But accuracy slips too, from 52.9 down to 51.2 AP.",
+  "tts": "But accuracy slips too, from 52.9 down to 51.2 A P.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 11,
+  "para": 2,
+  "text": "So a YOLO trades speed against accuracy, through a hand-tuned knob.",
+  "tts": "So a YO-lo trades speed against accuracy, through a hand-tuned knob.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 12,
+  "para": 2,
+  "text": "A set predictor doesn't have that knob at all.",
+  "tts": "A set predictor doesn't have that knob at all.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 13,
+  "para": 3,
+  "text": "RT-DETR then attacks its own remaining cost, the encoder.",
+  "tts": "R T DEE-ter then attacks its own remaining cost, the encoder.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 14,
+  "para": 3,
+  "text": "It runs self-attention only on the coarsest feature map, where each cell already stands for a whole object part.",
+  "tts": "It runs self-attention only on the coarsest feature map, where each cell already stands for a whole object part.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 15,
+  "para": 3,
+  "text": "The finer scales are fused with cheap convolutions instead.",
+  "tts": "The finer scales are fused with cheap convolutions instead.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 16,
+  "para": 3,
+  "text": "It picks its starting queries so that a high class score also means a well-placed box.",
+  "tts": "It picks its starting queries so that a high class score also means a well-placed box.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 17,
+  "para": 3,
+  "text": "And because every decoder layer is trained to predict, you can drop layers at inference to go faster, with no retraining.",
+  "tts": "And because every decoder layer is trained to predict, you can drop layers at inference to go faster, with no retraining.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 18,
+  "para": 4,
+  "text": "Here's the result, measured end to end, with NMS included for the YOLOs.",
+  "tts": "Here's the result, measured end to end, with N M S included for the YO-los.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 19,
+  "para": 4,
+  "text": "RT-DETR with a ResNet-50 gets 53.1 AP at 108 frames per second.",
+  "tts": "R T DEE-ter with a res-net fifty gets 53.1 A P at 108 frames per second.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 20,
+  "para": 4,
+  "text": "YOLOv8 large gets 52.9 AP at 71.",
+  "tts": "YO-lo vee eight large gets 52.9 A P at 71.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rt-detr",
+  "n": 8,
+  "idx": 21,
+  "para": 4,
+  "text": "Barely more accurate, and about half again as fast.",
+  "tts": "Barely more accurate, and about half again as fast.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 0,
+  "para": 0,
+  "text": "Real-time detectors usually come as a ladder of sizes.",
+  "tts": "Real-time detectors usually come as a ladder of sizes.",
+  "cues": [
+   "btn-budget-reset"
+  ]
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 1,
+  "para": 0,
+  "text": "Nano, small, medium, large, each designed by hand and trained separately.",
+  "tts": "Nano, small, medium, large, each designed by hand and trained separately.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 2,
+  "para": 0,
+  "text": "RF-DETR asks: why?",
+  "tts": "R F DEE-ter asks: why?",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 3,
+  "para": 1,
+  "text": "It takes a DETR with a pretrained DINOv2 backbone, and trains one network that contains many models.",
+  "tts": "It takes a DEE-ter with a pretrained DEE-no vee two backbone, and trains one network that contains many models.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 4,
+  "para": 1,
+  "text": "At every training step it picks a random patch size, a random image resolution, and a random number of attention windows.",
+  "tts": "At every training step it picks a random patch size, a random image resolution, and a random number of attention windows.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 5,
+  "para": 1,
+  "text": "So the same weights learn to work under all of those settings.",
+  "tts": "So the same weights learn to work under all of those settings.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 6,
+  "para": 1,
+  "text": "The number of decoder layers and queries is cut later, at inference.",
+  "tts": "The number of decoder layers and queries is cut later, at inference.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 7,
+  "para": 2,
+  "text": "Once training is done, a search tries thousands of configurations, and keeps the best trade-offs between accuracy and speed.",
+  "tts": "Once training is done, a search tries thousands of configurations, and keeps the best trade-offs between accuracy and speed.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 8,
+  "para": 2,
+  "text": "Picking a model is now just picking a latency budget.",
+  "tts": "Picking a model is now just picking a latency budget.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 9,
+  "para": 3,
+  "text": "Give it three milliseconds.",
+  "tts": "Give it three milliseconds.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 10,
+  "para": 3,
+  "text": "You get the nano model: 48 AP at 2.3 milliseconds.",
+  "tts": "You get the nano model: 48 A P at 2.3 milliseconds.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 11,
+  "para": 3,
+  "text": "That's 5.3 AP more than D-FINE's nano, at a similar speed.",
+  "tts": "That's 5.3 A P more than dee-fine's nano, at a similar speed.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 12,
+  "para": 4,
+  "text": "Give it seven milliseconds.",
+  "tts": "Give it seven milliseconds.",
+  "cues": [
+   "btn-budget-7"
+  ]
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 13,
+  "para": 4,
+  "text": "Resolution and decoder depth grow, while the patch size stays put.",
+  "tts": "Resolution and decoder depth grow, while the patch size stays put.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 14,
+  "para": 4,
+  "text": "Now eighteen.",
+  "tts": "Now eighteen.",
+  "cues": [
+   "btn-budget-18"
+  ]
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 15,
+  "para": 4,
+  "text": "This one crosses 60: 60.1 AP at 17.2 milliseconds, the first real-time detector above that line.",
+  "tts": "This one crosses 60: 60.1 A P at 17.2 milliseconds, the first real-time detector above that line.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 16,
+  "para": 5,
+  "text": "But it doesn't win everywhere.",
+  "tts": "But it doesn't win everywhere.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 17,
+  "para": 5,
+  "text": "Turn the baselines on, and you can see D-FINE ahead at the medium, large and extra large sizes.",
+  "tts": "Turn the baselines on, and you can see dee-fine ahead at the medium, large and extra large sizes.",
+  "cues": [
+   "btn-base-on"
+  ]
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 18,
+  "para": 6,
+  "text": "And notice what never changed, all the way from 2020.",
+  "tts": "And notice what never changed, all the way from 2020.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 19,
+  "para": 6,
+  "text": "A fixed set of queries, one-to-one matching, and no NMS.",
+  "tts": "A fixed set of queries, one-to-one matching, and no N M S.",
+  "cues": []
+ },
+ {
+  "chapter": "ch-rf-detr",
+  "n": 9,
+  "idx": 20,
+  "para": 6,
+  "text": "Everything else, the attention, the queries, the training signal and the backbone, was rebuilt around that one idea.",
+  "tts": "Everything else, the attention, the queries, the training signal and the backbone, was rebuilt around that one idea.",
+  "cues": []
+ }
+]

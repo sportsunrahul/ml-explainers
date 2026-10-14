@@ -1,0 +1,13 @@
+  <article data-chapter="cover">
+    <header class="ch-head"><span class="num">4 of 9</span><h2>A batch of near-duplicates</h2><p class="subhead">Core-sets</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-strategy="topk" aria-pressed="true">Top-10 uncertain</button>
+      <button type="button" class="tool" data-strategy="greedy" aria-pressed="false">Greedy k-Center</button>
+      <button type="button" class="tool" data-strategy="random" aria-pressed="false">Random 10</button>
+    </div>
+    <p>Batches are labeled together, and the ten most uncertain images are often ten frames of one moment. Sener and Savarese pick the batch so that every unlabeled image is close, in the network's feature space, to some labeled one: the <button class="inline-term" data-open="kcenter">k-Center</button> problem, solved greedily by always adding the farthest point.</p>
+    <p class="note">Toy data. Brown points are the pool, with a burst of near-copies on the model's boundary. Yellow discs show how far the worst-covered point is from a label (the covering radius).</p>
+    <p>Diversity alone is not enough either: over 33 settings in the BADGE study, plain core-set and plain entropy both averaged worse than random. Methods that mix uncertainty and spread (BADGE, BatchBALD, stochastic sampling) held up.</p>
+    <p class="inscription">Never send a plain top-k batch from video. Deduplicate, then spread the batch.</p>
+    <button type="button" class="continue" data-go="budget">Continue with why random is hard to beat</button>
+  </article>

@@ -1,0 +1,290 @@
+[
+ {
+  "id": "page-pipeline-accum-vs-rr",
+  "claim": "Flamingo-3B overall ablation score: gradient accumulation over all datasets vs round-robin",
+  "value": "70.7 vs 62.9",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 3 row (ii) (tables/ablations_no_classif.tex l.13)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-accum-main",
+  "claim": "Flamingo optimisation strategy",
+  "value": "We accumulate gradients over all datasets",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4 (content.tex l.248)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-rr-def",
+  "claim": "Round-robin definition",
+  "value": "alternate batches of each dataset, updating the parameters on each batch",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B contrastive-data ablation (B_experiments.tex l.380)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-updates",
+  "claim": "Flamingo ablation schedule: gradient steps vs updates",
+  "value": "250,000 gradient updates",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B ablation setup (B_experiments.tex l.311): 1 million gradient steps = 250,000 updates",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-lambda-key",
+  "claim": "Importance of per-dataset weights",
+  "value": "key to performance",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4 (content.tex l.247)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-llava-uniform",
+  "claim": "LLaVA stage-2 sampling of the three response types",
+  "value": "uniformly sampled in training",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.2 Stage 2 (approach.tex l.188)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-15-equal",
+  "claim": "LLaVA-1.5 mixture sampling",
+  "value": "sampled with the same probability",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix data (9_appendix.tex l.141)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-15-modality",
+  "claim": "LLaVA-1.5 single-modality batches",
+  "value": "speeds up the training by 25%",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix data (9_appendix.tex l.138)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-15-merge",
+  "claim": "LLaVA-1.5 merges QA pairs per image",
+  "value": "QA pairs from the same training image are merged into a single conversation",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix data (9_appendix.tex l.132)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-sqrt",
+  "claim": "Molmo fine-tuning mixture rates",
+  "value": "proportional to the square root of their size",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 4 fine-tuning (mmolmo.tex l.249)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-share",
+  "claim": "Molmo multi-annotation training savings",
+  "value": "reducing the number of processed images by two-thirds and shortening training time by over half",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 2 Multi-annotated images (mmolmo.tex l.194)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-seq",
+  "claim": "Molmo multi-annotation sequence-length cost",
+  "value": "25% increase in sequence length",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 2 Multi-annotated images (mmolmo.tex l.194)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-rule",
+  "claim": "Molmo multi-annotation attention rule",
+  "value": "attend to the image tokens, each other, but not to tokens from different annotations",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 2 Multi-annotated images (mmolmo.tex l.194)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-maxlen",
+  "claim": "Molmo maximum sequence length",
+  "value": "2304",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix Implementation (mmolmo.tex l.866)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-norm",
+  "claim": "Molmo loss normalisation fix: captioning drop without it",
+  "value": "0.5-1 points",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix Implementation (mmolmo.tex l.861-864)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-qwen2-infer",
+  "claim": "Qwen2-VL packs variable-resolution images (stated for inference)",
+  "value": "images of varying resolutions are packed into a single sequence",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Naive Dynamic Resolution (template.tex l.359), 'At the inference stage'",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-predict",
+  "claim": "LLaVA loss targets",
+  "value": "trained to predict the assistant answers and where to stop",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Table 2 caption",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-stop",
+  "claim": "LLaVA <STOP> token",
+  "value": "###",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Table 2 caption",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-stage1-hp",
+  "claim": "LLaVA stage-1 schedule",
+  "value": "1 epoch with a learning rate of 2e-3 and a batch size of 128",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5 (experiment.tex l.46)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-stage2-hp",
+  "claim": "LLaVA stage-2 schedule",
+  "value": "3 epochs, with a learning rate of 2e-5 and a batch size of 32",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5 (experiment.tex l.46)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-tokenizer",
+  "claim": "LLaVA stage 1 interpretation",
+  "value": "training a compatible visual tokenizer for the frozen LLM",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.2 Stage 1 (approach.tex l.177)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-no-pretrain",
+  "claim": "ScienceQA without stage-1 pretraining",
+  "value": "85.81%",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 Ablations (iii)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-flamingo-nobp",
+  "claim": "Flamingo: no backprop through the frozen vision encoder",
+  "value": "no backpropagation is performed through the frozen Vision Encoder",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 (B_experiments.tex, image resolution paragraph)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-steps",
+  "claim": "Flamingo ablation schedule length in gradient computations",
+  "value": "1 million",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B ablation setup (B_experiments.tex l.311)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-qwen224",
+  "claim": "Qwen2-VL example image size for the 66-token count",
+  "value": "224",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Naive Dynamic Resolution (template.tex l.361)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-sqa-epochs",
+  "claim": "LLaVA's ScienceQA fine-tuning length",
+  "value": "12 epochs",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 ScienceQA (experiment.tex l.162: 'train it for 12 epochs')",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-molmo-nostage1",
+  "claim": "Molmo on the connector-only stage",
+  "value": "We find this step unnecessary when pre-training on PixMo-Cap",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 4 Training, Pre-training paragraph (mmolmo.tex l.231)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-l15-epoch",
+  "claim": "LLaVA-1.5 epochs per stage (both stages)",
+  "value": "1",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix hyperparameter table, epoch row (9_appendix.tex l.160)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-l15-pre-lr",
+  "claim": "LLaVA-1.5 pretrain learning rate",
+  "value": "1e-3",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix hyperparameter table, lr row, Pretrain (9_appendix.tex l.156)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-l15-pre-bs",
+  "claim": "LLaVA-1.5 pretrain batch size",
+  "value": "256",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix hyperparameter table, batch size row, Pretrain (9_appendix.tex l.155)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-l15-ft-lr",
+  "claim": "LLaVA-1.5 finetune learning rate",
+  "value": "2e-5",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix hyperparameter table, lr row, Finetune (9_appendix.tex l.156)",
+  "uncertain": false
+ },
+ {
+  "id": "page-pipeline-l15-ft-bs",
+  "claim": "LLaVA-1.5 finetune batch size",
+  "value": "128",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix hyperparameter table, batch size row, Finetune (9_appendix.tex l.155)",
+  "uncertain": false
+ }
+]

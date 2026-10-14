@@ -1,0 +1,175 @@
+<style>#viz-sam3 .stage { height:clamp(340px, 40vw, 440px); } @media (max-width: 620px) { #viz-sam3 .stage { height:560px; } }</style>
+<section id="ch-sam3" class="chapter">
+<h2>SAM 3: every object of this kind</h2>
+<p>SAM and SAM 2 answer "which pixels belong to <em>this</em> object?" for one prompt at a time. SAM 3 (first posted <span data-claim="sam3-v1-date">2025-11-20</span>) answers "where is <em>every</em> object of this kind?" from a short phrase such as "leaf", from example boxes, or from both, and returns a mask for each instance.</p>
+
+<figure class="viz" id="viz-sam3" data-scene="sam3" data-toy>
+  <div class="controls" role="group" aria-label="Concept prompt">
+    <span class="lbl">Phrase:</span>
+    <button type="button" data-concept="leaf" id="btn-sam3-leaf">leaf</button>
+    <button type="button" data-concept="pane" id="btn-sam3-pane">window pane</button>
+    <button type="button" data-concept="mug" id="btn-sam3-mug">mug</button>
+    <button type="button" data-concept="shade" id="btn-sam3-shade">lamp shade</button>
+    <button type="button" data-concept="ymug" id="btn-sam3-ymug">yellow mug</button>
+    <button type="button" data-concept="cat" id="btn-sam3-cat">cat</button>
+  </div>
+  <div class="controls">
+    <label>Or type one <input type="text" data-concept-input id="sam3-input" maxlength="40" placeholder="e.g. glass pane" style="font:inherit;width:9.5rem;padding:.25rem .5rem;border-radius:8px;border:1px solid var(--rule);background:var(--bg);color:var(--fg)"></label>
+    <button type="button" data-concept-go id="btn-sam3-go">Find</button>
+  </div>
+  <div class="stage"></div>
+  <div class="controls">
+    <span class="lbl">Exemplars:</span>
+    <button type="button" data-exemplar="leaf" id="btn-sam3-ex-leaf">+ box on a small leaf</button>
+    <button type="button" data-exemplar="pane" id="btn-sam3-ex-pane">- box on the window frame</button>
+  </div>
+  <div class="controls">
+    <span class="lbl">Presence head:</span>
+    <button type="button" data-presence="1" id="btn-sam3-pres-on">on</button>
+    <button type="button" data-presence="0" id="btn-sam3-pres-off">off</button>
+    <span class="lbl">Hard negatives in training:</span>
+    <button type="button" data-hn="0" id="btn-sam3-hn0">none</button>
+    <button type="button" data-hn="1" id="btn-sam3-hn1">yes</button>
+    <button type="button" data-cue-reset id="btn-sam3-reset">Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model on the desk scene. Each row is one query's proposed region: the outline is its query score, the fill is the total score after the presence gate. SAM 3 uses <span data-claim="sam3-queries">200</span> queries and its proposals depend on the prompt; here the ten best are shown. All scores are illustrative.</figcaption>
+</figure>
+
+<p>Before you press "yellow mug", guess. The mug in the scene is grey. A detector that judges each region on its own sees something that looks very much like a mug. What stops it from answering "here is your yellow mug"?</p>
+
+<p>The paper calls the task <dfn>promptable concept segmentation</dfn> (PCS). A <dfn>concept</dfn> is a short noun phrase, a set of exemplar boxes (each marked positive or negative), or both. The output is every matching instance, and in a video each instance keeps one identity across frames for clips of up to <span data-claim="sam3-video-len">30 secs</span>.</p>
+
+<h3>A detector with a presence token</h3>
+<p>The detector is built like <a href="../detr-family/explainer.html#ch-queries">DETR</a>. A fixed set of learned <dfn>queries</dfn> passes through a transformer decoder; each query ends as one proposed object with a box, a mask and a score. SAM 3 adds one more token to the decoder, the <dfn>presence token</dfn>. It does not look for any instance. It answers one question for the whole image: is this phrase here at all? The authors split the decision in two because "is it here" needs the whole image, while "is this region an instance" is local, and asking each query to do both "can conflict with the localization objectives that are by nature very local" (App. C.2).</p>
+
+<div class="eq" id="eq-sam3-presence" data-build data-viz="viz-sam3"><div class="tex tex-display">
+\htmlData{step=1, link=total}{\htmlClass{t-green}{p(\text{query}_i \text{ matches NP})}} = \htmlData{step=2, link=query}{p(\text{query}_i \text{ matches NP}\mid \text{NP appears in image})} \cdot \htmlData{step=3, link=presence}{\htmlClass{t-blue}{p(\text{NP appears in image})}}
+</div></div>
+<p class="eqno">SAM 3 v2, App. C.2, "Presence Head" (unnumbered display).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{p(\text{query}_i \text{ matches NP})}</span>: the total score of query <span class="tex">i</span>. A mask is kept when it is above <span data-claim="sam3-conf-thresh">0.5</span>.</li>
+  <li>The first factor is the query's own score: how well its region matches the noun phrase (NP), <em>if</em> the phrase is in the image. It only has to localise.</li>
+  <li><span class="tex">\htmlClass{t-blue}{p(\text{NP appears in image})}</span>: the presence score, one number from the presence token, shared by every query.</li>
+</ul>
+<p>The training rule follows from the split. The presence head is trained with a binary cross-entropy loss on every image (weight <span data-claim="sam3-loss-presence">20</span>). The query scores are trained only when the phrase is present. When it is absent, no query score gets a gradient, so only the presence head learns what absence looks like. Supervising the query scores only when the phrase is present gave <span data-claim="sam3-pres-sup-a">54.0</span> on the paper's main benchmark (cgF1, defined below), against <span data-claim="sam3-pres-sup-b">52.2</span> for the usual DETR rule of supervising them always. These are ablation runs (a smaller, shorter-trained model on an internal version of the benchmark); the best row, <span data-claim="sam3-pres-sup-c">54.9</span>, also supervises the total score (Table 10).</p>
+
+<h3>What the presence token and hard negatives buy, honestly</h3>
+<p>A <dfn>hard negative</dfn> is a phrase that is not in the image but names something that looks similar: "yellow mug" for a grey mug. The data engine adds them on purpose. Set the figure to "yellow mug" and switch hard negatives off and on. In the toy, only the presence score moves; the query for the mug still looks like a mug either way (our reading of the mechanism). The paper's ablation measures whole models, not the presence score alone, but its numbers fit that picture. As hard negatives go from none to 30 per image, image-level accuracy (IL_MCC, defined below) rises from <span data-claim="sam3-hn-0-mcc">0.44</span> to <span data-claim="sam3-hn-30-mcc">0.68</span>, while mask quality (pmF1) stays flat at <span data-claim="sam3-hn-0-pmf">62.4</span> and <span data-claim="sam3-hn-30-pmf">62.8</span> (Table 9b).</p>
+<p>The presence head is not free. Adding it raised IL_MCC from <span data-claim="sam3-pres-off-mcc">0.77</span> to <span data-claim="sam3-pres-on-mcc">0.82</span>, but lowered pmF1 from <span data-claim="sam3-pres-off-pmf">65.4</span> to <span data-claim="sam3-pres-on-pmf">63.4</span>. The combined score still rose by <span data-claim="sam3-pres-gain">+1.5</span> (Table 9a, shorter training runs). SAM 3 also does not beat SAM 2 on everything. On the interactive point benchmark (SA-37) with one click it scores <span data-claim="sam3-sa37-1click">66.1</span> mIoU against <span data-claim="sam3-sa37-1click-sam21">66.4</span> for SAM 2.1 L, and it runs at <span data-claim="sam3-sa37-fps">43.5</span> frames per second against <span data-claim="sam3-sa37-fps-sam21">93.0</span> (Table 7).</p>
+
+<h3>Exemplars, and ambiguity again</h3>
+<p>Words are not always enough. An <dfn>exemplar</dfn> is a box drawn on one instance, marked positive ("more like this") or negative ("not this"). Each exemplar becomes a prompt token from its position, its label and the image features inside the box. In the figure, one positive box on a small leaf brings in the two sideways leaves that the word alone missed, and one negative box removes the window frame from "window pane". With one exemplar and no text, SAM 3 beat the earlier exemplar model T-Rex2 by <span data-claim="sam3-exemplar-gain-coco">+18.3</span> AP+ on COCO, a metric scored on positive examples only: <span data-claim="sam3-trex-coco-applus-sam3">76.8</span> against <span data-claim="sam3-trex-coco-applus-trex">58.5</span> (Table 3).</p>
+<p>SAM 1 met ambiguity with three masks per click (<a href="#ch-promptable">chapter 3</a>). SAM 3 meets it at the level of concepts. "Window" may mean the whole window or each pane. An <dfn>ambiguity head</dfn> holds <span data-claim="sam3-amb-k">2</span> experts trained winner-takes-all, the same rule as SAM's three masks: only the expert with the lowest loss gets a gradient, so each learns one reading. It is trained on top of a frozen SAM 3 and cut overlapping instances by <span data-claim="sam3-amb-overlap">15%</span> (App. C.2).</p>
+
+<h3>Inside SAM 3: forward, then backward</h3>
+<p>SAM 3 has about <span data-claim="sam3-params-total">850M</span> parameters (the README says <span data-claim="sam3-params-readme">848M</span>). Most of them sit in one backbone, the Perception Encoder (PE), whose image and text encoders were first trained together contrastively on <span data-claim="sam3-pe-pairs">5.4 billion</span> image-text pairs (stage 1). The detector and the video tracker share that backbone. Step through the detector's training stages 2 and 3; stage 4, the tracker, is the second figure.</p>
+
+<figure class="viz archflow" id="viz-sam3flow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-sam3flow-input" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-sam3flow-encode" aria-pressed="false">2 Encoders</button>
+    <button type="button" id="btn-sam3flow-fuse" aria-pressed="false">3 Fusion</button>
+    <button type="button" id="btn-sam3flow-decode" aria-pressed="false">4 Decoder</button>
+    <button type="button" id="btn-sam3flow-heads" aria-pressed="false">5 Heads</button>
+    <button type="button" id="btn-sam3flow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-sam3flow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-sam3flow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Training stage"><span>stage</span><button type="button" id="btn-sam3flow-s2" aria-pressed="true">2: detector pretraining</button><button type="button" id="btn-sam3flow-s3" aria-pressed="false">3: fine-tuning + presence</button></div>
+  <canvas id="sam3flow-canvas" role="img" aria-label="SAM 3's detector as a diagram: an image goes into the PE vision encoder, a noun phrase into the PE text encoder, exemplar boxes into an exemplar encoder; a fusion encoder conditions the image tokens on the prompt; a decoder with object queries and a presence token feeds box, score, presence and mask heads, which meet a red matching loss. In the backward stages every box is outlined in red: in stages 2 and 3 the whole detector, backbone included, is trained."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-sam3flow-prev">Previous</button>
+    <button type="button" id="btn-sam3flow-next">Next</button>
+    <button type="button" id="btn-sam3flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="sam3flow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Three kinds of input, one shared backbone, a <b class="c-green">decoder</b> with queries and a presence token, and one <b class="c-red">loss</b>. Before stage 7, guess: does the gradient reach the PE backbone in these stages?</p></div>
+    <div data-stage="input" hidden><h4>1. Inputs</h4><p>An image resized to <span data-claim="sam3-res">1008</span> x 1008 pixels, a noun phrase of at most <span data-claim="sam3-text-ctx">32</span> text tokens, and optional exemplar boxes, each with a positive or negative label. In training, the phrase is sometimes dropped and boxes are added, so the model learns every combination.</p></div>
+    <div data-stage="encode" hidden><h4>2. Encoders</h4><p>The PE vision encoder (about <span data-claim="sam3-params-vision">450M</span> parameters) cuts the image into <span data-claim="sam3-patch">14</span>-pixel patches and runs <span data-claim="sam3-layers">32</span> layers; <span data-claim="sam3-global-layers">4</span> of them use global attention and the rest attend inside windows of <span data-claim="sam3-window">336</span> pixels. That gives a 72 x 72 grid of image tokens (our arithmetic: 1008 / 14; the paper's ablations use a 2 x 2 downsampled grid of <span data-claim="sam3-tokens-ablation">1296</span> tokens). The PE text encoder (about <span data-claim="sam3-params-text">300M</span>) encodes the phrase. A small exemplar encoder turns each box into a token from its position, label and pooled image features.</p></div>
+    <div data-stage="fuse" hidden><h4>3. Fusion</h4><p><span data-claim="sam3-fusion-blocks">6</span> transformer blocks in which the image tokens attend to the prompt tokens. The output is a "conditioned" image: features that already know what you asked for.</p></div>
+    <div data-stage="decode" hidden><h4>4. Decoder</h4><p><span data-claim="sam3-decoder-blocks">6</span> blocks over <span data-claim="sam3-queries">200</span> object queries plus the presence token. Queries attend to each other, to the prompt tokens and to the conditioned image, and each block refines each query's box, a DETR trick. In stage 3 the presence token is added.</p></div>
+    <div data-stage="heads" hidden><h4>5. Heads</h4><p>Small networks on each query predict a box and a score; a mask head in the MaskFormer style (<a href="#ch-before">chapter 1</a>) turns each query into a mask using the conditioned image features. The presence head reads the presence token.</p></div>
+    <div data-stage="loss" hidden><h4>6. Loss</h4><p>Queries are matched one to one to the true instances, as in DETR. Matched boxes get an L1 loss (weight <span data-claim="sam3-loss-l1">5</span>) and a gIoU loss (weight <span data-claim="sam3-loss-giou">2</span>); scores get a classification loss (weight <span data-claim="sam3-loss-cls">100</span>); masks get focal and dice losses (weights <span data-claim="sam3-loss-focal">200</span> and <span data-claim="sam3-loss-dice">10</span>). Stage 3 adds the presence loss (weight <span data-claim="sam3-loss-presence">20</span>).</p></div>
+    <div data-stage="backward" hidden><h4>7. Gradients reach everything</h4><p>In stages 2 and 3 nothing is frozen. The gradient runs from the loss through the heads, the decoder and the fusion encoder into all three encoders, the PE backbone included. The encoders learn more slowly than the rest. The vision encoder has learning rate <span data-claim="sam3-s2-lr-vision">5e-4</span> with layer-wise decay <span data-claim="sam3-s2-lld">0.9</span>, the text encoder the slowest, <span data-claim="sam3-s2-lr-text">1e-4</span>, and the rest <span data-claim="sam3-s2-lr-rest">1e-3</span> for the rest.</p></div>
+    <div data-stage="update" hidden><h4>8. Update</h4><p>AdamW. Stage 2: about <span data-claim="sam3-s2-iters">95k</span> iterations at batch <span data-claim="sam3-s2-batch">896</span> on the synthetic, human and external data. Stage 3: about <span data-claim="sam3-s3-iters">5k</span> iterations at batch <span data-claim="sam3-s3-batch">512</span> on the highest-quality data only, all learning rates multiplied by <span data-claim="sam3-s3-lr">0.025</span>.</p></div>
+  </div>
+</figure>
+
+<figure class="viz archflow" id="viz-sam3trk" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-sam3trk-frame" aria-pressed="false">1 Frame</button>
+    <button type="button" id="btn-sam3trk-encode" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-sam3trk-memory" aria-pressed="false">3 Memory</button>
+    <button type="button" id="btn-sam3trk-track" aria-pressed="false">4 Tracker</button>
+    <button type="button" id="btn-sam3trk-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-sam3trk-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-sam3trk-update" aria-pressed="false">7 Update</button>
+  </div>
+  <canvas id="sam3trk-canvas" role="img" aria-label="Stage 4, the tracker: a video frame goes through the brown, frozen PE backbone; a memory bank of past frames and the frame features feed the green tracker (memory attention and mask decoder, as in SAM 2), which predicts three masks, an IoU score and an occlusion score, meeting a red loss. In the backward stages only the tracker is outlined in red; the gradient stops at the frozen backbone."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-sam3trk-prev">Previous</button>
+    <button type="button" id="btn-sam3trk-next">Next</button>
+    <button type="button" id="btn-sam3trk-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="sam3trk-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>Stage 4: the tracker</h4><p>The tracker is SAM 2's design (<a href="#ch-sam2">chapter 8</a>) on top of SAM 3's backbone. The backbone is now <b class="c-brown">frozen</b>. Guess before stage 6: where does the gradient stop?</p></div>
+    <div data-stage="frame" hidden><h4>1. A frame of a clip</h4><p>Training uses single frames and short clips; at the end, clips of 16 and 32 frames for <span data-claim="sam3-s4-long">60k</span> more iterations. The paper gives no other details of the clip lengths.</p></div>
+    <div data-stage="encode" hidden><h4>2. The frozen backbone</h4><p>The same PE features the detector uses, through a separate neck. The paper explains the freeze: earlier stages already trained the backbone on video frames, so this stage "focuses on spatial-temporal tracking without degrading other capabilities" (App. C.4).</p></div>
+    <div data-stage="memory" hidden><h4>3. Memory</h4><p>Past frames and the frames with prompts are stored as memories, as in SAM 2; the paper says the occlusion score may also be used to choose which frames to keep.</p></div>
+    <div data-stage="track" hidden><h4>4. Tracker</h4><p>Memory attention conditions the frame on the memories; SAM 2's prompt encoder and mask decoder then predict three masks per object, an IoU score and an occlusion score.</p></div>
+    <div data-stage="loss" hidden><h4>5. Loss</h4><p>Focal and dice losses on the masks, an absolute-error loss on the IoU score and cross-entropy on occlusion, weighted <span data-claim="sam3-s4-weights">20:1:1:1</span>. Of the three masks, only the one with the lowest loss is supervised.</p></div>
+    <div data-stage="backward" hidden><h4>6. The gradient stops at the backbone</h4><p>Only the tracker is trained. The backbone is frozen and nothing trainable sits before it, so the gradient stops there.</p></div>
+    <div data-stage="update" hidden><h4>7. Update</h4><p>Batch <span data-claim="sam3-s4-batch">512</span>, about <span data-claim="sam3-s4-iters">190k</span> iterations, cosine schedule with peak learning rate <span data-claim="sam3-s4-lr">5.0e-4</span>. The whole model took <span data-claim="sam3-gpu-a100">172k</span> A100 GPU hours plus <span data-claim="sam3-gpu-h200">86k</span> H200 GPU hours to train (model card).</p></div>
+  </div>
+</figure>
+
+<h3>Detect, then match, in video</h3>
+<p>In a video, SAM 3 runs the detector on every frame and the tracker on every known object, then reconciles the two:</p>
+<div class="eq"><div class="tex tex-display">
+\hat{\mathcal{M}}_{t} = \mathrm{propagate}(\mathcal{M}_{t-1}), \quad \mathcal{O}_{t} = \mathrm{detect}(I_{t}, P), \quad \mathcal{M}_{t} = \mathrm{match\_and\_update}(\hat{\mathcal{M}}_{t}, \mathcal{O}_{t})
+</div></div>
+<p class="eqno">SAM 3 v2, Sec. 3 (unnumbered). <span class="tex">\mathcal{M}</span>: the tracked objects ("masklets"); <span class="tex">\mathcal{O}_t</span>: the detections on frame <span class="tex">t</span>; <span class="tex">P</span>: the prompt.</p>
+<p>A detection that overlaps no tracked object starts a new one. A few simple rules keep the identities clean (App. C.3):</p>
+<ol>
+  <li><b>Wait before you trust.</b> A new object is confirmed only after <span data-claim="sam3-confirm-T">15</span> more frames. If it matched detections in fewer frames than it missed them, it is removed.</li>
+  <li><b>Remove duplicates.</b> Two tracks that both overlap the same detection (IoU above <span data-claim="sam3-dup-iou">0.1</span>) for half of that window are one object; the younger track goes.</li>
+  <li><b>Re-anchor on good detections.</b> Every <span data-claim="sam3-reprompt-N">16</span> frames, if a detection matches a track with IoU and both scores at least <span data-claim="sam3-reprompt-iou">0.8</span>, the track restarts from the detection's mask.</li>
+</ol>
+
+<div class="claim-card">
+  <h4>Claim card: the SA-Co data engine and the cgF1 metric</h4>
+  <dl>
+    <dt>Claim</dt><dd>Language models used as "AI verifiers", plus adversarial hard negatives, let a data engine label concepts exhaustively at a scale people alone could not reach.</dd>
+    <dt>How</dt><dd>Four phases. Phase 1: a captioner and a parser propose phrases, SAM 2 prompted by an open-vocabulary detector proposes masks, and people verify them (<span data-claim="sam3-p1-pairs">4.3M</span> image-phrase pairs). Phase 2: Llama models fine-tuned on those decisions take over two checks, "is this mask right?" and "are all instances found?"; SAM 3 is retrained <span data-claim="sam3-p2-retrain">6</span> times (<span data-claim="sam3-p2-pairs">122.2M</span> pairs). Phase 3: more domains (the high-quality set spans <span data-claim="sam3-p3-domains">15</span>) and long-tail phrases mined from a Wikidata-based ontology of <span data-claim="sam3-ontology-nodes">22.4M</span> nodes (<span data-claim="sam3-ontology-top">17</span> top-level categories, <span data-claim="sam3-ontology-sub">72</span> sub-categories). Phase 4: video.</dd>
+    <dt>Result</dt><dd>The AI verifiers match people: <span data-claim="sam3-verifier-mv-ai">77.7</span> against <span data-claim="sam3-verifier-mv-human">75</span> on mask checks and <span data-claim="sam3-verifier-ev-ai">81.1</span> against <span data-claim="sam3-verifier-ev-human">81.8</span> on exhaustivity (Table 23). A negative phrase took <span data-claim="sam3-thru-neg">71</span> seconds for a person and <span data-claim="sam3-thru-neg-engine">6</span> with the full engine. The high-quality set, verified by people and AI verifiers, has <span data-claim="sam3-hq-nps">4M</span> unique phrases on <span data-claim="sam3-hq-imgs">5.2M</span> images with <span data-claim="sam3-hq-masks">52M</span> masks; <span data-claim="sam3-hq-neg">88.5%</span> of its image-phrase pairs are negatives. The synthetic set adds <span data-claim="sam3-syn-masks">1.4B</span> masks with no people involved.</dd>
+    <dt>Falsified if</dt><dd>Models trained on verifier-labelled data scored no better than on human-only data, or the verifiers disagreed with people far more than people disagree with each other.</dd>
+  </dl>
+</div>
+
+<p>A benchmark with <span data-claim="sam3-bench-nps">207K</span> unique phrases (the README says <span data-claim="sam3-bench-nps-readme">270K</span>), most of them on images where the phrase is absent, breaks the usual detection metric, average precision. Its average over tens of thousands of rare classes is mostly noise, and it ignores whether the scores are calibrated. The paper's metric multiplies two parts:</p>
+<div class="eq"><div class="tex tex-display">
+\mathrm{cgF}_1 = 100 \cdot \mathrm{pmF}_1 \cdot \mathrm{IL\_MCC}
+</div></div>
+<p class="eqno">SAM 3 v2, App. E.3, Eq. 3.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathrm{pmF}_1</span>: mask quality on images where the phrase is present: F1 over matched instances, averaged over IoU thresholds from 0.5 to 0.95 (Eq. 1).</li>
+  <li><span class="tex">\mathrm{IL\_MCC}</span>: image-level correctness, a Matthews correlation between "the phrase is here" and "the model predicted something" (Eq. 2). It ignores mask quality.</li>
+</ul>
+<p>On the benchmark's Gold split, SAM 3 scores <span data-claim="sam3-gold-cgf">54.1</span> cgF1, more than double the strongest baseline (OWLv2* at <span data-claim="sam3-gold-owl">24.6</span>), and <span data-claim="sam3-gold-pct-human">74%</span> of the human score of <span data-claim="sam3-gold-human">72.8</span> (Table 1). The paper gives four human numbers for this split: <span data-claim="sam3-gold-human">72.8</span> in Table 1, <span data-claim="sam3-human-oracle">76.2</span> for the oracle protocol on a three-reviewer subset (Table 29; SAM 3's Gold score also uses the oracle protocol, so this is the like-for-like number), <span data-claim="sam3-human-randpair">55.5</span> on the same subset when one reviewer is scored against one other at random, and <span data-claim="sam3-human-internal">70.8</span> on the internal version used for ablations. On LVIS, a standard benchmark with a long tail of rare classes, SAM 3 reaches <span data-claim="sam3-lvis-mask-ap">48.5</span> zero-shot mask AP in Table 1, against <span data-claim="sam3-lvis-prev-best">38.5</span> for the best earlier zero-shot model (DINO-X, as reported in its own paper; models trained on LVIS score higher); the introduction states <span data-claim="sam3-lvis-mask-ap-intro">48.8</span>, and the paper does not explain the difference.</p>
+
+<div class="aside">
+  <h4>Object Multiplex (version 2 appendix)</h4>
+  <p>The paper's video pipeline processes each object separately, so video cost grows with the number of objects. The version 2 appendix (we read only version 2; the README dates the SAM 3.1 Object Multiplex release 2026-03-27) packs objects into buckets of <span data-claim="sam3-mux-M">16</span> slots that share one memory, with a per-object embedding to keep identities apart. At 128 objects it is <span data-claim="sam3-mux-speedup">5.2x</span> faster on one H100; with a single object it costs about <span data-claim="sam3-mux-overhead">7%</span> more time. Both figures use the authors' optimised internal implementation (App. H).</p>
+</div>
+
+<p>The limits matter for inspection. The paper says SAM 3 "struggles to generalize to fine-grained out-of-domain concepts (e.g., aircraft types, medical terms) in a zero-shot manner, especially in niche visual domains (e.g., thermal imagery)", and that it accepts only simple noun phrases (App. B). Its remedy is a few labelled examples. On RF-100VL, a benchmark of 100 datasets from varied real-world domains, zero-shot SAM 3 scores <span data-claim="sam3-rf100-0shot">15.2</span> box AP, slightly below Grounding DINO-T at <span data-claim="sam3-rf100-0shot-gdino">15.7</span>. Fine-tuned on the official 10-shot splits (ten labelled examples per class, per dataset), it reaches <span data-claim="sam3-rf100-10shot">36.5</span> (Table 2). <a href="#ch-inspection">Chapter 14</a> returns to this.</p>
+</section>

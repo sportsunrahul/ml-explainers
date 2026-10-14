@@ -1,0 +1,173 @@
+[
+ {
+  "id": "ncsn-score-definition",
+  "claim": "The score of a density p(x) is defined as its gradient of log-density, grad_x log p(x)",
+  "value": "\\nabla_\\bfx \\log p(\\bfx)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 2 (pre.tex), first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-manifold-loss-fluctuates",
+  "claim": "Sliced score matching loss on raw CIFAR-10 fluctuates irregularly but converges once data are perturbed with small Gaussian noise",
+  "value": "noise N(0, 0.0001) (variance; std 0.01)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 3.1, Figure 1",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-toy-mixture",
+  "claim": "Toy mixture used to show inaccurate scores in low-density regions and Langevin mode-weight failure",
+  "value": "1/5 N((-5,-5), I) + 4/5 N((5,5), I)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 3.2.1, Figures 2-3",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-langevin-ignores-mode-weight",
+  "claim": "For modes with disjoint supports the score does not depend on the mixing weight pi, so Langevin samples cannot recover relative mode weights",
+  "value": "score independent of pi",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 3.2.2",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-geometric-sigma",
+  "claim": "Noise levels form a positive geometric sequence with sigma_1 the largest",
+  "value": "sigma_1/sigma_2 = ... = sigma_{L-1}/sigma_L > 1",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-image-num-levels",
+  "claim": "Number of noise levels used for image experiments",
+  "value": "L = 10",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-image-sigma-range",
+  "claim": "Largest and smallest noise std for image experiments (pixels in [0,1])",
+  "value": "sigma_1 = 1, sigma_10 = 0.01",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-toy-sigma-range",
+  "claim": "Noise schedule for the 2D toy annealed Langevin demo",
+  "value": "L = 10; sigma_1 = 10, sigma_10 = 0.1 (Sec. 4.3) vs sigma_1 = 20, sigma_10 = 1 (App. B.1)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.3 last paragraph vs App. B.1 (inconsistent)",
+  "uncertain": true
+ },
+ {
+  "id": "ncsn-lambda-sigma-squared",
+  "claim": "Loss weighting chosen so every noise level contributes similar magnitude, motivated by ||s_theta(x,sigma)|| proportional to 1/sigma",
+  "value": "lambda(sigma) = sigma^2",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.2, Eq. 6",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-step-size-schedule",
+  "claim": "Annealed Langevin step size per noise level",
+  "value": "alpha_i = epsilon * sigma_i^2 / sigma_L^2",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.3, Algorithm 1",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-langevin-steps-per-level",
+  "claim": "Langevin steps per noise level in image generation",
+  "value": "T = 100",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-base-step-size",
+  "claim": "Base Langevin step size for images; values between 5e-6 and 5e-5 generally work",
+  "value": "epsilon = 2e-5",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-init-uniform",
+  "claim": "Annealed Langevin sampling for images is initialized from uniform noise",
+  "value": "uniform noise",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-cifar10-is",
+  "claim": "CIFAR-10 unconditional Inception Score, claimed state of the art",
+  "value": "8.87 +/- .12",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Table 1, row NCSN (Ours)",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-cifar10-fid",
+  "claim": "CIFAR-10 unconditional FID (comparable to SNGAN 21.7; MoLM 18.9 is the best unconditional FID in the table; conditional BigGAN 14.73)",
+  "value": "25.32",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Table 1, row NCSN (Ours)",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-fid-50k",
+  "claim": "IS and FID computed on 50000 samples",
+  "value": "50000",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "App. B (app.tex), experiment details",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-single-noise-baseline-fails",
+  "claim": "Baseline with a single noise level sigma = 0.01 and vanilla Langevin fails to generate reasonable images",
+  "value": "fails",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Image generation; Figures 7-8",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-ssm-4x-cost",
+  "claim": "Sliced score matching needs around four times more computation than denoising score matching due to forward-mode autodiff",
+  "value": "~4x",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 2.1, Sliced score matching",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-code",
+  "claim": "Official code and checkpoints",
+  "value": "https://github.com/ermongroup/ncsn",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "App. A (app.tex), first paragraph",
+  "uncertain": false
+ }
+]

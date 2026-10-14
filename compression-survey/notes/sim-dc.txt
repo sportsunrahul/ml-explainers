@@ -1,0 +1,19 @@
+viz-dc simulation (kit parts/kit/61-dc.js): {"n":256,"sigma":0.1,"q":1,"k":8,"gapBits":5,"seed":23,"gradSeed":5,"gradScale":0.02,"lr":0.1}
+weights n=256, std 0.0990, threshold t = q*std = 0.0990
+kept 89 of 256 (34.8%), max gap 10, filler zeros 0
+k-means linear init: -0.2690 -0.1847 -0.1004 -0.0161 0.0681 0.1524 0.2367 0.3210
+k-means converged in 6 iterations: -0.2490 -0.1757 -0.1165 -0.0161 0.1175 0.1640 0.2266 0.3210
+cluster sizes: 3 14 30 0 23 13 5 1
+summed gradients per centroid: 0.0189 -0.0130 -0.0139 0.0000 0.1968 0.0150 0.0136 0.0131
+centroids after one step (lr 0.1): -0.2509 -0.1744 -0.1151 -0.0161 0.0978 0.1625 0.2252 0.3197
+Huffman codes (cluster): {"0":"01001","1":"00","2":"11","4":"10","5":"011","6":"0101","7":"01000"}
+Huffman codes (gap): {"1":"11","2":"01","3":"101","4":"100","5":"0010","6":"0011","7":"00010","8":"0000","10":"00011"}
+dense: value 8192 + index 0 + codebook 0 = 8192 bits; 32.000 bits/weight; 1.00x
+prune: value 2848 + index 445 + codebook 0 = 3293 bits; 12.863 bits/weight; 2.49x
+share: value 267 + index 445 + codebook 256 = 968 bits; 3.781 bits/weight; 8.46x
+huff: value 213 + index 236 + codebook 256 = 705 bits; 2.754 bits/weight; 11.62x
+readout dense: Dense: 256 weights stored as FP32, 32 bits per weight.
+readout prune: Prune: threshold t = qxstd = 0.10 keeps 89 of 256 weights. Each survivor stores its FP32 value plus a 5-bit gap to the previous survivor; no gap is too long, so no filler zeros. 12.86 bits per weight, 2.5x smaller than FP32.
+readout share: Share: k-means from linear initialization converged in 6 iterations to 8 shared values, so each survivor stores a 3-bit code plus its gap; the codebook adds 8 x 32 bits. One linear-init centroid starts inside the pruned gap and gets no members. 3.78 bits per weight, 8.5x smaller than FP32.
+readout huff: Huffman: frequent codes get short bit strings. Codes average 2.39 bits (from 3), gaps 2.65 bits (from 5); code tables are not counted. 2.75 bits per weight, 11.6x smaller than FP32.
+readout share tuned: Share: k-means from linear initialization converged in 6 iterations to 8 shared values, so each survivor stores a 3-bit code plus its gap; the codebook adds 8 x 32 bits. One linear-init centroid starts inside the pruned gap and gets no members. One fine-tuning step moved the centroids by the summed gradients of their members (largest move 0.02). 3.78 bits per weight, 8.5x smaller than FP32.

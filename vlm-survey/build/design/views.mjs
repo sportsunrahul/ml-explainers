@@ -1,0 +1,17 @@
+import path from 'path'; import { createRequire } from 'module';
+const require = createRequire(path.join(process.cwd(), 'x.js')); const { chromium } = require('playwright');
+const [file, out] = process.argv.slice(2);
+const b = await chromium.launch();
+const d = await (await b.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' })).newPage();
+d.on('pageerror', e => console.log('ERR', e.message));
+await d.goto('file://' + file); await d.waitForTimeout(500);
+await d.evaluate(() => document.querySelector('nav.toc').scrollIntoView({ behavior: 'instant' })); await d.waitForTimeout(400); await d.screenshot({ path: `${out}/v-toc.png` });
+await d.evaluate(() => { const k = document.querySelectorAll('.kicker')[1]; window.scrollTo({ top: k.getBoundingClientRect().top + scrollY - 120, behavior: 'instant' }); }); await d.waitForTimeout(400); await d.screenshot({ path: `${out}/v-act2.png` });
+await d.evaluate(() => document.getElementById('eq-clip').scrollIntoView({ block: 'center', behavior: 'instant' })); await d.waitForTimeout(400);
+await d.hover('#eq-clip [data-link="pos"]'); await d.waitForTimeout(450); await d.screenshot({ path: `${out}/v-eqhover.png` });
+const m = await (await b.newContext({ viewport: { width: 375, height: 812 }, colorScheme: 'dark' })).newPage();
+await m.goto('file://' + file); await m.waitForTimeout(300);
+await m.evaluate(() => document.getElementById('ch-flamingo').scrollIntoView({ behavior: 'instant' })); await m.waitForTimeout(400);
+await m.screenshot({ path: `${out}/v-mob-bar.png` });
+await m.click('#pe-rail-toggle'); await m.waitForTimeout(300); await m.screenshot({ path: `${out}/v-mob-menu.png` });
+await b.close();

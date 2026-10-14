@@ -1,0 +1,33 @@
+  <article data-chapter="glip" data-chip="GLIP">
+    <header class="ch-head"><span class="num"></span><h2>GLIP: detection as grounding</h2><p class="subhead">One prompt, every token, fused early</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="GLIP">
+        <button type="button" role="tab" data-step="0">Prompt as classifier</button>
+        <button type="button" role="tab" data-step="1">Token alignment</button>
+        <button type="button" role="tab" data-step="2">Deep fusion</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Targets</span><button type="button" class="tool" data-phrase="person">person</button><button type="button" class="tool" data-phrase="cone">traffic cone</button><button type="button" class="tool" data-phrase="tooth">toothbrush</button></div>
+      <div class="row"><span>Fusion</span><button type="button" class="tool" data-fuse="late">late</button><button type="button" class="tool" data-fuse="deep">deep</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>The prompt is the classifier</h3>
+      <p>GLIP (Grounded Language-Image Pre-training) writes the class names into one prompt, "person. traffic cone. toothbrush", and scores every box against it. Each phrase does the job of one class row, so the stage shows one column per phrase. Detection becomes <button class="inline-term" data-open="glip-grounding">phrase grounding</button>.</p>
+      <p class="note">The pallet and the forklift match no phrase. For this prompt, they are background.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Every token gets a target</h3>
+      <p>A text encoder reads <button class="inline-term" data-open="glip-token">tokens</button>, not phrases. "traffic cone" is two tokens, and the paper splits "toothbrush" into "tooth#" and "#brush". GLIP copies each box's label to every token of its phrase. Added tokens are always negative. No box shows a toothbrush, so its tokens are negative for every box: a name in the prompt with nothing in the image teaches the model to say no.</p>
+      <p class="note">Any captioned image with boxes is now training data. GLIP's human grounding data alone has 44,518 unique phrases in Flickr30K and 110,689 in VG Caption; the largest detection datasets have no more than 2,000 categories.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Words change the image features</h3>
+      <p>In late fusion the image side never reads the prompt, and part of the "stingray" score leaks onto the fish. GLIP adds <button class="inline-term" data-open="glip-xattn">cross-attention</button> in the last encoder layers. Each region takes in the words it matches best, and each word takes in the regions that match it, so the leak shrinks layer by layer.</p>
+      <p class="note">The price is speed: GLIP-T runs at 4.84 frames per second without fusion and 2.52 with it, because the fusion layers run for every new pair of image and prompt.</p>
+    </div>
+    <p class="note">The stage is a toy. Tabs 1 and 2 use made-up scores; the subword split is the paper's example. Tab 3 runs GLIP's fusion equations on made-up five-number features. The numbers in the text are GLIP's own (Sec. 3.3, Tables 7 and 8).</p>
+    <div class="stat"><span>Zero-shot ODinW-13 (13 small datasets from other domains), GLIP-T: late fusion, then deep fusion</span><b>35.5, 44.4</b></div>
+    <p class="inscription">Write the classes as a sentence and detection becomes grounding: captions become training data, and deep fusion lets the words change what the image side sees.</p>
+    <button type="button" class="continue" data-go="overview">Back to the start</button>
+  </article>

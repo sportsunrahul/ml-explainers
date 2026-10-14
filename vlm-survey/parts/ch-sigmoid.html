@@ -1,0 +1,191 @@
+<section id="ch-sigmoid" class="chapter">
+<h2>The softmax needs the whole batch</h2>
+<p>CLIP's loss asks every photo to pick its caption out of the whole batch, so no single cell of the table can be scored without looking at its entire row and column. SigLIP replaced that softmax with a plain yes/no question per cell, and the same five photos and captions from the last chapter show what changes.</p>
+
+<figure class="viz" id="viz-siglip" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="siglip-canvas" tabindex="0" role="img" aria-label="The five photos (blue) and five captions (yellow) from chapter 1 on a circle, a five by five table colored by either the softmax or the sigmoid, a loss bar and the bias. Click a cell or use the arrow keys to pick one."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglip-softmax">Softmax view</button>
+    <button type="button" id="btn-siglip-sigmoid">Sigmoid view</button>
+    <button type="button" id="btn-siglip-b10">Train, bias starts at -10</button>
+    <button type="button" id="btn-siglip-b0">Train, bias starts at 0</button>
+    <button type="button" id="btn-siglip-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siglip-readout" aria-live="polite"></p>
+  <figcaption>The red outlines show what the loss term for the picked cell touches: in the softmax view, its whole row (solid) and whole column (dashed); in the sigmoid view, the cell alone. Before you press either Train button, guess: does it matter where the bias starts? Both buttons train from the same scrambled start as chapter 1 (seed 65), with real gradient descent on the sigmoid loss. What is toy: two dimensions and five pairs; the scale t (the inverse temperature) is held at SigLIP's starting value t = 10 while only the bias is learned (SigLIP learns both). From this start the bias-0 run ends with <span data-computed>two of five</span> pairs matched (the three collapsed photos tie between their three captions); over 200 random starts it averages <span data-computed>about one and a half</span>, against <span data-computed>almost five</span> for bias -10.</figcaption>
+</figure>
+
+<h3>The wall: every cell depends on the whole batch</h3>
+<p>Look again at CLIP's loss for one photo: a softmax over its row. The probability of the right caption is its score divided by the sum of the scores of <em>every</em> caption in the batch. Press <b>Softmax view</b> and pick any cell: the loss that cell feeds into spans its whole row, and the mirror-image loss for captions spans its whole column. One similarity is tied to <span class="tex">2N - 1</span> cells (<span data-computed>9 of the 25</span> here).</p>
+<p>At toy size that is harmless. At CLIP's batch of <span data-claim="clip-batch-size">32,768</span>, the photos and captions are spread across many accelerators, each holding a slice of the batch. To finish even one row, a device needs every caption embedding from every other device (an <em>all-gather</em>), and the textbook implementation then builds the full table of pairwise similarities in memory. Even the numerics want the whole batch: a softmax is usually stabilised by subtracting the row's maximum first, <span data-claim="page-siglip-another-pass">which requires another pass over the full batch</span>.</p>
+
+<h3>A yes/no question per cell</h3>
+<p>SigLIP (Sigmoid loss for Language-Image Pre-training) drops the competition. Each cell asks its own question: <em>do this photo and this caption belong together?</em> The diagonal cells should say yes, every other cell should say no, and each answer is scored by a logistic (sigmoid) loss, the same loss as any binary classifier. The paper's phrase is that the loss <span data-claim="page-siglip-independent">processes every image-text pair independently</span>: the batch of <span class="tex">N</span> pairs becomes <span class="tex">N^2</span> separate binary examples. Press <b>Sigmoid view</b>. The table now shows, for each cell, the probability the model gives to "match", computed from that cell alone, and the red outline shrinks to the single cell you picked.</p>
+<p>There is a catch hiding in that table: in a batch of <span class="tex">N</span> pairs there are only <span class="tex">N</span> yes-cells and <span class="tex">N^2 - N</span> no-cells. The softmax never noticed, because each row had exactly one right answer. The sigmoid sees <span data-computed>20 no-cells for every 5 yes-cells</span> here, and a real batch is far more lopsided.</p>
+
+<h3>Predict: what if the bias starts at 0?</h3>
+<p>SigLIP adds a learnable bias <span class="tex">b</span> to every cell's score before the sigmoid, and starts it at <span data-claim="siglip-init-b">-10</span>, with the scale <span class="tex">t</span> (the inverse temperature) starting at <span data-claim="siglip-init-t">log 10 (t = 10)</span> in its log form. A cosine is at most 1, so at <span class="tex">t = 10</span> a score is at most 10, and with the bias at -10 every cell starts out saying "no": the <em>prior</em>, correct for all the negatives. With the bias at 0, a cell at right angles is a coin flip and every cell with a positive cosine says "yes". Before pressing, guess which start ends with all five pairs matched.</p>
+<p>Press <b>Train, bias starts at -10</b>. Nothing in the table says yes at first (the readout counts <span data-computed>0 of 25</span>), so the only strong signal is the five diagonal cells asking to be pulled together; they close up within a few dozen steps, the pairs spread around the circle, and all five match. Now press <b>Train, bias starts at 0</b> from the same start. <span data-computed>12 of the 25</span> cells begin as "yes", <span data-computed>9</span> of them wrongly, and the twenty negatives dominate the first steps: the fastest way to silence them is to push everything apart, correct pairs included. Three photos and their three captions end up clumped in two lumps, the bias has only crawled part of the way down, and those three photos can no longer tell their captions apart.</p>
+<p>That is the toy's picture of what the paper describes: without the bias, <span data-claim="page-siglip-imbalance">the heavy imbalance coming from the many negatives dominates the loss, leading to large initial optimization steps attempting to correct this bias</span>, while the -10 start <span data-claim="page-siglip-prior">starts roughly close to the prior and does not require massive over-correction</span>. The toy exaggerates the effect (it is two-dimensional and keeps <span class="tex">t</span> fixed). In the paper's ablation (Table 4, a Base model), ImageNet zero-shot accuracy is <span data-claim="siglip-bias-ablation">62.0 vs 63.0</span> for no bias against the -10 start, and a bias started at 0 gives <span data-claim="page-siglip-b0-ablation">61.7</span>; with the scale <span class="tex">t</span> also started small (<span class="tex">t' = \log 1</span>, so <span class="tex">t = 1</span>: a hot start in chapter 1's terms), it falls to <span data-claim="page-siglip-b0-t1">53.7</span>.</p>
+
+<h3>The two losses, side by side</h3>
+<p>First the softmax loss, as SigLIP writes it for CLIP, with <span class="tex">t</span> the inverse of the temperature <span class="tex">\tau</span> from chapter 1. Each term is a whole row or a whole column:</p>
+<div class="eq" id="eq-siglip-soft" data-build data-viz="viz-siglip"><div class="tex tex-display">
+\htmlData{step=3}{\htmlClass{t-red}{\mathcal{L}_{\text{soft}}} = -\frac{1}{2|B|}\sum_{i=1}^{|B|}\Big(} \htmlData{step=1, link=row}{\log \frac{e^{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_i}}}{\sum_{j=1}^{|B|} e^{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_j}}}} + \htmlData{step=2, link=col}{\log \frac{e^{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_i}}}{\sum_{j=1}^{|B|} e^{t\,\htmlClass{t-blue}{x_j}\cdot \htmlClass{t-yellow}{y_i}}}} \htmlData{step=3}{\Big)}
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.1 of SigLIP v4 (the same loss as CLIP's Fig. 3 pseudocode, with t = 1/&tau;).</p>
+<p>Then the sigmoid loss. One term per cell, and nothing in the term mentions any other cell:</p>
+<div class="eq" id="eq-siglip" data-build data-viz="viz-siglip"><div class="tex tex-display">
+\htmlData{step=4, link=pairs}{\htmlClass{t-red}{\mathcal{L}_{\text{sig}}} = -\frac{1}{|B|}\sum_{i=1}^{|B|}\sum_{j=1}^{|B|}} \log \sigma\big(\htmlData{step=1, link=label}{\htmlClass{t-green}{z_{ij}}} \cdot \big(\htmlData{step=2, link=logit}{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_j}} \htmlData{step=3, link=bias}{+\, b}\big)\big)
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.2 of SigLIP v4, written in the form of Algorithm 1 (<code>logits = t x.y + b</code>). The equation printed in Sec. 3.2 has the opposite sign on b; with b starting at -10, only the Algorithm 1 form makes every cell start at "no", so we follow Algorithm 1.</p>
+<ul class="gloss">
+  <li><span class="tex">B</span>: the batch of photo-caption pairs; <span class="tex">|B|</span> is its size, the <span class="tex">N</span> of the toy.</li>
+  <li><span class="tex">\htmlClass{t-blue}{x_i}</span>, <span class="tex">\htmlClass{t-yellow}{y_j}</span>: the unit-length embeddings of photo <span class="tex">i</span> and caption <span class="tex">j</span>, so <span class="tex">x_i \cdot y_j</span> is the cosine in cell <span class="tex">(i, j)</span>.</li>
+  <li><span class="tex">\htmlClass{t-green}{z_{ij}}</span>: the label, +1 on the diagonal (a true pair) and -1 everywhere else.</li>
+  <li><span class="tex">t</span>: the inverse temperature, learned as <span class="tex">t = e^{t'}</span>; it stretches cosines from [-1, 1] into scores from <span class="tex">-t</span> to <span class="tex">t</span>.</li>
+  <li><span class="tex">b</span>: the learned bias, shared by every cell; it sets where "no" turns into "yes".</li>
+  <li><span class="tex">\sigma(u) = 1/(1 + e^{-u})</span>: the sigmoid, the probability of the answer the label asks for. Its log is 0 when the cell answers confidently and correctly, and very negative when it is confidently wrong.</li>
+  <li>The sum runs over all <span class="tex">|B|^2</span> cells but is divided by <span class="tex">|B|</span>, not <span class="tex">|B|^2</span>.</li>
+</ul>
+
+<h3>Why this lets the batch grow</h3>
+<p>Because each cell's term stands alone, the table never has to exist all at once. SigLIP splits the loss by device. With the batch spread over <span class="tex">D</span> devices, each device holds its own slice of photos and captions, the per-device batch <span class="tex">b_{\text{dev}} = |B|/D</span> (the paper calls this <span class="tex">b</span> too, a different quantity from the bias). Each device scores its own photos against its own captions, which contains all its positives, then passes its captions to the next device and scores the new block, which is all negatives, and so on around the ring until every photo has met every caption. A final sum across devices adds up the pieces.</p>
+
+<figure class="viz" id="viz-siglip-batch" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="siglip-batch-canvas" tabindex="0" role="img" aria-label="The full similarity table split into device blocks. Softmax: the whole table in memory at once. Chunked sigmoid: each device holds one block at a time, stepping through the table as captions pass between devices. Bars compare the memory on a log scale."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglip-batch-mock">The paper's mock setup</button>
+    <button type="button" id="btn-siglip-batch-full">Softmax: full table</button>
+    <button type="button" id="btn-siglip-batch-chunk">Sigmoid: one block at a time</button>
+    <button type="button" id="btn-siglip-batch-reset" data-cue-reset>Reset</button>
+    <label for="rng-siglip-batch-dev">devices <input type="range" id="rng-siglip-batch-dev" min="0" max="8" step="1" value="2"> <span id="siglip-batch-dev-val">3</span></label>
+    <label for="rng-siglip-batch-per">per-device batch <input type="range" id="rng-siglip-batch-per" min="2" max="12" step="1" value="2"> <span id="siglip-batch-per-val">4</span></label>
+  </div>
+  <p class="readout" id="siglip-batch-readout" aria-live="polite"></p>
+  <figcaption>Rows are photos (blue, they stay on their device); columns are captions (yellow, they move one device along at each step). Red is what sits in memory: the whole table for the softmax, one block per device for the chunked sigmoid; pale red blocks are already scored and summed. The counts are computed from the sliders; they are similarities held at once, not bytes, and the devices and per-device batch are knobs, not settings from the paper. The first state is the paper's own Fig. 1 example.</figcaption>
+</figure>
+
+<p>Press <b>The paper's mock setup</b>: it is the example in SigLIP's Fig. 1, <span data-claim="page-siglip-fig1-mock">3 devices and a global batch size of 12</span>. The captions hop around three times and every cell gets scored, yet at any moment each device holds only one block of <span data-claim="page-siglip-fig1-block">size 4 x 4</span>, and there are no all-gathers. Press <b>Softmax: full table</b> for comparison, then drag the devices slider. The paper states the scaling: memory at any moment falls <span data-claim="siglip-memory-full">from |B|^2 to b^2 (b = |B|/D per-device batch)</span>, a factor of <span class="tex">D^2</span>. The paper adds that "<span data-claim="page-siglip-b-constant">Usually b is constant as scaling |B| is achieved by increasing the number of accelerators</span>", so the per-device block stays the same size while the full table grows with the square of the device count. Passing captions around is cheap too: the paper notes that <span data-claim="page-siglip-permute">D collective permutes is typically faster than two all-gathers between D devices</span>.</p>
+<div class="eq" id="eq-siglip-batch" data-build data-viz="viz-siglip-batch"><div class="tex tex-display">
+\htmlData{step=1, link=devices}{\htmlClass{t-red}{\mathcal{L}_{\text{sig}}} = -\frac{1}{|B|}\sum_{d_i=1}^{D}} \htmlData{step=2, link=swap}{\sum_{d_j=1}^{D}} \htmlData{step=3, link=block}{\sum_{i=b_{\text{dev}} d_i}^{b_{\text{dev}}(d_i+1)}\ \sum_{j=b_{\text{dev}} d_j}^{b_{\text{dev}}(d_j+1)} \htmlClass{t-red}{\mathcal{L}_{ij}}}
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.3 of SigLIP v4; the paper writes the per-device batch as b, we write b<sub>dev</sub> to keep it apart from the bias.</p>
+<ul class="gloss">
+  <li>First sum, over devices <span class="tex">d_i</span>: every device works in parallel on its own photos; the final cross-device sum adds their results.</li>
+  <li>Second sum, over <span class="tex">d_j</span>: the captions of device <span class="tex">d_j</span> visit each device in turn (the paper's label: "swap negs across devices").</li>
+  <li>Inner double sum: one <span class="tex">b_{\text{dev}} \times b_{\text{dev}}</span> block of cells, the only part of the table in memory at that moment; <span class="tex">\mathcal{L}_{ij}</span> is the per-cell term of the sigmoid loss above.</li>
+</ul>
+<p>The softmax cannot be split this simply: each row's sum needs every caption before that row's term can be finished. In practice the saving is concrete. The paper reports that four TPU-v4 chips fit a batch of <span data-claim="siglip-fit-4chips">4096 vs 2048</span> for a Base SigLIP model against the corresponding CLIP model.</p>
+
+<h3>What the bigger batches bought</h3>
+<p>The surprise is that SigLIP's authors, having made huge batches cheap, found they barely need them. The sigmoid loss wins most clearly at small batch: when the batch is <span data-claim="siglip-gap-threshold">smaller than 16 k</span> it beats the softmax by a large margin, for example ImageNet zero-shot at <span data-claim="siglip-s512-3b">batch 512: 51.5 vs 47.7</span> (SigLIP, sigmoid first) and <span data-claim="siglip-lit-512-3b">77.2 vs 74.6</span> for SigLiT (below). As the batch grows the gap closes. SigLIP performs best at batch size <span data-claim="page-siglip-peaks">32 k, whereas the softmax loss required 98 k</span>, and the softmax did not beat it even there. The abstract's conclusion: <span data-claim="page-siglip-diminish">the benefits of growing batch size quickly diminish</span>, and a batch of <span data-claim="siglip-saturate-32k">32 k</span> is enough.</p>
+<p>The extreme experiment was run on SigLiT, a cheaper variant: the image tower is a frozen, already-trained ViT whose embeddings are precomputed (the "Locked-image Tuning" setup), and only the text tower learns. SigLiT trained at a batch of <span data-claim="page-siglip-1m">one million</span>; performance saturated around <span data-claim="siglip-saturate-32k">32 k</span> and the model peaks at <span data-claim="page-siglip-peak256">256 k</span>. No from-scratch SigLIP was trained at a million. The frozen tower also makes SigLiT very cheap. In the abstract's words, "<span data-claim="page-siglip-g14">with only four TPUv4 chips, we train a SigLiT model that achieves 84.5% ImageNet zero-shot accuracy in two days</span>."</p>
+
+<h3>Inside SigLIP: forward, then backward</h3>
+<p>SigLIP keeps CLIP's two-lane machine and changes one box: the loss. Step through it below and watch for the three differences, the per-cell sigmoid with its learnable <span class="tex">t</span> and <span class="tex">b</span>, a backward pass in which no cell's gradient waits for its row, and (in the SigLiT variant) an image lane that is frozen solid.</p>
+
+<figure class="viz archflow" id="viz-siglipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-siglipflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-siglipflow-tokens" aria-pressed="false">2 Tokens</button>
+    <button type="button" id="btn-siglipflow-encode" aria-pressed="false">3 Encoders</button>
+    <button type="button" id="btn-siglipflow-embed" aria-pressed="false">4 Normalize</button>
+    <button type="button" id="btn-siglipflow-sim" aria-pressed="false">5 Logits</button>
+    <button type="button" id="btn-siglipflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-siglipflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-siglipflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Recipe">
+    <span>recipe</span>
+    <button type="button" id="btn-siglipflow-b16" aria-pressed="true">SigLIP B/16, 224 px</button>
+    <button type="button" id="btn-siglipflow-b16x" aria-pressed="false">B/16, 256 px, 64 tokens</button>
+    <button type="button" id="btn-siglipflow-siglit" aria-pressed="false">SigLiT (frozen image tower)</button>
+  </div>
+  <canvas id="siglipflow-canvas" role="img" aria-label="SigLIP's training step as a diagram: an image lane (blue) and a text lane (yellow), each going through tokens, an encoder with pooling and a normalization, meeting in an N by N logits table (green diagonal) and a per-cell sigmoid loss (red). In the SigLiT recipe the image patches and encoder are brown (frozen). In the backward stages red arrows run from the loss back into the lanes that learn."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglipflow-prev">Previous</button>
+    <button type="button" id="btn-siglipflow-next">Next</button>
+    <button type="button" id="btn-siglipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siglipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map: CLIP's, with a new loss box</h4>
+      <p>The lanes are the ones from the <a href="#viz-clipflow">CLIP stepper</a>: photos (<b class="c-blue">blue</b>) and captions (<b class="c-yellow">yellow</b>) go through their own transformer, end as unit vectors, and meet only in the table of logits (<b class="c-green">green</b>). What is new sits on the right: the table gets a bias, and the loss (<b class="c-red">red</b>) scores every cell alone. Pick a recipe, press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of pairs</h4>
+      <p>SigLIP trains on English image-text pairs from WebLI. The batch the paper settles on is <span data-claim="siglip-saturate-32k">32 k</span>, where its batch-size study saturates; the drawing shows four pairs. In the SigLiT recipe the photos are never loaded as pixels during training: the authors <span data-claim="siglip-arch-siglit-precompute">precompute embeddings to accelerate the training</span>, once, with the frozen tower.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>2. Tokens</h4>
+      <p><b class="c-blue">Image:</b> the base recipe is <span data-claim="siglip-arch-b16">B/16 ViT for image embeddings and B-sized transformer for text embeddings</span>, with photos resized to <span data-claim="siglip-arch-res">224</span> pixels square: <span data-computed>14 &times; 14 = 196</span> patches of 16 pixels, cut and embedded the ViT way (<a href="#ch-patches">next chapter</a>). The scaled-up recipe uses <span data-claim="siglip-arch-scaled">256 image patches and 64 text tokens</span>, which is <span data-computed>256 pixels</span> at the same patch size.</p>
+      <p><b class="c-yellow">Text:</b> a <span data-claim="siglip-arch-vocab">32 k vocabulary sentencepiece tokenizer</span> (trained on English C4), and <span data-claim="siglip-arch-text16">a maximum of 16 text tokens are kept</span>: a much shorter cap than CLIP's 76.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>3. Two encoders, one vector each</h4>
+      <p>The paper's model card says, for the released models, "<span data-claim="siglip-arch-samesize">The vision and language encoders always have the same size</span>" (SigLiT, below, pairs a B/8 image tower with a Large text tower, so the rule is not general), and that each outputs one vector of width <span class="tex">d</span>: <span data-claim="siglip-arch-d">768, 1024 and 1152</span> for B, L and SoViT-400M. Depth, width and heads of ViT-B come from the ViT paper that SigLIP cites (<span data-claim="vit-arch-base-layers">12</span> layers, width <span data-claim="page-tokens-base-d">768</span>, <span data-claim="vit-arch-base-heads">12</span> heads); for the text model the paper states only its width, <span data-claim="siglip-arch-textw">W = 768</span> for Base, not its depth.</p>
+      <p>How each lane turns a sequence of tokens into one vector is <em>not stated in the paper</em>, so the drawing just says "pool". SigLiT's text tower is <span data-claim="siglip-arch-siglit-text">a Large Transformer, but with a depth of only 12 layers (instead of 24)</span>; its image tower is the public <span data-claim="siglip-arch-siglit-tower">ViT-AugReg-B/8</span>, frozen.</p>
+    </div>
+    <div data-stage="embed" hidden>
+      <h4>4. Unit vectors</h4>
+      <p>Exactly as in CLIP, and as in Algorithm 1 (<code>zimg = l2_normalize(img_emb)</code>): each row is divided by its length, so a dot product is a cosine. The paper gives only the output width <span class="tex">d</span>, so the drawing does not assert whether a separate projection sits before this step.</p>
+    </div>
+    <div data-stage="sim" hidden>
+      <h4>5. The table, with a bias</h4>
+      <p><code>logits = dot(zimg, ztxt.T) * t + b</code>: CLIP's table, plus one learned number <span class="tex">b</span> added to every cell. The scale starts at <span data-claim="siglip-init-t">log 10 (t = 10)</span> and the bias at <span data-claim="siglip-init-b">-10</span>, so every cell starts as a confident "no". The table is never materialized whole: each device scores its own photos against one block of captions at a time, as the <a href="#viz-siglip-batch">device figure above</a> animates (this stepper cannot draw devices, so it points there). The line under the drawing computes the block size.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>6. What the loss grades</h4>
+      <p>Every one of the <span class="tex">N^2</span> cells: the <span class="tex">N</span> diagonal cells are graded against "yes" (<span class="tex">z = +1</span>), the <span class="tex">N^2 - N</span> others against "no" (<span class="tex">z = -1</span>), each by its own log-sigmoid, summed and divided by <span class="tex">N</span> (<a href="#eq-siglip">the equation above</a>). No softmax, no normalization across a row: in the paper's words <span data-claim="siglip-arch-symmetric">the sigmoid loss is symmetric, requires just a single pass</span>. On devices, each block's cells are summed where they were computed, and then <span data-claim="siglip-arch-final-sum">Losses can then simply be summed across all devices</span>.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>7. Each cell sends back its own error</h4>
+      <p>The gradient on one logit is <span class="tex">\tfrac{1}{N}\big(\sigma(\ell_{ij}) - \delta_{ij}\big)</span> (derived below): the cell's own "yes" probability minus 1 on the diagonal (0 elsewhere). CLIP's was <span class="tex">\tfrac{1}{N}\big(\tfrac{p_{ij} + q_{ij}}{2} - \delta_{ij}\big)</span>, where <span class="tex">p</span> and <span class="tex">q</span> are softmaxes over the whole row and column. From the table the gradient splits into the two lanes the same way as in CLIP, and <span class="tex">t</span> and <span class="tex">b</span> get theirs directly from the table.</p>
+      <p>Switch to <b>SigLiT</b> and replay this stage: the patch embedding and the ViT are <b class="c-brown">brown</b> and the gradient stops at the table's image side, because nothing upstream of it can learn. The paper also tried the middle road, an image tower that starts pretrained but is not frozen, with a <span data-claim="siglip-arch-unlocked-mult">0.1 learning rate multiplier to the pre-trained image tower</span> and weight decay switched off for it: "<span data-claim="siglip-arch-unlocked-wd">Weight decay is therefore only applied to the randomly initialized weights in the text model</span>".</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>8. One optimizer step</h4>
+      <p>SigLIP uses the <span data-claim="siglip-arch-adafactor">ScalingViT-Adafactor optimizer</span> with <span class="tex">\beta_2</span> lowered to <span data-claim="siglip-arch-beta2">0.95</span> to stop gradient spikes from derailing large-batch runs, and one default for every batch size from 512 up: <span data-claim="siglip-arch-lrwd">0.001 learning rate and 0.0001 weight decay</span>, with the <span data-claim="siglip-arch-cosine">default cosine learning rate scheduler</span>. The from-scratch B/16 reached its best Table 1 result in <span data-claim="siglip-arch-b16-chips">5 days with 32 TPUv4 chips</span>. The scaled-up recipe trains <span data-claim="siglip-arch-scaled-sizes">ViT-B, ViT-L or So-400m</span> for <span data-claim="siglip-arch-scaled-examples">40 billion examples seen at batch size 32 k</span>, then, for each higher resolution, <span data-claim="siglip-arch-resft">5 billion more examples at the target resolution, with a 100x smaller learning rate and no weight decay</span> (SO400M ends at <span data-claim="siglip-arch-so-patches">729</span> patches).</p>
+      <p>SigLiT on <span data-claim="siglip-arch-siglit-chips">four TPU-v4 chips</span> uses <span data-claim="siglip-arch-lion">LION</span> instead: peak learning rate <span data-claim="siglip-arch-lion-lr">1 x 10^-4</span> after <span data-claim="siglip-arch-lion-warm">6.5k steps</span> of warm-up, weight decay <span data-claim="siglip-arch-lion-wd">1 x 10^-7</span>, cosine to zero, <span data-claim="siglip-arch-siglit-steps">65,000</span> steps in all.</p>
+    </div>
+  </div>
+  <figcaption>Computed: shapes come from the paper's resolution, patch size, token cap and model-card widths; ViT-B's depth, width and heads come from the ViT paper; where SigLIP gives no number (text depth, SigLiT's input size and output width) the drawing writes a symbol. Block sizes assume one device per TPU chip (our reading). Before you open stage 7 on the SigLiT recipe, guess: which boxes will the gradient reach?</figcaption>
+</figure>
+
+<h3>Backward: no cell waits for its row</h3>
+<p>Stage 7 claimed that a cell's gradient depends only on that cell. Here is the check. Both tables start mostly solved; then one wrong cell, the dog photo against the caption "cat", rises. Before you press, guess: in each table, which cells' gradients will change?</p>
+
+<figure class="viz" id="viz-siglipgrad" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="siglipgrad-canvas" role="img" aria-label="Two five by five tables of per-logit gradients, softmax on one side and sigmoid on the other. Green cells are pulled up, brown cells pushed down; the cell for the dog photo and the caption cat is outlined in red, and cells whose gradient changed get a white outline."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglipgrad-before">Every wrong cell low</button>
+    <button type="button" id="btn-siglipgrad-raise">Dog photo drifts toward "cat"</button>
+    <button type="button" id="btn-siglipgrad-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siglipgrad-readout" aria-live="polite"></p>
+  <figcaption>Each cell shows the exact gradient of the loss on that logit, times <span class="tex">N</span>; green means gradient descent will raise the logit, brown lower it, and an outline marks a cell whose gradient changed. Both use scale <span class="tex">t = 10</span>, the sigmoid also SigLIP's starting bias <span class="tex">b = -10</span>. What is toy: five pairs and a hand-picked table of cosines (the same in both), and only one cell moving.</figcaption>
+</figure>
+
+<p>Press <b>Dog photo drifts toward "cat"</b>. On the softmax side the red cell turns brown, as expected, but it drags others with it: the dog photo's own cell and the caption "cat"'s own cell suddenly pull hard, because they share a row or column with the intruder and their softmax probability has dropped. Every cell of that row and column changes a little. On the sigmoid side only the red cell changes. The true pairs were already being pulled (a cosine of <span data-toy>0.80</span> is still below the "yes" line that <span class="tex">b = -10</span> draws), and they are pulled exactly as hard as before.</p>
+
+<div class="eq" id="eq-siglipgrad" data-build data-viz="viz-siglipgrad"><div class="tex tex-display">
+\frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{sig}}}}{\partial \ell_{ij}} = \frac{1}{|B|}\big(\htmlData{step=1, link=cell}{\sigma(\ell_{ij})} \htmlData{step=2, link=own}{\htmlClass{t-green}{{} - \delta_{ij}}}\big) \qquad \htmlData{step=3, link=rowcol}{\frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{soft}}}}{\partial \ell_{ij}} = \frac{1}{|B|}\Big(\htmlClass{t-brown}{\tfrac{p_{ij} + q_{ij}}{2}} \htmlClass{t-green}{{} - \delta_{ij}}\Big)} \qquad \htmlData{step=4}{\frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{sig}}}}{\partial \htmlClass{t-blue}{x_i}} = t \sum_{j} \frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{sig}}}}{\partial \ell_{ij}}\, \htmlClass{t-yellow}{y_j}}
+</div></div>
+<p class="eqno">Derived here from the Algorithm 1 form of the loss (SigLIP v4 prints no gradient); <span class="tex">\ell_{ij} = t\,x_i \cdot y_j + b</span>. The softmax version is the one derived in chapter 1, with <span class="tex">t = 1/\tau</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\sigma(\ell_{ij})</span>: the probability that cell <span class="tex">(i, j)</span> says "yes". It is computed from that one logit, so nothing else in the batch can change it. Write <span class="tex">u = z_{ij}\ell_{ij}</span>; the cell's loss is <span class="tex">-\log\sigma(u)</span>, whose derivative is <span class="tex">-(1 - \sigma(u))\,z_{ij}</span>, and for <span class="tex">z = +1</span> and <span class="tex">z = -1</span> both cases come out as the formula shown.</li>
+  <li><span class="tex">\htmlClass{t-green}{-\delta_{ij}}</span>: minus one on the diagonal, the pull toward "yes" for a true pair. It fades only as that pair's own <span class="tex">\sigma</span> approaches 1.</li>
+  <li><span class="tex">\htmlClass{t-brown}{p_{ij}}, \htmlClass{t-brown}{q_{ij}}</span>: the row and column softmax of CLIP's loss. Each has a denominator summed over the whole row or column, which is why raising one wrong cell changed the gradients of its neighbours.</li>
+  <li>The last formula is the step into the image lane. Photo <span class="tex">i</span> still collects from every caption in its row: its gradient is a sum over <span class="tex">j</span>. What changed is that each term of that sum is known the moment its own cell is computed, so the sum can be built one block at a time as captions pass between devices (our reading: the paper describes the chunked forward pass, not its backward). The bias gets the plain sum of all cell gradients, and <span class="tex">t</span> gets <span class="tex">\sum_{ij} (\partial\mathcal{L}/\partial\ell_{ij})\, x_i \cdot y_j</span>.</li>
+</ul>
+
+<p>After this chapter we have what the rest of the page builds on: an image encoder and a text encoder whose vectors line up, trained with a loss that works at any batch size. SigLIP-trained image encoders turn up again in later chapters, feeding language models. But so far the image encoder has been a black box that turns a photo into one vector. Next: what it actually looks at, the grid of patches a vision transformer cuts every image into.</p>
+</section>

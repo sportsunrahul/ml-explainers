@@ -1,0 +1,796 @@
+[
+ {
+  "id": "sam-published",
+  "claim": "SAM v1 submission date",
+  "value": "2023-04-05",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "abs.html"
+ },
+ {
+  "id": "sam-authors-count",
+  "claim": "Number of authors",
+  "value": "12",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "title block"
+ },
+ {
+  "id": "sam-ambiguity-masks",
+  "claim": "Number of masks output for a single (ambiguous) prompt",
+  "value": "3",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 3 'Resolving ambiguity'; App. A"
+ },
+ {
+  "id": "sam-nest-depth",
+  "claim": "Nesting levels named for ambiguity",
+  "value": "whole, part, and subpart",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 3 'Resolving ambiguity'"
+ },
+ {
+  "id": "sam-input-res",
+  "claim": "Image encoder input resolution",
+  "value": "1024x1024",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-encoder",
+  "claim": "Image encoder backbone",
+  "value": "ViT-H/16",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-encoder-init",
+  "claim": "Image encoder initialization",
+  "value": "MAE",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'; 'Training recipe'"
+ },
+ {
+  "id": "sam-window",
+  "claim": "Windowed attention size",
+  "value": "14x14",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-global-blocks",
+  "claim": "Number of equally spaced global attention blocks",
+  "value": "four",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-downscale",
+  "claim": "Encoder output downscale factor",
+  "value": "16x",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-embed-grid",
+  "claim": "Image embedding spatial size",
+  "value": "64x64",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-embed-ch",
+  "claim": "Image embedding channels after neck",
+  "value": "256",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-neck",
+  "claim": "Neck convolutions",
+  "value": "1x1 convolution",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-neck2",
+  "claim": "Neck second convolution",
+  "value": "3x3 convolution",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Image encoder'"
+ },
+ {
+  "id": "sam-prompt-dim",
+  "claim": "Sparse prompt embedding dimension",
+  "value": "256",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Prompt encoder'"
+ },
+ {
+  "id": "sam-point-learned",
+  "claim": "Learned embeddings for point polarity",
+  "value": "two learned embeddings",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Prompt encoder'"
+ },
+ {
+  "id": "sam-mask-prompt-res",
+  "claim": "Mask prompt input resolution vs image",
+  "value": "4x lower",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Prompt encoder'"
+ },
+ {
+  "id": "sam-mask-prompt-ch",
+  "claim": "Mask prompt conv output channels",
+  "value": "4 and 16",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Prompt encoder'"
+ },
+ {
+  "id": "sam-mask-prompt-res-px",
+  "claim": "Mask prompt input size (our reading: 1024/4)",
+  "value": "256x256",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Prompt encoder', arithmetic"
+ },
+ {
+  "id": "sam-dec-layers",
+  "claim": "Mask decoder transformer layers",
+  "value": "2",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 3 'Mask decoder'; App. A"
+ },
+ {
+  "id": "sam-dec-steps",
+  "claim": "Steps per decoder layer",
+  "value": "4 steps",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-dec-dim",
+  "claim": "Decoder embedding dimension",
+  "value": "256",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-dec-mlp",
+  "claim": "Decoder MLP internal dimension",
+  "value": "2048",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-dec-xattn",
+  "claim": "Cross-attention q/k/v channel dimension",
+  "value": "128",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-dec-heads",
+  "claim": "Attention heads in all decoder attention layers",
+  "value": "8 heads",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-dec-dropout",
+  "claim": "Decoder dropout at training",
+  "value": "0.1",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-dec-tokens-rare",
+  "claim": "Token count rarely exceeded",
+  "value": "20",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-image-set",
+  "claim": "Image embedding as a set during cross-attention",
+  "value": "64^2",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder' (written 64$^2$)"
+ },
+ {
+  "id": "sam-upscale",
+  "claim": "Upscale factor of image embedding after decoder",
+  "value": "4x",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-upconv-ch",
+  "claim": "Transposed conv output channels",
+  "value": "64 and 32",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-upscaled-shape",
+  "claim": "Upscaled embedding (our arithmetic: 64x64 x4, 32 ch)",
+  "value": "256x256x32",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A, arithmetic"
+ },
+ {
+  "id": "sam-hyper-mlp",
+  "claim": "Output-token MLP depth",
+  "value": "3-layer MLP",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Lightweight mask decoder'"
+ },
+ {
+  "id": "sam-output-tokens",
+  "claim": "Output tokens (our count: 3 mask + 1 single-mask + 1 IoU)",
+  "value": "5",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Making the model ambiguity-aware', arithmetic"
+ },
+ {
+  "id": "sam-fourth-token",
+  "claim": "Extra mask token for multi-prompt input",
+  "value": "fourth output token",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Making the model ambiguity-aware'"
+ },
+ {
+  "id": "sam-focal-dice",
+  "claim": "Focal to dice loss ratio",
+  "value": "20:1",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Losses'"
+ },
+ {
+  "id": "sam-iou-loss",
+  "claim": "IoU head loss",
+  "value": "mean-square-error",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Losses'"
+ },
+ {
+  "id": "sam-iou-weight",
+  "claim": "IoU loss scaling factor",
+  "value": "1.0",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Losses'"
+ },
+ {
+  "id": "sam-rounds",
+  "claim": "Simulated interactive rounds per mask",
+  "value": "11",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 3 'Losses and training'; App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-sampled-points",
+  "claim": "Iteratively sampled points",
+  "value": "8",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-max-tested",
+  "claim": "Maximum sampled points tested",
+  "value": "16",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-nopoint-rounds",
+  "claim": "Rounds with no new point",
+  "value": "two",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-default-points",
+  "claim": "Default points per mask in training (App. B wording)",
+  "value": "9",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. B 'Automatic mask generation model'"
+ },
+ {
+  "id": "sam-box-noise",
+  "claim": "Box noise std as fraction of side length",
+  "value": "10%",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-box-noise-max",
+  "claim": "Box noise maximum",
+  "value": "20 pixels",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-decoder-compute",
+  "claim": "Decoder compute vs image encoder",
+  "value": "less than 1%",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training algorithm'"
+ },
+ {
+  "id": "sam-optimizer",
+  "claim": "Optimizer",
+  "value": "AdamW",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-beta1",
+  "claim": "AdamW beta1",
+  "value": "0.9",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-beta2",
+  "claim": "AdamW beta2",
+  "value": "0.999",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-warmup",
+  "claim": "Linear warmup iterations",
+  "value": "250",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-lr",
+  "claim": "Initial learning rate after warmup (ViT-H)",
+  "value": "8e-4",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' (\\expnum{8}{-4})"
+ },
+ {
+  "id": "sam-iters",
+  "claim": "Training iterations (ViT-H)",
+  "value": "90k",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-epochs",
+  "claim": "Approximate SA-1B epochs",
+  "value": "2",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-lr-drop1",
+  "claim": "First LR decay step",
+  "value": "60k",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-lr-drop2",
+  "claim": "Second LR decay step",
+  "value": "86666",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-lr-factor",
+  "claim": "LR decay factor",
+  "value": "10",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-batch",
+  "claim": "Batch size (images)",
+  "value": "256",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-gpus",
+  "claim": "Training GPUs (ViT-H)",
+  "value": "256 GPUs",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-masks-per-gpu",
+  "claim": "Max sampled masks per GPU",
+  "value": "64",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-wd",
+  "claim": "Weight decay",
+  "value": "0.1",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-dp",
+  "claim": "Drop path rate (ViT-H)",
+  "value": "0.4",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-ld",
+  "claim": "Layer-wise LR decay (ViT-H)",
+  "value": "0.8",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-mask-filter",
+  "claim": "Masks discarded if covering more than this fraction of image",
+  "value": "90%",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe'"
+ },
+ {
+  "id": "sam-bl-iters",
+  "claim": "ViT-B/L training iterations",
+  "value": "180k",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-bl-batch",
+  "claim": "ViT-B/L batch size",
+  "value": "128",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-bl-gpus",
+  "claim": "ViT-B/L GPUs",
+  "value": "128 GPUs",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-lr-b",
+  "claim": "ViT-B learning rate",
+  "value": "8e-4",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-lr-l",
+  "claim": "ViT-L learning rate",
+  "value": "4e-4",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-ld-b",
+  "claim": "ViT-B layer-wise decay",
+  "value": "0.6",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-dp-b",
+  "claim": "ViT-B drop path",
+  "value": "0.6",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-lsj",
+  "claim": "Large-scale jitter scale range (stage 1/2-only runs)",
+  "value": "[0.1, 2.0]",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. A 'Training recipe' last para"
+ },
+ {
+  "id": "sam-compute-gpus",
+  "claim": "Training hardware (model card)",
+  "value": "256 A100 GPUs",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Table 9 model card, 'Cost and impact of compute'"
+ },
+ {
+  "id": "sam-compute-hours",
+  "claim": "Training duration (model card)",
+  "value": "68 hours",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Table 9 model card, 'Cost and impact of compute'"
+ },
+ {
+  "id": "sam-energy",
+  "claim": "Training energy (model card)",
+  "value": "6963 kWh",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Table 9 model card"
+ },
+ {
+  "id": "sam-co2",
+  "claim": "Training CO2 (model card)",
+  "value": "2.8 metric tons",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Table 9 model card"
+ },
+ {
+  "id": "sam-decoder-runtime",
+  "claim": "Prompt encoder + mask decoder runtime in browser on CPU",
+  "value": "50ms",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 1 'Model'; Sec. 3 'Efficiency' (written ~50ms)"
+ },
+ {
+  "id": "sam-params-b",
+  "claim": "ViT-B parameter count (Fig. 13 axis; what is counted not stated)",
+  "value": "91M",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, x-axis"
+ },
+ {
+  "id": "sam-params-l",
+  "claim": "ViT-L parameter count (Fig. 13 axis)",
+  "value": "308M",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, x-axis"
+ },
+ {
+  "id": "sam-params-h",
+  "claim": "ViT-H parameter count (Fig. 13 axis)",
+  "value": "636M",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, x-axis"
+ },
+ {
+  "id": "sam-oversample",
+  "claim": "Oversampling of manual + semi-automatic masks when training on all stages",
+  "value": "10x",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 7.6 para 2"
+ },
+ {
+  "id": "sam-auto-only-gap",
+  "claim": "mIoU gap of automatic-only vs all data",
+  "value": "0.5 mIoU",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 7.6 para 2 (written ~0.5)"
+ },
+ {
+  "id": "sam-data-subsample",
+  "claim": "Subsampled training set sizes in data-volume ablation",
+  "value": "1M and 0.1M",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 7.6 para 3"
+ },
+ {
+  "id": "sam-1m-masks",
+  "claim": "Masks in the 1M-image regime",
+  "value": "100M masks",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 7.6 para 3 (approximately)"
+ },
+ {
+  "id": "sam-1m-frac",
+  "claim": "1M images as fraction of SA-1B",
+  "value": "10%",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 7.6 para 3; Fig. 13 caption"
+ },
+ {
+  "id": "sam-retrain-stage1",
+  "claim": "Model retrains in assisted-manual stage",
+  "value": "6 times",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Sec. 4 'Assisted-manual stage'"
+ },
+ {
+  "id": "sam-amg-iters",
+  "claim": "Iterations of the data-generation SAM",
+  "value": "177656",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. B 'Automatic mask generation model'"
+ },
+ {
+  "id": "sam-amg-points",
+  "claim": "Points per mask for data-generation SAM",
+  "value": "4 points",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. B 'Automatic mask generation model'"
+ },
+ {
+  "id": "sam-amg-dec-layers",
+  "claim": "Decoder layers in data-generation SAM",
+  "value": "3 layers",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. B 'Automatic mask generation model'"
+ },
+ {
+  "id": "sam-clip-model",
+  "claim": "CLIP model for text-to-mask",
+  "value": "ViT-L/14@336px",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "App. D.5 'Model and training'"
+ },
+ {
+  "id": "sam-abl-stage-1pt-auto",
+  "claim": "Fig. 13 left, 1 point mIoU, +automatic (read from plot)",
+  "value": "~60",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 left, '+ automatic' bar, read from plot",
+  "uncertain": true
+ },
+ {
+  "id": "sam-abl-stage-1pt-manual",
+  "claim": "Fig. 13 left, 1 point mIoU, manual only (read from plot)",
+  "value": "~49",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 left, 'manual' bar, read from plot",
+  "uncertain": true
+ },
+ {
+  "id": "sam-abl-enc-1pt-b",
+  "claim": "Fig. 13 right, 1 point mIoU, ViT-B (read from plot)",
+  "value": "~57.5",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, 1 point line, read from plot",
+  "uncertain": true
+ },
+ {
+  "id": "sam-abl-enc-1pt-h",
+  "claim": "Fig. 13 right, 1 point mIoU, ViT-H (read from plot)",
+  "value": "~59",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, 1 point line, read from plot",
+  "uncertain": true
+ },
+ {
+  "id": "sam-abl-enc-oracle-b",
+  "claim": "Fig. 13 right, oracle mIoU, ViT-B (read from plot)",
+  "value": "~69",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, oracle line, read from plot",
+  "uncertain": true
+ },
+ {
+  "id": "sam-abl-enc-oracle-h",
+  "claim": "Fig. 13 right, oracle mIoU, ViT-H (read from plot)",
+  "value": "~72",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "Fig. 13 right, oracle line, read from plot",
+  "uncertain": true
+ },
+ {
+  "id": "sam-vith-width",
+  "claim": "ViT-H width (standard ViT-H, not restated in SAM)",
+  "value": "1280",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "not in SAM paper; ViT paper config",
+  "uncertain": true
+ },
+ {
+  "id": "sam-vith-depth",
+  "claim": "ViT-H depth (standard ViT-H, not restated in SAM)",
+  "value": "32",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "not in SAM paper; ViT paper config",
+  "uncertain": true
+ },
+ {
+  "id": "sam-vith-heads",
+  "claim": "ViT-H heads (standard ViT-H, not restated in SAM)",
+  "value": "16",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "not in SAM paper; ViT paper config",
+  "uncertain": true
+ },
+ {
+  "id": "sam-checkpoints",
+  "claim": "Released checkpoints (README)",
+  "value": "vit_h",
+  "paper": "SAM",
+  "arxiv": "2304.02643v1",
+  "loc": "README 'Model Checkpoints' (default = vit_h; also vit_l, vit_b)",
+  "code_only": true
+ }
+]

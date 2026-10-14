@@ -1,0 +1,71 @@
+# ViLD-family + YOLO-World group. Format: id | verdict | severity | what is wrong | what source says | loc
+## Claims (32)
+regionclip-concepts-cc3m | confirmed | | | "filtered the concepts whose frequency is lower than 100, resulting in 4764/6790 concepts" (COCO/CC3M) | regionclip src/experiments.tex:8 (Sec. 4.1 Datasets)
+vild-t3-vildtext-apr | confirmed | | | R50 ViLD-text APr 10.1, mask AP | vild src/arxiv_after_camera_ready.tex:445 (Table 3, PDF p6)
+vild-t5-vildtext-voc-ap75 | confirmed | | | ViLD-text VOC AP75 31.6, box AP | arxiv_after_camera_ready.tex:561 (Table 5)
+vild-lsj | confirmed | | | "large-scale jittering augmentation of range [0.1, 2.0]" (stronger-teacher runs use [0.5, 2.0], App. D) | arxiv_after_camera_ready.tex:345
+vild-t5-finetune-o365-ap | confirmed | | | Finetuning row, Objects365 AP 15.2, box AP | arxiv_after_camera_ready.tex:563 (Table 5)
+vild-t8-vild-r152-mask-apr | confirmed | | | R152 ViLD (w=1.0) Mask APr 18.7 (box APr 19.1) | arxiv_after_camera_ready.tex:871 (Table 8, App. C)
+detic-v3-date | confirmed | | | [v3] Fri, 29 Jul 2022 | sources/detic/abs.html submission history
+vild-t3-vild-r50-apf | confirmed | | | R50 ViLD (w=0.5) APf 28.3 mask | arxiv_after_camera_ready.tex:447 (Table 3)
+vild-t6-align-apc | confirmed | | | ALIGN on cropped regions APc 32.6, "We report box APs here" | arxiv_after_camera_ready.tex:755 (Table 6, App. B, PDF p17)
+vild-t7-l2-0.5-apr | confirmed | | | L2 w=0.5 APr 13.7; caption: R50, 84,375 iters, mask AP | arxiv_after_camera_ready.tex:823 (Table 7, App. C)
+vild-t3-runs | confirmed | | | "We average over 3 runs for R50 experiments." | arxiv_after_camera_ready.tex:429 (Table 3 caption)
+vild-t7-nodistill-apr | confirmed | | | No distill w=0.0 APr 10.4 | arxiv_after_camera_ready.tex:821 (Table 7)
+vild-t3-rfs-apr | confirmed | | | R50 Supervised-RFS (base+novel) APr 12.3 mask | arxiv_after_camera_ready.tex:442 (Table 3)
+vild-published | confirmed | | | [v1] Wed, 28 Apr 2021 | sources/vild/abs.html
+detic-inl-classes | confirmed | | | "997 classes that overlap with the LVIS vocabulary ... IN-L"; dataset table IN-L 1.2M images, 997 classes | detic src/experiments.tex:22,40 (Sec. 5 intro, PDF p8)
+vild-t6-align-ap | confirmed | | | ALIGN on cropped regions AP 31.4 (box) | arxiv_after_camera_ready.tex:755 (Table 6)
+yoloworld-t6-v8-m-ap | confirmed | | | YOLOv8-M from scratch AP 50.5, COCO val2017 | yoloworld src/main.tex:498 (Table 6)
+yoloworld-ft-lr | confirmed | | | "initial learning rate is set to 0.0002" (Sec. 4.4); App. A.2 repeats 0.0002 | main.tex:472, 699
+yoloworld-t2-glipt-og-params | confirmed | | | GLIP-T Swin-T 232M O365,GoldG | main.tex:353 (Table 2)
+yoloworld-t7-baron-ap | confirmed | | | BARON AP 29.5 | main.tex:543 (Table 7). Note: see note-yoloworld-t7-mixed below
+yoloworld-data-gqa-images | confirmed | | | GQA Grounding 621k images, 3,681k anno. | main.tex:317 (Table 1)
+yoloworld-t7-v8-l-ap | confirmed | | | gray YOLOv8-L 26.9 (trained on full LVIS, class-balanced sampling) | main.tex:548 (Table 7)
+yoloworld-l-params-orig | confirmed | | | "48M (110M)"; bracket = original version. LaTeX comments ("w/ clip") back the text-encoder reading | main.tex:373 (Table 2)
+yoloworld-gqa-gain | confirmed | | | "adding GQA ... 8.4 AP gain on LVIS" (23.5 -> 31.9 in Table 3) | main.tex:391 (Sec. 4.3)
+yoloworld-t2-gdinot-og-ap | confirmed | | | Grounding DINO-T O365,GoldG AP 25.6 | main.tex:359 (Table 2)
+yoloworld-detclip-speedup | confirmed | | | "20x increase in inference speed" (52.0/2.3 = 22.6) | main.tex:340 (Sec. 4.2)
+yoloworld-t6-ftwo-m-fps | confirmed | | | Fine-tuned w/o RepVL-PAN, M: FPS 231, V100 w/ TensorRT | main.tex:516 (Table 6)
+yoloworld-t4-none-apr | confirmed | | | row (no GQA, no T->I, no I->T) APr 14.5 | main.tex:430 (Table 4)
+yoloworld-ipool-grid | confirmed | | | "max pooling on multi-scale features to obtain 3x3 regions, ... 27 patch tokens" | main.tex:238 (Sec. 3.3)
+yoloworld-t2-gdinot-cap-params | confirmed | | | Grounding DINO-T 172M O365,GoldG,Cap4M | main.tex:360 (Table 2)
+yoloworld-p3-size | confirmed | | our_reading flag correct: no 640, 80x80, stride or 8400 anywhere in main.tex; only P3-P5 / C3-C5 named | main.tex (grep 640/8400/stride: no hits)
+yoloworld-t3-o365-gqa-apr | confirmed | | | O365,GQA APr 22.5 | main.tex:399 (Table 3)
+(flags) | confirmed | | No other claim in this group has a "not in paper" or figure read-off loc without a flag | -
+## Outline
+outline-L3 | wrong | minor wording | Span "2021-2025" not updated after the L237 correction; OVR-CNN (in Act II) is 2020. L49 heading "(2021)" is also stale | OVR-CNN [v1] Fri, 20 Nov 2020 | sources/ovrcnn/abs.html
+outline-L13 | confirmed | | | ViLD-text classifier = text embeddings; ViLD-image distills CLIP crop embeddings into region embeddings | vild tex:258-330 (Sec. 3.3)
+outline-L17 | confirmed | | (caveat already logged at L244-245) | Sec. 3.3 "offline vocabulary embeddings can be re-parameterized into weights of convolutional or linear layers" | yoloworld main.tex:211
+outline-L40 | wrong | unsupported | ViLD Sec. 4.1 gives no separate frequent/common counts (superseded by L229, but see L229 for a source that does) | "1,203 categories ... 866 frequent and common categories as the base ... 337 rare" | vild tex:356
+outline-L52-56 | confirmed | | | Table 1 bbox AR on rare: base 39.3/48.3/55.6 vs base+novel 41.1/50.9/57.0 at 100/300/1000; "~2 AR" | vild tex:368-386 (Table 1, Sec. 4.2, PDF p5)
+outline-L54-55 | unverifiable | minor wording | "RoIAlign 7x7" is not in any local source (standard Mask R-CNN value); acceptable only because the figure is labelled Toy | - | -
+outline-L61-62 | confirmed | | | "These proposals can contain objects in both C_B and C_N ... In contrast, ViLD-text can only learn from C_B" | vild tex:301-302
+outline-L67 | confirmed | | | Eq. 1 crop ensemble, Eq. 2 ViLD-text with e_bg, Eq. 3 L1 distill, Eq. 4 total (Eq. 5 is the ensemble) | vild tex:234-337
+outline-L68 | confirmed | | All six rows are Table 3, LVIS v1, mask AP (like for like). Say on the chart: CLIP-on-crops is R-CNN style (ResNet-50+ViT-B/32, objectness ensembled, 630x runtime) and Supervised-RFS trained on base+novel | CLIP crops 18.9, RFS 12.3, GloVe 3.0, ViLD-text 10.1, ViLD-image 11.2, ViLD 16.1 | vild tex:425-460 (Table 3)
+outline-L69-72 | confirmed | | Mask R-CNN ResNet FPN, projection layer, e_bg, precomputed CLIP crop embeddings. "Encoders frozen" is superseded by L232 (encoders are not in the graph) | Fig. 2 caption; Sec. 3.2-3.3 | vild tex:256, 238, 301
+outline-L73 | confirmed | | | OVR-CNN pretrains a V2L layer with captions (grounding + MLM); frozen BERT-Base embeddings | ovrcnn src/3_method.tex:19-90; 4_experiments.tex:20-22
+outline-L74 | confirmed | | | concepts parsed from captions, filled into prompts, CLIP teacher aligns region-text pairs | regionclip src/method.tex:16
+outline-L75 | wrong | minor wording | "ImageNet-21k classes": the like-for-like Detic result (17.8) uses IN-L, the 997 IN-21K classes that overlap LVIS; full 21K is only Sec. 5.5 | max-size loss on the largest proposal (Eq. L_max-size); IN-L 997 classes | detic src/method.tex:94; experiments.tex:22, 235-248 (Table 2)
+outline-L143-150 | confirmed | | | P3-P5 PAN top-down/bottom-up, decoupled head, task-aligned assignment, max-sigmoid T-CSPLayer, I-Pooling Attention, contrastive head, prompt-then-detect | yoloworld main.tex:177-240
+outline-L151-152 | confirmed | | Table 2: LVIS minival zero-shot Fixed AP, FPS on 1x V100 w/o TensorRT. Risk: Table 2 prints GLIP-T at 0.12 FPS (V100), while GLIP's own Table 7 prints GLIP-T 4.84/2.52 FPS (P100, batch 1) used in ch 8; do not show both without the setting | YOLO-World Table 2; GLIP Table 7 | main.tex:347-379; /tmp/ovd-fc/glip.txt:1019-1040 (GLIP PDF p15)
+outline-L153-154 | confirmed | | Eq. 1-3 exist (contrastive head, max-sigmoid, I-Pooling MHA). Shapes superseded by L246 | - | main.tex:190, 228, 241
+outline-L155 | confirmed | | | YOLOE exists with text/visual/prompt-free | yoloe src/camera_ready.tex:37
+outline-L200-202 | wrong | minor wording | ViLD App. B is about CLIP-on-crops (an R-CNN-style baseline) scores ignoring box quality within one prompt; it does not show that scores fail to transfer across prompts or that thresholds do not transfer. Cite it for "class score ignores localization", not for cross-prompt calibration | "The prediction scores of CLIP do not reflect the quality of bounding box localization" | vild tex:785-797 (App. B, Fig. 12, PDF p18)
+outline-L229-230 | wrong | unsupported | "No separate frequent/common counts" is false for the project's sources: T-Rex2 gives the split. Also relevant to L165: LVIS minival has only 70 rare categories vs 337 on val | "frequent, common, and rare, with a ratio of 405:461:337 for the val split, and 389:345:70 for the minival split" (405+461=866) | trex2 src/sec/4_experiments.tex:58 (Sec. 4.3, PDF p7)
+outline-L231-234 | confirmed | | | "train the model from scratch for 180,000 iterations"; text embeddings generated offline; M image embeddings precomputed; App. D 1000 proposals only for R-CNN-style runs; N, M, embedding width unstated; ALIGN 1,376 dims = "2.7x CLIP" supports derived 512; no hardware stated | vild tex:345-346, 238, 301, 935-940, 952
+outline-L235-236 | confirmed | | RegionCLIP box reading is supported: its LVIS table's ViLD* rows (16.7/26.5/34.2/27.8; 19.8/27.1/34.5/28.7) are ViLD Table 8 BOX AP. OVR-CNN 22.8 is target mAP at IoU 0.5 (AP50) in the generalized 48+17 setting; target-only is 27.5. Add "AP50" to the label | ViLD Table 3 "All results are mask AP"; Detic Table 2 "mask mAP" 17.8 vs ViLD 16.1 | regionclip experiments.tex:54-64; vild tex:429, 860-871; detic experiments.tex:231-245; ovrcnn tables/main_results.tex:30
+outline-L237 | confirmed | | Date correct. But OVR-CNN uses frozen BERT-Base word embeddings and predates CLIP, so Act II "borrow CLIP's eyes" does not describe it; also L3 and L49 still say 2021 | [v1] 20 Nov 2020 | ovrcnn abs.html; 4_experiments.tex:20
+outline-L238 | confirmed | | Different metric from ViLD Table 1: Detic Table 8(a) reports AR at IoU 0.5 (ARr50@100/300/1k: 63.3/76.3/79.7 vs 62.2/76.2/78.5) | App. A "Region proposal quality" | /tmp/ovd-fc/detic.txt:942-972 (Detic PDF p19)
+outline-L239-240 | wrong | minor wording | Item numbers do not match the ch 13 list: ViLD App. B is cited in item 5 (not 4), and texture targets is item 3 (not 2). Content is correct | App. A Fig. 9: most common failure is missed detection, less common is misclassification by visual similarity | vild tex:700-712
+outline-L241 | confirmed | | | OVR-CNN "fixed, all-zero background embedding performs better than a trainable one"; RegionCLIP "fixed all-zero embedding"; ViLD "learn its own embedding e_bg" | ovrcnn 3_method.tex:106; regionclip method.tex:101; vild tex:261
+outline-L244-245 | confirmed | | | App. A.1 Eq. 4 (1x1 conv re-param); App. A.2 class embeddings stored in classification layers; App. Eq. 5-6: X~ is B x D x 27 from multi-scale features, so I-Pooling still runs per image | yoloworld main.tex:667-700
+outline-L246-247 | confirmed | | | no 640/8400 in paper; "at most M nouns, and M is set to 80" | main.tex:198
+outline-L248-249 | wrong | minor wording | "Only names Darknet, C2f, task-aligned assignment and DFL" undercounts: the paper also names a PAN with top-down and bottom-up paths over P3-P5, a decoupled head with two 3x3 convs, IoU loss and 4-image mosaic, so these can be taught as sourced | - | main.tex:177, 188, 208, 247-249, 300
+outline-L250-251 | confirmed | | Printed caption calls the two FPS values "re-parameterized version (w/o bracket) and original version (w/ bracket)"; "with/without text encoder" is backed only by LaTeX comments (w/o clip 13.5 ms; w/ clip 50.3 ms). Label as the paper does | Table 2 caption; Table 6 is "w/ TensorRT" | main.tex:366-378, 520
+outline-L252 | confirmed | | | "CLIP-base (ViT-base)"; "The text encoder is frozen during pre-training"; fine-tuning stage trains it at 0.01x lr | main.tex:302, 444, 473
+outline-L253 | confirmed | | Table 3 O365,GoldG 32.5 vs Table 2 YOLO-World-L O365,GoldG 35.0; Table 3 caption does not say Fixed AP | - | main.tex:396-404, 373
+outline-L254 | confirmed | | App. Eq. 4 exists; App. Eq. 6 printed with an unbalanced parenthesis "Softmax(W . X~), dim=-1)". Eq. 6 also multiplies by W, not X~, so it does not match Eq. 3 (MHA over X~) | - | main.tex:676, 693; yoloworld PDF eq. (6)
+outline-L255-256 | confirmed | | YOLOE Table 5 "- Cross-modal. fusion": 31.9 -> 30.0 AP (-1.9), FPS 80.0 -> 102.5 on T4 TensorRT (1.28x; 1.23x on iPhone 12). Metric is standard AP (not Fixed AP), LVIS minival, YOLO-Worldv2-L baseline cut to 30 epochs; not comparable with YOLO-World Table 2. Visual and prompt-free modes confirmed | "results in 1.9% AP degradation but with 1.28x and 1.23x inference speedups" | yoloe camera_ready.tex:303-332 (Table 5)
+## Extra findings (not in sample)
+note-yoloworld-t7-mixed | wrong | wrong metric or setting | YOLO-World Table 7 caption says "bbox AP", but its Detic row (26.8 / APr 17.8) is Detic's MASK mAP (Detic Table 2), while its ViLD row (27.8 / 16.7) is ViLD-ensemble R50 BOX AP (ViLD Table 8). Do not chart Table 7 as uniform box AP | Detic Table 2 "mAP^mask 26.8, mAP^mask_novel 17.8"; ViLD Table 8 box ViLD-ensemble 16.7/26.5/34.2/27.8 | yoloworld main.tex:538-541; detic experiments.tex:238; vild tex:865

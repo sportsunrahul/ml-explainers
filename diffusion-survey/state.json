@@ -1,0 +1,111 @@
+{
+  "slug": "diffusion-survey",
+  "stage": "done (page only)",
+  "approvals": {
+    "checkpoint0": true,
+    "checkpoint2": "approved 2026-09-29: outline (12 ch) + ch1 style; build all, page only"
+  },
+  "compute": {
+    "target": "pod",
+    "gpu": "RTX 4090 24GB, 0% util, ~24GB free",
+    "ram_free_gb": 33,
+    "disk_free": "438G",
+    "hf_reachable": true,
+    "venv_present": true
+  },
+  "tts_backend": "qwen3-tts-1.7b (proposed)",
+  "papers_candidate": [
+    "1503.03585v8",
+    "1907.05600v3",
+    "2006.11239v2",
+    "2010.02502v4",
+    "2011.13456v2",
+    "2102.09672v1",
+    "2105.05233v4",
+    "2207.12598v1",
+    "2112.10752v2",
+    "2206.00364v2",
+    "2212.09748v2",
+    "2209.03003v1",
+    "2210.02747v2",
+    "2303.01469v2",
+    "2403.03206v1"
+  ],
+  "reader_background": "assume none: explain everything from scratch (probability, generative models, SDEs); focus = history + math + practice; keep all 15 papers",
+  "audio": "deferred: narration not started; eq link pulses fixed 2026-10-01 (design pass)",
+  "papers": [
+    {
+      "name": "Sohl-Dickstein",
+      "arxiv": "1503.03585v8"
+    },
+    {
+      "name": "NCSN",
+      "arxiv": "1907.05600v3"
+    },
+    {
+      "name": "DDPM",
+      "arxiv": "2006.11239v2"
+    },
+    {
+      "name": "DDIM",
+      "arxiv": "2010.02502v4"
+    },
+    {
+      "name": "Score SDE",
+      "arxiv": "2011.13456v2"
+    },
+    {
+      "name": "Improved DDPM",
+      "arxiv": "2102.09672v1"
+    },
+    {
+      "name": "ADM",
+      "arxiv": "2105.05233v4"
+    },
+    {
+      "name": "CFG",
+      "arxiv": "2207.12598v1"
+    },
+    {
+      "name": "LDM",
+      "arxiv": "2112.10752v2"
+    },
+    {
+      "name": "EDM",
+      "arxiv": "2206.00364v2"
+    },
+    {
+      "name": "DiT",
+      "arxiv": "2212.09748v2"
+    },
+    {
+      "name": "Rectified Flow",
+      "arxiv": "2209.03003v1"
+    },
+    {
+      "name": "Flow Matching",
+      "arxiv": "2210.02747v2"
+    },
+    {
+      "name": "CM",
+      "arxiv": "2303.01469v2"
+    },
+    {
+      "name": "SD3",
+      "arxiv": "2403.03206v1"
+    }
+  ],
+  "page": {
+    "file": "explainer.html",
+    "size": "1.1 MB",
+    "chapters": 12,
+    "claims": 413
+  },
+  "design": {
+    "date": "2026-10-01",
+    "plan": "notes/design.md",
+    "hero": "computed 1D toy (cosine schedule, exact denoiser, DDIM)",
+    "page_chrome": "assets/page-chrome.js inlined",
+    "check_page": "PASS"
+  }
+}

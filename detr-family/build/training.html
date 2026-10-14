@@ -1,0 +1,330 @@
+
+<style>
+.tr-stages { display:flex; flex-wrap:wrap; gap:.3rem; margin:0 0 .6rem; padding-right:6rem; font:.85rem system-ui, sans-serif; counter-reset:trs; }
+.tr-stages button { counter-increment:trs; font:inherit; color:var(--muted); background:var(--bg); border:1px solid var(--rule); border-radius:999px; padding:.22rem .6rem; cursor:pointer; }
+.tr-stages button::before { content:counter(trs) "\00a0"; font-weight:700; }
+.tr-stages button.done { color:var(--fg); border-color:var(--muted); }
+.tr-stages button[aria-current="step"] { color:var(--bg); background:var(--fg); border-color:var(--fg); }
+.tr-stages button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.tr-text { font:.95rem/1.55 system-ui, sans-serif; margin:.7rem 0 0; min-height:9em; max-width:var(--measure, 40rem); }
+.tr-text h3 { font-size:1rem; margin:0 0 .3rem; }
+.tr-text p { margin:0 0 .5rem; }
+@media (max-width: 520px) { .tr-stages { padding-right:0; margin-top:1.8rem; } }
+</style>
+<section id="ch-training" class="chapter">
+<h2>One training step, end to end</h2>
+<p class="note narrated-only">This chapter has no narration: step through it at your own pace.</p>
+<p>You have now seen every part of DETR. Here they are running together in one training step: a batch leaves the data loader, flows through the network, gets matched to its ground truth, and becomes one loss and one weight update. Click a stage or press <b>Next</b> to walk through it, or <b>Run a step</b> to watch the whole pass. <b>New batch</b> draws fresh augmented image sizes, and every tensor shape below updates with them.</p>
+
+<figure class="viz" id="viz-train-step">
+  <span class="badge computed">Computed</span>
+  <div class="tr-stages" id="tr-stages" aria-label="Training step stages">
+    <button type="button" id="btn-tr-s0">Batch</button>
+    <button type="button" id="btn-tr-s1">Backbone</button>
+    <button type="button" id="btn-tr-s2">Tokens</button>
+    <button type="button" id="btn-tr-s3">Encoder</button>
+    <button type="button" id="btn-tr-s4">Decoder</button>
+    <button type="button" id="btn-tr-s5">Heads</button>
+    <button type="button" id="btn-tr-s6">Match</button>
+    <button type="button" id="btn-tr-s7">Loss and update</button>
+  </div>
+  <canvas id="tr-canvas" role="img" aria-label="Drawing of the current stage of one DETR training step"></canvas>
+  <p class="readout" id="tr-shape" aria-live="polite"></p>
+  <div class="tr-text">
+    <div data-stage="0">
+      <h3>Batch: resize, pad, keep the targets as lists</h3>
+      <p>Each image is rescaled so its short side is somewhere from <span data-claim="pg-tr-short">480 to 800 pixels</span>, with the long side <span data-claim="pg-tr-long">at most 1333</span>; with <span data-claim="pg-tr-crop">probability 0.5</span> it is randomly cropped first (DETR's code also flips images horizontally at random). The images in a batch now differ in size, so each is <b>zero-padded</b> to the batch's largest height and largest width, which may come from different images (<span class="c-brown">brown hatching</span>). DETR's code pads on the right and bottom and keeps a pixel mask of which pixels are padding.</p>
+      <p>The targets are not padded to a common length: each image keeps its own list of <b class="c-yellow">classes and boxes</b>, with boxes written as (center x, center y, width, height) divided by the image size. The "no object" padding from <a href="#ch-matching">chapter 2</a> happens implicitly at the Match stage. The paper trains with <span data-claim="pg-tr-img-gpu">4 images per GPU</span> on <span data-claim="pg-tr-gpus">16 V100 GPUs</span>, a <span data-claim="pg-tr-batch">batch of 64</span>; the figure shows one GPU's share.</p>
+    </div>
+    <div data-stage="1" hidden>
+      <h3>Backbone: a coarse grid of features</h3>
+      <p>A ResNet turns each padded image into a feature map with <span data-claim="pg-tr-c">2048 channels</span> at <span data-claim="pg-tr-stride">stride 32</span>: one feature vector per grid cell. DETR's code downsamples the pixel mask to the same grid by nearest-neighbour sampling, marking each cell as real or padding (<span class="c-brown">brown cells</span>); a boundary cell that is entirely padding can still come out marked real. That coarse grid is also why DETR struggles with small objects, which <a href="#ch-detr-limits">the next chapter</a> takes up.</p>
+    </div>
+    <div data-stage="2" hidden>
+      <h3>Tokens: project, flatten, add positions</h3>
+      <p>A <code>1x1</code> convolution cuts the channels to <span data-claim="pg-tr-d">d = 256</span>, and the grid is flattened row by row into one sequence of H x W tokens (padding tokens stay in the sequence, marked by the mask). Attention on its own ignores order, so each token also gets a fixed sine positional encoding of its (x, y) cell. DETR adds that encoding to the queries and keys of every attention layer rather than once at the input, and the same encodings are shared between all layers.</p>
+    </div>
+    <div data-stage="3" hidden>
+      <h3>Encoder: every token looks at every token</h3>
+      <p><span data-claim="pg-tr-enc">6 encoder layers</span>, each one self-attention with <span data-claim="pg-tr-heads">8 heads</span> followed by an FFN, with <span data-claim="pg-tr-drop">dropout 0.1</span>. The FFN's <span data-claim="pg-tr-ffn">hidden size 2048</span> is DETR's code default; the paper does not give it. Tokens marked as padding are masked out as keys, so no token attends to them (also from the code; the paper does not spell it out).</p>
+      <p>Every token is scored against every other token, so the work grows with the square of the token count; the readout gives it for this batch. The output, called the <b>memory</b>, is one d-dimensional vector per cell that now carries context from the whole image.</p>
+    </div>
+    <div data-stage="4" hidden>
+      <h3>Decoder: the slots read the memory</h3>
+      <p>The decoder holds <span data-claim="pg-tr-n">100 queries</span>, the slots. Their content starts at zero, and the learned object queries are added as positional encodings at every layer. Each of the <span data-claim="pg-tr-dec">6 decoder layers</span> runs self-attention among the <b class="c-blue">slots</b> (so they can agree who takes which object), then cross-attention into the memory (padding masked again), then an FFN.</p>
+      <p>Every layer's output is kept, not only the last one's. The remaining stages use all six.</p>
+    </div>
+    <div data-stage="5" hidden>
+      <h3>Heads: a class and a box for every slot, at every layer</h3>
+      <p>A linear layer gives each slot <span data-claim="pg-tr-cls">91 + 1</span> class scores (COCO's category ids plus "no object"), turned into probabilities by a softmax. A <span data-claim="pg-tr-mlp">3-layer</span> MLP gives a box, squashed by a sigmoid into (center x, center y, width, height) relative to the image. The same two heads, with shared weights and a shared layer norm in front of them, run on the output of all six decoder layers.</p>
+    </div>
+    <div data-stage="6" hidden>
+      <h3>Match: choose each slot's target (no gradients)</h3>
+      <p>Now the matching from <a href="#ch-matching">chapter 2</a> runs: build the <a href="#eq-cost">matching cost</a> between this image's slots and its objects, and take the cheapest one-to-one assignment (<a href="#eq-assign">the argmin</a>). It runs separately for every image and for every decoder layer, since each layer makes its own predictions. It is a discrete choice, so no gradient flows through it; DETR's code runs it with SciPy under <code>no_grad</code>, one image at a time.</p>
+      <p>The result is just a target per slot: <b class="c-green">matched slots</b> get their object, every other slot gets <b class="c-brown">"no object"</b>.</p>
+    </div>
+    <div data-stage="7" hidden>
+      <h3>Loss and update</h3>
+      <p>For every layer, apply the <a href="#eq-loss">Hungarian loss</a>: cross-entropy on every slot's class, with the "no object" term at <span data-claim="pg-tr-noobj">weight 0.1</span> because it is so common, plus <span data-claim="pg-tr-l1">5 x L1</span> and <span data-claim="pg-tr-giou">2 x GIoU</span> loss on the boxes of matched slots. The box losses are divided by the number of objects in the whole batch, summed over all GPUs, so every object carries the same weight; dividing by each GPU's own count would make an object on a sparsely filled GPU count for more than one on a crowded GPU.</p>
+      <p>The six per-layer losses are added up. The five on the intermediate layers are the <b>auxiliary decoding losses</b>, which the paper found help, especially for getting the number of objects of each class right. Then one backward pass through heads, decoder, encoder and backbone, gradients clipped to <span data-claim="pg-tr-clip">norm 0.1</span>, and one AdamW step with learning rate <span data-claim="pg-tr-lr">1e-4</span> (<span data-claim="pg-tr-lrbb">1e-5 for the backbone</span>) and <span data-claim="pg-tr-wd">weight decay 1e-4</span>.</p>
+    </div>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-tr-prev">Previous</button>
+    <button type="button" id="btn-tr-next">Next</button>
+    <button type="button" id="btn-tr-run" aria-pressed="false">Run a step</button>
+    <button type="button" id="btn-tr-batch">New batch</button>
+    <button type="button" id="btn-tr-reset" data-cue-reset>Reset</button>
+  </div>
+  <figcaption>Computed: the image sizes follow DETR's scale augmentation (short side from its 480-800 list, long side capped at 1333), padding and the stride-32 grid follow the paper and DETR's code, and every tensor shape in the readout is computed from them. Toy: the aspect ratios, the scenes, the predicted boxes and their probabilities, and the loss bar lengths. The matching in stage 7 is solved exactly on those toy boxes with DETR's cost, and only a few of the slots are drawn.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('tr-canvas'), out = document.getElementById('tr-shape');
+  const fig = document.getElementById('viz-train-step');
+  const chips = [...fig.querySelectorAll('#tr-stages button')], texts = [...fig.querySelectorAll('.tr-text > div')];
+  const NS = chips.length, B = 4, NQ = 100, NL = 6, SHOWN = 14, MAX = 1333;
+  const SCALES = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800];
+  const NAMES = ['car', 'person', 'dog', 'bike'];
+  const S = { stage: 0, t: 1, seed: 1, running: false };
+  let stopA = () => {}, runTimer = 0, batch;
+  const fmt = n => n.toLocaleString('en-US');
+
+  function makeBatch(seed) {
+    const r = PE.rng(seed * 7919), imgs = [];
+    for (let i = 0; i < B; i++) {
+      const ar = [4 / 3, 3 / 4, 16 / 9, 1, 3 / 2][Math.floor(r() * 5)], s = SCALES[Math.floor(r() * SCALES.length)];
+      let h = ar >= 1 ? s : Math.round(s / ar), w = ar >= 1 ? Math.round(s * ar) : s;
+      const m = Math.max(h, w); if (m > MAX) { h = Math.round(h * MAX / m); w = Math.round(w * MAX / m); }
+      const objs = [];
+      for (let k = 0, n = 1 + Math.floor(r() * 3), tries = 0; objs.length < n && tries < 40; tries++) {
+        const bw = .16 + r() * .26, bh = .2 + r() * .34, b = PE.fromC(bw / 2 + r() * (1 - bw), bh / 2 + r() * (1 - bh), bw, bh);
+        if (objs.every(o => PE.iou(o.b, b) < .05)) objs.push({ n: NAMES[objs.length % 4], b });
+      }
+      imgs.push({ h, w, objs });
+    }
+    const H0 = Math.max(...imgs.map(i => i.h)), W0 = Math.max(...imgs.map(i => i.w)), Hf = Math.ceil(H0 / 32), Wf = Math.ceil(W0 / 32);
+    // F.interpolate(mode='nearest') reads pixel floor(i * float32(N / F)); count the cells that land inside the image.
+    const real = (n, N, F) => { const sc = Math.fround(N / F); let k = 0; for (let i = 0; i < F; i++) if (Math.min(Math.floor(Math.fround(i * sc)), N - 1) < n) k++; return k; };
+    imgs.forEach(im => { im.hf = real(im.h, H0, Hf); im.wf = real(im.w, W0, Wf); });
+    // Toy predictions for image 1: a good and a sloppy copy per object, then clutter.
+    const im = imgs[0], P = [];
+    im.objs.forEach((o, k) => [.02, .09].forEach((j, c) => { const [cx, cy, w, h] = PE.cxcywh(o.b);
+      P.push({ b: PE.fromC(cx + (r() - .5) * j, cy + (r() - .5) * j, w * (1 + (r() - .5) * j * 2), h * (1 + (r() - .5) * j * 2)), k, p: c ? .3 + r() * .2 : .75 + r() * .2 }); }));
+    while (P.length < SHOWN) { const w = .08 + r() * .22, h = .1 + r() * .28; P.push({ b: PE.fromC(w / 2 + r() * (1 - w), h / 2 + r() * (1 - h), w, h), k: -1, p: .02 + r() * .12 }); }
+    const prob = (p, k) => p.k === k ? p.p : .03;
+    const l1 = (a, b) => { const A = PE.cxcywh(a), Bc = PE.cxcywh(b); return A.reduce((s, v, i) => s + Math.abs(v - Bc[i]), 0); };
+    const C = P.map(p => P.map((_, j) => j < im.objs.length ? -prob(p, j) + 5 * l1(p.b, im.objs[j].b) + 2 * (1 - PE.giou(p.b, im.objs[j].b)) : 0));
+    const match = PE.hungarian(C);
+    const losses = Array.from({ length: NL }, (_, l) => { const f = 1 - l * .11; return [(.5 + r() * .15) * f, (.35 + r() * .1) * f, (.3 + r() * .1) * f]; });
+    const cells = Array.from({ length: 70 }, () => [r(), r(), r()]);
+    return { imgs, H0, W0, Hf, Wf, P, match, cost: C, losses, cells };
+  }
+
+  function hatch(ctx, x, y, w, h) {
+    if (w <= 0 || h <= 0) return;
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    ctx.fillStyle = PE.css('--brown'); ctx.globalAlpha = .16; ctx.fillRect(x, y, w, h);
+    ctx.globalAlpha = .45; ctx.strokeStyle = PE.css('--brown'); ctx.lineWidth = 1;
+    for (let d = -h; d < w; d += 7) { ctx.beginPath(); ctx.moveTo(x + d, y + h); ctx.lineTo(x + d + h, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  // Padded frame of H0 x W0 fitted into box (x, y, w, h); returns where image `im` lands.
+  function frame(ctx, bx, by, bw, bh, im, padA = 1) {
+    const sc = Math.min(bw / batch.W0, bh / batch.H0), fw = batch.W0 * sc, fh = batch.H0 * sc;
+    const x = bx + (bw - fw) / 2, y = by, iw = im.w * sc, ih = im.h * sc;
+    ctx.save(); ctx.strokeStyle = PE.css('--rule'); ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, fw - 1, fh - 1); ctx.restore();
+    ctx.fillStyle = PE.css('--panel2'); ctx.fillRect(x, y, iw, ih);
+    if (padA > 0) { ctx.save(); ctx.globalAlpha = padA; hatch(ctx, x + iw, y, fw - iw, fh); hatch(ctx, x, y + ih, iw, fh - ih); ctx.restore(); }
+    return { x, y, fw, fh, iw, ih, sc };
+  }
+  function boxIn(ctx, f, b, color, lw, dash, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha ?? 1; ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.strokeRect(f.x + b.x1 * f.iw, f.y + b.y1 * f.ih, (b.x2 - b.x1) * f.iw, (b.y2 - b.y1) * f.ih); ctx.restore();
+  }
+  function objects(ctx, f, im, withBoxes = true) {
+    im.objs.forEach(o => { ctx.save(); ctx.fillStyle = PE.css('--yellow'); ctx.globalAlpha = .35;
+      ctx.fillRect(f.x + o.b.x1 * f.iw + 2, f.y + o.b.y1 * f.ih + 2, (o.b.x2 - o.b.x1) * f.iw - 4, (o.b.y2 - o.b.y1) * f.ih - 4); ctx.restore();
+      if (withBoxes) boxIn(ctx, f, o.b, PE.css('--yellow'), 1.5, [3, 3]); });
+  }
+  function grid(ctx, f, im, alpha, fillPad = true) {
+    const cw = 32 * f.sc; ctx.save(); ctx.strokeStyle = PE.css('--muted'); ctx.lineWidth = .5; ctx.globalAlpha = .55 * alpha;
+    for (let c = 0; c <= batch.Wf; c++) { const x = f.x + Math.min(c * cw, f.fw); ctx.beginPath(); ctx.moveTo(x, f.y); ctx.lineTo(x, f.y + f.fh); ctx.stroke(); }
+    for (let r = 0; r <= batch.Hf; r++) { const y = f.y + Math.min(r * cw, f.fh); ctx.beginPath(); ctx.moveTo(f.x, y); ctx.lineTo(f.x + f.fw, y); ctx.stroke(); }
+    ctx.restore();
+    if (fillPad) { ctx.save(); ctx.fillStyle = PE.css('--brown'); ctx.globalAlpha = .35 * alpha;
+      for (let r = 0; r < batch.Hf; r++) for (let c = 0; c < batch.Wf; c++) if (r >= im.hf || c >= im.wf)
+        ctx.fillRect(f.x + c * cw + .5, f.y + r * cw + .5, Math.min(cw, f.fw - c * cw) - 1, Math.min(cw, f.fh - r * cw) - 1);
+      ctx.restore(); }
+    return cw;
+  }
+  function slab(ctx, x, y, w, h, n, color, label, sub) {
+    for (let i = n - 1; i >= 0; i--) { ctx.save(); ctx.fillStyle = PE.css('--panel2'); ctx.strokeStyle = color; ctx.globalAlpha = .9;
+      ctx.fillRect(x + i * 5, y - i * 5, w, h); ctx.strokeRect(x + i * 5 + .5, y - i * 5 + .5, w, h); ctx.restore(); }
+    PE.label(ctx, label, x, y + h + 16, color, 12); if (sub) PE.label(ctx, sub, x, y + h + 31, PE.css('--muted'), 11);
+  }
+  function arrow(ctx, x1, y1, x2, y2, color) {
+    ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    const a = Math.atan2(y2 - y1, x2 - x1); ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 8 * Math.cos(a - .4), y2 - 8 * Math.sin(a - .4)); ctx.lineTo(x2 - 8 * Math.cos(a + .4), y2 - 8 * Math.sin(a + .4)); ctx.fill(); ctx.restore();
+  }
+
+  const DRAW = [
+    (ctx, W, H, t) => { // batch
+      const gap = 10, lab = 22, fit = (cols, rows) => Math.min((W - gap * (cols - 1)) / cols / batch.W0, ((H - 8) / rows - lab) / batch.H0);
+      const cols = fit(4, 1) >= fit(2, 2) ? 4 : 2, rows = B / cols, bw = (W - gap * (cols - 1)) / cols, bh = (H - 8) / rows;
+      batch.imgs.forEach((im, i) => { const c = i % cols, r = Math.floor(i / cols);
+        const f = frame(ctx, c * (bw + gap), 4 + r * bh, bw, bh - lab, im, PE.clamp(t * 2 - .6, 0, 1)); objects(ctx, f, im);
+        PE.label(ctx, `img ${i + 1}: ${im.h} x ${im.w}`, f.x, f.y + f.fh + 14, PE.css('--fg'), 11); });
+      const fh = Math.min(bw / batch.W0, bh - lab) * batch.H0, yb = 4 + fh + 40;
+      if (cols === 4 && yb + 8 < H) { ctx.save(); ctx.globalAlpha = PE.clamp(t * 2 - .8, 0, 1); ctx.strokeStyle = PE.css('--muted'); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(2, yb - 6); ctx.lineTo(2, yb); ctx.lineTo(W - 2, yb); ctx.lineTo(W - 2, yb - 6); ctx.stroke(); ctx.restore();
+        PE.label(ctx, `one tensor: all four padded to ${batch.H0} x ${batch.W0} (brown is padding)`, W / 2, yb + 18, PE.css('--muted'), 12, 'center'); }
+    },
+    (ctx, W, H, t) => { // backbone
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .56, H - 30, im); objects(ctx, f, im, false); grid(ctx, f, im, t);
+      PE.label(ctx, 'img 1, stride-32 grid', f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+      const x = W * .64, s = Math.min(W * .22, H * .45);
+      arrow(ctx, f.x + f.fw + 8, H * .4, x - 8, H * .4, PE.css('--muted'));
+      slab(ctx, x, H * .22, s * (batch.Wf / Math.max(batch.Wf, batch.Hf)), s * (batch.Hf / Math.max(batch.Wf, batch.Hf)), Math.round(2 + 6 * t), PE.css('--blue'),
+        `2048 x ${batch.Hf} x ${batch.Wf}`, 'one vector per cell');
+    },
+    (ctx, W, H, t) => { // tokens
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .34, H - 30, im, 0); ctx.save(); ctx.globalAlpha = .35; objects(ctx, f, im, false); grid(ctx, f, im, 1); ctx.restore();
+      const cw = 32 * f.sc, n = batch.Hf * batch.Wf, ax = W * .4, aw = W * .6 - 4, ay = 26, ah = H - 50;
+      let side = 0, cols = batch.Wf;
+      for (let k = 1; k <= 8; k++) { const s2 = Math.min(aw / (k * batch.Wf), ah / Math.ceil(batch.Hf / k)); if (s2 > side) { side = s2; cols = k * batch.Wf; } }
+      PE.label(ctx, `${n} tokens, flattened row by row`, ax, 14, PE.css('--fg'), 11);
+      for (let r = 0; r < batch.Hf; r++) for (let c = 0; c < batch.Wf; c++) {
+        const i = r * batch.Wf + c, pad = r >= im.hf || c >= im.wf, u = PE.clamp(t * 1.6 - i / n * .6, 0, 1);
+        const sx = f.x + c * cw, sy = f.y + r * cw, tx = ax + (i % cols) * side, ty = ay + Math.floor(i / cols) * side;
+        ctx.fillStyle = pad ? PE.css('--brown') : PE.css('--fg'); ctx.globalAlpha = pad ? .45 : .55;
+        const sz = cw + (side - cw) * u; ctx.fillRect(sx + (tx - sx) * u, sy + (ty - sy) * u, Math.max(1, sz - .6), Math.max(1, sz - .6));
+      }
+      ctx.globalAlpha = 1;
+      const wy = ay + Math.ceil(n / cols) * side + 12;
+      if (t > .7 && wy < H - 6) { ctx.save(); ctx.strokeStyle = PE.css('--muted'); ctx.globalAlpha = (t - .7) / .3; ctx.beginPath();
+        for (let x = 0; x < Math.min(aw, cols * side); x++) ctx.lineTo(ax + x, wy + 4 * Math.sin(x / 6)); ctx.stroke(); ctx.restore();
+        PE.label(ctx, '+ sine position per token', ax, Math.min(H - 2, wy + 20), PE.css('--muted'), 11); }
+    },
+    (ctx, W, H, t) => { // encoder
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .7, H - 30, im); objects(ctx, f, im, false); const cw = grid(ctx, f, im, 1);
+      const o = im.objs[0].b, qc = Math.min(im.wf - 1, Math.floor((o.x1 + o.x2) / 2 * im.w / 32)), qr = Math.min(im.hf - 1, Math.floor((o.y1 + o.y2) / 2 * im.h / 32));
+      const qx = f.x + (qc + .5) * cw, qy = f.y + (qr + .5) * cw, k = Math.round(batch.cells.length * t);
+      batch.cells.slice(0, k).forEach(([u, v, a]) => { const c = Math.floor(u * im.wf), r = Math.floor(v * im.hf);
+        ctx.save(); ctx.strokeStyle = PE.css('--fg'); ctx.globalAlpha = .1 + .45 * a * a; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(qx, qy);
+        ctx.lineTo(f.x + (c + .5) * cw, f.y + (r + .5) * cw); ctx.stroke(); ctx.restore(); });
+      ctx.fillStyle = PE.css('--fg'); ctx.beginPath(); ctx.arc(qx, qy, 4.5, 0, 7); ctx.fill();
+      const lx = f.x + f.fw + 12; PE.label(ctx, 'one token', lx, 30, PE.css('--fg'), 12);
+      PE.label(ctx, 'attends to', lx, 46, PE.css('--muted'), 11); PE.label(ctx, 'every real token', lx, 62, PE.css('--fg'), 12);
+      PE.label(ctx, 'padding masked', lx, 86, PE.css('--brown'), 12); PE.label(ctx, `x ${NL} layers`, lx, 110, PE.css('--fg'), 12);
+    },
+    (ctx, W, H, t) => { // decoder
+      const im = batch.imgs[0], qs = Math.min(W * .3, H - 50), cell = qs / 10, ox = 6, oy = 22;
+      const f = frame(ctx, W * .45, 8, W * .55, H - 30, im); objects(ctx, f, im, false); const cw = grid(ctx, f, im, .6);
+      PE.label(ctx, `${NQ} slots`, ox, 14, PE.css('--blue'), 12); PE.label(ctx, 'memory (encoder output)', f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+      const hot = im.objs.map((_, k) => 11 + k * 27);
+      for (let i = 0; i < NQ; i++) { const x = ox + (i % 10 + .5) * cell, y = oy + (Math.floor(i / 10) + .5) * cell, h = hot.includes(i);
+        ctx.fillStyle = PE.css('--blue'); ctx.globalAlpha = h ? 1 : .35; ctx.beginPath(); ctx.arc(x, y, h ? cell * .32 : cell * .22, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      const pos = i => [ox + (i % 10 + .5) * cell, oy + (Math.floor(i / 10) + .5) * cell];
+      hot.forEach((i, k) => { const [x, y] = pos(i), o = im.objs[k].b, u = PE.clamp(t * 1.5 - k * .15, 0, 1);
+        for (let s = 0; s < 5; s++) { const tx = f.x + (o.x1 + (o.x2 - o.x1) * (.2 + .15 * s)) * f.iw, ty = f.y + (o.y1 + (o.y2 - o.y1) * (.3 + .1 * (s % 3))) * f.ih;
+          ctx.save(); ctx.strokeStyle = PE.css('--blue'); ctx.globalAlpha = .45; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (tx - x) * u, y + (ty - y) * u); ctx.stroke(); ctx.restore(); } });
+      if (hot.length > 1 && t > .5) { ctx.save(); ctx.strokeStyle = PE.css('--blue'); ctx.setLineDash([4, 3]); ctx.globalAlpha = (t - .5) * 2; ctx.lineWidth = 1.5;
+        for (let a = 0; a < hot.length; a++) for (let b = a + 1; b < hot.length; b++) { const [x1, y1] = pos(hot[a]), [x2, y2] = pos(hot[b]);
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo((x1 + x2) / 2 - cell * 2, (y1 + y2) / 2, x2, y2); ctx.stroke(); } ctx.restore(); }
+      PE.label(ctx, 'dashed: self-attention', ox, oy + qs + 16, PE.css('--blue'), 11); PE.label(ctx, 'solid: cross-attention', ox, oy + qs + 30, PE.css('--blue'), 11);
+    },
+    (ctx, W, H, t) => { // heads
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .62, H - 30, im); objects(ctx, f, im, false);
+      batch.P.forEach(p => boxIn(ctx, f, p.b, PE.css('--blue'), 1 + 2 * p.p, null, PE.clamp(t * 1.4 - (1 - p.p) * .4, 0, 1) * (.25 + .75 * p.p)));
+      batch.P.filter(p => p.p > .7).forEach(p => PE.label(ctx, `${im.objs[p.k].n} ${p.p.toFixed(2)}`, f.x + p.b.x1 * f.iw + 2, f.y + p.b.y1 * f.ih - 3, PE.css('--blue'), 11));
+      const lx = f.x + f.fw + 14; PE.label(ctx, 'per slot:', lx, 30, PE.css('--muted'), 11);
+      PE.label(ctx, 'class probs (92)', lx, 48, PE.css('--blue'), 12); PE.label(ctx, 'box (cx, cy, w, h)', lx, 66, PE.css('--blue'), 12);
+      for (let l = 0; l < NL; l++) { ctx.save(); ctx.globalAlpha = PE.clamp(t * 2 - l * .15, 0, 1); ctx.fillStyle = PE.css('--panel2'); ctx.strokeStyle = PE.css('--blue');
+        ctx.fillRect(lx, 90 + l * 18, 90, 13); ctx.strokeRect(lx + .5, 90.5 + l * 18, 90, 13); ctx.restore(); PE.label(ctx, `layer ${l + 1}`, lx + 6, 101 + l * 18, PE.css('--fg'), 10); }
+      PE.label(ctx, 'same heads on each', lx, 90 + NL * 18 + 12, PE.css('--muted'), 11);
+      PE.label(ctx, `${SHOWN} of ${NQ} slots drawn`, f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+    },
+    (ctx, W, H, t) => { // match
+      const im = batch.imgs[0], n = im.objs.length, rows = SHOWN, top = 24, ch = (H - top - 14) / rows, cwid = Math.min(46, W * .09), lx = 34;
+      PE.label(ctx, 'slot', 2, 16, PE.css('--blue'), 11);
+      im.objs.forEach((o, j) => PE.label(ctx, o.n, lx + j * cwid + 3, 16, PE.css('--yellow'), 11));
+      const vals = batch.cost.flatMap(r => r.slice(0, n)), cmin = Math.min(...vals), cmax = Math.max(...vals);
+      for (let i = 0; i < rows; i++) { ctx.globalAlpha = 1; PE.label(ctx, `p${i + 1}`, 2, top + i * ch + ch * .75, PE.css('--blue'), 10);
+        for (let j = 0; j < n; j++) { const v = batch.cost[i][j], sel = batch.match[i] === j && t > .35;
+          ctx.fillStyle = sel ? PE.css('--green') : PE.css('--red'); ctx.globalAlpha = sel ? .95 : .08 + .62 * (v - cmin) / (cmax - cmin || 1);
+          ctx.fillRect(lx + j * cwid, top + i * ch + 1, cwid - 3, ch - 2); } }
+      ctx.globalAlpha = 1;
+      const f = frame(ctx, lx + n * cwid + 16, 8, W - (lx + n * cwid + 16), H - 30, im); objects(ctx, f, im);
+      batch.P.forEach((p, i) => { const j = batch.match[i], hit = j < n;
+        boxIn(ctx, f, p.b, hit && t > .35 ? PE.css('--green') : PE.css('--brown'), hit && t > .35 ? 2.5 : 1, hit && t > .35 ? null : [4, 3], hit && t > .35 ? 1 : .45); });
+      PE.label(ctx, 'redder = costlier; green = assigned', f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+    },
+    (ctx, W, H, t) => { // loss and update
+      const lx = 64, top = 18, bh = Math.min(18, (H - 70) / (NL + 1.6)), tot = batch.losses.reduce((a, l) => a.map((v, i) => v + l[i]), [0, 0, 0]);
+      const scale = (W - lx - 20) / (tot[0] + tot[1] + tot[2]);
+      const seg = (y, vals, a) => { let x = lx; vals.forEach((v, i) => { ctx.save(); ctx.fillStyle = PE.css('--red'); ctx.globalAlpha = [.9, .55, .3][i] * a;
+        ctx.fillRect(x, y, v * scale * t, bh); ctx.restore(); x += v * scale * t; }); };
+      batch.losses.forEach((l, i) => { PE.label(ctx, `layer ${i + 1}`, 4, top + i * (bh + 5) + bh * .8, PE.css('--fg'), 11); seg(top + i * (bh + 5), l, 1); });
+      const ty = top + NL * (bh + 5) + 6; PE.label(ctx, 'total', 4, ty + bh * .8, PE.css('--red'), 12); seg(ty, tot, 1);
+      ['class', '5 x L1', '2 x GIoU loss'].forEach((k, i) => { const x = lx + i * 80; ctx.save(); ctx.fillStyle = PE.css('--red'); ctx.globalAlpha = [.9, .55, .3][i];
+        ctx.fillRect(x, ty + bh + 7, 11, 11); ctx.restore(); PE.label(ctx, k, x + 15, ty + bh + 17, PE.css('--fg'), 11); });
+      if (t > .5) { // backward order; one row when wide, a two-row snake when narrow
+        const flow = ['loss', 'heads', 'decoder', 'encoder', 'backbone', 'AdamW step'], wide = W >= 560, per = wide ? 6 : 3;
+        const y0 = ty + bh + 34, hgt = 24, sw = (W - 8) / per, bw = sw - 22;
+        const at = i => { const r = Math.floor(i / per), c = i % per, col = r % 2 === 0 ? per - 1 - c : c; return { x: 4 + col * sw, y: y0 + r * (hgt + 22) }; };
+        ctx.save(); ctx.globalAlpha = PE.clamp((t - .5) * 2, 0, 1);
+        flow.forEach((k, i) => { const p = at(i); ctx.strokeStyle = PE.css('--red'); ctx.strokeRect(p.x + .5, p.y + .5, bw, hgt);
+          PE.label(ctx, k, p.x + 5, p.y + hgt / 2 + 4, PE.css('--fg'), 11);
+          if (i > 0) { const q = at(i - 1);
+            if (q.y === p.y) { const dir = Math.sign(p.x - q.x); arrow(ctx, dir < 0 ? q.x - 2 : q.x + bw + 2, p.y + hgt / 2, dir < 0 ? p.x + bw + 4 : p.x - 4, p.y + hgt / 2, PE.css('--red')); }
+            else arrow(ctx, q.x + bw / 2, q.y + hgt + 2, p.x + bw / 2, p.y - 3, PE.css('--red')); } });
+        const last = at(flow.length - 1);
+        PE.label(ctx, 'gradients of the loss flow back, get clipped, then one AdamW step', 4, last.y + hgt + 16, PE.css('--red'), 11); ctx.restore(); }
+    },
+  ];
+
+  const cv = PE.canvas(el, w => w < 560 ? .85 : .46, (ctx, W, H) => { if (!W) return; ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H); DRAW[S.stage](ctx, W, H, S.t); });
+
+  function readout() {
+    const b = batch, im = b.imgs[0], n = b.Hf * b.Wf, nobj = b.imgs.map(i => i.objs.length), tot = nobj.reduce((a, c) => a + c, 0);
+    const pad = 1 - b.imgs.reduce((a, i) => a + i.h * i.w, 0) / (B * b.H0 * b.W0), mpad = 1 - im.hf * im.wf / n, matched = im.objs.length;
+    out.textContent = [
+      `Batch tensor 4 x 3 x ${b.H0} x ${b.W0} after padding, pixel mask 4 x ${b.H0} x ${b.W0}; ${Math.round(pad * 100)}% of its pixels are padding. Targets: [${nobj.join(', ')}] objects per image.`,
+      `Features 4 x 2048 x ${b.Hf} x ${b.Wf}; mask downsampled to 4 x ${b.Hf} x ${b.Wf}. For image 1 the code marks ${im.hf} x ${im.wf} of those cells as real.`,
+      `1x1 conv to 4 x 256 x ${b.Hf} x ${b.Wf}, flattened to ${n} tokens per image: 4 x ${n} x 256, plus a positional encoding of the same shape.`,
+      `Per encoder layer and head: ${n} x ${n} = ${fmt(n * n)} attention scores per image; ${Math.round(mpad * 100)}% of image 1's tokens are marked as padding and masked. Memory: 4 x ${n} x 256.`,
+      `Slots 100 x 256, shared by all images; cross-attention is 100 x ${n} scores per head. Kept outputs, one per layer: 6 x 4 x 100 x 256.`,
+      `Class logits 6 x 4 x 100 x 92 and boxes 6 x 4 x 100 x 4, one set per decoder layer.`,
+      `${NL} layers x ${B} images = ${NL * B} separate assignments this step. Image 1: ${matched} of 100 slots get an object, ${100 - matched} are trained toward "no object".`,
+      `This GPU's images hold ${tot} objects; the box losses divide by that count summed over all GPUs. ${NL} layer losses are summed, then one backward pass and one optimizer step.`,
+    ][S.stage];
+  }
+  function show(k, animate = true) {
+    stopA(); S.stage = (k + NS) % NS;
+    chips.forEach((c, i) => { c.classList.toggle('done', i < S.stage); if (i === S.stage) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
+    texts.forEach((d, i) => { d.hidden = i !== S.stage; });
+    readout();
+    if (animate) { S.t = 0; stopA = PE.animate(900, u => { S.t = u; cv.redraw(); }); } else { S.t = 1; cv.redraw(); }
+  }
+  function stopRun() { clearTimeout(runTimer); S.running = false; document.getElementById('btn-tr-run').setAttribute('aria-pressed', 'false'); }
+  function run() {
+    stopRun(); S.running = true; document.getElementById('btn-tr-run').setAttribute('aria-pressed', 'true');
+    const still = PE.instant();
+    let k = 0; const tick = () => { show(k, !still); if (++k < NS) runTimer = setTimeout(tick, 2200); else stopRun(); }; tick();
+  }
+  chips.forEach((c, i) => c.onclick = () => { stopRun(); show(i); });
+  document.getElementById('btn-tr-prev').onclick = () => { stopRun(); show(S.stage - 1); };
+  document.getElementById('btn-tr-next').onclick = () => { stopRun(); show(S.stage + 1); };
+  document.getElementById('btn-tr-run').onclick = () => { if (S.running) stopRun(); else run(); };
+  document.getElementById('btn-tr-batch').onclick = () => { S.seed++; batch = makeBatch(S.seed); show(S.stage); };
+  document.getElementById('btn-tr-reset').onclick = () => { stopRun(); S.seed = 1; batch = makeBatch(1); show(0, false); };
+  batch = makeBatch(1); show(0, false);
+})();
+</script>
+
+<p>At inference there is no matching and no loss: take the last decoder layer's 100 slots and give each one its most likely real class (ignoring "no object") and its box. For its COCO AP numbers the paper keeps all of them this way, even slots whose top class is "no object", and reports that this scores <span data-claim="pg-tr-override">2 AP</span> higher than filtering those slots out. To draw a clean picture you would instead keep only the slots whose score clears a threshold. No NMS either way.</p>
+<p>Training repeats this step for every batch: <span data-claim="pg-tr-300">300 epochs</span> with the learning rate cut tenfold <span data-claim="pg-tr-300drop">after 200</span> for the paper's ablations, or <span data-claim="pg-tr-500">500 epochs</span> with the drop <span data-claim="pg-tr-500drop">after 400</span> for the headline model. The paper reports <span data-claim="pg-tr-3days">3 days</span> on <span data-claim="pg-tr-gpus">16 V100 GPUs</span> for the shorter schedule. Why it needs so many epochs is where the next chapter starts.</p>
+</section>

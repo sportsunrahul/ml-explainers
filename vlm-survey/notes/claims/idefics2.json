@@ -1,0 +1,290 @@
+[
+ {
+  "id": "idefics2-lm-swap",
+  "claim": "Avg score, cross-attention arch, LM backbone Llama-1-7B vs Mistral-7B",
+  "value": "62.5 vs 67.6",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_archi_lm_backbone (Sec. 3.1)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-lm-swap-mmlu",
+  "claim": "MMLU of the swapped LMs Llama-1-7B vs Mistral-7B",
+  "value": "35.1% vs 60.1%",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ve-swap",
+  "claim": "Avg score by vision encoder CLIP-ViT-H (224) / EVA-CLIP-5B (224) / SigLIP-SO400M (384)",
+  "value": "57.4 / 60.2 / 60.7",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_archi_vision_encode_backbone (Sec. 3.1)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ve-swap-appendix-siglip",
+  "claim": "SigLIP-SO400M avg in the appendix detailed table (main text says 60.7)",
+  "value": "60.6",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix, detailed vision backbone table",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ve-imagenet",
+  "claim": "ImageNet acc of CLIP-ViT-H vs SigLIP-SO400M",
+  "value": "78.0% vs 83.2%",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ve-eva-size",
+  "claim": "EVA-CLIP-5B vs SigLIP-SO400M parameter size",
+  "value": "4.4B vs 400M ('11 times more parameters')",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix, vision backbone table + text",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-finding1",
+  "claim": "Finding 1",
+  "value": "For a fixed number of parameters, the quality of the language model backbone has a higher impact on the performance of the final VLM than the quality of the vision backbone.",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1, Finding 1",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-table",
+  "claim": "Avg score: FA no Perceiver frozen / FA frozen / CA frozen / CA LoRA / FA LoRA",
+  "value": "51.8 / 60.3 / 66.7 / 67.3 / 69.5",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_archi_type_archi_method_training (Sec. 3.2)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ca-extra-params",
+  "claim": "Cross-attention has this many more trainable params than FA when frozen; inference flops",
+  "value": "1.3B more (2B trainable); 10% more flops",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-lora-gain-stated",
+  "claim": "Paper-stated gain from unfreezing (LoRA) under FA and CA (table rows give 9.2 for FA)",
+  "value": "12.9 points FA, 0.6 point CA",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 4",
+  "uncertain": true
+ },
+ {
+  "id": "idefics2-divergence",
+  "claim": "Unfreezing all params under FA",
+  "value": "loss divergences, not stabilised by aggressively lowering the learning rate or gradually unfreezing; LoRA made training stable",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 3 (the \"loss divergences ... aggressively lowering the learning rate\" sentences precede the \"12.9 points\" paragraph)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-finding2",
+  "claim": "Finding 2",
+  "value": "The cross-attention architecture performs better than the fully autoregressive one when unimodal pre-trained backbones are kept frozen. However, when training the unimodal backbones, the fully autoregressive architecture outperforms the cross-attention one, even though the latter has more parameters.",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.2, Finding 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-pooling-tokens",
+  "claim": "Avg score, Perceiver pooling, 128 vs 64 visual tokens",
+  "value": "71.2 vs 71.7",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_archi_pooling (Sec. 3.3)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-pooling-gain",
+  "claim": "Learned pooling effect: points gained and tokens per image before/after",
+  "value": "+8.5 points on average; 729 -> 64 visual tokens",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.3 'Number of visual tokens'",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-connector-ablation",
+  "claim": "Avg score linear projection / MapNet / Perceiver (training setup not stated; the values match frozen fully-autoregressive rows)",
+  "value": "44.5 / 51.8 / 60.3",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix, \"Comparing various pooling strategies\", Table 11",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-perceiver-layers",
+  "claim": "Avg score with 1 / 3 / 12 perceiver layers",
+  "value": "69.3 / 68.6 / 69.0",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix, perceiver_depth",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-mlp-proj",
+  "claim": "Avg score with vs without 2-layer MLP before perceiver",
+  "value": "71.4 vs 69.6",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix, modality_projection_prior_to_perceiver",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-other-vlm-tokens",
+  "claim": "Visual tokens per image in other VLMs",
+  "value": "576 (DeepSeek-VL) to 2890 (SPHINX-2k)",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.3",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-aspect-ratio",
+  "claim": "Avg score square images 768 vs aspect-ratio preserving 378-768",
+  "value": "73.1 vs 72.1",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_archi_aspect_ratio_preserving (Sec. 3.3)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-splitting-tokens",
+  "claim": "Visual tokens per image without / with image splitting (4 crops + original)",
+  "value": "64 / 320",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-splitting-textvqa",
+  "claim": "TextVQA val acc, max sub-image resolution vs default, with splitting",
+  "value": "73.6% vs 73.0%",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.4 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-splitting-docvqa",
+  "claim": "DocVQA val ANLS, max sub-image resolution vs default, with splitting",
+  "value": "72.7 vs 72.9",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.4 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-sft-64-vs-320",
+  "claim": "Idefics2 8B same weights at 64 vs 320 tokens: MMMU val/test, MathVista, TextVQA, MMBench",
+  "value": "64: 43.5/37.9, 51.6, 70.4, 76.8; 320: 43.0/37.7, 51.4, 73.0, 76.7",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table perf_sft (Sec. 4.2)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-captions",
+  "claim": "Avg score alt-text vs synthetic captions",
+  "value": "49.8 vs 52.9",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_pretraining_type_captions (Sec. 4.1)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ocr",
+  "claim": "DocVQA: no OCR data at 384 / no OCR at 768 / with OCR at 768",
+  "value": "22.6 / 42.9 / 49.9",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table ablations_finetuning_ocr (Sec. 4.1)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-ablation-protocol",
+  "claim": "Standard ablation protocol",
+  "value": "6,000 steps, avg of 4-shot VQAv2, TextVQA, OKVQA, COCO",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3 intro",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-final-spec",
+  "claim": "Final Idefics2 spec",
+  "value": "SigLIP-SO400M + Mistral-7B-v0.1, 8 billion parameters, fully autoregressive, 64 visual tokens per image (320 with splitting), max image resolution 980 pixels",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Abstract; Sec. 4.1; Sec. 3.4",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-stage-res",
+  "claim": "Max image resolution stage 1 vs stage 2 of pre-training",
+  "value": "384 pixels vs 980 pixels",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 4.1 para on two stages",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-train-scale",
+  "claim": "Pre-training amount",
+  "value": "~2 epochs, approximately 1.5 billion images and 225 billion text tokens, lr 1e-4",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 4.1 last para",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-obelics",
+  "claim": "OBELICS size",
+  "value": "350 million images and 115 billion text tokens",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-base-results",
+  "claim": "Idefics2-base 8B (64 tok) vs MM1 7B (144 tok), 8-shot VQAv2/TextVQA/OKVQA/COCO",
+  "value": "70.3/57.9/54.6/116.0 vs 63.6/46.3/51.4/116.3",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Table perf_base (Sec. 4.1)",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-splitting-docvqa-main",
+  "claim": "Idefics2 8B DocVQA at 64 vs 320 tokens per image (image splitting)",
+  "value": "67.3 vs 74.0",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix Table perf_sft_full (expanded evaluation)",
+  "uncertain": false
+ }
+]

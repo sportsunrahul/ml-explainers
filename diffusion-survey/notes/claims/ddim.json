@@ -1,0 +1,182 @@
+[
+ {
+  "id": "ddim-ddpm-sampling-cost",
+  "claim": "Sampling 50k 32x32 images from a DDPM takes about 20 hours vs under a minute for a GAN on an Nvidia 2080 Ti; 50k 256x256 images take nearly 1000 hours",
+  "value": "~20 h (32x32), ~1000 h (256x256)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 1, paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-loss-depends-on-marginals",
+  "claim": "The DDPM objective L_gamma depends only on the marginals q(x_t|x_0), not on the joint forward process, so non-Markovian forward processes with the same marginals share it",
+  "value": "key observation",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 3, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-theorem1-same-objective",
+  "claim": "For all sigma > 0 the non-Markovian variational objective equals a reweighted DDPM objective up to a constant",
+  "value": "J_sigma = L_gamma + C",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 3.2, Theorem 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-alpha-is-alphabar",
+  "claim": "DDIM's alpha_t denotes DDPM's cumulative alpha-bar_t",
+  "value": "alpha_t (DDIM) = alpha-bar_t (Ho et al.)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "App. C.2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-update-three-terms",
+  "claim": "Generalized sampling step = sqrt(alpha_{t-1}) * predicted x0 + sqrt(1 - alpha_{t-1} - sigma_t^2) * eps_theta + sigma_t * noise",
+  "value": "Eq. 12",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 4.1, Eq. 12",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-eta-interpolates",
+  "claim": "sigma_tau_i(eta) = eta * sqrt((1-alpha_{tau_{i-1}})/(1-alpha_{tau_i})) * sqrt(1 - alpha_{tau_i}/alpha_{tau_{i-1}}); eta = 1 is DDPM, eta = 0 is DDIM",
+  "value": "eta in [0, inf); 0 = deterministic",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5, Eq. 16",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-no-retraining",
+  "claim": "All experiments reuse the same trained model with T = 1000 and gamma = 1; only the sampler (tau, sigma) changes",
+  "value": "T = 1000",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5, paragraph 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-tau-selection",
+  "claim": "Sub-sequence tau chosen quadratic (floor(c i^2)) for CIFAR-10 and linear (floor(c i)) for other datasets",
+  "value": "quadratic CIFAR-10, linear otherwise",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "App. D.2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-cifar10-fid-steps",
+  "claim": "CIFAR-10 FID of DDIM (eta=0) at S = 10, 20, 50, 100, 1000",
+  "value": "13.36, 6.84, 4.67, 4.16, 4.04",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, row eta=0.0, CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-cifar10-ddpm-fid-steps",
+  "claim": "CIFAR-10 FID of DDPM (eta=1) at S = 10, 20, 50, 100, 1000",
+  "value": "41.07, 18.36, 8.01, 5.78, 4.73",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, row eta=1.0, CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-cifar10-sigmahat-fid-steps",
+  "claim": "CIFAR-10 FID of DDPM with larger variance sigma-hat (Ho et al. CIFAR-10 setting) at S = 10, 20, 50, 100, 1000",
+  "value": "367.43, 133.37, 32.72, 9.99, 3.17",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, row sigma-hat, CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-celeba-fid-steps",
+  "claim": "CelebA 64x64 FID of DDIM (eta=0) vs DDPM (eta=1) at S = 10, 20, 50, 100, 1000",
+  "value": "DDIM 17.33, 13.73, 9.17, 6.53, 3.51; DDPM 33.12, 26.03, 18.48, 13.93, 5.98",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, rows eta=0.0 and eta=1.0, CelebA",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-speedup-abstract",
+  "claim": "DDIMs produce high quality samples faster than DDPMs in wall-clock time",
+  "value": "10x to 50x",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-speedup-sec51",
+  "claim": "Quality comparable to 1000-step models within 20 to 100 steps",
+  "value": "10x to 50x speedup",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5.1, paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-speedup-sec5-intro",
+  "claim": "DDIMs outperform DDPMs when fewer iterations are used, with speedups over the original DDPM process (also stated in Sec. 1)",
+  "value": "10x to 100x",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5, first sentence; Sec. 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-lsun-50-step",
+  "claim": "LSUN 256x256 FID at 50 steps DDIM vs 1000-step DDPM",
+  "value": "Bedroom 6.75 vs 6.36; Church 10.84 vs 7.89",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 3 (App. D.1), caption and row DDIM",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-consistency",
+  "claim": "With a fixed x_T, samples from different trajectory lengths share high-level features; 20-step samples are often very similar to 1000-step ones",
+  "value": "qualitative",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5.2, Figure 5",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-reconstruction-error",
+  "claim": "CIFAR-10 test encode/decode per-dimension MSE with S steps each way",
+  "value": "0.014 (S=10), 0.0065 (20), 0.0023 (50), 0.0009 (100), 0.0001 (1000)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-ode-ve-equivalence",
+  "claim": "The DDIM ODE with the optimal model is equivalent to the probability flow ODE of the Variance-Exploding SDE of Song et al. 2020; Euler steps differ (d sigma vs d t)",
+  "value": "Proposition 1",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 4.3, Eq. 14, Proposition 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-code",
+  "claim": "Official code repository",
+  "value": "github.com/ermongroup/ddim (not stated in the LaTeX source)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "not in source",
+  "uncertain": true
+ }
+]

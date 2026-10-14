@@ -1,0 +1,151 @@
+<section id="ch-training-step" class="chapter">
+<h2>One training step, end to end</h2>
+<p>Under their different connectors, most models from here on train the same way: turn the image into tokens, put them in one sequence with the text, and ask the language model to predict the next token. What decides whether that works is the plumbing, which this chapter walks through one stage at a time: which examples are drawn, how they are spliced and batched, which tokens are graded, and which weights are allowed to move.</p>
+
+<style>
+#viz-pipeline .pl-stages { display:flex; flex-wrap:wrap; gap:.3rem; margin:0 0 .6rem; padding-right:6.5rem; font:.84rem system-ui, sans-serif; }
+#viz-pipeline .pl-stages button { font:inherit; color:var(--muted); background:var(--bg); border:1px solid var(--rule); border-radius:999px; padding:.2rem .55rem; cursor:pointer; }
+#viz-pipeline .pl-stages button[aria-pressed="true"] { color:var(--bg); background:var(--blue); border-color:var(--blue); }
+#viz-pipeline .pl-stages button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+#viz-pipeline .pl-stages .pl-sep { width:100%; height:0; }
+#viz-pipeline .pl-text { font:.95rem/1.55 system-ui, sans-serif; margin:.6rem 0 0; min-height:7.5em; }
+#viz-pipeline .pl-text h4 { font-size:1rem; margin:0 0 .3rem; }
+#viz-pipeline .pl-text p { margin:0 0 .5rem; }
+@media (max-width: 520px) { #viz-pipeline .pl-stages { padding-right:0; margin-top:1.8rem; } }
+</style>
+
+<figure class="viz" id="viz-pipeline" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="pl-stages" role="group" aria-label="Training step stages">
+    <button type="button" id="btn-pipeline-contrastive" aria-pressed="false">A. Contrastive (CLIP)</button>
+    <span class="pl-sep"></span>
+    <button type="button" id="btn-pipeline-sample" aria-pressed="false">1 Sample</button>
+    <button type="button" id="btn-pipeline-encode" aria-pressed="false">2 Image</button>
+    <button type="button" id="btn-pipeline-template" aria-pressed="false">3 Text</button>
+    <button type="button" id="btn-pipeline-splice" aria-pressed="false">4 Splice</button>
+    <button type="button" id="btn-pipeline-pad" aria-pressed="false">5a Pad</button>
+    <button type="button" id="btn-pipeline-pack" aria-pressed="false">5b Pack</button>
+    <button type="button" id="btn-pipeline-share" aria-pressed="false">5c Molmo</button>
+    <button type="button" id="btn-pipeline-targets" aria-pressed="false">6a Targets</button>
+    <button type="button" id="btn-pipeline-mask" aria-pressed="false">6b Loss mask</button>
+    <button type="button" id="btn-pipeline-stage1" aria-pressed="false">7a Stage 1</button>
+    <button type="button" id="btn-pipeline-stage2" aria-pressed="false">7b Stage 2</button>
+  </div>
+  <canvas id="pipeline-canvas" role="img" aria-label="The current stage of one vision-language training step, drawn with token rows: blue visual tokens, yellow text tokens, brown padding, red graded targets."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-pipeline-prev">Previous</button>
+    <button type="button" id="btn-pipeline-next">Next</button>
+    <button type="button" id="btn-pipeline-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="pipeline-readout" aria-live="polite"></p>
+  <div class="pl-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>This is one generative training step (call it Mode B) as seven stages. Press <b>1 Sample</b> and walk forward with <b>Next</b>, or press <b>A</b> first to see the contrastive step that CLIP used, for comparison.</p>
+    </div>
+    <div data-stage="contrastive" hidden>
+      <h4>Mode A: the contrastive step</h4>
+      <p>CLIP's step from the first chapter. Images and captions never share a sequence: each goes through its own encoder, and the loss compares every image vector with every caption vector. The other captions in the batch are the negatives, so the batch size is part of the method; CLIP used <span data-claim="clip-batch-size">32,768</span>. Every tensor shape of that step, and the backward pass, is in <a href="#viz-clipflow">the CLIP pipeline figure</a> in the first chapter.</p>
+    </div>
+    <div data-stage="sample" hidden>
+      <h4>1. Sample</h4>
+      <p>LLaVA-1.5 concatenates its ten splits, which are <span data-claim="page-pipeline-15-equal">sampled with the same probability</span>; after concatenation every example is equally likely, so a big split supplies more of each batch. Our toy batch has three examples: two from LLaVA-Instruct, one from VQAv2.</p>
+      <p>Flamingo mixes differently: every update takes one batch from each of its four datasets and weights their losses by <span data-claim="flamingo-loss-weights">1.0 / 0.2 / 0.2 / 0.03</span>. Doing that beats alternating datasets from update to update, <span data-claim="page-pipeline-accum-vs-rr">70.7 vs 62.9</span>.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>2. Image to tokens</h4>
+      <p>The image is resized to <span data-claim="page-connectors-336">336</span> pixels square and cut into 14-pixel patches, <span data-computed>24 &times; 24 = 576</span> of them. The frozen CLIP encoder turns each patch into a vector, and the trainable connector maps each vector to the width of the language model's word embeddings. From here on the figure draws each image as 9 tokens so the rows fit on screen.</p>
+    </div>
+    <div data-stage="template" hidden>
+      <h4>3. Text to tokens</h4>
+      <p>The conversation is poured into LLaVA's template (its Table 2): a system message, then alternating <code>Human:</code> and <code>Assistant:</code> turns, each ended by a <code>&lt;STOP&gt;</code>, which LLaVA sets to <span data-claim="page-pipeline-stop"><code>###</code></span>. An <code>&lt;image&gt;</code> placeholder (an implementation device; the paper writes the image straight into the first instruction) marks where the picture goes. Then everything is tokenized (the toy uses one word per token).</p>
+    </div>
+    <div data-stage="splice" hidden>
+      <h4>4. Splice</h4>
+      <p>The placeholder is cut out and the visual tokens are dropped into its place. The result is one sequence of vectors per example. From here on, nothing in LLaVA's sequence marks which vectors came from pixels and which from words (later models add markers, such as Qwen2-VL's vision-start and vision-end tokens). The three examples now have different lengths: <span data-computed>36, 50 and 32</span> tokens in the toy.</p>
+    </div>
+    <div data-stage="pad" hidden>
+      <h4>5a. Pad to the longest</h4>
+      <p>A GPU wants a rectangle, so the simplest batch pads every row with dummy tokens up to the longest one, and an attention mask stops real tokens from looking at the padding. Before you press <b>5b</b>, guess: what share of this batch is padding?</p>
+    </div>
+    <div data-stage="pack" hidden>
+      <h4>5b. Pack</h4>
+      <p>In the toy, <span data-computed>32 of 150 cells (21%)</span> were padding. Packing instead lays the examples end to end and replaces padding with a block-diagonal attention mask, so each example still sees only itself. This is common practice rather than something these papers specify; Molmo's related trick for one image with many questions is in <b>5c</b>, and Qwen2-VL's packing of images is in the text below.</p>
+    </div>
+    <div data-stage="share" hidden>
+      <h4>5c. Molmo: one image, many questions</h4>
+      <p>Molmo puts all the annotations of one image into a single sequence and masks attention so that each annotation's tokens <span data-claim="page-pipeline-molmo-rule">attend to the image tokens, each other, but not to tokens from different annotations</span>. The image is encoded once instead of once per question, <span data-claim="page-pipeline-molmo-share">reducing the number of processed images by two-thirds and shortening training time by over half</span>. (The image block's own attention is drawn causal, as in the LLM; the paper does not specify it.)</p>
+    </div>
+    <div data-stage="targets" hidden>
+      <h4>6a. Targets</h4>
+      <p>The language model reads the whole row in one pass; its causal mask lets each position see only what comes before it, and each position is asked to predict the token that follows. Every position followed by a word therefore has a target; a position followed by a visual token has none, since a vector is not in the vocabulary. Before you press <b>6b</b>, predict: which of these targets should the model be graded on?</p>
+    </div>
+    <div data-stage="mask" hidden>
+      <h4>6b. The loss mask</h4>
+      <p>LLaVA is <span data-claim="page-pipeline-predict">trained to predict the assistant answers and where to stop</span>. In its Table 2 the graded tokens are the answers and every <code>&lt;STOP&gt;</code>. Nothing else is ever a graded target: the system message, the human's words, the role labels and the visual tokens are read as context only, and the padding is not read at all (the pad mask hides it).</p>
+    </div>
+    <div data-stage="stage1" hidden>
+      <h4>7a. Backward, stage 1</h4>
+      <p>LLaVA's first stage freezes both the encoder and the language model and trains only the connector on <span data-claim="llava-cc3m-filtered">595K image-text pairs</span>, which, the paper says, can be understood as <span data-claim="page-pipeline-tokenizer">training a compatible visual tokenizer for the frozen LLM</span>. The gradient still has to travel back through every frozen LLM layer to reach the connector.</p>
+    </div>
+    <div data-stage="stage2" hidden>
+      <h4>7b. Backward, stage 2</h4>
+      <p>The second stage unfreezes the language model, so the same backward pass now updates the connector and the LLM, on the <span data-claim="llava-instruct-total">158K</span> instruction-following samples (conversations, detailed descriptions and complex reasoning). The encoder stays frozen in both stages.</p>
+    </div>
+  </div>
+  <figcaption>Sourced: the conversation template and <code>&lt;STOP&gt; = ###</code> (LLaVA Table 2), the loss-mask rule (answers and every <code>&lt;STOP&gt;</code>, Table 2), the 336-pixel, 14-pixel-patch grid of LLaVA-1.5 (576 tokens, computed), the LLaVA-1.5 split sizes, Flamingo's loss weights and its accumulate vs round-robin result, LLaVA's two-stage freezing and schedules, and Molmo's shared-image mask (except the image block's own attention, drawn causal as an assumption). Common practice, not specified by these papers: an <code>&lt;image&gt;</code> placeholder token that is replaced by the visual tokens (LLaVA's paper just writes the image into the first instruction), padding with a pad mask, and packing unrelated examples with a block-diagonal mask. Toy: the three examples and their words, one word per token, the whole system message as one token, 9 visual tokens per image, a batch of 3, example C as a single VQAv2 question (LLaVA-1.5 merges all QA pairs of a VQA image into one conversation), and every length and percentage computed from them. The paper colors loss tokens green; on this page loss is red.</figcaption>
+</figure>
+
+<h3>Two ways to learn from pictures and words</h3>
+<p>Press <b>A</b>. That is the step from <a href="#ch-shared-space">the first chapter</a>: two encoders run side by side, one on the images and one on the captions, and the loss is a table of every image against every caption. Nothing is generated; the model only learns to say which caption goes with which photo. The batch is doing real work here, because every other caption in it serves as a negative. CLIP's batch of <span data-claim="clip-batch-size">32,768</span> is part of the method, not just an efficiency choice.</p>
+<p>Now press <b>1 Sample</b> and step through with <b>Next</b>. The generative step is different in kind. Each example becomes one sequence, the language model reads it, and the loss asks it to write the right words. Examples in a batch never see each other: padded rows are independent, and packed rows are masked apart. Apart from how the loss is averaged (see the Molmo note below), the batch size mainly sets how noisy each gradient is and how busy the GPUs are. Everything on the rest of this page, from LLaVA to Qwen3-VL, trains with this second kind of step.</p>
+
+<h3>Where the examples come from</h3>
+<p>A step starts by drawing examples, and even that simple act is a design choice. LLaVA says only that its three kinds of instruction data are <span data-claim="page-pipeline-llava-uniform">uniformly sampled in training</span>, not whether per kind or per example. LLaVA-1.5 concatenates its ten splits, which are then <span data-claim="page-pipeline-15-equal">sampled with the same probability</span>; after concatenation that makes every example equally likely, so the big splits dominate. Molmo samples each dataset at a rate <span data-claim="page-pipeline-molmo-sqrt">proportional to the square root of their size</span>, then adjusts by hand (down-weighting some very large synthetic sets, up-weighting pointing data); the square root alone gives small datasets a larger share than their size would.</p>
+<p>Flamingo does not mix inside a batch at all: each update takes a fixed-size batch from every dataset, and the mixture is written into the loss:</p>
+<div class="eq" id="eq-pipeline-mix" data-build data-viz="viz-pipeline"><div class="tex tex-display">
+\htmlData{step=4, link=sum}{\sum_{m=1}^{M}} \htmlData{step=3, link=lambda}{\lambda_m} \cdot \htmlData{step=1, link=dataset}{\mathbb{E}_{(x, y)\sim \mathcal{D}_m}} \Big[ \htmlData{step=2, link=nll}{\htmlClass{t-red}{-\sum_{\ell=1}^{L} \log p(y_\ell \mid y_{<\ell}, x_{\le \ell})}} \Big]
+</div></div>
+<p class="eqno">Eq. 2 in Flamingo v2.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathcal{D}_m</span>: the <span class="tex">m</span>-th of <span class="tex">M</span> = 4 datasets (interleaved web pages, two sets of image-text pairs, video-text pairs), the four rows in the lower half of stage 1.</li>
+  <li>The bracket: the usual next-token loss on one example's text, given its earlier text <span class="tex">y_{&lt;\ell}</span> and the images before it <span class="tex">x_{\le \ell}</span> (the red bars).</li>
+  <li><span class="tex">\lambda_m</span>: how much that dataset's loss counts: <span data-claim="flamingo-loss-weights">1.0 / 0.2 / 0.2 / 0.03</span>. The paper calls tuning them <span data-claim="page-pipeline-lambda-key">key to performance</span>.</li>
+  <li><span class="tex">\sum_m</span>: the weighted losses are added into one objective, and one update follows.</li>
+</ul>
+<p>In practice the outer sum is a loop: <span data-claim="page-pipeline-accum-main">We accumulate gradients over all datasets</span>, one batch from each, before a single optimizer update. In the paper's ablation setup, <span data-claim="page-pipeline-steps">1 million</span> gradient computations therefore make only <span data-claim="page-pipeline-updates">250,000 gradient updates</span>. The obvious alternative, round-robin, is (in the words of Flamingo's appendix, which compares the same strategies for its contrastive encoder) to <span data-claim="page-pipeline-rr-def">alternate batches of each dataset, updating the parameters on each batch</span>. It sounds equivalent, but it scores <span data-claim="page-pipeline-accum-vs-rr">70.7 vs 62.9</span> in Flamingo's ablation, in favour of accumulating. The paper does not say why. One plausible reading (ours): when every update sees all the datasets at once, no single dataset gets to pull the weights its own way for a whole update.</p>
+
+<h3>From pixels and words to one sequence</h3>
+<p>Stages 2 to 4 turn one example into one row. The image side is the previous chapter's connector, run at LLaVA-1.5's size: a <span data-claim="page-connectors-336">336</span>-pixel square, 14-pixel patches, <span data-computed>576</span> vectors out of the frozen encoder, each mapped by the connector to the LLM's embedding width. The text side is plain formatting: LLaVA's Table 2 wraps the conversation in a system message and alternating <code>Human:</code> / <code>Assistant:</code> turns, each closed by a <code>&lt;STOP&gt;</code> token (<span data-claim="page-pipeline-stop"><code>###</code></span>), with an <code>&lt;image&gt;</code> placeholder in the first human turn. LLaVA's Eq. 2 even randomizes whether the placeholder comes before or after the first question; example A in stage 3 has it after.</p>
+<p>Splicing is the moment the two modalities meet: the placeholder is replaced by the visual tokens, and from then on the language model just sees a sequence of vectors. With real-size images the picture dominates that sequence: our three short examples become <span data-computed>603, 617 and 599</span> tokens long, of which <span data-computed>576</span> each are the image.</p>
+
+<h3>Forming the batch</h3>
+<p>GPUs process a batch as one rectangular tensor, but the examples have different lengths. Press <b>5a</b>: the simplest fix pads every row with dummy tokens up to the longest, and a pad mask keeps real tokens from attending to them. Guess how much of the batch is filler, then press <b>5b</b>. In the toy it is <span data-computed>32 of 150 cells, 21%</span>: every one of those cells is computed on and then thrown away.</p>
+<p>Packing removes the filler: lay the examples end to end, then give the attention a block-diagonal mask so that each example can only see its own earlier tokens, as if it were alone. The same three examples fit in <span data-computed>118</span> cells, and the <span data-computed>32</span> free cells can take part of the next example. This general recipe is common practice across training code; the papers on this page describe their own variants of it.</p>
+<p>At real scale the picture changes in an instructive way. With <span data-computed>576</span>-token images, the same three examples waste only <span data-computed>1.7%</span> to padding, because the image makes every row roughly the same length. Padding bites when lengths really spread. LLaVA-1.5 noticed that its text-only conversations are often longer than its image conversations, so it draws each batch from a single modality, which <span data-claim="page-pipeline-15-modality">speeds up the training by 25%</span>. It also shrinks the number of short sequences in the first place: <span data-claim="page-pipeline-15-merge">QA pairs from the same training image are merged into a single conversation</span>.</p>
+<p>Press <b>5c</b> for the most interesting variant. Many datasets ask several questions about the same image, and training on each question separately encodes that image again every time. Molmo puts the image once and every question after it, and masks attention so that each annotation's tokens <span data-claim="page-pipeline-molmo-rule">attend to the image tokens, each other, but not to tokens from different annotations</span>. The paper calls this equivalent to training on individual image-text pairs, and it ends up <span data-claim="page-pipeline-molmo-share">reducing the number of processed images by two-thirds and shortening training time by over half</span>, at the price of only a <span data-claim="page-pipeline-molmo-seq">25% increase in sequence length</span> for Molmo's data mix (Molmo caps sequences at <span data-claim="page-pipeline-molmo-maxlen">2304</span> tokens). Qwen2-VL, whose images turn into a varying number of tokens (a <span data-claim="page-pipeline-qwen224">224</span>-pixel image becomes <span data-claim="qwen2vl-224-tokens">66 tokens</span>), says that <span data-claim="page-pipeline-qwen2-infer">images of varying resolutions are packed into a single sequence</span>; the paper states this for inference, in its description of the vision encoder (packing image patches, in the style of NaViT), not for batching the language model's training examples.</p>
+
+<h3>Which tokens are graded</h3>
+<p>Press <b>6a</b>. The language model reads the row in one pass and, at every position, predicts the next token; causal attention guarantees that no position can peek at its own answer. So every position followed by a word comes with a target, the next token along; positions followed by a visual token have none. Should all of them count? Make your guess, then press <b>6b</b>.</p>
+<p>They should not. The model is being trained as the assistant, so it is graded only on what the assistant says: LLaVA is <span data-claim="page-pipeline-predict">trained to predict the assistant answers and where to stop</span>. Grade it on the human's words too, and it would spend capacity learning to write questions; the visual tokens are never targets, since they are continuous vectors with no vocabulary entry to predict (the last visual position in example A is graded only because the token it predicts is the <code>###</code> after the image). Look closely at the paper's Table 2 and you find one surprise: every <code>&lt;STOP&gt;</code> is marked as a target, including the ones that close the system message and the human's turns. The model learns where each turn ends, but never how the human fills it. The ignored positions (padding aside) still matter as context; they just contribute no loss. Over the whole toy batch, <span data-computed>47 of 150 cells (31%)</span> carry loss; keep the same toy text but give each image its real <span data-computed>576</span> visual tokens and it is <span data-computed>2.5%</span>. The exact figure depends on the toy's short answers, but the direction holds: most of what the model reads, it is never graded on.</p>
+<p>Written as a probability, the objective is the chance of the answer given the image and the instructions, built one answer token at a time:</p>
+<div class="eq" id="eq-pipeline" data-build data-viz="viz-pipeline"><div class="tex tex-display">
+\begin{gathered}p(\htmlClass{t-red}{X_{a}} \mid \htmlClass{t-blue}{X_{v}}, \htmlClass{t-yellow}{X_{\text{instruct}}}) = \htmlData{step=1, link=answer}{\prod_{i=1}^{L} p_{\htmlData{step=5, link=trainable}{\theta}}(\htmlClass{t-red}{x_i}} \mid \htmlData{step=2, link=visual}{\htmlClass{t-blue}{X_{v}}}, \htmlData{step=3, link=instruct}{\htmlClass{t-yellow}{X_{\text{instruct},<i}}}, \htmlData{step=4, link=prev}{X_{a,<i}}) \\[4pt] \htmlData{step=6, link=loss}{\htmlClass{t-red}{\mathcal{L}} = -\log p(\htmlClass{t-red}{X_{a}} \mid \htmlClass{t-blue}{X_{v}}, \htmlClass{t-yellow}{X_{\text{instruct}}})}
+\end{gathered}
+</div></div>
+<p class="eqno">Eq. 3 in LLaVA v2 (the second line, its negative log, is the loss that is minimized).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-red}{x_i}</span>: the <span class="tex">i</span>-th token. The paper colors it as a prediction token and introduces the equation "for a sequence of length <span class="tex">L</span>". Read with Table 2, only the prediction tokens (the red targets in stage 6b) contribute factors, so in effect the product runs over those.</li>
+  <li><span class="tex">\htmlClass{t-blue}{X_v}</span>: the image, as its visual tokens. The paper writes it into every factor to stress that every answer is grounded in the image.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{X_{\text{instruct},&lt;i}}</span>: the human's turns before position <span class="tex">i</span>; read, never graded.</li>
+  <li><span class="tex">X_{a,&lt;i}</span>: the assistant's own earlier answer tokens, which become context for later ones (in example A, the first answer is context for the second).</li>
+  <li><span class="tex">\theta</span>: the weights being trained, which is where stage 7 comes in.</li>
+</ul>
+<p>One subtle trap sits in how this loss is averaged. A batch is split across many GPUs, and if each GPU divides its summed loss by its own count of graded tokens, a GPU that happened to get short answers (like example C's single word) weights each of them more heavily. Molmo divides by the average count across all devices instead, and reports that captioning performance can drop by <span data-claim="page-pipeline-molmo-norm">0.5-1 points</span> without this fix.</p>
+
+<h3>Which weights move</h3>
+<p>The backward pass sends the gradient of that loss back through everything that produced it, and the training recipe decides which weights actually change. Press <b>7a</b>. In LLaVA's stage 1 both the encoder and the language model are frozen and only the connector <span class="tex">\htmlClass{t-green}{W}</span> learns, on <span data-claim="llava-cc3m-filtered">595K image-text pairs</span> turned into one-turn chats (describe the image; answer: its caption), for <span data-claim="page-pipeline-stage1-hp">1 epoch with a learning rate of 2e-3 and a batch size of 128</span>. Note what the gradient has to do: the loss sits at the top of the language model, and the connector sits below it, so the gradient must pass through every frozen LLM layer on its way down. Frozen means the weights do not change, not that the gradient stops. Below the connector nothing trains, so the encoder needs no backward pass at all; Flamingo makes the same point for its own frozen encoder: <span data-claim="page-pipeline-flamingo-nobp">no backpropagation is performed through the frozen Vision Encoder</span>.</p>
+<p>Press <b>7b</b>. Stage 2 unfreezes the language model and trains it together with the connector on the instruction data, for <span data-claim="page-pipeline-stage2-hp">3 epochs, with a learning rate of 2e-5 and a batch size of 32</span>; the learning rate is a hundred times smaller than in stage 1. Skipping stage 1 was not free for LLaVA: on ScienceQA (fine-tuned on ScienceQA itself for <span data-claim="page-pipeline-sqa-epochs">12 epochs</span>), training without it reaches <span data-claim="page-pipeline-no-pretrain">85.81%</span> against <span data-claim="llava-sqa-alone">90.92%</span> with it. The lesson is not universal: Molmo, which pre-trains all of its weights on its dense captions, writes <span data-claim="page-pipeline-molmo-nostage1">We find this step unnecessary when pre-training on PixMo-Cap</span>. LLaVA-1.5 keeps the same two stages, with <span data-claim="llava15-pretrain-size">558K</span> pairs for the first and its <span data-claim="llava15-mixture-total">665K</span> mixture for the second, but its connector is the 2-layer MLP drawn in stage 2 rather than the original single matrix <span class="tex">\htmlClass{t-green}{W}</span>, and its own schedule is <span data-claim="page-pipeline-l15-epoch">1</span> epoch per stage (learning rate <span data-claim="page-pipeline-l15-pre-lr">1e-3</span> and batch <span data-claim="page-pipeline-l15-pre-bs">256</span>, then <span data-claim="page-pipeline-l15-ft-lr">2e-5</span> and batch <span data-claim="page-pipeline-l15-ft-bs">128</span>).</p>
+
+<p>That is the whole loop: sample, tokenize, splice, batch, mask, and send the gradient back to whatever is allowed to learn. Notice, though, that every image in this chapter's pipeline was a small square, <span data-claim="page-connectors-336">336</span> pixels on a side at most. A photo of a dog survives that. A page of a contract, a dense chart or a phone screenshot does not: its words shrink to a few pixels. Act IV is about what happens when the image has to be read, not just recognized.</p>
+</section>

@@ -1,0 +1,83 @@
+<section id="ch-owlv2" class="chapter">
+<h2>OWLv2: label the web with yourself</h2>
+<div class="tapstrip" data-model="owl" role="img" aria-label="The tap strip for OWLv2, the same as for OWL-ViT: the text lane joins the image lane only at the final score."></div>
+<p class="note">Where text enters: the same place as in OWL-ViT, the final score. OWLv2 changes the training data and the training cost, not the graph; at inference it is the same model (Sec. 3.2).</p>
+
+<p>OWL-ViT trained on about <span data-claim="owlvit-det-images">2 million</span> images with human boxes, and chapter 5 ended on the suspicion that data was its limit. The web has billions of captioned images and no boxes, so OWLv2 lets OWL-ViT draw the boxes and trains a new detector on them.</p>
+
+<figure class="viz" id="viz-owlst" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="owlst-canvas" role="img" aria-label="OWLv2's self-training pipeline in five steps. A drawn warehouse photo with the alt text Toyota forklift lifting a wooden pallet in our warehouse. The alt text becomes N-gram queries. The teacher boxes the forklift, the pallet, the shelf and the person, and each box keeps its best query. Weak boxes and an image with no confident box are dropped. A mosaic of pseudo-labelled images trains a new OWL model. A dashed arrow from the student back to the teacher says that a second round is not done in the paper."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-owlst-web" aria-pressed="true">1 Web image</button>
+    <button type="button" id="btn-owlst-ngrams" aria-pressed="false">2 N-grams</button>
+    <button type="button" id="btn-owlst-teacher" aria-pressed="false">3 Teacher boxes</button>
+    <button type="button" id="btn-owlst-filter" aria-pressed="false">4 Keep confident</button>
+    <button type="button" id="btn-owlst-student" aria-pressed="false">5 Train student</button>
+    <button type="button" id="btn-owlst-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="owlst-readout" aria-live="polite"></p>
+  <div class="owlst-text">
+    <div data-stage="web"><p><strong>1. Web images with alt text.</strong> WebLI holds about <span data-claim="owlv2-webli-size">10B</span> images, each with the alt text of its web page, machine-translated to English where needed (Sec. 3.1). Alt text is a noisy caption: it may name what is in the picture, or something else.</p></div>
+    <div data-stage="ngrams" hidden><p><strong>2. Every N-gram is a query.</strong> There is no parser and no fixed class list. OWLv2 takes every word N-gram up to <span data-claim="owlv2-ngram-maxlen">10</span> words long and removes only generic words (such as "image" or "png") and N-grams made only of stop words (Sec. 3.1). The code example in App. A.2 caps it at <span data-claim="owlv2-ngram-maxqueries">300</span> queries per image. The toy's count follows this rule.</p></div>
+    <div data-stage="teacher" hidden><p><strong>3. The teacher names the boxes.</strong> The public OWL-ViT CLIP <span data-claim="owlv2-teacher">L/14</span> boxes every image. Its boxes come from the image alone, so the queries cannot change where the boxes are, only what they are called (Sec. 3.1). Each box is scored against every query, averaged over <span data-claim="owlv2-prompt-templates">7</span> prompt templates, and keeps its best query as a hard label.</p></div>
+    <div data-stage="filter" hidden><p><strong>4. Keep the confident ones.</strong> Boxes below a score threshold go, and so do images left with no box. A strict threshold keeps the teacher's biases; a loose one adds noise. From the lowest to the highest threshold the paper tests, the images that keep a box shrink from <span data-claim="owlv2-thr-0.1-images">5B</span> to <span data-claim="owlv2-thr-0.3-images">2B</span>, <span data-claim="owlv2-thr-0.5-images">782M</span> and <span data-claim="owlv2-thr-0.7-images">224M</span> (Fig. 3, B/16). A moderate threshold works well and strict ones do poorly. The main models train on about <span data-claim="owlv2-st-dataset-size">2B</span> images (Sec. 4.5).</p></div>
+    <div data-stage="student" hidden><p><strong>5. Train a new detector.</strong> The student is a fresh OWL model. Its image and text towers start from CLIP (B/16, L/14) or SigLIP (G/14), its heads start random, and it trains on the pseudo-boxes with OWL-ViT's losses (Sec. 3.2). The paper annotates the web once, with OWL-ViT L/14; it does not let the student relabel it.</p></div>
+  </div>
+  <figcaption>The N-gram count follows the paper's rule on the toy sentence; the boxes, scores and the second image are made up. In the paper the teacher scores real WebLI images, and "scale" means more examples and more compute for the student, not more rounds of labelling.</figcaption>
+</figure>
+
+<h3>Three ways to make billions of images affordable</h3>
+<p>Self-training only pays if the student sees far more images than any human-labelled set holds. OWLv2 makes each training example cheaper in three ways (Sec. 3.2):</p>
+<ul>
+  <li><strong>Drop flat patches.</strong> A ViT's tokens form an unordered set, so some can be left out. OWLv2 drops the <span data-claim="owlv2-token-drop">50%</span> of patches with the lowest pixel variance: sky, plain walls and padding. It does this only in training.</li>
+  <li><strong>Grade only likely objects.</strong> A new objectness head scores each token, and boxes, class scores and losses are computed only for the top tokens, about <span data-claim="owlv2-topk-share">10%</span>. For L/14 at <span data-claim="owlv2-res-14">1008</span> pixels the image has <span data-claim="owlv2-l14-1008-tokens">5184</span> tokens and the top <span data-claim="owlv2-topk-l14-g14">512</span> are kept (Table A2). At inference all tokens are used.</li>
+  <li><strong>Pack many images into one.</strong> Mosaics with grids up to <span data-claim="owlv2-mosaic-max">6x6</span> put <span data-claim="owlv2-mosaic-avg">13.2</span> web images into one training example on average.</li>
+</ul>
+<p>Together these cut training FLOPs by about <span data-claim="owlv2-flops-reduction">50%</span> and raise throughput <span data-claim="owlv2-throughput-gain">2x</span>: for L/14 at <span data-claim="owl-page-res-840">840</span> pixels, <span data-claim="owlv2-gflops-owlvit">11945.4</span> GFLOPs per example for OWL-ViT against <span data-claim="owlv2-gflops-owlv2">5357.9</span> for OWLv2. The paper says that at inference "the model is identical to the original OWL-ViT".</p>
+
+<figure class="viz" id="viz-owldrop" data-toy>
+  <span class="badge toy" style="right:6.6rem">Toy model</span>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="owldrop-canvas" role="img" aria-label="Left: a two by two mosaic of drawn images with gray padding, cut into 16 by 16 patches; the patches with the lowest pixel variance turn brown as the drop rate rises, padding and blank wall first. Right: a chart of LVIS val AP and rare-class AP against the share of patches dropped in training, from OWLv2 Table A1: flat up to half, lower at 70 percent."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-owldrop-0" aria-pressed="true">No dropping</button>
+    <button type="button" id="btn-owldrop-25" aria-pressed="false">Drop 25%</button>
+    <button type="button" id="btn-owldrop-33" aria-pressed="false">Drop 33%</button>
+    <button type="button" id="btn-owldrop-50" aria-pressed="false">Drop 50% (OWLv2)</button>
+    <button type="button" id="btn-owldrop-70" aria-pressed="false">Drop 70%</button>
+    <button type="button" id="btn-owldrop-infer" aria-pressed="false">At inference</button>
+    <button type="button" id="btn-owldrop-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="owldrop-readout" aria-live="polite"></p>
+  <figcaption>Left, a toy: the paper's rule (rank patches by mean pixel variance plus a little uniform noise, drop the lowest share; App. A.5) runs on this drawing's own pixels. Right, sourced: OWLv2 Table A1, which trained a standard OWL-ViT L/14 on Objects365 and Visual Genome at each drop rate. The bars at zero show one standard deviation over three runs.</figcaption>
+</figure>
+
+<p>The chart is the evidence for dropping half. Rare-class AP is <span data-claim="owlv2-tokdrop-000-apr">31.8</span> with no dropping and <span data-claim="owlv2-tokdrop-050-apr">30.8</span> with half the patches gone, but the no-drop runs alone vary with a standard deviation of <span data-claim="owlv2-tokdrop-000-apr-sd">1.16</span>. At 70% the loss is real: AP falls from <span data-claim="owlv2-tokdrop-000-ap">33.3</span> to <span data-claim="owlv2-tokdrop-070-ap">30.4</span> and rare-class AP to <span data-claim="owlv2-tokdrop-070-apr">28.2</span> (LVIS val). Remember the last button: a deployed OWLv2 drops nothing.</p>
+
+<h3>Self-training alone beats human boxes on rare classes</h3>
+<p>All numbers here are LVIS val with standard AP (OWLv2 Table 1). No human ever drew a box for a rare class at any stage, for the teacher or the student. Self-training alone lifts the B/16 model from <span data-claim="owlv2-main-owl-b16-val-apr">20.6</span> to <span data-claim="owlv2-main-st-b16-val-apr">29.6</span> rare-class AP, <span data-claim="owlv2-gain-b16-vs-owl">9 points</span> above OWL-ViT. The self-trained models even do better on rare classes than on all classes (<span data-claim="owlv2-main-st-b16-val-apr">29.6</span> against <span data-claim="owlv2-main-st-b16-val-ap">27.0</span> for B/16); the paper guesses that web text about an unusual object tends to be about that object. The self-trained G/14 reaches <span data-claim="owlv2-main-st-g14-val-apr">37.5</span>, above the best earlier open-vocabulary result in its table, F-VLM at <span data-claim="owlv2-main-fvlm-r50x64-val-apr">32.8</span>.</p>
+
+<h3>Fine-tune, or not</h3>
+<p>An optional last step fine-tunes the student on LVIS base, the LVIS boxes minus the rare classes, for <span data-claim="owlv2-ft-images">1.1M</span> images, about <span data-claim="owlv2-ft-epochs">100</span> LVIS epochs (Sec. 4.1). Rare-class AP on LVIS jumps. The paper also tested every model on ODinW, a set of <span data-claim="owlv2-odinw-n-datasets">35</span> small datasets from other domains (drones, aquariums, potholes, hard hats). Its main table, like most papers, reports only a <span data-claim="owlv2-odinw-n-subset">13</span>-dataset subset.</p>
+
+<p class="predict"><strong>Guess first.</strong> The chart starts with the self-trained models. Fine-tuning on LVIS base raises LVIS rare-class AP at every size. Before you press <em>+ Fine-tune on LVIS</em>, guess what happens to the median AP over the 35 ODinW datasets.</p>
+
+<figure class="viz" id="viz-owltrade">
+  <span class="badge sourced">Sourced</span>
+  <canvas id="owltrade-canvas" role="img" aria-label="Two panels. Left: LVIS val rare-class AP for OWLv2 B/16, L/14 and G/14, self-trained and then fine-tuned; every line rises. Right: the median zero-shot AP over 35 ODinW datasets for the same models; every line falls. A third column on the right adds the weight average of the curated-vocabulary L/14 model, which recovers part of the drop but stays below the self-trained L/14."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-owltrade-st" aria-pressed="true">Self-trained</button>
+    <button type="button" id="btn-owltrade-ft" aria-pressed="false">+ Fine-tune on LVIS</button>
+    <button type="button" id="btn-owltrade-ens" aria-pressed="false">+ Weight average</button>
+    <button type="button" id="btn-owltrade-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="owltrade-readout" aria-live="polite"></p>
+  <figcaption>Sourced: OWLv2 Table 1 (LVIS val, rare-class AP, standard AP; rows 11 to 16) and Table A4 (median zero-shot AP over all 35 ODinW datasets, same rows, and the weight-average row). The two panels use different metrics on purpose; do not compare heights across them.</figcaption>
+</figure>
+
+<p>LVIS rare-class AP rises at every size: B/16 <span data-claim="owlv2-main-st-b16-val-apr">29.6</span> to <span data-claim="owlv2-main-stft-b16-val-apr">36.2</span>, L/14 <span data-claim="owlv2-main-st-l14-val-apr">34.9</span> to <span data-claim="owlv2-main-stft-l14-val-apr">44.6</span>, G/14 <span data-claim="owlv2-main-st-g14-val-apr">37.5</span> to <span data-claim="owlv2-main-stft-g14-val-apr">47.2</span>. The median zero-shot AP over the 35 ODinW datasets falls at every size: <span data-claim="owlv2-odinw-st-b16-median35">11.6</span> to <span data-claim="owlv2-odinw-stft-b16-median35">6.0</span>, <span data-claim="owlv2-odinw-st-l14-median35">16.2</span> to <span data-claim="owlv2-odinw-stft-l14-median35">6.3</span>, <span data-claim="owlv2-odinw-st-g14-median35">17.5</span> to <span data-claim="owlv2-odinw-stft-g14-median35">9.5</span> (Table A4). The usual 13-dataset mean hides most of this: it goes from <span data-claim="owlv2-odinw-st-l14-mean13">53.0</span> to <span data-claim="owlv2-odinw-stft-l14-mean13">50.1</span> for L/14, and for G/14 it even rises, from <span data-claim="owlv2-odinw-st-g14-mean13">49.9</span> to <span data-claim="owlv2-odinw-stft-g14-mean13">50.1</span>. The paper's own verdict: LVIS rare-class AP "only measures a narrow concept of open-vocabulary performance" (Sec. 4.6).</p>
+<p>Why does the median tell a different story from the mean? For the self-trained L/14, the mean over the 13 usual datasets is <span data-claim="owlv2-odinw-st-l14-mean13">53.0</span>, the mean over all 35 is <span data-claim="owlv2-odinw-st-l14-mean35">24.4</span>, and the median is <span data-claim="owlv2-odinw-st-l14-median35">16.2</span>. A few easy datasets carry the mean, and the 13 favour them. Chapter 12 plots all 35 datasets one by one.</p>
+<p>The paper's remedy is weight averaging: average the weights of the self-trained and the fine-tuned checkpoints, with weight <span data-claim="owlv2-ens-weight">0.4</span> on the fine-tuned one. It reports this for one model only, the L/14 trained with N-grams plus a curated list of <span data-claim="owlv2-curated-classes">2520</span> class names (Table 1 row 21). On the 13-dataset mean the average scores <span data-claim="owlv2-odinw-ens-l14-mean13">56.3</span>, the best in the paper, against <span data-claim="owlv2-odinw-stft-cur-l14-mean13">48.7</span> for that model fine-tuned. On the median over 35 it scores <span data-claim="owlv2-odinw-ens-l14-median35">10.6</span>: better than the fine-tuned <span data-claim="owlv2-odinw-stft-cur-l14-median35">7.0</span>, still below the self-trained L/14's <span data-claim="owlv2-odinw-st-l14-median35">16.2</span>. No table gives its LVIS AP. So the average recovers part of the loss, not all of it.</p>
+<p>Two caveats. WebLI was deduplicated against common benchmarks but not against ODinW (Sec. 4.1), so web images close to ODinW's could have reached the student (<span class="reading">our reading</span> of what that allows). And the paper names its own limits (Sec. 5): self-training needs a great deal of compute and data, and a fine-tuned model's scores for out-of-distribution queries "may be poorly calibrated and may depend on the precise wording of the query". Chapters 12 and 13 take both points to factory data.</p>
+</section>

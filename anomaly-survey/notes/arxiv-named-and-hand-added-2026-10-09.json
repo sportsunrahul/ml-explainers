@@ -1,0 +1,377 @@
+{
+ "fetched": "2026-10-09",
+ "note": "named spine papers and hand-added papers the keyword scan missed",
+ "queries": [
+  "https://export.arxiv.org/api/query?id_list=2005.02357,2011.08785,2106.08265,2111.07677,2104.04015,2108.07610,2303.14535,2206.03687,2303.14814,2310.18961,2207.14315&max_results=20",
+  "https://export.arxiv.org/api/query?id_list=2002.10445,1807.02011,2201.10703,2305.17382,2403.06495,2404.06564,2310.14228,2406.03262,2202.08341,2407.09359,1911.02357,2006.16067,2503.21622&max_results=20"
+ ],
+ "papers": [
+  {
+   "id": "2111.07677v2",
+   "date": "2021-11-15",
+   "updated": "2021-11-16",
+   "title": "FastFlow: Unsupervised Anomaly Detection and Localization via 2D Normalizing Flows",
+   "authors": [
+    "Jiawei Yu",
+    "Ye Zheng",
+    "Xiang Wang",
+    "Wei Li",
+    "Yushuang Wu",
+    "Rui Zhao",
+    "Liwei Wu"
+   ],
+   "comment": "11 pages,8 figures",
+   "abstract": "Unsupervised anomaly detection and localization is crucial to the practical application when collecting and labeling sufficient anomaly data is infeasible. Most existing representation-based approaches extract normal image features with a deep convolutional neural network and characterize the corresponding distribution through non-parametric distribution estimation methods. The anomaly score is calculated by measuring the distance between the feature of the test image and the estimated distribution. However, current methods can not effectively map image features to a tractable base distribution and ignore the relationship between local and global features which are important to identify anomalies. To this end, we propose FastFlow implemented with 2D normalizing flows and use it as the probability distribution estimator. Our FastFlow can be used as a plug-in module with arbitrary deep feature extractors such as ResNet and vision transformer for unsupervised anomaly detection and localization. In training phase, FastFlow learns to transform the input visual feature into a tractable distribution and obtains the likelihood to recognize anomalies in inference phase. Extensive experimental results on the MVTec AD dataset show that FastFlow surpasses previous state-of-the-art methods in terms of accuracy and inference efficiency with various backbone networks. Our approach achieves 99.4% AUC in anomaly detection with high inference efficiency."
+  },
+  {
+   "id": "2005.02357v3",
+   "date": "2020-05-05",
+   "updated": "2021-02-03",
+   "title": "Sub-Image Anomaly Detection with Deep Pyramid Correspondences",
+   "authors": [
+    "Niv Cohen",
+    "Yedid Hoshen"
+   ],
+   "comment": null,
+   "abstract": "Nearest neighbor (kNN) methods utilizing deep pre-trained features exhibit very strong anomaly detection performance when applied to entire images. A limitation of kNN methods is the lack of segmentation map describing where the anomaly lies inside the image. In this work we present a novel anomaly segmentation approach based on alignment between an anomalous image and a constant number of the similar normal images. Our method, Semantic Pyramid Anomaly Detection (SPADE) uses correspondences based on a multi-resolution feature pyramid. SPADE is shown to achieve state-of-the-art performance on unsupervised anomaly detection and localization while requiring virtually no training time."
+  },
+  {
+   "id": "2011.08785v1",
+   "date": "2020-11-17",
+   "updated": "2020-11-17",
+   "title": "PaDiM: a Patch Distribution Modeling Framework for Anomaly Detection and Localization",
+   "authors": [
+    "Thomas Defard",
+    "Aleksandr Setkov",
+    "Angelique Loesch",
+    "Romaric Audigier"
+   ],
+   "comment": "7 pages, 2 figures, 8 tables, accepted at the 1st International Workshop on Industrial Machine Learning, ICPR 2020",
+   "abstract": "We present a new framework for Patch Distribution Modeling, PaDiM, to concurrently detect and localize anomalies in images in a one-class learning setting. PaDiM makes use of a pretrained convolutional neural network (CNN) for patch embedding, and of multivariate Gaussian distributions to get a probabilistic representation of the normal class. It also exploits correlations between the different semantic levels of CNN to better localize anomalies. PaDiM outperforms current state-of-the-art approaches for both anomaly detection and localization on the MVTec AD and STC datasets. To match real-world visual industrial inspection, we extend the evaluation protocol to assess performance of anomaly localization algorithms on non-aligned dataset. The state-of-the-art performance and low complexity of PaDiM make it a good candidate for many industrial applications."
+  },
+  {
+   "id": "2108.07610v2",
+   "date": "2021-08-17",
+   "updated": "2021-09-27",
+   "title": "DRAEM -- A discriminatively trained reconstruction embedding for surface anomaly detection",
+   "authors": [
+    "Vitjan Zavrtanik",
+    "Matej Kristan",
+    "Danijel Sko\u010daj"
+   ],
+   "comment": "Accepted to ICCV2021",
+   "abstract": "Visual surface anomaly detection aims to detect local image regions that significantly deviate from normal appearance. Recent surface anomaly detection methods rely on generative models to accurately reconstruct the normal areas and to fail on anomalies. These methods are trained only on anomaly-free images, and often require hand-crafted post-processing steps to localize the anomalies, which prohibits optimizing the feature extraction for maximal detection capability. In addition to reconstructive approach, we cast surface anomaly detection primarily as a discriminative problem and propose a discriminatively trained reconstruction anomaly embedding model (DRAEM). The proposed method learns a joint representation of an anomalous image and its anomaly-free reconstruction, while simultaneously learning a decision boundary between normal and anomalous examples. The method enables direct anomaly localization without the need for additional complicated post-processing of the network output and can be trained using simple and general anomaly simulations. On the challenging MVTec anomaly detection dataset, DRAEM outperforms the current state-of-the-art unsupervised methods by a large margin and even delivers detection performance close to the fully-supervised methods on the widely used DAGM surface-defect detection dataset, while substantially outperforming them in localization accuracy."
+  },
+  {
+   "id": "2104.04015v1",
+   "date": "2021-04-08",
+   "updated": "2021-04-08",
+   "title": "CutPaste: Self-Supervised Learning for Anomaly Detection and Localization",
+   "authors": [
+    "Chun-Liang Li",
+    "Kihyuk Sohn",
+    "Jinsung Yoon",
+    "Tomas Pfister"
+   ],
+   "comment": "Published at CVPR 2021. The first two authors contributed equally",
+   "abstract": "We aim at constructing a high performance model for defect detection that detects unknown anomalous patterns of an image without anomalous data. To this end, we propose a two-stage framework for building anomaly detectors using normal training data only. We first learn self-supervised deep representations and then build a generative one-class classifier on learned representations. We learn representations by classifying normal data from the CutPaste, a simple data augmentation strategy that cuts an image patch and pastes at a random location of a large image. Our empirical study on MVTec anomaly detection dataset demonstrates the proposed algorithm is general to be able to detect various types of real-world defects. We bring the improvement upon previous arts by 3.1 AUCs when learning representations from scratch. By transfer learning on pretrained representations on ImageNet, we achieve a new state-of-theart 96.6 AUC. Lastly, we extend the framework to learn and extract representations from patches to allow localizing defective areas without annotations during training."
+  },
+  {
+   "id": "2303.14814v1",
+   "date": "2023-03-26",
+   "updated": "2023-03-26",
+   "title": "WinCLIP: Zero-/Few-Shot Anomaly Classification and Segmentation",
+   "authors": [
+    "Jongheon Jeong",
+    "Yang Zou",
+    "Taewan Kim",
+    "Dongqing Zhang",
+    "Avinash Ravichandran",
+    "Onkar Dabeer"
+   ],
+   "comment": "Accepted to Conference on Computer Vision and Pattern Recognition (CVPR) 2023",
+   "abstract": "Visual anomaly classification and segmentation are vital for automating industrial quality inspection. The focus of prior research in the field has been on training custom models for each quality inspection task, which requires task-specific images and annotation. In this paper we move away from this regime, addressing zero-shot and few-normal-shot anomaly classification and segmentation. Recently CLIP, a vision-language model, has shown revolutionary generality with competitive zero-/few-shot performance in comparison to full-supervision. But CLIP falls short on anomaly classification and segmentation tasks. Hence, we propose window-based CLIP (WinCLIP) with (1) a compositional ensemble on state words and prompt templates and (2) efficient extraction and aggregation of window/patch/image-level features aligned with text. We also propose its few-normal-shot extension WinCLIP+, which uses complementary information from normal images. In MVTec-AD (and VisA), without further tuning, WinCLIP achieves 91.8%/85.1% (78.1%/79.6%) AUROC in zero-shot anomaly classification and segmentation while WinCLIP+ does 93.1%/95.2% (83.8%/96.4%) in 1-normal-shot, surpassing state-of-the-art by large margins."
+  },
+  {
+   "id": "2207.14315v1",
+   "date": "2022-07-28",
+   "updated": "2022-07-28",
+   "title": "SPot-the-Difference Self-Supervised Pre-training for Anomaly Detection and Segmentation",
+   "authors": [
+    "Yang Zou",
+    "Jongheon Jeong",
+    "Latha Pemula",
+    "Dongqing Zhang",
+    "Onkar Dabeer"
+   ],
+   "comment": "Accepted to European Conference on Computer Vision 2022",
+   "abstract": "Visual anomaly detection is commonly used in industrial quality inspection. In this paper, we present a new dataset as well as a new self-supervised learning method for ImageNet pre-training to improve anomaly detection and segmentation in 1-class and 2-class 5/10/high-shot training setups. We release the Visual Anomaly (VisA) Dataset consisting of 10,821 high-resolution color images (9,621 normal and 1,200 anomalous samples) covering 12 objects in 3 domains, making it the largest industrial anomaly detection dataset to date. Both image and pixel-level labels are provided. We also propose a new self-supervised framework - SPot-the-difference (SPD) - which can regularize contrastive self-supervised pre-training, such as SimSiam, MoCo and SimCLR, to be more suitable for anomaly detection tasks. Our experiments on VisA and MVTec-AD dataset show that SPD consistently improves these contrastive pre-training baselines and even the supervised pre-training. For example, SPD improves Area Under the Precision-Recall curve (AU-PR) for anomaly segmentation by 5.9% and 6.8% over SimSiam and supervised pre-training respectively in the 2-class high-shot regime. We open-source the project at http://github.com/amazon-research/spot-diff ."
+  },
+  {
+   "id": "2310.18961v12",
+   "date": "2023-10-29",
+   "updated": "2026-01-01",
+   "title": "AnomalyCLIP: Object-agnostic Prompt Learning for Zero-shot Anomaly Detection",
+   "authors": [
+    "Qihang Zhou",
+    "Guansong Pang",
+    "Yu Tian",
+    "Shibo He",
+    "Jiming Chen"
+   ],
+   "comment": "Accepted by ICLR 2024",
+   "abstract": "Zero-shot anomaly detection (ZSAD) requires detection models trained using auxiliary data to detect anomalies without any training sample in a target dataset. It is a crucial task when training data is not accessible due to various concerns, eg, data privacy, yet it is challenging since the models need to generalize to anomalies across different domains where the appearance of foreground objects, abnormal regions, and background features, such as defects/tumors on different products/organs, can vary significantly. Recently large pre-trained vision-language models (VLMs), such as CLIP, have demonstrated strong zero-shot recognition ability in various vision tasks, including anomaly detection. However, their ZSAD performance is weak since the VLMs focus more on modeling the class semantics of the foreground objects rather than the abnormality/normality in the images. In this paper we introduce a novel approach, namely AnomalyCLIP, to adapt CLIP for accurate ZSAD across different domains. The key insight of AnomalyCLIP is to learn object-agnostic text prompts that capture generic normality and abnormality in an image regardless of its foreground objects. This allows our model to focus on the abnormal image regions rather than the object semantics, enabling generalized normality and abnormality recognition on diverse types of objects. Large-scale experiments on 17 real-world anomaly detection datasets show that AnomalyCLIP achieves superior zero-shot performance of detecting and segmenting anomalies in datasets of highly diverse class semantics from various defect inspection and medical imaging domains. Code will be made available at https://github.com/zqhang/AnomalyCLIP."
+  },
+  {
+   "id": "2303.14535v3",
+   "date": "2023-03-25",
+   "updated": "2024-02-08",
+   "title": "EfficientAD: Accurate Visual Anomaly Detection at Millisecond-Level Latencies",
+   "authors": [
+    "Kilian Batzner",
+    "Lars Heckler",
+    "Rebecca K\u00f6nig"
+   ],
+   "comment": "Accepted as Oral to WACV 2024",
+   "abstract": "Detecting anomalies in images is an important task, especially in real-time computer vision applications. In this work, we focus on computational efficiency and propose a lightweight feature extractor that processes an image in less than a millisecond on a modern GPU. We then use a student-teacher approach to detect anomalous features. We train a student network to predict the extracted features of normal, i.e., anomaly-free training images. The detection of anomalies at test time is enabled by the student failing to predict their features. We propose a training loss that hinders the student from imitating the teacher feature extractor beyond the normal images. It allows us to drastically reduce the computational cost of the student-teacher model, while improving the detection of anomalous features. We furthermore address the detection of challenging logical anomalies that involve invalid combinations of normal local features, for example, a wrong ordering of objects. We detect these anomalies by efficiently incorporating an autoencoder that analyzes images globally. We evaluate our method, called EfficientAD, on 32 datasets from three industrial anomaly detection dataset collections. EfficientAD sets new standards for both the detection and the localization of anomalies. At a latency of two milliseconds and a throughput of six hundred images per second, it enables a fast handling of anomalies. Together with its low error rate, this makes it an economical solution for real-world applications and a fruitful basis for future research."
+  },
+  {
+   "id": "2106.08265v2",
+   "date": "2021-06-15",
+   "updated": "2022-05-05",
+   "title": "Towards Total Recall in Industrial Anomaly Detection",
+   "authors": [
+    "Karsten Roth",
+    "Latha Pemula",
+    "Joaquin Zepeda",
+    "Bernhard Sch\u00f6lkopf",
+    "Thomas Brox",
+    "Peter Gehler"
+   ],
+   "comment": "Accepted to CVPR 2022",
+   "abstract": "Being able to spot defective parts is a critical component in large-scale industrial manufacturing. A particular challenge that we address in this work is the cold-start problem: fit a model using nominal (non-defective) example images only. While handcrafted solutions per class are possible, the goal is to build systems that work well simultaneously on many different tasks automatically. The best performing approaches combine embeddings from ImageNet models with an outlier detection model. In this paper, we extend on this line of work and propose \\textbf{PatchCore}, which uses a maximally representative memory bank of nominal patch-features. PatchCore offers competitive inference times while achieving state-of-the-art performance for both detection and localization. On the challenging, widely used MVTec AD benchmark PatchCore achieves an image-level anomaly detection AUROC score of up to $99.6\\%$, more than halving the error compared to the next best competitor. We further report competitive results on two additional datasets and also find competitive results in the few samples regime.\\freefootnote{$^*$ Work done during a research internship at Amazon AWS.} Code: github.com/amazon-research/patchcore-inspection."
+  },
+  {
+   "id": "2206.03687v3",
+   "date": "2022-06-08",
+   "updated": "2022-10-25",
+   "title": "A Unified Model for Multi-class Anomaly Detection",
+   "authors": [
+    "Zhiyuan You",
+    "Lei Cui",
+    "Yujun Shen",
+    "Kai Yang",
+    "Xin Lu",
+    "Yu Zheng",
+    "Xinyi Le"
+   ],
+   "comment": "Accepted by NeurIPS 2022",
+   "abstract": "Despite the rapid advance of unsupervised anomaly detection, existing methods require to train separate models for different objects. In this work, we present UniAD that accomplishes anomaly detection for multiple classes with a unified framework. Under such a challenging setting, popular reconstruction networks may fall into an \"identical shortcut\", where both normal and anomalous samples can be well recovered, and hence fail to spot outliers. To tackle this obstacle, we make three improvements. First, we revisit the formulations of fully-connected layer, convolutional layer, as well as attention layer, and confirm the important role of query embedding (i.e., within attention layer) in preventing the network from learning the shortcut. We therefore come up with a layer-wise query decoder to help model the multi-class distribution. Second, we employ a neighbor masked attention module to further avoid the information leak from the input feature to the reconstructed output feature. Third, we propose a feature jittering strategy that urges the model to recover the correct message even with noisy inputs. We evaluate our algorithm on MVTec-AD and CIFAR-10 datasets, where we surpass the state-of-the-art alternatives by a sufficiently large margin. For example, when learning a unified model for 15 categories in MVTec-AD, we surpass the second competitor on the tasks of both anomaly detection (from 88.1% to 96.5%) and anomaly localization (from 89.5% to 96.8%). Code is available at https://github.com/zhiyuanyou/UniAD."
+  },
+  {
+   "id": "1807.02011v3",
+   "date": "2018-07-05",
+   "updated": "2019-02-01",
+   "title": "Improving Unsupervised Defect Segmentation by Applying Structural Similarity to Autoencoders",
+   "authors": [
+    "Paul Bergmann",
+    "Sindy L\u00f6we",
+    "Michael Fauser",
+    "David Sattlegger",
+    "Carsten Steger"
+   ],
+   "comment": null,
+   "abstract": "Convolutional autoencoders have emerged as popular methods for unsupervised defect segmentation on image data. Most commonly, this task is performed by thresholding a pixel-wise reconstruction error based on an $\\ell^p$ distance. This procedure, however, leads to large residuals whenever the reconstruction encompasses slight localization inaccuracies around edges. It also fails to reveal defective regions that have been visually altered when intensity values stay roughly consistent. We show that these problems prevent these approaches from being applied to complex real-world scenarios and that it cannot be easily avoided by employing more elaborate architectures such as variational or feature matching autoencoders. We propose to use a perceptual loss function based on structural similarity which examines inter-dependencies between local image regions, taking into account luminance, contrast and structural information, instead of simply comparing single pixel values. It achieves significant performance gains on a challenging real-world dataset of nanofibrous materials and a novel dataset of two woven fabrics over the state of the art approaches for unsupervised defect segmentation that use pixel-wise reconstruction error metrics."
+  },
+  {
+   "id": "2406.03262v6",
+   "date": "2024-06-05",
+   "updated": "2025-08-19",
+   "title": "A Comprehensive Library for Benchmarking Multi-class Visual Anomaly Detection",
+   "authors": [
+    "Jiangning Zhang",
+    "Haoyang He",
+    "Zhenye Gan",
+    "Qingdong He",
+    "Yuxuan Cai",
+    "Zhucun Xue",
+    "Yabiao Wang",
+    "Chengjie Wang",
+    "Lei Xie",
+    "Yong Liu"
+   ],
+   "comment": null,
+   "abstract": "Visual anomaly detection aims to identify anomalous regions in images through unsupervised learning paradigms, with increasing application demand and value in fields such as industrial inspection and medical lesion detection. Despite significant progress in recent years, there is a lack of comprehensive benchmarks to adequately evaluate the performance of various mainstream methods across different datasets under the practical multi-class setting. The absence of standardized experimental setups can lead to potential biases in training epochs, resolution, and metric results, resulting in erroneous conclusions. This paper addresses this issue by proposing a comprehensive visual anomaly detection benchmark, ADer, which is a modular framework that is highly extensible for new methods. The benchmark includes multiple datasets from industrial and medical domains, implementing fifteen state-of-the-art methods and nine comprehensive metrics. Additionally, we have proposed the GPU-assisted ADEval package to address the slow evaluation problem of metrics like time-consuming mAU-PRO on large-scale data, significantly reducing evaluation time by more than 1000-fold. Through extensive experimental results, we objectively reveal the strengths and weaknesses of different methods and provide insights into the challenges and future directions of multi-class visual anomaly detection. We hope that ADer will become a valuable resource for researchers and practitioners in the field, promoting the development of more robust and generalizable anomaly detection systems. Full codes are open-sourced at https://github.com/zhangzjn/ader."
+  },
+  {
+   "id": "2404.06564v4",
+   "date": "2024-04-09",
+   "updated": "2025-03-09",
+   "title": "MambaAD: Exploring State Space Models for Multi-class Unsupervised Anomaly Detection",
+   "authors": [
+    "Haoyang He",
+    "Yuhu Bai",
+    "Jiangning Zhang",
+    "Qingdong He",
+    "Hongxu Chen",
+    "Zhenye Gan",
+    "Chengjie Wang",
+    "Xiangtai Li",
+    "Guanzhong Tian",
+    "Lei Xie"
+   ],
+   "comment": "NeurIPS'24",
+   "abstract": "Recent advancements in anomaly detection have seen the efficacy of CNN- and transformer-based approaches. However, CNNs struggle with long-range dependencies, while transformers are burdened by quadratic computational complexity. Mamba-based models, with their superior long-range modeling and linear efficiency, have garnered substantial attention. This study pioneers the application of Mamba to multi-class unsupervised anomaly detection, presenting MambaAD, which consists of a pre-trained encoder and a Mamba decoder featuring (Locality-Enhanced State Space) LSS modules at multi-scales. The proposed LSS module, integrating parallel cascaded (Hybrid State Space) HSS blocks and multi-kernel convolutions operations, effectively captures both long-range and local information. The HSS block, utilizing (Hybrid Scanning) HS encoders, encodes feature maps into five scanning methods and eight directions, thereby strengthening global connections through the (State Space Model) SSM. The use of Hilbert scanning and eight directions significantly improves feature sequence modeling. Comprehensive experiments on six diverse anomaly detection datasets and seven metrics demonstrate state-of-the-art performance, substantiating the method's effectiveness. The code and models are available at https://lewandofskee.github.io/projects/MambaAD."
+  },
+  {
+   "id": "2202.08341v1",
+   "date": "2022-02-16",
+   "updated": "2022-02-16",
+   "title": "Anomalib: A Deep Learning Library for Anomaly Detection",
+   "authors": [
+    "Samet Akcay",
+    "Dick Ameln",
+    "Ashwin Vaidya",
+    "Barath Lakshmanan",
+    "Nilesh Ahuja",
+    "Utku Genc"
+   ],
+   "comment": null,
+   "abstract": "This paper introduces anomalib, a novel library for unsupervised anomaly detection and localization. With reproducibility and modularity in mind, this open-source library provides algorithms from the literature and a set of tools to design custom anomaly detection algorithms via a plug-and-play approach. Anomalib comprises state-of-the-art anomaly detection algorithms that achieve top performance on the benchmarks and that can be used off-the-shelf. In addition, the library provides components to design custom algorithms that could be tailored towards specific needs. Additional tools, including experiment trackers, visualizers, and hyper-parameter optimizers, make it simple to design and implement anomaly detection models. The library also supports OpenVINO model optimization and quantization for real-time deployment. Overall, anomalib is an extensive library for the design, implementation, and deployment of unsupervised anomaly detection models from data to the edge."
+  },
+  {
+   "id": "2403.06495v3",
+   "date": "2024-03-11",
+   "updated": "2024-03-16",
+   "title": "Toward Generalist Anomaly Detection via In-context Residual Learning with Few-shot Sample Prompts",
+   "authors": [
+    "Jiawen Zhu",
+    "Guansong Pang"
+   ],
+   "comment": "Accepted to CVPR 2024; 17 pages; 5 figures",
+   "abstract": "This paper explores the problem of Generalist Anomaly Detection (GAD), aiming to train one single detection model that can generalize to detect anomalies in diverse datasets from different application domains without any further training on the target data. Some recent studies have shown that large pre-trained Visual-Language Models (VLMs) like CLIP have strong generalization capabilities on detecting industrial defects from various datasets, but their methods rely heavily on handcrafted text prompts about defects, making them difficult to generalize to anomalies in other applications, e.g., medical image anomalies or semantic anomalies in natural images. In this work, we propose to train a GAD model with few-shot normal images as sample prompts for AD on diverse datasets on the fly. To this end, we introduce a novel approach that learns an in-context residual learning model for GAD, termed InCTRL. It is trained on an auxiliary dataset to discriminate anomalies from normal samples based on a holistic evaluation of the residuals between query images and few-shot normal sample prompts. Regardless of the datasets, per definition of anomaly, larger residuals are expected for anomalies than normal samples, thereby enabling InCTRL to generalize across different domains without further training. Comprehensive experiments on nine AD datasets are performed to establish a GAD benchmark that encapsulate the detection of industrial defect anomalies, medical anomalies, and semantic anomalies in both one-vs-all and multi-class setting, on which InCTRL is the best performer and significantly outperforms state-of-the-art competing methods. Code is available at https://github.com/mala-lab/InCTRL."
+  },
+  {
+   "id": "2002.10445v1",
+   "date": "2020-02-24",
+   "updated": "2020-02-24",
+   "title": "Deep Nearest Neighbor Anomaly Detection",
+   "authors": [
+    "Liron Bergman",
+    "Niv Cohen",
+    "Yedid Hoshen"
+   ],
+   "comment": null,
+   "abstract": "Nearest neighbors is a successful and long-standing technique for anomaly detection. Significant progress has been recently achieved by self-supervised deep methods (e.g. RotNet). Self-supervised features however typically under-perform Imagenet pre-trained features. In this work, we investigate whether the recent progress can indeed outperform nearest-neighbor methods operating on an Imagenet pretrained feature space. The simple nearest-neighbor based-approach is experimentally shown to outperform self-supervised methods in: accuracy, few shot generalization, training time and noise robustness while making fewer assumptions on image distributions."
+  },
+  {
+   "id": "1911.02357v2",
+   "date": "2019-11-06",
+   "updated": "2020-03-18",
+   "title": "Uninformed Students: Student-Teacher Anomaly Detection with Discriminative Latent Embeddings",
+   "authors": [
+    "Paul Bergmann",
+    "Michael Fauser",
+    "David Sattlegger",
+    "Carsten Steger"
+   ],
+   "comment": "Accepted to CVPR 2020",
+   "abstract": "We introduce a powerful student-teacher framework for the challenging problem of unsupervised anomaly detection and pixel-precise anomaly segmentation in high-resolution images. Student networks are trained to regress the output of a descriptive teacher network that was pretrained on a large dataset of patches from natural images. This circumvents the need for prior data annotation. Anomalies are detected when the outputs of the student networks differ from that of the teacher network. This happens when they fail to generalize outside the manifold of anomaly-free training data. The intrinsic uncertainty in the student networks is used as an additional scoring function that indicates anomalies. We compare our method to a large number of existing deep learning based methods for unsupervised anomaly detection. Our experiments demonstrate improvements over state-of-the-art methods on a number of real-world datasets, including the recently introduced MVTec Anomaly Detection dataset that was specifically designed to benchmark anomaly segmentation algorithms."
+  },
+  {
+   "id": "2407.09359v1",
+   "date": "2024-07-12",
+   "updated": "2024-07-12",
+   "title": "A Unified Anomaly Synthesis Strategy with Gradient Ascent for Industrial Anomaly Detection and Localization",
+   "authors": [
+    "Qiyu Chen",
+    "Huiyuan Luo",
+    "Chengkan Lv",
+    "Zhengtao Zhang"
+   ],
+   "comment": null,
+   "abstract": "Anomaly synthesis strategies can effectively enhance unsupervised anomaly detection. However, existing strategies have limitations in the coverage and controllability of anomaly synthesis, particularly for weak defects that are very similar to normal regions. In this paper, we propose Global and Local Anomaly co-Synthesis Strategy (GLASS), a novel unified framework designed to synthesize a broader coverage of anomalies under the manifold and hypersphere distribution constraints of Global Anomaly Synthesis (GAS) at the feature level and Local Anomaly Synthesis (LAS) at the image level. Our method synthesizes near-in-distribution anomalies in a controllable way using Gaussian noise guided by gradient ascent and truncated projection. GLASS achieves state-of-the-art results on the MVTec AD (detection AUROC of 99.9\\%), VisA, and MPDD datasets and excels in weak defect detection. The effectiveness and efficiency have been further validated in industrial applications for woven fabric defect detection. The code and dataset are available at: \\url{https://github.com/cqylunlun/GLASS}."
+  },
+  {
+   "id": "2503.21622v1",
+   "date": "2025-03-27",
+   "updated": "2025-03-27",
+   "title": "The MVTec AD 2 Dataset: Advanced Scenarios for Unsupervised Anomaly Detection",
+   "authors": [
+    "Lars Heckler-Kram",
+    "Jan-Hendrik Neudeck",
+    "Ulla Scheler",
+    "Rebecca K\u00f6nig",
+    "Carsten Steger"
+   ],
+   "comment": "paper under review; dataset first released for the VAND3.0 challenge @ CVPR 2025 https://sites.google.com/view/vand30cvpr2025/challenge",
+   "abstract": "In recent years, performance on existing anomaly detection benchmarks like MVTec AD and VisA has started to saturate in terms of segmentation AU-PRO, with state-of-the-art models often competing in the range of less than one percentage point. This lack of discriminatory power prevents a meaningful comparison of models and thus hinders progress of the field, especially when considering the inherent stochastic nature of machine learning results. We present MVTec AD 2, a collection of eight anomaly detection scenarios with more than 8000 high-resolution images. It comprises challenging and highly relevant industrial inspection use cases that have not been considered in previous datasets, including transparent and overlapping objects, dark-field and back light illumination, objects with high variance in the normal data, and extremely small defects. We provide comprehensive evaluations of state-of-the-art methods and show that their performance remains below 60% average AU-PRO. Additionally, our dataset provides test scenarios with lighting condition changes to assess the robustness of methods under real-world distribution shifts. We host a publicly accessible evaluation server that holds the pixel-precise ground truth of the test set (https://benchmark.mvtec.com/). All image data is available at https://www.mvtec.com/company/research/datasets/mvtec-ad-2."
+  },
+  {
+   "id": "2201.10703v2",
+   "date": "2022-01-26",
+   "updated": "2022-03-23",
+   "title": "Anomaly Detection via Reverse Distillation from One-Class Embedding",
+   "authors": [
+    "Hanqiu Deng",
+    "Xingyu Li"
+   ],
+   "comment": "10 pages, 7 figures",
+   "abstract": "Knowledge distillation (KD) achieves promising results on the challenging problem of unsupervised anomaly detection (AD).The representation discrepancy of anomalies in the teacher-student (T-S) model provides essential evidence for AD. However, using similar or identical architectures to build the teacher and student models in previous studies hinders the diversity of anomalous representations. To tackle this problem, we propose a novel T-S model consisting of a teacher encoder and a student decoder and introduce a simple yet effective \"reverse distillation\" paradigm accordingly. Instead of receiving raw images directly, the student network takes teacher model's one-class embedding as input and targets to restore the teacher's multiscale representations. Inherently, knowledge distillation in this study starts from abstract, high-level presentations to low-level features. In addition, we introduce a trainable one-class bottleneck embedding (OCBE) module in our T-S model. The obtained compact embedding effectively preserves essential information on normal patterns, but abandons anomaly perturbations. Extensive experimentation on AD and one-class novelty detection benchmarks shows that our method surpasses SOTA performance, demonstrating our proposed approach's effectiveness and generalizability."
+  },
+  {
+   "id": "2310.14228v1",
+   "date": "2023-10-22",
+   "updated": "2023-10-22",
+   "title": "Hierarchical Vector Quantized Transformer for Multi-class Unsupervised Anomaly Detection",
+   "authors": [
+    "Ruiying Lu",
+    "YuJie Wu",
+    "Long Tian",
+    "Dongsheng Wang",
+    "Bo Chen",
+    "Xiyang Liu",
+    "Ruimin Hu"
+   ],
+   "comment": null,
+   "abstract": "Unsupervised image Anomaly Detection (UAD) aims to learn robust and discriminative representations of normal samples. While separate solutions per class endow expensive computation and limited generalizability, this paper focuses on building a unified framework for multiple classes. Under such a challenging setting, popular reconstruction-based networks with continuous latent representation assumption always suffer from the \"identical shortcut\" issue, where both normal and abnormal samples can be well recovered and difficult to distinguish. To address this pivotal issue, we propose a hierarchical vector quantized prototype-oriented Transformer under a probabilistic framework. First, instead of learning the continuous representations, we preserve the typical normal patterns as discrete iconic prototypes, and confirm the importance of Vector Quantization in preventing the model from falling into the shortcut. The vector quantized iconic prototype is integrated into the Transformer for reconstruction, such that the abnormal data point is flipped to a normal data point.Second, we investigate an exquisite hierarchical framework to relieve the codebook collapse issue and replenish frail normal patterns. Third, a prototype-oriented optimal transport method is proposed to better regulate the prototypes and hierarchically evaluate the abnormal score. By evaluating on MVTec-AD and VisA datasets, our model surpasses the state-of-the-art alternatives and possesses good interpretability. The code is available at https://github.com/RuiyingLu/HVQ-Trans."
+  },
+  {
+   "id": "2305.17382v3",
+   "date": "2023-05-27",
+   "updated": "2023-10-11",
+   "title": "APRIL-GAN: A Zero-/Few-Shot Anomaly Classification and Segmentation Method for CVPR 2023 VAND Workshop Challenge Tracks 1&2: 1st Place on Zero-shot AD and 4th Place on Few-shot AD",
+   "authors": [
+    "Xuhai Chen",
+    "Yue Han",
+    "Jiangning Zhang"
+   ],
+   "comment": null,
+   "abstract": "In this technical report, we briefly introduce our solution for the Zero/Few-shot Track of the Visual Anomaly and Novelty Detection (VAND) 2023 Challenge. For industrial visual inspection, building a single model that can be rapidly adapted to numerous categories without or with only a few normal reference images is a promising research direction. This is primarily because of the vast variety of the product types. For the zero-shot track, we propose a solution based on the CLIP model by adding extra linear layers. These layers are used to map the image features to the joint embedding space, so that they can compare with the text features to generate the anomaly maps. Besides, when the reference images are available, we utilize multiple memory banks to store their features and compare them with the features of the test images during the testing phase. In this challenge, our method achieved first place in the zero-shot track, especially excelling in segmentation with an impressive F1 score improvement of 0.0489 over the second-ranked participant. Furthermore, in the few-shot track, we secured the fourth position overall, with our classification F1 score of 0.8687 ranking first among all participating teams."
+  },
+  {
+   "id": "2006.16067v2",
+   "date": "2020-06-29",
+   "updated": "2020-07-13",
+   "title": "Patch SVDD: Patch-level SVDD for Anomaly Detection and Segmentation",
+   "authors": [
+    "Jihun Yi",
+    "Sungroh Yoon"
+   ],
+   "comment": null,
+   "abstract": "In this paper, we address the problem of image anomaly detection and segmentation. Anomaly detection involves making a binary decision as to whether an input image contains an anomaly, and anomaly segmentation aims to locate the anomaly on the pixel level. Support vector data description (SVDD) is a long-standing algorithm used for an anomaly detection, and we extend its deep learning variant to the patch-based method using self-supervised learning. This extension enables anomaly segmentation and improves detection performance. As a result, anomaly detection and segmentation performances measured in AUROC on MVTec AD dataset increased by 9.8% and 7.0%, respectively, compared to the previous state-of-the-art methods. Our results indicate the efficacy of the proposed method and its potential for industrial application. Detailed analysis of the proposed method offers insights regarding its behavior, and the code is available online."
+  }
+ ],
+ "non_arxiv": [
+  {
+   "name": "MVTec AD",
+   "venue": "CVPR 2019",
+   "url": "https://openaccess.thecvf.com/content_CVPR_2019/papers/Bergmann_MVTec_AD_--_A_Comprehensive_Real-World_Dataset_for_Unsupervised_Anomaly_CVPR_2019_paper.pdf"
+  },
+  {
+   "name": "MVTec LOCO AD (Beyond Dents and Scratches)",
+   "venue": "IJCV 2022",
+   "url": "to resolve at extraction"
+  }
+ ]
+}

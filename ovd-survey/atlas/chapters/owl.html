@@ -1,0 +1,54 @@
+  <article data-chapter="owl" data-chip="OWL-ViT and OWLv2">
+    <header class="ch-head"><span class="num"></span><h2>Make CLIP the detector</h2><p class="subhead">Every patch is a candidate object</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="OWL-ViT and OWLv2">
+        <button type="button" role="tab" data-step="0">Every token a box</button>
+        <button type="button" role="tab" data-step="1">Text query</button>
+        <button type="button" role="tab" data-step="2">Image query</button>
+        <button type="button" role="tab" data-step="3">Label the web</button>
+        <button type="button" role="tab" data-step="4">Fine-tune or not</button>
+      </div>
+      <button type="button" class="tool" data-replay>Replay</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Query</span><button type="button" class="tool" data-q="forklift">forklift</button><button type="button" class="tool" data-q="pallet">pallet</button><button type="button" class="tool" data-q="rare">delineator</button><button type="button" class="tool" data-q="image">example box</button></div>
+      <label class="slider"><span>Score threshold <b id="atlas-owl-thr-value">0.50</b></span><input id="atlas-owl-thr" type="range" min="0.05" max="0.95" step="0.05" value="0.5"></label>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>Drop the pooling, keep every token</h3>
+      <p>CLIP's image tower is a <button class="inline-term" data-open="owl-vit">Vision Transformer</button>: it cuts the image into patches and turns each patch into a token. CLIP then pools all the tokens into one vector per image. OWL-ViT (2022) removes that pooling. Every output token now predicts one box and one embedding.</p>
+      <p class="note">The stage is a toy grid of 144 tokens over a drawn warehouse; a real ViT-B/32 at 768 x 768 pixels has 576. Click a token to see the box it predicts. Nothing has a name yet: names come from queries.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>A query is one more dot product</h3>
+      <p>Pick a class name. The text tower turns it into a vector, and every token's embedding is scored against it: a dot product, then a sigmoid. Pick another name and the scores change, but no box moves. The image tower never sees the text, so thousands of queries cost almost nothing. Later chapters mix text into the image encoder instead.</p>
+      <p>Training follows DETR: <button class="inline-term" data-open="owl-matching">bipartite matching</button> gives each labelled object one token, and the rest learn "no object". Nothing is frozen, but the text tower trains at a learning rate far below the image tower's.</p>
+      <p class="note">The slider sets which boxes you keep. The rare name <span class="prompt">delineator</span> barely matches the cone in this toy. OWL-ViT's own Fig. 2 shows the real case: a text query fails on a rare moth species.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Show it an example</h3>
+      <p>The query does not have to come from text. Cut a box from another image, take the model's embedding for it, and use that as the query: one-shot detection. On COCO classes held out from training, OWL-ViT reaches 41.8 one-shot AP50, against 24.3 for the best earlier method (means over four splits, from an R50+H/32 model).</p>
+      <p class="note">The stage scores every token against the embedding of a cone cut from another image. The embeddings are six-dimensional toys.</p>
+    </div>
+    <div class="step-text" data-step="3">
+      <h3>OWLv2: let the detector label the web</h3>
+      <p>Human boxes are scarce: OWL-ViT trained on about 2 million images. OWLv2 (2023) runs OWL-ViT L/14 over about 10B web images, with every word N-gram of each image's alt text as a query. It keeps the confident boxes as <button class="inline-term" data-open="owl-pseudo">pseudo-labels</button> and trains a new detector on them. Self-training alone lifts the B/16 model from 20.6 to 29.6 rare-class AP on LVIS val.</p>
+      <p>To afford billions of images, training drops the flattest 50% of patches and grades only the tokens most likely to be objects. At inference nothing is dropped: the model is the same as OWL-ViT.</p>
+      <p class="note">Replay walks through the five steps. The boxes and scores are toys; the N-gram count follows the paper's rule. The paper labels the web once and does not let the student relabel it.</p>
+    </div>
+    <div class="step-text" data-step="4">
+      <h3>Fine-tuning trades breadth for a benchmark</h3>
+      <p>A short fine-tune on the LVIS base classes raises LVIS rare-class AP at every model size. It also lowers the median AP over the 35 <button class="inline-term" data-open="owl-odinw">ODinW</button> datasets at every size. <button class="inline-term" data-open="owl-ensemble">Weight averaging</button> the two checkpoints recovers part of the loss, not all of it.</p>
+      <table class="data">
+        <thead><tr><th>OWLv2 L/14</th><th class="n">LVIS val rare AP</th><th class="n">ODinW median (35)</th></tr></thead>
+        <tbody>
+          <tr><td>Self-trained</td><td class="n">34.9</td><td class="n">16.2</td></tr>
+          <tr><td>+ fine-tuned on LVIS base</td><td class="n">44.6</td><td class="n">6.3</td></tr>
+          <tr><td>Weight average (curated-vocabulary model)</td><td class="n">not reported</td><td class="n">10.6</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Sourced: OWLv2 Table 1 (LVIS val, standard AP) and Table A4 (zero-shot AP). The weight average exists only for a related L/14 trained with a curated class list as well; its 13-dataset ODinW mean, 56.3, is the paper's best.</p>
+      <p class="inscription">OWL puts text at the very end, so a query is cheap and an image can be a query. Its limit was data; OWLv2 labels the web with itself, and fine-tuning then trades breadth for benchmark score.</p>
+    </div>
+    <button type="button" class="continue" data-go="x">Continue</button>
+  </article>

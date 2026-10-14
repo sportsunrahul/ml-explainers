@@ -1,0 +1,15 @@
+  <article data-chapter="loop">
+    <header class="ch-head"><span class="num">1 of 9</span><h2>The loop</h2><p class="subhead">Two decisions in every round</p></header>
+    <div class="tools"><button type="button" class="tool play" data-replay>Replay</button></div>
+    <p>A vision model scores a stream of images. A person can label only a few. Each round, the system decides <span class="c-yellow">which images go to a person</span>, and then <span class="c-green">which returned labels to believe</span>. The stage plays one round with real <button class="inline-term" data-open="cifar">CIFAR-10</button> images.</p>
+    <p class="note">The model draws a blue confidence bar under each image. The three shortest bars get a yellow ring and go to the labeler. One of the three tags is wrong: the image's label was flipped in our noisy copy of CIFAR-10. In the training set its loss stays high, so it gets a red strike and goes back to review.</p>
+    <h3>Main findings of the survey</h3>
+    <ul>
+      <li>Asking about the images the model is least sure of saves labels in the middle of a campaign, but not at the very start, and not when a batch is full of near-copies.</li>
+      <li>Random sampling is a much stronger baseline than its reputation: with strong augmentation and several seeds, most active-learning gains shrink to the size of the seed-to-seed spread.</li>
+      <li>A network learns the consistent pattern before it memorizes wrong labels. That window is what confident learning, Co-teaching and DivideMix all use.</li>
+      <li>Real datasets carry label errors, test sets included, and a noisy test set can rank the wrong model first. Check the evaluation labels first.</li>
+    </ul>
+    <p class="inscription">Labels are the scarce input. Spend them where they teach the most, and doubt the ones that disagree with everything else.</p>
+    <button type="button" class="continue" data-go="ask">Continue with asking about the coin flips</button>
+  </article>

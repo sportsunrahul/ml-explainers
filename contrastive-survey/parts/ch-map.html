@@ -1,0 +1,140 @@
+<section id="ch-map" class="chapter">
+<h2>The field at a glance</h2>
+<p>How big is this field, and which branches does this page follow? This chapter gives you a map: a count of papers by year, and a family tree you can come back to.</p>
+<p class="note">Optional on a first read: skip to <a href="#ch-infonce">chapter 3</a> for the mechanics.</p>
+
+<h3>Counting papers</h3>
+<p>One cheap way to see a field is to count how often its name appears. The chart below asks the arXiv preprint server two questions for each year. First, how many papers have the word "contrastive" in the title? Second, how many have the phrase "contrastive learning" in the abstract, the summary paragraph at the top of a paper?</p>
+
+<figure class="viz" id="viz-map">
+  <span class="badge sourced">Sourced</span>
+  <div class="controls fig-top" role="group" aria-label="What to count">
+    <span class="lbl">Count</span>
+    <button type="button" id="btn-map-words" aria-pressed="true">Title vs abstract</button>
+    <button type="button" id="btn-map-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls" role="group" aria-label="Titles that also name a topic">
+    <span class="lbl">Titles that also name</span>
+    <button type="button" id="btn-map-image" aria-pressed="false">image or visual</button>
+    <button type="button" id="btn-map-text" aria-pressed="false">text</button>
+    <button type="button" id="btn-map-graph" aria-pressed="false">graph</button>
+    <button type="button" id="btn-map-video" aria-pressed="false">video or audio</button>
+    <button type="button" id="btn-map-medical" aria-pressed="false">medical</button>
+    <button type="button" id="btn-map-rec" aria-pressed="false">recommendation</button>
+    <button type="button" id="btn-map-anomaly" aria-pressed="false">anomaly</button>
+    <button type="button" id="btn-map-supervised" aria-pressed="false">supervised</button>
+  </div>
+  <canvas id="map-canvas" role="img" aria-label="Bar chart of arXiv papers per year from 2017 to 2026. In the first view, grey bars count titles with the word contrastive and solid bars count abstracts with the phrase contrastive learning; both jump in 2020 and 2021. In the topic view, grey bars count all contrastive titles, a solid bar counts the titles that also name the chosen topic, and a dashed line shows that topic's share on a right-hand axis."></canvas>
+  <p class="readout" id="map-readout" aria-live="polite"></p>
+  <figcaption>Every bar is plotted from one arXiv search per year, run on <span data-claim="scan-date">2026-10-13</span> (the file <code>notes/scan/arxiv-counts-2026-10-13.json</code>; each count and its exact query are in the page's claims file). The 2026 bars are partial: they stop at the scan date. The topic split is a title-keyword heuristic: a title must contain "contrastive" and one of the topic words. One title can match two topics, and the search engine also matches word variants.</figcaption>
+</figure>
+
+<h3>Why 2020 is the turning point</h3>
+<p>Look at the solid bars first. The phrase "contrastive learning" was almost absent from abstracts before 2020: <span data-claim="scan-abs-2019">17</span> papers in 2019. Then it jumped to <span data-claim="scan-abs-2020">241</span> in 2020 and <span data-claim="scan-abs-2021">690</span> in 2021.</p>
+<p>Two papers sit right at the jump. MoCo (first posted <span data-claim="moco-published">2019-11-13</span>) and SimCLR (<span data-claim="simclr-published">2020-02-13</span>) turned the idea of <a href="#ch-compare">chapter 1</a> into a recipe that anyone could copy: two augmented views, a standard network, and many negatives. <a href="#ch-moco">Chapters 4</a> and <a href="#ch-simclr">5</a> open each recipe up. Once a recipe is simple and works, other people start to use it, and the counts follow.</p>
+
+<h3>A word becomes a tool</h3>
+<p>Now compare the two bar colors. Before 2022, more papers put "contrastive" in the title than put "contrastive learning" in the abstract. From 2022 on it is the other way round: <span data-claim="scan-abs-2022">1203</span> abstracts against <span data-claim="scan-title-2022">1197</span> titles that year, and the gap grows through 2025.</p>
+<p>Here is our reading of that. A title names what a paper is <em>about</em>. An abstract also names what a paper <em>uses</em>. When the abstract count overtakes the title count, more papers use contrastive learning as one part of a larger method than study it for its own sake. The idea has become a tool.</p>
+<p>A warning about the early title bars: "contrastive" is an ordinary English word. In 2019, <span data-claim="scan-title-2019">183</span> titles contained it, but only <span data-claim="scan-abs-2019">17</span> abstracts said "contrastive learning". Many of those early titles are likely about other things, such as contrastive explanations or the contrastive study of languages. The abstract phrase is the cleaner signal.</p>
+
+<h3>Where the word spread</h3>
+<p>The method was born in vision. You might expect images to dominate the counts. <b>Make a guess before you press "image or visual":</b> what share of all "contrastive" titles also name images, and did that share rise or fall after 2020?</p>
+<p>Press it. The image count keeps rising: <span data-claim="scan-image-2019">49</span> titles in 2019, <span data-claim="scan-image-2025">240</span> in 2025. But the dashed share line falls from about a quarter to under a fifth and then stays flat. Now press "text", "graph" and "recommendation". Each of them starts near zero before 2020 and climbs after. The image count grew; the rest of the field grew faster.</p>
+<p>That is why a raw count can mislead you. To compare one slice across years, divide it by the whole.</p>
+
+<div class="eq" id="eq-map-share" data-build data-viz="viz-map"><div class="tex tex-display">
+\htmlData{step=3, link=share}{s(y)} = \frac{\htmlData{step=1, link=slice}{n_{\text{slice}}(y)}}{\htmlData{step=2, link=all}{n_{\text{all}}(y)}}
+</div></div>
+<p class="eqno">Derived here, in our notation: a plain share, not an equation from a paper.</p>
+<ul class="gloss">
+  <li><span class="tex">y</span>: the year of first submission to arXiv.</li>
+  <li><span class="tex">n_{\text{slice}}(y)</span>: the titles that contain "contrastive" and also a topic word, such as image or graph (the solid bars in the topic view).</li>
+  <li><span class="tex">n_{\text{all}}(y)</span>: all titles that contain "contrastive" (the grey bars).</li>
+  <li><span class="tex">s(y)</span>: the slice's share of the whole, between 0 and 1 (the dashed line).</li>
+</ul>
+<p>Try it with the image slice:</p>
+<ul>
+  <li>In 2019, <span data-claim="scan-image-2019">49</span> of <span data-claim="scan-title-2019">183</span> titles named images, so <span class="tex">s = 49 / 183 \approx 0.27</span>: about <span data-claim="scan-image-share-2019">27%</span>.</li>
+  <li>In 2021, <span data-claim="scan-image-2021">142</span> of <span data-claim="scan-title-2021">853</span>, so <span class="tex">s \approx 0.17</span>: about <span data-claim="scan-image-share-2021">17%</span>.</li>
+  <li>In 2025, <span data-claim="scan-image-2025">240</span> of <span data-claim="scan-title-2025">1324</span>, so <span class="tex">s \approx 0.18</span>: about <span data-claim="scan-image-share-2025">18%</span>.</li>
+</ul>
+<p>So the image slice is a steady minority, near a fifth of the titles, while the word spread to text, graphs, recommendation and medicine. This page stays with images, because that is where the ideas were found and tested.</p>
+
+<div class="aside claim">
+  <h4>Claim card: the arXiv scan</h4>
+  <dl>
+    <dt>Claim</dt><dd>Use of the phrase "contrastive learning" jumped in 2020 and 2021, and spread from vision into many other fields; titles that name images are a steady minority after 2021.</dd>
+    <dt>Measured</dt><dd>The arXiv search API's total-result count, one query per year of first submission, 2017 to 2026: "contrastive" in the title, "contrastive learning" in the abstract, and "contrastive" in the title together with one topic word. All of arXiv, every category.</dd>
+    <dt>Cannot see</dt><dd>Papers that use the idea without the word. Many papers train with a CLIP-style loss or start from a contrastive backbone and never write "contrastive". Also missing: papers not on arXiv, and quality. The "supervised" slice mixes self-supervised, semi-supervised and supervised work, and the search also matches variants such as "supervision". A count measures attention, not progress.</dd>
+    <dt>Would change the picture</dt><dd>A hand-labelled sample showing that most matching titles are not about the learning method, or a full-text search showing that image papers use the method far more often than their titles say.</dd>
+  </dl>
+</div>
+
+<details class="check">
+  <summary>Check yourself: a 2024 paper fine-tunes a detector on top of a SigLIP image encoder, and never writes "contrastive" in its title or abstract. Which bars count it?</summary>
+  <p>None of them. The scan only matches words. That paper depends on contrastive pretraining, but the count cannot see it. This is the main blind spot of the chart: the more a method becomes a standard part, the less often papers name it.</p>
+</details>
+
+<h3>The family tree</h3>
+<p>Counts tell you how much. The tree tells you who built on whom. Each pill is one paper, placed in a <em>lane</em>: the problem it works on. Time runs down the page. Inside a lane the order is exact; across lanes, papers on the same band share only the year. Solid pills are taught in depth on this page, and dashed pills are named in passing. Press any pill.</p>
+<p>Do not worry about the names yet; each solid pill gets a chapter. Come back to this map after chapter 8.</p>
+
+<figure class="viz" id="viz-tree">
+  <span class="badge sourced">Sourced</span>
+  <div class="tree" id="tree-host" style="margin-top:1.6rem"></div>
+  <div class="controls"><button type="button" id="btn-tree-reset" class="reset" data-cue-reset>Clear selection</button></div>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Dates are each paper's first arXiv version, or the conference for the four papers that are not on arXiv. Rows show order, not a time scale. A line means "builds on", as the paper's own text describes it; it is our reading of the paper notes, not a full citation graph. On a phone the tree is one dated column, and lines appear only for the selected paper.</figcaption>
+</figure>
+
+<h3>How to read the lanes</h3>
+<p>Each lane is a question the field had to answer, and each one gets a chapter:</p>
+<ul>
+  <li><b>Negatives</b>: how do you get many negatives cheaply? Memory bank, CPC, MoCo, SimCLR. This lane is the spine of <a href="#ch-infonce">chapters 3</a> to <a href="#ch-simclr">5</a>.</li>
+  <li><b>Theory</b>: what does the loss actually optimize? Mutual information first, then alignment and uniformity on the sphere (<a href="#ch-sphere">chapter 6</a>).</li>
+  <li><b>Hard negatives</b>: which negatives teach the most, and which are secretly positives (<a href="#ch-negatives">chapter 7</a>)?</li>
+  <li><b>No negatives</b>: can you stop collapse without negatives at all (<a href="#ch-beyond">chapter 8</a>)?</li>
+  <li><b>Labels</b> and <b>Language</b>: what changes when the positive is a same-class image (<a href="#ch-supcon">chapter 9</a>) or a caption (<a href="#ch-clip">chapter 10</a>)?</li>
+  <li><b>Dense</b>: can you contrast regions or pixels instead of whole images, for detection and segmentation? This page does not teach it; the guide and chapter 10 point to it.</li>
+</ul>
+<p>Now read the bottom half of the tree. After 2021 the image-only lanes add self-distillation papers (DINOv2, DINOv3, Web-SSL), which use no negatives. The lane with new contrastive work is Language: SigLIP, MetaCLIP, SigLIP 2 and Perception Encoder. Our reading: image-only contrastive pretraining peaked around 2020 and 2021, and the image-text form is the one that lives on. The idea of pulling the pair and pushing the rest did not go away; it moved to pairs of images and captions.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why 2020 is the turning point, and which two recipes made the idea easy to copy.</li>
+    <li>Why a slice's share, not its raw count, shows whether it is growing relative to the field, and what a word count cannot see.</li>
+    <li>Which lane of the family tree each later chapter follows, and why the image-text lane is the one still active.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>If you need an image encoder today, you will usually start from a pretrained one, not train your own. In our reading, most such encoders come from two lanes of the tree: Language (CLIP, SigLIP and their successors) and No negatives (DINOv2, DINOv3). The Negatives lane is where the ideas behind both were worked out, which is why the rest of this page starts there. When you search for prior work in your own domain, search for the mechanism as well as the word: many papers that use it never say "contrastive".</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-map'), out = document.getElementById('map-readout');
+  const kit = KIT.mapchart(document.getElementById('map-canvas'), { fig });
+  const doms = ['image', 'text', 'graph', 'video', 'medical', 'rec', 'anomaly', 'supervised'];
+  const words = document.getElementById('btn-map-words'), db = Object.fromEntries(doms.map(d => [d, document.getElementById('btn-map-' + d)]));
+  const go = st => {
+    kit.set(st);
+    words.setAttribute('aria-pressed', String(st.view === 'words'));
+    doms.forEach(d => db[d].setAttribute('aria-pressed', String(st.view === 'domain' && st.dom === d)));
+    out.innerHTML = KIT.mapText(kit.state);
+  };
+  words.addEventListener('click', () => go({ view: 'words', dom: 'image' }));
+  doms.forEach(d => db[d].addEventListener('click', () => go({ view: 'domain', dom: d })));
+  document.getElementById('btn-map-reset').addEventListener('click', () => go({ view: 'words', dom: 'image' }));
+  out.innerHTML = KIT.mapText(kit.state);
+
+  const tout = document.getElementById('tree-readout'), tree = KIT.ctree(document.getElementById('tree-host'));
+  tree.pills.forEach(b => b.addEventListener('click', () => { tree.set(b.id.slice(9)); tout.innerHTML = KIT.ctreeText(tree.state.sel); }));
+  document.getElementById('btn-tree-reset').addEventListener('click', () => { tree.set(null); tout.innerHTML = KIT.ctreeText(null); });
+  tout.innerHTML = KIT.ctreeText(null);
+})();
+</script>
+</section>

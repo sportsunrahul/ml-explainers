@@ -1,0 +1,4395 @@
+[
+ {
+  "id": "anomalydino-published",
+  "claim": "AnomalyDINO arXiv v1 submission date",
+  "value": "2024-05-23",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "abs.html submission history [v1]",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-version-read",
+  "claim": "AnomalyDINO version read (v3) date",
+  "value": "2025-03-13",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "abs.html submission history [v3]",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-venue",
+  "claim": "AnomalyDINO venue",
+  "value": "WACV 2025",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "abs.html Comments; LaTeX footnote line 98",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-backbone",
+  "claim": "AnomalyDINO default backbone size",
+  "value": "ViT-S",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Defaults (LaTeX line 360)",
+  "protocol": "AnomalyDINO-S default"
+ },
+ {
+  "id": "anomalydino-backbone-params",
+  "claim": "DINOv2 ViT-S parameter count",
+  "value": "21",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Defaults (line 359, 21x10^6); Table 9d 'S (21 M)'",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-vitg-params",
+  "claim": "DINOv2 ViT-G parameter count (largest)",
+  "value": "1,100",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9d 'G (1,100 M)'",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-patch-size",
+  "claim": "DINOv2 patch size in pixels",
+  "value": "14",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 3.1 (line 259)",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-res-default",
+  "claim": "AnomalyDINO input resolution, smaller edge (default)",
+  "value": "448",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Defaults (line 360)",
+  "protocol": "smaller edge"
+ },
+ {
+  "id": "anomalydino-res-high",
+  "claim": "AnomalyDINO second input resolution, smaller edge",
+  "value": "672",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Defaults (line 360)",
+  "protocol": "smaller edge"
+ },
+ {
+  "id": "anomalydino-sigma",
+  "claim": "Gaussian smoothing sigma for the anomaly map",
+  "value": "4.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 3.1 (line 306)",
+  "protocol": "pixel map"
+ },
+ {
+  "id": "anomalydino-top-percent",
+  "claim": "Image score = mean of the highest x% patch distances",
+  "value": "1%",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 3.1 (line 297), Eq. 4",
+  "protocol": "image score"
+ },
+ {
+  "id": "anomalydino-patches-per-image",
+  "claim": "Typical patches per image range",
+  "value": "200 and 1000",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. C.2 Scoring (line 1235)",
+  "protocol": "depends on resolution and masking"
+ },
+ {
+  "id": "anomalydino-runs",
+  "claim": "Repeats per experiment (different reference samples)",
+  "value": "three",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Evaluation Metrics (line 374)",
+  "protocol": "mean and std of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-masked-cats",
+  "claim": "MVTec AD categories masked by default",
+  "value": "5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 8 (Capsule, Hazelnut, Pill, Screw, Toothbrush)",
+  "protocol": "masking test on first reference"
+ },
+ {
+  "id": "anomalydino-visa-masked-cats",
+  "claim": "VisA categories masked by default",
+  "value": "12",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 8 (all checkmarks)",
+  "protocol": "masking test on first reference"
+ },
+ {
+  "id": "anomalydino-prev-sota-1shot",
+  "claim": "Previous best 1-shot MVTec AD image AUROC (WinCLIP+) cited in abstract",
+  "value": "93.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Abstract; Table 2 1-shot WinCLIP+",
+  "protocol": "1-shot"
+ },
+ {
+  "id": "anomalydino-abstract-1shot",
+  "claim": "AnomalyDINO 1-shot MVTec AD image AUROC (abstract)",
+  "value": "96.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Abstract; Table 2 1-shot AnomalyDINO-S (672)",
+  "protocol": "1-shot, 672px"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-1shot-448",
+  "claim": "AnomalyDINO-S (448) 1-shot MVTec AD Classification AUROC",
+  "value": "96.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-1shot-448",
+  "claim": "AnomalyDINO-S (448) 1-shot MVTec AD Segmentation AUROC",
+  "value": "96.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-1shot-448",
+  "claim": "AnomalyDINO-S (448) 1-shot MVTec AD Segmentation PRO",
+  "value": "91.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-1shot-672",
+  "claim": "AnomalyDINO-S (672) 1-shot MVTec AD Classification AUROC",
+  "value": "96.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-1shot-672",
+  "claim": "AnomalyDINO-S (672) 1-shot MVTec AD Segmentation AUROC",
+  "value": "96.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-1shot-672",
+  "claim": "AnomalyDINO-S (672) 1-shot MVTec AD Segmentation PRO",
+  "value": "92.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-2shot-448",
+  "claim": "AnomalyDINO-S (448) 2-shot MVTec AD Classification AUROC",
+  "value": "96.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-2shot-448",
+  "claim": "AnomalyDINO-S (448) 2-shot MVTec AD Segmentation AUROC",
+  "value": "96.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-2shot-448",
+  "claim": "AnomalyDINO-S (448) 2-shot MVTec AD Segmentation PRO",
+  "value": "92.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-2shot-672",
+  "claim": "AnomalyDINO-S (672) 2-shot MVTec AD Classification AUROC",
+  "value": "96.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-2shot-672",
+  "claim": "AnomalyDINO-S (672) 2-shot MVTec AD Segmentation AUROC",
+  "value": "97.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-2shot-672",
+  "claim": "AnomalyDINO-S (672) 2-shot MVTec AD Segmentation PRO",
+  "value": "93.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-4shot-448",
+  "claim": "AnomalyDINO-S (448) 4-shot MVTec AD Classification AUROC",
+  "value": "97.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-4shot-448",
+  "claim": "AnomalyDINO-S (448) 4-shot MVTec AD Segmentation AUROC",
+  "value": "96.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-4shot-448",
+  "claim": "AnomalyDINO-S (448) 4-shot MVTec AD Segmentation PRO",
+  "value": "92.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-4shot-672",
+  "claim": "AnomalyDINO-S (672) 4-shot MVTec AD Classification AUROC",
+  "value": "97.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-4shot-672",
+  "claim": "AnomalyDINO-S (672) 4-shot MVTec AD Segmentation AUROC",
+  "value": "97.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-4shot-672",
+  "claim": "AnomalyDINO-S (672) 4-shot MVTec AD Segmentation PRO",
+  "value": "93.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-8shot-448",
+  "claim": "AnomalyDINO-S (448) 8-shot MVTec AD Classification AUROC",
+  "value": "98.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-8shot-448",
+  "claim": "AnomalyDINO-S (448) 8-shot MVTec AD Segmentation AUROC",
+  "value": "97.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-8shot-448",
+  "claim": "AnomalyDINO-S (448) 8-shot MVTec AD Segmentation PRO",
+  "value": "92.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-8shot-672",
+  "claim": "AnomalyDINO-S (672) 8-shot MVTec AD Classification AUROC",
+  "value": "98.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-8shot-672",
+  "claim": "AnomalyDINO-S (672) 8-shot MVTec AD Segmentation AUROC",
+  "value": "97.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-8shot-672",
+  "claim": "AnomalyDINO-S (672) 8-shot MVTec AD Segmentation PRO",
+  "value": "93.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-16shot-448",
+  "claim": "AnomalyDINO-S (448) 16-shot MVTec AD Classification AUROC",
+  "value": "98.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-16shot-448",
+  "claim": "AnomalyDINO-S (448) 16-shot MVTec AD Segmentation AUROC",
+  "value": "97.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-16shot-448",
+  "claim": "AnomalyDINO-S (448) 16-shot MVTec AD Segmentation PRO",
+  "value": "92.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-img-auroc-16shot-672",
+  "claim": "AnomalyDINO-S (672) 16-shot MVTec AD Classification AUROC",
+  "value": "98.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pix-auroc-16shot-672",
+  "claim": "AnomalyDINO-S (672) 16-shot MVTec AD Segmentation AUROC",
+  "value": "97.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-pro-16shot-672",
+  "claim": "AnomalyDINO-S (672) 16-shot MVTec AD Segmentation PRO",
+  "value": "94.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-1shot-448",
+  "claim": "AnomalyDINO-S (448) 1-shot VisA Classification AUROC",
+  "value": "85.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-1shot-448",
+  "claim": "AnomalyDINO-S (448) 1-shot VisA Segmentation AUROC",
+  "value": "97.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-1shot-448",
+  "claim": "AnomalyDINO-S (448) 1-shot VisA Segmentation PRO",
+  "value": "90.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-1shot-672",
+  "claim": "AnomalyDINO-S (672) 1-shot VisA Classification AUROC",
+  "value": "87.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-1shot-672",
+  "claim": "AnomalyDINO-S (672) 1-shot VisA Segmentation AUROC",
+  "value": "97.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-1shot-672",
+  "claim": "AnomalyDINO-S (672) 1-shot VisA Segmentation PRO",
+  "value": "92.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=1, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-2shot-448",
+  "claim": "AnomalyDINO-S (448) 2-shot VisA Classification AUROC",
+  "value": "88.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-2shot-448",
+  "claim": "AnomalyDINO-S (448) 2-shot VisA Segmentation AUROC",
+  "value": "97.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-2shot-448",
+  "claim": "AnomalyDINO-S (448) 2-shot VisA Segmentation PRO",
+  "value": "91.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-2shot-672",
+  "claim": "AnomalyDINO-S (672) 2-shot VisA Classification AUROC",
+  "value": "89.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-2shot-672",
+  "claim": "AnomalyDINO-S (672) 2-shot VisA Segmentation AUROC",
+  "value": "98.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-2shot-672",
+  "claim": "AnomalyDINO-S (672) 2-shot VisA Segmentation PRO",
+  "value": "93.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=2, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-4shot-448",
+  "claim": "AnomalyDINO-S (448) 4-shot VisA Classification AUROC",
+  "value": "91.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-4shot-448",
+  "claim": "AnomalyDINO-S (448) 4-shot VisA Segmentation AUROC",
+  "value": "98.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-4shot-448",
+  "claim": "AnomalyDINO-S (448) 4-shot VisA Segmentation PRO",
+  "value": "92.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-4shot-672",
+  "claim": "AnomalyDINO-S (672) 4-shot VisA Classification AUROC",
+  "value": "92.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-4shot-672",
+  "claim": "AnomalyDINO-S (672) 4-shot VisA Segmentation AUROC",
+  "value": "98.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-4shot-672",
+  "claim": "AnomalyDINO-S (672) 4-shot VisA Segmentation PRO",
+  "value": "94.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=4, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-8shot-448",
+  "claim": "AnomalyDINO-S (448) 8-shot VisA Classification AUROC",
+  "value": "92.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-8shot-448",
+  "claim": "AnomalyDINO-S (448) 8-shot VisA Segmentation AUROC",
+  "value": "98.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-8shot-448",
+  "claim": "AnomalyDINO-S (448) 8-shot VisA Segmentation PRO",
+  "value": "93.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-8shot-672",
+  "claim": "AnomalyDINO-S (672) 8-shot VisA Classification AUROC",
+  "value": "93.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-8shot-672",
+  "claim": "AnomalyDINO-S (672) 8-shot VisA Segmentation AUROC",
+  "value": "98.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-8shot-672",
+  "claim": "AnomalyDINO-S (672) 8-shot VisA Segmentation PRO",
+  "value": "94.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=8, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-16shot-448",
+  "claim": "AnomalyDINO-S (448) 16-shot VisA Classification AUROC",
+  "value": "93.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row AnomalyDINO-S (448), column Classification AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-16shot-448",
+  "claim": "AnomalyDINO-S (448) 16-shot VisA Segmentation AUROC",
+  "value": "98.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row AnomalyDINO-S (448), column Segmentation AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-16shot-448",
+  "claim": "AnomalyDINO-S (448) 16-shot VisA Segmentation PRO",
+  "value": "93.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row AnomalyDINO-S (448), column Segmentation PRO",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 448px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-img-auroc-16shot-672",
+  "claim": "AnomalyDINO-S (672) 16-shot VisA Classification AUROC",
+  "value": "94.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row AnomalyDINO-S (672), column Classification AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pix-auroc-16shot-672",
+  "claim": "AnomalyDINO-S (672) 16-shot VisA Segmentation AUROC",
+  "value": "98.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row AnomalyDINO-S (672), column Segmentation AUROC",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-visa-pro-16shot-672",
+  "claim": "AnomalyDINO-S (672) 16-shot VisA Segmentation PRO",
+  "value": "95.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row AnomalyDINO-S (672), column Segmentation PRO",
+  "protocol": "few-shot k=16, one memory bank per category, training-free, DINOv2 ViT-S/14, 672px smaller edge, agnostic preprocessing, mean of 3 runs"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-img-auroc-1shot",
+  "claim": "WinCLIP+ 1-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "93.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-pix-auroc-1shot",
+  "claim": "WinCLIP+ 1-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row WinCLIP+, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-pro-1shot",
+  "claim": "WinCLIP+ 1-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "87.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row WinCLIP+, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-img-auroc-2shot",
+  "claim": "WinCLIP+ 2-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "94.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-pix-auroc-2shot",
+  "claim": "WinCLIP+ 2-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row WinCLIP+, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-pro-2shot",
+  "claim": "WinCLIP+ 2-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "88.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row WinCLIP+, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-img-auroc-4shot",
+  "claim": "WinCLIP+ 4-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "95.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-pix-auroc-4shot",
+  "claim": "WinCLIP+ 4-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row WinCLIP+, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-pro-4shot",
+  "claim": "WinCLIP+ 4-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "89.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row WinCLIP+, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-img-auroc-8shot",
+  "claim": "WinCLIP+ 8-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "94.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from ADP (kwak2024few) WinCLIP re-implementation (star), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-img-auroc-16shot",
+  "claim": "WinCLIP+ 16-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "94.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from ADP (kwak2024few) WinCLIP re-implementation (star), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-1shot",
+  "claim": "APRIL-GAN 1-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "92.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-1shot",
+  "claim": "APRIL-GAN 1-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-1shot",
+  "claim": "APRIL-GAN 1-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "90.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-2shot",
+  "claim": "APRIL-GAN 2-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "92.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-2shot",
+  "claim": "APRIL-GAN 2-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-2shot",
+  "claim": "APRIL-GAN 2-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "91.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-4shot",
+  "claim": "APRIL-GAN 4-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "92.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-4shot",
+  "claim": "APRIL-GAN 4-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-4shot",
+  "claim": "APRIL-GAN 4-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "91.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-8shot",
+  "claim": "APRIL-GAN 8-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "93.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-8shot",
+  "claim": "APRIL-GAN 8-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-8shot",
+  "claim": "APRIL-GAN 8-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "92.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-16shot",
+  "claim": "APRIL-GAN 16-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "93.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-16shot",
+  "claim": "APRIL-GAN 16-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-16shot",
+  "claim": "APRIL-GAN 16-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "92.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-adp-img-auroc-2shot",
+  "claim": "ADP_l 2-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "95.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-adp-img-auroc-4shot",
+  "claim": "ADP_l 4-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "96.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-adp-img-auroc-8shot",
+  "claim": "ADP_l 8-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "97.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-adp-img-auroc-16shot",
+  "claim": "ADP_l 16-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "97.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 16-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-img-auroc-1shot",
+  "claim": "PatchCore 1-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "83.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row PatchCore, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-pix-auroc-1shot",
+  "claim": "PatchCore 1-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "92.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row PatchCore, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-pro-1shot",
+  "claim": "PatchCore 1-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "79.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row PatchCore, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-img-auroc-2shot",
+  "claim": "PatchCore 2-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "86.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row PatchCore, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-pix-auroc-2shot",
+  "claim": "PatchCore 2-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "93.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row PatchCore, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-pro-2shot",
+  "claim": "PatchCore 2-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "82.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row PatchCore, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-img-auroc-4shot",
+  "claim": "PatchCore 4-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "88.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row PatchCore, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-pix-auroc-4shot",
+  "claim": "PatchCore 4-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "94.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row PatchCore, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-patchcore-pro-4shot",
+  "claim": "PatchCore 4-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "84.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row PatchCore, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-img-auroc-1shot",
+  "claim": "GraphCore 1-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "89.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row GraphCore, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-pix-auroc-1shot",
+  "claim": "GraphCore 1-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row GraphCore, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-img-auroc-2shot",
+  "claim": "GraphCore 2-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "91.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row GraphCore, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-pix-auroc-2shot",
+  "claim": "GraphCore 2-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row GraphCore, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-img-auroc-4shot",
+  "claim": "GraphCore 4-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "92.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row GraphCore, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-pix-auroc-4shot",
+  "claim": "GraphCore 4-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "97.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row GraphCore, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-img-auroc-8shot",
+  "claim": "GraphCore 8-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "95.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row GraphCore, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-graphcore-pix-auroc-8shot",
+  "claim": "GraphCore 8-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "97.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 8-shot block, row GraphCore, column Segmentation AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the GraphCore publication (2301.12082); no std reported, not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-img-auroc-1shot",
+  "claim": "SPADE 1-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "81.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row SPADE, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-pix-auroc-1shot",
+  "claim": "SPADE 1-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "91.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row SPADE, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-pro-1shot",
+  "claim": "SPADE 1-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "83.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 1-shot block, row SPADE, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-img-auroc-2shot",
+  "claim": "SPADE 2-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "82.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row SPADE, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-pix-auroc-2shot",
+  "claim": "SPADE 2-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "92.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row SPADE, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-pro-2shot",
+  "claim": "SPADE 2-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "85.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 2-shot block, row SPADE, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-img-auroc-4shot",
+  "claim": "SPADE 4-shot MVTec AD Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "84.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row SPADE, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-pix-auroc-4shot",
+  "claim": "SPADE 4-shot MVTec AD Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "92.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row SPADE, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-spade-pro-4shot",
+  "claim": "SPADE 4-shot MVTec AD Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "87.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 2, 4-shot block, row SPADE, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-img-auroc-1shot",
+  "claim": "WinCLIP+ 1-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "83.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-pix-auroc-1shot",
+  "claim": "WinCLIP+ 1-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row WinCLIP+, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-pro-1shot",
+  "claim": "WinCLIP+ 1-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "85.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row WinCLIP+, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-img-auroc-2shot",
+  "claim": "WinCLIP+ 2-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "84.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-pix-auroc-2shot",
+  "claim": "WinCLIP+ 2-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row WinCLIP+, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-pro-2shot",
+  "claim": "WinCLIP+ 2-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "86.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row WinCLIP+, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-img-auroc-4shot",
+  "claim": "WinCLIP+ 4-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "87.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-pix-auroc-4shot",
+  "claim": "WinCLIP+ 4-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "97.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row WinCLIP+, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-pro-4shot",
+  "claim": "WinCLIP+ 4-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "87.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row WinCLIP+, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (original publication), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-img-auroc-8shot",
+  "claim": "WinCLIP+ 8-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "85.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from ADP (kwak2024few) WinCLIP re-implementation (star), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-winclip-img-auroc-16shot",
+  "claim": "WinCLIP+ 16-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "85.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row WinCLIP+, column Classification AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from ADP (kwak2024few) WinCLIP re-implementation (star), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-1shot",
+  "claim": "APRIL-GAN 1-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "91.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-1shot",
+  "claim": "APRIL-GAN 1-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-1shot",
+  "claim": "APRIL-GAN 1-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "90.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-2shot",
+  "claim": "APRIL-GAN 2-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "92.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-2shot",
+  "claim": "APRIL-GAN 2-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-2shot",
+  "claim": "APRIL-GAN 2-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "90.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-4shot",
+  "claim": "APRIL-GAN 4-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "92.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-4shot",
+  "claim": "APRIL-GAN 4-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-4shot",
+  "claim": "APRIL-GAN 4-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "90.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-8shot",
+  "claim": "APRIL-GAN 8-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "93.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-8shot",
+  "claim": "APRIL-GAN 8-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-8shot",
+  "claim": "APRIL-GAN 8-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "90.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-16shot",
+  "claim": "APRIL-GAN 16-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "93.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row APRIL-GAN, column Classification AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-16shot",
+  "claim": "APRIL-GAN 16-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row APRIL-GAN, column Segmentation AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-16shot",
+  "claim": "APRIL-GAN 16-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "90.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row APRIL-GAN, column Segmentation PRO",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-adp-img-auroc-2shot",
+  "claim": "ADP_l 2-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "86.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-adp-img-auroc-4shot",
+  "claim": "ADP_l 4-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "88.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-adp-img-auroc-8shot",
+  "claim": "ADP_l 8-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "89.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 8-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=8; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-adp-img-auroc-16shot",
+  "claim": "ADP_l 16-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "90.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 16-shot block, row ADP_l, column Classification AUROC",
+  "protocol": "few-shot k=16; copied by AnomalyDINO from the ADP publication (kwak2024few), class-label variant ADP_l; fine-tuned, not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-img-auroc-1shot",
+  "claim": "PatchCore 1-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "79.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row PatchCore, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-pix-auroc-1shot",
+  "claim": "PatchCore 1-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row PatchCore, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-pro-1shot",
+  "claim": "PatchCore 1-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "80.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row PatchCore, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-img-auroc-2shot",
+  "claim": "PatchCore 2-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "81.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row PatchCore, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-pix-auroc-2shot",
+  "claim": "PatchCore 2-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row PatchCore, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-pro-2shot",
+  "claim": "PatchCore 2-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "82.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row PatchCore, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-img-auroc-4shot",
+  "claim": "PatchCore 4-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "85.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row PatchCore, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-pix-auroc-4shot",
+  "claim": "PatchCore 4-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row PatchCore, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-patchcore-pro-4shot",
+  "claim": "PatchCore 4-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "84.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row PatchCore, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-img-auroc-1shot",
+  "claim": "PaDiM 1-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "62.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row PaDiM, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-pix-auroc-1shot",
+  "claim": "PaDiM 1-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "89.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row PaDiM, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-pro-1shot",
+  "claim": "PaDiM 1-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "64.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row PaDiM, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-img-auroc-2shot",
+  "claim": "PaDiM 2-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "67.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row PaDiM, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-pix-auroc-2shot",
+  "claim": "PaDiM 2-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "92.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row PaDiM, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-pro-2shot",
+  "claim": "PaDiM 2-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "70.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row PaDiM, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-img-auroc-4shot",
+  "claim": "PaDiM 4-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "72.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row PaDiM, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-pix-auroc-4shot",
+  "claim": "PaDiM 4-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "93.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row PaDiM, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-padim-pro-4shot",
+  "claim": "PaDiM 4-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "72.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row PaDiM, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-img-auroc-1shot",
+  "claim": "SPADE 1-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "79.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row SPADE, column Classification AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-pix-auroc-1shot",
+  "claim": "SPADE 1-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "95.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row SPADE, column Segmentation AUROC",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-pro-1shot",
+  "claim": "SPADE 1-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "84.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 1-shot block, row SPADE, column Segmentation PRO",
+  "protocol": "few-shot k=1; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-img-auroc-2shot",
+  "claim": "SPADE 2-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "80.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row SPADE, column Classification AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-pix-auroc-2shot",
+  "claim": "SPADE 2-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row SPADE, column Segmentation AUROC",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-pro-2shot",
+  "claim": "SPADE 2-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "85.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 2-shot block, row SPADE, column Segmentation PRO",
+  "protocol": "few-shot k=2; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-img-auroc-4shot",
+  "claim": "SPADE 4-shot VisA Classification AUROC (baseline row in AnomalyDINO)",
+  "value": "81.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row SPADE, column Classification AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-pix-auroc-4shot",
+  "claim": "SPADE 4-shot VisA Segmentation AUROC (baseline row in AnomalyDINO)",
+  "value": "96.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row SPADE, column Segmentation AUROC",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-visa-spade-pro-4shot",
+  "claim": "SPADE 4-shot VisA Segmentation PRO (baseline row in AnomalyDINO)",
+  "value": "87.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 3, 4-shot block, row SPADE, column Segmentation PRO",
+  "protocol": "few-shot k=4; copied by AnomalyDINO from the WinCLIP paper (dagger), not re-run"
+ },
+ {
+  "id": "anomalydino-mvtec-winclip-0shot",
+  "claim": "WinCLIP MVTec AD image AUROC (other settings)",
+  "value": "91.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row WinCLIP, column MVTec-AD",
+  "protocol": "zero-shot; copied by AnomalyDINO from original publication"
+ },
+ {
+  "id": "anomalydino-visa-winclip-0shot",
+  "claim": "WinCLIP VisA image AUROC (other settings)",
+  "value": "78.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row WinCLIP, column VisA",
+  "protocol": "zero-shot; copied by AnomalyDINO from original publication"
+ },
+ {
+  "id": "anomalydino-mvtec-anomalyclip-0shot",
+  "claim": "AnomalyCLIP MVTec AD image AUROC (other settings)",
+  "value": "91.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row AnomalyCLIP, column MVTec-AD",
+  "protocol": "zero-shot, meta-trained on the other dataset; copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-visa-anomalyclip-0shot",
+  "claim": "AnomalyCLIP VisA image AUROC (other settings)",
+  "value": "82.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row AnomalyCLIP, column VisA",
+  "protocol": "zero-shot, meta-trained on the other dataset; copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-0shot",
+  "claim": "APRIL-GAN MVTec AD image AUROC (other settings)",
+  "value": "86.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row APRIL-GAN, column MVTec-AD",
+  "protocol": "zero-shot, meta-trained on the other dataset; copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-0shot",
+  "claim": "APRIL-GAN VisA image AUROC (other settings)",
+  "value": "78.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row APRIL-GAN, column VisA",
+  "protocol": "zero-shot, meta-trained on the other dataset; copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-mvtec-musc-batched",
+  "claim": "MuSc MVTec AD image AUROC (other settings)",
+  "value": "97.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row MuSc, column MVTec-AD",
+  "protocol": "batched zero-shot (whole test set); copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-visa-musc-batched",
+  "claim": "MuSc VisA image AUROC (other settings)",
+  "value": "92.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row MuSc, column VisA",
+  "protocol": "batched zero-shot (whole test set); copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-mvtec-batched-448",
+  "claim": "AnomalyDINO-S (448) MVTec AD image AUROC (other settings)",
+  "value": "93.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row AnomalyDINO-S (448), column MVTec-AD",
+  "protocol": "batched zero-shot, 448px"
+ },
+ {
+  "id": "anomalydino-visa-batched-448",
+  "claim": "AnomalyDINO-S (448) VisA image AUROC (other settings)",
+  "value": "89.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row AnomalyDINO-S (448), column VisA",
+  "protocol": "batched zero-shot, 448px"
+ },
+ {
+  "id": "anomalydino-mvtec-batched-672",
+  "claim": "AnomalyDINO-S (672) MVTec AD image AUROC (other settings)",
+  "value": "94.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row AnomalyDINO-S (672), column MVTec-AD",
+  "protocol": "batched zero-shot, 672px"
+ },
+ {
+  "id": "anomalydino-visa-batched-672",
+  "claim": "AnomalyDINO-S (672) VisA image AUROC (other settings)",
+  "value": "90.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row AnomalyDINO-S (672), column VisA",
+  "protocol": "batched zero-shot, 672px"
+ },
+ {
+  "id": "anomalydino-mvtec-acr-batched",
+  "claim": "ACR MVTec AD image AUROC (other settings)",
+  "value": "85.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 4, row ACR, column MVTec-AD",
+  "protocol": "batched zero-shot; copied by AnomalyDINO"
+ },
+ {
+  "id": "anomalydino-fullshot-mvtec-img-auroc-448",
+  "claim": "AnomalyDINO-S (448) full-shot MVTec AD Detection AUROC",
+  "value": "99.3",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row MVTec AD 448, column Detection AUROC",
+  "protocol": "one-class, full-shot (all train images), 448px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-mvtec-pix-auroc-448",
+  "claim": "AnomalyDINO-S (448) full-shot MVTec AD Segmentation AUROC",
+  "value": "97.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row MVTec AD 448, column Segmentation AUROC",
+  "protocol": "one-class, full-shot (all train images), 448px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-mvtec-pro-448",
+  "claim": "AnomalyDINO-S (448) full-shot MVTec AD Segmentation PRO",
+  "value": "93.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row MVTec AD 448, column Segmentation PRO",
+  "protocol": "one-class, full-shot (all train images), 448px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-mvtec-img-auroc-672",
+  "claim": "AnomalyDINO-S (672) full-shot MVTec AD Detection AUROC",
+  "value": "99.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row MVTec AD 672, column Detection AUROC",
+  "protocol": "one-class, full-shot (all train images), 672px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-mvtec-pix-auroc-672",
+  "claim": "AnomalyDINO-S (672) full-shot MVTec AD Segmentation AUROC",
+  "value": "98.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row MVTec AD 672, column Segmentation AUROC",
+  "protocol": "one-class, full-shot (all train images), 672px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-mvtec-pro-672",
+  "claim": "AnomalyDINO-S (672) full-shot MVTec AD Segmentation PRO",
+  "value": "95.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row MVTec AD 672, column Segmentation PRO",
+  "protocol": "one-class, full-shot (all train images), 672px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-visa-img-auroc-448",
+  "claim": "AnomalyDINO-S (448) full-shot VisA Detection AUROC",
+  "value": "97.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row VisA 448, column Detection AUROC",
+  "protocol": "one-class, full-shot (all train images), 448px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-visa-pix-auroc-448",
+  "claim": "AnomalyDINO-S (448) full-shot VisA Segmentation AUROC",
+  "value": "98.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row VisA 448, column Segmentation AUROC",
+  "protocol": "one-class, full-shot (all train images), 448px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-visa-pro-448",
+  "claim": "AnomalyDINO-S (448) full-shot VisA Segmentation PRO",
+  "value": "95.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row VisA 448, column Segmentation PRO",
+  "protocol": "one-class, full-shot (all train images), 448px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-visa-img-auroc-672",
+  "claim": "AnomalyDINO-S (672) full-shot VisA Detection AUROC",
+  "value": "97.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row VisA 672, column Detection AUROC",
+  "protocol": "one-class, full-shot (all train images), 672px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-visa-pix-auroc-672",
+  "claim": "AnomalyDINO-S (672) full-shot VisA Segmentation AUROC",
+  "value": "98.8",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row VisA 672, column Segmentation AUROC",
+  "protocol": "one-class, full-shot (all train images), 672px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-fullshot-visa-pro-672",
+  "claim": "AnomalyDINO-S (672) full-shot VisA Segmentation PRO",
+  "value": "96.1",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 5, row VisA 672, column Segmentation PRO",
+  "protocol": "one-class, full-shot (all train images), 672px, masking only, no augmentation, deterministic"
+ },
+ {
+  "id": "anomalydino-latency-default",
+  "claim": "AnomalyDINO-S (448) 1-shot inference time per image",
+  "value": "60 ms",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4.2 Inference time (line 481) 'roughly 60ms'; Table 9a row 1: 0.060 s",
+  "protocol": "1-shot, ViT-S, 448px, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-default-s",
+  "claim": "AnomalyDINO-S (448) 1-shot inference time per image, seconds",
+  "value": "0.060",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9a, Shots=1, Inference",
+  "protocol": "1-shot, ViT-S, 448px, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-throughput-default",
+  "claim": "AnomalyDINO-S (448) throughput",
+  "value": "16.7",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. C.1 Runtime analysis (line 1165) '16.7 samples/s'",
+  "protocol": "1-shot, ViT-S, 448px; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-noprep",
+  "claim": "AnomalyDINO 1-shot inference time without preprocessing",
+  "value": "0.055",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9b, Mask=no, Rotate=no",
+  "protocol": "1-shot, ViT-S, 448px; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-fullshot-mask",
+  "claim": "AnomalyDINO full-shot inference time (masking only)",
+  "value": "0.067",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9a, row full (masking only)",
+  "protocol": "full-shot, ViT-S, 448px; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-fullshot-agnostic",
+  "claim": "AnomalyDINO full-shot inference time (agnostic)",
+  "value": "0.130",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9a, row full (agnostic)",
+  "protocol": "full-shot, ViT-S, 448px; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-res-224",
+  "claim": "AnomalyDINO-S inference time at resolution 224",
+  "value": "0.043",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9c, row 224",
+  "protocol": "1-shot, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-res-672",
+  "claim": "AnomalyDINO-S inference time at resolution 672",
+  "value": "0.086",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9c, row 672",
+  "protocol": "1-shot, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-res-896",
+  "claim": "AnomalyDINO-S inference time at resolution 896",
+  "value": "0.141",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9c, row 896",
+  "protocol": "1-shot, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-size-b",
+  "claim": "AnomalyDINO-B inference time (448px)",
+  "value": "0.084",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9d, row B",
+  "protocol": "1-shot, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-size-l",
+  "claim": "AnomalyDINO-L inference time (448px)",
+  "value": "0.141",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9d, row L",
+  "protocol": "1-shot, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-latency-size-g",
+  "claim": "AnomalyDINO-G inference time (448px)",
+  "value": "0.306",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9d, row G",
+  "protocol": "1-shot, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-membank-1shot",
+  "claim": "Time to build the 1-shot memory bank per category (seconds)",
+  "value": "0.52",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 9a, Shots=1, Memory Bank",
+  "protocol": "1-shot, ViT-S, 448px, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)"
+ },
+ {
+  "id": "anomalydino-speedup-claim",
+  "claim": "AnomalyDINO vs SOTA one-shot competitors, inference speed",
+  "value": "one order of magnitude",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. C.1 (line 1166); Fig. 3 (log axis)",
+  "protocol": "1-shot MVTec AD"
+ },
+ {
+  "id": "anomalydino-gpu",
+  "claim": "GPU used for all AnomalyDINO runtimes",
+  "value": "A40",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Fig. 3 caption; Table 9 caption",
+  "protocol": "n/a"
+ },
+ {
+  "id": "anomalydino-agg-max-d-mvtec-1shot",
+  "claim": "Image AUROC with q = max patch distance, MVTec AD 1-shot",
+  "value": "95.0",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 10, MVTec-AD row 1, q=max(D) AUROC",
+  "protocol": "1-shot, ViT-S, 448px"
+ },
+ {
+  "id": "anomalydino-agg-max-a-mvtec-1shot",
+  "claim": "Image AUROC with q = max of smoothed anomaly map, MVTec AD 1-shot",
+  "value": "94.9",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 10, MVTec-AD row 1, q=max(A) AUROC",
+  "protocol": "1-shot, ViT-S, 448px"
+ },
+ {
+  "id": "anomalydino-agg-max-d-visa-1shot",
+  "claim": "Image AUROC with q = max patch distance, VisA 1-shot",
+  "value": "82.4",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 10, VisA row 1, q=max(D) AUROC",
+  "protocol": "1-shot, ViT-S, 448px"
+ },
+ {
+  "id": "anomalydino-agg-max-a-visa-1shot",
+  "claim": "Image AUROC with q = max of smoothed anomaly map, VisA 1-shot",
+  "value": "80.5",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Table 10, VisA row 1, q=max(A) AUROC",
+  "protocol": "1-shot, ViT-S, 448px"
+ },
+ {
+  "id": "anomalydino-rotation-screw-before",
+  "claim": "Screw 1-shot image AUROC without rotation",
+  "value": "65.6",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. C.1 Rotation (line 953)",
+  "protocol": "1-shot, MVTec AD Screw"
+ },
+ {
+  "id": "anomalydino-rotation-screw-after",
+  "claim": "Screw 1-shot image AUROC with rotation",
+  "value": "89.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. C.1 Rotation (line 953)",
+  "protocol": "1-shot, MVTec AD Screw"
+ },
+ {
+  "id": "anomalydino-preprocessing-gain",
+  "claim": "AUROC gain from preprocessing (approx.)",
+  "value": "2%",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4.2 Preprocessing (line 487)",
+  "protocol": "1-shot MVTec AD, Fig. 3"
+ },
+ {
+  "id": "anomalydino-backbone-gain",
+  "claim": "DINOv2 vs ImageNet ViT-B/L AUROC gain",
+  "value": "+4%",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. C.4 (line 1340); Fig. 17",
+  "protocol": "224px, no preprocessing, few-shot"
+ },
+ {
+  "id": "anomalydino-cable-swap",
+  "claim": "AnomalyDINO detection AUROC on Cable 'cable swap' (semantic anomaly)",
+  "value": "50.2",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "App. B.1 (line 788)",
+  "protocol": "1-shot, MVTec AD Cable, cable swap only"
+ },
+ {
+  "id": "anomalydino-mvtec-normal-pixels",
+  "claim": "Share of normal pixels in MVTec AD test set (cited from MuSc)",
+  "value": "97.26%",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Evaluation Metrics (line 373)",
+  "protocol": "cited from MuSc"
+ },
+ {
+  "id": "anomalydino-visa-normal-pixels",
+  "claim": "Share of normal pixels in VisA test set (cited from MuSc)",
+  "value": "99.45%",
+  "paper": "AnomalyDINO",
+  "arxiv": "2405.14529v3",
+  "loc": "Sec. 4 Evaluation Metrics (line 373)",
+  "protocol": "cited from MuSc"
+ },
+ {
+  "id": "dinomaly-published",
+  "claim": "Dinomaly arXiv v1 submission date",
+  "value": "2024-05-23",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "abs.html submission history [v1]",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-version-read",
+  "claim": "Dinomaly version read (v5) date",
+  "value": "2025-04-02",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "abs.html submission history [v5]",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-venue",
+  "claim": "Dinomaly venue",
+  "value": "CVPR 2025",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "abs.html Comments; LaTeX footnote",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-backbone",
+  "claim": "Dinomaly default encoder",
+  "value": "ViT-Base/14",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 3.1 Foundation Transformers; Sec. 4.1 Implementation Details",
+  "protocol": "default"
+ },
+ {
+  "id": "dinomaly-backbone-pretrain",
+  "claim": "Dinomaly encoder pretraining",
+  "value": "DINOv2-R",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Implementation Details; App. B",
+  "protocol": "DINOv2 with registers"
+ },
+ {
+  "id": "dinomaly-registers",
+  "claim": "Extra register tokens in DINOv2-R",
+  "value": "4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. C Pre-Trained Foundations (line 154)",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-encoder-layers",
+  "claim": "Layers in ViT-Base encoder",
+  "value": "12",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 3.1 (line 8)",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-middle-layers",
+  "claim": "Encoder middle layers used for reconstruction and bottleneck",
+  "value": "8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 3.1 (line 8); App. B",
+  "protocol": "ViT-B and ViT-S"
+ },
+ {
+  "id": "dinomaly-vitl-layers",
+  "claim": "ViT-Large layers used (index from 0)",
+  "value": "[4,6,8,...18]",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B (line 90)",
+  "protocol": "ViT-L"
+ },
+ {
+  "id": "dinomaly-decoder-layers",
+  "claim": "Decoder Transformer layers",
+  "value": "8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 3.1; App. B 'The decoder always contains 8 layer'",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-groups",
+  "claim": "Loose constraint groups",
+  "value": "2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Implementation Details",
+  "protocol": "default"
+ },
+ {
+  "id": "dinomaly-dropout",
+  "claim": "Noisy Bottleneck dropout rate (default)",
+  "value": "0.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1; App. B",
+  "protocol": "MVTec AD, VisA"
+ },
+ {
+  "id": "dinomaly-dropout-realiad",
+  "claim": "Noisy Bottleneck dropout rate on Real-IAD",
+  "value": "0.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1; App. B",
+  "protocol": "Real-IAD"
+ },
+ {
+  "id": "dinomaly-resize",
+  "claim": "Input resize before crop",
+  "value": "448",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Implementation Details",
+  "protocol": "resize 448^2"
+ },
+ {
+  "id": "dinomaly-crop",
+  "claim": "Input center-crop size",
+  "value": "392",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Implementation Details",
+  "protocol": "center crop 392^2"
+ },
+ {
+  "id": "dinomaly-feature-map",
+  "claim": "Feature map side length",
+  "value": "28",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Implementation Details",
+  "protocol": "392 / 14"
+ },
+ {
+  "id": "dinomaly-lr",
+  "claim": "Learning rate",
+  "value": "2e-3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1; App. B",
+  "protocol": "StableAdamW + AMSGrad"
+ },
+ {
+  "id": "dinomaly-wd",
+  "claim": "Weight decay",
+  "value": "1e-4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1; App. B",
+  "protocol": "StableAdamW + AMSGrad"
+ },
+ {
+  "id": "dinomaly-lr-final",
+  "claim": "Cosine-annealed final learning rate",
+  "value": "2e-4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B",
+  "protocol": "after 100-iteration warm-up"
+ },
+ {
+  "id": "dinomaly-warmup-iters",
+  "claim": "Learning-rate warm-up iterations",
+  "value": "100",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-iters-mvtec-visa",
+  "claim": "Training iterations, MVTec AD and VisA",
+  "value": "10,000",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1; App. B",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-iters-realiad",
+  "claim": "Training iterations, Real-IAD",
+  "value": "50,000",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1; App. B",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-iters-class-sep",
+  "claim": "Training iterations per class, class-separated",
+  "value": "5,000",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B",
+  "protocol": "class-separated"
+ },
+ {
+  "id": "dinomaly-hm-final",
+  "claim": "Hard-mining discard rate after warm-up",
+  "value": "90%",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B (rises linearly from 0% over the first 1,000 iterations)",
+  "protocol": "Eq. 5"
+ },
+ {
+  "id": "dinomaly-hm-warmup",
+  "claim": "Hard-mining warm-up iterations",
+  "value": "1,000",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-grad-shrink",
+  "claim": "Gradient multiplier on well-reconstructed points",
+  "value": "one-tenth",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 3.4 after Eq. 6, sg(.)_0.1",
+  "protocol": "Eq. 5"
+ },
+ {
+  "id": "dinomaly-top-percent",
+  "claim": "Image score = mean of top x% anomaly-map pixels",
+  "value": "1%",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B",
+  "protocol": "image score"
+ },
+ {
+  "id": "dinomaly-pixel-eval-size",
+  "claim": "Localization evaluated at this size for all methods",
+  "value": "256",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. C Input Size (line 214)",
+  "protocol": "256x256"
+ },
+ {
+  "id": "dinomaly-gpu",
+  "claim": "GPU for training and throughput",
+  "value": "RTX3090",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "App. B; Table 4 caption",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-la-phi",
+  "claim": "Linear attention feature map",
+  "value": "elu(x)+1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 3.3 before Eq. 3",
+  "protocol": "n/a"
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-img-auroc",
+  "claim": "RD4AD MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "94.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row RD4AD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-pix-auroc",
+  "claim": "RD4AD MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row RD4AD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-aupro",
+  "claim": "RD4AD MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "91.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row RD4AD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-img-auroc",
+  "claim": "SimpleNet MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "95.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row SimpleNet, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-pix-auroc",
+  "claim": "SimpleNet MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row SimpleNet, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-aupro",
+  "claim": "SimpleNet MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "86.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row SimpleNet, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-destseg-img-auroc",
+  "claim": "DeSTSeg MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "89.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row DeSTSeg, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-destseg-pix-auroc",
+  "claim": "DeSTSeg MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "93.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row DeSTSeg, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-destseg-aupro",
+  "claim": "DeSTSeg MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "64.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row DeSTSeg, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-uniad-img-auroc",
+  "claim": "UniAD MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row UniAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-uniad-pix-auroc",
+  "claim": "UniAD MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row UniAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-uniad-aupro",
+  "claim": "UniAD MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "90.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row UniAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-recontrast-img-auroc",
+  "claim": "ReContrast MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row ReContrast, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-recontrast-pix-auroc",
+  "claim": "ReContrast MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row ReContrast, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-recontrast-aupro",
+  "claim": "ReContrast MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "93.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row ReContrast, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-diad-img-auroc",
+  "claim": "DiAD MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row DiAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-diad-pix-auroc",
+  "claim": "DiAD MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row DiAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-diad-aupro",
+  "claim": "DiAD MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "90.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row DiAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-vitad-img-auroc",
+  "claim": "ViTAD MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row ViTAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-vitad-pix-auroc",
+  "claim": "ViTAD MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row ViTAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-vitad-aupro",
+  "claim": "ViTAD MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "91.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row ViTAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-mambaad-img-auroc",
+  "claim": "MambaAD MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row MambaAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-mambaad-pix-auroc",
+  "claim": "MambaAD MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row MambaAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-mambaad-aupro",
+  "claim": "MambaAD MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "93.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row MambaAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-img-auroc",
+  "claim": "Dinomaly MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "99.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row Dinomaly, column Image-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-mvtec-pix-auroc",
+  "claim": "Dinomaly MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row Dinomaly, column Pixel-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-mvtec-aupro",
+  "claim": "Dinomaly MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "94.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row Dinomaly, column Pixel-level AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-mvtec-up-img-auroc",
+  "claim": "Dinomaly-up (gray row) MVTec AD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "99.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row Dinomaly-up (gray row), column Image-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-mvtec-up-pix-auroc",
+  "claim": "Dinomaly-up (gray row) MVTec AD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row Dinomaly-up (gray row), column Pixel-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-mvtec-up-aupro",
+  "claim": "Dinomaly-up (gray row) MVTec AD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "94.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec AD block, row Dinomaly-up (gray row), column Pixel-level AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-img-auroc",
+  "claim": "RD4AD VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "92.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row RD4AD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-pix-auroc",
+  "claim": "RD4AD VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row RD4AD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-aupro",
+  "claim": "RD4AD VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "91.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row RD4AD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-simplenet-img-auroc",
+  "claim": "SimpleNet VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "87.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row SimpleNet, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-simplenet-pix-auroc",
+  "claim": "SimpleNet VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row SimpleNet, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-simplenet-aupro",
+  "claim": "SimpleNet VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "81.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row SimpleNet, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-destseg-img-auroc",
+  "claim": "DeSTSeg VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "88.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row DeSTSeg, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-destseg-pix-auroc",
+  "claim": "DeSTSeg VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row DeSTSeg, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-destseg-aupro",
+  "claim": "DeSTSeg VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "67.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row DeSTSeg, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-uniad-img-auroc",
+  "claim": "UniAD VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "88.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row UniAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-uniad-pix-auroc",
+  "claim": "UniAD VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row UniAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-uniad-aupro",
+  "claim": "UniAD VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "85.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row UniAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-recontrast-img-auroc",
+  "claim": "ReContrast VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "95.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row ReContrast, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-recontrast-pix-auroc",
+  "claim": "ReContrast VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row ReContrast, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-recontrast-aupro",
+  "claim": "ReContrast VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "91.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row ReContrast, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-diad-img-auroc",
+  "claim": "DiAD VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "86.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row DiAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-diad-pix-auroc",
+  "claim": "DiAD VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "96.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row DiAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-diad-aupro",
+  "claim": "DiAD VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "75.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row DiAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-vitad-img-auroc",
+  "claim": "ViTAD VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "90.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row ViTAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-vitad-pix-auroc",
+  "claim": "ViTAD VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row ViTAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-vitad-aupro",
+  "claim": "ViTAD VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "85.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row ViTAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-mambaad-img-auroc",
+  "claim": "MambaAD VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "94.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row MambaAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-mambaad-pix-auroc",
+  "claim": "MambaAD VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row MambaAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-mambaad-aupro",
+  "claim": "MambaAD VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "91.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row MambaAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-visa-img-auroc",
+  "claim": "Dinomaly VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row Dinomaly, column Image-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-visa-pix-auroc",
+  "claim": "Dinomaly VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row Dinomaly, column Pixel-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-visa-aupro",
+  "claim": "Dinomaly VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "94.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row Dinomaly, column Pixel-level AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-visa-up-img-auroc",
+  "claim": "Dinomaly-up (gray row) VisA Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row Dinomaly-up (gray row), column Image-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-visa-up-pix-auroc",
+  "claim": "Dinomaly-up (gray row) VisA Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row Dinomaly-up (gray row), column Pixel-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-visa-up-aupro",
+  "claim": "Dinomaly-up (gray row) VisA Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "94.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA block, row Dinomaly-up (gray row), column Pixel-level AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-img-auroc",
+  "claim": "RD4AD Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "82.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row RD4AD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-pix-auroc",
+  "claim": "RD4AD Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row RD4AD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-aupro",
+  "claim": "RD4AD Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "89.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row RD4AD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-img-auroc",
+  "claim": "SimpleNet Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "57.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row SimpleNet, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-pix-auroc",
+  "claim": "SimpleNet Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "75.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row SimpleNet, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-aupro",
+  "claim": "SimpleNet Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "39.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row SimpleNet, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-destseg-img-auroc",
+  "claim": "DeSTSeg Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "82.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row DeSTSeg, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-destseg-pix-auroc",
+  "claim": "DeSTSeg Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "94.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row DeSTSeg, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-destseg-aupro",
+  "claim": "DeSTSeg Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "40.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row DeSTSeg, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-uniad-img-auroc",
+  "claim": "UniAD Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "83.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row UniAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-uniad-pix-auroc",
+  "claim": "UniAD Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row UniAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-uniad-aupro",
+  "claim": "UniAD Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "86.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row UniAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-recontrast-img-auroc",
+  "claim": "ReContrast Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "86.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row ReContrast, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-recontrast-pix-auroc",
+  "claim": "ReContrast Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row ReContrast, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-recontrast-aupro",
+  "claim": "ReContrast Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "91.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row ReContrast, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-diad-img-auroc",
+  "claim": "DiAD Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "75.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row DiAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-diad-pix-auroc",
+  "claim": "DiAD Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "88.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row DiAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-diad-aupro",
+  "claim": "DiAD Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "58.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row DiAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-vitad-img-auroc",
+  "claim": "ViTAD Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "82.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row ViTAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-vitad-pix-auroc",
+  "claim": "ViTAD Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "97.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row ViTAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-vitad-aupro",
+  "claim": "ViTAD Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "84.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row ViTAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-mambaad-img-auroc",
+  "claim": "MambaAD Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "86.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row MambaAD, column Image-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-mambaad-pix-auroc",
+  "claim": "MambaAD Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row MambaAD, column Pixel-level AUROC",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-mambaad-aupro",
+  "claim": "MambaAD Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "90.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row MambaAD, column Pixel-level AUPRO",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-realiad-img-auroc",
+  "claim": "Dinomaly Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "89.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row Dinomaly, column Image-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-realiad-pix-auroc",
+  "claim": "Dinomaly Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row Dinomaly, column Pixel-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-realiad-aupro",
+  "claim": "Dinomaly Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "93.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row Dinomaly, column Pixel-level AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-realiad-up-img-auroc",
+  "claim": "Dinomaly-up (gray row) Real-IAD Image-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "89.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row Dinomaly-up (gray row), column Image-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-realiad-up-pix-auroc",
+  "claim": "Dinomaly-up (gray row) Real-IAD Pixel-level AUROC, multi-class (Dinomaly Table 1)",
+  "value": "98.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row Dinomaly-up (gray row), column Pixel-level AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-realiad-up-aupro",
+  "claim": "Dinomaly-up (gray row) Real-IAD Pixel-level AUPRO, multi-class (Dinomaly Table 1)",
+  "value": "94.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, Real-IAD block, row Dinomaly-up (gray row), column Pixel-level AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; training scaled to 20,000/20,000/100,000 iterations"
+ },
+ {
+  "id": "dinomaly-mvtec-img-ap",
+  "claim": "Dinomaly MVTec AD image AP, multi-class",
+  "value": "99.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec-AD, Dinomaly, Image-level AP",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-mvtec-img-f1",
+  "claim": "Dinomaly MVTec AD image F1-max, multi-class",
+  "value": "99.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec-AD, Dinomaly, Image-level F1-max",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-mvtec-pix-ap",
+  "claim": "Dinomaly MVTec AD pixel AP, multi-class",
+  "value": "69.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec-AD, Dinomaly, Pixel-level AP",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-visa-pix-ap",
+  "claim": "Dinomaly VisA pixel AP, multi-class",
+  "value": "53.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, VisA, Dinomaly, Pixel-level AP",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-uniad-mvtec-pix-ap",
+  "claim": "UniAD MVTec AD pixel AP, multi-class (Dinomaly Table 1)",
+  "value": "43.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 1, MVTec-AD, UniAD, Pixel-level AP",
+  "protocol": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size"
+ },
+ {
+  "id": "dinomaly-mvtec-dinomaly-cs-img-auroc",
+  "claim": "Dinomaly (class-separated) MVTec AD I-AUROC (Dinomaly Table 2)",
+  "value": "99.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), MVTec AD column I-AUROC",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-mvtec-dinomaly-cs-pix-auroc",
+  "claim": "Dinomaly (class-separated) [printed 99.9 in LaTeX and PDF; our reading: likely a typo] MVTec AD P-AUROC (Dinomaly Table 2)",
+  "value": "99.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), MVTec AD column P-AUROC",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class",
+  "uncertain": true
+ },
+ {
+  "id": "dinomaly-mvtec-dinomaly-cs-aupro",
+  "claim": "Dinomaly (class-separated) MVTec AD P-AUPRO (Dinomaly Table 2)",
+  "value": "95.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), MVTec AD column P-AUPRO",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-visa-dinomaly-cs-img-auroc",
+  "claim": "Dinomaly (class-separated) VisA I-AUROC (Dinomaly Table 2)",
+  "value": "98.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), VisA column I-AUROC",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-visa-dinomaly-cs-pix-auroc",
+  "claim": "Dinomaly (class-separated) VisA P-AUROC (Dinomaly Table 2)",
+  "value": "98.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), VisA column P-AUROC",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-visa-dinomaly-cs-aupro",
+  "claim": "Dinomaly (class-separated) VisA P-AUPRO (Dinomaly Table 2)",
+  "value": "95.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), VisA column P-AUPRO",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-realiad-dinomaly-cs-img-auroc",
+  "claim": "Dinomaly (class-separated) Real-IAD I-AUROC (Dinomaly Table 2)",
+  "value": "92.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), Real-IAD column I-AUROC",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-realiad-dinomaly-cs-pix-auroc",
+  "claim": "Dinomaly (class-separated) Real-IAD P-AUROC (Dinomaly Table 2)",
+  "value": "99.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), Real-IAD column P-AUROC",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-realiad-dinomaly-cs-aupro",
+  "claim": "Dinomaly (class-separated) Real-IAD P-AUPRO (Dinomaly Table 2)",
+  "value": "95.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row Dinomaly (class-separated), Real-IAD column P-AUPRO",
+  "protocol": "class-separated (one model per class), ViT-B DINOv2-R, 392px, 5,000 iterations per class"
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-cs-img-auroc",
+  "claim": "RD4AD MVTec AD I-AUROC (Dinomaly Table 2)",
+  "value": "98.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, MVTec AD column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-cs-pix-auroc",
+  "claim": "RD4AD MVTec AD P-AUROC (Dinomaly Table 2)",
+  "value": "97.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, MVTec AD column P-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-cs-aupro",
+  "claim": "RD4AD MVTec AD P-AUPRO (Dinomaly Table 2)",
+  "value": "93.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, MVTec AD column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-cs-img-auroc",
+  "claim": "RD4AD VisA I-AUROC (Dinomaly Table 2)",
+  "value": "96.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, VisA column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-cs-pix-auroc",
+  "claim": "RD4AD VisA P-AUROC (Dinomaly Table 2)",
+  "value": "90.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, VisA column P-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-cs-aupro",
+  "claim": "RD4AD VisA P-AUPRO (Dinomaly Table 2)",
+  "value": "70.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, VisA column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-cs-img-auroc",
+  "claim": "RD4AD Real-IAD I-AUROC (Dinomaly Table 2)",
+  "value": "87.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, Real-IAD column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-cs-aupro",
+  "claim": "RD4AD Real-IAD P-AUPRO (Dinomaly Table 2)",
+  "value": "93.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row RD4AD, Real-IAD column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-patchcore-cs-img-auroc",
+  "claim": "PatchCore MVTec AD I-AUROC (Dinomaly Table 2)",
+  "value": "99.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, MVTec AD column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-patchcore-cs-pix-auroc",
+  "claim": "PatchCore MVTec AD P-AUROC (Dinomaly Table 2)",
+  "value": "98.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, MVTec AD column P-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-patchcore-cs-aupro",
+  "claim": "PatchCore MVTec AD P-AUPRO (Dinomaly Table 2)",
+  "value": "93.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, MVTec AD column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-patchcore-cs-img-auroc",
+  "claim": "PatchCore VisA I-AUROC (Dinomaly Table 2)",
+  "value": "94.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, VisA column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-patchcore-cs-pix-auroc",
+  "claim": "PatchCore VisA P-AUROC (Dinomaly Table 2)",
+  "value": "98.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, VisA column P-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-patchcore-cs-aupro",
+  "claim": "PatchCore VisA P-AUPRO (Dinomaly Table 2)",
+  "value": "91.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, VisA column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-realiad-patchcore-cs-img-auroc",
+  "claim": "PatchCore Real-IAD I-AUROC (Dinomaly Table 2)",
+  "value": "89.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, Real-IAD column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-realiad-patchcore-cs-aupro",
+  "claim": "PatchCore Real-IAD P-AUPRO (Dinomaly Table 2)",
+  "value": "91.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row PatchCore, Real-IAD column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-cs-img-auroc",
+  "claim": "SimpleNet MVTec AD I-AUROC (Dinomaly Table 2)",
+  "value": "99.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, MVTec AD column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-cs-pix-auroc",
+  "claim": "SimpleNet MVTec AD P-AUROC (Dinomaly Table 2)",
+  "value": "98.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, MVTec AD column P-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-cs-aupro",
+  "claim": "SimpleNet MVTec AD P-AUPRO (Dinomaly Table 2)",
+  "value": "90.0",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, MVTec AD column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-simplenet-cs-img-auroc",
+  "claim": "SimpleNet VisA I-AUROC (Dinomaly Table 2)",
+  "value": "97.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, VisA column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-simplenet-cs-pix-auroc",
+  "claim": "SimpleNet VisA P-AUROC (Dinomaly Table 2)",
+  "value": "98.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, VisA column P-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-visa-simplenet-cs-aupro",
+  "claim": "SimpleNet VisA P-AUPRO (Dinomaly Table 2)",
+  "value": "90.7",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, VisA column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-cs-img-auroc",
+  "claim": "SimpleNet Real-IAD I-AUROC (Dinomaly Table 2)",
+  "value": "88.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, Real-IAD column I-AUROC",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-cs-aupro",
+  "claim": "SimpleNet Real-IAD P-AUPRO (Dinomaly Table 2)",
+  "value": "84.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 2, row SimpleNet, Real-IAD column P-AUPRO",
+  "protocol": "class-separated (one model per class); row printed in Dinomaly Table 2, source not stated, not re-run by Dinomaly as far as stated"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-baseline-img",
+  "claim": "Ablation baseline (no NB/LA/LC/LL) MVTec AD image AUROC",
+  "value": "98.41",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, row 1 (no checks), Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-baseline-aupro",
+  "claim": "Ablation baseline MVTec AD AUPRO",
+  "value": "92.95",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, row 1, AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-nb-img",
+  "claim": "+Noisy Bottleneck only, MVTec AD image AUROC",
+  "value": "99.06",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, row NB only, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-la-img",
+  "claim": "+Linear Attention only, MVTec AD image AUROC",
+  "value": "98.54",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, row LA only, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-lc-img",
+  "claim": "+Loose Constraint only, MVTec AD image AUROC",
+  "value": "98.35",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, row LC only, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-ll-img",
+  "claim": "+Loose Loss only, MVTec AD image AUROC",
+  "value": "99.03",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, row LL only, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-full-img",
+  "claim": "All four components, MVTec AD image AUROC",
+  "value": "99.60",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, last row, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-mvtec-full-aupro",
+  "claim": "All four components, MVTec AD AUPRO",
+  "value": "94.79",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 3, last row, AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-visa-baseline-img",
+  "claim": "Ablation baseline VisA image AUROC",
+  "value": "95.81",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A4, row 1, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-visa-nb-img",
+  "claim": "+Noisy Bottleneck only, VisA image AUROC",
+  "value": "97.38",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A4, row NB only, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-abl-visa-full-img",
+  "claim": "All four components, VisA image AUROC",
+  "value": "98.73",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A4, last row, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-dropout0-img",
+  "claim": "Dropout 0 (noiseless) MVTec AD image AUROC",
+  "value": "99.19",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A5, row 0, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-jitter20-img",
+  "claim": "Feature jitter scale=20 instead of dropout, MVTec AD image AUROC",
+  "value": "99.59",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A8, row Feature Jitter scale=20, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-jitter20-aupro",
+  "claim": "Feature jitter scale=20, MVTec AD AUPRO",
+  "value": "94.40",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A8, row Feature Jitter scale=20, AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-softmax-img",
+  "claim": "Softmax Attention decoder, MVTec AD image AUROC",
+  "value": "99.52",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A7, row Softmax Attention, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-softmax-nm3-img",
+  "claim": "Softmax Attention + neighbour mask n=3, MVTec AD image AUROC",
+  "value": "99.56",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A7, row Softmax Attention w/ Neighbour-Mask n=3",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-la-nm3-img",
+  "claim": "Linear Attention + neighbour mask n=3, MVTec AD image AUROC",
+  "value": "99.60",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A7, row Linear Attention w/ Neighbour-Mask n=3",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-conv3-img",
+  "claim": "ConvBlock 3x3 decoder, MVTec AD image AUROC",
+  "value": "99.45",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A7, row ConvBlock 3x3, Image AUROC",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-dense-l2l-img",
+  "claim": "Layer-to-layer dense constraint, MVTec AD image AUROC",
+  "value": "99.39",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A6, row layer-to-layer (dense, every 1)",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-group1-aupro",
+  "claim": "1-group constraint, MVTec AD AUPRO",
+  "value": "93.96",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A6, row group-to-group (1 group), AUPRO",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1"
+ },
+ {
+  "id": "dinomaly-rd4ad-nbll-img",
+  "claim": "RD4AD + NB + LL, MVTec AD image AUROC",
+  "value": "98.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A9, last row, Image AUROC",
+  "protocol": "multi-class, RD4AD reproduced in Dinomaly's framework (dagger)"
+ },
+ {
+  "id": "dinomaly-rd4ad-repro-img",
+  "claim": "RD4AD reproduced in Dinomaly framework, MVTec AD image AUROC",
+  "value": "97.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A9, row RD4AD dagger",
+  "protocol": "multi-class, re-run by Dinomaly"
+ },
+ {
+  "id": "dinomaly-seeds-img",
+  "claim": "Mean image AUROC over 5 seeds, MVTec AD",
+  "value": "99.60",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A12, mean+-std row",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; 5 seeds"
+ },
+ {
+  "id": "dinomaly-seeds-img-std",
+  "claim": "Std of image AUROC over 5 seeds, MVTec AD",
+  "value": "0.03",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A12, mean+-std row",
+  "protocol": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; 5 seeds"
+ },
+ {
+  "id": "dinomaly-backbone-dinov2r-img",
+  "claim": "Dinomaly with DINOv2-R ViT-B encoder, MVTec AD image AUROC",
+  "value": "99.60",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row DINOv2-R (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-dinov2-img",
+  "claim": "Dinomaly with DINOv2 ViT-B encoder, MVTec AD image AUROC",
+  "value": "99.55",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row DINOv2 (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-ibot-img",
+  "claim": "Dinomaly with iBOT ViT-B encoder, MVTec AD image AUROC",
+  "value": "99.22",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row iBOT (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-dino-img",
+  "claim": "Dinomaly with DINO ViT-B encoder, MVTec AD image AUROC",
+  "value": "98.97",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row DINO (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-digpt-img",
+  "claim": "Dinomaly with D-iGPT ViT-B encoder, MVTec AD image AUROC",
+  "value": "98.75",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row D-iGPT (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-mocov3-img",
+  "claim": "Dinomaly with MOCOv3 ViT-B encoder, MVTec AD image AUROC",
+  "value": "98.47",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row MOCOv3 (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-deit-img",
+  "claim": "Dinomaly with DeiT ViT-B encoder, MVTec AD image AUROC",
+  "value": "98.19",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row DeiT (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-backbone-mae-img",
+  "claim": "Dinomaly with MAE ViT-B encoder, MVTec AD image AUROC",
+  "value": "96.27",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A1, row MAE (upper block), Image AUROC",
+  "protocol": "multi-class, ViT-B, feature map 28x28 (R448-C392 for /14, R512-C448 for /16)"
+ },
+ {
+  "id": "dinomaly-small-params",
+  "claim": "Dinomaly ViT-Small parameters",
+  "value": "37.4M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Small, Params",
+  "protocol": "multi-class MVTec AD, ViT-Small, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-small-macs",
+  "claim": "Dinomaly ViT-Small MACs",
+  "value": "26.3G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Small, MACs",
+  "protocol": "multi-class MVTec AD, ViT-Small, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-small-throughput",
+  "claim": "Dinomaly ViT-Small throughput (images/s)",
+  "value": "153.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Small, Im/s",
+  "protocol": "multi-class MVTec AD, ViT-Small, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-small-mvtec-img-auroc",
+  "claim": "Dinomaly ViT-Small MVTec AD image AUROC",
+  "value": "99.26",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Small, Image AUROC",
+  "protocol": "multi-class MVTec AD, ViT-Small, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-small-mvtec-aupro",
+  "claim": "Dinomaly ViT-Small MVTec AD AUPRO",
+  "value": "94.36",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Small, AUPRO",
+  "protocol": "multi-class MVTec AD, ViT-Small, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-base-params",
+  "claim": "Dinomaly ViT-Base parameters",
+  "value": "148.0M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Base, Params",
+  "protocol": "multi-class MVTec AD, ViT-Base, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-base-macs",
+  "claim": "Dinomaly ViT-Base MACs",
+  "value": "104.7G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Base, MACs",
+  "protocol": "multi-class MVTec AD, ViT-Base, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-base-throughput",
+  "claim": "Dinomaly ViT-Base throughput (images/s)",
+  "value": "58.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Base, Im/s",
+  "protocol": "multi-class MVTec AD, ViT-Base, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-base-mvtec-img-auroc",
+  "claim": "Dinomaly ViT-Base MVTec AD image AUROC",
+  "value": "99.60",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Base, Image AUROC",
+  "protocol": "multi-class MVTec AD, ViT-Base, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-base-mvtec-aupro",
+  "claim": "Dinomaly ViT-Base MVTec AD AUPRO",
+  "value": "94.79",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Base, AUPRO",
+  "protocol": "multi-class MVTec AD, ViT-Base, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-large-params",
+  "claim": "Dinomaly ViT-Large parameters",
+  "value": "275.3M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Large, Params",
+  "protocol": "multi-class MVTec AD, ViT-Large, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-large-macs",
+  "claim": "Dinomaly ViT-Large MACs",
+  "value": "413.5G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Large, MACs",
+  "protocol": "multi-class MVTec AD, ViT-Large, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-large-throughput",
+  "claim": "Dinomaly ViT-Large throughput (images/s)",
+  "value": "24.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Large, Im/s",
+  "protocol": "multi-class MVTec AD, ViT-Large, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-large-mvtec-img-auroc",
+  "claim": "Dinomaly ViT-Large MVTec AD image AUROC",
+  "value": "99.77",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Large, Image AUROC",
+  "protocol": "multi-class MVTec AD, ViT-Large, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-large-mvtec-aupro",
+  "claim": "Dinomaly ViT-Large MVTec AD AUPRO",
+  "value": "95.09",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 4, row ViT-Large, AUPRO",
+  "protocol": "multi-class MVTec AD, ViT-Large, 392px; Im/s on NVIDIA RTX3090, batch size 16"
+ },
+ {
+  "id": "dinomaly-large-visa-img-auroc",
+  "claim": "Dinomaly ViT-Large VisA image AUROC",
+  "value": "98.85",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A3, VisA ViT-Large, Image AUROC",
+  "protocol": "multi-class, ViT-L"
+ },
+ {
+  "id": "dinomaly-large-realiad-img-auroc",
+  "claim": "Dinomaly ViT-Large Real-IAD image AUROC",
+  "value": "90.07",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A3, Real-IAD ViT-Large, Image AUROC",
+  "protocol": "multi-class, ViT-L"
+ },
+ {
+  "id": "dinomaly-small-visa-img-auroc",
+  "claim": "Dinomaly ViT-Small VisA image AUROC",
+  "value": "97.94",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A3, VisA ViT-Small, Image AUROC",
+  "protocol": "multi-class, ViT-S"
+ },
+ {
+  "id": "dinomaly-intro-best-mvtec",
+  "claim": "Best scaled Dinomaly MVTec AD image AUROC (intro, rounded)",
+  "value": "99.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 1 last paragraph",
+  "protocol": "multi-class, scaled-up model"
+ },
+ {
+  "id": "dinomaly-intro-best-visa",
+  "claim": "Best scaled Dinomaly VisA image AUROC (intro, rounded)",
+  "value": "98.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 1 last paragraph",
+  "protocol": "multi-class, scaled-up model"
+ },
+ {
+  "id": "dinomaly-intro-best-realiad",
+  "claim": "Best scaled Dinomaly Real-IAD image AUROC (intro, rounded)",
+  "value": "90.1",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 1 last paragraph",
+  "protocol": "multi-class, scaled-up model"
+ },
+ {
+  "id": "dinomaly-cost-diad-params",
+  "claim": "DiAD parameters (Dinomaly Table A11)",
+  "value": "1331M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row DiAD, Params",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-diad-macs",
+  "claim": "DiAD MACs (Dinomaly Table A11)",
+  "value": "451.5G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row DiAD, MACs",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-recontrast-params",
+  "claim": "ReContrast parameters (Dinomaly Table A11)",
+  "value": "154.2M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row ReContrast, Params",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-recontrast-macs",
+  "claim": "ReContrast MACs (Dinomaly Table A11)",
+  "value": "67.4G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row ReContrast, MACs",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-rd4ad-params",
+  "claim": "RD4AD parameters (Dinomaly Table A11)",
+  "value": "126.7M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row RD4AD, Params",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-rd4ad-macs",
+  "claim": "RD4AD MACs (Dinomaly Table A11)",
+  "value": "32.1G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row RD4AD, MACs",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-vitad-params",
+  "claim": "ViTAD parameters (Dinomaly Table A11)",
+  "value": "39.0M",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row ViTAD, Params",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-vitad-macs",
+  "claim": "ViTAD MACs (Dinomaly Table A11)",
+  "value": "9.7G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row ViTAD, MACs",
+  "protocol": "as printed by Dinomaly; source not stated"
+ },
+ {
+  "id": "dinomaly-cost-base-280-macs",
+  "claim": "Dinomaly-Base-280^2 MACs",
+  "value": "53.7G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Base-280^2, MACs",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-base-280-mvtec-img",
+  "claim": "Dinomaly-Base-280^2 MVTec AD image AUROC",
+  "value": "99.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Base-280^2, MVTec I-AUROC",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-base-280-visa-img",
+  "claim": "Dinomaly-Base-280^2 VisA image AUROC",
+  "value": "97.8",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Base-280^2, VisA I-AUROC",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-small-392-macs",
+  "claim": "Dinomaly-Small-392^2 MACs",
+  "value": "26.2G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Small-392^2, MACs",
+  "protocol": "multi-class; note Table 4 prints 26.3G for ViT-Small"
+ },
+ {
+  "id": "dinomaly-cost-small-392-mvtec-img",
+  "claim": "Dinomaly-Small-392^2 MVTec AD image AUROC",
+  "value": "99.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Small-392^2, MVTec I-AUROC",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-small-392-visa-img",
+  "claim": "Dinomaly-Small-392^2 VisA image AUROC",
+  "value": "97.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Small-392^2, VisA I-AUROC",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-small-280-macs",
+  "claim": "Dinomaly-Small-280^2 MACs",
+  "value": "14.5G",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Small-280^2, MACs",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-small-280-mvtec-img",
+  "claim": "Dinomaly-Small-280^2 MVTec AD image AUROC",
+  "value": "99.3",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Small-280^2, MVTec I-AUROC",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-cost-small-280-visa-img",
+  "claim": "Dinomaly-Small-280^2 VisA image AUROC",
+  "value": "96.5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A11, row Dinomaly-Small-280^2, VisA I-AUROC",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-res-280-aupro",
+  "claim": "Dinomaly MVTec AD AUPRO at 280^2 input",
+  "value": "93.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 5, Dinomaly 280^2, pixel-level last value",
+  "protocol": "multi-class, ViT-B"
+ },
+ {
+  "id": "dinomaly-res-280-img",
+  "claim": "Dinomaly MVTec AD image AUROC at 280^2 input",
+  "value": "99.6",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table 5, Dinomaly 280^2, image-level first value",
+  "protocol": "multi-class, ViT-B"
+ },
+ {
+  "id": "dinomaly-mpdd-img-auroc",
+  "claim": "Dinomaly mpdd image AUROC, multi-class",
+  "value": "97.2",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A13, mpdd block, row Dinomaly; Sec. 4.2 text",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-btad-img-auroc",
+  "claim": "Dinomaly btad image AUROC, multi-class",
+  "value": "95.4",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A13, btad block, row Dinomaly; Sec. 4.2 text",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-unimedical-img-auroc",
+  "claim": "Dinomaly unimedical image AUROC, multi-class",
+  "value": "84.9",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Table A13, unimedical block, row Dinomaly; Sec. 4.2 text",
+  "protocol": "multi-class"
+ },
+ {
+  "id": "dinomaly-data-mvtec-train",
+  "claim": "MVTec AD normal training images",
+  "value": "3,629",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-mvtec-test",
+  "claim": "MVTec AD test images",
+  "value": "1,725",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-mvtec-test-normal",
+  "claim": "MVTec AD normal test images",
+  "value": "467",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-mvtec-test-anom",
+  "claim": "MVTec AD anomalous test images",
+  "value": "1,258",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-visa-train",
+  "claim": "VisA normal training images",
+  "value": "8,659",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-visa-test",
+  "claim": "VisA test images",
+  "value": "2,162",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-visa-test-normal",
+  "claim": "VisA normal test images",
+  "value": "962",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-visa-test-anom",
+  "claim": "VisA anomalous test images",
+  "value": "1,200",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split"
+ },
+ {
+  "id": "dinomaly-data-realiad-classes",
+  "claim": "Real-IAD object classes",
+  "value": "30",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split; Real-IAD all views"
+ },
+ {
+  "id": "dinomaly-data-realiad-train",
+  "claim": "Real-IAD normal training images",
+  "value": "36,465",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split; Real-IAD all views"
+ },
+ {
+  "id": "dinomaly-data-realiad-test",
+  "claim": "Real-IAD test images",
+  "value": "114,585",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split; Real-IAD all views"
+ },
+ {
+  "id": "dinomaly-data-realiad-test-normal",
+  "claim": "Real-IAD normal test images",
+  "value": "63,256",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split; Real-IAD all views"
+ },
+ {
+  "id": "dinomaly-data-realiad-test-anom",
+  "claim": "Real-IAD anomalous test images",
+  "value": "51,329",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split; Real-IAD all views"
+ },
+ {
+  "id": "dinomaly-data-realiad-views",
+  "claim": "Real-IAD camera views per class",
+  "value": "5",
+  "paper": "Dinomaly",
+  "arxiv": "2405.14325v5",
+  "loc": "Sec. 4.1 Datasets (Real-IAD views: Sec. 4.2 text)",
+  "protocol": "official split; Real-IAD all views"
+ }
+]

@@ -1,0 +1,66 @@
+<section id="ch-random" class="chapter">
+<h2>Why random is hard to beat</h2>
+<p>Many active-learning papers report large gains over random sampling. Two careful re-runs found most of those gains shrink, and sometimes flip, once the comparison is made fair.</p>
+
+<figure class="viz" id="viz-budget" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="budget-canvas" role="img" aria-label="Left: a curve of the benefit of tilting a labeling batch toward typical images, against budget. It is positive (label typical images) at small budgets and negative (label uncertain images) after a switch point. Right: bars of each active-learning method's test accuracy minus random sampling at 20, 30 and 40 percent labels on CIFAR-10, for a plain or a strongly regularized ResNet-18."></canvas>
+  <div class="controls">
+    <label>share of easy, typical data p <input type="range" id="budget-p" min="0.55" max="0.95" step="0.01" value="0.8"></label>
+    <label>how slowly the hard part is learned alpha <input type="range" id="budget-a" min="0.02" max="0.9" step="0.01" value="0.1"></label>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-random-plain" aria-pressed="true">Plain training</button>
+    <button type="button" id="btn-random-sr" aria-pressed="false">Strong augmentation + weight averaging</button>
+    <button type="button" id="btn-random-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="budget-readout" aria-live="polite"></p>
+  <figcaption>Left, computed from TypiClust's own model (Hacohen, Dekel and Weinshall 2022, Eq. 2) with the paper's toy settings <span class="tex">E(m) = e^{-m}</span>, <span class="tex">p = 0.8</span>, <span class="tex">\alpha = 0.1</span>; the curve is the derivative of the expected error with respect to the tilt (our derivation). Right, sourced: Munjal et al. (2022), Table 4, CIFAR-10 (batches chosen by VGG16, then trained on ResNet-18; best of a hyperparameter search per entry). Before you press the second button, guess: do the bars grow or shrink?</figcaption>
+</figure>
+
+<p>Three things make random sampling hard to beat.</p>
+
+<p><b>A tuned model gains more than clever selection.</b> Munjal et al. re-ran the popular methods in one code base, retuned every model at every round, and repeated each run over <span data-claim="munjal-protocol-initsets">5</span> initial labeled sets and <span data-claim="munjal-protocol-seeds">5</span> seeds. With only 10% of CIFAR-10 labeled, adding RandAugment and stochastic weight averaging to a random-sampling baseline moved its accuracy from <span data-claim="munjal-t3-rsb-c10">69.16</span>% to <span data-claim="munjal-t3-swa-ra-c10">82.16</span>%. That one change is larger than the lead any selection rule showed over random in the study. Press the second button. In a transfer test (batches chosen by a VGG16, then a strongly regularized ResNet-18 trained on them), the best method led random by only 0.7 to 1.8 points, which is the size of the run-to-run spread the authors report, "<span data-claim="munjal-std-quote">A standard deviation of 1-2% in accuracy among different AL methods, indicating that out of chance, it is possible to achieve seemingly better results</span>".</p>
+
+<div class="claim-card">
+<h4>Claim card: Munjal et al. (2022)</h4>
+<dl>
+<dt>Claim</dt><dd>Under identical, well-tuned training, active-learning methods give small and inconsistent gains over random sampling, and strong regularization shrinks them further.</dd>
+<dt>How measured</dt><dd>CIFAR-10 and CIFAR-100 (plus limited ImageNet runs at a 5% budget); on CIFAR, <span data-claim="munjal-protocol-initial">10%</span> initial labels, <span data-claim="munjal-protocol-budget">10%</span> more per round up to <span data-claim="munjal-protocol-final">40%</span>; <span data-claim="munjal-protocol-runs">25</span> models per method; hyperparameters re-searched at every round; non-parametric significance tests.</dd>
+<dt>Result</dt><dd>No method beat random in every setting. In a transfer test with a strongly regularized ResNet-18, the best method's lead over random was 0.7 to 1.8 points.</dd>
+<dt>Would have falsified it</dt><dd>One method beating a strongly regularized random baseline by more than the seed spread, across datasets, budgets and architectures.</dd>
+</dl></div>
+
+<p>Other careful re-runs agree. Mittal et al. found that with modern augmentation "<span data-claim="illusions-aug-04">all the AL methods show similar performance within a range of 0.4%</span>" on CIFAR-10: the methods became hard to tell apart from each other, though they still beat random. Beck et al. are more positive: "<span data-claim="beck-2x-4x">AL techniques are 2× to 4× more label-efficient compared to RS with the use of data augmentation</span>". The honest summary is that active learning helps, by less than early papers claimed, and only against a baseline that was given the same care.</p>
+
+<p><b>At a tiny budget, the right pick is the opposite of uncertain.</b> Chapter 2's toy already showed this: with three labels, uncertainty sampling asked about the wrong places. Hacohen, Dekel and Weinshall explain why with the model on the left. Split the data into an easy, typical region and a hard, rare one. With few labels, each extra label in the typical region removes more error, because that region is most of the data and is learned fastest; once it is learned, labels in the hard region pay more. Drag the sliders: the switch point moves, but it always exists. Their method, TypiClust, embeds the pool with self-supervised learning, clusters it, and labels the most typical image of each uncovered cluster, where typicality is the inverse of the mean distance to the <span class="tex">K = 20</span> nearest neighbours. With 10 labels on CIFAR-10 and semi-supervised training, it reached <span data-claim="typiclust-abstract-932">93.2%</span>, a gain of <span data-claim="typiclust-abstract-394">39.4%</span> over random selection.</p>
+
+<div class="claim-card">
+<h4>Claim card: Hacohen, Dekel and Weinshall (2022)</h4>
+<dl>
+<dt>Claim</dt><dd>The best query strategy flips with the budget: typical images at low budgets, atypical (uncertain) images at high budgets.</dd>
+<dt>How measured</dt><dd>A two-region theory (Eq. 2, Theorem 1), then accuracy minus random against the number of labels in supervised, self-supervised-embedding and semi-supervised training.</dd>
+<dt>Result</dt><dd>With a handful of labels per class, "<span data-claim="typiclust-baselines-quote">all other baseline AL methods perform on par with random selection or worse</span>"; TypiClust leads. Uncertainty methods overtake it only at larger budgets.</dd>
+<dt>Would have falsified it</dt><dd>Uncertainty sampling beating random at one to ten labels per class, or typical-image selection still winning at large budgets.</dd>
+</dl></div>
+
+<p><b>A selected set is a biased set.</b> Settles' survey puts it plainly: with active learning, "<span data-claim="settles-biased-quote">the labeled instances are a biased distribution, not drawn i.i.d. from the underlying natural density</span>". The selected images over-represent the boundaries the model found hard. That is what you want for training. It follows (our inference) that it is exactly what you do not want for measuring accuracy. A validation set built from actively selected images reports accuracy on the hardest cases of the model that chose them, not on the stream your users see.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>For a new camera or product (one to ten labels per class), label the most typical image of each cluster of an unlabeled embedding, not the most uncertain. Switch to uncertainty sampling once the labeled set is in the thousands. Before you buy an active-learning pipeline, compare it to random sampling trained with strong augmentation over several seeds. And always label a random slice of the stream for the evaluation set.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('budget-readout');
+  const f = FIG.budget(document.getElementById('budget-canvas'), { say: t => out.textContent = t });
+  const p = document.getElementById('budget-p'), a = document.getElementById('budget-a');
+  const bs = ['plain', 'sr'].map(k => document.getElementById('btn-random-' + k));
+  p.addEventListener('input', () => f.p(+p.value)); a.addEventListener('input', () => f.a(+a.value));
+  bs.forEach(b => b.addEventListener('click', () => { KIT.press(bs, b); f.sr(b.id.endsWith('sr')); }));
+  document.getElementById('btn-random-reset').addEventListener('click', () => { p.value = .8; a.value = .1; KIT.press(bs, bs[0]); f.reset(); });
+  f.reset();
+})();
+</script>
+</section>

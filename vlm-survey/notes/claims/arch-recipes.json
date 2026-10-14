@@ -1,0 +1,137 @@
+[
+ {
+  "id": "idefics2-arch-fixed",
+  "claim": "Backbone ablation controls",
+  "value": "We fix the size of the pretrained backbones, the data used for multimodal pre-training, and the number of training updates",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-under-ca",
+  "claim": "Backbone ablation architecture",
+  "value": "cross-attention architecture",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 2 (\"Under the cross-attention architecture\")",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-lm-boost",
+  "claim": "LM swap gain stated",
+  "value": "yields a boost of 5.1",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-ve-boost",
+  "claim": "Vision swap gain stated",
+  "value": "yields a 3.3 increase",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-share",
+  "claim": "Trained share with frozen backbones",
+  "value": "approximately 15% for the fully autoregressive architecture and 25% for the cross-attention",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-lora-split",
+  "claim": "LoRA setup",
+  "value": "to adapt the pre-trained parameters while using standard full fine-tuning for the newly initialized ones",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-no-gain64",
+  "claim": "Token count result",
+  "value": "we observe no gains when using more than 64 visual tokens",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.3 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-infinite",
+  "claim": "Token count caveat",
+  "value": "in a hypothetical scenario of infinite training on unlimited data, performance might eventually improve",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.3 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-onpar",
+  "claim": "Pre-training data result",
+  "value": "Our human annotated data performs on par with distilling GPT-4o by using it to caption the same set of images",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 3b caption",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-config",
+  "claim": "Ablation base model",
+  "value": "Our ablations test modifications to the Molmo-7B-D model configuration",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. Ablations para 1",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-gpt4o-all",
+  "claim": "GPT-4o caption variant",
+  "value": "if we caption all PixMo-Cap images with GPT-4o and train on those captions, both metrics perform strongly",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix, Pre-training data paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-f1-judge",
+  "claim": "cap F1 procedure",
+  "value": "We prompt GPT-4o to enumerate a list of all distinct atomic statements",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix, cap F1 definition",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-tenx",
+  "claim": "EVA-CLIP-5B size vs SO400M",
+  "value": "ten times bigger in parameter counts than SigLIP-SO400M",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Sec. 3.1 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "idefics2-arch-tokens",
+  "claim": "Tokens per image by architecture",
+  "value": "the cross-attention architecture feeds a single token per image to the language model, against 64 for the fully autoregressive architecture",
+  "paper": "Idefics2",
+  "version": "v1",
+  "loc": "Appendix, cross-attention vs fully autoregressive comparison",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-gpt4o-win",
+  "claim": "GPT-4o-caption ablation win rate vs default (ties excluded)",
+  "value": "55%",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 4 (ablation Elo)",
+  "uncertain": false
+ }
+]

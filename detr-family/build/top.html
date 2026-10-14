@@ -1,0 +1,59 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="A set of object-query slots fires predicted boxes, all at once, at a toy street scene with a car, a person and a dog. Two of the boxes are duplicates, a second box on the car and one on the person, and the rest land on nothing in particular. The three ground-truth boxes appear. During training, one-to-one matching links each object to exactly one slot, drawn in green. All the other slots, the duplicates included, get the target &quot;no object&quot; and fade to brown. The loss teaches those slots to stay silent, so at test time the model outputs three boxes with no NMS step."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+  </div>
+  <h1>The DETR family, intuition first</h1>
+  <p class="hook">How object detection became a set-prediction problem, why that first version trained so slowly, and how six follow-ups made it fast to train and then fast to run.</p>
+  <p class="papers-note">The seven papers, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/2005.12872v3" title="arXiv 2005.12872v3">DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2010.04159v4" title="arXiv 2010.04159v4">Deformable DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2201.12329v4" title="arXiv 2201.12329v4">DAB-DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2203.01305v3" title="arXiv 2203.01305v3">DN-DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2203.03605v4" title="arXiv 2203.03605v4">DINO</a></li>
+    <li><a href="https://arxiv.org/abs/2304.08069v3" title="arXiv 2304.08069v3">RT-DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2511.09554v2" title="arXiv 2511.09554v2">RF-DETR</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: DETR</li>
+    <li><a href="#ch-set-problem" data-rail="A set problem">Detection is a set problem</a></li>
+    <li><a href="#ch-matching" data-rail="Hungarian matching">One prediction per object: Hungarian matching</a></li>
+    <li><a href="#ch-queries" data-rail="Object queries">Object queries and a decoder that talks to itself</a></li>
+    <li><a href="#ch-training" data-rail="Training step">One training step, end to end</a></li>
+    <li><a href="#ch-detr-limits" data-rail="What it cost">What it cost: long training and small objects</a></li>
+    <li class="act col-break">Act II: making DETR train fast</li>
+    <li><a href="#ch-deformable" data-rail="Deformable DETR">Deformable DETR: look at a few points, not every pixel</a></li>
+    <li><a href="#ch-anchor-queries" data-rail="DAB-DETR">DAB-DETR: a query is a box</a></li>
+    <li><a href="#ch-denoising" data-rail="DN-DETR, DINO">DN-DETR and DINO: teach with noisy answers</a></li>
+    <li class="act">Act III: making DETR run fast</li>
+    <li><a href="#ch-rt-detr" data-rail="RT-DETR">RT-DETR: DETRs beat YOLOs once you count NMS</a></li>
+    <li><a href="#ch-rf-detr" data-rail="RF-DETR">RF-DETR: train once, pick your latency</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Family tree</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">predictions and queries</span>
+  <span class="c-yellow">ground truth</span>
+  <span class="c-green">matched, kept, positive</span>
+  <span class="c-red">cost, loss, removed, negative</span>
+  <span class="c-brown">"no object", background, baseline models</span>
+</div>
+<script>
+// Mark display equations that still overflow (on a phone), so CSS can fade their edge until scrolled to the end.
+addEventListener('DOMContentLoaded', () => {
+  const mark = () => document.querySelectorAll('.eq').forEach(e => { e.classList.toggle('scrolls', e.scrollWidth > e.clientWidth + 2); e.classList.toggle('at-end', e.scrollLeft + e.clientWidth >= e.scrollWidth - 2); });
+  document.querySelectorAll('.eq').forEach(e => e.addEventListener('scroll', mark, { passive: true }));
+  addEventListener('resize', mark); mark();
+});
+</script>
+<p class="note">Each interactive carries a badge. <b>Toy model</b> means an illustration of the mechanism, not the paper's network. <b>Computed</b> means a real formula from the paper evaluated on toy inputs. <b>Sourced</b> means the numbers come from the paper's tables. <b>Diagram</b> means a drawing of a structure or rule that the papers state. Numbers in the text are checked against a claim list kept with this page. In the matching equations, hover or tap a term that names part of the figure: that part of the figure lights up.</p>
+

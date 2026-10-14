@@ -1,0 +1,100 @@
+
+<style>
+#ch-scan .controls .sep { width:1px; align-self:stretch; background:var(--rule); margin:0 .2rem; }
+</style>
+<section id="ch-scan" class="chapter">
+<h2>The parallel scan and the hardware-aware kernel</h2>
+<p>Selection took away S4's shortcut. When <span class="tex">\overline{A}</span> and <span class="tex">\overline{B}</span> change at every token there is no single kernel to convolve with, so the states must come from the recurrence itself, and a loop over <span class="tex">L</span> tokens takes <span class="tex">L</span> steps, one after another: exactly what made RNNs slow to train. But each step is still linear in <span class="tex">\htmlClass{t-yellow}{h}</span>, and that is enough to compute all <span class="tex">L</span> states in about <span class="tex">2 \log_2 L</span> rounds instead.</p>
+
+<figure class="viz" id="viz-scan" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="scan-canvas" role="img" aria-label="A binary tree over 8 tokens. The bottom row holds the tokens as pairs (a, b). In the up-sweep, neighbouring nodes combine level by level, so each node holds the effect of a span of tokens. In the down-sweep, yellow chips carrying the state just before each span flow back down the tree. A row of yellow bars shows the finished states, and a row of dots below counts how many states a sequential loop would have finished in the same number of rounds."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-scan-8" aria-pressed="true">8 tokens</button>
+    <button type="button" id="btn-scan-16" aria-pressed="false">16 tokens</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" id="btn-scan-inputs" aria-pressed="true">Inputs</button>
+    <button type="button" id="btn-scan-up" aria-pressed="false">Up-sweep done</button>
+    <button type="button" id="btn-scan-down" aria-pressed="false">Down-sweep done</button>
+    <button type="button" id="btn-scan-states" aria-pressed="false">All states</button>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-scan-prev">Previous</button>
+    <button type="button" id="btn-scan-next">Next level</button>
+    <button type="button" id="btn-scan-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="scan-readout" aria-live="polite"></p>
+  <figcaption>Toy model, exact: one state cell with random decays <span class="tex">a_t</span> and inputs <span class="tex">b_t</span>. The tree runs the up-sweep and down-sweep of a work-efficient parallel scan, then one combine per token, and its states match the plain loop to the last bit of floating point. In a Mamba layer every one of the <span class="tex">D \times N</span> state cells runs its own copy of this tree, all at once. Rounds count combines that can run at the same time; the dots at the bottom show how far a loop doing one step per round would have got.</figcaption>
+</figure>
+
+<p>Step through it with <b>Next level</b>. Write one step of the recurrence, <span class="tex">\htmlClass{t-yellow}{h_t} = a_t \htmlClass{t-yellow}{h_{t-1}} + b_t</span>, as the pair <span class="tex">(a_t, b_t)</span>: keep <span class="tex">a_t</span> of the old state, then add <span class="tex">b_t</span>. In Mamba, <span class="tex">a_t = \overline{A}_t</span> and <span class="tex">b_t = \overline{B}_t \htmlClass{t-blue}{x_t}</span>, separately for each state cell. Two steps in a row are again one step of the same form, so two pairs can be merged into one before anyone knows what state they will be applied to. In the up-sweep, neighbours merge in parallel: pairs of tokens, then fours, then eights, until the root holds the effect of the whole sequence. In the down-sweep, each node is handed the state just before its span: a left child copies its parent's, and a right child merges its parent's with its left sibling's pair. One last merge per token turns "the state before me" into "my state".</p>
+
+<p>Martin and Cundy, who parallelized linear RNNs this way in 2018, write a step as an operator <span class="tex">(\Lambda, x) \bullet h = \Lambda h + x</span>. The merge rule below is our derivation from it: apply one step, then the next.</p>
+
+<div class="eq" id="eq-scan" data-build data-viz="viz-scan"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=pair}{\htmlClass{t-yellow}{h_t} = a_t\, \htmlClass{t-yellow}{h_{t-1}} + b_t \quad\longleftrightarrow\quad (a_t,\ b_t)} \\[4pt]
+&\htmlData{step=2, link=combine}{(a_1, b_1) \circ (a_2, b_2) = (a_1 a_2,\ \ a_2 b_1 + b_2)} \\[4pt]
+&\htmlData{step=3, link=assoc}{(p \circ q) \circ r = p \circ (q \circ r)} \\[4pt]
+&\htmlData{step=4, link=state}{\htmlClass{t-yellow}{h_t} = \text{the } b \text{ of } (a_1, b_1) \circ (a_2, b_2) \circ \cdots \circ (a_t, b_t), \quad \htmlClass{t-yellow}{h_0} = 0}
+\end{aligned}
+</div></div>
+<p class="eqno">Line 1 is Martin and Cundy's operator (Algorithm 1, line 2) in this page's letters. Lines 2 to 4 are our derivation from it. Mamba cites the parallel scan (Blelloch; Martin and Cundy; S5) and calls its own computation "recurrence (scan) only" (Algorithm 2, line 6), without writing the operator.</p>
+<ul class="gloss">
+  <li><span class="tex">a_t</span> is how much of the old state survives step <span class="tex">t</span> (a decay between 0 and 1 in Mamba), and <span class="tex">b_t</span> is what step <span class="tex">t</span> writes. The pair is the whole effect of one step on any state.</li>
+  <li><span class="tex">\circ</span> means "apply the left pair, then the right one". The result is one pair that does both steps. Order matters: swap the two and you get <span class="tex">(a_1 a_2,\ a_1 b_2 + b_1)</span>, a different step.</li>
+  <li>Grouping does not matter (associativity, which you can check by expanding both sides). So any tree of merges gives the same answer, and a parallel machine is free to pick the shallowest tree.</li>
+  <li>Starting from <span class="tex">\htmlClass{t-yellow}{h_0} = 0</span>, the merged pair for tokens 1 to <span class="tex">t</span> maps 0 to its own <span class="tex">b</span>, which is therefore <span class="tex">\htmlClass{t-yellow}{h_t}</span>.</li>
+</ul>
+
+<p>Before you press <b>All states</b>: will the scan do less arithmetic than the loop, or more? It does more. For 8 tokens the tree needs <span data-toy>22</span> combines against the loop's <span data-toy>8</span> steps, about three times the work, but in <span data-toy>7</span> rounds that each run in parallel. The rounds grow with <span class="tex">\log_2 L</span>, so the gap opens quickly: at <span data-claim="pscan-len-2048">2,048</span> tokens the scan needs <span data-claim="pscan-rounds-2048">23</span> rounds instead of 2,048. Martin and Cundy count the same trade for <span class="tex">p</span> processors: <span class="tex">O(6n(T/p + \lg p))</span> for the parallel scan against <span class="tex">O(2nT)</span> for the serial one, with <span class="tex">n</span> features and <span class="tex">T</span> steps.</p>
+
+<p>Against attention, the training bill now reads: attention scores about <span class="tex">L^2/2</span> pairs per head per layer, while the scan does about <span class="tex">3L</span> combines per state cell, in about <span class="tex">2\log_2 L</span> rounds.</p>
+
+<h3>Where the state lives</h3>
+<p>The tree fixes the depth. It does not fix the size. Every token's state has <span class="tex">D \times N</span> numbers, so the states of a whole batch form a tensor of shape <span class="tex">(B, L, D, N)</span>, <span class="tex">N</span> times larger than the layer's input and output of shape <span class="tex">(B, L, D)</span>. On a GPU, most operations other than matrix multiplication are limited by how fast data moves to and from memory, not by arithmetic (Mamba, Sec 3.3.2), so writing that tensor out and reading it back would cost more than computing it.</p>
+
+<figure class="viz" id="viz-scanmem" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="scanmem-canvas" role="img" aria-label="Two memory boxes: a large, slow HBM on the left holding tensors drawn as bars whose length is proportional to their size, and a small, fast SRAM on the right. Red arrows show the bytes moved between them at each stage. In the standard mode, two long expanded tensors and a long tensor of states appear in HBM; in the fused mode they never leave SRAM. A red meter at the bottom adds up the traffic."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-scanmem-fused" aria-pressed="true">Fused (Mamba)</button>
+    <button type="button" id="btn-scanmem-standard" aria-pressed="false">Standard</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" id="btn-scanmem-read" aria-pressed="false">1 Read</button>
+    <button type="button" id="btn-scanmem-expand" aria-pressed="false">2 Expand</button>
+    <button type="button" id="btn-scanmem-scan" aria-pressed="false">3 Scan</button>
+    <button type="button" id="btn-scanmem-out" aria-pressed="false">4 Read out</button>
+    <button type="button" id="btn-scanmem-back" aria-pressed="false">5 Backward</button>
+    <button type="button" id="btn-scanmem-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="scanmem-readout" aria-live="polite"></p>
+  <figcaption>Computed for one selective-scan layer and one sequence: <span data-claim="mamba-train-ctx">2048</span> tokens (Mamba's training context), inner width <span data-claim="mamba-2p8b-inner-width">5120</span> (Mamba 2.8B, from the README's width times <span data-claim="mamba-expand-e">2</span>), state size <span data-claim="mamba-state-n">16</span>, 16 bits per value. The stages follow Mamba's App. D; the bytes per stage are our count of the reads and writes it describes, and the "standard" column is our reading of the unfused implementation it compares against. Bar lengths in HBM are proportional to bytes.</figcaption>
+</figure>
+
+<p>Mamba's kernel answers with three classical techniques, all named in its Sec 3.3.2. <b>Kernel fusion</b>: discretization, the scan and the multiplication by <span class="tex">C</span> run inside one GPU kernel, so the <span class="tex">(B, L, D, N)</span> values exist only in SRAM, the small fast memory on the chip, and only the inputs and the output cross to HBM, the large slow memory. <b>The parallel scan</b> runs inside that kernel. <b>Recomputation</b>: the states are not saved for the backward pass but recomputed when the inputs are loaded again, which is cheaper than storing them and reading them back. A sequence too long for SRAM is cut into chunks, and the scan carries its state from one chunk to the next (App. D). In the figure the fused kernel moves about <span data-claim="pscan-io-ratio">33</span> times fewer bytes than the standard route; Mamba states the saving as a factor of order <span class="tex">N</span> in memory traffic.</p>
+
+<div class="claimcard">
+  <h4>Claim card: the fused scan is fast, and costs about as much memory as FlashAttention</h4>
+  <dl>
+    <dt>Claim</dt><dd>The hardware-aware scan is much faster than a standard scan, faster than the best attention kernel on long sequences, and needs about the training memory of a well-optimized Transformer.</dd>
+    <dt>How it was measured</dt><dd>On an <span data-claim="mamba-scan-bench-gpu">A100 80GB PCIe</span>: the scan alone at batch 1, <span data-claim="mamba-scan-bench-d">1024</span> channels, state size <span data-claim="mamba-scan-bench-n">16</span>, lengths up to <span data-claim="mamba-scan-bench-maxlen">500K</span>, against a PyTorch scan without fusion, a PyTorch FFT convolution and FlashAttention-2. Memory: training <span data-claim="pscan-mem-model">125M</span>-parameter models on sequences of <span data-claim="pscan-mem-seqlen">2048</span> tokens, against a Transformer with FlashAttention-2 and <code>torch.compile</code> fusion.</dd>
+    <dt>Result</dt><dd>Speed: "up to <span data-claim="mamba-scan-vs-pytorch-20-40x">20-40x</span> faster than a standard scan implementation in PyTorch" (Sec 4.5; App. D says the same); the caption of Fig. 8 rounds it to <span data-claim="mamba-scan-vs-pytorch-40x">40x</span>. Faster than FlashAttention-2 beyond <span data-claim="mamba-scan-fa2-crossover">2K</span> tokens, and up to <span data-claim="mamba-scan-vs-attn-7x">7x</span> faster than attention at <span data-claim="mamba-scan-vs-attn-32k">32K</span> (App. D). Memory (Table 15):
+      <table class="data"><thead><tr><th>Batch</th><th>Transformer + FlashAttention-2</th><th>Mamba</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span data-claim="mamba-mem-bs1-tf">4.6GB</span></td><td><span data-claim="mamba-mem-bs1-mamba">4.8GB</span></td></tr>
+        <tr><td>8</td><td><span data-claim="mamba-mem-bs8-tf">11.5GB</span></td><td><span data-claim="mamba-mem-bs8-mamba">12.3GB</span></td></tr>
+        <tr><td>32</td><td><span data-claim="mamba-mem-bs32-tf">34.5GB</span></td><td><span data-claim="mamba-mem-bs32-mamba">38.2GB</span></td></tr>
+      </tbody></table>
+      The text calls this "the same memory requirements"; the table shows Mamba a little higher at every batch size. Comparable, not lower.</dd>
+    <dt>What would have falsified it</dt><dd>Memory growing with the state size <span class="tex">N</span>, as it must if the <span class="tex">(B, L, D, N)</span> states were stored for the backward pass. It stays within about a tenth of the Transformer's.</dd>
+  </dl>
+</div>
+
+<div class="aside">
+  <h4>When the tree does not pay</h4>
+  <p>The tree buys depth with extra work, so it wins only when there is enough length to spread. Martin and Cundy's parallel kernel runs at <span data-claim="parscan-kernel-L16-m4">0.06</span> times the speed of a serial one on 16-step sequences, and <span data-claim="parscan-kernel-L65536-m4">38.5</span> times faster on 65,536 steps (their Table 1, 4 features). Hardware matters as much. Griffin, trained on <span data-claim="griffin-hw">TPU-v3</span>, found the associative scan "significantly slower" than a plain sequential scan: its training step was up to <span data-claim="griffin-assoc-slower">50%</span> slower with it. Its authors wrote a sequential scan kernel that keeps the state in fast on-chip memory, almost <span data-claim="griffin-pallas-speedup">3x</span> faster than the default JAX version, and guess that the tree's scattered memory access suits the TPU poorly. Our reading: the two papers agree on what matters, keeping the state in fast memory and moving as few bytes as possible; they differ on whether the tree is worth its extra work on their hardware.</p>
+</div>
+
+<p>None of this runs when the model writes text. Generating one token at a time, a selective SSM takes exactly one step of its recurrence per token and keeps one state, which is where the flat yellow line of the first chapter comes from. The interlude follows one such token through a whole model, next to a Transformer reading its cache. After it, Mamba-2 finds a third way to compute the same states, one that runs on the GPU's matrix-multiply units.</p>
+</section>

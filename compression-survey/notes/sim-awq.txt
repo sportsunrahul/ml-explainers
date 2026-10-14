@@ -1,0 +1,11 @@
+viz-awq node simulation (parts/kit/72-awq.js in node; run 2026-10-10).
+Toy: W 16 x 32 N(0, 0.4^2), seed 7; X 32 x 64; channels 7 and 24 (1-based) have activation std 8-10, others 0.5-1.2. s_X = mean|X| per channel (salient 8.11, 6.44; median of the rest 0.62).
+Quantizer: INT3 symmetric per group of 16 input channels, Delta = max|w| / 3 (our convention, 2^(N-1)-1). Loss L = ||Q(W diag s)(diag s^-1 X) - WX||_F. Grid alpha = i/19, i = 0..19.
+AWQ grid 0.00:37.81 0.05:31.58 0.11:27.42 0.16:23.89 0.21:21.63 0.26:18.99 0.32:19.75 0.37:18.85 0.42:18.49 0.47:19.17 0.53:20.89 0.58:21.81 0.63:24.06 0.68:27.99 0.74:31.37 0.79:33.77 0.84:39.40 0.89:40.66 0.95:42.52 1.00:45.32
+alpha = 0: s = 1 for every channel, so this is plain round to nearest on the INT3 grid. Output error L = 37.8.
+alpha = 0.25: the two large-activation channels are multiplied by 1.7 and 1.6 before rounding, and their inputs divided by the same. Output error L = 18.7, against 37.8 with no scaling (2.03x lower).
+alpha = 0.50: the two large-activation channels are multiplied by 2.8 and 2.5 before rounding, and their inputs divided by the same. Output error L = 20.2, against 37.8 with no scaling (1.87x lower).
+alpha = 1.00: the two large-activation channels are multiplied by 8.1 and 6.4 before rounding, and their inputs divided by the same. Output error L = 45.3, against 37.8 with no scaling (1.20x higher: the scaled channels now set the group maximum).
+alpha = 0.42: the two large-activation channels are multiplied by 2.4 and 2.2 before rounding, and their inputs divided by the same. Output error L = 18.5, against 37.8 with no scaling (2.04x lower). The grid search over 20 values of alpha picked 0.42.
+sx salient [ '8.11', '6.44' ] others median 0.62
+Visible effect: L falls from 37.8 (alpha 0, plain RTN) to 18.5 at the grid optimum alpha = 0.42 (2.04x lower) and rises to 45.3 at alpha 1 (U shape, as in AWQ Table 2).

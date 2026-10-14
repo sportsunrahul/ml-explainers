@@ -1,0 +1,120 @@
+<section id="ch-synthetic" class="chapter">
+<h2>Make fake defects (CutPaste, DRAEM)</h2>
+<p>If you have no defects, manufacture plausible ones. Paste fake damage onto good images and train a network to find it, and anomaly detection becomes ordinary supervised learning.</p>
+
+<figure class="viz" id="viz-synth" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-synth" tabindex="0" aria-label="Training samples made from a toy image. In CutPaste mode: the good image with a dashed blue source rectangle, the same image with that patch pasted inside a yellow target rectangle, and the training label, class 0 for the original and class 1 for the edited copy. Drag either rectangle; arrow keys move the target. In DRAEM mode: the good image, a foreign texture, a red mask made from Perlin noise, and the fake anomaly where the texture is blended into the image inside the mask."></canvas>
+  <div class="controls" role="group" aria-label="Method and product">
+    <span>Method</span>
+    <button type="button" id="btn-synth-cutpaste" aria-pressed="true">CutPaste</button>
+    <button type="button" id="btn-synth-draem" aria-pressed="false">DRAEM</button>
+    <span>Product</span>
+    <button type="button" id="btn-synth-mesh" aria-pressed="true">Mesh</button>
+    <button type="button" id="btn-synth-cap" aria-pressed="false">Cap</button>
+    <button type="button" id="btn-synth-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls" role="group" aria-label="CutPaste settings">
+    <span>CutPaste</span>
+    <button type="button" id="btn-synth-large" aria-pressed="true">Large patch</button>
+    <button type="button" id="btn-synth-scar" aria-pressed="false">Scar</button>
+    <label>Area <input type="range" id="rng-synth-area" min="2" max="15" step="1" value="6"> <output id="out-synth-area">6%</output></label>
+    <label>Aspect <input type="range" id="rng-synth-aspect" min="0.3" max="3.3" step="0.1" value="1.6"> <output id="out-synth-aspect">1.6</output></label>
+  </div>
+  <div class="controls" role="group" aria-label="DRAEM settings">
+    <span>DRAEM</span>
+    <label>Noise threshold <input type="range" id="rng-synth-thr" min="0.55" max="0.85" step="0.01" value="0.72"> <output id="out-synth-thr">0.72</output></label>
+    <label>Opacity beta <input type="range" id="rng-synth-beta" min="0.1" max="1" step="0.05" value="0.6"> <output id="out-synth-beta">0.60</output></label>
+    <button type="button" id="btn-synth-noise">New noise</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. The fakes are computed from the toy images with the papers' recipes: CutPaste's area and aspect ranges are the paper's (the scar is scaled to the 128-pixel toy); DRAEM's opacity range is the paper's, and its mask is real Perlin noise thresholded after rescaling to 0 to 1. The foreign texture is a procedural stand-in for the texture dataset DRAEM uses.</figcaption>
+</figure>
+
+<p>Both methods start from a good image and damage it on purpose. CutPaste cuts a rectangle out of the image and pastes it somewhere else in the same image: drag the rectangles and see a seam appear in the weave. DRAEM makes a blob-shaped mask from Perlin noise and paints a foreign texture into it: move the threshold to grow or shrink the blob, and lower the opacity to make the fake fainter and harder. Neither fake looks much like a real scratch. Keep that in mind; it is the central question of this chapter.</p>
+
+<h3>CutPaste: learn to spot an edit, then forget the classifier</h3>
+<p>CutPaste trains an ordinary classifier on two classes: the good image <span class="tex">x</span>, and its edited copy <span class="tex">\mathrm{CP}(x)</span>. A seam in a weave or a bolt hole in the wrong place is an irregularity, and to spot it the network has to learn what regular looks like.</p>
+<div class="eq" id="eq-cp-loss" data-build data-viz="viz-synth"><div class="tex tex-display">
+\htmlData{step=1}{\mathcal{L}_{\mathrm{CP}} = \mathbb{E}_{x \in \mathcal{X}}\big\{} \htmlData{step=2}{\mathbb{CE}\big(g(\htmlClass{t-blue}{x}), 0\big)} + \htmlData{step=3, link=mask}{\mathbb{CE}\big(g(\htmlClass{t-yellow}{\mathrm{CP}(x)}), 1\big)} \htmlData{step=1}{\big\}}
+</div></div>
+<p class="eqno">Eq. 1 in CutPaste v1. <span class="tex">\mathcal{X}</span> is the set of good images, <span class="tex">g</span> a binary classifier and <span class="tex">\mathbb{CE}</span> the cross-entropy. The best variant has three classes: normal, large patch, and scar.</p>
+<p>Then comes the twist: the classifier is thrown away. Its job was only to teach the network useful features. To score a test image, CutPaste fits one Gaussian to the features <span class="tex">f(x)</span> of the good training images and measures how unlikely a test feature is under it:</p>
+<div class="eq" id="eq-cp-gde" data-build><div class="tex tex-display">
+\htmlData{step=1}{\log p_{\mathrm{gde}}(x)} \propto \htmlData{step=2}{\Big\{ -\tfrac{1}{2} \big(f(x) - \htmlClass{t-blue}{\mu}\big)^{\top} \htmlClass{t-blue}{\Sigma}^{-1} \big(f(x) - \htmlClass{t-blue}{\mu}\big) \Big\}}
+</div></div>
+<p class="eqno">Eq. 2 in CutPaste v1: a Gaussian density estimator, with mean <span class="tex">\htmlClass{t-blue}{\mu}</span> and covariance <span class="tex">\htmlClass{t-blue}{\Sigma}</span> of good images' features. The bracket is minus half a squared Mahalanobis distance, the same distance as PaDiM's.</p>
+<p>With a ResNet-18 trained from scratch, the three-class version reaches <span data-claim="cutpaste-mvtec-img-auroc-3way">95.2</span> image AUROC on MVTec AD, and an ensemble of five reaches <span data-claim="cutpaste-mvtec-img-auroc-ensemble">96.1</span>. Fine-tuning an ImageNet-pretrained EfficientNet-B4 with CutPaste gives <span data-claim="cutpaste-effnet-finetune-pool">96.6</span>. For a heat map, CutPaste trains a second model on small crops and scores every patch, with a separate Gaussian per location for aligned objects; that model reaches <span data-claim="cutpaste-mvtec-pix-auroc">96.0</span> pixel AUROC. The per-location Gaussian is PaDiM's idea again.</p>
+<p>The most interesting result is a picture. In a two-dimensional map of the learned features (Fig. 3 of the paper), the pasted fakes sit far from the real defects, yet the features still separate real defects from good parts. The authors read it this way: CutPaste "is still not a perfect simulation of real defects", and "learning on it to find irregularity generalizes well on unseen anomalies."</p>
+
+<h3>DRAEM: repair the fake, then compare</h3>
+<p>DRAEM adds a second idea. A <b class="c-green">reconstructive subnet</b> learns to repair the fake, mapping <span class="tex">\htmlClass{t-yellow}{I_a}</span> back to the clean image <span class="tex">\htmlClass{t-blue}{I}</span>. A <b class="c-green">discriminative subnet</b> then looks at the input and its repair side by side and outputs a pixel map of where they disagree. The segmenter does not learn what a fake looks like. It learns how far an image is from its own repaired version, and that distance also exists for real defects. First, the fake (hover the terms to light the panels):</p>
+<div class="eq" id="eq-draem-blend" data-build data-viz="viz-synth"><div class="tex tex-display">
+\htmlData{step=1, link=beta}{\htmlClass{t-yellow}{I_a}} = \htmlData{step=2, link=image}{\overline{M}_a \odot \htmlClass{t-blue}{I}} + \htmlData{step=3, link=mask}{(1-\beta)\,(M_a \odot \htmlClass{t-blue}{I})} + \htmlData{step=4, link=texture}{\beta\,(M_a \odot \htmlClass{t-brown}{A})}
+</div></div>
+<p class="eqno">Eq. 4 in DRAEM v2. <span class="tex">M_a</span> is the thresholded Perlin mask and <span class="tex">\overline{M}_a</span> its inverse; <span class="tex">\htmlClass{t-brown}{A}</span> is a texture from the Describable Textures Dataset after three random augmentations; the opacity <span class="tex">\beta</span> is drawn uniformly from <span data-claim="draem-beta-range">[0.1, 1.0]</span>. The paper draws the noise threshold at random too; the slider makes it a control.</p>
+<p>Training minimizes two losses together. The repair must match the clean image, measured by structural similarity plus squared error. The map must match the fake's mask, measured by a focal loss, a cross-entropy that down-weights pixels that are already easy:</p>
+<div class="eq" id="eq-draem-loss" data-build><div class="tex tex-display">
+\htmlData{step=1}{L = \underbrace{\lambda L_{\mathrm{SSIM}}(I, I_r) + l_2(I, I_r)}_{L_{rec}}} \htmlData{step=2}{\; + \; L_{seg}(M_a, M)}
+</div></div>
+<p class="eqno">Eq. 2 and 3 in DRAEM v2. The paper gives no value for <span class="tex">\lambda</span> (the official code uses <span data-claim="draem-code-lambda">1</span>) and does not print the focal loss; it cites Lin et al. 2017, and the code uses focusing parameter <span data-claim="draem-code-focal-gamma">2</span>.</p>
+<p>At test time there is no fake: the real image goes in, and the map <span class="tex">M_o</span> is the anomaly map. The image score is the largest value of the map after a mean filter, so one stray pixel cannot decide the verdict:</p>
+<div class="eq" id="eq-draem-score" data-build><div class="tex tex-display">
+\htmlData{step=1}{\eta = \max\big(M_o \ast f_{s_f \times s_f}\big)}
+</div></div>
+<p class="eqno">Eq. 5 in DRAEM v2. The filter size <span class="tex">s_f</span> is not in the paper; the official code uses <span data-claim="draem-code-sf">21</span>.</p>
+<p>On MVTec AD, one model per product, DRAEM reaches <span data-claim="draem-mvtec-img-auroc">98.0</span> image AUROC, <span data-claim="draem-mvtec-pix-auroc">97.3</span> pixel AUROC and <span data-claim="draem-mvtec-pix-ap">68.4</span> pixel average precision. In the same table, DRAEM's own run of PaDiM has the higher pixel AUROC, <span data-claim="draem-t2-padim-pix">97.4</span>, but only <span data-claim="draem-t2-padim-ap">55.0</span> average precision. DRAEM argues for average precision for exactly the reason in <a href="#ch-benchmark">chapter 2</a>: the false-positive rate is swamped by the huge number of normal pixels.</p>
+
+<h3>Does realism matter?</h3>
+<p>Predict before you press the buttons. Which hurts DRAEM more: fakes that look nothing like real defects, or removing the repair-and-compare design?</p>
+<figure class="viz" id="viz-draemabl">
+  <span class="badge sourced">Sourced</span>
+  <canvas id="cv-draemabl" role="img" aria-label="Horizontal bars of image AUROC on MVTec AD for variants of DRAEM. Full DRAEM 98.0. Unrealistic fakes: no texture augmentation and no random opacity 97.4, rectangles 96.9, flat colors 96.2. Design taken apart: discriminative subnet only 93.9, the supervised segmenter of Bozic et al. 92.8, reconstruction only 83.9. A dashed line marks PaDiM at 95.5 as printed by DRAEM."></canvas>
+  <div class="controls" role="group" aria-label="Highlight">
+    <button type="button" id="btn-draemabl-all" aria-pressed="true">All variants</button>
+    <button type="button" id="btn-draemabl-realism" aria-pressed="false">Unrealistic fakes</button>
+    <button type="button" id="btn-draemabl-design" aria-pressed="false">Design taken apart</button>
+    <button type="button" id="btn-draemabl-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Sourced: DRAEM v2, Table 3 (ablation) and Table 1 (PaDiM's image AUROC as DRAEM prints it). MVTec AD, one model per product.</figcaption>
+</figure>
+<p>The design matters far more than realism. Flat color blobs still score <span data-claim="draem-abl-color-img">96.2</span> and rectangles <span data-claim="draem-abl-rect-img">96.9</span>, both above the PaDiM number DRAEM prints, <span data-claim="draem-t1-padim-img">95.5</span>. But train the segmenter alone on the same fakes, without the repair subnet, and it falls to <span data-claim="draem-abl-disc-img">93.9</span>. The authors blame "overfitting of the discriminative sub-network to the simulated anomalies".</p>
+<p>That is the risk of the whole family: <b>the model can learn your fakes instead of real defects</b>. A segmenter trained to find blobs of foreign texture finds blobs of foreign texture. Both papers soften the risk with an extra step that is not about the fakes: CutPaste discards its classifier and keeps a Gaussian on the features, and DRAEM compares an image with its own repair. Both also fail on the same kind of defect. CutPaste lists missing and flipped components among its failure cases, and DRAEM writes that "the absence of a part of the object is especially difficult to detect". A missing part leaves no foreign texture to find. <a href="#ch-efficientad">Chapter 10</a> attacks that case directly.</p>
+
+<h3>Inside DRAEM: forward, then backward</h3>
+<p>Before you press the backward steps, predict: does the segmentation loss reach the reconstructive subnet?</p>
+<figure class="viz archflow" id="viz-draemflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-draemflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-draemflow-simulate" aria-pressed="false">2 Fake</button>
+    <button type="button" id="btn-draemflow-reconstruct" aria-pressed="false">3 Repair</button>
+    <button type="button" id="btn-draemflow-compare" aria-pressed="false">4 Compare</button>
+    <button type="button" id="btn-draemflow-losses" aria-pressed="false">5 Losses</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-draemflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-draemflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <canvas id="draemflow-canvas" role="img" aria-label="DRAEM as a diagram: a good image becomes a yellow fake with a mask; a green reconstructive subnet repairs it; the repair and the fake are concatenated and a green U-Net segments the difference. Two red losses: reconstruction against the clean image, and focal loss against the mask. In the backward stages red arrows reach both subnets."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-draemflow-prev">Previous</button>
+    <button type="button" id="btn-draemflow-next">Next</button>
+    <button type="button" id="btn-draemflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="draemflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>A good image becomes a <b class="c-yellow">fake anomaly</b> with a known mask. The <b class="c-green">reconstructive subnet</b> repairs it; the <b class="c-green">discriminative subnet</b> compares repair and input; two <b class="c-red">losses</b> grade them. Nothing is pretrained and nothing is frozen. Press <b>1 Image</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. A good image</h4><p>Good training images of one product, rotated at random between <span data-claim="draem-rotation">(-45,45)</span> degrees. The official code resizes them to <span data-claim="draem-code-input">256 x 256</span> (code-only).</p></div>
+    <div data-stage="simulate" hidden><h4>2. The fake</h4><p>A Perlin-noise mask and a texture from the <span data-claim="draem-texture-source">Describable Textures Dataset</span>, after <span data-claim="draem-aug-count">3</span> augmentations drawn from a set of <span data-claim="draem-aug-set-size">7</span>, blended with Eq. 4. The paper reports that fewer than <span data-claim="draem-few-textures">10</span> texture images are enough when they are augmented.</p></div>
+    <div data-stage="reconstruct" hidden><h4>3. The repair</h4><p>An encoder-decoder maps the fake back to a clean-looking image. In the code it has base width <span data-claim="draem-code-recon-width">128</span>, a bottleneck of <span data-claim="draem-code-recon-bottleneck">1024 x 16 x 16</span>, and no skip connections (all code-only), so it cannot pass the fake straight through.</p></div>
+    <div data-stage="compare" hidden><h4>4. The comparison</h4><p>The repair and the fake are stacked into <span data-claim="draem-code-disc-in">6</span> channels. A U-Net with base width <span data-claim="draem-code-disc-width">64</span> outputs <span data-claim="draem-code-disc-out">2</span> channels per pixel (code-only). Its softmax is the anomaly map.</p></div>
+    <div data-stage="losses" hidden><h4>5. Two losses</h4><p>The reconstruction loss compares the repair with the clean image: structural similarity plus squared error (Eq. 2). The focal loss compares the map with the mask of the fake (Eq. 3). Their sum is the training loss.</p></div>
+    <div data-stage="backward" hidden><h4>6. Where the gradient goes</h4><p>The focal loss reaches the U-Net, and through the repair <span class="tex">I_r</span> it also reaches the reconstructive subnet: the paper says the repair network gets "an additional training signal" from the discriminative network. The reconstruction loss reaches the repair network directly. Both subnets are red: there is no frozen part.</p></div>
+    <div data-stage="update" hidden><h4>7. The update</h4><p>Both subnets train together for <span data-claim="draem-epochs">700</span> epochs at learning rate <span data-claim="draem-lr">1e-4</span>, divided by 10 after <span data-claim="draem-lr-steps">400 and 600</span> epochs. At test time only the forward pass runs, on a real image with no fake.</p></div>
+  </div>
+  <figcaption>Computed from the official DRAEM code (code-only): the paper states neither the input size nor the layer widths. Shapes for a <span data-claim="draem-code-input">256 x 256</span> input.</figcaption>
+</figure>
+<p class="note">Related methods on the family tree: NSA (2109.15222), MemSeg (2205.00908), DSR (2208.01521), SimpleNet (2303.15140) and GLASS (2407.09359).</p>
+</section>

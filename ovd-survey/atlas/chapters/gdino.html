@@ -1,0 +1,45 @@
+  <article data-chapter="gdino" data-chip="Grounding DINO">
+    <header class="ch-head"><span class="num"></span><h2>Grounding DINO: text in three places</h2><p class="subhead">The prompt picks where the decoder looks</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Where text enters">
+        <button type="button" role="tab" data-step="0">Encoder fusion</button>
+        <button type="button" role="tab" data-step="1">Query selection</button>
+        <button type="button" role="tab" data-step="2">Decoder</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="row"><span>prompt</span>
+        <button type="button" class="tool" data-prompt="forklift" aria-pressed="true">forklift</button>
+        <button type="button" class="tool" data-prompt="pallet-person" aria-pressed="false">pallet . person</button>
+        <button type="button" class="tool" data-prompt="cone" aria-pressed="false">traffic cone</button>
+        <button type="button" class="tool" data-prompt="ladder" aria-pressed="false">ladder</button>
+      </div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>Words reach into the image</h3>
+      <p>Grounding DINO builds on <button class="inline-term" data-open="gdino-dino">DINO</button>, a transformer detector. Before it picks any boxes, six fusion layers let the image and the prompt read each other through <button class="inline-term" data-open="gdino-xattn">cross-attention</button>. The yellow lines show the image tokens that each word reads most.</p>
+      <p>After these layers, the image features depend on the prompt. The same photo gives different features for <b>forklift</b> and for <b>ladder</b>.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>The prompt picks where to look</h3>
+      <p>Each small square is an image token. Its heat (green) is its best score against any word of the prompt. The hottest tokens become the starting boxes of the decoder's <button class="inline-term" data-open="gdino-query">queries</button>: 900 of them in the paper, out of more than 10,000 tokens.</p>
+      <p>A token sets only where its query starts. What the query carries is learned, the same for every image. Try <b>ladder</b>: nothing in the scene matches, yet the selection still keeps its quota, on the shelf.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>The queries read the image and the text</h3>
+      <p>Six decoder layers move each starting box onto an object. Each layer reads the image and, new in Grounding DINO, the text too. At the end, each query is scored against the words of the prompt. One query per object claims it (green); the others score low (brown).</p>
+      <p>With <b>ladder</b>, every query scores low, so nothing is detected. A real model can fail this last check; the paper lists false positives as a limitation.</p>
+    </div>
+    <p class="note">The stage is a toy: a drawn scene, 144 tokens instead of thousands, made-up features and scores. The table is from the paper: each row removes one piece and measures zero-shot box AP on LVIS minival (Table 7; Swin-T backbone, pre-trained on Objects365 only).</p>
+    <table class="data">
+      <thead><tr><th>Model (Table 7)</th><th class="n">LVIS AP</th></tr></thead>
+      <tbody>
+        <tr class="ours"><td>Full Grounding DINO T</td><td class="n">16.1</td></tr>
+        <tr><td>Without encoder fusion</td><td class="n">13.1</td></tr>
+        <tr><td>Static query selection</td><td class="n">13.6</td></tr>
+        <tr><td>Without text cross-attention in the decoder</td><td class="n">14.3</td></tr>
+      </tbody>
+    </table>
+    <p class="inscription">The prompt enters three times: it changes the image features, it chooses where the decoder looks, and it guides every decoder layer.</p>
+    <button type="button" class="continue" data-go="x">Continue</button>
+  </article>

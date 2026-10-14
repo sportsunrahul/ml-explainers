@@ -1,0 +1,299 @@
+
+<!-- ============================ ACT IV ============================ -->
+<p class="kicker">Act IV: control and scale</p>
+<section id="ch-guidance" class="chapter">
+<h2>Steering: classifier guidance and classifier-free guidance</h2>
+<p>So far the model makes "some image". To ask for a particular kind, say "a dog", condition it on a label and then <em>push</em> the samples toward what is typical for that label. Split the spiral into two classes, pick one, and turn up the push.</p>
+
+<figure class="viz" id="viz-guidance" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="guidance-canvas" aria-label="Two-class swiss roll: filled dots are the inner class, rings the outer class. Green samples generated for the chosen class with classifier-free guidance of the chosen strength." role="img"></canvas>
+  <div class="controls">
+    <label for="rng-guide-w">guidance w <input type="range" id="rng-guide-w" min="0" max="40" step="1" value="0"></label>
+    <button type="button" id="btn-guide-w0">No guidance</button>
+    <button type="button" id="btn-guide-w1">w = 1</button>
+    <button type="button" id="btn-guide-w4">w = 4</button>
+    <button type="button" id="btn-guide-inner" aria-pressed="true">Ask for: inner class</button>
+    <button type="button" id="btn-guide-outer" aria-pressed="false">Ask for: outer class</button>
+    <button type="button" id="btn-guide-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="guidance-readout" aria-live="polite"></p>
+  <figcaption>Samples use EDM's deterministic sampler with CFG's rule applied to the exact conditional and unconditional denoisers of this toy (<span class="tex">w = 0</span> is plain conditional sampling). "On target" is the share of samples nearest a point of the requested class; "coverage" is the share of that class's points with a sample close by, a stand-in for diversity.</figcaption>
+</figure>
+
+<h3>Classifier guidance (ADM, 2021)</h3>
+<p>Dhariwal and Nichol's "Diffusion Models Beat GANs" (<span data-claim="page-date-beat-gans">11 May 2021</span>) did two things. First, a careful architecture search on the U-Net: attention at several resolutions, more attention heads, BigGAN-style residual blocks for resizing, and "adaptive group normalization", which injects the step and class information by scaling and shifting each layer's normalized activations. They call the result ADM. Second, <b>classifier guidance</b>. Train a separate classifier <span class="tex">p_\phi(y \mid x_t)</span> on <em>noisy</em> images, and at every sampling step nudge the mean of the reverse step up the classifier's gradient toward the label <span class="tex">y</span>:</p>
+<div class="eq" id="eq-classifier-guidance" data-build data-viz="viz-guidance"><div class="tex tex-display">
+x_{t-1} \sim \mathcal{N}\big(\htmlData{step=1, link=samples}{\mu} + \htmlData{step=2, link=push}{s\,\Sigma\,\nabla_{x_t} \log p_\phi(y \mid x_t)},\; \Sigma\big)
+</div></div>
+<p class="eqno">Algorithm 1 in ADM v4 (the "Beat GANs" paper)</p>
+<ul class="gloss">
+  <li><span class="tex">\mu, \Sigma</span>: the mean and variance of the ordinary, unguided reverse step.</li>
+  <li><span class="tex">\nabla_{x_t} \log p_\phi(y \mid x_t)</span>: "which direction makes this noisy image look more like class <span class="tex">y</span> to the classifier".</li>
+  <li><span class="tex">s</span>: the guidance scale. Multiplying the gradient by <span class="tex">s</span> is the same as sharpening the classifier to <span class="tex">p(y\mid x)^s</span>, so larger <span class="tex">s</span> concentrates samples on what the classifier finds most unmistakably <span class="tex">y</span>.</li>
+</ul>
+<p>On ImageNet at <span data-computed>256x256</span> this took a class-conditional model from FID <span data-claim="page-adm-unguided-fid">10.94</span> to <span data-claim="page-adm-s1-fid">4.59</span> at scale 1 (Inception Score <span data-claim="page-adm-s1-is">186.70</span>). At scale 10 the IS climbed to <span data-claim="page-adm-s10-is">283.92</span> but FID got worse again, <span data-claim="page-adm-s10-fid">9.11</span>, and recall, a measure of how much of the data's variety the samples cover, fell through <span data-claim="page-adm-recall">0.63, 0.52 and 0.32</span>. The guided model beat BigGAN-deep's FID (<span data-claim="beat-gans-fid-in256">4.59 vs 6.95</span>) with much higher recall (<span data-claim="beat-gans-recall-in256">0.52 vs 0.28</span>): the title's claim, at the price of hundreds of network calls per image instead of one.</p>
+
+<h3>Classifier-free guidance (CFG, 2022)</h3>
+<p>A separate noisy-image classifier is a nuisance to train, and its gradients can be adversarial noise rather than meaningful direction. Ho and Salimans (<span data-claim="page-date-cfg">26 Jul 2022</span>) removed it. Train <em>one</em> network that is sometimes told the label and sometimes not: during training, replace the label with a "null" token some fraction of the time (<span data-claim="page-cfg-puncond">0.1 and 0.2</span> worked equally well). Then at every sampling step run the network twice and extrapolate:</p>
+<div class="eq" id="eq-cfg" data-build data-viz="viz-guidance"><div class="tex tex-display">
+\tilde\epsilon_\theta(z, c) = \htmlData{step=1, link=cond}{(1+w)\,\htmlClass{t-blue}{\epsilon_\theta(z, c)}} - \htmlData{step=2, link=uncond}{w\,\htmlClass{t-blue}{\epsilon_\theta(z)}}
+</div></div>
+<p class="eqno">Eq. 6 in CFG v1</p>
+<ul class="gloss">
+  <li><span class="tex">\epsilon_\theta(z, c)</span>: the noise prediction when told the label <span class="tex">c</span>; <span class="tex">\epsilon_\theta(z)</span>: the same network with the null label.</li>
+  <li>Rewritten as <span class="tex">\epsilon_\theta(z,c) + w\,[\epsilon_\theta(z,c) - \epsilon_\theta(z)]</span>: start from the conditional prediction and push further along the direction by which knowing the label changed it.</li>
+  <li>That difference is, by Bayes' rule, the gradient of an <em>implicit</em> classifier <span class="tex">p(c \mid z) \propto p(z \mid c)/p(z)</span> built from the generative model itself. So this is classifier guidance without a classifier.</li>
+</ul>
+<p>In the toy, predict before you drag: as <span class="tex">w</span> grows, will the samples spread over the whole inner arm or crowd somewhere? The push points away from what the <em>other</em> class looks like, so samples retreat to the part of their class least like the other one, the innermost coil, and coverage falls. That is the same fidelity-for-diversity trade the real model shows below: FID (which punishes lost variety) is best with a little guidance, while IS (which rewards unmistakable samples) keeps rising.</p>
+
+<figure class="viz" id="viz-cfg-sweep" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="cfg-sweep-canvas" aria-label="FID and Inception Score of classifier-free guidance on ImageNet 128 against guidance strength w: FID falls to a minimum near w 0.3 then rises; IS rises steadily." role="img"></canvas>
+  <p class="readout" id="cfg-sweep-readout" aria-live="polite"></p>
+  <figcaption>CFG v1 <span data-claim="page-cfg-t2">Table 2</span>, ImageNet <span data-computed>128x128</span>, 256 sampling steps. The white marker follows the toy's <span class="tex">w</span> slider. FID goes from <span data-claim="page-cfg-unguided-fid">7.27</span> unguided down to <span data-claim="cfg-in128-best-fid">2.43 vs 2.97</span> for classifier-guided ADM-G, then up to <span data-claim="page-cfg-w4-fid">21.53</span> at <span class="tex">w = 4</span>; IS climbs from <span data-claim="page-cfg-is-0">82.45</span> to <span data-claim="page-cfg-is-4">421.03</span>.</figcaption>
+</figure>
+
+<p>The cost is two network evaluations per step instead of one. The benefit is a single knob that every text-to-image system since has exposed, often called the "guidance scale". Chapters 8 and 12 use it. Strong guidance also has a recognizable look, oversaturated and overly "typical" images, which is the toy's crowded inner coil in pixel form.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('guidance-canvas'), out = document.getElementById('guidance-readout'), slider = document.getElementById('rng-guide-w');
+  const data = PE.swissRoll(240, 11), inner = data.slice(0, 120), outer = data.slice(120), SMAX = 8, SMIN = .002, N = 18;
+  const grid = (() => { const a = []; for (let i = 0; i < N; i++) a.push((SMAX ** (1 / 7) + i / (N - 1) * (SMIN ** (1 / 7) - SMAX ** (1 / 7))) ** 7); a.push(0); return a; })();
+  const g = PE.gauss(PE.rng(15)), P0 = Array.from({ length: 160 }, () => [SMAX * g(), SMAX * g()]);
+  const S = { w: 0, cls: 'inner', res: null, shown: null };
+  let stop = () => {};
+  function sample() { const cond = S.cls === 'inner' ? inner : outer, w = S.w;
+    const Dg = (x, y, s) => { const c = PE.idealX0(x, y, 1, s * s, cond), u = PE.idealX0(x, y, 1, s * s, data); return [(1 + w) * c[0] - w * u[0], (1 + w) * c[1] - w * u[1]]; };
+    return P0.map(([x, y]) => { for (let i = 0; i < N; i++) { const s = grid[i], sn = grid[i + 1], d = Dg(x, y, s), dx = (x - d[0]) / s, dy = (y - d[1]) / s;
+      let xn = x + (sn - s) * dx, yn = y + (sn - s) * dy;
+      if (sn > 0) { const d2 = Dg(xn, yn, sn); xn = x + (sn - s) * (dx + (xn - d2[0]) / sn) / 2; yn = y + (sn - s) * (dy + (yn - d2[1]) / sn) / 2; }
+      x = xn; y = yn; } return [x, y]; }); }
+  const stats = P => { const cond = S.cls === 'inner' ? inner : outer, off = S.cls === 'inner' ? 0 : 120;
+    let on = 0; P.forEach(p => { let b = 0, bd = 1e9; data.forEach((q, i) => { const d = (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2; if (d < bd) { bd = d; b = i; } }); if ((b >= off) && (b < off + 120)) on++; });
+    const cov = cond.filter(q => P.some(p => (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2 < .15 * .15)).length / cond.length;
+    return { on: on / P.length, cov }; };
+  const cv = PE.canvas(el, w => w < 560 ? .95 : .6, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), G = PE.css('--green');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 4), rs = W < 500 ? 1.8 : 2.4;
+    inner.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .55));
+    ctx.save(); ctx.strokeStyle = Y; ctx.globalAlpha = .6; ctx.lineWidth = 1;
+    outer.forEach(p => { ctx.beginPath(); ctx.arc(V.X(p[0]), V.Y(p[1]), rs + .6, 0, 7); ctx.stroke(); }); ctx.restore();
+    if (S.shown) S.shown.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs + .5, G, .9));
+    PE.label(ctx, 'filled: inner class   rings: outer class', 10, 18, PE.css('--muted'), 11);
+  });
+  function readout(st) { out.textContent = `w = ${S.w.toFixed(1)}, asking for the ${S.cls} class: ${Math.round(st.on * 100)}% of samples on target, covering ${Math.round(st.cov * 100)}% of that class. `
+    + (S.w === 0 ? 'Conditional sampling alone already mostly respects the label.' : S.w < 1.5 ? 'More on target, slightly less spread.' : 'Samples crowd into the part of the class least like the other one: fidelity up, diversity down.'); }
+  function update() { stop(); const prev = S.shown || P0.map(p => [p[0] / 3, p[1] / 3]); S.res = sample(); const st = stats(S.res);
+    stop = PE.animate(700, u => { S.shown = S.res.map((p, i) => [PE.lerp(prev[i][0], p[0], u), PE.lerp(prev[i][1], p[1], u)]); cv.redraw(); });
+    readout(st); document.dispatchEvent(new CustomEvent('pe-guide-w', { detail: S.w })); }
+  const setW = w => { S.w = w; slider.value = Math.round(w * 10); update(); };
+  const setCls = c => { S.cls = c; document.getElementById('btn-guide-inner').setAttribute('aria-pressed', c === 'inner'); document.getElementById('btn-guide-outer').setAttribute('aria-pressed', c === 'outer'); update(); };
+  let raf = 0; slider.addEventListener('input', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { S.w = +slider.value / 10; update(); }); });
+  document.getElementById('btn-guide-w0').addEventListener('click', () => setW(0));
+  document.getElementById('btn-guide-w1').addEventListener('click', () => setW(1));
+  document.getElementById('btn-guide-w4').addEventListener('click', () => setW(4));
+  document.getElementById('btn-guide-inner').addEventListener('click', () => setCls('inner'));
+  document.getElementById('btn-guide-outer').addEventListener('click', () => setCls('outer'));
+  document.getElementById('btn-guide-reset').addEventListener('click', () => { S.w = 0; slider.value = 0; setCls('inner'); });
+  update();
+
+  // Sourced sweep: CFG Table 2, ImageNet 128, T = 256.
+  const Wv = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 2, 3, 4];
+  const FID = [7.27, 4.53, 3.03, 2.43, 2.49, 2.98, 3.76, 4.67, 5.74, 6.8, 7.86, 15.93, 19.77, 21.53];
+  const IS = [82.45, 106.12, 132.54, 158.47, 183.41, 207.98, 228.83, 249.25, 267.99, 283.41, 297.98, 377.37, 407.44, 421.03];
+  let mark = 0; const sOut = document.getElementById('cfg-sweep-readout');
+  const interp = (arr, w) => { for (let i = 0; i < Wv.length - 1; i++) if (w <= Wv[i + 1]) { const u = (w - Wv[i]) / (Wv[i + 1] - Wv[i]); return PE.lerp(arr[i], arr[i + 1], u); } return arr[arr.length - 1]; };
+  const sc = PE.canvas(document.getElementById('cfg-sweep-canvas'), w => w < 560 ? .75 : .42, (ctx, W, H) => {
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const Rd = PE.css('--red'), G = PE.css('--green'), F = PE.css('--fg');
+    const b = { x: 46, y: 16, w: W - 96, h: H - 58 };
+    const a1 = PE.axes(ctx, b, [0, 4], [0, 25], { xt: [0, 1, 2, 3, 4], yt: [0, 5, 10, 15, 20, 25], xl: 'guidance strength w', yl: 'FID (lower is better)' });
+    const Y2 = v => b.y + b.h - v / 450 * b.h;
+    ctx.save(); ctx.fillStyle = G; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left';
+    [0, 100, 200, 300, 400].forEach(v => ctx.fillText(v, b.x + b.w + 6, Y2(v) + 4)); ctx.restore();
+    PE.polyline(ctx, Wv.map((w, i) => [a1.X(w), a1.Y(FID[i])]), Rd, 2.2); Wv.forEach((w, i) => PE.dot(ctx, a1.X(w), a1.Y(FID[i]), 3, Rd));
+    PE.polyline(ctx, Wv.map((w, i) => [a1.X(w), Y2(IS[i])]), G, 2.2, [5, 4]); Wv.forEach((w, i) => PE.dot(ctx, a1.X(w), Y2(IS[i]), 3, G));
+    PE.label(ctx, 'FID', a1.X(3.3), a1.Y(21) - 8, Rd, 12); PE.label(ctx, 'IS (right axis)', a1.X(2.3), Y2(395) - 8, G, 12);
+    ctx.save(); ctx.strokeStyle = F; ctx.globalAlpha = .7; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(a1.X(mark), b.y); ctx.lineTo(a1.X(mark), b.y + b.h); ctx.stroke(); ctx.restore();
+    PE.dot(ctx, a1.X(mark), a1.Y(interp(FID, mark)), 5, F); PE.dot(ctx, a1.X(mark), Y2(interp(IS, mark)), 5, F);
+  });
+  const sRead = () => { sOut.textContent = `At w = ${mark.toFixed(1)} the real ImageNet model has FID about ${interp(FID, mark).toFixed(1)} and IS about ${Math.round(interp(IS, mark))} (interpolated between table rows).`; };
+  document.addEventListener('pe-guide-w', e => { const m0 = mark, m1 = e.detail; PE.animate(600, u => { mark = PE.lerp(m0, m1, u); sc.redraw(); }); mark = m1; sRead(); });
+  sRead();
+})();
+</script>
+
+<section id="ch-latent" class="chapter">
+<h2>Diffuse in a compressed space: latent diffusion</h2>
+<p>Pixel-space diffusion spends most of its effort on detail nobody would miss. Latent diffusion first squeezes the image into a small grid with an autoencoder, and runs the whole diffusion process there. Pick a compression factor and see what the diffusion model is left to generate.</p>
+
+<figure class="viz" id="viz-latent" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="latent-canvas" aria-label="A synthetic scene next to the grid of latent cells the diffusion model would work on at the chosen downsampling factor, with bars for relative cost and for the paper's measured reconstruction quality." role="img"></canvas>
+  <div class="controls">
+    <span>downsampling f:</span>
+    <button type="button" id="btn-latent-f1" aria-pressed="false">1 (pixels)</button>
+    <button type="button" id="btn-latent-f4" aria-pressed="false">4</button>
+    <button type="button" id="btn-latent-f8" aria-pressed="true">8</button>
+    <button type="button" id="btn-latent-f16" aria-pressed="false">16</button>
+    <button type="button" id="btn-latent-f32" aria-pressed="false">32</button>
+    <button type="button" id="btn-latent-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="latent-readout" aria-live="polite"></p>
+  <figcaption>The latent grid is drawn as block averages of a synthetic <span data-computed>256x256</span> scene: a toy picture of "fewer, richer cells", not a real encoder, whose cells are learned features, not colors. Grid shapes and reconstruction scores are sourced from LDM v2 Table 8 (VQ-regularized autoencoders on ImageNet validation; R-FID compares reconstructions to originals, lower is better).</figcaption>
+</figure>
+
+<h3>Two kinds of compression</h3>
+<p>DDPM's paper already noticed that most of a diffusion model's bits describe imperceptible detail. Rombach and colleagues (<span data-claim="page-date-ldm">20 Dec 2021</span>) separated the two jobs. A first-stage <b>autoencoder</b> handles <em>perceptual</em> compression: an encoder <span class="tex">\mathcal{E}</span> maps an image <span class="tex">x</span> to a latent <span class="tex">z = \mathcal{E}(x)</span> that is <span class="tex">f</span> times smaller along each side, and a decoder <span class="tex">\mathcal{D}</span> maps it back, trained with a perceptual loss and a small adversarial critic so textures come back sharp. The diffusion model then does the <em>semantic</em> work, deciding what is in the picture, on the latent grid:</p>
+<div class="eq" id="eq-ldm" data-build data-viz="viz-latent"><div class="tex tex-display">
+L_{\text{LDM}} = \mathbb{E}_{\htmlData{step=1, link=encode}{\mathcal{E}(x)},\,\epsilon,\,t}\Big[\big\lVert \htmlClass{t-brown}{\epsilon} - \htmlData{step=2, link=cells}{\htmlClass{t-blue}{\epsilon_\theta(z_t, t)}}\big\rVert^2\Big]
+</div></div>
+<p class="eqno">Eq. 2 in LDM v2</p>
+<p>It is DDPM's <span class="tex">L_{\text{simple}}</span> with <span class="tex">x</span> replaced by <span class="tex">z</span>. Nothing about diffusion changes; only the space does. To generate, sample a latent with any sampler from Act III, then decode it once.</p>
+
+<h3>How much to compress</h3>
+<p>Press through the factors. The number of cells the network processes falls with the square of <span class="tex">f</span>, and the cost with it. Reconstruction quality falls too, slowly at first and then sharply: R-FID <span data-claim="page-ldm-rfid-4">0.58</span> at <span class="tex">f = 4</span>, <span data-claim="page-ldm-rfid-8">1.14</span> at 8, <span data-claim="page-ldm-rfid-16">5.15</span> at 16 and <span data-claim="page-ldm-rfid-32">31.83</span> at 32. The paper found that small factors train slowly and very large ones stagnate, with <span data-claim="ldm-f-sweet-spot">f = 4-16</span> as the sweet spot; at equal compute, <span class="tex">f = 8</span> beat pixel-space diffusion by an FID gap of <span data-claim="ldm-fid-gap-38">38</span>. A <span data-computed>256x256</span> image becomes a <span data-claim="page-ldm-z-8">32x32x4</span> latent at <span class="tex">f = 8</span>.</p>
+<p>On class-conditional ImageNet at <span data-computed>256x256</span>, LDM-4 with classifier-free guidance scored FID <span data-claim="page-ldm-in256">3.60</span>, better than ADM-G, with fewer parameters (<span data-claim="page-ldm-params">400M vs 608M</span>), about a third of the training compute (<span data-claim="page-ldm-v100">271 vs 916</span> V100-days, without guidance) and several times the sampling speed (<span data-claim="page-ldm-throughput">0.4 vs 0.07</span> samples per second on one A100).</p>
+
+<h3>Conditioning on text: cross-attention</h3>
+<p>The second contribution is a general way to condition on anything. A separate encoder <span class="tex">\tau_\theta</span> turns the condition <span class="tex">y</span> (a caption, a layout, a mask) into a sequence of vectors, and layers inside the U-Net let every latent cell look them up:</p>
+<div class="eq" id="eq-cross-attn" data-build data-viz="viz-latent"><div class="tex tex-display">
+\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\Big(\frac{QK^{\top}}{\sqrt{d}}\Big)V, \quad \htmlData{step=1, link=cells}{Q = W_Q\,\varphi(z_t)},\; \htmlData{step=2, link=text}{K = W_K\,\tau_\theta(y),\; V = W_V\,\tau_\theta(y)}
+</div></div>
+<p class="eqno">Sec. 3.3 of LDM v2 (unnumbered)</p>
+<p>Each latent cell forms a query ("what am I looking for?"), each word of the caption offers a key ("what am I about?") and a value ("what do I contribute?"); the softmax picks which words each cell listens to. A <span data-claim="page-ldm-t2i-size">1.45B</span>-parameter text-to-image LDM trained on LAION-400M captions reached MS-COCO FID <span data-claim="page-ldm-coco">12.63</span> with classifier-free guidance, close to the far larger GLIDE (<span data-claim="page-ldm-glide">12.24</span>). The openly released Stable Diffusion models were built on this recipe, which is why "latent diffusion" and "Stable Diffusion" are often used interchangeably.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('latent-canvas'), out = document.getElementById('latent-readout');
+  // Synthetic 256x256 scene rendered once offscreen.
+  const src = document.createElement('canvas'); src.width = src.height = 256; const c = src.getContext('2d');
+  const sky = c.createLinearGradient(0, 0, 0, 170); sky.addColorStop(0, '#2d5d8a'); sky.addColorStop(1, '#e9b07a'); c.fillStyle = sky; c.fillRect(0, 0, 256, 256);
+  c.fillStyle = '#ffd86b'; c.beginPath(); c.arc(190, 70, 26, 0, 7); c.fill();
+  c.fillStyle = '#3f6b3a'; c.beginPath(); c.moveTo(0, 175); c.quadraticCurveTo(80, 120, 150, 170); c.quadraticCurveTo(210, 200, 256, 160); c.lineTo(256, 256); c.lineTo(0, 256); c.fill();
+  c.fillStyle = '#2c4a28'; c.beginPath(); c.moveTo(0, 215); c.quadraticCurveTo(120, 180, 256, 222); c.lineTo(256, 256); c.lineTo(0, 256); c.fill();
+  c.fillStyle = '#b5523b'; c.fillRect(60, 150, 44, 34); c.fillStyle = '#6e2e22'; c.beginPath(); c.moveTo(54, 152); c.lineTo(82, 128); c.lineTo(110, 152); c.fill();
+  c.fillStyle = '#f3e3b0'; c.fillRect(72, 160, 9, 9); c.fillRect(88, 160, 9, 9); c.fillStyle = '#4a2a1a'; c.fillRect(80, 170, 8, 14);
+  for (let i = 0; i < 40; i++) { c.fillStyle = `rgba(255,255,255,${.25 + .5 * ((i * 37) % 10) / 10})`; c.fillRect((i * 53) % 256, 180 + (i * 29) % 70, 2, 2); }
+  const px = c.getImageData(0, 0, 256, 256).data;
+  const avg = f => { const n = 256 / f, cells = []; for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { let r = 0, g = 0, b = 0;
+    for (let y = j * f; y < (j + 1) * f; y++) for (let x = i * f; x < (i + 1) * f; x++) { const k = (y * 256 + x) * 4; r += px[k]; g += px[k + 1]; b += px[k + 2]; }
+    const m = f * f; cells.push([r / m, g / m, b / m]); } return { n, cells }; };
+  const Z = { 1: ['256x256x3', null], 4: ['64x64x3', 'page-ldm-rfid-4', .58], 8: ['32x32x4', 'page-ldm-rfid-8', 1.14], 16: ['16x16x8', 'page-ldm-rfid-16', 5.15], 32: ['8x8x32', 'page-ldm-rfid-32', 31.83] };
+  const S = { f: 8, shown: 8, fade: 1 };
+  let stop = () => {};
+  const cv = PE.canvas(el, w => w < 560 ? 1.35 : .52, (ctx, W, H) => {
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const M = PE.css('--muted'), Bl = PE.css('--blue'), Rd = PE.css('--red'), F = PE.css('--fg'), narrow = W < 560;
+    const sz = narrow ? Math.min(W * .44, 170) : Math.min(H - 70, W * .3), y0 = 26;
+    const x1 = narrow ? W * .04 : 16, x2 = narrow ? W * .52 : 16 + sz + 40;
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(src, x1, y0, sz, sz);
+    PE.label(ctx, 'image: 256x256x3 pixels', x1, y0 - 8, M, 11);
+    const A = avg(S.shown), cs = sz / A.n;
+    ctx.globalAlpha = S.fade; A.cells.forEach(([r, g, b], k) => { ctx.fillStyle = `rgb(${r | 0},${g | 0},${b | 0})`; ctx.fillRect(x2 + (k % A.n) * cs, y0 + Math.floor(k / A.n) * cs, Math.ceil(cs), Math.ceil(cs)); });
+    ctx.globalAlpha = 1;
+    if (A.n <= 64) { ctx.save(); ctx.strokeStyle = PE.css('--bg'); ctx.globalAlpha = .35; ctx.lineWidth = 1;
+      for (let i = 1; i < A.n; i++) { ctx.beginPath(); ctx.moveTo(x2 + i * cs, y0); ctx.lineTo(x2 + i * cs, y0 + sz); ctx.moveTo(x2, y0 + i * cs); ctx.lineTo(x2 + sz, y0 + i * cs); ctx.stroke(); } ctx.restore(); }
+    PE.label(ctx, `latent the diffusion model generates: ${Z[S.f][0]}`, x2, y0 - 8, Bl, 11);
+    // Bars: relative cost (cells) and reconstruction R-FID.
+    const bx = narrow ? x1 : x2 + sz + 36, bw = narrow ? W - 2 * x1 : W - bx - 16, by = narrow ? y0 + sz + 40 : y0 + 10;
+    const cells = (256 / S.f) ** 2;
+    PE.label(ctx, 'cells to process (share of pixels)', bx, by, M, 11);
+    ctx.fillStyle = PE.css('--panel2'); ctx.fillRect(bx, by + 8, bw, 14); ctx.fillStyle = Bl; ctx.fillRect(bx, by + 8, Math.max(2, bw * cells / 65536), 14);
+    PE.label(ctx, `${cells} cells = 1/${S.f * S.f} of the pixels`, bx, by + 38, F, 12);
+    PE.label(ctx, 'reconstruction error (R-FID, Table 8)', bx, by + 66, M, 11);
+    ctx.fillStyle = PE.css('--panel2'); ctx.fillRect(bx, by + 74, bw, 14);
+    if (Z[S.f][1]) { ctx.fillStyle = Rd; ctx.fillRect(bx, by + 74, Math.max(2, bw * Math.log10(1 + Z[S.f][2]) / Math.log10(33)), 14); }
+    PE.label(ctx, Z[S.f][1] ? `R-FID ${Z[S.f][2]} (log bar)` : 'no autoencoder: exact pixels', bx, by + 104, F, 12);
+  });
+  function readout() { const f = S.f;
+    out.textContent = f === 1 ? 'f = 1 is ordinary pixel-space diffusion: every one of the 65,536 pixel positions goes through the network at every step.'
+      : `f = ${f}: the diffusion model works on a ${Z[f][0]} latent, ${(256 / f) ** 2} cells, and the decoder restores the rest. `
+      + (f <= 8 ? 'Reconstructions stay close to the original.' : f === 16 ? 'Reconstructions start to lose detail.' : 'Too aggressive: the decoder can no longer restore the image faithfully.'); }
+  const Fs = [1, 4, 8, 16, 32];
+  function setF(f) { stop(); Fs.forEach(k => document.getElementById('btn-latent-f' + k).setAttribute('aria-pressed', k === f)); S.f = f;
+    stop = PE.animate(700, u => { if (u > .5) S.shown = f; S.fade = Math.abs(1 - 2 * u) * .75 + .25; if (u === 1) S.fade = 1; cv.redraw(); }); readout(); }
+  Fs.forEach(f => document.getElementById('btn-latent-f' + f).addEventListener('click', () => setF(f)));
+  document.getElementById('btn-latent-reset').addEventListener('click', () => setF(8));
+  readout();
+  window.PE_latentScene = src;
+})();
+</script>
+
+<section id="ch-dit" class="chapter">
+<h2>Swap the U-Net for a transformer: DiT</h2>
+<p>Every model so far used a U-Net. Peebles and Xie asked whether the transformer, the architecture whose quality grows predictably with compute in language models, would do the same for diffusion. Cut the latent into patches, and choose a model size: the chart shows what the paper measured.</p>
+
+<figure class="viz" id="viz-dit" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="dit-canvas" aria-label="Left: the 32 by 32 latent cut into patches of the chosen size, each patch one token. Right: FID against forward-pass Gflops for all twelve DiT configurations, with the chosen one highlighted." role="img"></canvas>
+  <div class="controls">
+    <span>model:</span>
+    <button type="button" id="btn-dit-s" aria-pressed="false">S</button>
+    <button type="button" id="btn-dit-b" aria-pressed="false">B</button>
+    <button type="button" id="btn-dit-l" aria-pressed="false">L</button>
+    <button type="button" id="btn-dit-xl" aria-pressed="true">XL</button>
+    <span>patch size:</span>
+    <button type="button" id="btn-dit-p8" aria-pressed="false">8</button>
+    <button type="button" id="btn-dit-p4" aria-pressed="false">4</button>
+    <button type="button" id="btn-dit-p2" aria-pressed="true">2</button>
+    <button type="button" id="btn-dit-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="dit-readout" aria-live="polite"></p>
+  <figcaption>Data: DiT v2 appendix table "<span data-claim="page-dit-table">Details of all DiT models</span>": class-conditional ImageNet <span data-computed>256x256</span>, 400K training steps, FID-50K without guidance, Gflops of one forward pass. The latent on the left is the toy scene from the previous chapter at <span class="tex">f = 8</span>.</figcaption>
+</figure>
+
+<h3>Patches are tokens</h3>
+<p>DiT (<span data-claim="page-date-dit">19 Dec 2022</span>) works inside Stable Diffusion's autoencoder: a <span data-computed>256x256</span> image becomes a <span data-claim="dit-latent-shape">32x32x4</span> latent. "Patchify" cuts that into <span class="tex">p \times p</span> squares and turns each into one vector, a <b>token</b>, so the transformer sees <span class="tex">T = (I/p)^2</span> tokens for an <span class="tex">I \times I</span> latent: 16, 64 or 256 tokens for <span class="tex">p</span> = 8, 4, 2. Halving the patch size quadruples the tokens, and since every token attends to every other, the compute grows at least as fast, while the parameter count barely changes.</p>
+
+<h3>Telling every layer the noise level: adaLN-Zero</h3>
+<p>The network must know the step <span class="tex">t</span> and the class <span class="tex">c</span>. DiT tried four ways: appending them as extra tokens, cross-attention to them, and two variants of <b>adaptive layer norm</b>, where a small network maps <span class="tex">(t, c)</span> to a per-channel scale and shift applied after each normalization, like ADM's adaptive group norm. The winner, <b>adaLN-Zero</b>, also outputs a gate for each residual branch and initializes it to zero, so every block starts as the identity function and training eases each one in. At 400K steps the four gave FID <span data-claim="page-dit-incontext">35.24</span> (tokens), <span data-claim="page-dit-crossattn">26.14</span> (cross-attention), <span data-claim="page-dit-adaln">25.21</span> (adaLN) and <span data-claim="page-dit-xl2-noguide-400k">19.47</span> (adaLN-Zero), and adaLN-Zero was also the cheapest.</p>
+
+<h3>Quality follows compute</h3>
+<p>Before you press the buttons, guess which matters more for quality: the number of parameters (model size) or the compute per forward pass (which the patch size also controls)? The chart answers. DiT-S/2 and DiT-B/4 have about the same Gflops but four times different parameter counts, and nearly identical FID (<span data-claim="page-dit-s2">68.40</span> vs <span data-claim="page-dit-b4">68.38</span>). Across all twelve models, FID tracks forward-pass Gflops. The largest, DiT-XL/2 at <span data-claim="dit-xl2-gflops-params">118.64 Gflops, 675M params</span>, trained longer and sampled with classifier-free guidance, reached FID <span data-claim="dit-fid-256-cfg">2.27</span> on ImageNet <span data-computed>256x256</span> (<span data-claim="dit-fid-256-noguide">9.62</span> without guidance), the best diffusion result at the time, while using far less compute per step than pixel-space ADM (<span data-claim="page-dit-adm-gflops">1120</span> Gflops) though more than LDM-4's U-Net (<span data-claim="page-dit-ldm4-gflops">104</span>). That scaling behavior is why the next generation of systems, SD3 among them (Chapter 12), are transformers.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('dit-canvas'), out = document.getElementById('dit-readout');
+  const T = { 'S/8': [.36, 33, 153.60], 'S/4': [1.41, 33, 100.41], 'S/2': [6.06, 33, 68.40], 'B/8': [1.42, 131, 122.74], 'B/4': [5.56, 130, 68.38], 'B/2': [23.01, 130, 43.47],
+    'L/8': [5.01, 459, 118.87], 'L/4': [19.70, 458, 45.64], 'L/2': [80.71, 458, 23.33], 'XL/8': [7.39, 676, 106.41], 'XL/4': [29.05, 675, 43.01], 'XL/2': [118.64, 675, 19.47] };
+  const S = { m: 'XL', p: 2, pulse: 0 };
+  let stop = () => {};
+  const cv = PE.canvas(el, w => w < 560 ? 1.35 : .5, (ctx, W, H) => {
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const M = PE.css('--muted'), Bl = PE.css('--blue'), G = PE.css('--green'), F = PE.css('--fg'), Br = PE.css('--brown'), narrow = W < 560;
+    const sz = narrow ? Math.min(W * .6, 200) : Math.min(H - 60, W * .33), x0 = narrow ? (W - sz) / 2 : 16, y0 = 24;
+    const scene = window.PE_latentScene;
+    if (scene) { const n = 32, cs = sz / n, sctx = scene.getContext('2d'), d = sctx.getImageData(0, 0, 256, 256).data;
+      for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { let r = 0, g = 0, b = 0; for (let y = j * 8; y < j * 8 + 8; y++) for (let x = i * 8; x < i * 8 + 8; x++) { const k = (y * 256 + x) * 4; r += d[k]; g += d[k + 1]; b += d[k + 2]; }
+        ctx.fillStyle = `rgb(${r / 64 | 0},${g / 64 | 0},${b / 64 | 0})`; ctx.fillRect(x0 + i * cs, y0 + j * cs, Math.ceil(cs), Math.ceil(cs)); }
+      const np = 32 / S.p, ps = sz / np; ctx.save(); ctx.strokeStyle = Bl; ctx.lineWidth = 1.5 + 1.5 * S.pulse; ctx.globalAlpha = .9;
+      for (let i = 0; i <= np; i++) { ctx.beginPath(); ctx.moveTo(x0 + i * ps, y0); ctx.lineTo(x0 + i * ps, y0 + sz); ctx.moveTo(x0, y0 + i * ps); ctx.lineTo(x0 + sz, y0 + i * ps); ctx.stroke(); } ctx.restore(); }
+    PE.label(ctx, `32x32x4 latent, p = ${S.p}: ${(32 / S.p) ** 2} tokens`, x0, y0 - 8, Bl, 11);
+    const b = narrow ? { x: 52, y: y0 + sz + 34, w: W - 70, h: H - sz - 100 } : { x: x0 + sz + 70, y: 16, w: W - x0 - sz - 88, h: H - 58 };
+    const ax = PE.axes(ctx, b, [.3, 150], [15, 170], { logx: true, logy: true, xt: [1, 10, 100], yt: [20, 40, 80, 160], xl: 'Gflops per forward pass (log)', yl: 'FID-50K, 400K steps (log)', ylo: 40 });
+    const sizes = ['S', 'B', 'L', 'XL'];
+    sizes.forEach(m => PE.polyline(ctx, [8, 4, 2].map(p => { const r = T[`${m}/${p}`]; return [ax.X(r[0]), ax.Y(r[2])]; }), M, 1, [3, 3], .6));
+    Object.entries(T).forEach(([k, [gf, pm, fid]]) => { const sel = k === `${S.m}/${S.p}`, rad = 3 + Math.sqrt(pm) / 6;
+      PE.dot(ctx, ax.X(gf), ax.Y(fid), rad + (sel ? 2 + 3 * S.pulse : 0), sel ? G : Br, sel ? 1 : .6);
+      if (sel || !narrow) PE.label(ctx, k, ax.X(gf) + rad + 3, ax.Y(fid) + 4, sel ? G : M, sel ? 12 : 10); });
+    PE.label(ctx, 'dot area ~ parameters; dashed: same model, patch 8 -> 4 -> 2', b.x + 4, b.y + 12, M, 10);
+  });
+  function readout() { const [gf, pm, fid] = T[`${S.m}/${S.p}`];
+    out.textContent = `DiT-${S.m}/${S.p}: ${(32 / S.p) ** 2} tokens, ${gf} Gflops, ${pm}M parameters, FID ${fid} after 400K steps without guidance.`; }
+  function set(o) { stop(); Object.assign(S, o);
+    ['s', 'b', 'l', 'xl'].forEach(k => document.getElementById('btn-dit-' + k).setAttribute('aria-pressed', k.toUpperCase() === S.m));
+    [8, 4, 2].forEach(p => document.getElementById('btn-dit-p' + p).setAttribute('aria-pressed', p === S.p));
+    readout(); stop = PE.animate(800, u => { S.pulse = Math.sin(Math.PI * u); cv.redraw(); }); }
+  ['s', 'b', 'l', 'xl'].forEach(k => document.getElementById('btn-dit-' + k).addEventListener('click', () => set({ m: k.toUpperCase() })));
+  [8, 4, 2].forEach(p => document.getElementById('btn-dit-p' + p).addEventListener('click', () => set({ p })));
+  document.getElementById('btn-dit-reset').addEventListener('click', () => set({ m: 'XL', p: 2 }));
+  readout();
+})();
+</script>

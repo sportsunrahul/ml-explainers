@@ -1,0 +1,150 @@
+<section id="ch-guide" class="chapter">
+<h2>A decision guide for detection and segmentation</h2>
+<p>Try the cheap and safe steps first, measure on your own validation set after each one, and pay for training only when the measurement says so. Pick your GPU, your model family and your accuracy budget below; the recipe and its evidence update together.</p>
+
+<figure class="viz" id="viz-guide">
+  <span class="badge computed">Our reading</span>
+  <div class="controls fig-top" role="group" aria-label="GPU">
+    <span class="lbl">GPU</span>
+    <button type="button" id="btn-guide-cc75" aria-pressed="true">CC 7.5 (T4)</button>
+    <button type="button" id="btn-guide-cc80" aria-pressed="false">CC 8.0/8.6 (A100, A10)</button>
+    <button type="button" id="btn-guide-cc89" aria-pressed="false">CC 8.9 (L40S)</button>
+    <button type="button" id="btn-guide-cc90" aria-pressed="false">CC 9.0 (H100)</button>
+    <button type="button" id="btn-guide-cc100" aria-pressed="false">CC 10.0+ (B200)</button>
+  </div>
+  <div class="controls" role="group" aria-label="Model family">
+    <span class="lbl">Model</span>
+    <button type="button" id="btn-guide-cnn" aria-pressed="true">ResNet-style CNN</button>
+    <button type="button" id="btn-guide-dw" aria-pressed="false">depthwise-heavy</button>
+    <button type="button" id="btn-guide-yolo" aria-pressed="false">YOLO family</button>
+    <button type="button" id="btn-guide-vit" aria-pressed="false">transformer</button>
+  </div>
+  <div class="controls" role="group" aria-label="Budget and training">
+    <span class="lbl">Budget</span>
+    <button type="button" id="btn-guide-b03" aria-pressed="false">0.3 points</button>
+    <button type="button" id="btn-guide-b1" aria-pressed="true">1 point</button>
+    <button type="button" id="btn-guide-b2" aria-pressed="false">2 points</button>
+    <span class="lbl">Fine-tuning</span>
+    <button type="button" id="btn-guide-train" aria-pressed="true">possible</button>
+    <button type="button" id="btn-guide-notrain" aria-pressed="false">not possible</button>
+    <button type="button" id="btn-guide-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="guide-canvas" role="img" aria-label="A flowchart of the recipe: boxes for each step from top to bottom, blue for measuring, yellow for quantization steps, brown for structural changes, with a green stop arrow where the expected loss fits the budget."></canvas>
+  <div class="readout guide-recipe" id="guide-readout" aria-live="polite"></div>
+  <figcaption>The order of steps and the "expected loss" behind each stop arrow are our reading of the tables below, not a published recipe. "Points" are absolute points of COCO mAP or mIoU. A family without sourced INT8 rows (YOLO under TensorRT, transformer detectors) never gets a stop arrow: measure it.</figcaption>
+</figure>
+
+<h3>Two kinds of "accuracy loss"</h3>
+<p>Papers report a quantized model's accuracy loss in two ways, and mixing them up is the most common mistake when reading these tables. NVIDIA's study reports a <em>relative</em> change in percent; most others report an <em>absolute</em> change in points.</p>
+<div class="eq" id="eq-units" data-build data-viz="viz-guide-tables"><div class="tex tex-display">
+\htmlData{step=1, link=rel}{\Delta_{\text{rel}} = 100\,\frac{\htmlClass{t-yellow}{a_q} - \htmlClass{t-blue}{a_{\text{fp}}}}{\htmlClass{t-blue}{a_{\text{fp}}}}\ \%} \qquad \htmlData{step=2, link=abs}{\Delta_{\text{abs}} = \htmlClass{t-yellow}{a_q} - \htmlClass{t-blue}{a_{\text{fp}}}\ \text{points}}
+</div></div>
+<p class="eqno">Our notation. Wu et al. (2004.09602v1) report relative percent; Nagel et al., BRECQ, Mishra et al. and van Baalen et al. report absolute points.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{a_{\text{fp}}}</span>: the full-precision model's accuracy (mAP or mIoU).</li>
+  <li><span class="tex">\htmlClass{t-yellow}{a_q}</span>: the compressed model's accuracy, same metric and data.</li>
+  <li>For a detector at about 37 mAP, a relative change of 0.3% is about 0.1 absolute points.</li>
+</ul>
+
+<div id="viz-guide-tables">
+<h3 id="ev-wu">Table A: INT8 PTQ and QAT on ResNet-style models (relative percent)</h3>
+<p>Wu et al. (NVIDIA), PyTorch models with weights per channel and activations per tensor, calibrated on <span data-claim="wu20-t9-faster-r-cnn-calib-samples">512</span> training images per detection and segmentation model. COCO 2017 val; box mAP for detection, mIoU for segmentation.</p>
+<table class="data" aria-label="Wu et al. detection and segmentation INT8 results">
+  <thead><tr><th>Model (backbone)</th><th>FP32</th><th>max calibration</th><th>best calibration</th><th data-link="rel">best PTQ, relative</th><th>QAT</th><th data-link="rel">QAT, relative</th></tr></thead>
+  <tbody>
+    <tr><td>Faster R-CNN (ResNet-50-FPN)</td><td><span data-claim="wu20-t7-faster-r-cnn-fp32">36.95</span></td><td><span data-claim="wu20-t5-faster-r-cnn-max">36.38</span></td><td><span data-claim="wu20-t7-faster-r-cnn-ptq-acc">36.82</span> (<span data-claim="wu20-t7-faster-r-cnn-ptq-calib">entropy</span>)</td><td><span data-claim="wu20-t7-faster-r-cnn-ptq-rel">-0.35%</span></td><td><span data-claim="wu20-t7-faster-r-cnn-qat-acc">36.76</span></td><td><span data-claim="wu20-t7-faster-r-cnn-qat-rel">-0.51%</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50-FPN)</td><td><span data-claim="wu20-t7-mask-r-cnn-fp32">37.89</span></td><td><span data-claim="wu20-t5-mask-r-cnn-max">37.51</span></td><td><span data-claim="wu20-t7-mask-r-cnn-ptq-acc">37.80</span> (<span data-claim="wu20-t7-mask-r-cnn-ptq-calib">99.9999%</span>)</td><td><span data-claim="wu20-t7-mask-r-cnn-ptq-rel">-0.24%</span></td><td><span data-claim="wu20-t7-mask-r-cnn-qat-acc">37.75</span></td><td><span data-claim="wu20-t7-mask-r-cnn-qat-rel">-0.37%</span></td></tr>
+    <tr><td>RetinaNet (ResNeXt-101-32x4d-FPN)</td><td><span data-claim="wu20-t7-retinanet-fp32">39.30</span></td><td><span data-claim="wu20-t5-retinanet-max">38.90</span></td><td><span data-claim="wu20-t7-retinanet-ptq-acc">39.19</span> (<span data-claim="wu20-t7-retinanet-ptq-calib">99.999%</span>)</td><td><span data-claim="wu20-t7-retinanet-ptq-rel">-0.28%</span></td><td><span data-claim="wu20-t7-retinanet-qat-acc">39.25</span></td><td><span data-claim="wu20-t7-retinanet-qat-rel">-0.13%</span></td></tr>
+    <tr><td>FCN (ResNet-101), mIoU</td><td><span data-claim="wu20-t7-fcn-fp32">63.70</span></td><td><span data-claim="wu20-t5-fcn-max">63.40</span></td><td><span data-claim="wu20-t7-fcn-ptq-acc">64.00</span> (<span data-claim="wu20-t7-fcn-ptq-calib">entropy</span>)</td><td><span data-claim="wu20-t7-fcn-ptq-rel">0.47%</span></td><td><span data-claim="wu20-t7-fcn-qat-acc">64.10</span></td><td><span data-claim="wu20-t7-fcn-qat-rel">0.63%</span></td></tr>
+    <tr><td>DeepLabV3 (ResNet-101), mIoU</td><td><span data-claim="wu20-t7-deeplabv3-fp32">67.40</span></td><td><span data-claim="wu20-t5-deeplabv3-max">67.20</span></td><td><span data-claim="wu20-t7-deeplabv3-ptq-acc">67.50</span> (<span data-claim="wu20-t7-deeplabv3-ptq-calib">99.999%</span>)</td><td><span data-claim="wu20-t7-deeplabv3-ptq-rel">0.15%</span></td><td><span data-claim="wu20-t7-deeplabv3-qat-acc">67.50</span></td><td><span data-claim="wu20-t7-deeplabv3-qat-rel">0.15%</span></td></tr>
+  </tbody>
+  <caption>Wu et al. Table 5 (max column) and Table 7 (best calibrator, PTQ vs QAT). Relative percent as printed.</caption>
+</table>
+
+<h3 id="ev-nagel">Table B: a depthwise-heavy detector and a MobileNet segmenter (absolute points)</h3>
+<p>Nagel et al. (Qualcomm), standard PTQ pipeline (average of 5 runs) and standard QAT pipeline (average of 3 runs). EfficientDet-D1 on COCO 2017 (mAP); DeepLabV3 with a MobileNetV2 backbone on Pascal VOC (mIoU).</p>
+<table class="data" aria-label="Nagel et al. standard PTQ and QAT results">
+  <thead><tr><th>Model</th><th>FP32</th><th data-link="abs">PTQ W8A8 per-tensor</th><th data-link="abs">PTQ W8A8 per-channel</th><th data-link="abs">PTQ W4A8 per-tensor</th><th data-link="abs">PTQ W4A8 per-channel</th><th data-link="abs">QAT W8A8 per-channel</th><th data-link="abs">QAT W4A8 per-channel</th><th data-link="abs">QAT W4A4 per-channel</th></tr></thead>
+  <tbody>
+    <tr><td>EfficientDet-D1</td><td><span data-claim="nagel21-t6-efficientdet-d1-fp32">40.08</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pt-w8a8">38.29</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w8a8">38.67</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pt-w4a8">0.31</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w4a8">35.08</span></td><td><span data-claim="nagel21-t10-efficientdet-d1-pc-w8a8">38.97</span></td><td><span data-claim="nagel21-t10-efficientdet-d1-pc-w4a8">36.75</span></td><td><span data-claim="nagel21-t10-efficientdet-d1-pc-w4a4">28.68</span></td></tr>
+    <tr><td>DeepLabV3 (MobileNetV2)</td><td><span data-claim="nagel21-t6-deeplabv3-fp32">72.94</span></td><td><span data-claim="nagel21-t6-deeplabv3-pt-w8a8">72.44</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w8a8">72.27</span></td><td><span data-claim="nagel21-t6-deeplabv3-pt-w4a8">70.80</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w4a8">71.67</span></td><td><span data-claim="nagel21-t10-deeplabv3-pc-w8a8">72.87</span></td><td><span data-claim="nagel21-t10-deeplabv3-pc-w4a8">73.01</span></td><td><span data-claim="nagel21-t10-deeplabv3-pc-w4a4">68.90</span></td></tr>
+  </tbody>
+  <caption>Nagel et al. Table 6 (PTQ) and Table 10 (QAT). W8A8 means 8-bit weights and 8-bit activations.</caption>
+</table>
+
+<h3 id="ev-brecq">Table C: 4-bit weights without training (absolute points)</h3>
+<p>Li et al. (BRECQ), Faster R-CNN with a ResNet-50 backbone on COCO, box mAP, 8-bit activations, <span data-claim="brecq21-calib-coco">256</span> calibration images.</p>
+<table class="data" aria-label="BRECQ Faster R-CNN results">
+  <thead><tr><th>Method</th><th>W8A8</th><th>W4A8</th><th>W2A8</th></tr></thead>
+  <tbody>
+    <tr><td>Full precision</td><td colspan="3"><span data-claim="brecq21-t5-faster-rcnn-resnet-50-fp">38.55</span></td></tr>
+    <tr><td>Rounding plus bias correction</td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-bc-w8a8">38.25</span></td><td data-link="abs"><span data-claim="brecq21-t5-faster-rcnn-resnet-50-bc-w4a8">0.25</span></td><td>not reported</td></tr>
+    <tr><td>AdaRound</td><td>not reported</td><td data-link="abs"><span data-claim="brecq21-t5-faster-rcnn-resnet-50-adaround-w4a8">37.58</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-adaround-w2a8">19.63</span></td></tr>
+    <tr><td>BRECQ</td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-brecq-w8a8">38.54</span></td><td data-link="abs"><span data-claim="brecq21-t5-faster-rcnn-resnet-50-brecq-w4a8">38.29</span></td><td><span data-claim="brecq21-t5-faster-rcnn-resnet-50-brecq-w2a8">34.23</span></td></tr>
+  </tbody>
+  <caption>BRECQ Table 5.</caption>
+</table>
+
+<h3 id="ev-sparse">Table D: 2:4 sparsity with retraining (absolute points)</h3>
+<p>Mishra et al. (NVIDIA): train dense, prune to the 2:4 pattern, retrain. COCO 2017 box AP; there is no dense INT8 column in the source.</p>
+<table class="data" aria-label="2:4 sparsity detection results">
+  <thead><tr><th>Model</th><th>dense FP16</th><th data-link="abs">2:4 sparse FP16</th><th data-link="abs">2:4 sparse INT8</th></tr></thead>
+  <tbody>
+    <tr><td>RetinaNet (ResNet-50)</td><td><span data-claim="mishra2021-t4-retinanet-rn50-bbox-dense-fp16">34.8</span></td><td><span data-claim="mishra2021-t4-retinanet-rn50-bbox-sparse-fp16">35.2</span></td><td><span data-claim="mishra2021-t4-retinanet-rn50-bbox-sparse-int8">35.1</span></td></tr>
+    <tr><td>SSD (ResNet-50)</td><td><span data-claim="mishra2021-t4-ssd-rn50-bbox-dense-fp16">24.8</span></td><td><span data-claim="mishra2021-t4-ssd-rn50-bbox-sparse-fp16">24.8</span></td><td><span data-claim="mishra2021-t4-ssd-rn50-bbox-sparse-int8">24.9</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50), box</td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-bbox-dense-fp16">37.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-bbox-sparse-fp16">37.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-bbox-sparse-int8">37.8</span></td></tr>
+    <tr><td>Faster R-CNN (ResNet-50-FPN, 3x)</td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-3x-bbox-dense-fp16">39.8</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-3x-bbox-sparse-fp16">39.9</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-3x-bbox-sparse-int8">39.4</span></td></tr>
+  </tbody>
+  <caption>Mishra et al. Table 4 (selected rows; the full table has 15 detection and segmentation rows).</caption>
+</table>
+
+<h3 id="ev-yolo">Table E: other toolchains, distillation and a phone CPU</h3>
+<table class="data" aria-label="YOLO, distillation and phone results">
+  <thead><tr><th>Source and setting</th><th>before</th><th>after</th></tr></thead>
+  <tbody>
+    <tr><td>YoloV5, COCO mAP, naive INT8 PTQ (van Baalen et al., Qualcomm tooling; absolute change)</td><td><span data-claim="vb-t1-yolov5-fp32">56.3</span></td><td data-link="abs"><span data-claim="vb-t1-yolov5-int8">-1.8</span></td></tr>
+    <tr><td>Yolov3, INT8 PTQ with some 16-bit layers (van Baalen et al. Table 6, AIMET; dataset not stated)</td><td><span data-claim="vb-t6-yolov3-fp32">0.653</span></td><td><span data-claim="vb-t6-yolov3-int8">0.649</span></td></tr>
+    <tr><td>Yolo-v5, same setting</td><td><span data-claim="vb-t6-yolov5-fp32">0.557</span></td><td><span data-claim="vb-t6-yolov5-int8">0.559</span></td></tr>
+    <tr id="ev-other"><td>Faster R-CNN R50-FPN with half the channels, COCO AP, without and with feature imitation (Wang et al.; teacher <span data-claim="wang-coco-fpn-r50-ap">36.9</span>)</td><td><span data-claim="wang-coco-fpn-r50h-ap">31.2</span></td><td><span data-claim="wang-coco-fpn-r50h-i-ap">34.8</span></td></tr>
+    <tr><td>MobileNet SSD, COCO mAP, float vs 8-bit QAT (Jacob et al.; timed on a <span data-claim="jacob-hw-s835">Snapdragon 835</span> phone CPU, not a GPU)</td><td><span data-claim="jacob-coco-dm100-fp-map">22.1</span></td><td><span data-claim="jacob-coco-dm100-int8-map">21.7</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>What each GPU can run</h3>
+<p>From the TensorRT 11.4 support matrix, by compute capability (CC): CC 7.5 (T4) supports <span data-claim="trt-t4-precisions">FP32, FP16, INT8</span>. CC 8.0 and 8.6 (A100, A10) add TF32 and BF16, while FP8 is <span data-claim="trt-ampere-no-fp8">N/A</span>. FP8 starts at CC <span data-claim="trt-fp8-min-cc">8.9</span>. On CC 8.9 and 9.0, FP4 runs only in <span data-claim="trt-fp4-emulation">hardware emulation mode</span>; CC <span data-claim="trt-b200-cc">10.0</span> (B200) supports every listed precision. The saved support matrix does not say which GPUs accelerate 2:4 sparsity; Mishra et al. introduce it with the A100.</p>
+<div class="aside">
+  <h4>If your pipeline uses TensorRT calibrators</h4>
+  <p>TensorRT <span data-claim="trt-removal-version">11.0.0</span> removed implicit quantization: the INT8 calibrator classes (entropy, min-max, legacy) and the per-precision builder flags are gone. Quantization now means explicit Q/DQ nodes in the network, which NVIDIA's Model Optimizer can insert and calibrate. Engines are tied to a TensorRT major version: <span data-claim="trt-vc-cross-major">TensorRT 10</span> version-compatible engines run on a TensorRT 11 runtime, and TensorRT 8 engines do not. TensorRT 11 also removed <span data-claim="trt-removed-plugins">16</span> old plugins, including the EfficientNMS_ONNX_TRT plugin that some exported detectors use.</p>
+</div>
+
+<div class="aside detector">
+  <h4>On a detector: the short version</h4>
+  <p>For a ResNet-style detector or segmenter, INT8 post-training quantization with per-channel weights and a percentile or entropy calibrator is the first thing to try, and in the sourced rows it stays within a few tenths of a point. Depthwise-heavy models and 4-bit weights are where the real losses are; that is when to use equalization, sensitivity analysis, BRECQ-style PTQ or a short QAT run. For more speed after that, 2:4 sparsity with retraining and a distilled smaller backbone are the sourced options. For YOLO models and transformer detectors, no source here measures TensorRT INT8, so measure your own.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-guide'), out = document.getElementById('guide-readout');
+  const kit = KIT.guideFlow(document.getElementById('guide-canvas'), { fig });
+  const sel = { gpu: ['cc75', 'cc80', 'cc89', 'cc90', 'cc100'], model: ['cnn', 'dw', 'yolo', 'vit'] };
+  const btn = k => document.getElementById('btn-guide-' + k);
+  const budgets = { b03: .3, b1: 1, b2: 2 };
+  const highlight = () => { document.querySelectorAll('#viz-guide-tables h3').forEach(h => h.classList.remove('g-hl'));
+    out.querySelectorAll('.g-ev a').forEach(a => { const t = document.getElementById(a.getAttribute('href').slice(1)); if (t && t.tagName === 'H3') t.classList.add('g-hl'); }); };
+  const sync = () => { const s = kit.state;
+    sel.gpu.forEach(k => btn(k).setAttribute('aria-pressed', String(k === s.gpu)));
+    sel.model.forEach(k => btn(k).setAttribute('aria-pressed', String(k === s.model)));
+    for (const k in budgets) btn(k).setAttribute('aria-pressed', String(budgets[k] === s.budget));
+    btn('train').setAttribute('aria-pressed', String(s.train)); btn('notrain').setAttribute('aria-pressed', String(!s.train));
+    out.innerHTML = KIT.guideHTML(s); highlight(); };
+  sel.gpu.forEach(k => btn(k).addEventListener('click', () => { kit.set({ gpu: k }); sync(); }));
+  sel.model.forEach(k => btn(k).addEventListener('click', () => { kit.set({ model: k }); sync(); }));
+  for (const k in budgets) btn(k).addEventListener('click', () => { kit.set({ budget: budgets[k] }); sync(); });
+  btn('train').addEventListener('click', () => { kit.set({ train: true }); sync(); });
+  btn('notrain').addEventListener('click', () => { kit.set({ train: false }); sync(); });
+  btn('reset').addEventListener('click', () => { kit.set({ gpu: 'cc75', model: 'cnn', budget: 1, train: true }); sync(); });
+  sync();
+})();
+</script>
+</section>

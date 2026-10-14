@@ -1,0 +1,166 @@
+  <article data-chapter="overview">
+    <header class="ch-head"><span class="num">1 of 8</span><h2>What a JEPA does</h2><p class="subhead">One motion: see, hide, predict, measure</p></header>
+    <div class="tools"><button type="button" class="tool play" data-replay>Replay</button></div>
+    <p>A <strong class="key">JEPA</strong> learns from unlabeled data by hiding part of an input and predicting the hidden part. The twist is <em>where</em> it predicts. It does not paint the missing pixels. It predicts the <span class="c-yellow">embedding</span> of the hidden part from the <span class="c-blue">embedding</span> of the visible part, and the loss is the distance between the <span class="c-green">guess</span> and the target embedding.</p>
+    <p class="note">The stage shows one image cut into patches. Each patch rises to its embedding (blue). A block of patches is hidden (yellow). The predictor's guess (green) lands near the hidden embeddings, and the red segment is the miss that training shrinks. Drag to turn the scene.</p>
+    <h3>Main findings of the survey</h3>
+    <ul>
+      <li>Predicting in embedding space lets the model skip unpredictable detail. On ImageNet-1k, I-JEPA ViT-H/14 reaches 79.3% linear-probe top-1 in under 72 hours on 16 A100s, with about 5 times fewer iterations than pixel reconstruction (MAE).</li>
+      <li>Nothing in the loss forbids the trivial answer "every embedding is the same". JEPAs avoid <button class="inline-term" data-open="collapse">collapse</button> by an asymmetry: an <button class="inline-term" data-open="ema">EMA target encoder</button>, a <button class="inline-term" data-open="stopgrad">stop-gradient</button> and a predictor. LeJEPA replaces the asymmetry with one regulariser and one hyperparameter.</li>
+      <li>The same recipe scales to video (V-JEPA, V-JEPA 2) and, with an action-conditioned predictor, becomes a world model that plans a real robot arm from 62 hours of robot video.</li>
+      <li>The field has grown from 7 arXiv papers in 2023 to 447 in 2026 up to the scan date of 8 October; one third of them are about world models, planning and robotics.</li>
+    </ul>
+    <p class="inscription">A JEPA predicts what it cannot see, in the space where things mean something, not in the space of pixels.</p>
+    <button type="button" class="continue" data-go="loss">Continue with where the loss lives</button>
+  </article>
+
+  <article data-chapter="loss">
+    <header class="ch-head"><span class="num">2 of 8</span><h2>Where the loss lives</h2><p class="subhead">Three ways to fill in a blank</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Three families">
+        <button type="button" role="tab" data-step="0">Pixels</button>
+        <button type="button" role="tab" data-step="1">Two views</button>
+        <button type="button" role="tab" data-step="2">JEPA</button>
+      </div>
+    </div>
+    <div class="controls"><label class="slider"><span>Unpredictable detail in the hidden block (noise) <b id="loss-noise-value">0.0</b></span><input id="loss-noise" type="range" min="0" max="1" step="0.05" value="0"></label></div>
+    <div class="step-text" data-step="0">
+      <h3>Reconstruct the pixels</h3>
+      <p>Autoencoders and masked autoencoders (MAE) hide patches and paint them back. The loss is measured on <span class="c-red">every pixel</span>. The network must reproduce leaves, texture and sensor noise, so most of its capacity goes to detail that carries no meaning.</p>
+      <p class="note">Move the slider: as the hidden block gets more unpredictable detail, the pixel loss grows, even though nothing about the scene changed. Balestriero and LeCun (2402.11337) show that the pixel directions that explain 90% of the variance give worse classifiers than the bottom 20%.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Make two views agree</h3>
+      <p>Contrastive and self-distillation methods (SimCLR, BYOL, DINO) take two augmented views of one image and pull their <span class="c-blue">embeddings</span> together. No pixels are predicted. The cost is a hand-made list of augmentations, and the embedding must be <em>invariant</em> to all of them, which throws away position and layout.</p>
+      <p class="note">The two blue points are the two views. Training pulls them together. The trivial solution, every point at the same place, would also pull them together; that is the collapse problem of chapter 4.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Predict the embedding</h3>
+      <p>A JEPA encodes the visible part (<span class="c-blue">blue</span>) and the hidden part (<span class="c-yellow">yellow</span>) separately, then a <span class="c-green">predictor</span> maps the first embedding to the second. The loss lives in <span class="c-red">embedding space</span>. The target encoder may drop the leaves and keep "a tree", so the predictor never has to guess noise.</p>
+      <p class="note">Move the slider again: the embedding loss stays flat as the hidden block gets noisier, because the target encoder is free to ignore what cannot be predicted. This is the whole argument for the family. data2vec (2202.03555) is the closest predecessor: it predicts a teacher's averaged layer outputs.</p>
+      <p class="inscription">Where you measure the error decides what the network must learn. Measure it in embedding space, and the network learns meaning.</p>
+    </div>
+    <button type="button" class="continue" data-go="ijepa">Continue with I-JEPA</button>
+  </article>
+
+  <article data-chapter="ijepa">
+    <header class="ch-head"><span class="num">3 of 8</span><h2>I-JEPA</h2><p class="subhead">Predict the hidden block, in embedding space</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps of I-JEPA">
+        <button type="button" role="tab" data-step="0">Mask</button>
+        <button type="button" role="tab" data-step="1">Encode</button>
+        <button type="button" role="tab" data-step="2">Predict</button>
+        <button type="button" role="tab" data-step="3">Loss</button>
+      </div>
+      <button type="button" class="tool play" data-play>Play the step</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Masks</span><button type="button" class="tool" data-strat="multi" aria-pressed="true">Multi-block (paper)</button><button type="button" class="tool" data-strat="tiny">Tiny targets</button><button type="button" class="tool" data-strat="raster">Rasterised</button><button type="button" class="tool" data-strat="random">Random 60%</button></div>
+      <div class="row"><span></span><button type="button" class="tool" data-act="sample">Sample new masks</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>Mask</h3>
+      <p>A <button class="inline-term" data-open="vit">vision transformer</button> cuts a 224 px image into a 14 x 14 grid of patches. I-JEPA samples <span class="c-yellow">four target blocks</span> (each 15% to 20% of the image, aspect ratio 0.75 to 1.5) and <span class="c-blue">one context block</span> (85% to 100% of the image) and removes every target patch from the context.</p>
+      <p class="note">The stage runs the paper's sampler (src/masks/multiblock.py) with the paper's ranges. Press "Sample new masks" to draw again. The other mask strategies are the paper's ablations, and the numbers below are their 1% ImageNet accuracies from Table 6.</p>
+      <table class="data"><tr><th>Masking (ViT-B/16, 300 ep)</th><th class="n">1% top-1</th></tr><tr class="ours"><td>multi-block</td><td class="n">54.2</td></tr><tr><td>rasterised (one quadrant predicts three)</td><td class="n">15.5</td></tr><tr><td>single block</td><td class="n">20.2</td></tr><tr><td>random patches 60%</td><td class="n">17.6</td></tr></table>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Encode</h3>
+      <p>The <span class="c-blue">context encoder</span> (a ViT) sees only the context patches and outputs one vector per patch. The <span class="c-brown">target encoder</span> is a copy of it updated by an <button class="inline-term" data-open="ema">exponential moving average</button>; it sees the <em>whole</em> image, and its outputs at the target positions are the things to predict. No gradient ever flows into it.</p>
+      <p class="note">On the stage, context patches turn into blue embeddings and target patches into yellow ones. The target encoder sees everything, so a target embedding knows its surroundings; masking its input instead costs 11 points (Table 11: 67.3 vs 56.1).</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Predict</h3>
+      <p>The <span class="c-green">predictor</span> is a narrow ViT. It reads the context embeddings plus one <em>mask token</em> per target patch (a learned vector plus that patch's position), and outputs a guess for each target embedding. Because it is told <em>where</em> to predict, it must model layout, not just content.</p>
+      <p class="note">Green arrows run from the context embeddings to each target position. The predictor's width is 384, narrower than the encoder (1024 for ViT-L); a narrower predictor is better (Table 14: 70.7 vs 68.4 at width 1024).</p>
+    </div>
+    <div class="step-text" data-step="3">
+      <h3>Loss</h3>
+      <p>The loss is the mean squared distance between each <span class="c-green">guess</span> and the <span class="c-yellow">target encoder's output</span> at that patch. Gradients update the context encoder and the predictor. The target encoder follows by EMA with momentum rising from 0.996 to 1.0.</p>
+      <div class="eq">L = (1/M) sum over target blocks i, patches j in block i of || pred_j - s_y,j ||^2</div>
+      <p class="note">The red segments are the per-patch misses. Switch the targets to pixels and the same architecture drops from 66.9 to 40.7 on 1% ImageNet, even with 800 epochs instead of 500 (Table 7).</p>
+      <div class="stat"><span>ImageNet-1k linear probe, ViT-H/14, 300 epochs (Table 1)</span><b>79.3</b></div>
+      <p class="inscription">Large target blocks force semantic prediction; embedding targets let the model skip the pixels. Both are needed.</p>
+    </div>
+    <button type="button" class="continue" data-go="collapse">Continue with why it does not collapse</button>
+  </article>
+
+  <article data-chapter="collapse">
+    <header class="ch-head"><span class="num">4 of 8</span><h2>Why it does not collapse</h2><p class="subhead">An asymmetry, not a loss term</p></header>
+    <div class="tools"><button type="button" class="tool play" data-act="run">Train 600 steps</button><button type="button" class="tool" data-act="reset">Reset</button></div>
+    <div class="controls">
+      <div class="row"><span>Stop-grad</span><button type="button" class="tool" data-key="sg" data-val="1" aria-pressed="true">on</button><button type="button" class="tool" data-key="sg" data-val="0">off</button></div>
+      <div class="row"><span>Predictor</span><button type="button" class="tool" data-key="pred" data-val="1" aria-pressed="true">on</button><button type="button" class="tool" data-key="pred" data-val="0">off</button></div>
+      <div class="row"><span>EMA target</span><button type="button" class="tool" data-key="ema" data-val="0" aria-pressed="true">off</button><button type="button" class="tool" data-key="ema" data-val="1">on</button></div>
+      <div class="row"><span>Depth</span><button type="button" class="tool" data-key="L" data-val="1">1</button><button type="button" class="tool" data-key="L" data-val="2" aria-pressed="true">2</button><button type="button" class="tool" data-key="L" data-val="3">3</button></div>
+    </div>
+    <p>"Output the same vector for everything" has zero prediction error. Nothing in the I-JEPA loss forbids it. What prevents it is an <strong class="key">asymmetry</strong> between the two branches: the target branch gets no gradient (<button class="inline-term" data-open="stopgrad">stop-gradient</button>), the online branch has an extra <span class="c-green">predictor</span>, and the target weights lag behind (<button class="inline-term" data-open="ema">EMA</button>).</p>
+    <p class="note">The stage trains a tiny linear JEPA live, following the deep linear self-distillation analysis of Littwin et al. (2407.03475). The data has a slow axis (predictable), a noisy axis (unpredictable) and a mixed one. Watch the blue cloud: with stop-gradient and a predictor, the noisy axis flattens and the slow axis survives. Turn stop-gradient off and the whole cloud shrinks to a point.</p>
+    <h3>What the theory says</h3>
+    <ul>
+      <li><b>Slow features win</b> (2211.10831). A predictive loss between two moments in time keeps the features that change slowly and drops the fast, noisy ones.</li>
+      <li><b>Order of learning</b> (2407.03475). In a deep linear model, each data axis is learned at a rate set by its predictability over its noise, raised to the depth. Noisy axes are never learned, which is the implicit regulariser.</li>
+      <li><b>A hidden prior</b> (2210.07277). Methods that pull two views together assume balanced classes. On class-imbalanced batches MSN and VICReg lose 17.7 points on ImageNet; MAE and data2vec lose under 1 point.</li>
+    </ul>
+    <div class="stat"><span>SimSiam, ImageNet linear eval with vs without stop-gradient (2011.10566, Fig. 2)</span><b>67.7 vs 0.1</b></div>
+    <p class="inscription">JEPAs do not forbid collapse. They make the trivial answer unreachable by gradient descent, and the same asymmetry prefers slow, predictable features.</p>
+    <button type="button" class="continue" data-go="video">Continue with video</button>
+  </article>
+
+  <article data-chapter="video">
+    <header class="ch-head"><span class="num">5 of 8</span><h2>V-JEPA: masks through time</h2><p class="subhead">A video is a block of patches; hide tubes, not frames</p></header>
+    <div class="tools"><button type="button" class="tool" data-act="sample">Resample</button></div>
+    <div class="controls">
+      <div class="row"><span>Mask</span><button type="button" class="tool" data-mask="short" aria-pressed="true">Short-range (8 x 15%)</button><button type="button" class="tool" data-mask="long">Long-range (2 x 70%)</button><button type="button" class="tool" data-mask="frame">One frame only (ablation)</button></div>
+    </div>
+    <p>V-JEPA (2404.08471) feeds 16 frames, cut into <em>tubelets</em> of 2 frames x 16 x 16 pixels, so a clip is an 8 x 14 x 14 block of tokens. The <span class="c-yellow">masks span every time slot</span>. If they did not, the predictor could copy a hidden patch from the next frame and never learn motion. The loss is an L1 distance between predicted and target embeddings, with no pixels and no contrastive pairs.</p>
+    <p class="note">The stage is the token block with the paper's two mask types, sampled with the paper's block sizes. The "one frame only" option is not the paper's setting; it shows why the tubes are needed. The paper's masks hide about 90% of the clip on average.</p>
+    <h3>Feature targets vs pixel targets</h3>
+    <table class="data"><tr><th>ViT-L/16, frozen, 1 clip (Table 1)</th><th class="n">K400</th><th class="n">SSv2</th></tr><tr class="ours"><td>predict features (V-JEPA)</td><td class="n">73.7</td><td class="n">66.2</td></tr><tr><td>predict pixels</td><td class="n">68.6</td><td class="n">66.0</td></tr></table>
+    <p>Frozen V-JEPA ViT-H/16 reaches 82.0 on Kinetics-400 and 71.4 on Something-Something v2 with an <button class="inline-term" data-open="probe">attentive probe</button>. On SSv2, which needs motion, it beats the best image models (DINOv2 ViT-g/14, 50.6) by more than 20 points.</p>
+    <p class="inscription">Mask tubes through time, predict their embeddings, and the model is forced to learn how things move.</p>
+    <button type="button" class="continue" data-go="plan">Continue with planning</button>
+  </article>
+
+  <article data-chapter="plan">
+    <header class="ch-head"><span class="num">6 of 8</span><h2>V-JEPA 2: plan in embedding space</h2><p class="subhead">Freeze the encoder, condition the predictor on actions, search</p></header>
+    <div class="tools"><button type="button" class="tool play" data-act="sample">Imagine futures</button><button type="button" class="tool" data-act="refine">Refine</button><button type="button" class="tool" data-act="step">Act one step</button><button type="button" class="tool" data-act="reset">Reset</button></div>
+    <div class="controls"><label class="slider"><span>Planning horizon <b id="plan-h-value">3</b></span><input id="plan-h" type="range" min="1" max="6" step="1" value="3"></label></div>
+    <p>V-JEPA 2 (2506.09985) first scales the video recipe: over 1 million hours of video, a 1B-parameter ViT-g encoder, progressive resolution and 64-frame clips. Then it <span class="c-brown">freezes</span> that encoder and trains a 300M-parameter <span class="c-green">action-conditioned predictor</span> on about 62 hours of robot video (Droid). The predictor is a world model: given the current embedding and an action, it predicts the next embedding.</p>
+    <p class="note">The stage is a toy latent space with a hand-written dynamics function, but the planner runs the paper's algorithm: the cross-entropy method (<button class="inline-term" data-open="cem">CEM</button>) samples action sequences, rolls them through the predictor, scores each by the distance of its final embedding to the goal embedding (red), and refits the sampling distribution to the best ones. "Act one step" executes the first action and replans.</p>
+    <h3>On a real arm, zero-shot, two labs not in the data</h3>
+    <table class="data"><tr><th>Task (Table 2, average of two labs)</th><th class="n">V-JEPA 2-AC</th><th class="n">Octo</th></tr><tr class="ours"><td>reach</td><td class="n">100%</td><td class="n">100%</td></tr><tr class="ours"><td>grasp cup</td><td class="n">65%</td><td class="n">15%</td></tr><tr class="ours"><td>pick and place cup</td><td class="n">80%</td><td class="n">15%</td></tr><tr class="ours"><td>pick and place box</td><td class="n">65%</td><td class="n">10%</td></tr></table>
+    <p>CEM uses 800 samples, 10 iterations and a horizon of 1 for the robot tasks. The frozen features of the 2024 V-JEPA (ViT-H), probed for "surprise", already judge intuitive physics: 98% pairwise accuracy on IntPhys against a 50% chance level (2502.11831).</p>
+    <p class="inscription">A JEPA predictor that knows the action is a world model. Planning is a search for actions whose predicted embedding lands near the goal.</p>
+    <button type="button" class="continue" data-go="lejepa">Continue with LeJEPA</button>
+  </article>
+
+  <article data-chapter="lejepa">
+    <header class="ch-head"><span class="num">7 of 8</span><h2>LeJEPA: the shape of a good embedding</h2><p class="subhead">Replace the heuristics with one test for one distribution</p></header>
+    <div class="controls">
+      <div class="row"><span>Cloud</span><button type="button" class="tool" data-cloud="stretched" aria-pressed="true">Stretched</button><button type="button" class="tool" data-cloud="iso">Isotropic Gaussian</button><button type="button" class="tool" data-cloud="clumpy">Clumpy</button></div>
+      <div class="row"><span>Direction</span><button type="button" class="tool" data-dir="x" aria-pressed="true">x</button><button type="button" class="tool" data-dir="z">z</button><button type="button" class="tool" data-dir="rand">random</button></div>
+    </div>
+    <p>LeJEPA (2511.08544) asks which distribution of embeddings is best for every downstream task and proves it is the <strong class="key">isotropic Gaussian</strong>. It then enforces that shape directly with <button class="inline-term" data-open="sigreg">SIGReg</button>: project the embeddings onto random directions and test each 1D projection against a standard normal with the Epps-Pulley statistic. The EMA target, stop-gradient and the rest of the heuristics go away; one hyperparameter remains.</p>
+    <p class="note">The stage runs Algorithm 1 of the paper on a toy cloud. Pick a cloud shape and a test direction; the histogram compares the projection with N(0, 1). An isotropic Gaussian passes in every direction. The stretched cloud passes only along its unit-variance axis, and the clumpy one fails almost everywhere.</p>
+    <div class="stat"><span>ImageNet-1k frozen linear probe, ViT-H/14 (abstract; the tables report ViT-L at 77.1)</span><b>79%</b></div>
+    <p>The training loss tracks downstream accuracy with a Spearman correlation of about 85% (nearly 99% after a rescaling), so model selection needs no labels. The same recipe trains ResNets, ConvNeXts and ViTs up to 1.8B parameters.</p>
+    <p class="inscription">Say which shape the embeddings must have, and test for it. The collapse problem becomes a statistics problem.</p>
+    <button type="button" class="continue" data-go="family">Continue with the family</button>
+  </article>
+
+  <article data-chapter="family">
+    <header class="ch-head"><span class="num">8 of 8</span><h2>The family, 2022 to 2026</h2><p class="subhead">Where the 569 JEPA papers went</p></header>
+    <div class="tools"><button type="button" class="tool" data-view="months" aria-pressed="true">Papers per month</button><button type="button" class="tool" data-view="domains">By domain</button><button type="button" class="tool" data-view="tree">Lineage</button></div>
+    <p>An arXiv scan on 2026-10-08 (title and abstract queries for JEPA and "joint-embedding predictive") finds 569 unique papers: 1 in 2022, 7 in 2023, 38 in 2024, 76 in 2025 and 447 in 2026 so far. The October 2026 bar is a partial month.</p>
+    <p class="note">The three views: monthly counts, counts per domain (hand-assigned from titles and abstracts), and the lineage of the papers this tour is built on. In the lineage, blue is the image line, yellow the video line, green the world-model line and red the theory line.</p>
+    <h3>Branches worth knowing</h3>
+    <ul>
+      <li><b>Image world models</b> (IWM, 2403.00504): tell the predictor which augmentation separates context and target, and it learns to simulate it; the predictor can then be fine-tuned cheaply.</li>
+      <li><b>DINO-WM, PLDM, LeWorldModel, H-JEPA</b>: planning with frozen or jointly trained latent world models; LeWorldModel plans Push-T at 96% success with about 15M parameters and two loss terms; H-JEPA stacks levels for long horizons (AntMaze 18% to 73%).</li>
+      <li><b>V-JEPA 2.1</b>: a loss on every token and intermediate layers makes the features spatially dense without losing the global picture.</li>
+      <li><b>Beyond vision</b>: audio, graphs, molecules, time series, medical signals and language each have JEPA variants in the scan; the mechanism does not depend on pixels.</li>
+    </ul>
+    <p class="inscription">The idea is one sentence: predict the embedding of what you cannot see. The field is still finding out how far that sentence goes.</p>
+    <div class="end-links"><a class="btn" href="explainer.narrated.html">Open the narrated explainer</a><button class="btn" type="button" data-open="papers">Paper list</button></div>
+  </article>

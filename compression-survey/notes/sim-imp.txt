@@ -1,0 +1,34 @@
+viz-imp simulation (kit parts/kit/62-imp.js): {"G":32,"rate":0.2,"rounds":[0,3,7,9,15,16],"seed":31}
+toy "training": theta_r = theta_0 + 0.9*drift + 0.35*noise_r (seeded), no gradient descent; prune 20% of survivors by |theta_r|; reset to theta_0
+round 0: 1024 of 1024 left, P_m 100.0%
+round 1: 819 of 1024 left, P_m 80.0%
+round 2: 655 of 1024 left, P_m 64.0%
+round 3: 524 of 1024 left, P_m 51.2%
+round 4: 419 of 1024 left, P_m 40.9%
+round 5: 335 of 1024 left, P_m 32.7%
+round 6: 268 of 1024 left, P_m 26.2%
+round 7: 214 of 1024 left, P_m 20.9%
+round 8: 171 of 1024 left, P_m 16.7%
+round 9: 137 of 1024 left, P_m 13.4%
+round 10: 110 of 1024 left, P_m 10.7%
+round 11: 88 of 1024 left, P_m 8.6%
+round 12: 70 of 1024 left, P_m 6.8%
+round 13: 56 of 1024 left, P_m 5.5%
+round 14: 45 of 1024 left, P_m 4.4%
+round 15: 36 of 1024 left, P_m 3.5%
+round 16: 29 of 1024 left, P_m 2.8%
+round 16: iterative mask shares 17 of 29 weights with a one-shot mask of the same size from round-1 training
+readout r0 ticket: Toy mask: 1024 of 1024 weights, Pm = 100.0%. Ticket (Frankle's LeNet): The dense network, before any pruning.
+readout r0 reinit: Toy mask: 1024 of 1024 weights, Pm = 100.0%. Reinitialized (Frankle's LeNet): The dense network, before any pruning.
+readout r1 ticket: Round 1, step 3: reset the survivors to their initial values theta0. Toy mask: 819 of 1024 weights, Pm = 80.0%. Ticket (Frankle's LeNet): One round in, 80% of the weights remain; the text states no result at this size.
+readout r1 reinit: Round 1, step 3: control, the same mask with a new random initialization. Toy mask: 819 of 1024 weights, Pm = 80.0%. Reinitialized (Frankle's LeNet): One round in, 80% of the weights remain; the text states no result at this size.
+readout r3 ticket: Round 3, step 3: reset the survivors to their initial values theta0. Toy mask: 524 of 1024 weights, Pm = 51.2%. Ticket (Frankle's LeNet): At P_m = 51.3%, the ticket already learns faster than the dense network.
+readout r3 reinit: Round 3, step 3: control, the same mask with a new random initialization. Toy mask: 524 of 1024 weights, Pm = 51.2%. Reinitialized (Frankle's LeNet): Reinitialized subnetworks keep the dense accuracy only down to about P_m = 21.1%.
+readout r7 ticket: Round 7, step 3: reset the survivors to their initial values theta0. Toy mask: 214 of 1024 weights, Pm = 20.9%. Ticket (Frankle's LeNet): Near P_m = 21%, tickets learn fastest: early stopping comes 38% earlier than for the dense network.
+readout r7 reinit: Round 7, step 3: control, the same mask with a new random initialization. Toy mask: 214 of 1024 weights, Pm = 20.9%. Reinitialized (Frankle's LeNet): Here the ticket reaches its minimum validation loss 2.51x faster than the same mask reinitialized, whose accuracy starts to fall below the dense network at P_m = 21.1%.
+readout r9 ticket: Round 9, step 3: reset the survivors to their initial values theta0. Toy mask: 137 of 1024 weights, Pm = 13.4%. Ticket (Frankle's LeNet): At P_m = 13.5%, the ticket is more than 0.3 points more accurate than the dense network.
+readout r9 reinit: Round 9, step 3: control, the same mask with a new random initialization. Toy mask: 137 of 1024 weights, Pm = 13.4%. Reinitialized (Frankle's LeNet): The reinitialized network is already below the dense accuracy (its drop-off starts at P_m = 21.1%).
+readout r15 ticket: Round 15, step 3: reset the survivors to their initial values theta0. Toy mask: 36 of 1024 weights, Pm = 3.5%. Ticket (Frankle's LeNet): At P_m = 3.6%, the ticket is back to the dense network's accuracy.
+readout r15 reinit: Round 15, step 3: control, the same mask with a new random initialization. Toy mask: 36 of 1024 weights, Pm = 3.5%. Reinitialized (Frankle's LeNet): The reinitialized network is well below the dense accuracy.
+readout r16 ticket: Round 16, step 3: reset the survivors to their initial values theta0. Toy mask: 29 of 1024 weights, Pm = 2.8%. Ticket (Frankle's LeNet): Below P_m = 2.9%, even the ticket falls below the dense network.
+readout r16 reinit: Round 16, step 3: control, the same mask with a new random initialization. Toy mask: 29 of 1024 weights, Pm = 2.8%. Reinitialized (Frankle's LeNet): The reinitialized network is well below the dense accuracy.

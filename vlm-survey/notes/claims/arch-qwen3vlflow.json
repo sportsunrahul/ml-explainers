@@ -1,0 +1,236 @@
+[
+ {
+  "id": "qwen3vl-arch-fig-image",
+  "claim": "Architecture figure, Picture 3 size (width x height, px)",
+  "value": "1440 x 800",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Picture 3: Width 1440, Height 800",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-fig-image-tok",
+  "claim": "Architecture figure, Picture 3 token count",
+  "value": "1125 tokens",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Picture 3",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-fig-page",
+  "claim": "Architecture figure, Picture 1 size (width x height, px)",
+  "value": "1248 x 9376",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Picture 1: Width 1248, Height 9376",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-fig-page-tok",
+  "claim": "Architecture figure, Picture 1 token count",
+  "value": "11427 tokens",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Picture 1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-fig-strip",
+  "claim": "Architecture figure, Picture 2 size (width x height, px)",
+  "value": "256 x 32",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Picture 2: Width 256, Height 32",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-fig-strip-tok",
+  "claim": "Architecture figure, Picture 2 token count",
+  "value": "8 tokens",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Picture 2",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-fig-video",
+  "claim": "Architecture figure, Video 1 size and duration",
+  "value": "736 x 448, 8s",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Fig. arc (figures/qwen3vl_arc.jpg), Video 1: Width 736, Height 448, Time 8s",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-vit-cont",
+  "claim": "Encoder continued-training step before S0",
+  "value": "conducting continuous training with dynamic resolutions based on the pre-trained SigLIP-2 model",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 3.1 Training Recipe",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-vit-pos",
+  "claim": "Encoder position scheme",
+  "value": "2D-RoPE and interpolate absolute position embeddings based on input size",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2 Vision Encoder",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-merger-dim",
+  "claim": "Merger output width",
+  "value": "aligned with the LLM's hidden dimension",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2 MLP-based Vision-Language Merger",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-ds-inter",
+  "claim": "DeepStack source",
+  "value": "extract visual tokens from intermediate layers of the Vision Transformer (ViT)",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 DeepStack",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-ds-merger",
+  "claim": "DeepStack projection",
+  "value": "dedicated vision-language merger modules",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 DeepStack",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-ds-add",
+  "claim": "DeepStack injection",
+  "value": "added directly to the corresponding hidden states of the first three LLM layers",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 DeepStack",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-mrope-part",
+  "claim": "Old MRoPE layout",
+  "value": "partitioned into temporal (t), horizontal (h), and vertical (w) subspaces",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Interleaved MRoPE",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-interleave",
+  "claim": "New MRoPE layout",
+  "value": "interleaving the t, h, and w components across the embedding dimensions",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Interleaved MRoPE",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-ts",
+  "claim": "Timestamp placement",
+  "value": "each video temporal patch is prefixed with a timestamp expressed as a formatted text string",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.3 Video Timestamp",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-ts-cost",
+  "claim": "Timestamp cost",
+  "value": "a modest increase in context length",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.3 Video Timestamp",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-s0-plural",
+  "claim": "S0 update set, intro wording",
+  "value": "updates only the merger (vision-language projection) layers while keeping the rest of the model frozen",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 1, training pipeline paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-s1-unfreeze",
+  "claim": "S1 update set",
+  "value": "we unfreeze all model components",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 3.1 Stage 1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-budget",
+  "claim": "Token budget per stage S0/S1/S2/S3",
+  "value": "67B / ~1T / ~1T / 100B",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table training_setup",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-seqlen",
+  "claim": "Sequence length per stage S0/S1/S2/S3",
+  "value": "8,192 / 8,192 / 32,768 / 262,144",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table training_setup",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-lossmove",
+  "claim": "Loss normalisation change",
+  "value": "move from a per-sample loss to a square-root-normalized per-token loss",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 1 para (optimization side)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-megatron",
+  "claim": "Training framework",
+  "value": "Megatron-LM",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 4.6 Infrastructure",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-gpus",
+  "claim": "Training scale",
+  "value": "up to 10,000 GPUs",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 4.6 Infrastructure",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-distill",
+  "claim": "Distillation stage data and target",
+  "value": "using text-only data to fine-tune the LLM backbone",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 4.1 Training Recipe, Strong-to-Weak Distillation",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-arch-post",
+  "claim": "Post-training phases",
+  "value": "supervised fine-tuning on long chain-of-thought data",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 1, training pipeline paragraph",
+  "uncertain": false
+ }
+]

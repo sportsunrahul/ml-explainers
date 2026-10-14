@@ -1,0 +1,173 @@
+[
+ {
+  "id": "page-anatomy-so400m",
+  "claim": "Default vision encoder variant",
+  "value": "SigLIP2-SO-400M",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2, Vision Encoder",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-large",
+  "claim": "Smaller encoder for the small LLMs",
+  "value": "SigLIP2-Large (300M) for small-scale LLMs (2B and 4B)",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2, Vision Encoder",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-s0",
+  "claim": "Stage 0 alignment data size",
+  "value": "approximately 67B tokens",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 3.1 Stage 0; Table training_setup",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-s0-frozen",
+  "claim": "What trains in stage 0",
+  "value": "only the parameters of the MLP merger are trained during this phase, while both the vision encoder and the LLM backbone remain frozen",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 3.1 Stage 0",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-abl-setup",
+  "claim": "DeepStack ablation setup (table caption); evaluated on validation sets without post-training",
+  "value": "internal 15B-A2B LLM, with all experiments pretrained on 200 billion tokens",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results caption (Sec. 5 ablations, DeepStack)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-three-dense",
+  "claim": "The paper's text says three dense variants but lists four",
+  "value": "three dense variants (Qwen3-VL-2B/4B/8B/32B)",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2, Large Language Model",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-no-extra-ctx",
+  "claim": "DeepStack adds no sequence length",
+  "value": "without introducing extra context length",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 1, contributions (DeepStack for cross-layer fusion)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-mrope-quote",
+  "claim": "Goal of interleaving t, h, w (source writes spatial-temporal with an en dash)",
+  "value": "each spatial-temporal axis is uniformly represented across both low- and high-frequency bands",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Interleaved MRoPE",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-ts-limit",
+  "claim": "Limitation of Qwen2.5-VL's time-synchronised MRoPE",
+  "value": "excessively large and sparse temporal position ids for long videos",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.3 Video Timestamp",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-grounding",
+  "claim": "Grounding output forms",
+  "value": "two grounding modalities: bounding boxes and points",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 3 data, Grounding and Counting",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-dyn-res",
+  "claim": "Encoder training continues at dynamic resolution",
+  "value": "with dynamic input resolutions",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2, Vision Encoder",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-chartqa",
+  "claim": "DeepStack ablation ChartQA, baseline vs DeepStack",
+  "value": "81.5 vs 83.3",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (ChartQA column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-ai2d",
+  "claim": "DeepStack ablation AI2D, baseline vs DeepStack",
+  "value": "81.8 vs 83.2",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (AI2D column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-mmstar",
+  "claim": "DeepStack ablation MMStar, baseline vs DeepStack (the paper's appendix lists MMStar under General Visual Question Answering)",
+  "value": "55.5 vs 57.7",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (MMStar column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-rwqa",
+  "claim": "DeepStack ablation RealWorldQA (column RLWDQA), baseline vs DeepStack",
+  "value": "67.7 vs 68.1",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (RLWDQA column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-mmb-en",
+  "claim": "DeepStack ablation MMBench-EN, baseline vs DeepStack",
+  "value": "81.0 vs 81.2",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (MMB_EN column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-mmb-cn",
+  "claim": "DeepStack ablation MMBench-CN, baseline vs DeepStack",
+  "value": "78.1 vs 78.5",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (MMB_CN column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-mmmu",
+  "claim": "DeepStack ablation MMMU, baseline vs DeepStack",
+  "value": "52.9 vs 54.1",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results (MMMU column)",
+  "uncertain": false
+ },
+ {
+  "id": "page-anatomy-deepstack-quote",
+  "claim": "What the paper credits the DeepStack gain to (it names InfoVQA and DocVQA)",
+  "value": "fine-grained visual understanding, such as on the InfoVQA and DocVQA benchmarks",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 5 Ablation Study, DeepStack (text above Table deepstack_results)",
+  "uncertain": false
+ }
+]

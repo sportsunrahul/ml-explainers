@@ -1,0 +1,339 @@
+<style>
+#viz-augment .aug-row + .aug-row { margin-top:.1rem; }
+#viz-augment table.data td.aug-hl { outline:2px solid var(--fg); outline-offset:-2px; font-weight:700; }
+#viz-augment table.data td.aug-avg { color:var(--muted); }
+</style>
+<section id="ch-simclr" class="chapter">
+<h2>SimCLR: strong augmentation, a big batch, a throwaway head</h2>
+<p>MoCo built a queue and a momentum encoder to get many negatives. SimCLR asks whether you need any of that. Its answer is no, if you get three plain choices right. The most important choice is how you make the two views.</p>
+
+<figure class="viz" id="viz-augment" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top aug-row" role="group" aria-label="First transformation">
+    <span class="lbl">1st</span>
+    <button type="button" id="btn-augment-a-crop" aria-pressed="false">Crop</button>
+    <button type="button" id="btn-augment-a-cutout" aria-pressed="false">Cutout</button>
+    <button type="button" id="btn-augment-a-color" aria-pressed="false">Color</button>
+    <button type="button" id="btn-augment-a-sobel" aria-pressed="false">Sobel</button>
+    <button type="button" id="btn-augment-a-noise" aria-pressed="false">Noise</button>
+    <button type="button" id="btn-augment-a-blur" aria-pressed="false">Blur</button>
+    <button type="button" id="btn-augment-a-rotate" aria-pressed="false">Rotate</button>
+  </div>
+  <div class="controls aug-row" role="group" aria-label="Second transformation">
+    <span class="lbl">2nd</span>
+    <button type="button" id="btn-augment-b-crop" aria-pressed="false">Crop</button>
+    <button type="button" id="btn-augment-b-cutout" aria-pressed="false">Cutout</button>
+    <button type="button" id="btn-augment-b-color" aria-pressed="false">Color</button>
+    <button type="button" id="btn-augment-b-sobel" aria-pressed="false">Sobel</button>
+    <button type="button" id="btn-augment-b-noise" aria-pressed="false">Noise</button>
+    <button type="button" id="btn-augment-b-blur" aria-pressed="false">Blur</button>
+    <button type="button" id="btn-augment-b-rotate" aria-pressed="false">Rotate</button>
+    <button type="button" id="btn-augment-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="augment-canvas" role="img" aria-label="Left: a drawn photo of a mug on a table with a dashed crop box. Middle, outlined blue: branch 1, the crop only. Right, outlined yellow: branch 2, the same crop followed by the chosen first and second transformations. Below: the color histograms of the two views, blue for branch 1, yellow for branch 2, green where they overlap, with the shared percentage."></canvas>
+  <p class="readout" id="augment-readout" aria-live="polite"></p>
+  <table class="data" id="augment-table">
+  <caption>SimCLR Fig. 5: ImageNet linear-probe top-1 accuracy (%) with ResNet-50 in the paper's 100-epoch ablation setting, rows = 1st transformation, columns = 2nd. The diagonal is a single transformation; the last column is the row average over 2nd transformations. Darker green = higher.</caption>
+  <tr><th scope="col">1st \ 2nd</th><th scope="col">Crop</th><th scope="col">Cutout</th><th scope="col">Color</th><th scope="col">Sobel</th><th scope="col">Noise</th><th scope="col">Blur</th><th scope="col">Rotate</th><th scope="col">Row avg.</th></tr>
+  <tr><th scope="row">Crop</th><td data-a="crop" data-b="crop"><span data-claim="simclr-fig5-crop-crop">33.1</span></td><td data-a="crop" data-b="cutout"><span data-claim="simclr-fig5-crop-cutout">33.9</span></td><td data-a="crop" data-b="color"><span data-claim="simclr-fig5-crop-color">56.3</span></td><td data-a="crop" data-b="sobel"><span data-claim="simclr-fig5-crop-sobel">46.0</span></td><td data-a="crop" data-b="noise"><span data-claim="simclr-fig5-crop-noise">39.9</span></td><td data-a="crop" data-b="blur"><span data-claim="simclr-fig5-crop-blur">35.0</span></td><td data-a="crop" data-b="rotate"><span data-claim="simclr-fig5-crop-rotate">30.2</span></td><td class="aug-avg"><span data-claim="simclr-fig5-crop-average">39.2</span></td></tr>
+  <tr><th scope="row">Cutout</th><td data-a="cutout" data-b="crop"><span data-claim="simclr-fig5-cutout-crop">32.2</span></td><td data-a="cutout" data-b="cutout"><span data-claim="simclr-fig5-cutout-cutout">25.6</span></td><td data-a="cutout" data-b="color"><span data-claim="simclr-fig5-cutout-color">33.9</span></td><td data-a="cutout" data-b="sobel"><span data-claim="simclr-fig5-cutout-sobel">40.0</span></td><td data-a="cutout" data-b="noise"><span data-claim="simclr-fig5-cutout-noise">26.5</span></td><td data-a="cutout" data-b="blur"><span data-claim="simclr-fig5-cutout-blur">25.2</span></td><td data-a="cutout" data-b="rotate"><span data-claim="simclr-fig5-cutout-rotate">22.4</span></td><td class="aug-avg"><span data-claim="simclr-fig5-cutout-average">29.4</span></td></tr>
+  <tr><th scope="row">Color</th><td data-a="color" data-b="crop"><span data-claim="simclr-fig5-color-crop">55.8</span></td><td data-a="color" data-b="cutout"><span data-claim="simclr-fig5-color-cutout">35.5</span></td><td data-a="color" data-b="color"><span data-claim="simclr-fig5-color-color">18.8</span></td><td data-a="color" data-b="sobel"><span data-claim="simclr-fig5-color-sobel">21.0</span></td><td data-a="color" data-b="noise"><span data-claim="simclr-fig5-color-noise">11.4</span></td><td data-a="color" data-b="blur"><span data-claim="simclr-fig5-color-blur">16.5</span></td><td data-a="color" data-b="rotate"><span data-claim="simclr-fig5-color-rotate">20.8</span></td><td class="aug-avg"><span data-claim="simclr-fig5-color-average">25.7</span></td></tr>
+  <tr><th scope="row">Sobel</th><td data-a="sobel" data-b="crop"><span data-claim="simclr-fig5-sobel-crop">46.2</span></td><td data-a="sobel" data-b="cutout"><span data-claim="simclr-fig5-sobel-cutout">40.6</span></td><td data-a="sobel" data-b="color"><span data-claim="simclr-fig5-sobel-color">20.9</span></td><td data-a="sobel" data-b="sobel"><span data-claim="simclr-fig5-sobel-sobel">4.0</span></td><td data-a="sobel" data-b="noise"><span data-claim="simclr-fig5-sobel-noise">9.3</span></td><td data-a="sobel" data-b="blur"><span data-claim="simclr-fig5-sobel-blur">6.2</span></td><td data-a="sobel" data-b="rotate"><span data-claim="simclr-fig5-sobel-rotate">4.2</span></td><td class="aug-avg"><span data-claim="simclr-fig5-sobel-average">18.8</span></td></tr>
+  <tr><th scope="row">Noise</th><td data-a="noise" data-b="crop"><span data-claim="simclr-fig5-noise-crop">38.8</span></td><td data-a="noise" data-b="cutout"><span data-claim="simclr-fig5-noise-cutout">25.8</span></td><td data-a="noise" data-b="color"><span data-claim="simclr-fig5-noise-color">7.5</span></td><td data-a="noise" data-b="sobel"><span data-claim="simclr-fig5-noise-sobel">7.6</span></td><td data-a="noise" data-b="noise"><span data-claim="simclr-fig5-noise-noise">9.8</span></td><td data-a="noise" data-b="blur"><span data-claim="simclr-fig5-noise-blur">9.8</span></td><td data-a="noise" data-b="rotate"><span data-claim="simclr-fig5-noise-rotate">9.6</span></td><td class="aug-avg"><span data-claim="simclr-fig5-noise-average">15.5</span></td></tr>
+  <tr><th scope="row">Blur</th><td data-a="blur" data-b="crop"><span data-claim="simclr-fig5-blur-crop">35.1</span></td><td data-a="blur" data-b="cutout"><span data-claim="simclr-fig5-blur-cutout">25.2</span></td><td data-a="blur" data-b="color"><span data-claim="simclr-fig5-blur-color">16.6</span></td><td data-a="blur" data-b="sobel"><span data-claim="simclr-fig5-blur-sobel">5.8</span></td><td data-a="blur" data-b="noise"><span data-claim="simclr-fig5-blur-noise">9.7</span></td><td data-a="blur" data-b="blur"><span data-claim="simclr-fig5-blur-blur">2.6</span></td><td data-a="blur" data-b="rotate"><span data-claim="simclr-fig5-blur-rotate">6.7</span></td><td class="aug-avg"><span data-claim="simclr-fig5-blur-average">14.5</span></td></tr>
+  <tr><th scope="row">Rotate</th><td data-a="rotate" data-b="crop"><span data-claim="simclr-fig5-rotate-crop">30.0</span></td><td data-a="rotate" data-b="cutout"><span data-claim="simclr-fig5-rotate-cutout">22.5</span></td><td data-a="rotate" data-b="color"><span data-claim="simclr-fig5-rotate-color">20.7</span></td><td data-a="rotate" data-b="sobel"><span data-claim="simclr-fig5-rotate-sobel">4.3</span></td><td data-a="rotate" data-b="noise"><span data-claim="simclr-fig5-rotate-noise">9.7</span></td><td data-a="rotate" data-b="blur"><span data-claim="simclr-fig5-rotate-blur">6.5</span></td><td data-a="rotate" data-b="rotate"><span data-claim="simclr-fig5-rotate-rotate">2.6</span></td><td class="aug-avg"><span data-claim="simclr-fig5-rotate-average">13.8</span></td></tr>
+  </table>
+  <figcaption>Toy: the photo, the transformation parameters and the histograms are ours, drawn on this page; "Color" is drawn as jitter only (brightness, contrast, saturation, hue); SimCLR's color distortion also turns the view grey with probability <span data-claim="simclr-gray-p">0.2</span>. Sourced: the accuracies in the table and readout are the data labels of SimCLR Fig. 5. In that ablation every image is first randomly cropped and resized, and then the tested transformation(s) go on one branch only, while the other branch is left as it is. The paper notes that this asymmetric setup hurts accuracy, so these numbers sit well below SimCLR's full runs.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "2nd: Color".</b> The figure starts with crop alone. Which do you think trains better features: crop alone, or crop followed by color distortion? And what could the network learn from crops alone that would not help it later?</p>
+
+<h3>Lesson 1: crop alone lets the network cheat</h3>
+<p>Look at the histograms under the two views when only crop is on. Two crops of one photo share almost the same colors: the same beige wall, the same wooden table, the same mug. A crop of a different photo has different colors. So the network can find the partner by comparing color statistics alone, without ever learning what a mug looks like. That is a <em>shortcut</em>: a cheap feature that solves the training game and is useless afterwards.</p>
+<p>Now press "2nd: Color". The partner's colors shift, and the green overlap shrinks. Color can no longer identify the partner, so the network must use what color distortion leaves alone: edges, shapes, the layout of the scene. The table shows the effect: crop alone gives <span data-claim="simclr-fig5-crop-crop">33.1</span>, crop then color gives <span data-claim="simclr-fig5-crop-color">56.3</span>, and color then crop gives <span data-claim="simclr-fig5-color-crop">55.8</span>. The paper makes the same argument: color histograms alone suffice to tell its crops apart, so it composes cropping with color distortion.</p>
+<p>You might expect each transformation to be good on its own. In fact the diagonal is weak everywhere: color alone gives <span data-claim="simclr-fig5-color-color">18.8</span> and blur alone <span data-claim="simclr-fig5-blur-blur">2.6</span>. A good task needs views that differ in many ways at once, so that only the content of the photo connects them.</p>
+<p>The right strength is also not the one supervised learning likes. The paper varies the strength of color distortion:</p>
+<table class="data">
+  <caption>SimCLR Table 1: ImageNet top-1 with ResNet-50. SimCLR rows are linear probes after 100 epochs of pretraining; supervised rows are ResNet-50s trained for 90 epochs with the same augmentation. The two rows use different protocols; compare the trends, not the levels.</caption>
+  <tr><th scope="col">Color distortion strength</th><th scope="col">1/8</th><th scope="col">1/4</th><th scope="col">1/2</th><th scope="col">1</th><th scope="col">1 (+Blur)</th><th scope="col">AutoAugment (a learned augmentation policy)</th></tr>
+  <tr><td>SimCLR (linear probe, 100 epochs)</td><td><span data-claim="simclr-t1-1-8-simclr">59.6</span></td><td><span data-claim="simclr-t1-1-4-simclr">61.0</span></td><td><span data-claim="simclr-t1-1-2-simclr">62.6</span></td><td><span data-claim="simclr-t1-1-simclr">63.2</span></td><td><span data-claim="simclr-t1-1-blur-simclr">64.5</span></td><td><span data-claim="simclr-t1-autoaug-simclr">61.1</span></td></tr>
+  <tr><td>Supervised (90 epochs)</td><td><span data-claim="simclr-t1-1-8-sup">77.0</span></td><td><span data-claim="simclr-t1-1-4-sup">76.7</span></td><td><span data-claim="simclr-t1-1-2-sup">76.5</span></td><td><span data-claim="simclr-t1-1-sup">75.7</span></td><td><span data-claim="simclr-t1-1-blur-sup">75.4</span></td><td><span data-claim="simclr-t1-autoaug-sup">77.1</span></td></tr>
+</table>
+<p>Stronger color distortion helps SimCLR and slightly hurts the supervised model. With labels, color distortion is just noise. Without labels, the augmentation <em>is</em> the task: it decides what the network must learn to ignore.</p>
+
+<details class="check">
+  <summary>Check yourself: you train with crop only on product photos where every product has its own color. The training loss drops fast. Why might the features still be poor?</summary>
+  <p>The loss can be solved by color matching: each product's crops share a color, and other products' crops do not. The encoder learns color statistics, not shapes, so a classifier on top of it has little to work with. Add color distortion (and grey-scale views) so that color no longer identifies the partner.</p>
+</details>
+
+<h3>Lesson 2: the other views in the batch are the negatives</h3>
+<p>Now the loss. Take a batch of <span class="tex">N</span> photos and make two views of each, so you have <span class="tex">2N</span> views. Pick one view as the anchor. Its partner is the positive. Every one of the other <span class="tex">2(N-1)</span> views comes from a different photo, so each of them is a negative. There is no memory bank and no queue: the batch is the lineup.</p>
+<p>Careful: <span class="tex">N</span> now counts photos, not candidates. Each row's lineup has <span class="tex">2N - 1</span> candidates.</p>
+<p>Why does this work without MoCo's tricks? Every negative is computed in this step, by the encoder as it is now. A memory bank holds embeddings from earlier versions of the encoder, so they are stale; MoCo's momentum encoder keeps its queue consistent by changing slowly. In-batch negatives are never stale, so neither fix is needed. The price is the batch size: to see many negatives, you need a large batch, and that is the second ingredient.</p>
+<p>The figure below draws the whole loss for a tiny batch. On the left, the views sit on the unit circle (each embedding scaled to length 1). On the right is the table of cosine similarities between every pair of views, with views <span class="tex">2k-1</span> and <span class="tex">2k</span> from photo <span class="tex">k</span>, as in the paper.</p>
+
+<figure class="viz" id="viz-ntxent" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Batch and temperature">
+    <span class="lbl">Batch</span>
+    <button type="button" id="btn-ntxent-n2" aria-pressed="false">N = 2</button>
+    <button type="button" id="btn-ntxent-n4" aria-pressed="false">N = 4</button>
+    <span class="lbl">Temperature</span>
+    <button type="button" id="btn-ntxent-t01" aria-pressed="false">&tau; = 0.1</button>
+    <button type="button" id="btn-ntxent-t05" aria-pressed="false">&tau; = 0.5</button>
+    <button type="button" id="btn-ntxent-t1" aria-pressed="false">&tau; = 1</button>
+    <button type="button" id="btn-ntxent-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="ntxent-canvas" role="img" aria-label="Left: views on a circle, view 1 in blue, its partner view 2 in yellow, the other views in red, partners joined by green lines. Right: the 2N by 2N cosine table. The diagonal is crossed out. In each row the partner cell has a yellow box and green shading; the other cells are shaded red by their softmax probability. A red bar per row gives that row's loss, and the mean loss is printed below."></canvas>
+  <p class="readout" id="ntxent-readout" aria-live="polite"></p>
+  <figcaption>Computed: NT-Xent (Eq. 1 below) on fixed unit vectors in the plane. The angles are our choice; for N = 2 the cosines are 0.8, 0.6, 0 and -0.6 so you can check the numbers by hand. The temperatures are buttons, not SimCLR settings. The check script and its output are in the project notes (<code>build/sim/simclr-ntxent.js</code>, <code>notes/sim-simclr.txt</code>).</figcaption>
+</figure>
+
+<p>You might expect the diagonal to be the positive, as in a table of images against captions. Here it is not: the diagonal compares a view with itself, so its cosine is always 1 and it teaches nothing. The loss removes it. The positive sits next to the diagonal, at the partner's column.</p>
+
+<h3>The same idea as an equation</h3>
+<p>Read one row of the table as one softmax: "of all the other views, which is my partner?". SimCLR calls this loss NT-Xent, the normalized temperature-scaled cross-entropy.</p>
+<div class="eq" id="eq-ntxent" data-build data-viz="viz-ntxent"><div class="tex tex-display">
+\ell_{i,j} = -\log \frac{\htmlData{step=1, link=pos}{\htmlClass{t-yellow}{\exp(\htmlData{step=2, link=sim}{\mathrm{sim}(\bm z_i, \bm z_j)}/\htmlData{step=4, link=tau}{\tau})}}}{\htmlData{step=3, link=row}{\htmlClass{t-red}{\sum_{k=1}^{2N}}} \htmlData{step=5, link=mask}{\mathbb{1}_{[k \neq i]}}\htmlClass{t-red}{\exp(\mathrm{sim}(\bm z_i, \bm z_k)/\tau)}}
+</div></div>
+<p class="eqno">Eq. 1 in Chen, Kornblith, Norouzi and Hinton, "A Simple Framework for Contrastive Learning of Visual Representations", arXiv 2002.05709v3 (the indicator is written there with a blackboard-bold 1, macro <code>\one</code>).</p>
+<ul class="gloss">
+  <li><span class="tex">\bm z_i, \bm z_j</span>: the head's outputs for two views of the same photo. <span class="tex">i</span> is the anchor's row; <span class="tex">j</span> is the partner's column.</li>
+  <li><span class="tex">\mathrm{sim}(\bm u, \bm v) = \bm u^\top \bm v / (\lVert \bm u\rVert \lVert \bm v\rVert)</span>: the cosine similarity, one cell of the table. Dividing by the lengths is the "normalized" in NT-Xent.</li>
+  <li><span class="tex">\tau</span>: the temperature. Dividing by a small <span class="tex">\tau</span> stretches the gaps between cosines before the softmax.</li>
+  <li><span class="tex">\htmlClass{t-red}{\sum_{k=1}^{2N}}</span>: a sum over the whole row, all <span class="tex">2N</span> views.</li>
+  <li><span class="tex">\mathbb{1}_{[k \neq i]}</span>: 1 for every column except <span class="tex">k = i</span>, so the diagonal cell drops out. The row keeps the partner and the <span class="tex">2(N-1)</span> negatives.</li>
+</ul>
+<p>Try it with the numbers in the figure: <span class="tex">N = 2</span> and <span class="tex">\tau = 0.5</span> (our choice for the arithmetic; the paper does not give a default). Row 1 has cosines 0.8 with its partner, 0 and -0.6 with the two negatives.</p>
+<ul>
+  <li>Divide by <span class="tex">\tau</span>: <span class="tex">1.6,\ 0,\ -1.2</span>.</li>
+  <li>Exponentiate: <span class="tex">e^{1.6} \approx 4.95,\ e^{0} = 1,\ e^{-1.2} \approx 0.30</span>. The row sum is <span class="tex">6.25</span>.</li>
+  <li>The partner's probability is <span class="tex">4.95 / 6.25 \approx 0.79</span>, so <span class="tex">\ell_{1,2} = -\log 0.79 \approx 0.23</span>.</li>
+  <li>At <span class="tex">\tau = 1</span> the same row gives <span class="tex">e^{0.8} / (e^{0.8} + 1 + e^{-0.6}) \approx 0.59</span> and a loss of about <span class="tex">0.53</span>. Press the temperature buttons to see every row change.</li>
+</ul>
+<p>Each row is one loss. The batch loss averages all of them, both directions of every pair:</p>
+<div class="eq" id="eq-simclr-total" data-build data-viz="viz-ntxent"><div class="tex tex-display">
+\mathcal{L} = \htmlData{step=1, link=rows}{\frac{1}{2N} \sum_{k=1}^N} \left[ \htmlData{step=2, link=pos}{\htmlClass{t-red}{\ell(2k\!-\!1, 2k)}} + \htmlData{step=3, link=pos}{\htmlClass{t-red}{\ell(2k, 2k\!-\!1)}}\right]
+</div></div>
+<p class="eqno">Algorithm 1 in Chen et al., arXiv 2002.05709v3 (unnumbered there).</p>
+<p>For our tiny batch at <span class="tex">\tau = 0.5</span>, the four row losses average to the "mean over all rows" printed under the table. Now press <b>N = 4</b>. Every row goes from 2 negatives to 6, and the anchor's loss rises, because there are more strangers who might look like the partner. At <span class="tex">N = 4096</span>, SimCLR's default batch, each row has <span data-claim="simclr-neg-4096">8190</span> negatives (our arithmetic, <span class="tex">2(N-1)</span>). The paper itself gives <span data-claim="simclr-neg-8192">16382</span> negatives per positive pair at batch 8192.</p>
+<p>What about <span class="tex">\tau</span>? The paper does not state one default. In its sweep (Table 5, 100 epochs, with the embeddings normalized), <span class="tex">\tau = 0.1</span> gave the best linear-probe top-1, <span data-claim="simclr-t5-tau-0p1">64.4</span>, against <span data-claim="simclr-t5-tau-0p05">59.7</span> at 0.05 and <span data-claim="simclr-t5-tau-1">58.0</span> at 1. Why a small temperature helps, and why too small hurts, is the subject of <a href="#ch-sphere">chapter 6</a>.</p>
+
+<h3>Lesson 3: a head you train and then throw away</h3>
+<p>From here on, the embedding is what the loss sees (<span class="tex">\bm z</span>), and the representation is the encoder output you keep (<span class="tex">\bm h</span>). Before this chapter there was no head, so the two were the same vector.</p>
+<p>The loss wants the two views to land on the same point. To do that, the network must remove everything the augmentation changed: the color shift, the crop position, the blur. That is what we asked for, but it removes too much. Color can matter for the next task: a ripe banana and a green one differ only in color.</p>
+<p>SimCLR's fix is a small extra network, the <em>projection head</em> <span class="tex">g</span>, between the encoder and the loss. The encoder produces <span class="tex">\bm h</span>; the head turns it into <span class="tex">\bm z = g(\bm h)</span>; the loss sees only <span class="tex">\bm z</span>. Now the head can do the forgetting. It learns to throw away color and orientation, so <span class="tex">\bm z</span> is invariant, while <span class="tex">\bm h</span>, one layer earlier, is free to keep them. After pretraining you delete <span class="tex">g</span> and keep <span class="tex">\bm h</span>.</p>
+<p>Think of <span class="tex">\bm h</span> as your full notes and <span class="tex">g</span> as a cheat sheet written for one exam. The exam only asks "same photo or not?", so the cheat sheet leaves out the colors. For the next exam, you bring the notes.</p>
+<p>The paper measures both halves of this story. A nonlinear head (one hidden layer with a ReLU) beats a linear head by <span data-claim="simclr-head-linear-pts">3</span> points, and beats no head by more than <span data-claim="simclr-head-none-pts">10</span> points. Even with the nonlinear head, <span class="tex">\bm h</span> beats <span class="tex">\bm z</span> by more than <span data-claim="simclr-h-vs-z-pts">10</span> points under a linear probe (Sec. 4.2; the bars in its Fig. 8 carry no printed values). To test the "forgetting" idea, the authors train a small classifier to guess which transformation was applied, from <span class="tex">\bm h</span> or from <span class="tex">g(\bm h)</span>:</p>
+<table class="data">
+  <caption>SimCLR Table 3: accuracy of predicting the transformation applied during pretraining, from h or from g(h). For this test both are 2048 numbers wide. The last column is the score of always guessing the most common answer: grey-scale is applied with probability <span data-claim="simclr-gray-p">0.2</span>, so always guessing "color" is right <span data-claim="simclr-t3-color-guess">80</span>% of the time.</caption>
+  <tr><th scope="col">What to predict</th><th scope="col">from h</th><th scope="col">from g(h)</th><th scope="col">always guess the common answer</th></tr>
+  <tr><td>color or grey-scale</td><td><span data-claim="simclr-t3-color-h">99.3</span></td><td><span data-claim="simclr-t3-color-gh">97.4</span></td><td><span data-claim="simclr-t3-color-guess">80</span></td></tr>
+  <tr><td>rotation (4 angles)</td><td><span data-claim="simclr-t3-rot-h">67.6</span></td><td><span data-claim="simclr-t3-rot-gh">25.6</span></td><td><span data-claim="simclr-t3-rot-guess">25</span></td></tr>
+  <tr><td>original or corrupted</td><td><span data-claim="simclr-t3-corrupt-h">99.5</span></td><td><span data-claim="simclr-t3-corrupt-gh">59.6</span></td><td><span data-claim="simclr-t3-corrupt-guess">50</span></td></tr>
+  <tr><td>original or Sobel-filtered</td><td><span data-claim="simclr-t3-sobel-h">96.6</span></td><td><span data-claim="simclr-t3-sobel-gh">56.3</span></td><td><span data-claim="simclr-t3-sobel-guess">50</span></td></tr>
+</table>
+<p>From <span class="tex">g(\bm h)</span>, rotation is at chance level: the head has thrown it away. From <span class="tex">\bm h</span> it is still there. The paper offers this as its conjecture for why the head helps, and the table supports it.</p>
+
+<details class="check">
+  <summary>Check yourself: the loss is computed on z, so z is what training optimized. Why is it the worse representation?</summary>
+  <p>Because the loss rewards invariance to the augmentations, and z is where that invariance is enforced. Anything the augmentations change, such as color or orientation, is information z is pushed to discard. The layer before the head is only asked to make that job possible, so it can keep more of the photo. A downstream task that needs color or orientation finds them in h, not in z.</p>
+</details>
+
+<h3>Inside SimCLR: forward, then backward</h3>
+<p>Here is one training step of the real model, as a slide per stage. Step through it with <b>Next</b>. The line under the drawing gives each tensor's shape, computed from the paper's configuration; the batch buttons change <span class="tex">N</span> and recompute them. Before you reach the backward stages, guess: <b>which boxes will the gradient reach?</b></p>
+
+<figure class="viz archflow" id="viz-simclrflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-simclrflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-simclrflow-augment" aria-pressed="false">2 Views</button>
+    <button type="button" id="btn-simclrflow-encode" aria-pressed="false">3 Encoder</button>
+    <button type="button" id="btn-simclrflow-head" aria-pressed="false">4 Head</button>
+    <button type="button" id="btn-simclrflow-norm" aria-pressed="false">5 Normalize</button>
+    <button type="button" id="btn-simclrflow-sim" aria-pressed="false">6 Cosines</button>
+    <button type="button" id="btn-simclrflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-simclrflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-simclrflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Batch size">
+    <span>batch N</span>
+    <button type="button" id="btn-simclrflow-b256" aria-pressed="false">256</button>
+    <button type="button" id="btn-simclrflow-b1024" aria-pressed="false">1024</button>
+    <button type="button" id="btn-simclrflow-b4096" aria-pressed="true">4096</button>
+    <button type="button" id="btn-simclrflow-b8192" aria-pressed="false">8192</button>
+  </div>
+  <canvas id="simclrflow-canvas" role="img" aria-label="SimCLR's training step as a diagram: a batch of photos splits into view A (blue lane) and view B (yellow lane). Each lane runs the same ResNet-50, the same head g and a normalization; the lanes meet in a 2N by 2N cosine table and the loss. In the backward stages red arrows run from the loss back through both lanes to the head and the ResNet."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-simclrflow-prev">Previous</button>
+    <button type="button" id="btn-simclrflow-next">Next</button>
+    <button type="button" id="btn-simclrflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="simclrflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Two lanes, one per view: view A (<b class="c-blue">blue</b>) and view B (<b class="c-yellow">yellow</b>). Both lanes run the <em>same</em> encoder and the <em>same</em> head; they are drawn twice only to show the two views. The lanes meet in the cosine table and the loss (<b class="c-red">red</b>). Press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of photos</h4>
+      <p>Draw <span class="tex">N</span> unlabeled photos; the default is <span data-claim="simclr-batch">4096</span>. The paper varies <span class="tex">N</span> from 256 to 8192 in its ablations.</p>
+    </div>
+    <div data-stage="augment" hidden>
+      <h4>2. Two random views of each photo</h4>
+      <p>Each photo gets two independent random augmentations: a random crop covering <span data-claim="simclr-crop-area">0.08 to 1.0</span> of the area, resized to <span data-claim="simclr-crop-size">224x224</span>, with a random flip; color jitter with probability <span data-claim="simclr-jitter-p">0.8</span>, conversion to grey with probability <span data-claim="simclr-gray-p">0.2</span>; and Gaussian blur with probability <span data-claim="simclr-blur-p">50%</span> (App. A). The augmentation has no weights.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>3. One encoder for both views</h4>
+      <p>A standard ResNet-50, <span class="tex">f</span>, maps every view to <span class="tex">\bm h</span>, its output after average pooling: <span data-claim="simclr-h-dim">2048</span> numbers per view. There are no special layers. One detail matters: batch normalization computes its mean and variance over all devices (<em>global BN</em>). Both views of a photo sit on the same device, and per-device statistics would leak information the model could use to find the partner without learning good features.</p>
+    </div>
+    <div data-stage="head" hidden>
+      <h4>4. The projection head</h4>
+      <p>The head <span class="tex">g</span> is a 2-layer MLP, <span class="tex">\bm z = W^{(2)}\sigma(W^{(1)}\bm h)</span> with a ReLU <span class="tex">\sigma</span>, and outputs <span data-claim="simclr-z-dim">128</span> numbers. The paper does not give the hidden width of the default head, so the readout does not either.</p>
+    </div>
+    <div data-stage="norm" hidden>
+      <h4>5. Scale to length one</h4>
+      <p>The cosine similarity divides by the lengths, which is the same as scaling every <span class="tex">\bm z</span> to length 1 and then taking dot products. Every view becomes a point on the unit sphere.</p>
+    </div>
+    <div data-stage="sim" hidden>
+      <h4>6. Every view against every view</h4>
+      <p>One matrix product gives the <span class="tex">2N \times 2N</span> table of cosines: at the default batch, <span data-claim="simclr-views">8192</span> views (our arithmetic, <span class="tex">2N</span>) and an 8192 by 8192 table, <span data-claim="simclr-sim-entries">67,108,864</span> cosines (our arithmetic).</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. One number</h4>
+      <p>Mask the diagonal, find each row's partner, and apply <a href="#eq-ntxent">Eq. 1</a> to every row, then average (<a href="#eq-simclr-total">Algorithm 1</a>). Each row has <span data-claim="simclr-neg-4096">8190</span> negatives at the default batch (our arithmetic).</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. The gradient reaches everything</h4>
+      <p>Start at the loss and follow the arrows back. The gradient flows through the cosine table and the normalization (no weights there) into the head's <span class="tex">W^{(1)}, W^{(2)}</span> and into every ResNet weight, along <em>both</em> lanes. Nothing is frozen: there is no momentum copy and no part cut off from the gradient (a stop-gradient), unlike MoCo's key encoder in <a href="#ch-moco">chapter 4</a>. Each view gets gradient in two roles: as an anchor in its own row, and as a positive or negative in every other row.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. The update, and then throw the head away</h4>
+      <p>SimCLR uses the LARS optimizer, which the paper chose because large-batch training with plain SGD and linear learning-rate scaling can be unstable. The learning rate is <span data-claim="simclr-lr">4.8</span> (<span data-claim="simclr-lr-formula-base">0.3</span> x BatchSize / 256), with weight decay <span data-claim="simclr-wd">1e-6</span>, a linear warmup over the first <span data-claim="simclr-warmup">10</span> epochs and cosine decay. Ablations train for <span data-claim="simclr-ablation-epochs">100</span> epochs and the best models for <span data-claim="simclr-sota-epochs">1000</span>, on <span data-claim="simclr-tpu">32 to 128</span> TPU cores; a 100-epoch ResNet-50 run at batch <span data-claim="simclr-batch">4096</span> takes about <span data-claim="simclr-tpu-time">1.5 hours</span> on 128 TPU v3 cores. When pretraining ends, <span class="tex">g</span> is discarded and <span class="tex">\bm h</span> is the representation.</p>
+    </div>
+  </div>
+  <figcaption>Computed: every shape in the readout follows from the batch size N, the 224 x 224 crops, h = 2048 and z = 128 from the paper. The learning rates for the other batch sizes are our arithmetic from the paper's linear-scaling rule.</figcaption>
+</figure>
+
+<h3>Bigger batches and longer training</h3>
+<p>More negatives per step make the lineup harder, and a harder lineup teaches more. The paper's Table B.1 measures this directly: ResNet-50, linear probe, learning rate scaled linearly with the batch.</p>
+<table class="data">
+  <caption>SimCLR Table B.1 (left of each slash in the paper: linear learning-rate scaling): ImageNet linear-probe top-1 (%) of ResNet-50 by batch size and pretraining epochs. The paper also reports square-root scaling, which helps small batches at few epochs.</caption>
+  <tr><th scope="col">Batch size</th><th scope="col">100 epochs</th><th scope="col">200</th><th scope="col">400</th><th scope="col">800</th></tr>
+  <tr><td>256</td><td><span data-claim="simclr-tb1-b256-e100-lin">57.5</span></td><td><span data-claim="simclr-tb1-b256-e200-lin">61.9</span></td><td><span data-claim="simclr-tb1-b256-e400-lin">64.7</span></td><td><span data-claim="simclr-tb1-b256-e800-lin">66.6</span></td></tr>
+  <tr><td>512</td><td><span data-claim="simclr-tb1-b512-e100-lin">60.7</span></td><td><span data-claim="simclr-tb1-b512-e200-lin">64.0</span></td><td><span data-claim="simclr-tb1-b512-e400-lin">66.2</span></td><td><span data-claim="simclr-tb1-b512-e800-lin">67.8</span></td></tr>
+  <tr><td>1024</td><td><span data-claim="simclr-tb1-b1024-e100-lin">62.8</span></td><td><span data-claim="simclr-tb1-b1024-e200-lin">65.3</span></td><td><span data-claim="simclr-tb1-b1024-e400-lin">67.2</span></td><td><span data-claim="simclr-tb1-b1024-e800-lin">68.5</span></td></tr>
+  <tr><td>2048</td><td><span data-claim="simclr-tb1-b2048-e100-lin">64.0</span></td><td><span data-claim="simclr-tb1-b2048-e200-lin">66.1</span></td><td><span data-claim="simclr-tb1-b2048-e400-lin">68.1</span></td><td><span data-claim="simclr-tb1-b2048-e800-lin">68.9</span></td></tr>
+  <tr><td>4096</td><td><span data-claim="simclr-tb1-b4096-e100-lin">64.6</span></td><td><span data-claim="simclr-tb1-b4096-e200-lin">66.5</span></td><td><span data-claim="simclr-tb1-b4096-e400-lin">68.2</span></td><td><span data-claim="simclr-tb1-b4096-e800-lin">68.9</span></td></tr>
+  <tr><td>8192</td><td><span data-claim="simclr-tb1-b8192-e100-lin">64.8</span></td><td><span data-claim="simclr-tb1-b8192-e200-lin">66.6</span></td><td><span data-claim="simclr-tb1-b8192-e400-lin">67.8</span></td><td><span data-claim="simclr-tb1-b8192-e800-lin">69.0</span></td></tr>
+</table>
+<p>Read it by rows and by columns. At 100 epochs, going from batch 256 to 8192 gains more than seven points. At 800 epochs the same change gains less than three, because training longer also shows the model more negatives over time. The paper frames this as contrastive learning benefiting more than supervised learning from big batches and long training, and explains it by the negatives. Its supervised check covers only the length of training (a supervised ResNet does not improve when trained longer, App. B.3); it has no supervised batch-size sweep.</p>
+
+<h3>Where this came from</h3>
+<p>SimCLR is by Chen, Kornblith, Norouzi and Hinton (<a href="https://arxiv.org/abs/2002.05709v3">2002.05709</a>, submitted <span data-claim="simclr-published">2020-02-13</span>). In-batch negatives were not new; the N-pair loss in <a href="#ch-compare">chapter 1</a> already used them. The contribution was a careful ablation that found which simple parts matter, with no special architecture and no memory bank. Its ResNet-50 reaches <span data-claim="simclr-linear-r50">69.3</span> top-1 on ImageNet under a linear probe after <span data-claim="simclr-sota-epochs">1000</span> epochs of pretraining, and a four-times-wider ResNet-50 reaches <span data-claim="simclr-linear-r50-4x">76.5</span> under the same protocol.</p>
+<h3>What came next</h3>
+<p>InfoMin (Tian et al., <a href="https://arxiv.org/abs/2005.10243v3">2005.10243</a>) explains Lesson 1: good views share only the information the downstream task needs, so you reduce what the two views have in common but keep what matters for the label. Too little shared information makes the task impossible; too much lets shortcuts like color matching in.</p>
+<p>SimCLRv2 (<a href="https://arxiv.org/abs/2006.10029v2">2006.10029</a>) scaled the same recipe to bigger networks and used it to learn from a small fraction of labels. MoCo v2 borrowed SimCLR's MLP head and blur and kept its queue, so it needs no huge batch (<a href="#ch-moco">chapter 4</a>).</p>
+
+<h3>Where we go next</h3>
+<p>You now have a full recipe. But why should "pull the pair, push the rest" produce good features at all, and what does the temperature really control? <a href="#ch-sphere">Chapter 6</a> answers this on the sphere. First, the <a href="#ch-step">interlude</a> runs one complete SimCLR step at full size.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why crop alone lets the network match color histograms, and why adding color distortion removes that shortcut.</li>
+    <li>How the other <span class="tex">2(N-1)</span> views in a batch serve as negatives, why they are never stale, and what the masked diagonal is.</li>
+    <li>Why a projection head used only for the loss leaves the layer before it more useful, and why it is thrown away.</li>
+    <li>Why SimCLR needs a large batch, and what that costs.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>Start from the augmentations, not the loss. Ask what your downstream task must ignore and what it must keep: if color matters (ripe or unripe, rust or paint), weaken color distortion or keep a head and use the features before it. Always evaluate the encoder output <span class="tex">\bm h</span>, not the head output. If you cannot afford a batch of thousands, use a queue (<a href="#ch-moco">chapter 4</a>) instead of shrinking the lineup. With data-parallel training, make sure batch normalization statistics are shared across devices, or the model may cheat.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-augment'), out = document.getElementById('augment-readout');
+  const kit = KIT.augment(document.getElementById('augment-canvas'), { fig });
+  const tbl = document.getElementById('augment-table'), S = { a: 'crop', b: 'crop' };
+  tbl.querySelectorAll('td[data-a]').forEach(td => { const v = parseFloat(td.textContent);
+    td.style.background = 'color-mix(in srgb, var(--green) ' + Math.round(v / 60 * 55) + '%, transparent)'; });
+  const go = (a, b) => {
+    S.a = a; S.b = b; kit.set(a, b);
+    KIT.AUG_KINDS.forEach(k => { document.getElementById('btn-augment-a-' + k).setAttribute('aria-pressed', String(k === a));
+      document.getElementById('btn-augment-b-' + k).setAttribute('aria-pressed', String(k === b)); });
+    tbl.querySelectorAll('td[data-a]').forEach(td => td.classList.toggle('aug-hl', td.dataset.a === a && td.dataset.b === b));
+    const span = tbl.querySelector('td[data-a="' + a + '"][data-b="' + b + '"] span');
+    out.innerHTML = KIT.augmentText(a, b, span.textContent, span.dataset.claim, kit.views());
+  };
+  KIT.AUG_KINDS.forEach(k => { document.getElementById('btn-augment-a-' + k).addEventListener('click', () => go(k, S.b));
+    document.getElementById('btn-augment-b-' + k).addEventListener('click', () => go(S.a, k)); });
+  document.getElementById('btn-augment-reset').addEventListener('click', () => go('crop', 'crop'));
+  go('crop', 'crop');
+})();
+(() => {
+  const fig = document.getElementById('viz-ntxent'), out = document.getElementById('ntxent-readout');
+  const kit = KIT.ntxent(document.getElementById('ntxent-canvas'), { fig }), S = { N: 2, tau: .5 };
+  const nb = { 2: 'btn-ntxent-n2', 4: 'btn-ntxent-n4' }, tb = { 0.1: 'btn-ntxent-t01', 0.5: 'btn-ntxent-t05', 1: 'btn-ntxent-t1' };
+  const go = (N, tau) => { S.N = N; S.tau = tau; kit.set(N, tau);
+    Object.entries(nb).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(+k === N)));
+    Object.entries(tb).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(+k === tau)));
+    out.textContent = KIT.ntxentText(N, tau); };
+  Object.entries(nb).forEach(([k, id]) => document.getElementById(id).addEventListener('click', () => go(+k, S.tau)));
+  Object.entries(tb).forEach(([k, id]) => document.getElementById(id).addEventListener('click', () => go(S.N, +k)));
+  document.getElementById('btn-ntxent-reset').addEventListener('click', () => go(2, .5));
+  go(2, .5);
+})();
+(() => {
+  const x = ' x ', f = n => n.toLocaleString('en-US');
+  const V = { b256: { N: 256 }, b1024: { N: 1024 }, b4096: { N: 4096 }, b8192: { N: 8192 } };
+  const SH = { x: v => f(v.N) + ' photos', a1: v => f(v.N) + x + '3' + x + '224' + x + '224', b1: v => f(v.N) + x + '3' + x + '224' + x + '224',
+    a2: v => 'h: ' + f(v.N) + x + '2048', b2: v => 'h: ' + f(v.N) + x + '2048', a3: v => 'z: ' + f(v.N) + x + '128', b3: v => 'z: ' + f(v.N) + x + '128',
+    a4: v => f(v.N) + x + '128, unit', b4: v => f(v.N) + x + '128, unit', sim: v => f(2 * v.N) + x + f(2 * v.N), loss: () => 'one number' };
+  const PARAMS = { a2: 'ResNet-50|weights (shared)', b2: 'ResNet-50|weights (shared)', a3: 'W1, W2|(shared)', b3: 'W1, W2|(shared)' };
+  ArchFlow.mount({
+    prefix: 'simclrflow', grid: { cols: 7, rows: 2 },
+    boxes: {
+      x: { c: 0, r: .5, lane: 'mixed', title: ['photos'], glyph: 'photos', data: true },
+      a1: { c: 1, r: 0, lane: 'blue', title: ['view A'], glyph: 'photo', data: true },
+      b1: { c: 1, r: 1, lane: 'yellow', title: ['view B'], glyph: 'photo', data: true },
+      a2: { c: 2, r: 0, lane: 'blue', title: ['ResNet-50 f'], glyph: 'layers' },
+      b2: { c: 2, r: 1, lane: 'yellow', title: ['ResNet-50 f'], glyph: 'layers' },
+      a3: { c: 3, r: 0, lane: 'blue', title: ['head g'], glyph: 'layers' },
+      b3: { c: 3, r: 1, lane: 'yellow', title: ['head g'], glyph: 'layers' },
+      a4: { c: 4, r: 0, lane: 'blue', title: ['normalize'], glyph: 'unit' },
+      b4: { c: 4, r: 1, lane: 'yellow', title: ['normalize'], glyph: 'unit' },
+      sim: { c: 5, r: .5, lane: 'green', title: ['cosines'], glyph: 'matrix' },
+      loss: { c: 6, r: .5, lane: 'red', title: ['NT-Xent'], glyph: 'loss' },
+    },
+    edges: [['x', 'a1'], ['x', 'b1'], ['a1', 'a2'], ['a2', 'a3'], ['a3', 'a4'], ['a4', 'sim'], ['b1', 'b2'], ['b2', 'b3'], ['b3', 'b4'], ['b4', 'sim'], ['sim', 'loss']],
+    stages: [
+      { key: 'batch', show: ['x'] }, { key: 'augment', show: ['a1', 'b1'] }, { key: 'encode', show: ['a2', 'b2'] }, { key: 'head', show: ['a3', 'b3'] },
+      { key: 'norm', show: ['a4', 'b4'] }, { key: 'sim', show: ['sim'] }, { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: V, variant: 'b4096',
+    shape: (id, v) => SH[id](v),
+    params: id => PARAMS[id] || null,
+    frozen: () => false,
+    readout: (s, v) => {
+      const N = v.N, n2 = 2 * N;
+      return {
+        overview: 'Batch N = ' + f(N) + ': ' + f(n2) + ' views, one shared encoder and head, one ' + f(n2) + x + f(n2) + ' table, one loss.',
+        batch: 'Step 1: ' + f(N) + ' photos of different sizes, no labels.',
+        augment: 'Step 2: two views per photo, each cropped and resized to 224' + x + '224: two tensors of ' + SH.a1(v) + ', ' + f(n2) + ' views in all.',
+        encode: 'Step 3: the same ResNet-50 runs on both tensors: h is ' + f(N) + x + '2048 per lane, ' + f(n2) + x + '2048 in all.',
+        head: 'Step 4: the same head g maps each h to z: ' + f(N) + x + '128 per lane. Hidden width of g: not stated in the paper.',
+        norm: 'Step 5: each row of z divided by its length: still ' + f(n2) + x + '128, now on the unit sphere.',
+        sim: 'Step 6: stack both lanes and multiply: ' + f(n2) + x + f(n2) + ' = ' + f(n2 * n2) + ' cosines.',
+        loss: 'Step 7: ' + f(n2) + ' rows, each with 1 masked cell, 1 positive and ' + f(n2 - 2) + ' negatives, averaged to one number.',
+        backward: 'Backward: red outlines mark what the gradient updates: the shared head and the shared ResNet-50, reached through both lanes. Nothing is frozen.',
+        update: 'Update: one LARS step on every red-outlined weight, at a peak learning rate of 0.3' + x + f(N) + ' / 256 = ' + (0.3 * N / 256) + '. After pretraining, g is thrown away.',
+      }[s];
+    },
+  });
+})();
+</script>
+</section>

@@ -1,0 +1,27 @@
+  <article data-chapter="failures" data-chip="Failure modes">
+    <header class="ch-head"><span class="num"></span><h2>How they fail on rare industrial objects</h2><p class="subhead">Seven causes, three you can see here</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Failure modes">
+        <button type="button" role="tab" data-step="0">Jargon</button>
+        <button type="button" role="tab" data-step="1">Tiny defects</button>
+        <button type="button" role="tab" data-step="2">False alarms</button>
+      </div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>The name means something else on the web</h3>
+      <p>A text encoder places "porosity" where the web uses it: rock, skin, foam. The weld pores sit elsewhere. A plain description, "small round holes in a weld", lands near them. GLIP measured the effect: on one dataset, describing the look raised zero-shot AP from 13.6 to 73.8.</p>
+      <p class="note">The sphere is a toy with hand-placed points; the GLIP numbers are from its Table 10.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Small defects vanish at the input size</h3>
+      <p>OWL-ViT B/32 resizes your image to 768 pixels and reads 32-pixel patches. A 20-pixel defect in a 4096-pixel frame becomes under 4 pixels: a small fraction of one patch. Crop or tile instead.</p>
+      <p class="note">Computed from the model's input size, assuming a 4:3 image scaled by its long side (our reading of the preprocessing).</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>A threshold trades false alarms for misses</h3>
+      <p>With no score threshold, Grounding DINO puts a box on every image, including those without the target. A 0.9 threshold cuts those false alarms to 8.5%, and mAP falls from 20.7 to 3.8.</p>
+      <p class="note">Described Object Detection, Supp. Table 7. Set thresholds per class on your own clean and defective images.</p>
+      <p class="inscription">Know which failure you have: a rename fixes jargon, tiling fixes size, labels fix policy and thresholds.</p>
+    </div>
+    <button type="button" class="continue" data-go="overview">Continue</button>
+  </article>

@@ -1,0 +1,13 @@
+  <article data-chapter="granularity">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>One scale or many?</h2><p class="subhead">Per-tensor against per-channel weight grids</p></header>
+    <div class="controls">
+      <div class="row"><span>Grid</span><button type="button" class="tool" data-mode="tensor">per-tensor</button><button type="button" class="tool" data-mode="channel">per-channel</button></div>
+      <div class="row"><span>Height</span><button type="button" class="tool" data-zoom="0">true scale</button><button type="button" class="tool" data-zoom="1">zoom each channel</button></div>
+    </div>
+    <p>Each row of blue dots is one output channel of a depthwise 3x3 layer: its nine weights. After batch norm is folded into the weights, a few channels are far wider than the rest. One grid for the whole tensor must stretch over the widest channel, so the narrow channels fall between a few marks.</p>
+    <p>Press "zoom each channel" to see them: a typical narrow channel spans only a handful of the 256 levels, and its weights snap onto a few terraces. The red sticks are the rounding error. Then press "per-channel": with one <button type="button" class="inline-term" data-open="perchannel">scale per output channel</button>, every channel gets all 256 levels and the red sticks vanish.</p>
+    <p>On real networks the difference is drastic. Krishnamoorthi's 8-bit MobileNet-v1 scored 0.001 top-1 with one scale per layer and 0.703 with one per channel.</p>
+    <p class="note">Toy weights shaped after Nagel 2021 Fig. 5 as read off the figure (32 channels, six wide ones). Levels, errors and MSE are computed exactly. Drag to turn the landscape.</p>
+    <p class="inscription">Give each output channel of the weights its own scale. Activations keep one scale per tensor, because their scale must factor out of the sum.</p>
+    {{CONTINUE}}
+  </article>

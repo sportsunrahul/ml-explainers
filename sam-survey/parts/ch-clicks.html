@@ -1,0 +1,43 @@
+<section id="ch-clicks" class="chapter">
+<h2>A human in the loop</h2>
+<p>A second line of work never asked a model to know classes. In <dfn>interactive segmentation</dfn>, a person clicks on the thing they want, the model draws a mask, and the person clicks again where the mask is wrong.</p>
+
+<figure class="viz" id="viz-clicks" data-scene="clicks" data-toy>
+  <div class="controls">
+    <span class="lbl">Object:</span>
+    <button type="button" data-target="mug" id="btn-clicks-mug">Mug</button>
+    <button type="button" data-target="plant" id="btn-clicks-plant">Plant</button>
+    <button type="button" data-target="lamp" id="btn-clicks-lamp">Lamp</button>
+    <button type="button" data-target="window" id="btn-clicks-window">Window</button>
+  </div>
+  <div class="stage" style="height:clamp(430px, 40vw, 440px)"></div>
+  <div class="controls">
+    <button type="button" data-next id="btn-clicks-next">Simulated user: next click</button>
+    <button type="button" data-auto id="btn-clicks-auto">Run 12 clicks</button>
+    <button type="button" data-cue-reset id="btn-clicks-reset">Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. Click the image yourself, or let the simulated user click. Green: the model's mask. Red: where it is wrong. Dashed: the true object. A yellow dot adds pixels (a positive click); a brown ring removes them (a negative click).</figcaption>
+</figure>
+
+<p>Run the twelve clicks, then pick another object. Before you do, predict: will the first click or the tenth click change the mask more?</p>
+<p><b>DIOS</b> (Deep Interactive Object Selection, 2016) set the pattern. It turns the clicks into <span data-claim="dios-click-maps">2</span> extra image channels, one for positive and one for negative clicks, where each pixel holds its distance to the nearest click (truncated at <span data-claim="dios-truncate">255</span>). Stacked with the three colour channels, they go into a fully convolutional network, and the output is the mask. DIOS trained on simulated clicks: random positive clicks inside each object and negative clicks sampled by <span data-claim="dios-strategies">3</span> different rules, in the background around it and on other objects.</p>
+<p><b>RITM</b> (2021) revived and refined two ideas from an earlier method, ITIS (2018), and SAM later reuses both. First, it feeds the <em>previous mask</em> back in as a third input channel, so each click edits the last answer instead of starting again; ITIS had proposed this as an option, and RITM made it work reliably. Second, it trains <em>iteratively</em>: during training it runs the model, finds the error region, places the next click there, and repeats, up to <span data-claim="ritm-niters">3</span> times per example. It clicks inside an eroded error region, <span data-claim="ritm-erosion">4</span> times smaller in area, so the model does not overfit to the evaluation's exact rule. Trained on COCO and LVIS (<span data-claim="ritm-coco-lvis-images">104k</span> images, <span data-claim="ritm-coco-lvis-masks">1.6M</span> masks), RITM needed <span data-claim="ritm-h32itm-noc90-davis">5.34</span> clicks on average to reach 90% IoU on DAVIS.</p>
+<p><b>SimpleClick</b> (2022) swapped the convolutional backbone for a plain Vision Transformer pretrained with MAE, the same backbone SAM would use. The click maps and the previous mask enter through their own patch embedding. Its ViT-H model trained on COCO and LVIS needs <span data-claim="simpleclick-vith-cl-noc90-davis">4.78</span> clicks on DAVIS. FocalClick (2022) made the loop cheaper by recomputing only the region around each new click.</p>
+
+<h3>How the field keeps score</h3>
+<p>The benchmarks simulate the user. The rule, in RITM's words: "the next click is placed at the center of the region with any type of prediction error (false positive or false negative) with the largest area", where the centre is the point farthest from that region's boundary. The simulated user in the figure follows the same rule. The score is the number of clicks needed to reach a target IoU:</p>
+<div class="eq" id="eq-noc" data-build data-viz="viz-clicks"><div class="tex tex-display">
+\mathrm{NoC@90} = \min\{\, k : \htmlData{step=1, link=curve}{\htmlClass{t-green}{\mathrm{IoU}_k}} \ge \htmlData{step=2, link=threshold}{\htmlClass{t-yellow}{0.9}} \,\}, \quad \text{capped at } \htmlData{step=3, link=noc}{20}
+</div></div>
+<p class="eqno">Our notation for the metric defined in DIOS v1 (Sec. 4.1) and used by RITM and SimpleClick.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{\mathrm{IoU}_k}</span>: the overlap between the mask after <span class="tex">k</span> clicks and the true mask (intersection over union).</li>
+  <li><span class="tex">\htmlClass{t-yellow}{0.9}</span>: the target overlap; NoC@85 uses 0.85.</li>
+  <li>If 90% is never reached, the count is the cap, <span data-claim="dios-max-clicks">20</span> clicks.</li>
+</ul>
+<p>Lower is better. DIOS needed <span data-claim="dios-noc90-grabcut">6.04</span> clicks on the GrabCut images; RITM, five years later and trained on far more data (COCO and LVIS instead of PASCAL), <span data-claim="ritm-h32itm-noc90-grabcut">1.56</span>.</p>
+
+<h3>What was missing</h3>
+<p>Interactive segmentation had prompts (clicks), feedback (the previous mask) and a training loop that simulates a user. It had no notion of classes, so the window and the pencil are as easy as the mug. But each model was trained on a few datasets, accepted one kind of prompt, and assumed every click had one right answer. The next chapter shows what changes when one click may mean several objects, and when the training set has a billion masks.</p>
+</section>

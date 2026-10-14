@@ -1,0 +1,137 @@
+<script>
+(() => {
+  const el = document.getElementById('hero-canvas'), btn = document.getElementById('btn-hero-replay');
+  const T_END = 5.8;
+  let t = 0, raf = 0;
+  const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const ease = x => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const seg = (a, b) => ease((t - a) / (b - a));
+  // Scene boxes are fractions of the photo panel. Slot k fires box k; slots 0, 2, 4 win the matching.
+  const GT = [{ n: 'car', b: [.06, .48, .40, .86] }, { n: 'person', b: [.50, .17, .62, .86] }, { n: 'dog', b: [.70, .60, .92, .86] }];
+  const PRED = [
+    { b: [.07, .50, .39, .85], gt: 0 }, { b: [.11, .43, .44, .81], dup: 'above' }, { b: [.505, .19, .615, .85], gt: 1 },
+    { b: [.29, .07, .41, .29] }, { b: [.705, .62, .915, .86], gt: 2 }, { b: [.46, .25, .59, .79], dup: 'left' },
+    { b: [.79, .09, .95, .38] }, { b: [.61, .41, .73, .58] }, { b: [.14, .11, .26, .35] }, { b: [.38, .56, .49, .76] }];
+  const NS = PRED.length;
+  // Two virtual stages, wide (960 x 380) and narrow (360 x 540); everything is laid out in virtual units.
+  const L = wide => wide ? {
+    vw: 960, vh: 380, fs: 13, slot: k => ({ x: 64, y: 50 + k * 29, w: 30, h: 21 }), out: 'right',
+    pan: { x: 330, y: 34, w: 600, h: 312 }, qlab: [48, 30], qsub: [48, 362], match: [214, 196], none: [48, 362], fin: [930, 24],
+  } : {
+    vw: 360, vh: 540, fs: 12, slot: k => ({ x: 18 + k * 33, y: 40, w: 27, h: 22 }), out: 'down',
+    pan: { x: 18, y: 120, w: 324, h: 300 }, qlab: [18, 28], qsub: [18, 82], match: [18, 452], none: [18, 474], fin: [18, 500],
+  };
+  let C = {};
+  const tint = (c, a) => PE.mix(C.BG, c, a);
+  function rr(ctx, x, y, w, h, r, fill, stroke, lw = 1.5) {
+    r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+  }
+  const box = (P, b) => ({ x: P.x + b[0] * P.w, y: P.y + b[1] * P.h, w: (b[2] - b[0]) * P.w, h: (b[3] - b[1]) * P.h });
+  // Stroke the first fraction u of a rectangle's outline, starting at its top-left corner.
+  function rectPart(ctx, r, u, col, lw, dash = null, alpha = 1) {
+    if (u <= 0) return;
+    const pts = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h], [r.x, r.y]];
+    let left = u * 2 * (r.w + r.h);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(r.x, r.y);
+    for (let i = 1; i < pts.length && left > 0; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], d = Math.hypot(x1 - x0, y1 - y0), f = Math.min(1, left / d);
+      ctx.lineTo(x0 + (x1 - x0) * f, y0 + (y1 - y0) * f); left -= d; }
+    ctx.stroke(); ctx.restore();
+  }
+  // A quadratic curve from a slot to a box, drawn up to fraction u, with an arrowhead at its tip.
+  function wire(ctx, a, b, ctl, u, col, lw, alpha) {
+    if (u <= 0 || alpha <= 0) return;
+    const at = s => [(1 - s) * (1 - s) * a[0] + 2 * (1 - s) * s * ctl[0] + s * s * b[0], (1 - s) * (1 - s) * a[1] + 2 * (1 - s) * s * ctl[1] + s * s * b[1]];
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(a[0], a[1]);
+    const n = 28; for (let i = 1; i <= n * u; i++) { const p = at(i / n); ctx.lineTo(p[0], p[1]); }
+    const end = at(u); ctx.lineTo(end[0], end[1]); ctx.stroke(); ctx.restore();
+    const pre = at(Math.max(0, u - .06)); PE.arrow(ctx, pre[0], pre[1], end[0], end[1], col, lw, 7, alpha);
+  }
+  function scene(ctx, P) {
+    rr(ctx, P.x, P.y, P.w, P.h, 10, tint(C.F, .05));
+    ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y + P.h * .8, P.w, P.h * .2); ctx.clip(); rr(ctx, P.x, P.y, P.w, P.h, 10, tint(C.F, .1)); ctx.restore();
+    const Y = C.Y, f = tint(Y, .32), q = (fx, fy) => [P.x + fx * P.w, P.y + fy * P.h];
+    ctx.fillStyle = f;
+    // car
+    let [x, y] = q(.07, .62); rr(ctx, x, y, .32 * P.w, .17 * P.h, 8, f);
+    [x, y] = q(.13, .5); rr(ctx, x, y, .18 * P.w, .14 * P.h, 8, f);
+    [[.13, .82], [.32, .82]].forEach(([a, b]) => { const [cx, cy] = q(a, b); PE.dot(ctx, cx, cy, .045 * P.h, tint(Y, .5)); });
+    // person
+    [x, y] = q(.56, .25); PE.dot(ctx, x, y, .055 * P.h, f);
+    [x, y] = q(.525, .34); rr(ctx, x, y, .07 * P.w, .5 * P.h, 6, f);
+    // dog
+    [x, y] = q(.79, .72); ctx.beginPath(); ctx.ellipse(x, y, .075 * P.w, .055 * P.h, 0, 0, 7); ctx.fill();
+    [x, y] = q(.875, .655); PE.dot(ctx, x, y, .05 * P.h, f);
+    ctx.strokeStyle = f; ctx.lineWidth = Math.max(2, .012 * P.w); ctx.lineCap = 'round';
+    [[.74, .76, .735, .85], [.77, .77, .77, .85], [.82, .77, .825, .85], [.845, .76, .855, .85], [.72, .7, .7, .62]].forEach(([a, b, c, d]) => {
+      const [x0, y0] = q(a, b), [x1, y1] = q(c, d); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); });
+  }
+  const font = (ctx, fs, w = 600) => { ctx.font = `${w} ${fs}px system-ui, sans-serif`; };
+  const lab = (ctx, s, x, y, col, fs, al = 'left', alpha = 1) => { if (alpha <= 0) return; ctx.save(); ctx.globalAlpha = alpha; PE.label(ctx, s, x, y, col, fs, al); ctx.restore(); };
+
+  const cv = PE.canvas(el, w => w >= 620 ? 380 / 960 : 540 / 360, (ctx, W, H) => {
+    C = { B: PE.css('--blue'), Y: PE.css('--yellow'), G: PE.css('--green'), Br: PE.css('--brown'), F: PE.css('--fg'), M: PE.css('--muted'), BG: PE.css('--bg') };
+    ctx.clearRect(0, 0, W, H);
+    const wide = W >= 620, S = L(wide), k = W / S.vw, P = S.pan;
+    ctx.save(); ctx.scale(k, k);
+    // A: the photo and the slots appear.
+    const aIn = seg(0, .5);
+    ctx.save(); ctx.globalAlpha = aIn; scene(ctx, P); ctx.restore();
+    lab(ctx, 'object queries', S.qlab[0], S.qlab[1], C.B, S.fs, 'left', aIn);
+    lab(ctx, `${NS} of DETR's 100 slots`, S.qsub[0], S.qsub[1], C.M, S.fs - 1, 'left', aIn * (1 - seg(3.7, 4.2)));
+    // B: each slot fires a predicted box.
+    // The decoder predicts every slot in parallel, so the slots fire as one burst.
+    const fire = i => seg(.6 + i * .03, 1.3 + i * .03), draw = i => seg(1.05 + i * .03, 1.7 + i * .03);
+    // C: the ground truth. D: one-to-one matching. E: everything else becomes "no object".
+    const gtA = seg(1.9, 2.5), mt = i => seg(2.6 + i * .1, 3.3 + i * .1), none = seg(3.7, 4.5), fin = seg(4.7, 5.5);
+    const anchor = (s, r) => S.out === 'right' ? [[s.x + s.w + 4, s.y + s.h / 2], [r.x - 3, r.y + Math.min(14, r.h / 2)]] : [[s.x + s.w / 2, s.y + s.h + 4], [r.x + Math.min(14, r.w / 2), r.y - 3]];
+    PRED.forEach((p, i) => {
+      const s = S.slot(i), r = box(P, p.b), win = p.gt !== undefined, [a, b] = anchor(s, r);
+      const ctl = S.out === 'right' ? [(a[0] + b[0]) / 2, a[1]] : [a[0], (a[1] + b[1]) / 2];
+      const lowConf = !win && p.dup === undefined;
+      // Wires: blue while firing; winners turn green; losers fade with the "no object" step.
+      const wa = (win ? 1 : 1 - none) * (lowConf ? .45 : .8) * (1 - .55 * gtA * (win ? 0 : 1));
+      const mixG = win ? mt(p.gt) : 0;
+      wire(ctx, a, b, ctl, fire(i), mixG > 0 ? PE.mix(C.B, C.G, mixG) : C.B, win ? 1.4 + 1.2 * mixG : 1.2, wa);
+      // Predicted boxes.
+      const u = draw(i);
+      if (win) rectPart(ctx, r, u, mixG > 0 ? PE.mix(C.B, C.G, mixG) : C.B, 2 + 1.2 * mixG);
+      else { const al = (lowConf ? .5 : .95) * (1 - .6 * none), col = none > 0 ? PE.mix(C.B, C.Br, none) : C.B;
+        rectPart(ctx, r, u, col, lowConf ? 1.2 : 1.8, none > .5 ? [4, 4] : null, al); }
+      if (p.dup === 'above') lab(ctx, 'duplicate', r.x + 3, r.y - 5, C.Br, S.fs - 2, 'left', none);
+      if (p.dup === 'left') lab(ctx, 'duplicate', r.x - 5, r.y + 14, C.Br, S.fs - 2, 'right', none);
+      // The slot itself.
+      const sIn = seg(.05 + i * .04, .45 + i * .04), flash = Math.max(0, 1 - Math.abs((t - (.6 + i * .03)) / .25));
+      ctx.save(); ctx.globalAlpha = sIn;
+      const fill = win ? PE.mix(tint(C.B, .25 + .5 * flash), C.G, mixG) : PE.mix(tint(C.B, .25 + .5 * flash), tint(C.Br, .18), none);
+      const edge = win ? PE.mix(C.B, C.G, mixG) : PE.mix(C.B, C.Br, none);
+      rr(ctx, s.x, s.y, s.w, s.h, 5, fill, edge, 1.4);
+      if (!win && none > 0) { font(ctx, S.fs); ctx.globalAlpha = sIn * none; ctx.fillStyle = C.Br; ctx.textAlign = 'center'; ctx.fillText('\u2205', s.x + s.w / 2, s.y + s.h / 2 + 4.5); }
+      ctx.restore();
+      if (win && mixG > .2) {
+        const ring = Math.sin(Math.PI * cl((t - (3.0 + p.gt * .1)) / .8));
+        if (ring > 0) { ctx.save(); ctx.globalAlpha = .45 * ring; ctx.strokeStyle = C.G; ctx.lineWidth = 2; rr(ctx, s.x - 4, s.y - 4, s.w + 8, s.h + 8, 8, null, C.G, 2); ctx.restore(); }
+      }
+    });
+    // Ground truth, on top of the predictions.
+    GT.forEach((g, j) => { const r = box(P, g.b); rectPart(ctx, r, gtA, C.Y, 1.5, [3, 3]);
+      lab(ctx, g.n, r.x + 3, r.y + r.h + 15, C.Y, S.fs - 1, 'left', gtA); });
+    lab(ctx, 'ground truth', P.x + P.w - 8, P.y + P.h - 8, C.Y, S.fs - 1, 'right', gtA * (1 - fin));
+    lab(ctx, 'in training: one-to-one matching', S.match[0], S.match[1], C.G, wide ? S.fs - 1 : S.fs, wide ? 'center' : 'left', seg(2.7, 3.3));
+    lab(ctx, 'all other slots: target "no object"', S.none[0], S.none[1], C.Br, S.fs, 'left', none);
+    lab(ctx, 'after training: 3 objects, 3 boxes, no NMS', S.fin[0], S.fin[1], C.G, S.fs + 1, wide ? 'right' : 'left', fin);
+    ctx.restore();
+  });
+  function play() {
+    cancelAnimationFrame(raf);
+    if (PE.instant()) { t = T_END; cv.redraw(); return; }
+    const t0 = performance.now();
+    const f = now => { t = (now - t0) / 1000; cv.redraw(); if (t < T_END) raf = requestAnimationFrame(f); };
+    raf = requestAnimationFrame(f);
+  }
+  btn.addEventListener('click', play);
+  play();
+})();
+</script>

@@ -1,0 +1,103 @@
+<section id="ch-fp8" class="chapter">
+<h2>FP8: floating point in eight bits</h2>
+<p>An 8-bit integer spaces its 256 levels evenly, so the gap between two levels is the same near zero and near the largest value. An 8-bit float spends some of its bits on an exponent instead, so its levels are dense near zero and sparse far away, and that suits tensors in which most values are small and a few are huge.</p>
+
+<figure class="viz" id="viz-fp8" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Input distribution">
+    <span class="lbl">Tensor</span>
+    <button type="button" id="btn-fp8-uniform" aria-pressed="false">Uniform</button>
+    <button type="button" id="btn-fp8-normal" aria-pressed="true">Normal</button>
+    <button type="button" id="btn-fp8-student" aria-pressed="false">Student-t (heavy tails)</button>
+    <button type="button" id="btn-fp8-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="fp8-canvas" role="img" aria-label="A logarithmic number line of magnitudes. Blue bars show how the values of a toy tensor are spread. Below them, three rows of yellow marks show every positive value of INT8, E4M3 and E5M2 after each format is scaled so that its largest value meets the tensor's largest value. A red bar or value per row shows the mean squared error. Below the line, two grids colour all 256 codes of E4M3 and E5M2 by kind: normal, subnormal, zero, NaN and infinity."></canvas>
+  <p class="readout" id="fp8-readout" aria-live="polite"></p>
+  <figcaption>Computed by enumeration: every one of the 256 codes of each format is decoded with the rules of Micikevicius et al. Table 1 (E4M3: bias <span data-claim="mic-e4m3-bias">7</span>, no infinities, NaN (not a number) only at <span data-claim="mic-e4m3-nan-pattern">S.1111.111</span>; E5M2: bias <span data-claim="mic-e5m2-bias">15</span>, infinities and NaNs at exponent field 31). The three tensors are toys with the shapes van Baalen et al. use in their Fig. 5 (we pick 3 degrees of freedom for the Student-t), 16,384 values each, scaled to a root-mean-square (RMS) value of 1. The per-tensor scale (the format's maximum meets the tensor's maximum), the rounding to the nearest value with ties to even, and the error are our computation. A bar's height counts values in one log-wide bin; very small E5M2 values that fall off the left edge are counted there.</figcaption>
+</figure>
+
+<p>Read the number line from right to left. The dashed line is the tensor's largest magnitude, and every format is scaled so that its own largest value lands there. INT8's 127 positive levels are evenly spaced, so on a logarithmic axis they crowd into the top few doublings and stop at 1/127 of the maximum. Anything smaller rounds to zero. E4M3 puts the same number of marks, eight, into every doubling (a <em>binade</em>), so its relative precision is the same for small and large values. E5M2 has four marks per binade but covers almost twice as many binades.</p>
+<p>Press <b>Uniform</b> first. Values fill the range evenly, so the even INT8 grid fits them best, at <span data-toy>about 8 bits</span> of accuracy in our computation. Press <b>Normal</b>: INT8 still wins, because a bell curve has no value far beyond four times its RMS.</p>
+<p><b>Make a guess before you press "Student-t".</b> This tensor has heavy tails: most values sit near 1, but a few reach <span data-toy>about 20</span>. Which format has the lowest error? The answer is E4M3, with <span data-toy>about a third</span> of INT8's mean squared error, which is less than one bit of accuracy more. The single largest value sets INT8's step to <span data-toy>about 0.15</span>, which is coarse for the values near 1 that make up most of the tensor. E4M3 keeps eight marks per binade wherever the values are. Van Baalen et al. find the same winners among these formats for their three test shapes: E4 is best on the Student-t, but with <span data-claim="vb-studentt-e4-bits">only 5 bits</span> of accuracy, and INT8 reaches <span data-claim="vb-uniform-int8-bits">8 bits</span> on the uniform. Their FP8-E4 is a variant with <span data-claim="vb-e4-unique-values">255</span> distinct values, not the E4M3 drawn here, so their numbers and ours agree in shape, not digit for digit.</p>
+
+<h3>How eight bits become a number</h3>
+<p>A float code has three fields: a sign bit, an exponent field that picks the binade, and a mantissa field that picks a mark inside it. E4M3 has 4 exponent bits and 3 mantissa bits; E5M2 has 5 and 2. The grids at the bottom of the figure lay out all 256 codes with the exponent field running left to right, so moving one column doubles the value.</p>
+
+<div class="eq" id="eq-fp8-value" data-build data-viz="viz-fp8"><div class="tex tex-display">
+\htmlData{step=1, link=sign}{\htmlClass{t-yellow}{z} = (-1)^{s}} \cdot \htmlData{step=2, link=exp}{2^{\hat{e}-B}} \cdot \htmlData{step=3, link=mant}{\left(1+\frac{\hat{m}}{2^M}\right)} \qquad \htmlData{step=4, link=sub}{\text{if } \hat{e}=0:\;\; \htmlClass{t-yellow}{z} = (-1)^{s} \cdot \frac{\hat{m}}{2^M} \cdot 2^{1-B}}
+</div></div>
+<p class="eqno">Sec. 2 in van Baalen et al. 2023, arXiv 2303.17951v2, normal case and the subnormal footnote, with a sign factor added (our notation). The bit layouts are Table 1 in Micikevicius et al. 2022, arXiv 2209.05433v2.</p>
+<ul class="gloss">
+  <li><span class="tex">s</span>: the sign bit. The top half of each code grid has <span class="tex">s = 0</span>, the bottom half <span class="tex">s = 1</span>.</li>
+  <li><span class="tex">\hat{e}</span>: the exponent field read as an unsigned integer, one grid column per value.</li>
+  <li><span class="tex">B</span>: the exponent bias, <span data-claim="mic-e4m3-bias">7</span> for E4M3 and <span data-claim="mic-e5m2-bias">15</span> for E5M2. It shifts the binades so that half of them lie below 1.</li>
+  <li><span class="tex">\hat{m}</span> and <span class="tex">M</span>: the mantissa field and its number of bits (3 or 2). The mantissa picks one of <span class="tex">2^M</span> evenly spaced marks inside a binade.</li>
+  <li>The subnormal case: when the exponent field is zero, the leading 1 is dropped, so the marks continue evenly down to zero instead of halving forever. These codes are the faint first column of each grid.</li>
+</ul>
+<p>Try the largest E4M3 code. Its pattern is <span data-claim="mic-e4m3-max-pattern">S.1111.110</span>: exponent field 15, mantissa 6, so <span class="tex">2^{15-7} \cdot (1 + 6/8) = 1.75 \cdot 2^8</span>, which is <span data-claim="mic-e4m3-max">448</span>. The largest E5M2 code, <span data-claim="mic-e5m2-max-pattern">S.11110.11</span>, gives <span data-claim="mic-e5m2-max">57,344</span>.</p>
+
+<h3>Two encodings, one for each job</h3>
+<p>Micikevicius et al. propose two encodings: E4M3 for weights and activations, where precision matters, and E5M2 for gradients, where range matters. E5M2 follows the IEEE rules of FP16, with infinities and several NaN (not a number) codes in its top exponent column. E4M3 breaks them on purpose. It has no infinities and keeps only one NaN mantissa pattern, so the top exponent column holds real numbers. With IEEE-style special values its maximum would be <span data-claim="mic-e4m3-max-without-reclaim">240</span>; the reclaimed codes add the magnitudes <span data-claim="mic-e4m3-reclaimed">256, 288, 320, 352, 384, 416, 448</span>.</p>
+<table class="data">
+  <thead><tr><th>Property (Table 1 and our enumeration)</th><th>E4M3</th><th>E5M2</th></tr></thead>
+  <tbody>
+    <tr><td>Exponent bias</td><td><span data-claim="mic-e4m3-bias">7</span></td><td><span data-claim="mic-e5m2-bias">15</span></td></tr>
+    <tr><td>Largest value</td><td><span data-claim="mic-e4m3-max">448</span></td><td><span data-claim="mic-e5m2-max">57,344</span></td></tr>
+    <tr><td>Infinities</td><td><span data-claim="mic-e4m3-inf">N/A</span></td><td><span data-claim="mic-e5m2-inf-pattern">S.11111.00</span></td></tr>
+    <tr><td>NaN codes</td><td><span data-claim="mic-e4m3-nan-pattern">S.1111.111</span> (<span data-claim="mic-e4m3-nan-codes">2</span> codes)</td><td><span data-claim="mic-e5m2-nan-pattern">S.11111.{01, 10, 11}</span> (<span data-claim="mic-e5m2-nan-codes">6</span> codes)</td></tr>
+    <tr><td>Positive non-zero values</td><td><span data-claim="mic-e4m3-positive-values">126</span></td><td><span data-claim="mic-e5m2-positive-values">123</span></td></tr>
+    <tr><td>Dynamic range in binades, with subnormals</td><td><span data-claim="mic-e4m3-binades">18</span></td><td><span data-claim="mic-e5m2-binades">32</span></td></tr>
+  </tbody>
+  <caption>Formats from Micikevicius et al. 2022, arXiv 2209.05433v2, Table 1 and Sec. 3.1. The value counts are our enumeration of all 256 codes with those rules.</caption>
+</table>
+<p>TensorRT quantizes to <span data-claim="trt-fp8-type">FP8E4M3</span> only; E5M2 is not one of its quantized types. That fits the split above: inference has no gradients.</p>
+
+<h3>A scale is still needed</h3>
+<p>Eighteen binades sound like a lot, but they are fixed in place: without a scale, the largest E4M3 value is always <span data-claim="mic-e4m3-max">448</span> and the smallest is always tiny. A real tensor may live anywhere. So FP8, like INT8 in <a href="#ch-grid">chapter 4</a>, multiplies each tensor by a scale first. Micikevicius et al. choose the scale "such that the maximum magnitude in the tensor becomes close to the maximum representable magnitude in the corresponding format" (Sec. 2). The figure does exactly that.</p>
+
+<div class="eq" id="eq-fp8-cast" data-build data-viz="viz-fp8"><div class="tex tex-display">
+\htmlClass{t-yellow}{x_{q}} = \htmlData{step=3, link=cast}{\mathrm{castToFp8}\Big(} \htmlData{step=2, link=clip}{\mathrm{clip}\big(} \htmlData{step=1, link=scale}{\frac{\htmlClass{t-blue}{x}}{s}}, \htmlData{step=2, link=clip}{-448, 448\big)} \htmlData{step=3, link=cast}{\Big)}
+</div></div>
+<p class="eqno">TensorRT 11.4 documentation, quantized types schemes, FP8 (function names set upright). castToFp8 rounds to the nearest E4M3 value, ties to even.</p>
+<ul class="gloss">
+  <li><span class="tex">x</span>: a value of the full-precision tensor.</li>
+  <li><span class="tex">s</span>: the per-tensor scale, stored in FP32, FP16 or BF16. Dividing by it slides the tensor onto the format's binades.</li>
+  <li><span class="tex">\mathrm{clip}</span>: values beyond <span data-claim="trt-fp8-range">[-448, 448]</span> saturate to the largest code instead of becoming NaN.</li>
+  <li><span class="tex">\mathrm{castToFp8}</span>: rounding to the nearest of the E4M3 marks, which is the yellow row in the figure.</li>
+</ul>
+<p>How much the scale matters is measured on a language model. Micikevicius et al. cast GPT3 1.3B to E4M3 with exponent bias 7 and no scale, with both the matrix-multiply inputs and the residual-add inputs in FP8. Perplexity rose to <span data-claim="mic-s43-bias7-residual">12.59</span> against a bfloat16 baseline of <span data-claim="mic-s43-baseline">10.19</span>. With calibrated scales (per-channel for weights, per-tensor for activations) it was <span data-claim="mic-s43-pertensor-residual">10.44</span> (Sec. 4.3). The format alone is not enough.</p>
+
+<div class="aside claim">
+  <h4>Claim card: FP8 versus INT8 for inference (van Baalen et al. 2023, arXiv 2303.17951v2)</h4>
+  <dl>
+    <dt>Claim</dt><dd>"If a distribution has very significant outliers, the FP8-E4/FP8-E5 format is more accurate, but if the distributions are well-behaved and more Gaussian-shaped, then INT8 or FP8-E2/FP8-E3 is expected to perform better" (Sec. 4.1). Their conclusion: FP8 may be good for training, but for inference it does not warrant dedicated hardware in place of INT8.</dd>
+    <dt>Measured</dt><dd>Bits of accuracy on uniform, normal and Student-t inputs (Fig. 5); post-training quantization of many networks, with the best of several range settings for each format (Table 1); and quantization-aware training with the same recipe for INT8 and FP8 (Table 2). Both formats get the same freedom of scale, and the whole network runs in 8 bits. After training, INT8 is best on every 2D vision row, for example ResNet18 ImageNet top-1 <span data-claim="vb-t2-resnet18-int8">70.43</span> for INT8 against <span data-claim="vb-t2-resnet18-e4">69.35</span> for FP8-E4, and DeepLabV3 (MobileNetV2, Pascal VOC) mIoU <span data-claim="vb-t2-deeplabv3-int8">73.99</span> against <span data-claim="vb-t2-deeplabv3-e4">73.22</span>.</dd>
+    <dt>Hardware cost</dt><dd>A count of two-input gates per multiply-accumulate unit, taken as a stand-in for area and power. An FP8-E4 unit needs <span data-claim="vb-hw-e4-fp16acc">53%</span> more gates than INT8 with an FP16 accumulator and <span data-claim="vb-hw-e4-fp32acc">183%</span> more with an FP32 accumulator (Fig. 3; the INT8 unit has a <span data-claim="vb-int8-acc-bits">27-bit</span> fixed-point accumulator, our reading). This argues about dedicated accelerators. On an NVIDIA GPU the vendor has already fixed the FP8 and INT8 throughput, so the choice there depends on which formats the GPU and TensorRT support (our reading).</dd>
+    <dt>Their format</dt><dd>FP8-E4 reserves one code and has <span data-claim="vb-e4-unique-values">255</span> values; it is not the E4M3 of Micikevicius et al. and TensorRT.</dd>
+    <dt>Falsifier</dt><dd>A near-Gaussian network in which FP8-E4 beats INT8 after training with the same range learning; a synthesized FP8-E4 unit at or below INT8 cost with the same accumulator; or an outlier-heavy model in which neither INT8 with 16-bit activations on the outlier layers nor quantization-aware training matches FP8-E4.</dd>
+  </dl>
+</div>
+
+<h3>What Micikevicius et al. measured</h3>
+<p>Their main result is training, not post-training quantization. Networks trained with FP8 inputs to every matrix multiply match their 16-bit baselines within run-to-run noise, except MobileNet v2 (ImageNet top-1 <span data-claim="mic-t2-mobilenetv2-fp8">71.04</span> against <span data-claim="mic-t2-mobilenetv2-baseline">71.65</span>). ResNet-50 v1.5 reached <span data-claim="mic-t2-resnet50-fp8">76.76</span> against <span data-claim="mic-t2-resnet50-baseline">76.71</span> (Table 2). For post-training quantization they test only language models: BERT Base keeps SQuAD v1.1 F1 at <span data-claim="mic-t5-bert-base-e4m3">88.09</span> in E4M3 against <span data-claim="mic-t5-bert-base-fp16">88.19</span> in 16 bits, where INT8 drops to <span data-claim="mic-t5-bert-base-int8">76.89</span> (Table 5). Language models have the large activation outliers of <a href="#ch-outliers">chapter 10</a>, which is the case where the figure says FP8 should win. The paper has no detection or segmentation rows.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>FP8 on a GPU needs compute capability <span data-claim="trt-fp8-min-cc">8.9</span> or newer in TensorRT. A T4 (<span data-claim="trt-t4-cc">7.5</span>) supports only <span data-claim="trt-t4-precisions">FP32, FP16, INT8</span>, and on A100 and A10 FP8 is <span data-claim="trt-ampere-no-fp8">N/A</span>. On GPUs that have it, FP8 convolutions with kernel sizes larger than <span data-claim="trt-fp8-conv-kernel-limit">32</span> (the docs give a 7x7 convolution as the example) fall back to slower FP16 or FP32 kernels on SM89, SM90, SM120 and SM121. In van Baalen's naive post-training test, YoloV5 on COCO (mAP <span data-claim="vb-t1-yolov5-fp32">56.3</span>) changed by <span data-claim="vb-t1-yolov5-int8">-1.8</span> points with INT8 and by <span data-claim="vb-t1-yolov5-e4">-2</span> with their FP8-E4. That is simulated quantization on their own tooling, and the paper does not state the YoloV5 variant or input size. Our reading: convolutional detectors rarely have the heavy tails where FP8 wins, so per-channel INT8 stays the first choice, and FP8 is worth a test for transformer blocks with outliers. See <a href="#ch-guide">the decision guide</a>.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-fp8'), out = document.getElementById('fp8-readout');
+  const kit = KIT.fp8(document.getElementById('fp8-canvas'), { fig });
+  const btns = ['uniform', 'normal', 'student'].map(k => document.getElementById('btn-fp8-' + k));
+  const sync = () => {
+    btns.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-fp8-' + kit.state.dist)));
+    out.innerHTML = KIT.fp8Text(kit.info());
+  };
+  btns.forEach(b => b.addEventListener('click', () => { kit.set({ dist: b.id.slice(8) }); sync(); }));
+  document.getElementById('btn-fp8-reset').addEventListener('click', () => { kit.set({ dist: 'normal' }); sync(); });
+  sync();
+})();
+</script>
+</section>

@@ -1,0 +1,773 @@
+[
+ {
+  "id": "cpc-published",
+  "claim": "CPC arXiv v1 submission date",
+  "value": "2018-07-10",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "abs.html, Submitted on 10 Jul 2018"
+ },
+ {
+  "id": "cpc-version-read",
+  "claim": "CPC version read and its date",
+  "value": "2019-01-22",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "abs.html, v2 date"
+ },
+ {
+  "id": "cpc-infonce-eq",
+  "claim": "InfoNCE loss equation number in CPC",
+  "value": "Eq. 4",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 2.3, PDF p.3, Eq. (4)"
+ },
+ {
+  "id": "cpc-mi-bound",
+  "claim": "CPC MI lower bound I(x_{t+k}, c_t) >= log(N) - L_N; ceiling log N",
+  "value": "log N",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 2.3, unnumbered display after Eq. (5), PDF p.4; App. A.1 Eqs. (6)-(11), PDF p.13"
+ },
+ {
+  "id": "cpc-mi-bound-approx-step",
+  "claim": "CPC bound derivation step that is an approximation",
+  "value": "Eq. 8",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "App. A.1, Eq. (8) uses approx sign"
+ },
+ {
+  "id": "cpc-img-input",
+  "claim": "CPC image: crop size taken from a 300x300 image",
+  "value": "256x256",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, para 'The training procedure'"
+ },
+ {
+  "id": "cpc-img-resize",
+  "claim": "CPC image: source image size before random crop",
+  "value": "300x300",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, para 'The training procedure'"
+ },
+ {
+  "id": "cpc-img-grid",
+  "claim": "CPC image patch grid",
+  "value": "7x7",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, '7x7 grid of 64x64 crops with 32 pixels overlap'"
+ },
+ {
+  "id": "cpc-img-patch",
+  "claim": "CPC image patch size",
+  "value": "64x64",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-overlap",
+  "claim": "CPC image patch overlap in pixels (stride 32 is our reading)",
+  "value": "32",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, '32 pixels overlap'"
+ },
+ {
+  "id": "cpc-img-subcrop",
+  "claim": "CPC per-patch random subcrop, padded back to 64x64",
+  "value": "60x60",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-encoder",
+  "claim": "CPC image encoder (not pretrained, no BatchNorm)",
+  "value": "ResNet-v2-101",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-featdim",
+  "claim": "CPC per-patch feature dim after mean-pooling third residual block",
+  "value": "1024",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, '7x7x1024 tensor'"
+ },
+ {
+  "id": "cpc-img-tensor",
+  "claim": "CPC image latent tensor shape",
+  "value": "7x7x1024",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-context",
+  "claim": "CPC image context network type",
+  "value": "PixelCNN-style",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-rows-ahead",
+  "claim": "CPC image: rows predicted ahead (up to)",
+  "value": "five",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, 'We predict up to five rows from the 7x7 grid'"
+ },
+ {
+  "id": "cpc-img-lr",
+  "claim": "CPC image pretraining Adam learning rate",
+  "value": "2e-4",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-gpus",
+  "claim": "CPC image pretraining hardware",
+  "value": "32 GPUs",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, '32 GPUs each with a batch size of 16'"
+ },
+ {
+  "id": "cpc-img-batch-per-gpu",
+  "claim": "CPC image pretraining batch per GPU",
+  "value": "16",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "cpc-img-negatives",
+  "claim": "CPC image: number or source of negatives",
+  "value": "not stated",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2 gives no count; only audio Sec 3.1 states negatives drawn from the minibatch",
+  "uncertain": true
+ },
+ {
+  "id": "cpc-audio-negatives",
+  "claim": "CPC audio: negatives drawn from a minibatch of 8 examples per GPU (8 GPUs)",
+  "value": "8",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.1, encoder paragraph"
+ },
+ {
+  "id": "cpc-audio-steps-ahead",
+  "claim": "CPC audio prediction steps",
+  "value": "12",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.1"
+ },
+ {
+  "id": "cpc-linear-top1",
+  "claim": "CPC ImageNet linear top-1, ResNet-v2-101 (no BN), mean-pooled 1024-d, full labels; pretraining epochs not stated",
+  "value": "48.7",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Table 3, row CPC"
+ },
+ {
+  "id": "cpc-linear-top5",
+  "claim": "CPC ImageNet linear top-5, same protocol",
+  "value": "73.6",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Table 4, row CPC"
+ },
+ {
+  "id": "cpc-prev-best-top1",
+  "claim": "Best prior ResNet-V2 top-1 in CPC table (Colorization)",
+  "value": "39.6",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Table 3, row Colorization, Using ResNet-V2"
+ },
+ {
+  "id": "cpc-linear-batch",
+  "claim": "CPC linear classifier batch size",
+  "value": "2048",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "Sec 3.2, linear classifier paragraph"
+ },
+ {
+  "id": "wu2018-published",
+  "claim": "Wu 2018 arXiv v1 date",
+  "value": "2018-05-05",
+  "paper": "Wu 2018 (Instance Discrimination)",
+  "arxiv": "1805.01978v1",
+  "loc": "abs.html"
+ },
+ {
+  "id": "wu2018-tau",
+  "claim": "Wu 2018 temperature",
+  "value": "0.07",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 Experimental Settings"
+ },
+ {
+  "id": "wu2018-nce-m",
+  "claim": "Wu 2018 NCE noise samples per instance (ImageNet)",
+  "value": "4,096",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 Experimental Settings, 'NCE with m = 4,096'"
+ },
+ {
+  "id": "wu2018-featdim",
+  "claim": "Wu 2018 embedding dim",
+  "value": "128",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 2, #dim column"
+ },
+ {
+  "id": "wu2018-bank-size",
+  "claim": "Wu 2018 memory bank holds one vector per ImageNet image",
+  "value": "1.28M",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 list item 4, 'all 1.28M images'"
+ },
+ {
+  "id": "wu2018-bank-storage",
+  "claim": "storage of all 1.28M 128-d encoded features (Sec 4.2, said of kNN search; same size as the memory bank)",
+  "value": "600 MB",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 list item 4, 'about 600 MB'"
+ },
+ {
+  "id": "wu2018-bank-momentum",
+  "claim": "Wu 2018 memory bank update momentum (paper text says overwrite f_i -> v_i)",
+  "value": "0.5",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "src/readme.md run 6 'non-param-momentum: 0.5'; not in paper text",
+  "code_only": true
+ },
+ {
+  "id": "wu2018-epochs",
+  "claim": "Wu 2018 ImageNet pretraining epochs",
+  "value": "200",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 Experimental Settings"
+ },
+ {
+  "id": "wu2018-batch",
+  "claim": "Wu 2018 batch size",
+  "value": "256",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 Experimental Settings"
+ },
+ {
+  "id": "wu2018-lr",
+  "claim": "Wu 2018 initial learning rate",
+  "value": "0.03",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.2 Experimental Settings"
+ },
+ {
+  "id": "wu2018-knn-k",
+  "claim": "Wu 2018 weighted kNN neighbors",
+  "value": "200",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 3.4"
+ },
+ {
+  "id": "wu2018-r50-conv5-svm",
+  "claim": "Wu 2018 ImageNet top-1, ResNet-50, linear SVM on conv5 features, 200 epochs, batch 256, multi-crop not mentioned",
+  "value": "54.0",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 2, row Ours Resnet50, column conv5"
+ },
+ {
+  "id": "wu2018-r50-knn",
+  "claim": "Wu 2018 ImageNet top-1, ResNet-50, kNN on 128-d output",
+  "value": "46.5",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 2, row Ours Resnet50, column kNN"
+ },
+ {
+  "id": "wu2018-alexnet-conv5-svm",
+  "claim": "Wu 2018 ImageNet top-1, AlexNet, linear SVM on conv5",
+  "value": "35.6",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 2, row Ours Alexnet, column conv5"
+ },
+ {
+  "id": "wu2018-cifar-nonparam-knn",
+  "claim": "Wu 2018 CIFAR-10 kNN, ResNet-18, exact non-parametric softmax",
+  "value": "80.8",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 1, row Non-Param Softmax, Nearest Neighbor"
+ },
+ {
+  "id": "wu2018-cifar-param-knn",
+  "claim": "Wu 2018 CIFAR-10 kNN, parametric softmax",
+  "value": "63.0",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 1, row Param Softmax, Nearest Neighbor"
+ },
+ {
+  "id": "wu2018-cifar-nce4096-knn",
+  "claim": "Wu 2018 CIFAR-10 kNN, NCE m=4096",
+  "value": "80.4",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 1, row NCE m=4096, Nearest Neighbor"
+ },
+ {
+  "id": "wu2018-cifar-nce1-knn",
+  "claim": "Wu 2018 CIFAR-10 kNN, NCE m=1",
+  "value": "42.5",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Table 1, row NCE m=1, Nearest Neighbor"
+ },
+ {
+  "id": "wu2018-voc-r50",
+  "claim": "Wu 2018 VOC07 detection mAP, ResNet-50",
+  "value": "65.4",
+  "paper": "Wu 2018",
+  "arxiv": "1805.01978v1",
+  "loc": "Sec 4.4 text / Table 6"
+ },
+ {
+  "id": "hadsell2006-venue",
+  "claim": "DrLIM venue and year",
+  "value": "CVPR 2006",
+  "paper": "Hadsell, Chopra, LeCun 2006 (DrLIM)",
+  "arxiv": "none",
+  "loc": "PDF p.1 header 'To appear in CVPR 2006'"
+ },
+ {
+  "id": "hadsell2006-loss-eq",
+  "claim": "DrLIM exact contrastive loss equation number",
+  "value": "Eq. 4",
+  "paper": "DrLIM",
+  "arxiv": "none",
+  "loc": "Sec 2.1, PDF p.3, Eq. (4)"
+ },
+ {
+  "id": "hadsell2006-label-convention",
+  "claim": "DrLIM label for a similar pair (dissimilar is Y=1)",
+  "value": "Y = 0",
+  "paper": "DrLIM",
+  "arxiv": "none",
+  "loc": "Sec 2.1"
+ },
+ {
+  "id": "hadsell2006-margin-value",
+  "claim": "DrLIM margin m: no value given for any experiment; Fig. 1 marks 'margin: m' at energy 1.25 (illustrative plot only)",
+  "value": "1.25",
+  "paper": "DrLIM",
+  "arxiv": "none",
+  "loc": "Figure 1 x-axis tick under 'margin: m', PDF p.3",
+  "uncertain": true
+ },
+ {
+  "id": "hadsell2006-mnist-pairs",
+  "claim": "DrLIM MNIST experiment similar pairs (dissimilar ~18 million)",
+  "value": "30,000",
+  "paper": "DrLIM",
+  "arxiv": "none",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "hadsell2006-norb-dim",
+  "claim": "DrLIM NORB airplane output dimension",
+  "value": "3",
+  "paper": "DrLIM",
+  "arxiv": "none",
+  "loc": "Sec 3.1 / 3.4"
+ },
+ {
+  "id": "chopra2005-venue",
+  "claim": "Chopra 2005 venue",
+  "value": "CVPR 2005",
+  "paper": "Chopra, Hadsell, LeCun 2005",
+  "arxiv": "none",
+  "loc": "not printed in the Chopra PDF; hadsell2006 PDF, reference [5] (CVPR-05)"
+ },
+ {
+  "id": "chopra2005-loss-eq",
+  "claim": "Chopra 2005 exact loss (quadratic genuine term, exponential impostor term, no hinge)",
+  "value": "Eq. 9",
+  "paper": "Chopra 2005",
+  "arxiv": "none",
+  "loc": "Sec 2.3, PDF p.4, Eqs. (8)-(9)"
+ },
+ {
+  "id": "chopra2005-exp-constant",
+  "claim": "Chopra 2005 constant in impostor exponent -(2.77/Q) E_W",
+  "value": "2.77",
+  "paper": "Chopra 2005",
+  "arxiv": "none",
+  "loc": "Eq. (9)"
+ },
+ {
+  "id": "chopra2005-output-dim",
+  "claim": "Chopra 2005 embedding units (F6)",
+  "value": "50",
+  "paper": "Chopra 2005",
+  "arxiv": "none",
+  "loc": "Sec 3.2, layer F6"
+ },
+ {
+  "id": "chopra2005-ar-fr-at-fa10",
+  "claim": "Chopra 2005 AR test false reject % at 10% false accept",
+  "value": "11",
+  "paper": "Chopra 2005",
+  "arxiv": "none",
+  "loc": "Table 1 (lower), row AR (Test), column 10%"
+ },
+ {
+  "id": "gutmann2010-venue",
+  "claim": "NCE venue",
+  "value": "AISTATS 2010",
+  "paper": "Gutmann & Hyvarinen 2010 (NCE)",
+  "arxiv": "none",
+  "loc": "PDF p.1 footer"
+ },
+ {
+  "id": "gutmann2010-objective-eq",
+  "claim": "NCE objective equation number",
+  "value": "Eq. 3",
+  "paper": "NCE",
+  "arxiv": "none",
+  "loc": "Sec 2.1, PDF p.2"
+ },
+ {
+  "id": "gutmann2010-noise-ratio",
+  "claim": "NCE in this paper uses equal numbers of data and noise samples (T each)",
+  "value": "1/2",
+  "paper": "NCE",
+  "arxiv": "none",
+  "loc": "Sec 2.2, 'P(C = 1) = P(C = 0) = 1/2'"
+ },
+ {
+  "id": "sohn2016-venue",
+  "claim": "N-pair loss venue",
+  "value": "NIPS 2016",
+  "paper": "Sohn 2016 (N-pair)",
+  "arxiv": "none",
+  "loc": "PDF p.1 footer"
+ },
+ {
+  "id": "sohn2016-npair-eq",
+  "claim": "Multi-class N-pair loss equation number",
+  "value": "Eq. 7",
+  "paper": "Sohn 2016",
+  "arxiv": "none",
+  "loc": "Sec 3.2, PDF p.4"
+ },
+ {
+  "id": "sohn2016-batch-cost",
+  "claim": "N-pair batch needs 2N embeddings instead of (N+1)N",
+  "value": "2N",
+  "paper": "Sohn 2016",
+  "arxiv": "none",
+  "loc": "Abstract; Fig. 2 caption"
+ },
+ {
+  "id": "sohn2016-pairs-per-batch",
+  "claim": "Sohn 2016 pairs per batch in Sec 4.1 (144 examples)",
+  "value": "72",
+  "paper": "Sohn 2016",
+  "arxiv": "none",
+  "loc": "Sec 4.1"
+ },
+ {
+  "id": "sohn2016-car333-npair",
+  "claim": "Car-333 kNN recognition, 72-pair-mc",
+  "value": "88.37",
+  "paper": "Sohn 2016",
+  "arxiv": "none",
+  "loc": "Table 1, Car-333 Recognition, column 72-pair-mc"
+ },
+ {
+  "id": "sohn2016-car333-triplet",
+  "claim": "Car-333 kNN recognition, triplet",
+  "value": "70.24",
+  "paper": "Sohn 2016",
+  "arxiv": "none",
+  "loc": "Table 1, Car-333 Recognition, column triplet"
+ },
+ {
+  "id": "tschannen-published",
+  "claim": "Tschannen arXiv v1 date",
+  "value": "2019-07-31",
+  "paper": "Tschannen et al. (On MI maximization)",
+  "arxiv": "1907.13625v2",
+  "loc": "abs.html"
+ },
+ {
+  "id": "tschannen-venue",
+  "claim": "Tschannen venue",
+  "value": "ICLR 2020",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "PDF header"
+ },
+ {
+  "id": "tschannen-batch",
+  "claim": "Tschannen default batch size",
+  "value": "128",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3 Setup"
+ },
+ {
+  "id": "tschannen-logk-ceiling",
+  "claim": "I_NCE ceiling log(batch size) for batch 128",
+  "value": "4.85",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3 Setup, footnote"
+ },
+ {
+  "id": "tschannen-pixel-baseline",
+  "claim": "Linear classifier on raw pixels of MNIST top half, test accuracy (about)",
+  "value": "85%",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3 Setup"
+ },
+ {
+  "id": "tschannen-supervised-baseline",
+  "claim": "Supervised MLP or ConvNet accuracy (about)",
+  "value": "94%",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3 Setup; Sec 3.3"
+ },
+ {
+  "id": "tschannen-runs",
+  "claim": "Runs averaged per result",
+  "value": "20",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3 Setup"
+ },
+ {
+  "id": "tschannen-realnvp-layers",
+  "claim": "RealNVP coupling layers in invertible-encoder experiment",
+  "value": "30",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3.1"
+ },
+ {
+  "id": "tschannen-critic-params",
+  "claim": "Separable and MLP critics trainable parameters",
+  "value": "40k",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "poole-published",
+  "claim": "Poole arXiv v1 date",
+  "value": "2019-05-16",
+  "paper": "Poole et al. (Variational bounds of MI)",
+  "arxiv": "1905.06922v1",
+  "loc": "abs.html"
+ },
+ {
+  "id": "poole-infonce-eq",
+  "claim": "Poole InfoNCE bound equation (proved without CPC's approximation)",
+  "value": "Eq. 10",
+  "paper": "Poole et al.",
+  "arxiv": "1905.06922v1",
+  "loc": "Sec 2.3, Eq. (10) and footnote"
+ },
+ {
+  "id": "cpcv2-published",
+  "claim": "CPC v2 arXiv v1 date",
+  "value": "2019-05-22",
+  "paper": "CPC v2 (Henaff et al.)",
+  "arxiv": "1905.09272v3",
+  "loc": "abs.html"
+ },
+ {
+  "id": "cpcv2-r161-top1",
+  "claim": "CPC v2 ImageNet linear top-1, ResNet-161 (305M params), single crop, full labels, 200 epochs, batch 512",
+  "value": "71.5",
+  "paper": "CPC v2",
+  "arxiv": "1905.09272v3",
+  "loc": "Table 1, row CPC v2 - ResNet-161; epochs/batch Appendix optimization details"
+ },
+ {
+  "id": "cpcv2-r50-top1",
+  "claim": "CPC v2 ImageNet linear top-1, ResNet-50 (24M params)",
+  "value": "63.8",
+  "paper": "CPC v2",
+  "arxiv": "1905.09272v3",
+  "loc": "Table 1, row CPC v2 - ResNet-50"
+ },
+ {
+  "id": "cpcv2-1pct-top5",
+  "claim": "CPC v2 top-5 with 1% of ImageNet labels (fine-tuned)",
+  "value": "78.3",
+  "paper": "CPC v2",
+  "arxiv": "1905.09272v3",
+  "loc": "Sec 4.2 text / Table 2"
+ },
+ {
+  "id": "cmc-published",
+  "claim": "CMC arXiv v1 date",
+  "value": "2019-06-13",
+  "paper": "CMC (Tian et al.)",
+  "arxiv": "1906.05849v5",
+  "loc": "abs.html"
+ },
+ {
+  "id": "cmc-negatives",
+  "claim": "CMC ImageNet negatives from memory bank",
+  "value": "16384",
+  "paper": "CMC",
+  "arxiv": "1906.05849v5",
+  "loc": "Sec 4.1 Implementation"
+ },
+ {
+  "id": "cmc-lab-r50x2-top1",
+  "claim": "CMC {L,ab}, ResNet-50 x2 per view, ImageNet linear top-1, single crop",
+  "value": "68.3",
+  "paper": "CMC",
+  "arxiv": "1906.05849v5",
+  "loc": "Table 1, row {L,ab}, column ResNet-50 x2"
+ },
+ {
+  "id": "cmc-ra-r50x2-top1",
+  "claim": "CMC {Y,DbDr}+RandAugment, ResNet-50 x2 per view, linear top-1",
+  "value": "70.6",
+  "paper": "CMC",
+  "arxiv": "1906.05849v5",
+  "loc": "Table 1, row {Y,DbDr} + RA, column ResNet-50 x2"
+ },
+ {
+  "id": "arora-published",
+  "claim": "Arora arXiv v1 date",
+  "value": "2019-02-25",
+  "paper": "Arora et al. (Theoretical analysis)",
+  "arxiv": "1902.09229v1",
+  "loc": "abs.html"
+ },
+ {
+  "id": "arora-theorem",
+  "claim": "Arora main bound L_sup^mu(f_hat) <= 1/(1-tau) (L_un(f) - tau) + Gen_M term",
+  "value": "Theorem 4.1",
+  "paper": "Arora et al.",
+  "arxiv": "1902.09229v1",
+  "loc": "Sec 4.1"
+ },
+ {
+  "id": "arora-cifar100-unsup",
+  "claim": "Arora CIFAR-100 avg-2 accuracy, unsupervised, trained output layer",
+  "value": "93.2",
+  "paper": "Arora et al.",
+  "arxiv": "1902.09229v1",
+  "loc": "Table 1, CIFAR-100 avg-2, Unsupervised Tr"
+ },
+ {
+  "id": "arora-cifar100-sup",
+  "claim": "Arora CIFAR-100 avg-2 accuracy, supervised, trained output layer",
+  "value": "97.2",
+  "paper": "Arora et al.",
+  "arxiv": "1902.09229v1",
+  "loc": "Table 1, CIFAR-100 avg-2, Supervised Tr"
+ },
+ {
+  "id": "facenet-published",
+  "claim": "FaceNet arXiv v1 date",
+  "value": "2015-03-12",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "abs.html"
+ },
+ {
+  "id": "facenet-margin",
+  "claim": "FaceNet triplet margin alpha",
+  "value": "0.2",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "Sec 3.3, 'The margin alpha is set to 0.2'"
+ },
+ {
+  "id": "facenet-loss-eq",
+  "claim": "FaceNet triplet loss equation number",
+  "value": "Eq. 3",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "Sec 3.1, PDF Eq. (3)"
+ },
+ {
+  "id": "facenet-dim",
+  "claim": "FaceNet embedding dimension",
+  "value": "128",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "Sec 5.4"
+ },
+ {
+  "id": "facenet-batch",
+  "claim": "FaceNet batch size (exemplars, approx)",
+  "value": "1,800",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "facenet-faces-per-id",
+  "claim": "FaceNet faces per identity per mini-batch (around)",
+  "value": "40",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "Sec 3.2"
+ },
+ {
+  "id": "facenet-lfw",
+  "claim": "FaceNet LFW accuracy with face alignment",
+  "value": "99.63",
+  "paper": "FaceNet",
+  "arxiv": "1503.03832v3",
+  "loc": "Sec 5.6; abstract"
+ },
+ {
+  "id": "tschannen-target-high",
+  "claim": "Highest fixed MI-bound target t in the encoder experiment (t = 2 and 4)",
+  "value": "4",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3.3"
+ }
+]

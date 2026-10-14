@@ -1,0 +1,83 @@
+<section id="ch-timeline" class="chapter">
+<h2>The family tree</h2>
+<p>Every paper this page read, placed by family and date. Filled nodes are the papers read in full; hollow nodes are branches, read for one idea and one number. Lines join a paper to the one it changed.</p>
+
+<figure class="viz" id="viz-tree">
+  <span class="badge sourced">Sourced</span>
+  <div class="tree-scroll"><div id="tree-chart" role="img" aria-label="Family tree: one row per family (benchmarks and tools, feature memory, normalizing flows, synthetic defects, student-teacher, reconstruction and unified, vision-language, edge deployment), papers placed by publication date from 2018 to 2026."></div></div>
+  <div class="controls" role="group" aria-label="Which papers">
+    <button type="button" id="btn-tree-all" aria-pressed="true">All papers</button>
+    <button type="button" id="btn-tree-spine" aria-pressed="false">Papers read in full</button>
+    <button type="button" id="btn-tree-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="tree-detail readout" aria-live="polite"></div>
+  <figcaption>Sourced. Positions use each paper's first arXiv version date (MVTec AD: its CVPR 2019 publication). A family is a judgment about the main idea; several papers mix two. Select a node, or tab to it, for its idea and one number from the paper. {{NODE_COUNT}} papers on the tree, {{BRANCH_COUNT}} of them branches.</figcaption>
+  <details class="tree-list">
+    <summary>Every paper on the tree, as a list</summary>
+{{TREE_LIST}}
+  </details>
+  <script type="application/json" id="tree-data">{{TREE_JSON}}</script>
+</figure>
+
+<p>Read the tree from left to right and three phases stand out. Until 2021 the field learned to use pretrained features well: nearest neighbors, Gaussians and flows on top of an ImageNet backbone, plus fake defects to train on. From 2022 it chased cost: one model for every product, and models small enough for a line. From 2023 the vision-language row fills up, because a model that already knows the word "damaged" needs no images of your product. The map in <a href="#ch-map">chapter 3</a> counts the same shift across the whole arXiv scan.</p>
+</section>
+
+<section id="ch-summary" class="chapter">
+<h2>The scoreboard and what to use when</h2>
+<p>One table for every method read in full. Sort by any column, but compare only within a setting: a zero-shot score and a score from a model trained on the product answer different questions.</p>
+
+<figure class="viz" id="viz-scoreboard">
+  <span class="badge sourced">Sourced</span>
+  <div class="score-scroll">
+  <table class="data scoreboard" id="tbl-scoreboard">
+    <thead>
+      <tr><th rowspan="2" scope="col"><button type="button" id="btn-score-sort-0" data-col="0">Method</button></th><th rowspan="2" scope="col"><button type="button" id="btn-score-sort-1" data-col="1">Year</button></th><th rowspan="2" scope="col">Setting</th><th colspan="3" scope="colgroup">MVTec AD</th><th colspan="3" scope="colgroup">VisA</th></tr>
+      <tr><th scope="col"><button type="button" id="btn-score-sort-3" data-col="3">Image AUROC</button></th><th scope="col"><button type="button" id="btn-score-sort-4" data-col="4">Pixel AUROC</button></th><th scope="col"><button type="button" id="btn-score-sort-5" data-col="5">AU-PRO</button></th>
+          <th scope="col"><button type="button" id="btn-score-sort-6" data-col="6">Image AUROC</button></th><th scope="col"><button type="button" id="btn-score-sort-7" data-col="7">Pixel AUROC</button></th><th scope="col"><button type="button" id="btn-score-sort-8" data-col="8">AU-PRO</button></th></tr>
+    </thead>
+    <tbody>
+{{SCOREBOARD_ROWS}}
+    </tbody>
+  </table>
+  </div>
+  <div class="controls"><button type="button" id="btn-score-reset" data-cue-reset>Original order</button></div>
+  <p class="readout" aria-live="polite">Sorted in reading order. Hover or focus a cell for its table and row.</p>
+  <figcaption>Sourced. Each cell is the number the method's own paper reports, with its table in the cell's tooltip. A superscript r marks a number from a later paper's re-run, with a different backbone or split, shown because the method's paper reports nothing for that dataset. "Not reported" means no source read here gives one. Settings: one-class trains one model per product on good images; multi-class trains one model for all products; zero-shot uses no image of the product; 1-shot uses one good image. EfficientAD prints pixel AUROC only up to a 5% false positive rate, so its full-range cell stays empty. Even within one setting, the rows come from different papers, backbones and input sizes, so they are not a controlled comparison.</figcaption>
+</figure>
+
+<p>Three things to read off the table. First, on MVTec AD the strongest one-class methods all land between {{c:draem-mvtec-img-auroc}} (DRAEM) and {{c:fastflow-mvtec-img-auroc-cait}} (FastFlow) image AUROC, so the benchmark no longer separates them; MVTec AD 2, built to be harder, has a best AU-PRO of {{c:mad2-best}} at the usual false positive limit of 0.30; its own, stricter metric uses 0.05 (<a href="#ch-benchmark">chapter 2</a>). Second, AU-PRO sits lower and spreads wider than pixel AUROC, as chapter 2 predicts: WinCLIP scores {{c:winclip-mvtec-0shot-pix-auroc}} pixel AUROC but only {{c:winclip-mvtec-0shot-pro}} AU-PRO on MVTec AD. Third, the zero-shot rows trail the trained rows by several points on images and by more on AU-PRO: having no images of the product has a real cost.</p>
+
+<h3>If you have this, start here</h3>
+<ul class="guide">
+  <li><b>Hundreds of good images of one product, and a desktop GPU.</b> Start with PatchCore: {{c:patchcore-mvtec-img-auroc-25pct}} image AUROC on MVTec AD with nothing to train. If the line is fast, EfficientAD-S gives {{c:efficientad-t2-s-mvtec}} at {{c:efficientad-t17-s-a6000}} ms on an RTX A6000 (one image at a time, float16). If defects can be logical (a missing, extra or misplaced part), prefer EfficientAD: in the EfficientAD paper, EfficientAD-M scores {{c:efficientad-t2-m-loco}} on MVTec LOCO against {{c:efficientad-t2-patchcore-loco}} for the authors' re-run of PatchCore.</li>
+  <li><b>Many products and one model.</b> Dinomaly reaches {{c:dinomaly-mvtec-img-auroc}} image AUROC with one model for all MVTec AD classes, against UniAD's {{c:uniad-img-uniad-unified}}. PatchCore also survives this setting ({{c:ader-mvtec-img-auroc-patchcore-100e}} in ADer), but its MVTec AD test took {{c:ader-eff-mvtec-test-time-patchcore}} in total there, and it ran out of memory on VisA.</li>
+  <li><b>A handful of good images.</b> AnomalyDINO with one image per product gives {{c:anomalydino-mvtec-img-auroc-1shot-448}} on MVTec AD and {{c:anomalydino-visa-img-auroc-1shot-448}} on VisA, against WinCLIP+ at {{c:winclip-plus-mvtec-1shot-img-auroc}} and {{c:winclip-plus-visa-1shot-img-auroc}}.</li>
+  <li><b>No image of the product.</b> AnomalyCLIP ({{c:anomalyclip-mvtec-img-auroc}} image AUROC, {{c:anomalyclip-mvtec-pix-auroc}} pixel AUROC on MVTec AD) localizes defects better than WinCLIP ({{c:winclip-mvtec-0shot-img-auroc}} and {{c:winclip-mvtec-0shot-pix-auroc}}). Treat either as a start: collect good images and move up the list.</li>
+  <li><b>A Jetson at line speed.</b> On a Jetson Orin Nano, the continual-learning versions timed in one benchmark take {{c:rcad-orin-efficientad-ms}} ms (EfficientAD*) and {{c:rcad-orin-patchcore-ms}} ms (PatchCore* with a ResNet-18) (<a href="#ch-speed">chapter 15</a>). For zero-shot, EdgeZSAD runs at {{c:edgezsad-jetson-ms}} ms on an Orin Nano Super with TensorRT FP16. Measure accuracy again after every export to TensorRT or INT8.</li>
+</ul>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<p>For each paper, the part to read first, with the version this page used.</p>
+<ul class="deeper">
+  <li><b>MVTec AD</b> (CVPR 2019): Sec. 4.3 for the metrics and Table 1 for the categories. The AU-PRO metric used everywhere since is defined in Uninformed Students (1911.02357v2), Sec. 4.2.</li>
+  <li><b>VisA</b> (2207.14315v1): the dataset section and its split protocol, and the metric definitions (recall, false positive rate, precision).</li>
+  <li><b>MVTec AD 2</b> (2503.21622v1): Sec. 4.2.1 and Eq. (1), the PRO curve and why the limit moves to a false positive rate of 0.05.</li>
+  <li><b>SPADE</b> (2005.02357v3): Sec. 3.2 and 3.3, Eq. (2) for the image score and Eq. (3) for the pixel score.</li>
+  <li><b>PaDiM</b> (2011.08785v1): Sec. III-B and III-C, Eq. (1) for the regularized covariance and Eq. (2) for the Mahalanobis distance; Table II for random versus PCA dimension reduction.</li>
+  <li><b>PatchCore</b> (2106.08265v2): Sec. 3.1, Eq. 1 and 2 (locally aware patch features); Sec. 3.2, Eq. 5 and Algorithm 1 (greedy coreset); Eq. 6 (image score) and Eq. 7 (reweighting, which the official code does not apply).</li>
+  <li><b>FastFlow</b> (2111.07677v2): Sec. 3.3, Eq. (1) to (3): change of variables, log-likelihood and the affine coupling layer.</li>
+  <li><b>CutPaste</b> (2104.04015v1): Sec. 2.1, Eq. (1) (the training objective), and Sec. 2.3, Eq. (2) (the Gaussian density estimator).</li>
+  <li><b>DRAEM</b> (2108.07610v2): Sec. 3.1 to 3.3, Eq. (2) and (3) for the losses and Eq. (4) for the simulated anomaly.</li>
+  <li><b>EfficientAD</b> (2303.14535v3): Sec. 3.2 (hard feature loss), Sec. 3.3 (the autoencoder for logical anomalies), Sec. 3.4 (map normalization), and Table 17 for latency on five GPUs.</li>
+  <li><b>UniAD</b> (2206.03687v3): Sec. 3.1 and 3.2, Eq. (2) (the learnable query), Eq. (3) (feature jittering), Eq. (4) (the loss); Table 5a for the query ablation.</li>
+  <li><b>ADer</b> (2406.03262v6): Sec. 3 for the shared protocol and Table 3 for the multi-class results.</li>
+  <li><b>WinCLIP</b> (2303.14814v1): Sec. 4.2, Eq. (2) and (3) (windows and harmonic aggregation), then Sec. 4.3, Eq. (4) to (6) (WinCLIP+).</li>
+  <li><b>AnomalyCLIP</b> (2310.18961v12): Sec. 3.2 (object-agnostic prompt templates) and Sec. 3.3: Eq. (2) and the unnumbered local loss (the glocal loss), and Eq. (3) (the deep text tokens).</li>
+  <li><b>AnomalyDINO</b> (2405.14529v3): Eq. (2) to (4): the nearest-neighbor distance, the cosine distance and the mean of the top 1% of patch scores.</li>
+  <li><b>Dinomaly</b> (2405.14325v5): Eq. (3) (linear attention) and Eq. (4) (the loose loss), with its component ablation.</li>
+  <li><b>Continual AD on the edge</b> (2605.24251v2): Table 4, the latency of each method on a Jetson Orin Nano and a Raspberry Pi 5.</li>
+  <li><b>EdgeZSAD</b> (2606.16119v1): Tables 4 and 5, latency on two edge boards and the accuracy scored on the device.</li>
+</ul>
+</section>

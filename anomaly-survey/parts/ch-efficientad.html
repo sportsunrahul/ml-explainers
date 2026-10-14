@@ -1,0 +1,165 @@
+<p class="kicker"><span class="act-n">Act IV</span>Fast, and one model for all</p>
+
+<section id="ch-efficientad" class="chapter">
+<h2>A student that fails only on defects</h2>
+<p>Train a small network to copy the features of a bigger one, but show it only good parts. Where the copy goes wrong, the part contains something the student never learned.</p>
+
+<figure class="viz" id="viz-efficientad" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-efficientad" tabindex="0" aria-label="Four panels for the cap under inspection: the camera view, the student-versus-teacher map, the autoencoder-versus-student map, and the combined map with a pass or reject verdict. Yellow outlines on the camera view mark where the hard feature loss would put its gradient."></canvas>
+  <div class="controls" role="group" aria-label="Cap under inspection">
+    <span>Inspect</span>
+    <button type="button" id="btn-ead-good" aria-pressed="true">A good cap</button>
+    <button type="button" id="btn-ead-scratch" aria-pressed="false">A scratch (structural)</button>
+    <button type="button" id="btn-ead-extra" aria-pressed="false">An extra hole (logical)</button>
+  </div>
+  <div class="controls" role="group" aria-label="Hard feature loss">
+    <label><span>Hard feature loss, p<sub>hard</sub></span> <input type="range" id="rng-ead-phard" min="0" max="5" step="1" value="3"> <output id="out-ead-phard">0.999</output></label>
+    <button type="button" id="btn-ead-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <table class="data" id="tbl-ead-phard" aria-label="EfficientAD-M mean image AU-ROC for each p_hard (Table 3 in EfficientAD v3)">
+    <thead><tr><th>p<sub>hard</sub> (paper, Table 3)</th><th>0</th><th>0.9</th><th>0.99</th><th>0.999</th><th>0.9999</th><th>0.99999</th></tr></thead>
+    <tbody><tr><td>Mean AU-ROC, EfficientAD-M</td>
+      <td data-col="0"><span data-claim="efficientad-t3-phard-0">94.9</span></td>
+      <td data-col="1"><span data-claim="efficientad-t3-phard-0p9">94.9</span></td>
+      <td data-col="2"><span data-claim="efficientad-t3-phard-0p99">95.7</span></td>
+      <td data-col="3"><span data-claim="efficientad-t3-phard-0p999">96.0</span></td>
+      <td data-col="4"><span data-claim="efficientad-t3-phard-0p9999">95.8</span></td>
+      <td data-col="5"><span data-claim="efficientad-t3-phard-0p99999">95.7</span></td></tr></tbody>
+  </table>
+  <figcaption>Toy model, except the table. The toy teacher computes the toy patch features. The toy student is a nearest-neighbor regressor over pooled pixels from 40 good caps; like a small network trained only on good parts, it imitates the teacher well only near what it has seen. The toy autoencoder is a linear one (principal components of the whole feature map). Both maps are calibrated with the paper's quantile rule, so 0.1 marks the top 0.5 percent of normal scores; the toy verdict uses that level. The table row is sourced: the paper's mean image AU-ROC over MVTec AD, VisA and MVTec LOCO for each p<sub>hard</sub>.</figcaption>
+</figure>
+
+<p>Start with the scratch: the student has never seen a scratch, so its copy of the teacher's features breaks there, and the student-versus-teacher map lights up. Now predict before you press the last button: <em>the extra hole looks exactly like the six real holes. Which map will catch it?</em> Not the student-versus-teacher map, which sees one small patch at a time, and an ordinary hole is normal for a patch. The autoencoder map catches it, because the autoencoder squeezes the whole part through a narrow code and has only ever reconstructed six holes in six places.</p>
+
+<h3>Distillation, from scratch</h3>
+<p>Knowledge distillation trains a <em>student</em> network to reproduce the outputs of a fixed <em>teacher</em> network. For anomaly detection, the student sees only good parts. On a good part the student has learned to match the teacher. On a defect it was never trained, so its output drifts away from the teacher's, and the squared difference between them is an anomaly map. Uninformed Students (<a href="https://arxiv.org/abs/1911.02357">1911.02357</a>) introduced this student-teacher idea. EfficientAD (<span data-claim="efficientad-venue">WACV 2024</span>, first posted <span data-claim="efficientad-published">2023-03-25</span>) makes it fast and adds a second map for a different kind of defect.</p>
+
+<p>Speed comes from the network shape. In EfficientAD-S, both teacher and student are a patch description network (PDN) of only <span data-claim="efficientad-pdn-conv-layers">four</span> convolutional layers; EfficientAD-M uses a deeper, wider PDN. Each output vector sees a <span data-claim="efficientad-pdn-receptive-field">33x33</span> pixel patch, and the teacher outputs <span data-claim="efficientad-teacher-channels">384</span> channels. The paper times the PDN at under <span data-claim="efficientad-pdn-under-800us">800</span> microseconds for a <span data-claim="efficientad-input-size">256x256</span> image on one GPU. The teacher gets good features by distillation too: once, on ImageNet, it learns to copy the features that PatchCore uses from a frozen <span data-claim="efficientad-distill-backbone">WideResNet-101</span>.</p>
+
+<h3>Two tricks that make the student fail only off the normal data</h3>
+<p>A plain student generalizes too well: with enough capacity it learns to imitate the teacher on defects too, and the map goes quiet. EfficientAD adds two pressures. The first is the <em>hard feature loss</em>. Of all the squared differences between teacher and student outputs, it trains only on the largest ones, the elements at or above the <span class="tex">p_\text{hard}</span> quantile. With <span data-claim="efficientad-p-hard">0.999</span>, that is on average about <span data-claim="efficientad-p-hard-ten-percent">ten percent</span> of the values along each of the three dimensions. The student stops polishing easy background and spends its capacity on the hard normal structures.</p>
+
+<div class="eq" id="eq-ead-hard" data-build data-viz="viz-efficientad"><div class="tex tex-display">
+\htmlData{step=1, link=local}{D_{c,w,h} = \big(\htmlClass{t-brown}{T(I)_{c,w,h}} - \htmlClass{t-green}{S(I)_{c,w,h}}\big)^2}, \qquad \htmlData{step=2, link=hard}{L_\text{hard} = \operatorname{mean}\{\, D_{c,w,h} \;:\; D_{c,w,h} \ge d_\text{hard} \,\}}
+</div></div>
+<p class="eqno">Sec. 3.2 in EfficientAD v3. The paper writes these inline and unnumbered; <span class="tex">L_\text{hard}</span> is defined in words there and transcribed here.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-brown}{T(I)}</span> and <span class="tex">\htmlClass{t-green}{S(I)}</span> are the teacher's and student's feature maps for a good training image <span class="tex">I</span>; <span class="tex">c, w, h</span> index channel and position.</li>
+  <li><span class="tex">D</span> is the squared difference at every element. Averaged over channels it is the local anomaly map at test time.</li>
+  <li><span class="tex">d_\text{hard}</span> is the <span class="tex">p_\text{hard}</span>-quantile of all elements of <span class="tex">D</span>; only elements at or above it get a gradient. <span class="tex">p_\text{hard} = 0</span> is the plain student-teacher loss.</li>
+</ul>
+
+<p>The second pressure is a penalty on ImageNet images. In every step the student also sees one random ImageNet picture <span class="tex">P</span>, and the loss pushes its output on that picture toward zero. So the student learns to imitate the teacher on good parts and to say nothing elsewhere.</p>
+<div class="eq" id="eq-ead-st" data-build data-viz="viz-efficientad"><div class="tex tex-display">
+\htmlData{step=1, link=hard}{L_\text{ST} = L_\text{hard}} \htmlData{step=2, link=student}{+ \; (CWH)^{-1} \textstyle\sum_c \lVert \htmlClass{t-green}{S(P)_c} \rVert_F^2}
+</div></div>
+<p class="eqno">Sec. 3.2 in EfficientAD v3 (inline). <span class="tex">C, W, H</span> are the channel count and map size; <span class="tex">\lVert\cdot\rVert_F^2</span> sums the squares over a whole channel map.</p>
+<p>The cumulative ablation (Table 4) adds the tricks one at a time and scores the mean of three benchmarks: added after the map normalization, the hard feature loss gains <span data-claim="efficientad-t4-hard-gain">+ 1.0</span> point of image AU-ROC. The table in the figure shows the whole <span class="tex">p_\text{hard}</span> sweep: the default is the best setting, and much higher values train on too little.</p>
+
+<h3>Logical defects need a global view</h3>
+<p>Some defects are not damage at all. MVTec LOCO, a benchmark from the same group, has <em>logical</em> anomalies: missing, misplaced or surplus objects, or a wrong combination of normal objects. Every patch of such a part can look normal. A student that sees <span data-claim="efficientad-pdn-receptive-field">33x33</span> patches cannot notice that a part has one cable too many.</p>
+<p>So EfficientAD adds an autoencoder <span class="tex">A</span>. It takes the whole image, squeezes it through a code of <span data-claim="efficientad-ae-latent">64</span> numbers, and reconstructs the teacher's feature map. It cannot store where each detail sits, so it reconstructs the typical layout, and where the part breaks the layout, its output disagrees with the image. Autoencoders also blur fine detail on good parts. To cancel that, the student gets a second set of <span data-claim="efficientad-teacher-channels">384</span> output channels (<span data-claim="efficientad-student-channels">768</span> in all) that learns to predict the autoencoder's output. It learns the autoencoder's normal blur, but not its failures on anomalies.</p>
+<div class="eq" id="eq-ead-ae" data-build data-viz="viz-efficientad"><div class="tex tex-display">
+\htmlData{step=1, link=ae}{L_\text{AE} = (CWH)^{-1} \textstyle\sum_c \lVert \htmlClass{t-brown}{T(I)_c} - \htmlClass{t-green}{A(I)_c} \rVert_F^2}, \qquad \htmlData{step=2, link=global}{L_\text{STAE} = (CWH)^{-1} \textstyle\sum_c \lVert \htmlClass{t-green}{A(I)_c} - \htmlClass{t-green}{S'(I)_c} \rVert_F^2}
+</div></div>
+<p class="eqno">Sec. 3.3 in EfficientAD v3 (inline). The training loss is <span class="tex">L_\text{ST} + L_\text{AE} + L_\text{STAE}</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{A(I)}</span> is the autoencoder's reconstruction of the teacher's features (not of pixels).</li>
+  <li><span class="tex">\htmlClass{t-green}{S'(I)}</span> is the student's second half of channels. At test time <span class="tex">(A - S')^2</span>, averaged over channels, is the <em>global</em> map; <span class="tex">(T - S)^2</span> is the <em>local</em> map.</li>
+</ul>
+
+<h3>Two maps, one score</h3>
+<p>The two maps live on different scales. EfficientAD calibrates each one on held-out good images: the <span data-claim="efficientad-qa">0.9</span> quantile of its normal scores maps to 0 and the <span data-claim="efficientad-qb">0.995</span> quantile maps to <span data-claim="efficientad-qb-target">0.1</span>. Then it averages the two maps and takes the maximum as the image score. The targets change nothing about ranking; they put both maps on one color scale.</p>
+<div class="eq" id="eq-ead-map" data-build data-viz="viz-efficientad"><div class="tex tex-display">
+\htmlData{step=1, link=local}{\hat M = 0.1\,\dfrac{M - q_a}{q_b - q_a}}, \qquad \htmlData{step=2, link=combine}{M = 0.5\,\hat M_\text{ST} + 0.5\,\hat M_\text{AE}}, \qquad \htmlData{step=3, link=combine}{m_\text{image} = \max_{i,j} M_{i,j}}
+</div></div>
+<p class="eqno">Alg. 2 in EfficientAD v3.</p>
+
+<h3>What it scores, and how fast</h3>
+<p>The paper re-runs every baseline itself and reports one model per category. Image AU-ROC per benchmark (Table 2):</p>
+<table class="data">
+  <thead><tr><th>Method</th><th>MVTec AD</th><th>VisA</th><th>MVTec LOCO</th><th>LOCO logical only</th></tr></thead>
+  <tbody>
+    <tr><td>PatchCore (re-run by the EfficientAD authors)</td><td><span data-claim="efficientad-t2-patchcore-mvtec">98.7</span></td><td><span data-claim="efficientad-t2-patchcore-visa">94.3</span></td><td><span data-claim="efficientad-t2-patchcore-loco">80.3</span></td><td><span data-claim="efficientad-t2-patchcore-loco-logical">75.8</span></td></tr>
+    <tr><td>EfficientAD-S</td><td><span data-claim="efficientad-t2-s-mvtec">98.8</span></td><td><span data-claim="efficientad-t2-s-visa">97.5</span></td><td><span data-claim="efficientad-t2-s-loco">90.0</span></td><td><span data-claim="efficientad-t2-s-loco-logical">85.8</span></td></tr>
+    <tr><td>EfficientAD-M</td><td><span data-claim="efficientad-t2-m-mvtec">99.1</span></td><td><span data-claim="efficientad-t2-m-visa">98.1</span></td><td><span data-claim="efficientad-t2-m-loco">90.7</span></td><td><span data-claim="efficientad-t2-m-loco-logical">86.8</span></td></tr>
+  </tbody>
+</table>
+<p>On MVTec AD the gain is small, because the benchmark is nearly saturated. The gap opens on MVTec LOCO, where the global map earns its keep. The speed gap is larger still. On an <span data-claim="efficientad-speed-gpu">RTX A6000</span> at batch size <span data-claim="efficientad-latency-batch">1</span>, with every network in float16, EfficientAD-S takes <span data-claim="efficientad-t1-s-latency">2.2</span> ms per image and processes <span data-claim="efficientad-t1-s-throughput">614</span> images per second at batch <span data-claim="efficientad-throughput-batch">16</span>; EfficientAD-M takes <span data-claim="efficientad-t1-m-latency">4.5</span> ms. The re-run PatchCore takes <span data-claim="efficientad-t1-patchcore-latency">32</span> ms and AST <span data-claim="efficientad-t1-ast-latency">53</span> ms. Table 1 pairs these latencies with a mean AU-ROC over MVTec AD, VisA and MVTec LOCO (<span data-claim="efficientad-t1-s-auroc">95.4</span> for S, <span data-claim="efficientad-t1-m-auroc">96.0</span> for M), not with MVTec AD alone; <a href="#ch-speed">chapter 15</a> puts all the methods on one chart.</p>
+
+<h3>Inside EfficientAD: forward, then backward</h3>
+<p>Training has three stages. Stage 1 happens once, on ImageNet, and makes the teacher. Stage 2 happens per product and trains the student and the autoencoder. Stage 3 only measures quantiles. The first figure is stage 1.</p>
+
+<figure class="viz archflow" id="viz-eadistill" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-eadistill-images" aria-pressed="false">1 Images</button>
+    <button type="button" id="btn-eadistill-features" aria-pressed="false">2 Features</button>
+    <button type="button" id="btn-eadistill-loss" aria-pressed="false">3 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-eadistill-backward" aria-pressed="false">4 Gradients</button>
+    <button type="button" class="cf-back" id="btn-eadistill-update" aria-pressed="false">5 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-eadistill-s" aria-pressed="true">EfficientAD-S</button>
+    <button type="button" id="btn-eadistill-m" aria-pressed="false">EfficientAD-M</button>
+  </div>
+  <canvas id="eadistill-canvas" role="img" aria-label="Stage 1 of EfficientAD as a diagram: an ImageNet image at 512 pixels goes into a frozen WideResNet-101 with PatchCore's feature pooling; the same image at 256 pixels goes into the teacher PDN; both give 384 by 64 by 64 maps that meet in a mean squared error loss. In the backward stages the gradient reaches only the teacher PDN."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-eadistill-prev">Previous</button>
+    <button type="button" id="btn-eadistill-next">Next</button>
+    <button type="button" id="btn-eadistill-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="eadistill-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>Stage 1: make a fast teacher</h4><p>A big frozen network already has good features, but it is slow. Stage 1 trains the small teacher PDN to reproduce them. Press <b>1 Images</b>, then <b>Next</b>.</p></div>
+    <div data-stage="images" hidden><h4>1. One image at two sizes</h4><p>Each ImageNet image goes to the frozen network at <span data-claim="efficientad-distill-psi-input">512x512</span> and to the PDN at <span data-claim="efficientad-input-size">256x256</span>. The batch is <span data-claim="efficientad-distill-batch">16</span> images.</p></div>
+    <div data-stage="features" hidden><h4>2. Two feature maps of the same shape</h4><p>The frozen <span data-claim="efficientad-distill-backbone">WideResNet-101</span> gives PatchCore's pooled features, projected to <span data-claim="efficientad-distill-feature-dim">384</span> dimensions and normalized per channel. The PDN gives a map of the same shape.</p></div>
+    <div data-stage="loss" hidden><h4>3. Mean squared error</h4><p>The loss is the mean squared difference between the two maps, averaged over the batch.</p></div>
+    <div data-stage="backward" hidden><h4>4. Where the gradient goes</h4><p>Only into the teacher PDN. The big network is brown: frozen, and nothing trainable sits behind it, so the gradient stops.</p></div>
+    <div data-stage="update" hidden><h4>5. Update</h4><p>Adam, learning rate <span data-claim="efficientad-lr">1e-4</span>, for <span data-claim="efficientad-distill-iters">60,000</span> steps on <span data-claim="efficientad-distill-data">ImageNet</span>. After this stage the teacher is frozen for good.</p></div>
+  </div>
+  <figcaption>Computed: shapes from the paper's Tables 6 and 7 (our computation, with the padding the tables list; Alg. 1 confirms the 384 by 64 by 64 output). Parameter counts are our computation from the layer tables; they add up to the paper's printed totals.</figcaption>
+</figure>
+
+<figure class="viz archflow" id="viz-eaflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-eaflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-eaflow-networks" aria-pressed="false">2 Networks</button>
+    <button type="button" id="btn-eaflow-losses" aria-pressed="false">3 Losses</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-eaflow-backward" aria-pressed="false">4 Gradients</button>
+    <button type="button" class="cf-back" id="btn-eaflow-update" aria-pressed="false">5 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-eaflow-s" aria-pressed="true">EfficientAD-S</button>
+    <button type="button" id="btn-eaflow-m" aria-pressed="false">EfficientAD-M</button>
+  </div>
+  <canvas id="eaflow-canvas" role="img" aria-label="Stage 2 of EfficientAD as a diagram: a good training image goes into the frozen teacher, the autoencoder and the student; a random ImageNet image goes into the student too. Three losses: teacher against autoencoder, autoencoder against the student's second half, and the hard loss plus the ImageNet penalty for the student's first half. In the backward stages the gradient reaches the student and the autoencoder, never the teacher."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-eaflow-prev">Previous</button>
+    <button type="button" id="btn-eaflow-next">Next</button>
+    <button type="button" id="btn-eaflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="eaflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>Stage 2: train per product</h4><p>The teacher is now fixed. For each product, a fresh student and autoencoder train together on good images only. Press <b>1 Inputs</b>, then <b>Next</b>. Which boxes do you expect the gradient to reach?</p></div>
+    <div data-stage="inputs" hidden><h4>1. Two images per step</h4><p>One good training image, resized to <span data-claim="efficientad-input-size">256x256</span>, at batch size <span data-claim="efficientad-batch-size">1</span>. For the autoencoder it gets a random brightness, contrast or saturation change. One random ImageNet image feeds the penalty.</p></div>
+    <div data-stage="networks" hidden><h4>2. Teacher, autoencoder, student</h4><p>The teacher gives the target map, normalized per channel with statistics from the training images. The autoencoder reconstructs that map through its <span data-claim="efficientad-ae-latent">64</span>-number code. The student outputs <span data-claim="efficientad-student-channels">768</span> channels: the first half imitates the teacher, the second half the autoencoder. With padding disabled, as in every reported result, the maps are a few pixels smaller; the paper does not state the size.</p></div>
+    <div data-stage="losses" hidden><h4>3. Three losses, summed</h4><p><span class="tex">L_\text{ST}</span>: the hard feature loss on the first half, plus the ImageNet penalty. <span class="tex">L_\text{AE}</span>: autoencoder against teacher. <span class="tex">L_\text{STAE}</span>: the second half against the autoencoder.</p></div>
+    <div data-stage="backward" hidden><h4>4. Where the gradient goes</h4><p>Into the student, from <span class="tex">L_\text{ST}</span> and <span class="tex">L_\text{STAE}</span>, and into the autoencoder, from <span class="tex">L_\text{AE}</span> and <span class="tex">L_\text{STAE}</span>. The teacher is brown: frozen, and the gradient stops at it.</p></div>
+    <div data-stage="update" hidden><h4>5. Update, then calibrate</h4><p>Adam on the student and the autoencoder for <span data-claim="efficientad-train-iters">70,000</span> steps; the paper reports about <span data-claim="efficientad-train-time">20 minutes</span> per product. Stage 3 trains nothing: it runs held-out good images and stores the two quantiles of each map.</p></div>
+  </div>
+  <figcaption>Computed: shapes from the paper's Tables 6 to 8 (our computation, with the listed padding); parameter counts are our computation from the layer tables.</figcaption>
+</figure>
+
+<h3>Limits</h3>
+<p>The authors name two. Fine-grained logical defects stay hard: a screw two millimeters too long needs measurement, not a learned map. And unlike nearest-neighbor methods, EfficientAD trains per product, mostly so the autoencoder can learn the layout. Its ancestors and cousins in the student-teacher family are Uninformed Students, STPM (<a href="https://arxiv.org/abs/2103.04257">2103.04257</a>), Reverse Distillation (<a href="https://arxiv.org/abs/2201.10703">2201.10703</a>) and AST (<a href="https://arxiv.org/abs/2210.07829">2210.07829</a>). AST makes student and teacher different networks so that the student fails off the normal data; EfficientAD gets the same failure from the loss instead, at no cost at test time.</p>
+</section>

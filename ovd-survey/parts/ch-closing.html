@@ -1,0 +1,21 @@
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>An open-vocabulary detector is an ordinary detector whose class list has been replaced by a text encoder, so a new class is a new sentence instead of a new training run. The five designs on this page differ in where the text enters. ViLD and OWL-ViT use it only at the final score, which keeps the image side fixed and makes thousands of queries cheap. GLIP and Grounding DINO fuse it into the encoder, and Grounding DINO also uses it to choose its queries and inside its decoder, which makes the image features depend on the prompt. YOLO-World fuses it into the neck and then folds the vocabulary into the weights for speed. All of them inherit what the text encoder learned from web captions. That is their strength on common objects and their weakness on yours: on rare domains a prompt alone scores far below a model fine-tuned on ten boxes per class, and the failures have specific causes (jargon names, label policies, texture-like targets, small defects, uncalibrated scores, ignored modifiers, forgetting) with specific fixes. Start with a prompt, judge it on a labelled test set that includes clean parts, and fine-tune an open-vocabulary detector when it falls short.</p>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><strong>ViLD</strong> (2104.13921v3): Sec. 3.3 and Eqs. 2-4 for the two losses; Table 3 for the rare-class results; App. A and B for its failure cases and why CLIP scores ignore box quality.</li>
+  <li><strong>OWL-ViT</strong> (2205.06230v2): Sec. 3.1 for the architecture without fusion and the image-conditioned queries; Table 2 for one-shot detection; the ablation table for what made transfer work.</li>
+  <li><strong>OWLv2</strong> (2306.09683v3): Sec. 3 for the self-training recipe; Sec. 4.6 and Fig. 5 for the fine-tuning trade-off; Table A4 for all 35 ODinW datasets; Sec. 5 for its limitations.</li>
+  <li><strong>GLIP</strong> (2112.03857v2): Sec. 3.1, Eqs. 2-3 for detection as grounding; Sec. 3.2, Eqs. 4-6 for deep fusion; Table 8 for late vs deep fusion; Table 10 for prompt rewriting; Table 11 for the few-shot curves.</li>
+  <li><strong>Grounding DINO</strong> (2303.05499v5): Sec. 3 for the feature enhancer, Eq. 1 for query selection and the cross-modality decoder; the ablation table for each fusion point; Tables 12-14 for per-dataset ODinW.</li>
+  <li><strong>YOLO-World</strong> (2401.17270v3): Sec. 3.2 for the text contrastive head and Sec. 3.3 for RepVL-PAN (three equations in all); the appendix for re-parameterization; Table 2 for speed against accuracy.</li>
+  <li><strong>T-Rex2</strong> (2403.14610v1): its method section for how box prompts become embeddings, and the text vs visual prompt tables, read with the settings noted in chapter 11.</li>
+  <li><strong>Roboflow100-VL</strong> (2505.20612v4): Table 2 and Table 7 for every label budget; Fig. 2 for the hard-name types; Appendix R for the dataset list of each domain.</li>
+  <li><strong>Revisiting Few-Shot Object Detection with VLMs</strong> (2312.14494v4): Fig. 1 for the label-policy problem; Sec. 4.3 for what multi-modal prompts buy on nuImages.</li>
+  <li><strong>OVDEval</strong> (2308.13177v2) and <strong>Described Object Detection</strong> (2307.12813v2): the hard-negative protocol and NMS-AP; D3's Supp. Table 7 for the threshold trade-off.</li>
+  <li><strong>Your earlier explainers</strong>: <a href="../vlm-survey/explainer.html#ch-shared-space">CLIP's shared space</a> and <a href="../detr-family/explainer.html#ch-denoising">DN-DETR and DINO</a> carry the background this page recaps.</li>
+</ul>
+</section>

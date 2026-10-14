@@ -1,0 +1,2864 @@
+/* Figure kits shared by explainer.html and atlas.html. Each kit draws into a canvas from a state object and knows
+   nothing about buttons: the long page and the atlas each bind their own controls. ASCII only (atlas build checks). */
+const KIT = {};
+KIT.fmt = (x, d = 2) => {
+  const a = Math.abs(x);
+  if (a >= 1e12) return (x / 1e12).toFixed(d) + 'T';
+  if (a >= 1e9) return (x / 1e9).toFixed(d) + 'G';
+  if (a >= 1e6) return (x / 1e6).toFixed(d) + 'M';
+  if (a >= 1e3) return (x / 1e3).toFixed(d) + 'k';
+  return (+x.toFixed(d)).toString();
+};
+KIT.bytes = b => b >= 1048576 ? (b / 1048576).toFixed(2) + ' MiB' : b >= 1024 ? (b / 1024).toFixed(1) + ' KiB' : Math.round(b) + ' B';
+KIT.bits = (q, n = 8, signed = false) => {
+  const v = signed && q < 0 ? q + (1 << n) : q;
+  const s = (v >>> 0).toString(2).padStart(n, '0').slice(-n);
+  return n > 4 ? s.slice(0, n - 4) + ' ' + s.slice(n - 4) : s;
+};
+KIT.times = '\u00d7';
+// Tween a numeric state object toward a target with PE.animate; returns a cancel function.
+KIT.tween = (obj, to, ms, redraw, done) => {
+  const from = {}; for (const k in to) from[k] = obj[k];
+  return PE.animate(ms, u => { for (const k in to) obj[k] = from[k] + (to[k] - from[k]) * u; redraw(); }, done);
+};
+KIT.narrow = w => w < 560;
+
+/* Hero: one 16x16 weight tile goes through the four levers. Toy weights; the 2:4 pruning and the rounding are exact. */
+KIT.hero = (el, opts = {}) => {
+  const N = 16, r = PE.rng(7), g = PE.gauss(r);
+  const W = Array.from({ length: N * N }, () => g() * .5);
+  const maxA = Math.max(...W.map(Math.abs));
+  const LV = 7;                               // levels per sign shown (a 4-bit grid, so the snapping is visible)
+  const S = maxA / LV;
+  const Q = W.map(w => Math.round(w / S));
+  const keep = W.map(() => true);             // exact 2:4: in each row, each group of 4 keeps its 2 largest magnitudes
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j += 4) {
+    const idx = [0, 1, 2, 3].map(k => i * N + j + k).sort((a, b) => Math.abs(W[b]) - Math.abs(W[a]));
+    keep[idx[2]] = keep[idx[3]] = false;
+  }
+  const M = 8, r2 = PE.rng(11), g2 = PE.gauss(r2), SW = Array.from({ length: M * M }, () => Math.round(g2() * 2.2));
+  const T = { t: 0 }, END = 6.2;
+  let raf = 0;
+  const seg = (t, a, b) => PE.clamp((t - a) / (b - a), 0, 1);
+  const ease = u => u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+
+  function layout(w, h) {
+    const narrow = w < 620;
+    if (!narrow) {
+      const cw = w / 5, tile = Math.min(cw * .62, h * .5);
+      return { narrow, tile, cw, st: [0, 1, 2, 3, 4].map(k => ({ x: cw * (k + .5), y: h * .46 })) };
+    }
+    const top = 30, ch = (h - top) / 3, cw = w / 2, tile = Math.min(cw * .56, ch - 78);
+    const st = [0, 1, 2, 3].map(k => ({ x: cw * (k % 2 + .5), y: top + ch * Math.floor(k / 2) + 22 + tile / 2 }));
+    st.push({ x: w / 2, y: top + ch * 2 + 22 + tile / 2 });
+    return { narrow, tile, cw, st };
+  }
+  function cellGrid(ctx, cx, cy, size, n, fill) {
+    const c = size / n, x0 = cx - size / 2, y0 = cy - size / 2;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) fill(i, j, x0 + j * c + .5, y0 + i * c + .5, c - 1);
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const t = T.t, L = layout(w, h), C = n => PE.css(n);
+    const blue = C('--blue'), yellow = C('--yellow'), green = C('--green'), brown = C('--brown'), red = C('--red'), mut = C('--muted'), fg = C('--fg'), rule = C('--rule');
+    const names = ['trained, FP32', 'quantize', 'prune 2:4', 'distill', 'compile'];
+    const notes = [`256 ${KIT.times} 32 bits = 1024 B`, `256 ${KIT.times} 8 bits = 256 B`, `128 kept ${KIT.times} 8 bits + 2-bit indices = 160 B`, 'a smaller student: 64 weights', 'one fused kernel, one trip to memory'];
+    const fs = L.narrow ? 11 : 12;
+    const shown = [seg(t, 0, .6), seg(t, 1, 2), seg(t, 2.2, 3.2), seg(t, 3.4, 4.4), seg(t, 4.6, 5.6)];
+    // arrows between stations
+    for (let k = 0; k < 4; k++) {
+      const a = L.st[k], b = L.st[k + 1]; if (shown[k + 1] <= 0) continue;
+      if (Math.abs(a.y - b.y) > 1) continue;
+      PE.arrow(ctx, a.x + L.tile / 2 + 8, a.y, b.x - L.tile / 2 - 8, a.y, rule, 1.5, 7, Math.min(1, shown[k + 1] * 2));
+    }
+    // station 0: FP32 tile
+    const s0 = shown[0];
+    cellGrid(ctx, L.st[0].x, L.st[0].y, L.tile, N, (i, j, x, y, c) => {
+      ctx.globalAlpha = s0 * (.18 + .82 * Math.abs(W[i * N + j]) / maxA); ctx.fillStyle = blue; ctx.fillRect(x, y, c, c); });
+    // station 1: quantized tile, cells fly from station 0 and snap color to discrete levels
+    const s1 = ease(shown[1]);
+    if (s1 > 0) cellGrid(ctx, PE.lerp(L.st[0].x, L.st[1].x, s1), PE.lerp(L.st[0].y, L.st[1].y, s1), L.tile, N, (i, j, x, y, c) => {
+      const k = i * N + j, cont = Math.abs(W[k]) / maxA, disc = Math.abs(Q[k]) / LV;
+      ctx.globalAlpha = .18 + .82 * PE.lerp(cont, disc, s1); ctx.fillStyle = s1 < .5 ? blue : yellow; ctx.fillRect(x, y, c, c); });
+    // station 2: 2:4 pruned copy
+    const s2 = ease(shown[2]);
+    if (s2 > 0) cellGrid(ctx, PE.lerp(L.st[1].x, L.st[2].x, s2), PE.lerp(L.st[1].y, L.st[2].y, s2), L.tile, N, (i, j, x, y, c) => {
+      const k = i * N + j, a = .18 + .82 * Math.abs(Q[k]) / LV;
+      if (keep[k]) { ctx.globalAlpha = a; ctx.fillStyle = yellow; ctx.fillRect(x, y, c, c); }
+      else { ctx.globalAlpha = a * (1 - s2); ctx.fillStyle = yellow; ctx.fillRect(x, y, c, c);
+        ctx.globalAlpha = s2 * .9; ctx.strokeStyle = brown; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, c - 1, c - 1); } });
+    ctx.globalAlpha = 1;
+    // station 3: a smaller student tile grows in
+    const s3 = ease(shown[3]);
+    if (s3 > 0) { const size = L.tile * (1 - .5 * s3);
+      cellGrid(ctx, PE.lerp(L.st[2].x, L.st[3].x, s3), PE.lerp(L.st[2].y, L.st[3].y, s3), size, s3 < .5 ? N : M, (i, j, x, y, c) => {
+        const v = s3 < .5 ? Math.abs(Q[i * N + j]) / LV : Math.abs(SW[i * M + j]) / 6;
+        ctx.globalAlpha = .2 + .8 * Math.min(1, v); ctx.fillStyle = yellow; ctx.fillRect(x, y, c, c); });
+      ctx.globalAlpha = 1; }
+    // station 4: three kernels with memory trips merge into one fused kernel
+    const s4 = ease(shown[4]);
+    if (s4 > 0) {
+      const { x, y } = L.st[4], bw = L.tile * .8, bh = L.tile * .2, mem = y + L.tile * .46;
+      ctx.globalAlpha = s4; PE.polyline(ctx, [[x - bw * .6, mem], [x + bw * .6, mem]], mut, 3); ctx.globalAlpha = 1;
+      PE.label(ctx, 'memory', x, mem + 14, mut, 10, 'center', 400);
+      const labs = ['conv', '+ bias', 'ReLU'];
+      for (let k = 0; k < 3; k++) {
+        const y0 = y - L.tile * .42 + k * bh * 1.35, yk = PE.lerp(y0, y - bh / 2, s4 > .55 ? (s4 - .55) / .45 : 0);
+        const merged = s4 > .55 ? (s4 - .55) / .45 : 0;
+        PE.box(ctx, x - bw / 2, yk, bw, bh, merged > .5 ? green : blue, merged > .7 ? '' : labs[k], s4 * (k === 1 ? 1 : 1 - merged * .99));
+        if (merged < .5) { ctx.globalAlpha = s4 * (1 - merged * 2) * .7; PE.polyline(ctx, [[x + bw / 2 + 6, yk + bh / 2], [x + bw / 2 + 6, mem]], red, 1.2, [3, 3]); ctx.globalAlpha = 1; }
+      }
+      if (s4 > .8) { PE.label(ctx, 'fused kernel', x, y + 4, green, 12, 'center'); ctx.globalAlpha = (s4 - .8) / .2; PE.polyline(ctx, [[x + bw / 2 + 6, y], [x + bw / 2 + 6, mem]], red, 1.2, [3, 3]); ctx.globalAlpha = 1; }
+    }
+    // labels
+    for (let k = 0; k < 5; k++) {
+      const a = k === 0 ? s0 : seg(t, [0, 2, 3.2, 4.4, 5.6][k] - .2, [0, 2, 3.2, 4.4, 5.6][k] + .4);
+      if (a <= 0) continue;
+      const { x, y } = L.st[k], top = y - L.tile / 2 - 10, bot = y + L.tile / 2 + (k === 4 ? 26 : 18);
+      ctx.globalAlpha = a;
+      PE.label(ctx, names[k], x, top, k === 0 ? blue : k === 4 ? green : yellow, fs + 1, 'center');
+      const words = notes[k].split(' '), lines = [], maxW = L.cw * .92;
+      ctx.font = `400 ${fs}px system-ui, sans-serif`;
+      words.forEach(wd => { const cur = lines[lines.length - 1]; if (cur && ctx.measureText(cur + ' ' + wd).width < maxW) lines[lines.length - 1] = cur + ' ' + wd; else lines.push(wd); });
+      lines.forEach((ln, i) => PE.label(ctx, ln, x, bot + i * (fs + 3), k === 0 ? mut : fg, fs, 'center', 400));
+      ctx.globalAlpha = 1;
+    }
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 620 ? 1.62 : .36), draw);
+  function replay() {
+    cancelAnimationFrame(raf);
+    if (PE.instant()) { T.t = END; cv.redraw(); return; }
+    const t0 = performance.now();
+    const f = now => { T.t = Math.min(END, (now - t0) / 1000); cv.redraw(); if (T.t < END) raf = requestAnimationFrame(f); };
+    raf = requestAnimationFrame(f);
+  }
+  replay();
+  return { replay, redraw: cv.redraw, resize: cv.resize, destroy: () => { cancelAnimationFrame(raf); cv.destroy(); } };
+};
+
+/* Roofline: FLOPs and bytes per layer are exact for the stated shape (each tensor read or written once);
+   the GPU limits are a toy with a 1:8:16 FP32:FP16:INT8 math ratio and one memory bandwidth. */
+KIT.ROOF_GPU = { bw: 500e9, peak: { fp32: 12.5e12, fp16: 100e12, int8: 200e12 } };
+KIT.ROOF_PREC = { fp32: { w: 4, a: 4, math: 'fp32', name: 'FP32' }, fp16: { w: 2, a: 2, math: 'fp16', name: 'FP16' },
+  int8: { w: 1, a: 1, math: 'int8', name: 'INT8' }, w4: { w: .5, a: 2, math: 'fp16', name: '4-bit weights, FP16 math' } };
+KIT.ROOF_LAYERS = [
+  { key: 'c3', name: '3x3 conv, 256 ch, 40x40', short: '3x3 conv', kind: 'conv', cin: 256, cout: 256, k: 3, hw: 40 },
+  { key: 'hi', name: '3x3 conv, 64 ch, 160x160', short: 'early conv', kind: 'conv', cin: 64, cout: 64, k: 3, hw: 160 },
+  { key: 'c1', name: '1x1 conv, 256 -> 64, 40x40', short: '1x1 conv', kind: 'conv', cin: 256, cout: 64, k: 1, hw: 40 },
+  { key: 'dw', name: '3x3 depthwise, 256 ch, 40x40', short: 'depthwise', kind: 'dw', c: 256, k: 3, hw: 40 },
+  { key: 'hd', name: '3x3 head conv, 256 ch, 5x5', short: 'head on 5x5', kind: 'conv', cin: 256, cout: 256, k: 3, hw: 5 },
+  { key: 'fc', name: 'linear 4096 -> 4096, 1 token', short: 'LLM, 1 token', kind: 'fc', din: 4096, dout: 4096, tokens: 1 },
+];
+KIT.roofCost = (L, prec) => {
+  const P = KIT.ROOF_PREC[prec];
+  let flops, params, acts;
+  if (L.kind === 'conv') { const px = L.hw * L.hw; flops = 2 * px * L.cout * L.cin * L.k * L.k; params = L.cin * L.cout * L.k * L.k; acts = px * (L.cin + L.cout); }
+  else if (L.kind === 'dw') { const px = L.hw * L.hw; flops = 2 * px * L.c * L.k * L.k; params = L.c * L.k * L.k; acts = 2 * px * L.c; }
+  else { flops = 2 * L.tokens * L.din * L.dout; params = L.din * L.dout; acts = L.tokens * (L.din + L.dout); }
+  const bytes = params * P.w + acts * P.a, ai = flops / bytes, G = KIT.ROOF_GPU, peak = G.peak[P.math];
+  const tMath = flops / peak, tMem = bytes / G.bw, time = Math.max(tMath, tMem);
+  return { flops, bytes, params, acts, ai, tMath, tMem, time, bound: tMath >= tMem ? 'math' : 'memory', perf: flops / time };
+};
+KIT.roofline = (el, opts = {}) => {
+  const S = { prec: 'fp16', sel: 'c3', ai: {}, perf: {}, roof: 1, fig: opts.fig };
+  const keys = KIT.ROOF_LAYERS.map(L => L.key);
+  const target = prec => { const o = {}; KIT.ROOF_LAYERS.forEach(L => { const c = KIT.roofCost(L, prec); o['a_' + L.key] = Math.log10(c.ai); o['p_' + L.key] = Math.log10(c.perf); }); o.roof = Math.log10(KIT.ROOF_GPU.peak[KIT.ROOF_PREC[prec].math]); return o; };
+  Object.assign(S, target('fp16'));
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, C = n => PE.css(n);
+    const b = { x: narrow ? 46 : 64, y: narrow ? 30 : 22, w: w - (narrow ? 58 : 84), h: h - (narrow ? 78 : 66) - (opts.bottomPad || 0) };
+    const xr = [.25, 4000], yr = [1e10, 4e14];
+    const A = PE.axes(ctx, b, xr, yr, { logx: true, logy: true, xt: [1, 10, 100, 1000], yt: [1e11, 1e12, 1e13, 1e14],
+      yf: v => (v / 1e12) + 'T', xl: 'arithmetic intensity: operations per byte moved (log)', yl: 'ops per second (log)', ylo: narrow ? 36 : 48 });
+    const bw = KIT.ROOF_GPU.bw, mut = C('--muted');
+    // faint roofs for the other precisions, bold roof for the current one
+    const curMath = KIT.ROOF_PREC[S.prec].math;
+    for (const p of ['fp32', 'fp16', 'int8']) {
+      const cur = p === curMath, peak = cur ? Math.pow(10, S.roof) : KIT.ROOF_GPU.peak[p], ridge = peak / bw;
+      const pts = [[A.X(xr[0]), A.Y(Math.max(yr[0], xr[0] * bw))], [A.X(ridge), A.Y(peak)], [A.X(xr[1]), A.Y(peak)]];
+      const gl = glow(cur ? 'roof' : '');
+      PE.polyline(ctx, pts, cur ? C('--fg') : mut, cur ? 2.2 + 2 * gl : 1, cur ? null : [4, 4], cur ? 1 : .55);
+      PE.label(ctx, KIT.ROOF_PREC[p].name + ' math limit', A.X(xr[1]) - 4, A.Y(peak) - 5, cur ? C('--fg') : mut, 11, 'right', cur ? 600 : 400);
+    }
+    const gm = glow('mem');
+    PE.label(ctx, 'memory limit', A.X(1.1), A.Y(1.1 * bw) - 8, gm > 0 ? C('--red') : mut, 11, 'left', 400);
+    if (gm > 0) PE.polyline(ctx, [[A.X(xr[0]), A.Y(Math.max(yr[0], xr[0] * bw))], [A.X(Math.pow(10, S.roof) / bw), A.Y(Math.pow(10, S.roof))]], C('--red'), 2 + 3 * gm, null, gm);
+    // layer points; an unselected label that would collide with the selected dot is dropped
+    const selL = KIT.ROOF_LAYERS.find(L => L.key === S.sel), sx = A.X(Math.pow(10, S['a_' + selL.key])), sy = A.Y(Math.pow(10, S['p_' + selL.key]));
+    KIT.ROOF_LAYERS.forEach(L => {
+      const x = A.X(Math.pow(10, S['a_' + L.key])), y = A.Y(Math.pow(10, S['p_' + L.key])), sel = L.key === S.sel;
+      const color = S.prec === 'fp32' || S.prec === 'fp16' ? C('--blue') : C('--yellow');
+      PE.dot(ctx, x, y, sel ? 7 : 4.5, color, sel ? 1 : .55);
+      if (sel) PE.ring(ctx, x, y, 11 + 6 * glow('point'), color, 1.5, .8);
+      if (sel || (!narrow && (Math.abs(x - sx) > 60 || Math.abs(y - sy) > 24))) PE.label(ctx, L.short, x + (sel ? 12 : 8), y + (sel ? -10 : 14), sel ? C('--fg') : mut, sel ? 12 : 10, 'left', sel ? 600 : 400);
+    });
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? .95 : .56), draw);
+  let stop = () => {};
+  function set(next) {
+    if (next.sel) S.sel = next.sel;
+    if (next.prec && next.prec !== S.prec) { S.prec = next.prec; stop(); stop = KIT.tween(S, target(S.prec), 700, cv.redraw); }
+    cv.redraw();
+  }
+  function info() {
+    const L = KIT.ROOF_LAYERS.find(l => l.key === S.sel), c = KIT.roofCost(L, S.prec), base = KIT.roofCost(L, 'fp32');
+    return { L, c, speedup: base.time / c.time, prec: KIT.ROOF_PREC[S.prec].name };
+  }
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.roofText = i => `<b>${i.L.name}</b>, ${i.prec}: ${KIT.fmt(i.c.flops)} operations, ${KIT.bytes(i.c.bytes)} moved, ` +
+  `${i.c.ai >= 10 ? Math.round(i.c.ai) : i.c.ai.toFixed(1)} operations per byte. ` +
+  `<b class="${i.c.bound === 'memory' ? 'c-red' : 'c-green'}">${i.c.bound === 'memory' ? 'Memory-bound' : 'Math-bound'}</b>: ` +
+  `${(i.c.time * 1e6).toFixed(i.c.time < 1e-5 ? 2 : 1)} \u00b5s on the toy GPU, ${i.speedup.toFixed(1)}${KIT.times} faster than FP32.`;
+
+/* Map: arXiv title-keyword counts per year (notes/scan/arxiv-counts-2026-10-09.json, queried 2026-10-09; 2026 partial). */
+KIT.SCAN = { years: [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026], data: {
+  distillation: { all: [0, 8, 12, 20, 68, 159, 301, 414, 556, 821, 1007, 1257, 1924], llm: [0, 0, 0, 0, 0, 4, 5, 16, 19, 62, 151, 187, 316], dense_vision: [0, 0, 0, 2, 5, 11, 26, 55, 86, 103, 95, 113, 115] },
+  quantization: { all: [5, 8, 20, 32, 86, 126, 177, 176, 217, 285, 432, 600, 770], llm: [0, 0, 0, 0, 1, 0, 1, 4, 5, 49, 127, 160, 252], dense_vision: [0, 0, 1, 2, 2, 7, 3, 2, 3, 10, 11, 21, 17] },
+  pruning: { all: [7, 7, 20, 33, 76, 126, 207, 203, 221, 288, 392, 545, 577], llm: [0, 0, 0, 0, 2, 1, 0, 4, 8, 31, 88, 167, 170], dense_vision: [0, 1, 2, 0, 3, 5, 5, 9, 10, 15, 12, 26, 15] },
+} };
+
+/* Map chart: small multiples of KIT.SCAN, all titles as neutral bars, the chosen title subset overlaid. */
+KIT.mapchart = (el, opts = {}) => {
+  const S = { split: 'llm', u: 1 }, topics = ['distillation', 'quantization', 'pruning'], Y = KIT.SCAN.years;
+  const prev = { split: 'llm' };
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, C = n => PE.css(n), fg = C('--fg'), mut = C('--muted'), p2 = C('--panel2'), rule = C('--rule');
+    const n = topics.length, gap = narrow ? 34 : 26;
+    const pw = narrow ? w - 52 : (w - 52 - gap * (n - 1)) / n, ph = narrow ? (h - 30 - gap * n) / n : h - 70;
+    topics.forEach((t, k) => {
+      const x0 = 44 + (narrow ? 0 : k * (pw + gap)), y0 = narrow ? 22 + k * (ph + gap) : 26;
+      const all = KIT.SCAN.data[t].all, top = Math.max(...all) * 1.08, bw = pw / Y.length;
+      const sub = KIT.SCAN.data[t][S.split], old = KIT.SCAN.data[t][prev.split];
+      ctx.strokeStyle = rule; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, y0 + ph); ctx.lineTo(x0 + pw, y0 + ph); ctx.stroke();
+      [0, .5, 1].forEach(f => { const v = Math.round(top * f / 100) * 100, y = y0 + ph - ph * v / top;
+        if (f) { ctx.globalAlpha = .5; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + pw, y); ctx.stroke(); ctx.globalAlpha = 1; }
+        PE.label(ctx, String(v), x0 - 5, y + 4, mut, 10, 'right', 400); });
+      Y.forEach((yr, i) => {
+        const x = x0 + i * bw + bw * .14, bwi = bw * .72, ha = ph * all[i] / top;
+        ctx.fillStyle = p2; ctx.fillRect(x, y0 + ph - ha, bwi, ha);
+        if (yr === 2026) { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = mut; ctx.strokeRect(x + .5, y0 + ph - ha + .5, bwi - 1, ha - 1); ctx.restore(); }
+        const v = PE.lerp(old[i], sub[i], S.u), hs = ph * v / top;
+        ctx.fillStyle = fg; ctx.fillRect(x, y0 + ph - hs, bwi, hs);
+        if (i % (narrow ? 3 : 4) === 0 || i === Y.length - 1) PE.label(ctx, String(yr), x + bwi / 2, y0 + ph + 13, mut, 10, 'center', 400);
+      });
+      PE.label(ctx, t, x0, y0 - 8, fg, 12, 'left', 600);
+    });
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.35 : .42), draw);
+  let stop = () => {};
+  function set(next) {
+    if (next.split && next.split !== S.split) { prev.split = S.split; S.split = next.split; S.u = 0; stop(); stop = KIT.tween(S, { u: 1 }, 650, cv.redraw); }
+    cv.redraw();
+  }
+  return { set, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.mapText = split => {
+  const i = KIT.SCAN.years.indexOf(2025), d = KIT.SCAN.data, name = { all: 'all titles', llm: 'titles that name an LLM or language model', dense_vision: 'titles that name detection or segmentation' }[split];
+  return `In 2025, ${name}: ` + ['distillation', 'quantization', 'pruning'].map(t => `${t} ${d[t][split][i]} of ${d[t].all[i]}`).join(', ') + '. The dashed 2026 bars stop at 2026-10-09.';
+};
+
+/* Family tree: lanes by lever, time runs down (desktop) or one dated column (phones). Pills are buttons. */
+KIT.TREE = {
+  lanes: ['Distillation', 'Quantization, vision', 'Pruning', 'LLM era', 'Formats, compilers'],
+  nodes: [
+    ['bengio', 1, '1308.3432', 'STE', 'Bengio et al.: estimating gradients through hard thresholds; the identity straight-through estimator.'],
+    ['fitnets', 0, '1412.6550', 'FitNets', 'Romero et al.: distill intermediate features ("hints") through a small regressor.'],
+    ['hinton', 0, '1503.02531', 'Distillation', 'Hinton, Vinyals, Dean: train a student on the teacher\'s softmax at a raised temperature.'],
+    ['han15', 2, '1506.02626', 'Prune + retrain', 'Han et al.: remove small weights, retrain the rest.'],
+    ['dc', 2, '1510.00149', 'Deep Compression', 'Han, Mao, Dally: pruning, k-means weight sharing and Huffman coding in one pipeline.'],
+    ['lifilt', 2, '1608.08710', 'Filter pruning', 'Li et al.: remove whole convolution filters by L1 norm, so the dense layer shrinks.'],
+    ['slim', 2, '1708.06519', 'Network slimming', 'Liu et al.: an L1 penalty on BatchNorm scales picks channels to remove.'],
+    ['jacob', 1, '1712.05877', 'Integer-only', 'Jacob et al.: scale and zero-point, integer-only matrix multiply, quantization-aware training.'],
+    ['tvm', 4, '1802.04799', 'TVM', 'Chen et al.: an open deep-learning compiler with operator fusion and learned tuning.'],
+    ['lth', 2, '1803.03635', 'Lottery ticket', 'Frankle, Carbin: sparse subnetworks that train well from their original initialization.'],
+    ['pact', 1, '1805.06085', 'PACT', 'Choi et al.: learn the activation clipping value during training.'],
+    ['krish', 1, '1806.08342', 'Whitepaper 2018', 'Krishnamoorthi: per-channel weights, the clipped STE, practical recommendations.'],
+    ['rethink', 2, '1810.05270', 'Rethinking pruning', 'Liu et al.: a structurally pruned network trained from scratch does as well as fine-tuning.'],
+    ['lsq', 1, '1902.08153', 'LSQ', 'Esser et al.: learn the quantizer step size with a scaled gradient.'],
+    ['dfq', 1, '1906.04721', 'Data-free (CLE)', 'Nagel et al.: cross-layer equalization and bias correction without data.'],
+    ['wang', 0, '1906.03609', 'Detector imitation', 'Wang et al.: distill a detector by imitating features near objects.'],
+    ['lmc', 2, '1912.05671', 'Rewinding', 'Frankle et al.: at scale, reset to an early iteration instead of initialization.'],
+    ['blalock', 2, '2003.03033', 'State of pruning', 'Blalock et al.: pruning results are hard to compare; no standard benchmarks.'],
+    ['wu', 1, '2004.09602', 'NVIDIA INT8 study', 'Wu et al.: calibration methods, per-channel weights and QAT measured on detectors and segmenters.'],
+    ['adaround', 1, '2004.10568', 'AdaRound', 'Nagel et al.: learn whether each weight rounds up or down.'],
+    ['deit', 0, '2012.12877', 'DeiT', 'Touvron et al.: a distillation token for vision transformers with a convnet teacher.'],
+    ['brecq', 1, '2102.05426', 'BRECQ', 'Li et al.: reconstruct block outputs to push post-training quantization to 4 bits and below.'],
+    ['nm', 2, '2104.08378', '2:4 sparsity', 'Mishra et al.: two of every four weights zero, run on sparse tensor cores.'],
+    ['nagel', 1, '2106.08295', 'White paper 2021', 'Nagel et al.: the standard PTQ and QAT pipelines and a debugging flow.'],
+    ['ptq4vit', 1, '2111.12293', 'PTQ4ViT', 'Yuan et al.: grids for the post-softmax and post-GELU shapes in vision transformers.'],
+    ['int8', 3, '2208.07339', 'LLM.int8()', 'Dettmers et al.: keep outlier feature dimensions in FP16, the rest in INT8.'],
+    ['obc', 3, '2208.11580', 'OBC', 'Frantar et al.: exact second-order (OBS) compression, one weight at a time.'],
+    ['fp8', 4, '2209.05433', 'FP8 formats', 'Micikevicius et al.: the E4M3 and E5M2 eight-bit floating-point formats.'],
+    ['gptq', 3, '2210.17323', 'GPTQ', 'Frantar et al.: column-by-column rounding with Hessian error feedback, 3-4 bit weights.'],
+    ['smooth', 3, '2211.10438', 'SmoothQuant', 'Xiao et al.: move activation outliers into the weights with a per-channel scale.'],
+    ['sparsegpt', 3, '2301.00774', 'SparseGPT', 'Frantar, Alistarh: one-shot pruning with the same reconstruction machinery.'],
+    ['fp8int8', 4, '2303.17951', 'FP8 vs INT8', 'van Baalen et al.: for inference, INT8 is often as accurate and cheaper in silicon.'],
+    ['awq', 3, '2306.00978', 'AWQ', 'Lin et al.: protect the weight channels that see large activations by scaling them.'],
+    ['wanda', 3, '2306.11695', 'Wanda', 'Sun et al.: prune by weight magnitude times input activation norm.'],
+    ['trt', 4, null, 'TensorRT 11', 'NVIDIA TensorRT 11.4 docs: fusion, tactic selection, explicit Q/DQ quantization.'],
+  ],
+  edges: [['fitnets', 'wang'], ['hinton', 'wang'], ['hinton', 'deit'], ['bengio', 'jacob'], ['jacob', 'krish'], ['krish', 'wu'], ['pact', 'lsq'],
+    ['dfq', 'nagel'], ['adaround', 'brecq'], ['adaround', 'nagel'], ['wu', 'nagel'], ['han15', 'dc'], ['dc', 'lth'], ['lth', 'lmc'], ['lifilt', 'rethink'],
+    ['slim', 'rethink'], ['obc', 'gptq'], ['obc', 'sparsegpt'], ['gptq', 'sparsegpt'], ['int8', 'smooth'], ['dfq', 'smooth'], ['smooth', 'awq'],
+    ['gptq', 'awq'], ['sparsegpt', 'wanda'], ['fp8', 'fp8int8'], ['nm', 'trt'], ['fp8', 'trt'], ['tvm', 'trt']],
+};
+KIT.treeDate = id => id ? '20' + id.slice(0, 2) + '-' + id.slice(2, 4) : '2026';
+KIT.tree = (host, opts = {}) => {
+  const T = KIT.TREE, byKey = Object.fromEntries(T.nodes.map(n => [n[0], n]));
+  host.style.position = 'relative';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('aria-hidden', 'true');
+  svg.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible';
+  host.appendChild(svg);
+  const pills = T.nodes.map(n => { const b = document.createElement('button'); b.type = 'button'; b.id = 'btn-tree-' + n[0]; b.className = 'tree-pill';
+    b.textContent = n[3]; b.setAttribute('aria-pressed', 'false'); b.title = n[3] + ', ' + KIT.treeDate(n[2]); host.appendChild(b); return b; });
+  const S = { sel: null };
+  const t2y = id => { const d = KIT.treeDate(id); return +d.slice(0, 4) + (+(d.slice(5, 7) || 6) - 1) / 12; };
+  let pos = {};
+  function layout() {
+    const w = host.clientWidth, narrow = w < 640;
+    pos = {};
+    if (narrow) {
+      const order = T.nodes.slice().sort((a, b) => t2y(a[2]) - t2y(b[2]));
+      order.forEach((n, i) => { pos[n[0]] = { x: 64, y: 8 + i * 34 }; });
+      host.style.height = (order.length * 34 + 16) + 'px';
+    } else {
+      // one row per paper in date order: the vertical order is exact, the spacing is not to scale
+      const lw = (w - 60) / T.lanes.length, y0 = 40;
+      T.nodes.slice().sort((a, b) => t2y(a[2]) - t2y(b[2])).forEach((n, i) => { pos[n[0]] = { x: 60 + lw * n[1] + 6, y: y0 + i * 27, lw }; });
+      host.style.height = (y0 + T.nodes.length * 27 + 12) + 'px';
+    }
+    pills.forEach((b, i) => { const p = pos[T.nodes[i][0]]; b.style.left = p.x + 'px'; b.style.top = p.y + 'px';
+      b.style.maxWidth = narrow ? (w - 76) + 'px' : (p.lw - 14) + 'px'; });
+    draw(narrow, w);
+  }
+  function draw(narrow, w) {
+    const mut = PE.css('--muted'), fg = PE.css('--fg'), rule = PE.css('--rule');
+    let s = '';
+    if (narrow) {
+      T.nodes.slice().sort((a, b) => t2y(a[2]) - t2y(b[2])).forEach(n => { const p = pos[n[0]];
+        s += `<text x="0" y="${p.y + 17}" font-size="11" fill="${mut}" font-family="system-ui">${KIT.treeDate(n[2])}</text>`; });
+    } else {
+      const lw = (w - 60) / T.lanes.length;
+      T.lanes.forEach((l, i) => { s += `<text x="${60 + lw * i + 6}" y="22" font-size="12" font-weight="600" fill="${fg}" font-family="system-ui">${l}</text>`;
+        if (i) s += `<line x1="${60 + lw * i - 4}" y1="30" x2="${60 + lw * i - 4}" y2="100%" stroke="${rule}"/>`; });
+      let lastYear = '';
+      T.nodes.slice().sort((a, b) => t2y(a[2]) - t2y(b[2])).forEach(n => { const yr = KIT.treeDate(n[2]).slice(0, 4), p = pos[n[0]];
+        if (yr !== lastYear) { lastYear = yr; s += `<text x="0" y="${p.y + 16}" font-size="11" fill="${mut}" font-family="system-ui">${yr}</text>`;
+          s += `<line x1="34" y1="${p.y - 2}" x2="100%" y2="${p.y - 2}" stroke="${rule}" opacity=".6"/>`; } });
+      T.edges.forEach(([a, b]) => { const A = pills[T.nodes.indexOf(byKey[a])], B = pills[T.nodes.indexOf(byKey[b])];
+        const on = S.sel && (S.sel === a || S.sel === b);
+        const x1 = A.offsetLeft + A.offsetWidth / 2, y1 = A.offsetTop + A.offsetHeight, x2 = B.offsetLeft + B.offsetWidth / 2, y2 = B.offsetTop;
+        s += `<path d="M${x1},${y1} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2}" fill="none" stroke="${on ? fg : mut}" stroke-width="${on ? 1.8 : 1}" opacity="${on ? 1 : .35}"/>`; });
+    }
+    svg.innerHTML = s;
+  }
+  function set(next) { if ('sel' in next) S.sel = next.sel; pills.forEach((b, i) => b.setAttribute('aria-pressed', String(T.nodes[i][0] === S.sel))); draw(host.clientWidth < 640, host.clientWidth); }
+  const ro = new ResizeObserver(layout); ro.observe(host);
+  const off = PE.onTheme(() => draw(host.clientWidth < 640, host.clientWidth));
+  layout();
+  return { set, state: S, pills, destroy: () => { ro.disconnect(); off(); } };
+};
+KIT.treeText = key => {
+  const T = KIT.TREE, n = T.nodes.find(x => x[0] === key); if (!n) return 'Select a paper to see what it did and what it builds on.';
+  const from = T.edges.filter(e => e[1] === key).map(e => T.nodes.find(x => x[0] === e[0])[3]);
+  const to = T.edges.filter(e => e[0] === key).map(e => T.nodes.find(x => x[0] === e[1])[3]);
+  return `<b>${n[3]}</b> (${n[2] ? 'arXiv ' + n[2] + ', ' : ''}${KIT.treeDate(n[2])}). ${n[4]}` +
+    (from.length ? ` Builds on: ${from.join(', ')}.` : '') + (to.length ? ` Leads to: ${to.join(', ')}.` : '');
+};
+
+/* Temperature toy for knowledge distillation. The logits are ours (one "truck" image, six classes); the formulas are
+   Hinton 2015 Eq. 1 (softmax at temperature T), Eq. 2 (soft-loss gradient (q - p) / T) and Eq. 4 (its high-T limit,
+   computed on zero-meaned logits, since the softmax ignores a shift). Glow words: teacher, student, logits, temp, gap,
+   kl, hard, tsq, plain, limit. */
+KIT.TEMP_TOY = { classes: ['truck', 'bus', 'car', 'motorbike', 'person', 'cat'],
+  v: [9, 6, 4.5, 2, 0.5, -2], z: [7, 2.5, 4.5, 3, 2, 2.5], label: 0 };
+KIT.tempSoft = (a, T) => { const m = Math.max(...a), e = a.map(x => Math.exp((x - m) / T)), s = e.reduce((u, x) => u + x, 0); return e.map(x => x / s); };
+KIT.tempCore = (T, toy = KIT.TEMP_TOY) => {
+  const { v, z } = toy, N = v.length, p = KIT.tempSoft(v, T), q = KIT.tempSoft(z, T), q1 = KIT.tempSoft(z, 1);
+  const norm = a => Math.sqrt(a.reduce((s, x) => s + x * x, 0)), mean = a => a.reduce((s, x) => s + x, 0) / a.length;
+  const kl = p.reduce((s, pi, i) => s + pi * Math.log(pi / q[i]), 0);
+  const gap = q.map((qi, i) => qi - p[i]), g = norm(gap) / T;
+  const hard = norm(q1.map((x, i) => x - (i === toy.label ? 1 : 0)));
+  const mz = mean(z), mv = mean(v), lim = norm(z.map((x, i) => (x - mz) - (v[i] - mv))) / N;
+  return { T, p, q, q1, kl, gap, g, gT2: g * T * T, hard, limit: lim / (T * T), limitT2: lim };
+};
+KIT.temp = (el, opts = {}) => {
+  const toy = KIT.TEMP_TOY, N = toy.classes.length;
+  const S = { T: 1, Tt: 1, k: 0, t2: false };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const curve = []; for (let T = 1; T <= 20.001; T += .25) curve.push(KIT.tempCore(T, toy));
+  const f2 = x => x >= .1 ? x.toFixed(2) : x >= .001 ? x.toFixed(3) : '<.001';
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const C = n => PE.css(n), B = C('--blue'), Y = C('--yellow'), R = C('--red'), F = C('--fg'), M = C('--muted');
+    const narrow = w < 560, H = h - (opts.bottomPad || 0), c = KIT.tempCore(S.T, toy), fs = narrow ? 10 : 11;
+    // panel boxes: probabilities (b1) and gradient size vs T (b2)
+    let b1, b2;
+    if (narrow) {
+      const h1 = Math.round(H * .56);
+      b1 = { x: 44, y: 46, w: w - 54, h: h1 - 46 - 52 };
+      b2 = { x: 52, y: h1 + 44, w: w - 66, h: H - h1 - 44 - 40 };
+    } else {
+      const wl = Math.round(w * .56);
+      b1 = { x: 58, y: 50, w: wl - 70, h: H - 50 - 62 };
+      b2 = { x: wl + 64, y: 50, w: w - wl - 64 - 16, h: H - 50 - 46 };
+    }
+    // left: teacher (blue) and student (yellow) softmax at temperature T
+    const A = PE.axes(ctx, b1, [0, 1], [0, 1], { yt: [0, .5, 1], yl: 'probability', ylo: narrow ? 30 : 38 });
+    const gt = glow('temp');
+    ctx.save(); if (gt > 0) { ctx.globalAlpha = .25 * gt; ctx.fillStyle = Y; ctx.fillRect(b1.x + 2, b1.y - 36, 92, 24); } ctx.restore();
+    PE.label(ctx, 'T = ' + S.T.toFixed(1), b1.x + 6, b1.y - 18, F, narrow ? 14 : 16, 'left', 700);
+    const gk = glow('kl');
+    PE.label(ctx, 'KL(teacher || student) = ' + c.kl.toFixed(3), b1.x + b1.w, b1.y - 18, R, (narrow ? 11 : 12) + 2 * gk, 'right', 600 + (gk > .3 ? 100 : 0));
+    const gw = b1.w / N, bw = Math.min(gw * .3, 28), gl = glow('logits'), gh = glow('hard');
+    if (gl > 0) { ctx.save(); ctx.globalAlpha = .2 * gl; ctx.fillStyle = Y; ctx.fillRect(b1.x - 40, b1.y + b1.h + 22, b1.w + 40, 30); ctx.restore(); }
+    PE.label(ctx, 'v/T', b1.x - 6, b1.y + b1.h + 34, B, fs, 'right');
+    PE.label(ctx, 'z/T', b1.x - 6, b1.y + b1.h + 48, Y, fs, 'right');
+    toy.classes.forEach((name, i) => {
+      const cx = b1.x + gw * (i + .5), xt = cx - bw - 1, xs = cx + 1;
+      const yp = A.Y(c.p[i]), yq = A.Y(c.q[i]), y0 = A.Y(0);
+      const gT = glow('teacher'), gS = glow('student');
+      ctx.fillStyle = B; ctx.fillRect(xt, yp, bw, y0 - yp);
+      if (gT > 0) { ctx.save(); ctx.strokeStyle = B; ctx.lineWidth = 3 * gT; ctx.strokeRect(xt - 2, yp - 2, bw + 4, y0 - yp + 2); ctx.restore(); }
+      ctx.save(); ctx.globalAlpha = .9; ctx.fillStyle = Y; ctx.fillRect(xs, yq, bw, y0 - yq); ctx.restore();
+      if (gS > 0) { ctx.save(); ctx.strokeStyle = Y; ctx.lineWidth = 3 * gS; ctx.strokeRect(xs - 2, yq - 2, bw + 4, y0 - yq + 2); ctx.restore(); }
+      if (!narrow) PE.label(ctx, f2(c.p[i]), xt + bw / 2, yp - 5, B, 10, 'center', 500);
+      // red arrow: the soft loss pulls the student's probability toward the teacher's
+      const ga = glow('gap');
+      if (Math.abs(yp - yq) > 7) PE.arrow(ctx, xs + bw / 2, yq, xs + bw / 2, yp, R, 2 + 2 * ga, 7);
+      const isL = i === toy.label;
+      PE.label(ctx, isL ? name + ' (y)' : name, cx, b1.y + b1.h + 17, isL ? F : M, fs, 'center', isL ? 700 : 500);
+      if (isL && gh > 0) PE.ring(ctx, cx, b1.y + b1.h + 13, 30, R, 2, gh);
+      PE.label(ctx, (toy.v[i] / S.T).toFixed(narrow && S.T > 1.5 ? 1 : 2), cx, b1.y + b1.h + 34, B, fs, 'center', 500);
+      PE.label(ctx, (toy.z[i] / S.T).toFixed(narrow && S.T > 1.5 ? 1 : 2), cx, b1.y + b1.h + 48, Y, fs, 'center', 500);
+    });
+    // right: size of the soft-loss gradient against T, without and with the T^2 factor (log scale)
+    PE.label(ctx, 'soft-loss gradient size |dC/dz| (log scale)', b2.x, b2.y - 18, M, fs, 'left', 500);
+    const A2 = PE.axes(ctx, b2, [1, 20], [.001, 3], { logy: true, xt: [1, 5, 10, 15, 20], yt: [.001, .01, .1, 1],
+      xl: 'temperature T', yl: 'gradient size', ylo: narrow ? 38 : 44 });
+    const cl = y => Math.max(.001, Math.min(3, y));
+    const gp = glow('plain'), g2 = glow('tsq'), gL = glow('limit');
+    const aP = 1 - .7 * S.k, a2 = .3 + .7 * S.k;
+    PE.polyline(ctx, curve.map(d => [A2.X(d.T), A2.Y(cl(d.limit))]), M, 1.3 + 2 * gL, [2, 4], (.35 + .5 * (1 - S.k)) + gL * .3);
+    PE.polyline(ctx, curve.map(d => [A2.X(d.T), A2.Y(cl(d.limitT2))]), M, 1.3 + 2 * gL, [2, 4], (.35 + .5 * S.k) + gL * .3);
+    PE.label(ctx, 'Eq. 4 limit', A2.X(1) + 4, A2.Y(c.limitT2) - 6, M, 10, 'left', 500);
+    PE.polyline(ctx, [[A2.X(1), A2.Y(c.hard)], [A2.X(20), A2.Y(c.hard)]], M, 1.4 + 2 * gh, [8, 5], .9);
+    PE.label(ctx, 'hard-label gradient', A2.X(20) - 2, A2.Y(c.hard) + 13, gh > 0 ? R : M, 10, 'right', 500);
+    PE.polyline(ctx, curve.map(d => [A2.X(d.T), A2.Y(cl(d.g))]), R, 2.2 + 2 * gp, S.k > .5 ? [5, 4] : null, PE.clamp(aP + gp, 0, 1));
+    PE.polyline(ctx, curve.map(d => [A2.X(d.T), A2.Y(cl(d.gT2))]), R, 2.2 + 2 * g2, S.k > .5 ? null : [5, 4], PE.clamp(a2 + g2, 0, 1));
+    const last = curve[curve.length - 1];
+    PE.label(ctx, 'with T\u00b2', A2.X(20) - 2, A2.Y(last.gT2) + 15, R, fs, 'right', S.k > .5 ? 700 : 500);
+    PE.label(ctx, 'without T\u00b2', A2.X(20) - 2, A2.Y(last.g) - 8, R, fs, 'right', S.k > .5 ? 500 : 700);
+    const xm = A2.X(S.T);
+    PE.polyline(ctx, [[xm, b2.y], [xm, b2.y + b2.h]], M, 1 + 2 * gt, [3, 3], .8);
+    PE.dot(ctx, xm, A2.Y(cl(c.g)), 4 + 2 * (1 - S.k), R, aP);
+    PE.dot(ctx, xm, A2.Y(cl(c.gT2)), 4 + 2 * S.k, R, a2);
+    const sel = S.k > .5 ? c.gT2 : c.g, ys = A2.Y(cl(sel));
+    PE.label(ctx, f2(sel), xm + (S.T > 14 ? -8 : 8), ys + (S.k > .5 ? -8 : 16), F, 12, S.T > 14 ? 'right' : 'left', 700);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.5 : .5), draw);
+  let stopT = () => {}, stopK = () => {};
+  function set(next) {
+    if ('T' in next) { S.Tt = PE.clamp(+next.T, 1, 20); stopT(); stopT = KIT.tween(S, { T: S.Tt }, 450, cv.redraw); }
+    if ('t2' in next) { S.t2 = !!next.t2; stopK(); stopK = KIT.tween(S, { k: S.t2 ? 1 : 0 }, 650, cv.redraw); }
+    cv.redraw();
+  }
+  const info = () => ({ ...KIT.tempCore(S.Tt, toy), t2: S.t2, classes: toy.classes });
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stopT(); stopK(); cv.destroy(); } };
+};
+KIT.tempText = i => {
+  const f = x => x >= .1 ? x.toFixed(2) : x.toFixed(3), r = x => x >= 1 ? x.toFixed(1) : x.toFixed(2);
+  const sel = i.t2 ? i.gT2 : i.g, oth = i.t2 ? i.g : i.gT2;
+  return `<b>T = ${i.T.toFixed(1)}</b>. Teacher: truck ${f(i.p[0])}, bus ${f(i.p[1])}, cat ${f(i.p[5])}. ` +
+    `Student: truck ${f(i.q[0])}, bus ${f(i.q[1])}, cat ${f(i.q[5])}. KL(teacher || student) = ${i.kl.toFixed(3)}. ` +
+    `Soft-loss gradient size ${i.t2 ? 'with' : 'without'} T<sup>2</sup>: <b class="c-red">${f(sel)}</b>, ` +
+    `${r(sel / i.hard)}${KIT.times} the hard-label gradient (${f(i.hard)}); ${i.t2 ? 'without' : 'with'} T<sup>2</sup> it would be ${f(oth)} (${r(oth / i.hard)}${KIT.times}).`;
+};
+
+/* viz-ruler: a toy activation sample on a number line, quantized exactly for a chosen range, bit-width and grid.
+   Asymmetric grid: unsigned codes 0..2^b-1 with a zero-point Z, range nudged so 0.0 is a grid point (Jacob Eq. 1,
+   Krishnamoorthi Eq. 1-2). Symmetric grid: signed codes in [-(2^(b-1)-1), 2^(b-1)-1], Z = 0 (Wu Eq. 6-7).
+   S is the step size. Errors are exact sums over the toy sample, divided by N: a value whose code hit the clamp
+   is clipping error, measured to the end grid point; every other value is rounding error. */
+KIT.RULER_X = [-2.5, 7.5];
+KIT.RULER_PROBE = 1.37;
+KIT.rulerSample = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const r = PE.rng(41), g = PE.gauss(r), N = 4000, xs = new Float64Array(N);
+    for (let i = 0; i < N; i++) xs[i] = r() < .8 ? .5 + .55 * g() : .3 - .9 * Math.log(1 - r());
+    let mn = Infinity, mx = -Infinity;
+    for (const x of xs) { if (x < mn) mn = x; if (x > mx) mx = x; }
+    cache = { xs, min: mn, max: mx, N };
+    return cache;
+  };
+})();
+KIT.RULER_PRESETS = { tight: () => [-.5, 1.6], minmax: () => { const s = KIT.rulerSample(); return [s.min, s.max]; }, wide: () => KIT.RULER_X.slice() };
+KIT.rulerGrid = (lo, hi, bits, sym) => {
+  if (sym) { const qmax = (1 << (bits - 1)) - 1, m = Math.max(-lo, hi, 1e-6); return { S: m / qmax, Z: 0, qmin: -qmax, qmax, sym, bits, levels: 2 * qmax + 1 }; }
+  const qmax = (1 << bits) - 1, S = Math.max(hi - lo, 1e-6) / qmax, Z = PE.clamp(Math.round(-lo / S), 0, qmax);
+  return { S, Z, qmin: 0, qmax, sym, bits, levels: qmax + 1 };
+};
+KIT.rulerCode = (G, r) => PE.clamp(Math.round(r / G.S) + G.Z, G.qmin, G.qmax);
+KIT.rulerStats = (xs, G) => {
+  let er = 0, ec = 0, nc = 0;
+  const counts = new Map();
+  for (const x of xs) {
+    const raw = Math.round(x / G.S) + G.Z, q = Math.min(G.qmax, Math.max(G.qmin, raw)), d = x - G.S * (q - G.Z);
+    if (raw !== q) { ec += d * d; nc++; } else er += d * d;
+    counts.set(q, (counts.get(q) || 0) + 1);
+  }
+  const N = xs.length;
+  return { round: er / N, clip: ec / N, mse: (er + ec) / N, nClip: nc, used: counts.size, counts, N };
+};
+KIT.rulerNum = v => v === 0 ? '0' : Math.abs(v) < 1e-3 ? v.toExponential(1) : (+v.toPrecision(2)).toString();
+// Two horizontal log-scale error bars; shared with viz-calib.
+KIT.rulerBars = (ctx, x0, y0, w, rows, glow) => {
+  const L = v => v <= 0 ? 0 : PE.clamp((Math.log10(v) + 7) / 7, 0, 1);
+  const red = PE.css('--red'), mut = PE.css('--muted'), fg = PE.css('--fg');
+  const lw = Math.min(150, w * .34), bx = x0 + lw, bwid = Math.max(40, w - lw - 70);
+  rows.forEach((row, i) => {
+    const y = y0 + i * 22, g = glow ? glow(row.link || '') : 0;
+    PE.label(ctx, row.name, x0, y + 11, g > 0 ? fg : mut, 11, 'left', 500);
+    ctx.save(); ctx.globalAlpha = .25; ctx.fillStyle = mut; ctx.fillRect(bx, y + 3, bwid, 10); ctx.restore();
+    const len = bwid * L(row.v);
+    ctx.save(); ctx.globalAlpha = row.alpha == null ? .9 : row.alpha; ctx.fillStyle = red; ctx.fillRect(bx, y + 3 - 2 * g, Math.max(len, row.v > 0 ? 2 : 0), 10 + 4 * g); ctx.restore();
+    PE.label(ctx, KIT.rulerNum(row.v), bx + Math.max(len, 0) + 6, y + 12, fg, 11, 'left', 600);
+  });
+  PE.label(ctx, 'log scale: 1e-7 to 1', bx + bwid, y0 + rows.length * 22 + 8, mut, 10, 'right', 400);
+};
+
+KIT.ruler = (el, opts = {}) => {
+  const smp = KIT.rulerSample(), xs = smp.xs, XR = KIT.RULER_X;
+  const S = { lo: smp.min, hi: smp.max, bits: 8, sym: false, u: 1, active: 'hi', drag: null };
+  let G = KIT.rulerGrid(S.lo, S.hi, S.bits, S.sym), st = KIT.rulerStats(xs, G), Gp = G, stp = st;
+  const NB = 120, bw = (XR[1] - XR[0]) / NB, hist = new Float64Array(NB);
+  for (const x of xs) { const i = Math.floor((x - XR[0]) / bw); if (i >= 0 && i < NB) hist[i]++; }
+  const dmax = Math.max(...hist) / (smp.N * bw);
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  let L = null;
+  const recompute = () => { G = KIT.rulerGrid(S.lo, S.hi, S.bits, S.sym); st = KIT.rulerStats(xs, G); };
+
+  function layout(w, h) {
+    const narrow = w < 560, pad = opts.bottomPad || 0;
+    const x0 = narrow ? 12 : 24, x1 = w - (narrow ? 12 : 24);
+    const top = narrow ? 34 : 30, usable = h - top - pad - (narrow ? 96 : 92);
+    const hTop = usable * .56, hBot = usable * .44 - 30;
+    const yA = top + hTop, yQ = yA + 34;
+    return { narrow, x0, x1, top, yA, yQ, hTop, hBot, yBars: yQ + hBot + (narrow ? 34 : 30), X: v => x0 + (v - XR[0]) / (XR[1] - XR[0]) * (x1 - x0), V: px => XR[0] + (px - x0) / (x1 - x0) * (XR[1] - XR[0]) };
+  }
+  function drawGrid(ctx, Lg, Gr, sv, alpha, gl) {
+    const yel = PE.css('--yellow'), sc = Lg.hBot / (dmax * 1.08);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = yel; ctx.fillStyle = yel;
+    const pxStep = Gr.S / (XR[1] - XR[0]) * (Lg.x1 - Lg.x0);
+    for (let q = Gr.qmin; q <= Gr.qmax; q++) {
+      const v = Gr.S * (q - Gr.Z); if (v < XR[0] || v > XR[1]) continue;
+      const x = Lg.X(v);
+      ctx.lineWidth = pxStep < 3 ? .6 : 1.2 + 1.5 * gl; ctx.globalAlpha = alpha * (pxStep < 3 ? .55 : .95);
+      ctx.beginPath(); ctx.moveTo(x, Lg.yA + 2); ctx.lineTo(x, Lg.yA + (q === Gr.Z ? 16 : 10)); ctx.stroke();
+    }
+    // quantized values as a density: each code's count spread over one step, hanging below the ruler
+    ctx.globalAlpha = alpha * .85;
+    ctx.beginPath(); ctx.rect(Lg.x0, Lg.yQ - 2, Lg.x1 - Lg.x0, Lg.hBot + 8); ctx.clip();
+    const wpx = Math.max(1, pxStep * .92);
+    sv.counts.forEach((c, q) => {
+      const v = Gr.S * (q - Gr.Z), hgt = Math.min(Lg.hBot, c / (sv.N * Gr.S) * sc);
+      ctx.fillRect(Lg.X(v) - wpx / 2, Lg.yQ, wpx, hgt);
+      if (c / (sv.N * Gr.S) * sc > Lg.hBot + 1) { ctx.globalAlpha = alpha; ctx.fillRect(Lg.X(v) - 4, Lg.yQ + Lg.hBot + 3, 8, 2); ctx.globalAlpha = alpha * .85; }
+    });
+    ctx.restore();
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const Lg = L = layout(w, h), C = PE.css, blue = C('--blue'), yel = C('--yellow'), red = C('--red'), mut = C('--muted'), fg = C('--fg'), rule = C('--rule');
+    const fs = Lg.narrow ? 10 : 11, sc = Lg.hTop / (dmax * 1.08);
+    const gLo = G.S * (G.qmin - G.Z), gHi = G.S * (G.qmax - G.Z);
+    const gLoP = Gp.S * (Gp.qmin - Gp.Z), gHiP = Gp.S * (Gp.qmax - Gp.Z);
+    const eLo = PE.lerp(gLoP, gLo, S.u), eHi = PE.lerp(gHiP, gHi, S.u);
+    // clipped zones
+    const gc = glow('clip');
+    ctx.save(); ctx.fillStyle = red; ctx.globalAlpha = .1 + .15 * gc;
+    if (eLo > XR[0]) ctx.fillRect(Lg.x0, Lg.top - 8, Lg.X(eLo) - Lg.x0, Lg.yQ + Lg.hBot - Lg.top + 8);
+    if (eHi < XR[1]) ctx.fillRect(Lg.X(eHi), Lg.top - 8, Lg.x1 - Lg.X(eHi), Lg.yQ + Lg.hBot - Lg.top + 8);
+    ctx.restore();
+    if (eHi < XR[1] - .6) PE.label(ctx, 'clipped', Lg.X(eHi) + 12, Lg.top + 16, red, fs, 'left', 600);
+    // codes no value uses (symmetric grid on one-sided data)
+    if (S.sym && -G.S * G.qmax < smp.min - .3) {
+      const a = Math.max(XR[0], -G.S * G.qmax), b = smp.min;
+      ctx.save(); ctx.globalAlpha = .18 * S.u; ctx.fillStyle = mut; ctx.fillRect(Lg.X(a), Lg.yA + 2, Lg.X(b) - Lg.X(a), 14); ctx.restore();
+      if (Lg.X(b) - Lg.X(a) > 70) PE.label(ctx, 'codes no value uses', (Lg.X(a) + Lg.X(b)) / 2, Lg.yA - 8, mut, fs, 'center', 500);
+    }
+    // float histogram
+    const gr = glow('real');
+    ctx.save(); ctx.fillStyle = blue; ctx.globalAlpha = .75 + .25 * gr;
+    for (let i = 0; i < NB; i++) { const d = hist[i] / (smp.N * bw), x = Lg.X(XR[0] + i * bw); ctx.fillRect(x + .5, Lg.yA - d * sc, Math.max(1, Lg.X(XR[0] + bw) - Lg.x0 - 1), d * sc); }
+    ctx.restore();
+    PE.label(ctx, Lg.narrow ? 'float values' : 'float values (toy sample of ' + smp.N + ')', Lg.x0, Lg.top - 12, blue, fs, 'left', 600);
+    // axis
+    PE.polyline(ctx, [[Lg.x0, Lg.yA + .5], [Lg.x1, Lg.yA + .5]], rule, 1);
+    for (let v = Math.ceil(XR[0]); v <= XR[1]; v++) { if (Lg.narrow && v % 2) continue; PE.label(ctx, String(v), Lg.X(v), Lg.yA + 28, mut, fs, 'center', 400); }
+    // grids: previous fades out, current fades in
+    const gs = glow('scale');
+    if (S.u < 1) drawGrid(ctx, Lg, Gp, stp, 1 - S.u, 0);
+    drawGrid(ctx, Lg, G, st, S.u, gs);
+    PE.label(ctx, `after quantization: ${G.bits}-bit ${G.sym ? 'symmetric' : 'asymmetric'} grid`, Lg.x0, Lg.yQ + Lg.hBot + 16, yel, fs, 'left', 600);
+    // zero-point marker
+    const gz = glow('zero'), xz = Lg.X(0);
+    ctx.save(); ctx.fillStyle = yel; ctx.beginPath(); ctx.moveTo(xz, Lg.yA + 17); ctx.lineTo(xz - 5 - 2 * gz, Lg.yA + 25 + 3 * gz); ctx.lineTo(xz + 5 + 2 * gz, Lg.yA + 25 + 3 * gz); ctx.closePath(); ctx.fill(); ctx.restore();
+    PE.label(ctx, (Lg.narrow ? '\u25b2 0.0 = code ' : '\u25b2 real 0.0 = code ') + G.Z, Lg.x1, Lg.top - 12, gz > 0 ? fg : yel, fs, 'right', 600);
+    // range handles
+    [['lo', S.lo], ['hi', S.hi]].forEach(([k, v]) => {
+      const x = Lg.X(v), act = S.active === k && document.activeElement === el;
+      PE.polyline(ctx, [[x, Lg.top - 2], [x, Lg.yA]], fg, act ? 2 : 1.3, [3, 3], .8);
+      PE.dot(ctx, x, Lg.top - 2, act ? 7 : 6, fg); PE.dot(ctx, x, Lg.top - 2, 3, C('--bg'));
+    });
+    if (S.sym) { const xm = Lg.X(Math.max(XR[0], -G.S * G.qmax)); PE.polyline(ctx, [[xm, Lg.top + 6], [xm, Lg.yA]], yel, 1.2, [2, 4], .8 * S.u); }
+    // probe value
+    const gp = glow('code'), pr = KIT.RULER_PROBE, pq = KIT.rulerCode(G, pr), pv = G.S * (pq - G.Z);
+    PE.dot(ctx, Lg.X(pr), Lg.yA - 3, 4 + 2 * gp, blue); PE.ring(ctx, Lg.X(pv), Lg.yA + 7, 5 + 3 * gp, yel, 1.6);
+    // error bars
+    KIT.rulerBars(ctx, Lg.x0, Lg.yBars, Lg.x1 - Lg.x0, [
+      { name: 'rounding error (MSE)', v: PE.lerp(stp.round, st.round, S.u), link: 'round' },
+      { name: 'clipping error (MSE)', v: PE.lerp(stp.clip, st.clip, S.u), link: 'clip', alpha: .6 }], glow);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.05 : .56), draw);
+  let stop = () => {};
+  const tgt = { lo: S.lo, hi: S.hi };   // targets survive an interrupted tween
+  function set(next) {
+    if (next.lo != null) tgt.lo = next.lo;
+    if (next.hi != null) tgt.hi = next.hi;
+    const to = { lo: tgt.lo, hi: tgt.hi, u: 1 };
+    const gridChange = (next.bits && next.bits !== S.bits) || (next.sym != null && next.sym !== S.sym);
+    stop();
+    if (gridChange) { Gp = G; stp = st; S.u = 0; }
+    if (next.bits) S.bits = next.bits;
+    if (next.sym != null) S.sym = next.sym;
+    if (!gridChange) { Gp = G; stp = st; }
+    stop = KIT.tween(S, to, 650, () => { recompute(); cv.redraw(); }, () => { Gp = G; stp = st; cv.redraw(); });
+  }
+  // dragging the range ends, and arrow keys when the canvas has focus
+  el.tabIndex = 0;
+  const pick = e => { const r = el.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const move = v => {
+    if (S.active === 'lo') S.lo = PE.clamp(v, XR[0], Math.min(0, S.hi - .2));
+    else S.hi = PE.clamp(v, Math.max(0, S.lo + .2), XR[1]);
+    tgt.lo = S.lo; tgt.hi = S.hi; Gp = G; stp = st; S.u = 1; recompute(); cv.redraw();
+  };
+  const onDown = e => {
+    if (!L) return;
+    const p = pick(e), dl = Math.abs(p.x - L.X(S.lo)), dh = Math.abs(p.x - L.X(S.hi));
+    if (Math.min(dl, dh) > 28) return;
+    stop(); S.active = dl < dh ? 'lo' : 'hi'; S.drag = true; el.setPointerCapture(e.pointerId); e.preventDefault();
+  };
+  const onMove = e => { if (S.drag) move(L.V(pick(e).x)); };
+  const onUp = () => { if (!S.drag) return; S.drag = null; opts.onInput && opts.onInput(); };
+  const onKey = e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { S.active = S.active === 'lo' ? 'hi' : 'lo'; cv.redraw(); e.preventDefault(); return; }
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault(); stop();
+    move((S.active === 'lo' ? S.lo : S.hi) + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? .5 : .1));
+    opts.onInput && opts.onInput();
+  };
+  const onFocus = () => cv.redraw();
+  el.addEventListener('pointerdown', onDown); el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup', onUp); el.addEventListener('pointercancel', onUp); el.addEventListener('keydown', onKey);
+  el.addEventListener('focus', onFocus); el.addEventListener('blur', onFocus);
+  function info() {
+    const pq = KIT.rulerCode(G, KIT.RULER_PROBE);
+    return { G, st, lo: S.lo, hi: S.hi, probe: { r: KIT.RULER_PROBE, q: pq, rhat: G.S * (pq - G.Z), bits: KIT.bits(pq, G.bits, G.sym) } };
+  }
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize,
+    destroy: () => { stop(); cv.destroy(); el.removeEventListener('pointerdown', onDown); el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp); el.removeEventListener('pointercancel', onUp); el.removeEventListener('keydown', onKey);
+      el.removeEventListener('focus', onFocus); el.removeEventListener('blur', onFocus); } };
+};
+KIT.rulerText = i => {
+  const G = i.G, s = i.st, f = v => (+v.toPrecision(3)).toString();
+  return `<b>${G.bits}-bit ${G.sym ? 'symmetric' : 'asymmetric'}</b> on [${i.lo.toFixed(2)}, ${i.hi.toFixed(2)}]: ` +
+    `S = ${f(G.S)}, Z = ${G.Z}. The data use ${s.used} of ${G.levels} codes. ` +
+    `<b class="c-red">Rounding error ${KIT.rulerNum(s.round)}</b>, <b class="c-red">clipping error ${KIT.rulerNum(s.clip)}</b> ` +
+    `(${s.nClip} of ${s.N} values clipped). ` +
+    `r = ${i.probe.r} &rarr; q = ${i.probe.q} = <span class="bits">${i.probe.bits}</span> &rarr; ${f(i.probe.rhat)}.`;
+};
+
+/* viz-intmm: one output value of a 3x3 conv computed with integers only, as in Jacob Sec. 2.2-2.4.
+   Toy weights, inputs, bias and ranges; the arithmetic is exact: uint8 codes, an int32 accumulator, the
+   zero-point cross terms of Eq. 7-8, an int32 bias with S_bias = S1 S2 (Eq. 11), and requantization by
+   M = S1 S2 / S3 = 2^-n M0 (Eq. 5-6): a rounding fixed-point multiply by M0 (as gemmlowp does it, high 32 bits
+   of the doubled product) then a rounding right shift by n, ties away from zero (Jacob App. B). */
+KIT.INTMM = {
+  w: [-.62, .05, .71, -.88, .12, .79, -.47, -.03, .54],
+  x: [-.71, .18, .86, -.64, .25, .93, -.58, .31, .77].map(v => v * .55),
+  bias: .15, wr: [-1, .8], xr: [-1, 1], yr: [-2, 4],
+};
+KIT.intmmAffine = (a, b) => { const S = (b - a) / 255; return { S, Z: Math.min(255, Math.max(0, Math.round(-a / S))) }; };
+KIT.intmmRun = (P = KIT.INTMM) => {
+  const A1 = KIT.intmmAffine(...P.wr), A2 = KIT.intmmAffine(...P.xr), A3 = KIT.intmmAffine(...P.yr);
+  const code = (r, A) => Math.min(255, Math.max(0, Math.round(r / A.S) + A.Z));
+  const q1 = P.w.map(r => code(r, A1)), q2 = P.x.map(r => code(r, A2)), N = q1.length;
+  let core = 0, sum1 = 0, sum2 = 0, yf = P.bias;
+  for (let j = 0; j < N; j++) { core += q1[j] * q2[j]; sum1 += q1[j]; sum2 += q2[j]; yf += P.w[j] * P.x[j]; }
+  const t1 = -A1.Z * sum2, t2 = -A2.Z * sum1, t3 = N * A1.Z * A2.Z;
+  const Sb = A1.S * A2.S, qb = Math.round(P.bias / Sb);
+  const acc = core + t1 + t2 + t3 + qb;
+  const M = A1.S * A2.S / A3.S;
+  let n = 0, M0 = M; while (M0 < .5) { M0 *= 2; n++; }
+  const M0i = Math.round(M0 * 2 ** 31);
+  const ab = BigInt(acc) * BigInt(M0i), nudge = ab >= 0n ? (1n << 30n) : (1n - (1n << 30n));
+  const hi = Number((ab + nudge) / (1n << 31n));
+  const mask = (1 << n) - 1, rem = hi & mask, thr = (mask >> 1) + (hi < 0 ? 1 : 0);
+  const sh = (hi >> n) + (rem > thr ? 1 : 0);
+  const q3raw = A3.Z + sh, q3 = Math.min(255, Math.max(0, q3raw)), yhat = A3.S * (q3 - A3.Z);
+  return { P, A1, A2, A3, q1, q2, N, core, sum1, sum2, t1, t2, t3, Sb, qb, acc, M, n, M0, M0i, hi, sh, q3raw, q3, yhat, yf, err: yhat - yf };
+};
+KIT.INTMM_STEPS = ['real numbers', 'uint8 codes', 'int32 sum', 'zero-point terms', 'requantize'];
+KIT.intmmNum = v => (v < 0 ? '\u2212' : '') + Math.abs(v).toLocaleString('en-US');
+KIT.intmm = (el, opts = {}) => {
+  const R = KIT.intmmRun(), S = { step: 1, a: [1, 0, 0, 0, 0] };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const nm = KIT.intmmNum, f4 = v => v.toFixed(4);
+  function rows() {
+    const A1 = R.A1, A2 = R.A2;
+    return [
+      { s: 2, t: `int32 += uint8 * uint8:  \u03a3 q1\u00b7q2 = ${nm(R.core)}`, c: '--yellow', link: 'core' },
+      { s: 3, t: `\u2212 Z1\u00b7\u03a3q2 = \u2212${A1.Z} \u00d7 ${nm(R.sum2)} = ${nm(R.t1)}`, c: '--red', link: 'cross' },
+      { s: 3, t: `\u2212 Z2\u00b7\u03a3q1 = \u2212${A2.Z} \u00d7 ${nm(R.sum1)} = ${nm(R.t2)}`, c: '--red', link: 'cross' },
+      { s: 3, t: `+ N\u00b7Z1\u00b7Z2 = ${R.N} \u00d7 ${A1.Z} \u00d7 ${A2.Z} = ${nm(R.t3)}`, c: '--red', link: 'const' },
+      { s: 3, t: `+ bias in int32, scale S1\u00b7S2: ${nm(R.qb)}`, c: '--muted', link: 'bias' },
+      { s: 3, t: `= accumulator ${nm(R.acc)}`, c: '--fg', link: 'acc', bold: true },
+      { s: 4, t: `M = S1\u00b7S2/S3 = ${R.M.toExponential(4)} = 2^\u2212${R.n} \u00d7 ${R.M0.toFixed(5)}`, c: '--green', link: 'mult' },
+      { s: 4, t: `\u00d7 M0 (int32 ${nm(R.M0i)}, then >> 31): ${nm(R.hi)}`, c: '--green', link: 'mult' },
+      { s: 4, t: `rounding shift >> ${R.n}: ${nm(R.sh)};  + Z3 = ${R.A3.Z}: ${R.q3raw}`, c: '--green', link: 'shift' },
+      { s: 4, t: `uint8 output q3 = ${R.q3}`, c: '--yellow', link: 'zout', bold: true, bits: KIT.bits(R.q3, 8) },
+    ];
+  }
+  function cellGrid(ctx, x0, y0, cs, vals, codes, A, name, sub, gl) {
+    const C = PE.css, a2 = S.a[1];
+    PE.label(ctx, name, x0, y0 - 8, C('--fg'), 12, 'left', 600);
+    for (let k = 0; k < 9; k++) {
+      const x = x0 + (k % 3) * cs, y = y0 + Math.floor(k / 3) * cs;
+      ctx.save(); ctx.strokeStyle = gl > 0 ? C('--fg') : C('--rule'); ctx.lineWidth = 1 + gl; ctx.fillStyle = C('--panel');
+      ctx.beginPath(); ctx.roundRect(x + 1, y + 1, cs - 2, cs - 2, 5); ctx.fill(); ctx.stroke(); ctx.restore();
+      const fz = cs < 46 ? 10.5 : 12;
+      if (a2 < 1) { ctx.save(); ctx.globalAlpha = 1 - a2; PE.label(ctx, vals[k].toFixed(2), x + cs / 2, y + cs / 2 + 4, C('--blue'), fz, 'center', 500); ctx.restore(); }
+      if (a2 > 0) { ctx.save(); ctx.globalAlpha = a2; PE.label(ctx, String(codes[k]), x + cs / 2, y + cs / 2 + 4, C('--yellow'), fz + 1, 'center', 600); ctx.restore(); }
+    }
+    const t = a2 > .5 ? `S = ${A.S.toFixed(5)}, Z = ${A.Z}` : sub;
+    PE.label(ctx, t, x0, y0 + 3 * cs + 15, C('--muted'), 10.5, 'left', 400);
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const C = PE.css, narrow = w < 560, pad = opts.bottomPad || 0;
+    const cs = narrow ? Math.min(44, (w - 40) / 6.6) : Math.min(52, w / 17);
+    const gx = narrow ? 10 : 18, gy = 34, gc = glow('codes');
+    cellGrid(ctx, gx, gy, cs, R.P.w, R.q1, R.A1, 'weights r1', 'layer range [\u22121, 0.8]', gc);
+    cellGrid(ctx, gx + 3 * cs + (narrow ? 22 : 28), gy, cs, R.P.x, R.q2, R.A2, 'inputs r2', 'pixels in [\u22121, 1]', gc);
+    const lx = narrow ? 10 : gx + 6 * cs + 70, ly0 = narrow ? gy + 3 * cs + 46 : gy + 2;
+    const lh = narrow ? 19 : 21, fs = narrow ? 11 : 12.5;
+    // float reference, always shown
+    PE.label(ctx, `float reference: \u03a3 w\u00b7x + b = ${f4(R.yf)}`, lx, ly0 + 4, C('--blue'), fs, 'left', 600);
+    rows().forEach((r, i) => {
+      const al = S.a[r.s]; if (al <= 0) return;
+      const y = ly0 + 4 + (i + 1) * lh + (r.s >= 3 ? 6 : 0) + (r.s >= 4 ? 6 : 0), g = glow(r.link);
+      ctx.save(); ctx.globalAlpha = al;
+      if (g > 0) { ctx.fillStyle = C('--yellow'); ctx.globalAlpha = al * .18 * g; ctx.fillRect(lx - 4, y - lh + 5, (narrow ? w - 16 : w - lx - 8), lh); ctx.globalAlpha = al; }
+      PE.label(ctx, r.t, lx + (1 - al) * 18, y, C(r.c), fs, 'left', r.bold ? 700 : 500);
+      if (r.bits) { ctx.font = `700 ${fs}px system-ui, sans-serif`; const off = ctx.measureText(r.t).width;
+        ctx.font = `600 ${fs}px ui-monospace, Menlo, monospace`; ctx.fillStyle = C('--yellow'); ctx.fillText('= ' + r.bits, lx + (1 - al) * 18 + off + 8, y); }
+      ctx.restore();
+    });
+    const al = S.a[4];
+    if (al > 0) {
+      const y = ly0 + 4 + 11 * lh + 18;
+      ctx.save(); ctx.globalAlpha = al;
+      PE.label(ctx, `S3\u00b7(q3 \u2212 Z3) = ${f4(R.yhat)}  vs float ${f4(R.yf)}`, lx, y, C('--fg'), fs, 'left', 600);
+      PE.label(ctx, `error ${R.err >= 0 ? '+' : '\u2212'}${Math.abs(R.err).toFixed(4)}, half an output step S3/2 = ${(R.A3.S / 2).toFixed(4)}`, lx, y + lh, C('--red'), fs, 'left', 600);
+      ctx.restore();
+    }
+    void pad;
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.32 : .37), draw);
+  let stop = () => {};
+  function set(next) {
+    if (!next.step) return;
+    S.step = next.step;
+    const to = {}; S.a.forEach((v, i) => { to['a' + i] = i < next.step ? 1 : 0; });
+    const box = {}; S.a.forEach((v, i) => { box['a' + i] = v; });
+    stop(); stop = KIT.tween(box, to, 600, () => { S.a = S.a.map((_, i) => box['a' + i]); cv.redraw(); });
+  }
+  return { set, info: () => ({ R, step: S.step }), state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.intmmText = i => {
+  const R = i.R, n = KIT.intmmNum;
+  return [
+    `Step 1. Nine real weights and nine real inputs (a 3x3 patch of pixels scaled to [&minus;1, 1]). In floating point the output is ${R.yf.toFixed(4)}.`,
+    `Step 2. Each number becomes a uint8 code q = round(r/S) + Z. Weights: S1 = ${R.A1.S.toFixed(5)}, Z1 = ${R.A1.Z}. Inputs: S2 = ${R.A2.S.toFixed(5)}, Z2 = ${R.A2.Z}. The first weight, ${R.P.w[0]}, is code ${R.q1[0]} = <span class="bits">${KIT.bits(R.q1[0], 8)}</span>.`,
+    `Step 3. Multiply codes pairwise and add in a 32-bit integer: ${n(R.core)}. This is the only part that grows with the layer size.`,
+    `Step 4. Subtract the zero-point terms and add the bias (stored as int32 with scale S1&middot;S2): accumulator ${n(R.acc)} = &Sigma;(q1 &minus; Z1)(q2 &minus; Z2) + bias.`,
+    `Step 5. Scale by M = 2<sup>&minus;${R.n}</sup> &times; ${R.M0.toFixed(5)} with an integer multiply and a shift, add Z3 = ${R.A3.Z}: output code ${R.q3} = <span class="bits">${KIT.bits(R.q3, 8)}</span>, which means ${R.yhat.toFixed(4)}. Float gives ${R.yf.toFixed(4)}; the error is ${R.err.toFixed(4)}, less than half an output step (${(R.A3.S / 2).toFixed(4)}).`,
+  ][i.step - 1];
+};
+
+/* viz-chanland: a toy depthwise 3x3 layer after BN folding, 32 output channels x 9 weights, shaped after the
+   spread in Nagel 2021 Fig. 5 as read off the figure (six wide channels, two all-zero channels, the rest small).
+   Both grids are asymmetric 8-bit min-max grids (256 codes) with 0.0 exact: one grid for the whole tensor, or one
+   per output channel. "Levels inside a channel's range" counts the codes between the codes of its min and max. */
+KIT.CHAN_WIDE = { 4: [-25, 67], 14: [-46, 59], 15: [-60, 63], 27: [-29, 95], 28: [-45, 54], 29: [-57, 94], 3: [-6.5, 16] };
+KIT.CHAN_DEAD = [10, 22];
+KIT.chanWeights = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const r = PE.rng(5), W = [];
+    for (let k = 0; k < 32; k++) {
+      let lo, hi;
+      if (KIT.CHAN_WIDE[k]) [lo, hi] = KIT.CHAN_WIDE[k];
+      else if (KIT.CHAN_DEAD.includes(k)) { W.push(new Array(9).fill(0)); continue; }
+      else { const a = .6 + 4.2 * Math.pow(r(), 1.6); lo = -a * (.4 + .8 * r()); hi = a * (.5 + .7 * r()); }
+      const w = []; const imin = Math.floor(r() * 9); let imax = Math.floor(r() * 9); if (imax === imin) imax = (imin + 4) % 9;
+      for (let t = 0; t < 9; t++) w.push(t === imin ? lo : t === imax ? hi : lo + (hi - lo) * (.15 + .7 * (r() + r() + r()) / 3));
+      W.push(w);
+    }
+    cache = W; return W;
+  };
+})();
+KIT.chanGrid = (lo, hi) => { lo = Math.min(lo, 0); hi = Math.max(hi, 0); if (hi - lo < 1e-9) return { S: 0, Z: 0 }; const S = (hi - lo) / 255; return { S, Z: Math.min(255, Math.max(0, Math.round(-lo / S))) }; };
+KIT.chanCode = (G, v) => G.S === 0 ? G.Z : Math.min(255, Math.max(0, Math.round(v / G.S) + G.Z));
+KIT.chanStats = mode => {
+  const W = KIT.chanWeights(), all = W.flat();
+  const T = KIT.chanGrid(Math.min(...all), Math.max(...all));
+  let se = 0; const ch = [];
+  W.forEach(w => {
+    const G = mode === 'tensor' ? T : KIT.chanGrid(Math.min(...w), Math.max(...w));
+    const q = w.map(v => KIT.chanCode(G, v)), wq = q.map(c => G.S * (c - G.Z));
+    let e = 0, p = 0; w.forEach((v, t) => { e += (v - wq[t]) ** 2; p += v * v; }); se += e;
+    const levels = q.length ? Math.max(...q) - Math.min(...q) + 1 : 1;
+    ch.push({ G, wq, levels, rel: p > 0 ? Math.sqrt(e / p) : 0, lo: Math.min(...w), hi: Math.max(...w), dead: p === 0 });
+  });
+  const live = ch.filter(c => !c.dead), sortL = live.map(c => c.levels).sort((a, b) => a - b), sortR = live.map(c => c.rel).sort((a, b) => a - b);
+  const med = a => a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2;
+  return { mode, T, ch, mse: se / all.length, medLevels: med(sortL), minLevels: sortL[0], medRel: med(sortR), nSmall: live.filter(c => c.levels <= 16).length };
+};
+KIT.chanland = (el, opts = {}) => {
+  const W = KIT.chanWeights(), stats = { tensor: KIT.chanStats('tensor'), channel: KIT.chanStats('channel') };
+  const S = { mode: 'tensor', zoom: 0, m: 0 };     // m: 0 = per-tensor grid shown, 1 = per-channel grid shown
+  const XS = .155, X = k => (k - 15.5) * XS, Zt = t => (t - 4) * .05, YT = 1.45 / 95;
+  const amax = W.map(w => Math.max(1e-9, ...w.map(Math.abs)));
+  const Y = (k, v) => PE.lerp(v * YT, KIT.CHAN_DEAD.includes(k) ? 0 : v / amax[k] * .85, S.zoom);
+  const asp = opts.aspect || (w => w < 560 ? .75 : .6);
+  // camera distance that fits the 32 channels across the width for the current height / width ratio
+  const fitDist = () => { const w = el.clientWidth || 600; return Math.max(4.9, 3.05 * asp(w) / .364); };
+  const s3 = PE3.scene(el, { aspect: asp, yaw: -.3, pitch: .58, dist: fitDist(), fov: 40, items: [] });
+  function ticks(k, G, alpha, link) {
+    const out = [], w = W[k]; if (G.S === 0) return out;
+    const q0 = KIT.chanCode(G, Math.min(...w)), q1 = KIT.chanCode(G, Math.max(...w)), n = q1 - q0 + 1, z0 = Zt(-.6), z1 = Zt(8.6), x = X(k);
+    if (n > 24) {
+      const ya = Y(k, G.S * (q0 - G.Z)), yb = Y(k, G.S * (q1 - G.Z));
+      out.push({ type: 'quad', pts: [[x - .05, ya, z0], [x - .05, yb, z0], [x - .05, yb, z1], [x - .05, ya, z1]], fill: '--yellow', stroke: null, alpha: alpha * .16, link });
+      return out;
+    }
+    for (let q = q0; q <= q1; q++) { const y = Y(k, G.S * (q - G.Z)); out.push({ type: 'line', pts: [[x, y, z0], [x, y, z1]], color: '--yellow', width: 1.4, alpha: alpha * .9, link }); }
+    return out;
+  }
+  function build() {
+    const it = [], st = stats.tensor, sc = stats.channel, m = S.m;
+    it.push({ type: 'line', pts: [[X(-1), 0, Zt(-1)], [X(32), 0, Zt(-1)]], color: '--muted', width: 1, alpha: .6 });
+    it.push({ type: 'label', at: [X(4), -1.08, Zt(0)], text: 'output channel 1 to 32', color: '--muted', font: '500 11px system-ui, sans-serif' });
+    it.push({ type: 'label', at: [X(32.2), 0, Zt(4)], text: (el.clientWidth || 600) < 560 ? '9 each' : '9 weights each', color: '--muted', font: '500 11px system-ui, sans-serif', align: 'left' });
+    const blueP = [], yelP = [];
+    for (let k = 0; k < 32; k++) {
+      if (m < 1) it.push(...ticks(k, st.T, 1 - m, 'grid'));
+      if (m > 0) it.push(...ticks(k, sc.ch[k].G, m, 'grid'));
+      W[k].forEach((v, t) => {
+        const wq = PE.lerp(st.ch[k].wq[t], sc.ch[k].wq[t], m), yv = Y(k, v), yq = Y(k, wq), x = X(k), z = Zt(t);
+        it.push({ type: 'line', pts: [[x, 0, z], [x, yv, z]], color: '--blue', width: .8, alpha: .35, link: 'weights' });
+        blueP.push([x, yv, z]); yelP.push([x, yq, z]);
+        if (Math.abs(yq - yv) > .012) it.push({ type: 'line', pts: [[x, yv, z], [x, yq, z]], color: '--red', width: 2.2, alpha: .95, link: 'error' });
+      });
+    }
+    it.push({ type: 'points', pts: blueP, color: '--blue', size: 2.6, link: 'weights' });
+    it.push({ type: 'points', pts: yelP, color: '--yellow', size: 2.2, link: 'grid' });
+    const tall = 27, small = 23;
+    it.push({ type: 'label', at: [X(tall), Y(tall, 95) + .16, Zt(4)], text: 'widest channel', color: '--fg', font: '600 12px system-ui, sans-serif' });
+    const sm = S.mode === 'tensor' ? stats.tensor.ch[small] : stats.channel.ch[small];
+    it.push({ type: 'label', at: [X(small), PE.lerp(-.25, -.95, S.zoom), Zt(4)], text: `a small channel: ${sm.levels} levels`, color: '--yellow', font: '600 12px system-ui, sans-serif' });
+    s3.items = it; s3.redraw();
+  }
+  build();
+  let stop = () => {};
+  const tgt = { m: 0, zoom: 0 };     // targets survive an interrupted tween
+  function set(next) {
+    if (next.mode) { S.mode = next.mode; tgt.m = next.mode === 'tensor' ? 0 : 1; }
+    if (next.zoom != null) tgt.zoom = next.zoom;
+    const from = { m: S.m, zoom: S.zoom }, to = { m: tgt.m, zoom: tgt.zoom };
+    stop(); stop = s3.tween(800, u => { S.m = PE.lerp(from.m, to.m, u); S.zoom = PE.lerp(from.zoom, to.zoom, u); build(); });
+  }
+  // pe3 sizes from width only; a one-frame width nudge makes its ResizeObserver pick up a new stage height.
+  const resize = () => { s3.setView({ dist: fitDist() }); el.style.width = 'calc(100% - 1px)'; requestAnimationFrame(() => { el.style.width = ''; }); };
+  return { set, info: () => ({ s: stats[S.mode], other: stats[S.mode === 'tensor' ? 'channel' : 'tensor'], zoom: S.zoom }), state: S, scene: s3,
+    redraw: () => s3.redraw(), resize, destroy: () => { stop(); s3.destroy(); } };
+};
+KIT.chanlandText = i => {
+  const s = i.s, f = v => (+v.toPrecision(2)).toString();
+  return s.mode === 'tensor'
+    ? `<b>Per-tensor grid</b>: one scale S = ${s.T.S.toFixed(3)} for all 32 channels. The median channel spans only ${s.medLevels} of the 256 levels, the narrowest ${s.minLevels}; ${s.nSmall} channels get 16 levels or fewer. Total MSE ${f(s.mse)}. A typical channel's weights are off by ${(100 * s.medRel).toFixed(1)}% of their own size.`
+    : `<b>Per-channel grid</b>: 32 scales, one per output channel. Every live channel spans all 256 levels (the two all-zero channels need one). Total MSE ${f(s.mse)}. A typical channel's weights are off by ${(100 * s.medRel).toFixed(2)}% of their own size.`;
+};
+
+/* viz-calib: four calibrators pick a clip value T for a toy long-tailed ReLU activation sample; the grid is
+   symmetric signed 8-bit with S = T/127 (ReLU outputs use codes 0..127), as for a symmetric INT8 activation.
+   max: largest value. percentile: the 99.99th percentile of |x| over all values (Wu Sec. 3.4).
+   entropy: our reading of the KL method Wu Sec. 3.4 describes in words: a 2048-bin histogram of the nonzero values
+   on [0, max]; for each candidate end bin i >= 128, P = the first i bins with all mass above added to bin i, Q = the
+   first i bins merged into 128 groups and spread back evenly over each group's nonempty bins; T = the edge with the
+   smallest KL(P || Q). The exact zeros that ReLU makes are left out (zero is exact on the grid; our choice).
+   MSE: the T that minimizes the quantization MSE on the sample, Nagel Eq. 16, by a grid search (100 coarse values, then 100 finer ones around the best). */
+KIT.CALIB_N = 100000;
+KIT.calibSample = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const r = PE.rng(17), g = PE.gauss(r), N = KIT.CALIB_N, xs = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      const v = r() < .97 ? .1 + .3 * g() : .2 + .5 * Math.abs(g()) * Math.abs(g());
+      xs[i] = v > 0 ? v : 0;
+    }
+    const sorted = Float64Array.from(xs).sort();
+    cache = { xs, sorted, N, max: sorted[N - 1] };
+    return cache;
+  };
+})();
+KIT.calibErr = (xs, T) => {
+  const s = T / 127; let er = 0, ec = 0, nc = 0;
+  const n = xs.length, inv = 1 / s;
+  for (let i = 0; i < n; i++) { const x = xs[i], raw = Math.round(x * inv); if (raw > 127) { const d = x - T; ec += d * d; nc++; } else { const d = x - s * raw; er += d * d; } }
+  return { round: er / n, clip: ec / n, mse: (er + ec) / n, nClip: nc };
+};
+KIT.calibKL = (smp, NB = 2048, NQ = 128) => {
+  const bw = smp.max / NB, h = new Float64Array(NB);
+  for (const x of smp.xs) if (x > 0) h[Math.min(NB - 1, Math.floor(x / bw))]++;
+  let best = Infinity, bi = NB; const kls = [], suf = new Float64Array(NB + 1);
+  for (let j = NB - 1; j >= 0; j--) suf[j] = suf[j + 1] + h[j];
+  for (let i = NQ; i <= NB; i++) {
+    const tail = suf[i];
+    const P = h.slice(0, i); P[i - 1] += tail;
+    const Q = new Float64Array(i);
+    for (let gq = 0; gq < NQ; gq++) {
+      const a = Math.floor(gq * i / NQ), b = Math.floor((gq + 1) * i / NQ);
+      let sum = 0, nz = 0; for (let j = a; j < b; j++) { sum += h[j]; if (h[j] > 0) nz++; }
+      for (let j = a; j < b; j++) Q[j] = h[j] > 0 ? sum / nz : 0;
+    }
+    let sp = 0, sq = 0; for (let j = 0; j < i; j++) { sp += P[j]; sq += Q[j]; }
+    let kl = 0;
+    for (let j = 0; j < i; j++) if (P[j] > 0) { const p = P[j] / sp, q = Q[j] / sq; kl += q > 0 ? p * Math.log(p / q) : 1e3; }
+    kls.push(kl); if (kl <= best) { best = kl; bi = i; }
+  }
+  return { T: bi * bw, kl: best, kls, bw };
+};
+KIT.calibMSE = smp => {
+  // coarse grid of 100 values, then 100 finer values around the best; exact MSE on the whole sample
+  let best = Infinity, bT = smp.max;
+  for (let k = 1; k <= 100; k++) { const T = smp.max * k / 100, e = KIT.calibErr(smp.xs, T).mse; if (e < best) { best = e; bT = T; } }
+  const lo = bT - smp.max / 100;
+  for (let k = 0; k <= 100; k++) { const T = lo + smp.max / 50 * k / 100, e = KIT.calibErr(smp.xs, T).mse; if (e < best) { best = e; bT = T; } }
+  return { T: bT };
+};
+KIT.calibClips = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const smp = KIT.calibSample(), N = smp.N;
+    const pct = smp.sorted[Math.min(N - 1, Math.ceil(.9999 * N) - 1)];
+    cache = { max: smp.max, p9999: pct, entropy: KIT.calibKL(smp).T, mse: KIT.calibMSE(smp).T };
+    return cache;
+  };
+})();
+KIT.CALIB_NAMES = { max: 'max', p9999: 'percentile 99.99', entropy: 'entropy (KL)', mse: 'MSE' };
+KIT.calib = (el, opts = {}) => {
+  const smp = KIT.calibSample(), clips = KIT.calibClips(), errs = {};
+  for (const k in clips) errs[k] = KIT.calibErr(smp.xs, clips[k]);
+  const S = { method: 'max', T: clips.max, u: 1, prev: 'max' };
+  const NB = 160, XM = smp.max * 1.04, bw = XM / NB, h = new Float64Array(NB);
+  for (const x of smp.xs) h[Math.min(NB - 1, Math.floor(x / bw))]++;
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  function draw(ctx, w, h0) {
+    ctx.clearRect(0, 0, w, h0);
+    const C = PE.css, narrow = w < 560, pad = opts.bottomPad || 0, fs = narrow ? 10 : 11;
+    const b = { x: narrow ? 40 : 56, y: 28, w: w - (narrow ? 52 : 76), h: h0 - 28 - pad - (narrow ? 120 : 108) };
+    const A = PE.axes(ctx, b, [0, XM], [.5, 1e5], { logy: true, xt: (narrow ? [0, 1, 2, 3, 4] : [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4]).filter(v => v < XM), yt: [1, 10, 100, 1000, 10000],
+      yf: v => v >= 1000 ? v / 1000 + 'k' : String(v), xl: 'activation value after ReLU', yl: 'count per bin (log)', ylo: narrow ? 30 : 42 });
+    const T = S.T, gh = glow('hist');
+    ctx.save(); ctx.globalAlpha = .8 + .2 * gh;
+    for (let i = 0; i < NB; i++) { if (!h[i]) continue; const x0 = A.X(i * bw), x1 = A.X((i + 1) * bw), y = A.Y(h[i]);
+      ctx.fillStyle = (i + .5) * bw > T ? C('--red') : C('--blue'); ctx.fillRect(x0 + .3, y, Math.max(1, x1 - x0 - .6), b.y + b.h - y); }
+    ctx.restore();
+    // clipped zone and the 8-bit grid up to T
+    const gc = glow('clip');
+    ctx.save(); ctx.fillStyle = C('--red'); ctx.globalAlpha = .1 + .2 * gc; ctx.fillRect(A.X(T), b.y, b.x + b.w - A.X(T), b.h); ctx.restore();
+    const s = T / 127, gg = glow('grid');
+    ctx.save(); ctx.strokeStyle = C('--yellow'); ctx.globalAlpha = .55 + .4 * gg; ctx.lineWidth = .7 + gg;
+    for (let q = 0; q <= 127; q++) { const x = A.X(q * s); ctx.beginPath(); ctx.moveTo(x, b.y + b.h + 1); ctx.lineTo(x, b.y + b.h + (q % 16 ? 5 : 9)); ctx.stroke(); }
+    ctx.restore();
+    // the four clip values
+    const order = ['p9999', 'mse', 'entropy', 'max'].sort((p, q) => clips[p] - clips[q]);
+    order.forEach((k, j) => {
+      const x = A.X(clips[k]), sel = k === S.method, gk = glow(k === 'entropy' ? 'kl' : k === 'mse' ? 'mse' : '');
+      PE.polyline(ctx, [[x, b.y + 4], [x, b.y + b.h]], sel ? C('--fg') : C('--muted'), sel ? 2 + gk : 1 + 2 * gk, [4, 3], sel ? 1 : .8);
+      PE.label(ctx, KIT.CALIB_NAMES[k], x + (j % 2 ? -4 : 4), b.y + 10 + (j % 2) * 14 + (narrow ? (j > 1 ? 26 : 0) : 0), sel ? C('--fg') : C('--muted'), fs, j % 2 ? 'right' : 'left', sel ? 700 : 500);
+    });
+    const e = errs[S.method], ep = errs[S.prev];
+    KIT.rulerBars(ctx, b.x - (narrow ? 30 : 40), b.y + b.h + 44, b.w + (narrow ? 30 : 40), [
+      { name: 'rounding error (MSE)', v: Math.pow(10, PE.lerp(Math.log10(ep.round || 1e-9), Math.log10(e.round || 1e-9), S.u)), link: 'round' },
+      { name: 'clipping error (MSE)', v: S.u >= 1 ? e.clip : Math.pow(10, PE.lerp(Math.log10(ep.clip || 1e-9), Math.log10(e.clip || 1e-9), S.u)), link: 'clip', alpha: .6 }], glow);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.05 : .52), draw);
+  let stop = () => {};
+  function set(next) {
+    if (!next.method || !clips[next.method]) return;
+    S.prev = S.method; S.method = next.method; S.u = 0; stop();
+    stop = KIT.tween(S, { T: clips[next.method], u: 1 }, 700, cv.redraw);
+  }
+  return { set, info: () => ({ method: S.method, T: clips[S.method], e: errs[S.method], N: smp.N, clips, errs }), state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.calibText = i => {
+  const f = v => KIT.rulerNum(v), e = i.e;
+  return `<b>${KIT.CALIB_NAMES[i.method]}</b>: clip at T = ${i.T.toFixed(3)}, step S = T/127 = ${(i.T / 127).toFixed(4)}. ` +
+    `${e.nClip} of ${i.N.toLocaleString('en-US')} values clipped. Total MSE ${f(e.mse)} = <b class="c-red">rounding ${f(e.round)}</b> + <b class="c-red">clipping ${f(e.clip)}</b>.`;
+};
+
+/* Cross-layer equalization (Nagel 2021 Eq. 21-22; DFQ Eq. 11) on a toy block: 4 inputs -> 6 ReLU channels -> 3 outputs.
+   Toy weights; the rescaling, the per-tensor symmetric quantizer, the outputs and the empirical bias correction
+   (Nagel Eq. 27, applied to the output bias only) are computed exactly. Simulated in notes/sim-cle.txt. */
+KIT.CLE_R1 = [6.0, 0.05, 2.4, 0.25, 4.0, 0.1];   // range of each layer-1 output channel: a 120x spread
+KIT.CLE_R2 = [0.3, 2.5, 0.5, 1.5, 0.2, 2.0];     // range of each layer-2 input channel
+KIT.cleToy = (seed = 11) => {
+  const r = PE.rng(seed), g = PE.gauss(r), R1 = KIT.CLE_R1, R2 = KIT.CLE_R2, I = 4, O = 3, N = 256;
+  const norm = (v, R) => { const m = Math.max(...v.map(Math.abs)); return v.map(x => x / m * R); };
+  const W1 = R1.map(R => norm(Array.from({ length: I }, g), R));
+  const cols = R2.map(R => norm(Array.from({ length: O }, g), R));
+  const W2 = Array.from({ length: O }, (_, o) => cols.map(c => c[o]));
+  const b1 = R1.map(R => .3 * R * g()), b2 = Array.from({ length: O }, () => .2 * g());
+  const batch = () => Array.from({ length: N }, () => Array.from({ length: I }, () => .5 + g()));
+  const calib = batch(), test = batch();
+  return { W1, b1, W2, b2, calib, test, probe: test[0], I, O, N };
+};
+KIT.cleFwd = (W1, b1, W2, b2, x) => {
+  const h = W1.map((row, i) => Math.max(0, row.reduce((s, w, k) => s + w * x[k], 0) + b1[i]));
+  return W2.map((row, o) => row.reduce((s, w, i) => s + w * h[i], 0) + b2[o]);
+};
+// Per-tensor symmetric quantizer: one step for the whole tensor, levels -q..q with q = 2^(b-1) - 1.
+KIT.cleQuant = (W, bits) => {
+  const q = Math.pow(2, bits - 1) - 1, st = Math.max(...W.flat().map(Math.abs)) / q;
+  return { st, q, Q: W.map(row => row.map(w => PE.clamp(Math.round(w / st), -q, q) * st)) };
+};
+// t = 0: original weights; t = 1: s_i = sqrt(r1_i / r2_i), i.e. Eq. 22's (1 / r2_i) sqrt(r1_i r2_i). In between: s_i^t.
+KIT.cleEval = (T, t, bits, bc) => {
+  const R1 = KIT.CLE_R1, R2 = KIT.CLE_R2, O = T.O;
+  const sStar = R1.map((a, i) => Math.sqrt(a * R2[i]) / R2[i]), s = sStar.map(v => Math.pow(v, t));
+  const V1 = T.W1.map((row, i) => row.map(w => w / s[i])), c1 = T.b1.map((b, i) => b / s[i]);
+  const V2 = T.W2.map(row => row.map((w, i) => w * s[i]));
+  const q1 = KIT.cleQuant(V1, bits), q2 = KIT.cleQuant(V2, bits);
+  const r1 = V1.map(row => Math.max(...row.map(Math.abs))), r2 = V2[0].map((_, i) => Math.max(...V2.map(row => Math.abs(row[i]))));
+  const used = (r, st, q) => r.map(v => 2 * Math.min(q, Math.round(v / st)) + 1);
+  let b2q = T.b2.slice(), shift = Array(O).fill(0);
+  for (const x of T.calib) { const y = KIT.cleFwd(T.W1, T.b1, T.W2, T.b2, x), yq = KIT.cleFwd(q1.Q, c1, q2.Q, T.b2, x); y.forEach((v, o) => { shift[o] += (yq[o] - v) / T.N; }); }
+  if (bc) b2q = T.b2.map((b, o) => b - shift[o]);
+  let se = 0, sv = 0; const mean = Array(O).fill(0), my = Array(O).fill(0), ys = T.test.map(x => KIT.cleFwd(T.W1, T.b1, T.W2, T.b2, x));
+  ys.forEach(y => y.forEach((v, o) => { my[o] += v / T.N; }));
+  T.test.forEach((x, n) => { const yq = KIT.cleFwd(q1.Q, c1, q2.Q, b2q, x); ys[n].forEach((v, o) => { se += (yq[o] - v) ** 2; mean[o] += (yq[o] - v) / T.N; sv += (v - my[o]) ** 2; }); });
+  const yProbe0 = KIT.cleFwd(T.W1, T.b1, T.W2, T.b2, T.probe), yProbe = KIT.cleFwd(V1, c1, V2, T.b2, T.probe);
+  const sd = Math.sqrt(sv / (T.N * O));
+  return { s, sStar, V1, V2, r1, r2, q1, q2, lv1: used(r1, q1.st, q1.q), lv2: used(r2, q2.st, q2.q), L: 2 * q1.q + 1,
+    err: Math.sqrt(se / (T.N * O)) / sd, meanErr: Math.sqrt(mean.reduce((a, v) => a + v * v, 0) / O) / sd,
+    yProbe0, yProbe, maxDiff: Math.max(...yProbe.map((v, o) => Math.abs(v - yProbe0[o]))) };
+};
+KIT.cle = (el, opts = {}) => {
+  const T = KIT.cleToy(), S = { t: 0, bits: 8, bc: 0, bcT: 0, fig: opts.fig };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const base = { 8: KIT.cleEval(T, 0, 8, false), 4: KIT.cleEval(T, 0, 4, false) };
+  const fmt = v => v.toFixed(3);
+  function panel(ctx, P, E, layer, C, narrow) {
+    const r = layer === 1 ? E.r1 : E.r2, V = layer === 1 ? E.V1 : E.V2[0].map((_, i) => E.V2.map(row => row[i]));
+    const qz = layer === 1 ? E.q1 : E.q2, Qv = layer === 1 ? qz.Q : qz.Q[0].map((_, i) => qz.Q.map(row => row[i]));
+    const lv = layer === 1 ? E.lv1 : E.lv2, labW = narrow ? 58 : 74, R = Math.max(...r);
+    const ax0 = P.x + 6, ax1 = P.x + P.w - labW, cx = (ax0 + ax1) / 2, half = (ax1 - ax0) / 2, X = v => cx + v / R * half;
+    const rowH = P.h / 6, gl = glow(layer === 1 ? 'w1' : 'w2'), gr = glow('ranges');
+    PE.label(ctx, layer === 1 ? 'layer 1: weights out of each channel' : 'layer 2: weights into each channel', P.x + 4, P.y - 8, gl > 0 ? C.fg : C.mut, narrow ? 11 : 12, 'left', 600);
+    if (gl > 0) { ctx.save(); ctx.globalAlpha = gl; ctx.strokeStyle = layer === 1 ? C.blue : C.blue; ctx.lineWidth = 2; ctx.strokeRect(P.x - 2, P.y - 2, P.w + 4, P.h + 4); ctx.restore(); }
+    ctx.save(); ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx, P.y); ctx.lineTo(cx, P.y + P.h); ctx.stroke(); ctx.restore();
+    const px = qz.st / R * half;  // grid spacing in pixels
+    for (let i = 0; i < 6; i++) {
+      const y = P.y + (i + .5) * rowH, bh = Math.min(14, rowH * .42);
+      ctx.save(); ctx.globalAlpha = .16 + .3 * gr; ctx.fillStyle = C.blue; ctx.fillRect(X(-r[i]), y - bh / 2, Math.max(1, X(r[i]) - X(-r[i])), bh);
+      ctx.globalAlpha = .7; ctx.strokeStyle = C.blue; ctx.lineWidth = 1 + 1.5 * gr; ctx.strokeRect(X(-r[i]), y - bh / 2, Math.max(1, X(r[i]) - X(-r[i])), bh); ctx.restore();
+      if (px >= 3) { ctx.save(); ctx.strokeStyle = C.yellow; ctx.globalAlpha = .45; ctx.lineWidth = 1; ctx.beginPath();
+        for (let k = -qz.q; k <= qz.q; k++) { const xx = cx + k * px; ctx.moveTo(xx, y - bh / 2 - 3); ctx.lineTo(xx, y + bh / 2 + 3); } ctx.stroke(); ctx.restore(); }
+      V[i].forEach((v, k) => {
+        const xq = X(Qv[i][k]), xv = X(v);
+        if (Math.abs(xq - xv) > .8) PE.polyline(ctx, [[xv, y], [xq, y]], C.red, 2.2, null, .9);
+        ctx.save(); ctx.strokeStyle = C.yellow; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(xq, y - bh / 2 - 2); ctx.lineTo(xq, y + bh / 2 + 2); ctx.stroke(); ctx.restore();
+        PE.dot(ctx, xv, y, 3.2, C.blue);
+      });
+      const few = lv[i] <= (S.bits === 8 ? 9 : 3);
+      PE.label(ctx, narrow ? `${lv[i]}/${E.L}` : `${lv[i]} of ${E.L}`, ax1 + 8, y + 4, few ? C.red : C.yellow, narrow ? 10.5 : 11.5, 'left', 600);
+    }
+    PE.label(ctx, 'levels', ax1 + 8, P.y - 8, C.mut, 10.5, 'left', 400);
+    // the per-tensor ruler: one step for every channel of this tensor
+    const ry = P.y + P.h + 8; ctx.save(); ctx.strokeStyle = C.yellow; ctx.globalAlpha = .9; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(X(-R), ry); ctx.lineTo(X(R), ry); ctx.stroke();
+    const every = px >= 3 ? 1 : Math.pow(2, Math.ceil(Math.log2(3 / px)));
+    ctx.lineWidth = 1; ctx.beginPath(); for (let k = -qz.q; k <= qz.q; k += 1) if (k % every === 0) { const xx = cx + k * px; ctx.moveTo(xx, ry - 3); ctx.lineTo(xx, ry + 3); } ctx.stroke(); ctx.restore();
+    PE.label(ctx, `one ${S.bits}-bit grid for the tensor: step ${qz.st.toPrecision(2)}${every > 1 ? `, tick = ${every} levels` : ''}`, cx, ry + 16, C.yellow, 10.5, 'center', 400);
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = n => PE.css(n);
+    const C = { fg: cs('--fg'), mut: cs('--muted'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), green: cs('--green'), rule: cs('--rule') };
+    const E = KIT.cleEval(T, S.t, S.bits, false), Eb = KIT.cleEval(T, S.t, S.bits, true);
+    const pad = opts.bottomPad || 0, outH = narrow ? 96 : 74, H = h - pad;
+    let P1, P2, sx;
+    if (!narrow) { const midW = 96, pw = (w - 20 - midW) / 2, ph = H - outH - 26 - 30;
+      P1 = { x: 10, y: 26, w: pw, h: ph }; P2 = { x: 10 + pw + midW, y: 26, w: pw, h: ph }; sx = 10 + pw + midW / 2; }
+    else { const sW = 50, ph = (H - outH - 2 * 24 - 2 * 26) / 2;
+      P1 = { x: sW, y: 24, w: w - sW - 4, h: ph }; P2 = { x: sW, y: 24 + ph + 26 + 24, w: w - sW - 4, h: ph }; sx = sW / 2; }
+    panel(ctx, P1, E, 1, C, narrow); panel(ctx, P2, E, 2, C, narrow);
+    // the scale of each channel: layer 1 divides by it, layer 2 multiplies by it
+    const gs = glow('scale');
+    PE.label(ctx, narrow ? 's_i' : 'scale s_i', sx, P1.y - 8, gs > 0 ? C.green : C.mut, 11, 'center', 600);
+    for (let i = 0; i < 6; i++) {
+      const y = P1.y + (i + .5) * P1.h / 6, v = E.s[i];
+      PE.label(ctx, v >= 10 ? v.toFixed(1) : v.toFixed(2), sx, y + 4, Math.abs(v - 1) > .01 ? C.green : C.fg, 11.5 + 1.5 * gs, 'center', 600);
+      
+    }
+    // output strip: the FP32 output does not move; the INT8 error does
+    const oy = H - outH + 8, go = glow('out'), gsh = glow('shift');
+    ctx.save(); ctx.strokeStyle = C.rule; ctx.beginPath(); ctx.moveTo(8, oy - 6); ctx.lineTo(w - 8, oy - 6); ctx.stroke(); ctx.restore();
+    const ow = narrow ? w - 16 : w * .48;
+    PE.label(ctx, 'FP32 output, one test input', 10, oy + 10, go > 0 ? C.fg : C.mut, 11, 'left', 600);
+    PE.label(ctx, 'y = (' + E.yProbe0.map(fmt).join(', ') + ')  original', 10, oy + 28, C.blue, 11.5 + go, 'left', 600);
+    PE.label(ctx, 'y = (' + E.yProbe.map(fmt).join(', ') + ')  rescaled', 10, oy + 45, C.blue, 11.5 + go, 'left', 600);
+    const mx = narrow ? 10 : ow + 24, my = narrow ? oy + 58 : oy, mw = (narrow ? w - 20 : w - mx - 12);
+    const err = PE.lerp(E.err, Eb.err, S.bc), mean = PE.lerp(E.meanErr, Eb.meanErr, S.bc), ref = base[S.bits].err;
+    const bar = (y, v, lab, al, g) => {
+      const bw = mw - (narrow ? 118 : 150), x0 = mx + (narrow ? 118 : 150);
+      PE.label(ctx, lab, mx, y + 9, C.mut, 10.5, 'left', 400);
+      ctx.save(); ctx.fillStyle = C.rule; ctx.fillRect(x0, y, bw, 10); ctx.globalAlpha = al; ctx.fillStyle = C.red; ctx.fillRect(x0, y, Math.max(1.5, bw * Math.min(1, v / ref)), 10);
+      if (g > 0) { ctx.globalAlpha = g; ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.strokeRect(x0 - 2, y - 2, bw + 4, 14); } ctx.restore();
+      PE.label(ctx, (v * 100).toFixed(2) + '%', x0 + Math.min(bw - 40, bw * Math.min(1, v / ref) + 6), y + 9, C.fg, 10.5, 'left', 600);
+    };
+    if (!narrow) PE.label(ctx, `per-tensor ${S.bits}-bit weights, 256 test inputs`, mx, oy + 10, C.mut, 11, 'left', 600);
+    bar(narrow ? my : oy + 20, err, 'output error (RMS)', .95, 0);
+    bar(narrow ? my + 16 : oy + 38, mean, 'its mean shift', .55, gsh);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.55 : .54), draw);
+  let stopT = () => {}, stopB = () => {};
+  function set(next) {
+    if (next.bits && next.bits !== S.bits) S.bits = next.bits;
+    if (next.t != null && next.t !== S.t) { stopT(); stopT = next.instant ? (S.t = next.t, () => {}) : KIT.tween(S, { t: next.t }, 800, cv.redraw); }
+    if (next.bc != null && next.bc !== S.bcT) { S.bcT = next.bc; stopB(); stopB = KIT.tween(S, { bc: next.bc }, 600, cv.redraw); }
+    cv.redraw();
+  }
+  function info(t = S.t) {
+    const E = KIT.cleEval(T, t, S.bits, !!S.bcT), E0 = KIT.cleEval(T, 0, S.bits, !!S.bcT);
+    return { t, bits: S.bits, bc: !!S.bcT, E, E0, lvMin: Math.min(...E.lv1), lvMin0: Math.min(...E0.lv1) };
+  }
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stopT(); stopB(); cv.destroy(); } };
+};
+KIT.cleText = i => {
+  const pct = v => (v * 100).toFixed(2) + '%', y = i.E.yProbe.map(v => v.toFixed(3)).join(', ');
+  const where = i.t <= 0 ? 'Original weights (every s_i = 1).' : i.t >= 1 ? 'Equalized: every s_i at its Eq. 22 value.' : `Part way: each s_i raised to the power ${i.t.toFixed(2)}.`;
+  return `${where} Per-tensor ${i.bits}-bit weights${i.bc ? ' with bias correction' : ''}: output error <b class="c-red">${pct(i.E.err)}</b> of the output's spread` +
+    (i.t > 0 ? ` (${pct(i.E0.err)} before equalizing)` : '') + `; mean shift ${pct(i.E.meanErr)}. ` +
+    `The smallest channel uses ${i.lvMin} of ${i.E.L} levels${i.t > 0 ? ` (${i.lvMin0} before)` : ''}. ` +
+    `FP32 output for the test input: (${y}), largest change from the original ${i.E.maxDiff === 0 ? 0 : i.E.maxDiff.toExponential(0)}.`;
+};
+
+/* AdaRound's question on a plane: two weights (in units of the grid step), the four grid corners around them, and
+   the layer-output error d^T H d of rounding to each corner, H = E[x x^T] of the layer inputs. Exact arithmetic.
+   Reusable (GPTQ): KIT.adaround(el, { H, w }) takes any 2x2 positive-definite H; state.trail ([[x, y], ...]) and
+   state.marks ([{ p: [x, y], color, label }]) draw extra paths and points on the same plane. */
+KIT.quadForm = (H, d) => H[0][0] * d[0] * d[0] + 2 * H[0][1] * d[0] * d[1] + H[1][1] * d[1] * d[1];
+KIT.roundCosts = (w, H) => {
+  const f = w.map(Math.floor), near = w.map(Math.round);
+  const cs = [[0, 0], [1, 0], [0, 1], [1, 1]].map(([a, b]) => { const p = [f[0] + a, f[1] + b], d = [p[0] - w[0], p[1] - w[1]];
+    return { p, d, cost: KIT.quadForm(H, d), nearest: p[0] === near[0] && p[1] === near[1] }; });
+  const best = cs.reduce((m, c) => c.cost < m.cost ? c : m); best.best = true;
+  return cs;
+};
+// Points of the ellipse {v : (v - w)^T H (v - w) = level}, from the eigen-decomposition of the 2x2 H.
+KIT.quadEllipse = (H, w, level, n = 72) => {
+  const a = H[0][0], b = H[0][1], c = H[1][1], tr = (a + c) / 2, dt = Math.sqrt(((a - c) / 2) ** 2 + b * b);
+  const l1 = tr + dt, l2 = tr - dt, th = Math.abs(b) < 1e-12 ? (a >= c ? 0 : Math.PI / 2) : Math.atan2(l1 - a, b);
+  const r1 = Math.sqrt(level / l1), r2 = Math.sqrt(level / l2), ct = Math.cos(th), st = Math.sin(th);
+  return Array.from({ length: n + 1 }, (_, k) => { const t = 2 * Math.PI * k / n, u = r1 * Math.cos(t), v = r2 * Math.sin(t);
+    return [w[0] + u * ct - v * st, w[1] + u * st + v * ct]; });
+};
+KIT.ADA_H = { indep: [[1, 0], [0, 1]], corr: [[1, .5], [.5, 1]] };  // corr: the Hessian of AdaRound's Example 1 (Sec. 2)
+KIT.adaround = (el, opts = {}) => {
+  const S = { w: (opts.w || [.42, .35]).slice(), H: opts.H || KIT.ADA_H.corr, pick: null, u: 0, trail: [], marks: [] };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  let geo = null, drag = false;
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = n => PE.css(n), pad = opts.bottomPad || 0;
+    const C = { fg: cs('--fg'), mut: cs('--muted'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), green: cs('--green'), rule: cs('--rule') };
+    const side = narrow ? Math.min(w - 40, h - pad - 150) : Math.min(h - pad - 50, w * .58);
+    const ox = narrow ? (w - side) / 2 + 8 : 46, oy = 14, lo = -.75, hi = 1.75;
+    const X = v => ox + (v - lo) / (hi - lo) * side, Y = v => oy + side - (v - lo) / (hi - lo) * side;
+    geo = { X, Y, ix: px => lo + (px - ox) / side * (hi - lo), iy: py => lo + (oy + side - py) / side * (hi - lo) };
+    const costs = KIT.roundCosts(S.w, S.H), gh = glow('hess'), gd = glow('delta'), gc = glow('corners'), gl = glow('loss');
+    ctx.save(); ctx.strokeStyle = C.rule; ctx.strokeRect(X(lo), Y(hi), side, side); ctx.restore();
+    // the integer grid (yellow): lines through the grid points
+    for (const g of [0, 1]) { PE.polyline(ctx, [[X(g), Y(lo)], [X(g), Y(hi)]], C.yellow, 1, [3, 4], .45); PE.polyline(ctx, [[X(lo), Y(g)], [X(hi), Y(g)]], C.yellow, 1, [3, 4], .45); }
+    PE.label(ctx, 'w\u2081 / step', X(hi) - 4, Y(lo) + 26, C.mut, 11, 'right', 400);
+    ctx.save(); ctx.translate(X(lo) - 26, Y(hi) + 4); ctx.rotate(-Math.PI / 2); PE.label(ctx, 'w\u2082 / step', 0, 0, C.mut, 11, 'right', 400); ctx.restore();
+    for (const g of [0, 1]) { PE.label(ctx, String(g), X(g), Y(lo) + 13, C.mut, 10.5, 'center', 400); PE.label(ctx, String(g), X(lo) - 6, Y(g) + 4, C.mut, 10.5, 'right', 400); }
+    // error contours (red): the output error is the same along each ellipse; one passes through each corner
+    ctx.save(); ctx.beginPath(); ctx.rect(X(lo), Y(hi), side, side); ctx.clip();
+    const levels = costs.map(c => c.cost).sort((a, b) => a - b);
+    [levels[0] * .25, levels[0] * .6, ...levels].forEach((L, k) => {
+      const pts = KIT.quadEllipse(S.H, S.w, L).map(([a, b]) => [X(a), Y(b)]);
+      PE.polyline(ctx, pts, C.red, k >= 2 ? 1.4 + 2 * gh : 1 + gh, k >= 2 ? null : [2, 3], .35 + .25 * (k >= 2) + .4 * gh);
+    });
+    if (S.trail.length > 1) PE.polyline(ctx, S.trail.map(([a, b]) => [X(a), Y(b)]), C.fg, 1.5, [4, 3], .8);
+    ctx.restore();
+    // corners
+    costs.forEach(c => {
+      const x = X(c.p[0]), y = Y(c.p[1]), out = [c.p[0] - .5, c.p[1] - .5];
+      PE.dot(ctx, x, y, 6 + 2 * gc, C.yellow);
+      if (c.best) PE.ring(ctx, x, y, 12 + 3 * gc, C.green, 2.2);
+      if (c.nearest) { ctx.save(); ctx.setLineDash([3, 3]); PE.ring(ctx, x, y, c.best ? 17 : 12, C.yellow, 1.6); ctx.restore(); }
+      const tx = x + Math.sign(out[0]) * 16, ty = y - Math.sign(out[1]) * 18 + 4;
+      const tag = c.best && c.nearest ? 'nearest = best' : c.best ? 'best' : c.nearest ? 'nearest' : '';
+      PE.label(ctx, c.cost.toFixed(3), tx, ty, c.best ? C.green : C.fg, 11.5, out[0] < 0 ? 'right' : 'left', 600);
+      if (tag) PE.label(ctx, tag, tx, ty + 13, c.best ? C.green : C.yellow, 10.5, out[0] < 0 ? 'right' : 'left', 400);
+    });
+    // the rounding error vector (red arrow) from w to the chosen corner, and the moving rounded point
+    const tgt = S.pick ? costs.find(c => S.pick === 'best' ? c.best : c.nearest) : null;
+    const showD = tgt || (gd > 0 ? costs.find(c => c.nearest) : null);
+    if (showD) PE.arrow(ctx, X(S.w[0]), Y(S.w[1]), X(PE.lerp(S.w[0], showD.p[0], tgt ? S.u : 1)), Y(PE.lerp(S.w[1], showD.p[1], tgt ? S.u : 1)), C.red, 2 + 2 * gd, 9, .9);
+    S.marks.forEach(m => { PE.dot(ctx, X(m.p[0]), Y(m.p[1]), 5, m.color || C.fg); if (m.label) PE.label(ctx, m.label, X(m.p[0]) + 8, Y(m.p[1]) - 8, m.color || C.fg, 10.5, 'left', 600); });
+    PE.dot(ctx, X(S.w[0]), Y(S.w[1]), 7, C.blue); PE.ring(ctx, X(S.w[0]), Y(S.w[1]), 11, C.blue, 1.2, .6);
+    PE.label(ctx, 'w (FP32)' + (opts.drag !== false ? ', drag me' : ''), X(S.w[0]) + 12, Y(S.w[1]) + 18, C.blue, 11, 'left', 600);
+    // the cost list: one bar per corner
+    const lx = narrow ? 14 : ox + side + 34, ly = narrow ? oy + side + 52 : oy + 30, lw = narrow ? w - 28 : w - lx - 14;
+    PE.label(ctx, 'output error of each corner, \u0394w^T H \u0394w', lx, ly - 12, gl > 0 ? C.fg : C.mut, 11, 'left', 600);
+    const mx = Math.max(...costs.map(c => c.cost)), rowH = narrow ? 20 : 30;
+    costs.forEach((c, k) => {
+      const y = ly + k * rowH, bx = lx + 70, bw = Math.max(40, lw - 70 - 50);
+      PE.label(ctx, `(${c.p[0]}, ${c.p[1]})`, lx, y + 11, c.best ? C.green : C.fg, 11.5, 'left', 600);
+      ctx.save(); ctx.fillStyle = C.rule; ctx.fillRect(bx, y + 2, bw, 11); ctx.fillStyle = c.best ? C.green : C.red; ctx.globalAlpha = .85; ctx.fillRect(bx, y + 2, bw * c.cost / mx, 11);
+      if (gl > 0) { ctx.globalAlpha = gl; ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.strokeRect(bx - 2, y, bw + 4, 15); } ctx.restore();
+      PE.label(ctx, c.cost.toFixed(3) + (c.nearest ? ' n' : ''), bx + bw + 6, y + 11, c.best ? C.green : C.fg, 11, 'left', 600);
+    });
+    if (!narrow) { const hy = ly + 4 * rowH + 18, H = S.H;
+      PE.label(ctx, `toy H = [[${H[0][0]}, ${H[0][1]}], [${H[1][0]}, ${H[1][1]}]]`, lx, hy, gh > 0 ? C.red : C.mut, 11, 'left', 600);
+      PE.label(ctx, 'n = round to nearest', lx, hy + 16, C.mut, 10.5, 'left', 400); }
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.32 : .56), draw);
+  let stop = () => {};
+  function set(next) {
+    if (next.H) S.H = next.H;
+    if (next.w) S.w = next.w.slice();
+    if ('pick' in next && next.pick !== S.pick) { stop(); S.pick = next.pick; S.u = 0; if (S.pick) stop = KIT.tween(S, { u: 1 }, 700, cv.redraw); else S.u = 0; }
+    if (next.trail) S.trail = next.trail; if (next.marks) S.marks = next.marks;
+    cv.redraw();
+  }
+  if (opts.drag !== false) {
+    const pos = e => { const r = el.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    el.addEventListener('pointerdown', e => { if (!geo) return; const [x, y] = pos(e); if (Math.hypot(x - geo.X(S.w[0]), y - geo.Y(S.w[1])) < 26) { drag = true; el.setPointerCapture(e.pointerId); } });
+    el.addEventListener('pointermove', e => { if (!drag) return; const [x, y] = pos(e); S.w = [PE.clamp(geo.ix(x), .03, .97), PE.clamp(geo.iy(y), .03, .97)]; S.u = 1; cv.redraw(); });
+    el.addEventListener('pointerup', () => { if (drag) { drag = false; opts.onChange && opts.onChange(); } });
+  }
+  const info = () => ({ w: S.w, H: S.H, pick: S.pick, costs: KIT.roundCosts(S.w, S.H) });
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.adaroundText = i => {
+  const n = i.costs.find(c => c.nearest), b = i.costs.find(c => c.best), p = c => `(${c.p[0]}, ${c.p[1]})`;
+  const head = i.H[0][1] === 0 ? 'Independent inputs: H has no off-diagonal term.' : `Correlated inputs: off-diagonal H = ${i.H[0][1]}.`;
+  const verdict = n === b ? `Rounding to nearest picks ${p(n)}, which is also the best corner (error ${n.cost.toFixed(3)}).`
+    : `Rounding to nearest picks ${p(n)}: output error ${n.cost.toFixed(3)}. The best corner is <b class="c-green">${p(b)}</b>: ${b.cost.toFixed(3)}, ${Math.round(100 * (1 - b.cost / n.cost))}% lower.`;
+  const shown = i.pick ? ` Showing: ${i.pick === 'best' ? 'the best corner' : 'round to nearest'}.` : '';
+  return `w = (${i.w.map(v => v.toFixed(2)).join(', ')}) grid steps. ${head} ${verdict}${shown}`;
+};
+
+/* The straight-through estimator on a one-weight toy. Quantizer: LSQ Eq. 1-2 (Esser 1902.08153v3), 3-bit signed,
+   Q_N = 4, Q_P = 3. Model y = w_hat * x with x = 1, target 1.1, loss (y - 1.1)^2. Gradients: the true one (zero
+   almost everywhere), the clipped STE (Esser Eq. 5; Krishnamoorthi Eq. 14-15; Wu Eq. 13), and the STE plus LSQ's
+   step-size gradient (Esser Eq. 3) scaled by g = 1 / sqrt(N Q_P) with N = 1 weight. Simulated in notes/sim-ste.txt. */
+KIT.STE = { QN: 4, QP: 3, y: 1.1, w0: .1, s0: .25, lr: .1, lrs: .1 };
+KIT.steQ = (v, s) => Math.round(PE.clamp(v / s, -KIT.STE.QN, KIT.STE.QP)) * s;
+KIT.steGrad = (w, s, mode) => {
+  const P = KIT.STE, vh = KIT.steQ(w, s), dL = 2 * (vh - P.y), r = w / s, inside = r > -P.QN && r < P.QP;
+  const dvdw = mode === 'true' ? 0 : inside ? 1 : 0;
+  const dvds = r <= -P.QN ? -P.QN : r >= P.QP ? P.QP : -r + Math.round(r);
+  const gs = mode === 'lsq' ? dL * dvds / Math.sqrt(1 * P.QP) : 0;
+  return { vh, loss: (vh - P.y) ** 2, dL, dvdw, gw: dL * dvdw, gs, inside, r };
+};
+KIT.steStep = (st, mode) => { const g = KIT.steGrad(st.w, st.s, mode); return { w: st.w - KIT.STE.lr * g.gw, s: st.s - KIT.STE.lrs * g.gs }; };
+KIT.ste = (el, opts = {}) => {
+  const P = KIT.STE, S = { w: P.w0, s: P.s0, mode: 'ste', k: 0, end: null, trail: [P.w0], losses: [KIT.steGrad(P.w0, P.s0, 'ste').loss] };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const xr = [-.6, 1.55];
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = n => PE.css(n), pad = opts.bottomPad || 0;
+    const C = { fg: cs('--fg'), mut: cs('--muted'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), green: cs('--green'), brown: cs('--brown'), rule: cs('--rule') };
+    const H = h - pad, L = narrow ? 40 : 54, R = narrow ? 12 : 22, top = 26, gap = 40;
+    const h1 = (H - top - gap - 40) * .66, h2 = (H - top - gap - 40) * .34;
+    const b1 = { x: L, y: top, w: w - L - R, h: h1 }, b2 = { x: L, y: top + h1 + gap, w: w - L - R, h: h2 };
+    const g = { grid: glow('grid'), clip: glow('clip'), round: glow('round'), shadow: glow('shadow'), ste: glow('ste'), tru: glow('true'), step: glow('step') };
+    const lo = -P.QN * S.s, hi = P.QP * S.s;
+    // top: the fake quantizer w -> w_hat
+    const A = PE.axes(ctx, b1, xr, [-.6, 1.3], { xt: [-.5, 0, .5, 1, 1.5], yt: [-.5, 0, .5, 1], xl: '', yl: 'w_hat (used in the forward pass)', ylo: narrow ? 30 : 40 });
+    const shade = (x0, x1, b, A2, al) => { ctx.save(); ctx.fillStyle = C.brown; ctx.globalAlpha = al; const a = A2.X(PE.clamp(x0, xr[0], xr[1])), c = A2.X(PE.clamp(x1, xr[0], xr[1])); if (c > a) ctx.fillRect(a, b.y, c - a, b.h); ctx.restore(); };
+    shade(xr[0], lo, b1, A, .1 + .25 * g.clip); shade(hi, xr[1], b1, A, .1 + .25 * g.clip);
+    PE.label(ctx, 'clipped', A.X(Math.min(xr[1], hi)) + 6, b1.y + 14, C.brown, 10.5, 'left', 600);
+    for (let k = -P.QN; k <= P.QP; k++) { const yv = k * S.s; if (yv < -.6 || yv > 1.3) continue; PE.polyline(ctx, [[b1.x, A.Y(yv)], [b1.x + b1.w, A.Y(yv)]], C.yellow, 1 + 1.5 * g.grid, [2, 4], .3 + .5 * g.grid); }
+    PE.polyline(ctx, [[A.X(-.6), A.Y(-.6)], [A.X(1.3), A.Y(1.3)]], C.blue, 1, [5, 5], .5);
+    PE.label(ctx, 'no rounding', A.X(-.3) + 6, A.Y(-.3) + 14, C.blue, 10.5, 'left', 400);
+    const pts = []; for (let i = 0; i <= 600; i++) { const x = xr[0] + (xr[1] - xr[0]) * i / 600, v = KIT.steQ(x, S.s); if (pts.length && Math.abs(pts[pts.length - 1][2] - v) > 1e-9) pts.push([A.X(x), A.Y(pts[pts.length - 1][2]), v]); pts.push([A.X(x), A.Y(v), v]); }
+    PE.polyline(ctx, pts.map(p => [p[0], p[1]]), C.yellow, 2.4 + 2 * g.round, null, 1);
+    if (g.step > 0) { const xa = A.X(xr[1]) - 16; PE.arrow(ctx, xa, A.Y(0), xa, A.Y(S.s), C.yellow, 2, 6, g.step); PE.label(ctx, 'step s', xa - 4, A.Y(S.s / 2) + 4, C.yellow, 11, 'right', 600); }
+    PE.polyline(ctx, [[b1.x, A.Y(P.y)], [b1.x + b1.w, A.Y(P.y)]], C.red, 1.5, [6, 4], .9);
+    PE.label(ctx, 'target 1.1', A.X(.15), A.Y(P.y) - 5, C.red, 11, 'left', 600);
+    S.trail.forEach(t => PE.dot(ctx, A.X(t), b1.y + b1.h, 2.5, C.blue, .35));
+    const vh = KIT.steQ(S.w, S.s), xw = A.X(PE.clamp(S.w, xr[0], xr[1]));
+    PE.polyline(ctx, [[xw, b1.y + b1.h], [xw, A.Y(vh)]], C.blue, 1, [2, 3], .8);
+    PE.polyline(ctx, [[xw, A.Y(vh)], [b1.x, A.Y(vh)]], C.yellow, 1, [2, 3], .8);
+    PE.dot(ctx, xw, b1.y + b1.h, 6 + 2 * g.shadow, C.blue); PE.dot(ctx, xw, A.Y(vh), 6, C.yellow);
+    const rt = xw > b1.x + b1.w * .55; PE.label(ctx, 'shadow weight w (FP32)', xw + (rt ? -10 : 10), b1.y + b1.h - 8, C.blue, 11, rt ? 'right' : 'left', 600);
+    // loss history
+    const lw = narrow ? 92 : 130, lh = 34, lx = b1.x + 8, ly = b1.y + 6;
+    ctx.save(); ctx.fillStyle = cs('--bg'); ctx.globalAlpha = .85; ctx.fillRect(lx - 4, ly - 2, lw + 8, lh + 18); ctx.restore();
+    PE.label(ctx, `loss ${S.losses[S.losses.length - 1].toFixed(4)}`, lx, ly + 10, C.red, 11, 'left', 600);
+    const n = S.losses.length, lp = S.losses.map((v, i) => [lx + (n > 1 ? i / (n - 1) : 0) * lw, ly + 14 + lh - v / 1.21 * lh]);
+    if (n > 1) PE.polyline(ctx, lp, C.red, 1.5, null, .9);
+    // bottom: d w_hat / d w
+    const B = PE.axes(ctx, b2, xr, [0, 1.25], { xt: [-.5, 0, .5, 1, 1.5], yt: [0, 1], xl: 'shadow weight w', yl: 'd w_hat / d w', ylo: narrow ? 30 : 40 });
+    shade(xr[0], lo, b2, B, .1 + .25 * g.clip); shade(hi, xr[1], b2, B, .1 + .25 * g.clip);
+    const trueOn = S.mode === 'true', aT = trueOn ? 1 : .4, aS = trueOn ? .35 : 1;
+    PE.polyline(ctx, [[b2.x, B.Y(0)], [b2.x + b2.w, B.Y(0)]], C.mut, 2 + g.tru, null, aT);
+    for (let k = -P.QN; k < P.QP; k++) { const xs = (k + .5) * S.s; if (xs < xr[0] || xs > xr[1]) continue; PE.arrow(ctx, B.X(xs), B.Y(0), B.X(xs), b2.y + 2, C.mut, 1.2 + g.tru, 6, aT * .8); }
+    PE.label(ctx, 'true: 0, except spikes at each jump', b2.x + b2.w - 4, B.Y(0) - 6, C.mut, 10.5, 'right', 600);
+    const ste = [[A.X(xr[0]), B.Y(0)], [B.X(lo), B.Y(0)], [B.X(lo), B.Y(1)], [B.X(Math.min(hi, xr[1])), B.Y(1)], [B.X(Math.min(hi, xr[1])), B.Y(0)], [B.X(xr[1]), B.Y(0)]];
+    PE.polyline(ctx, ste, C.red, 2.4 + 2 * g.ste, null, aS);
+    PE.label(ctx, 'STE: 1 inside the range, 0 outside', B.X(Math.max(lo, xr[0])) + 6, B.Y(1) - 6, C.red, 10.5, 'left', 600);
+    const gr = KIT.steGrad(S.w, S.s, S.mode);
+    PE.dot(ctx, xw, B.Y(gr.dvdw), 6, S.mode === 'true' ? C.mut : C.red);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.3 : .6), draw);
+  let stop = () => {};
+  function step(n) {
+    stop(); let st = S.end ? { w: S.end.w, s: S.end.s } : { w: S.w, s: S.s };
+    for (let i = 0; i < n; i++) { st = KIT.steStep(st, S.mode); S.k++; S.trail.push(st.w); S.losses.push(KIT.steGrad(st.w, st.s, S.mode).loss); }
+    S.end = st; stop = KIT.tween(S, { w: st.w, s: st.s }, 450 + 90 * n, cv.redraw);
+  }
+  function set(next) {
+    stop();
+    if (next.mode && next.mode !== S.mode) { S.mode = next.mode; next.reset = true; }
+    if (next.reset) { if (S.end) { S.w = S.end.w; S.s = S.end.s; } S.end = { w: P.w0, s: P.s0 }; S.k = 0; S.trail = [P.w0]; S.losses = [KIT.steGrad(P.w0, P.s0, S.mode).loss];
+      stop = KIT.tween(S, { w: P.w0, s: P.s0 }, 500, cv.redraw); }
+    if (next.step) step(next.step);
+    cv.redraw();
+  }
+  // A tween may still be running: report the end state.
+  const info = () => { const e = S.end || S; return { mode: S.mode, k: S.k, w: e.w, s: e.s, g: KIT.steGrad(e.w, e.s, S.mode) }; };
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.steText = i => {
+  const name = { true: 'True gradient', ste: 'Straight-through estimator', lsq: 'STE plus a learned step size (LSQ)' }[i.mode], g = i.g;
+  let why;
+  if (i.mode === 'true') why = 'The rounding is flat almost everywhere, so d w_hat / d w = 0 and the weight never moves.';
+  else if (!g.inside) why = `w / s = ${g.r.toFixed(2)} is past the top of the range (Q_P = ${KIT.STE.QP}), so the clipped STE passes no gradient: w is stuck${i.mode === 'lsq' ? ', but the step size still learns' : ''}.`;
+  else if (Math.abs(g.gw) < 1e-3) why = 'The rounded value has reached the target, so the gradient is about zero.';
+  else why = `Inside the range the STE passes the gradient through as if rounding were the identity: dL/dw = ${g.gw.toFixed(2)}.`;
+  return `<b>${name}</b>, step ${i.k}: w = ${i.w.toFixed(3)}, w_hat = <span class="c-yellow">${g.vh.toFixed(3)}</span>, step size s = ${i.s.toFixed(3)}, loss <b class="c-red">${g.loss.toFixed(4)}</b>. ${why}`;
+};
+
+/* Nagel 2021 Fig. 8, redrawn: the standard PTQ pipeline, with the data / no-data branch at step 4. Step 0 = overview. */
+KIT.PTQ_STEPS = [
+  { key: 'fp', t: ['pre-trained', 'FP32 model'], c: '--blue' },
+  { key: 'cle', t: ['cross-layer', 'equalization'], c: '--green', n: 1 },
+  { key: 'add', t: ['add', 'quantizers'], c: '--yellow', n: 2 },
+  { key: 'wr', t: ['weight range', '(MSE)'], c: '--yellow', n: 3 },
+  { key: 'ada', t: ['AdaRound', '(with data)'], c: '--green', n: 4, br: -1 },
+  { key: 'bc', t: ['bias correction', '(no data)'], c: '--green', n: 4, br: 1 },
+  { key: 'ar', t: ['activation', 'range'], c: '--yellow', n: 5 },
+];
+KIT.ptqpipe = (el, opts = {}) => {
+  const S = { step: 0, u: 1 };
+  function layout(w, h) {
+    const narrow = w < 560, pos = {};
+    if (!narrow) { const cw = (w - 20) / 6, bw = Math.min(cw - 18, 118), bh = 46, cy = h / 2;
+      KIT.PTQ_STEPS.forEach(s => { const col = s.key === 'fp' ? 0 : s.key === 'cle' ? 1 : s.key === 'add' ? 2 : s.key === 'wr' ? 3 : s.br ? 4 : 5;
+        pos[s.key] = { x: 10 + cw * (col + .5) - bw / 2, y: cy - bh / 2 + (s.br || 0) * 40, w: bw, h: bh }; }); }
+    else { const rh = (h - 20) / 6, bw = Math.min(w / 2 - 16, 150), bh = 40;
+      KIT.PTQ_STEPS.forEach(s => { const row = s.key === 'fp' ? 0 : s.key === 'cle' ? 1 : s.key === 'add' ? 2 : s.key === 'wr' ? 3 : s.br ? 4 : 5;
+        pos[s.key] = { x: w / 2 - bw / 2 + (s.br || 0) * (bw / 2 + 8), y: 10 + rh * (row + .5) - bh / 2, w: s.br ? bw * .95 : bw, h: bh }; }); }
+    return { narrow, pos };
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const L = layout(w, h), P = L.pos, mut = PE.css('--muted'), fg = PE.css('--fg');
+    const mid = b => [b.x + b.w / 2, b.y + b.h / 2];
+    const edge = (a, b, lab) => { const A = P[a], B = P[b];
+      const [x1, y1] = L.narrow ? [mid(A)[0], A.y + A.h] : [A.x + A.w, mid(A)[1]], [x2, y2] = L.narrow ? [mid(B)[0], B.y] : [B.x, mid(B)[1]];
+      PE.arrow(ctx, x1 + (L.narrow ? 0 : 3), y1 + (L.narrow ? 3 : 0), x2 - (L.narrow ? 0 : 3), y2 - (L.narrow ? 3 : 0), mut, 1.4, 7, .8);
+      if (lab) PE.label(ctx, lab, (x1 + x2) / 2 - (L.narrow ? 0 : 8), (y1 + y2) / 2 + (L.narrow ? -2 : lab === 'data' ? -8 : 16), mut, 10, L.narrow ? 'center' : 'right', 400); };
+    edge('fp', 'cle'); edge('cle', 'add'); edge('add', 'wr'); edge('wr', 'ada', 'data'); edge('wr', 'bc', 'no data'); edge('ada', 'ar'); edge('bc', 'ar');
+    KIT.PTQ_STEPS.forEach(s => {
+      const b = P[s.key], col = PE.css(s.c), on = S.step === 0 || s.n === S.step || (s.key === 'fp' && S.step === 0);
+      const cur = s.n === S.step, al = S.step === 0 ? 1 : cur ? .35 + .65 * S.u : (s.n || 0) < S.step ? .75 : .35;
+      ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = PE.css('--panel'); ctx.strokeStyle = col; ctx.lineWidth = cur ? 2.6 : 1.4;
+      ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 8); ctx.fill(); ctx.stroke(); ctx.restore();
+      s.t.forEach((t, k) => PE.label(ctx, t, b.x + b.w / 2, b.y + b.h / 2 + 4 + (k - .5) * 13, on || cur ? fg : mut, 11, 'center', cur ? 700 : 500));
+      if (s.n && !L.narrow) PE.label(ctx, String(s.n), b.x + 8, b.y - 5, mut, 10.5, 'left', 600);
+      if (cur) PE.dot(ctx, b.x + b.w - 8, b.y + 8, 3.5, col, S.u);
+    });
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.15 : .26), draw);
+  let stop = () => {};
+  function set(next) { if (next.step != null && next.step !== S.step) { stop(); S.step = next.step; S.u = 0; stop = KIT.tween(S, { u: 1 }, 500, cv.redraw); } cv.redraw(); }
+  return { set, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+
+/* Sparsity patterns on one toy layer: 8 output channels x 16 inputs (inputs = the GEMM reduction dimension K).
+   Exact magnitude pruning for three patterns: unstructured (global |w| threshold), 2:4 (keep the two largest of each
+   group of four inputs, Mishra 2104.08378 Sec. 3.1), whole channels (drop rows with the smallest L1 norm, Li 1608.08710
+   Sec. 3.1). Readout: what a dense GPU kernel can skip and the share of total |w| that survives. */
+KIT.SPARSE = { R: 8, C: 16, rowScale: [1, .7, 1.1, .55, .9, .75, 1.05, .6] };
+KIT.sparseW = () => {
+  if (KIT.SPARSE.W) return KIT.SPARSE.W;
+  const P = KIT.SPARSE, g = PE.gauss(PE.rng(11)), W = [];
+  for (let r = 0; r < P.R; r++) for (let c = 0; c < P.C; c++) W.push(+(P.rowScale[r] * .45 * g()).toFixed(2) || .01);
+  return (P.W = W);
+};
+KIT.sparseMask = (pattern, s) => {
+  const P = KIT.SPARSE, W = KIT.sparseW(), n = W.length, m = new Array(n).fill(1);
+  let rowsOut = [];
+  if (pattern === '24') {
+    for (let r = 0; r < P.R; r++) for (let g0 = 0; g0 < P.C; g0 += 4) {
+      const idx = [0, 1, 2, 3].map(j => r * P.C + g0 + j).sort((a, b) => Math.abs(W[a]) - Math.abs(W[b]));
+      m[idx[0]] = 0; m[idx[1]] = 0;
+    }
+  } else if (pattern === 'chan') {
+    const k = Math.round(s * P.R), l1 = [];
+    for (let r = 0; r < P.R; r++) { let a = 0; for (let c = 0; c < P.C; c++) a += Math.abs(W[r * P.C + c]); l1.push([a, r]); }
+    rowsOut = l1.sort((a, b) => a[0] - b[0]).slice(0, k).map(x => x[1]).sort((a, b) => a - b);
+    rowsOut.forEach(r => { for (let c = 0; c < P.C; c++) m[r * P.C + c] = 0; });
+  } else {
+    const k = Math.round(s * n), idx = W.map((_, i) => i).sort((a, b) => Math.abs(W[a]) - Math.abs(W[b]));
+    for (let i = 0; i < k; i++) m[idx[i]] = 0;
+  }
+  return { m, rowsOut };
+};
+KIT.sparseInfo = (pattern, s) => {
+  const P = KIT.SPARSE, W = KIT.sparseW(), n = W.length, { m, rowsOut } = KIT.sparseMask(pattern, s);
+  let tot = 0, keptMag = 0, kept = 0, thr = 0, minKept = Infinity, maxOut = 0;
+  W.forEach((w, i) => { const a = Math.abs(w); tot += a; if (m[i]) { kept++; keptMag += a; minKept = Math.min(minKept, a); } else maxOut = Math.max(maxOut, a); });
+  if (pattern === 'unstructured') thr = kept < n ? (minKept + maxOut) / 2 : 0;
+  const mults = pattern === 'unstructured' ? n : pattern === '24' ? n / 2 : kept;
+  return { pattern, s: 1 - kept / n, kept, n, mag: keptMag / tot, thr, mults, rowsOut, m, bigLost: maxOut > minKept,
+    rowsLeft: P.R - rowsOut.length, R: P.R, C: P.C };
+};
+KIT.SPARSE_NAMES = { unstructured: 'Unstructured', '24': '2:4', chan: 'Whole channels' };
+KIT.sparseText = i => {
+  const pct = x => (100 * x).toFixed(1) + '%', head = `<b>${KIT.SPARSE_NAMES[i.pattern]}, ${Math.round(100 * i.s)}% zeros</b>: `;
+  const mag = `keeps ${i.kept} of ${i.n} weights and <b class="c-green">${pct(i.mag)}</b> of their total magnitude. `;
+  if (i.pattern === 'unstructured') return head + mag + (i.kept === i.n ? 'Nothing is pruned yet. ' :
+    `A dense GPU kernel skips <b class="c-brown">nothing</b>: it still does all ${i.n} multiplies, ${i.n - i.kept} of them by zero. `) +
+    'Only a sparse kernel could skip them, and on a GPU that pays off in narrow cases (next figure).';
+  if (i.pattern === '24') return head + mag + `Sparse tensor cores skip <b class="c-green">half the multiplies</b>: ${i.mults} of ${i.n}, ` +
+    `up to <span data-claim="mishra2021-math-speedup">2</span>${KIT.times} math throughput. Stored as ${i.kept} FP16 values with a 2-bit index each: ` +
+    `${i.kept * 18} bits instead of ${i.n * 16}, ${(100 * (1 - i.kept * 18 / (i.n * 16))).toFixed(1)}% less.`;
+  return head + mag + (i.rowsOut.length ? `What is left is a <b class="c-green">smaller dense layer</b>, ${i.rowsLeft} ${KIT.times} ${i.C}: an ordinary dense kernel does ${i.mults} of ${i.n} multiplies, ` +
+    `and the next layer drops the matching ${i.rowsOut.length} input channel${i.rowsOut.length > 1 ? 's' : ''}.` : 'No channel is removed yet.');
+};
+KIT.sparse = (el, opts = {}) => {
+  const P = KIT.SPARSE, W = KIT.sparseW(), n = W.length, wmax = Math.max(...W.map(Math.abs));
+  const S = { pattern: 'unstructured', s: .5, keep: KIT.sparseMask('unstructured', .5).m.slice(), panel: 1, info: KIT.sparseInfo('unstructured', .5) };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  let stop = () => {}, stopP = () => {};
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = k => PE.css(k), pad = opts.bottomPad || 0, H = h - pad;
+    const C = { fg: cs('--fg'), mut: cs('--muted'), green: cs('--green'), brown: cs('--brown'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), rule: cs('--rule'), bg: cs('--bg') };
+    const I = S.info, gK = glow('kept'), gP = glow('pruned'), gT = glow('thr'), gM = glow('mag');
+    // matrix block
+    const lab = narrow ? 34 : 46, top = 40;
+    const mw = narrow ? w - lab - 10 : w * .56 - lab;
+    const mhMax = narrow ? H * .42 : H - top - 30;
+    const cell = Math.max(8, Math.min(mw / P.C, (mhMax) / P.R)), mx = lab, my = top;
+    const tall = !narrow && H - top > cell * P.R * 1.8 + 120, short = narrow && H / w < 1.3;
+    PE.label(ctx, `one layer: ${P.R} output channels ${KIT.times} ${P.C} inputs`, mx, 16, C.fg, narrow ? 11 : 12, 'left', 600);
+    PE.label(ctx, 'inputs (the dimension a GEMM sums over)', mx, my + P.R * cell + 16, C.mut, narrow ? 10 : 11, 'left', 400);
+    for (let r = 0; r < P.R; r++) {
+      const out = I.rowsOut.includes(r);
+      PE.label(ctx, (narrow ? '' : 'ch ') + (r + 1), mx - 6, my + r * cell + cell / 2 + 4, out ? C.brown : C.mut, narrow ? 10 : 11, 'right', out ? 600 : 400);
+      for (let c = 0; c < P.C; c++) {
+        const i = r * P.C + c, k = S.keep[i], a = Math.abs(W[i]) / wmax, x = mx + c * cell, y = my + r * cell, gap = cell > 14 ? 1.5 : 1;
+        ctx.save();
+        ctx.globalAlpha = (.18 + .82 * a) * k; ctx.fillStyle = C.green; ctx.fillRect(x + gap, y + gap, cell - 2 * gap, cell - 2 * gap);
+        ctx.globalAlpha = (1 - k) * (.34 + .3 * gP); ctx.fillStyle = C.brown; ctx.fillRect(x + gap, y + gap, cell - 2 * gap, cell - 2 * gap);
+        if (k > .5 && gK > 0) { ctx.globalAlpha = gK; ctx.strokeStyle = C.green; ctx.lineWidth = 2; ctx.strokeRect(x + gap, y + gap, cell - 2 * gap, cell - 2 * gap); }
+        ctx.restore();
+        if (cell >= 30) PE.label(ctx, (W[i] < 0 ? '-' : '') + Math.abs(W[i]).toFixed(2).replace(/^0/, ''), x + cell / 2, y + cell / 2 + 4, k > .5 ? (a > .55 ? C.bg : C.fg) : C.brown, 10, 'center', k > .5 ? 600 : 400);
+      }
+      if (out) PE.polyline(ctx, [[mx - 2, my + r * cell + cell / 2], [mx + P.C * cell + 2, my + r * cell + cell / 2]], C.brown, 1.5, null, .8);
+    }
+    // groups of four along K
+    for (let g0 = 0; g0 <= P.C; g0 += 4) {
+      const x = mx + g0 * cell, on = S.pattern === '24';
+      PE.polyline(ctx, [[x, my - (on ? 6 : 2)], [x, my + P.R * cell + (on ? 4 : 0)]], on ? C.fg : C.rule, on ? 1.5 : 1, null, on ? .9 : 1);
+      if (on && g0 < P.C && cell * 4 > 50) PE.label(ctx, 'group of 4', x + 2 * cell, my - 9, C.mut, 10, 'center', 400);
+    }
+    // right (or lower) panels: |w| histogram, then what the GPU runs
+    const px = narrow ? 12 : w * .6 + 8, pw = narrow ? w - 24 : w * .4 - 20;
+    const hy = narrow ? my + P.R * cell + 56 : top + (tall ? 16 : 0), hh = short ? 0 : narrow ? H * .2 : (H - top) * (tall ? .5 : .38);
+    const nb = 12, bins = Array.from({ length: nb }, () => [0, 0]);
+    W.forEach((v, i) => { const b = Math.min(nb - 1, Math.floor(Math.abs(v) / wmax * nb)); bins[b][S.keep[i] > .5 ? 0 : 1]++; });
+    const bmax = Math.max(...bins.map(b => b[0] + b[1])), bw = pw / nb;
+    if (hh > 0) {
+    PE.label(ctx, 'how many weights have each size |w|', px, hy - 8, C.fg, narrow ? 11 : 12, 'left', 600);
+    bins.forEach((b, j) => {
+      const x = px + j * bw, hk = b[0] / bmax * hh, hp = b[1] / bmax * hh, base = hy + hh;
+      ctx.save(); ctx.globalAlpha = .55 + .45 * gM; ctx.fillStyle = C.brown; ctx.fillRect(x + 1, base - hp, bw - 2, hp);
+      ctx.fillStyle = C.green; ctx.fillRect(x + 1, base - hp - hk, bw - 2, hk); ctx.restore();
+    });
+    PE.polyline(ctx, [[px, hy + hh], [px + pw, hy + hh]], C.mut, 1);
+    PE.label(ctx, '0', px, hy + hh + 13, C.mut, 10, 'left', 400);
+    PE.label(ctx, 'largest |w|', px + pw, hy + hh + 13, C.mut, 10, 'right', 400);
+    if (S.pattern === 'unstructured' && I.thr > 0) {
+      const tx = px + I.thr / wmax * pw;
+      PE.polyline(ctx, [[tx, hy - 2], [tx, hy + hh + 2]], C.fg, 1.5 + 2.5 * gT, [4, 3], 1);
+      PE.label(ctx, 'threshold t', tx + 4, hy + 10, C.fg, 10.5, 'left', 600);
+    } else if (I.bigLost) PE.label(ctx, 'some large weights are removed too', px + pw, hy + 10, C.brown, 10.5, 'right', 600);
+    }
+    // what the GPU runs
+    const gy = tall ? my + P.R * cell + 58 : short ? hy : hy + hh + (narrow ? 34 : 40), gh = H - gy - 10;
+    const gpx = tall ? mx : px, gpw = tall ? P.C * cell : pw;
+    ctx.save(); ctx.globalAlpha = S.panel;
+    PE.label(ctx, 'what the GPU multiplies', gpx, gy, C.fg, narrow ? 11 : 12, 'left', 600);
+    const rows = S.pattern === 'chan' ? I.rowsLeft : P.R, cols = S.pattern === '24' ? P.C / 2 : P.C;
+    const mc = Math.max(3, Math.min((gpw - 10) / P.C * (tall ? .75 : 1), (gh - 52) / P.R));
+    const gx0 = gpx, gy0 = gy + 10;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      let zero = false;
+      if (S.pattern === 'unstructured') zero = !I.m[r * P.C + c];
+      ctx.fillStyle = zero ? C.brown : C.green; ctx.globalAlpha = S.panel * (zero ? .45 : .8);
+      ctx.fillRect(gx0 + c * mc + .5, gy0 + r * mc + .5, mc - 1, mc - 1);
+    }
+    ctx.globalAlpha = S.panel;
+    if (S.pattern === '24') { // 2-bit index metadata next to the compressed values
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { ctx.fillStyle = C.mut; ctx.globalAlpha = S.panel * .6; ctx.fillRect(gx0 + cols * mc + 6 + c * mc / 4, gy0 + r * mc + .5, mc / 4 - .5, mc - 1); }
+      ctx.globalAlpha = S.panel;
+      PE.label(ctx, '2-bit index', gx0 + cols * mc + 8 + cols * mc / 4, gy0 + mc * rows / 2 + 4, C.mut, 10, 'left', 400);
+    }
+    const ty = gy0 + rows * mc + 16, txt = S.pattern === 'unstructured' ? `${I.mults} of ${I.n} multiplies, zeros included` :
+      S.pattern === '24' ? `${I.mults} of ${I.n}: half, on sparse tensor cores` : `${I.mults} of ${I.n}: a smaller dense layer`;
+    PE.label(ctx, txt, gx0, ty, S.pattern === 'unstructured' && I.kept < I.n ? C.brown : C.green, narrow ? 10.5 : 11.5, 'left', 600);
+    // multiplies bar
+    const by = ty + 8, bl = Math.min(gpw, 240), useful = (S.pattern === 'unstructured' ? I.kept : I.mults) / I.n, done = I.mults / I.n;
+    ctx.fillStyle = C.rule; ctx.fillRect(gx0, by, bl, 7);
+    ctx.fillStyle = C.brown; ctx.globalAlpha = S.panel * .7; ctx.fillRect(gx0, by, bl * done, 7);
+    ctx.fillStyle = C.green; ctx.globalAlpha = S.panel; ctx.fillRect(gx0, by, bl * useful, 7);
+    ctx.restore();
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.45 : .44), draw);
+  function set(next) {
+    const pattern = next.pattern || S.pattern, s = pattern === '24' ? .5 : (next.s != null ? next.s : S.s);
+    const changed = pattern !== S.pattern;
+    S.pattern = pattern; S.s = s; S.info = KIT.sparseInfo(pattern, s);
+    stop(); stop = KIT.tween(S.keep, Object.assign({}, S.info.m), 600, cv.redraw);
+    if (changed) { stopP(); S.panel = 0; stopP = KIT.tween(S, { panel: 1 }, 500, cv.redraw); }
+    cv.redraw();
+  }
+  return { set, state: S, info: () => S.info, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); stopP(); cv.destroy(); } };
+};
+
+/* Deep Compression (Han, Mao, Dally 1510.00149v5) run for real on 256 toy weights.
+   Prune: Han 2015 (1506.02626v3) Sec. 4 rule, threshold = quality parameter q x the layer's standard deviation.
+   Store survivors as relative indices (gap to the previous survivor) in gapBits bits; a longer gap needs a filler zero.
+   Share: 1-D k-means (Eq. 2) with linear initialization over [min, max] of the survivors (Sec. 3.2), k = 8 (3-bit codes).
+   Fine-tune: centroid gradient = sum of its members' gradients (Eq. 3); the toy gradients are random, like Fig. 3.
+   Huffman: real Huffman codes for the cluster indices and for the gaps. Simulated in notes/sim-dc.txt. */
+KIT.DC = { n: 256, sigma: .1, q: 1, k: 8, gapBits: 5, seed: 23, gradSeed: 5, gradScale: .02, lr: .1 };
+KIT.dcHuffman = freq => { // freq: {symbol: count}; returns {symbol: code string}
+  const keys = Object.keys(freq).filter(k => freq[k] > 0);
+  if (keys.length === 1) return { [keys[0]]: '0' };
+  let nodes = keys.map(k => ({ f: freq[k], s: [k] })); const code = {}; keys.forEach(k => (code[k] = ''));
+  while (nodes.length > 1) {
+    nodes.sort((a, b) => a.f - b.f || a.s[0].localeCompare(b.s[0]));
+    const a = nodes.shift(), b = nodes.shift();
+    a.s.forEach(k => (code[k] = '0' + code[k])); b.s.forEach(k => (code[k] = '1' + code[k]));
+    nodes.push({ f: a.f + b.f, s: a.s.concat(b.s) });
+  }
+  return code;
+};
+KIT.dcKmeans = (vals, k) => {
+  const lo = Math.min(...vals), hi = Math.max(...vals), init = Array.from({ length: k }, (_, j) => lo + (hi - lo) * j / (k - 1));
+  let c = init.slice(), a = vals.map(() => -1), it = 0;
+  for (; it < 100; it++) {
+    const na = vals.map(v => { let b = 0; c.forEach((cj, j) => { if (Math.abs(v - cj) < Math.abs(v - c[b])) b = j; }); return b; });
+    const same = na.every((x, i) => x === a[i]); a = na;
+    if (same) break;
+    c = c.map((cj, j) => { const m = vals.filter((_, i) => a[i] === j); return m.length ? m.reduce((s, x) => s + x, 0) / m.length : cj; });
+  }
+  return { init, c, a, iters: it };
+};
+KIT.dcRun = () => {
+  if (KIT.DC.run) return KIT.DC.run;
+  const P = KIT.DC, g = PE.gauss(PE.rng(P.seed)), W = Array.from({ length: P.n }, () => +(P.sigma * g()).toFixed(3));
+  const mean = W.reduce((s, x) => s + x, 0) / P.n, std = Math.sqrt(W.reduce((s, x) => s + (x - mean) ** 2, 0) / P.n), t = P.q * std;
+  const keptIdx = W.map((_, i) => i).filter(i => Math.abs(W[i]) > t), kept = keptIdx.map(i => W[i]);
+  const gaps = keptIdx.map((i, j) => i - (j ? keptIdx[j - 1] : -1)), span = 1 << P.gapBits;
+  const fillers = gaps.reduce((s, d) => s + Math.floor((d - 1) / span), 0);
+  const km = KIT.dcKmeans(kept, P.k), cb = Math.log2(P.k);
+  const gg = PE.gauss(PE.rng(P.gradSeed)), grad = kept.map(() => +(P.gradScale * gg()).toFixed(4));
+  const cgrad = km.c.map((_, j) => grad.reduce((s, x, i) => s + (km.a[i] === j ? x : 0), 0));
+  const tuned = km.c.map((cj, j) => cj - P.lr * cgrad[j]);
+  const cfreq = {}, gfreq = {}; km.a.forEach(j => (cfreq[j] = (cfreq[j] || 0) + 1)); gaps.forEach(d => (gfreq[d] = (gfreq[d] || 0) + 1));
+  const hc = KIT.dcHuffman(cfreq), hg = KIT.dcHuffman(gfreq), E = kept.length + fillers;
+  const huffW = km.a.reduce((s, j) => s + hc[j].length, 0), huffI = gaps.reduce((s, d) => s + hg[d].length, 0);
+  const bits = {
+    dense: { val: 32 * P.n, idx: 0, book: 0 },
+    prune: { val: 32 * E, idx: P.gapBits * E, book: 0 },
+    share: { val: cb * E, idx: P.gapBits * E, book: 32 * P.k },
+    huff: { val: huffW, idx: huffI, book: 32 * P.k },
+  };
+  for (const k in bits) { const b = bits[k]; b.tot = b.val + b.idx + b.book; b.per = b.tot / P.n; b.ratio = 32 * P.n / b.tot; }
+  return (P.run = { W, std, t, keptIdx, kept, gaps, fillers, km, grad, cgrad, tuned, cfreq, hc, hg, bits, huffW, huffI, cb });
+};
+KIT.DC_STAGES = ['dense', 'prune', 'share', 'huff'];
+KIT.dcText = (st, tuned) => {
+  const R = KIT.dcRun(), P = KIT.DC, b = R.bits[st], f1 = x => x.toFixed(1), f2 = x => x.toFixed(2);
+  const tail = ` <b>${f2(b.per)} bits per weight</b>, ${f1(b.ratio)}${KIT.times} smaller than FP32.`;
+  if (st === 'dense') return `<b>Dense</b>: ${P.n} weights stored as FP32, <b>32 bits per weight</b>.`;
+  if (st === 'prune') return `<b>Prune</b>: threshold t = q${KIT.times}std = ${f2(R.t)} keeps ${R.kept.length} of ${P.n} weights. ` +
+    `Each survivor stores its FP32 value plus a ${P.gapBits}-bit gap to the previous survivor` + (R.fillers ? ` (${R.fillers} filler zeros).` : '; no gap is too long, so no filler zeros.') + tail;
+  if (st === 'share') return `<b>Share</b>: k-means from linear initialization converged in ${R.km.iters} iterations to ${P.k} shared values, so each survivor stores a ${R.cb}-bit code` +
+    ` plus its gap; the codebook adds ${P.k} ${KIT.times} 32 bits.` + (R.km.c.some((_, j) => !R.cfreq[j]) ? ' One linear-init centroid starts inside the pruned gap and gets no members.' : '') + (tuned ? ` One fine-tuning step moved the centroids by the summed gradients of their members (largest move ${f2(Math.max(...R.cgrad.map(x => Math.abs(P.lr * x))))}).` : '') + tail;
+  return `<b>Huffman</b>: frequent codes get short bit strings. Codes average ${f2(R.huffW / R.kept.length)} bits (from ${R.cb}), gaps ${f2(R.huffI / R.kept.length)} bits (from ${P.gapBits}); code tables are not counted.` + tail;
+};
+KIT.dc = (el, opts = {}) => {
+  const P = KIT.DC, R = KIT.dcRun();
+  const S = { stage: 'dense', tuned: false, u: { p: 0, s: 0, h: 0, t: 0 } };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const jr = PE.rng(4), jit = R.W.map(() => jr());
+  const keptPos = new Map(R.keptIdx.map((i, j) => [i, j]));
+  const big = R.km.c.map((_, j) => R.km.a.filter(a => a === j).length).reduce((b, x, j, arr) => x > arr[b] ? j : b, 0);
+  let stop = () => {};
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = k => PE.css(k), pad = opts.bottomPad || 0, H = h - pad, u = S.u;
+    const C = { fg: cs('--fg'), mut: cs('--muted'), green: cs('--green'), brown: cs('--brown'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), rule: cs('--rule') };
+    const gC = glow('centroid'), gG = glow('grad'), gM = glow('member');
+    const L = narrow ? 12 : 24, Rr = narrow ? 12 : 24;
+    // band 1: every weight on a value axis
+    const b1 = { x: L, y: 30, w: w - L - Rr, h: narrow ? H * .4 : H * .5 };
+    const lim = Math.max(...R.W.map(Math.abs)) * 1.05, X = v => b1.x + (v + lim) / (2 * lim) * b1.w;
+    PE.label(ctx, `${P.n} weights of one layer, placed by value`, b1.x, 16, C.fg, narrow ? 11 : 12, 'left', 600);
+    const axY = b1.y + b1.h;
+    PE.polyline(ctx, [[b1.x, axY], [b1.x + b1.w, axY]], C.mut, 1);
+    [-.3, -.2, -.1, 0, .1, .2, .3].filter(v => Math.abs(v) < lim).forEach(v => { PE.polyline(ctx, [[X(v), axY], [X(v), axY + 4]], C.mut, 1); PE.label(ctx, v.toFixed(1), X(v), axY + 15, C.mut, 10, 'center', 400); });
+    // threshold band
+    if (u.p > 0) {
+      ctx.save(); ctx.globalAlpha = .12 * u.p; ctx.fillStyle = C.brown; ctx.fillRect(X(-R.t), b1.y, X(R.t) - X(-R.t), b1.h); ctx.restore();
+      [-R.t, R.t].forEach(v => PE.polyline(ctx, [[X(v), b1.y], [X(v), axY]], C.fg, 1, [4, 3], .7 * u.p));
+      PE.label(ctx, '\u00b1t', X(R.t) + 3, b1.y + 10, C.fg, 10.5, 'left', 600);
+      if (!narrow) PE.label(ctx, 'pruned', X(0), b1.y + 10, C.brown, 10.5, 'center', 600);
+    }
+    // centroids
+    const cpos = j => PE.lerp(PE.lerp(R.km.init[j], R.km.c[j], Math.min(1, u.s * 1.6)), R.tuned[j], u.t);
+    if (u.s > 0 || gC > 0 || gM > 0) {
+      R.km.c.forEach((_, j) => {
+        const x = X(cpos(j)), gl = Math.max(gC, j === big ? gM : 0);
+        PE.polyline(ctx, [[x, b1.y + 14], [x, axY]], C.yellow, 1.2 + 2 * gl, null, (.5 + .5 * gl) * Math.max(u.s, gl));
+        if (u.s < 1) PE.polyline(ctx, [[X(R.km.init[j]), axY - 6], [X(R.km.init[j]), axY]], C.yellow, 1, null, .6 * (1 - u.s));
+      });
+      if (u.s > 0 && (!narrow || u.h === 0)) PE.label(ctx, 'shared values (centroids)', X(cpos(P.k - 1)), b1.y + 10 + (u.p > 0 ? 12 : 0), C.yellow, 10.5, 'right', 600);
+    }
+    // dots
+    const dotR = narrow ? 2.2 : 2.8;
+    R.W.forEach((v, i) => {
+      const j = keptPos.get(i), y0 = b1.y + 18 + jit[i] * (b1.h - 26);
+      if (j === undefined) { // pruned: fade to brown and sink
+        const y = y0, a = 1 - .75 * u.p;
+        PE.dot(ctx, X(v), y, dotR, u.p > .5 ? C.brown : C.blue, a); return;
+      }
+      const cj = R.km.a[j], x = X(PE.lerp(v, cpos(cj), u.s)), col = u.s > .5 ? C.yellow : C.blue;
+      const gl = cj === big ? gM : 0;
+      PE.dot(ctx, x, y0, dotR + 1.5 * gl, col, .9);
+      const ga = Math.max(u.t, gG) * Math.min(1, u.s);
+      if (ga > 0) { const dx = -R.grad[j] * b1.w * .45; PE.arrow(ctx, x, y0, x + dx, y0, C.red, 1.2, 4, ga * .8); }
+    });
+    if (u.t > 0 || gG > 0) { const a = Math.max(u.t, gG) * u.s;
+      R.km.c.forEach((_, j) => { const x = X(cpos(j)), dx = -R.cgrad[j] * b1.w * .45; if (Math.abs(dx) > 1) PE.arrow(ctx, x, b1.y + 26, x + dx, b1.y + 26, C.red, 2.4, 7, a); });
+      PE.label(ctx, narrow ? 'red: minus each gradient; thick: sum per centroid' : 'red arrows: minus each weight gradient; thick arrows: their sum for each centroid', b1.x, b1.y + b1.h + 30, C.red, 10.5, 'left', 600); }
+    // band 2: bits per weight, one bar per stage
+    const by = axY + (narrow ? 54 : 50), stages = KIT.DC_STAGES, reached = stages.indexOf(S.stage);
+    const names = { dense: 'dense FP32', prune: 'pruned', share: 'shared', huff: 'Huffman' };
+    const cw = narrow ? w - L - Rr : (w - L - Rr) * .62, lw = narrow ? 64 : 82, bx = L + lw, bl = cw - lw - (narrow ? 70 : 80);
+    const rowH = Math.min(26, (H - by - 18) / 5);
+    PE.label(ctx, 'bits per original weight', L, by, C.fg, narrow ? 11 : 12, 'left', 600);
+    stages.forEach((st, k) => {
+      const b = R.bits[st], y = by + 10 + k * rowH, on = k <= reached, a = on ? 1 : .18, sc = bl / 32 / P.n;
+      const valCol = st === 'dense' || st === 'prune' ? C.blue : C.yellow;
+      PE.label(ctx, names[st], L, y + rowH * .5 + 3, on ? C.fg : C.mut, narrow ? 10 : 11, 'left', 400);
+      let x = bx; ctx.save(); ctx.globalAlpha = a;
+      [[b.val, valCol], [b.idx, C.mut], [b.book, C.green]].forEach(([v, col]) => { ctx.fillStyle = col; ctx.fillRect(x, y + 3, v * sc, rowH - 8); x += v * sc; });
+      ctx.restore();
+      if (on) PE.label(ctx, `${b.per.toFixed(2)}  (${b.ratio.toFixed(1)}${KIT.times})`, x + 6, y + rowH * .5 + 3, C.fg, narrow ? 10 : 11, 'left', 600);
+    });
+    const ky = by + 14 + 4 * rowH + 4;
+    [['value', C.blue], ['code', C.yellow], ['index', C.mut], ['codebook', C.green]].forEach(([t, col], k) => {
+      const x = bx + k * (narrow ? 56 : 70); ctx.fillStyle = col; ctx.fillRect(x, ky, 9, 9); PE.label(ctx, t, x + 12, ky + 9, C.mut, 10, 'left', 400); });
+    // Huffman code table (right of the bars, or hidden on narrow screens until reached)
+    if (u.h > 0) {
+      const tx = narrow ? L : L + cw + 16, ty = narrow ? ky + 30 : by, colW = narrow ? (w - 2 * L) / 2 : w - tx - Rr;
+      ctx.save(); ctx.globalAlpha = u.h;
+      PE.label(ctx, 'code  members  Huffman bits', tx, ty, C.fg, narrow ? 10.5 : 11.5, 'left', 600);
+      const order = R.km.c.map((_, j) => j).sort((a, b) => (R.cfreq[b] || 0) - (R.cfreq[a] || 0));
+      const lh = narrow ? 13 : Math.min(15, (H - ty - 8) / (P.k + 1));
+      order.forEach((j, r) => {
+        const x = narrow ? tx + (r % 2) * colW : tx, y = narrow ? ty + 14 + Math.floor(r / 2) * lh : ty + 14 + r * lh;
+        ctx.font = `${narrow ? 10 : 11}px ui-monospace, Menlo, Consolas, monospace`; ctx.fillStyle = C.yellow; ctx.textAlign = 'left';
+        ctx.fillText(KIT.bits(j, R.cb), x, y);
+        ctx.fillStyle = C.mut; ctx.fillText(String(R.cfreq[j] || 0).padStart(4, ' '), x + 26, y);
+        ctx.fillStyle = C.fg; ctx.fillText(R.hc[j] || '-', x + 66, y);
+      });
+      ctx.restore();
+    }
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.55 : .56), draw);
+  const target = () => { const k = KIT.DC_STAGES.indexOf(S.stage); return { p: k >= 1 ? 1 : 0, s: k >= 2 ? 1 : 0, h: k >= 3 ? 1 : 0, t: S.tuned && k >= 2 ? 1 : 0 }; };
+  function set(next) {
+    if (next.stage) S.stage = next.stage;
+    if (next.tuned != null) S.tuned = next.tuned;
+    if (S.tuned && KIT.DC_STAGES.indexOf(S.stage) < 2) S.stage = 'share';
+    stop(); stop = KIT.tween(S.u, target(), 850, cv.redraw);
+  }
+  return { set, state: S, text: () => KIT.dcText(S.stage, S.tuned), redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+
+/* Iterative magnitude pruning (Frankle and Carbin 1803.03635v5, Sec. 1) on a toy 32 x 32 weight mask.
+   Each round: "train" (toy: theta_0 plus a fixed drift plus round noise, no real training), prune the 20% of survivors
+   with the smallest trained magnitude (the LeNet rate), reset survivors to theta_0 (or draw a new random init: the
+   control). Only the findings Frankle states in the text are plotted (LeNet on MNIST, Sec. 2); the paper's curves have
+   no tabulated values. Mask sizes simulated in notes/sim-imp.txt. */
+KIT.IMP = { G: 32, rate: .2, rounds: [0, 3, 7, 9, 15, 16], seed: 31 };
+KIT.impRun = () => {
+  if (KIT.IMP.run) return KIT.IMP.run;
+  const P = KIT.IMP, n = P.G * P.G, g0 = PE.gauss(PE.rng(P.seed)), gd = PE.gauss(PE.rng(P.seed + 1)), gr = PE.gauss(PE.rng(P.seed + 2));
+  const th0 = Array.from({ length: n }, () => g0()), drift = Array.from({ length: n }, () => .9 * gd()), re = Array.from({ length: n }, () => gr());
+  const masks = [new Array(n).fill(1)], trained = [];
+  const last = Math.max(...P.rounds);
+  for (let r = 1; r <= last; r++) {
+    const gn = PE.gauss(PE.rng(1000 + r)), th = th0.map((v, i) => v + drift[i] + .35 * gn()), m = masks[r - 1].slice();
+    const alive = m.map((x, i) => x ? i : -1).filter(i => i >= 0).sort((a, b) => Math.abs(th[a]) - Math.abs(th[b]));
+    alive.slice(0, Math.round(P.rate * alive.length)).forEach(i => (m[i] = 0));
+    trained[r] = th; masks.push(m);
+  }
+  const counts = masks.map(m => m.reduce((s, x) => s + x, 0));
+  return (P.run = { n, th0, re, masks, trained, counts });
+};
+// Frankle and Carbin, LeNet-300-100 on MNIST, Sec. 2: the only accuracy and speed points the text states.
+KIT.IMP_FIND = {
+  0: { t: 'The dense network, before any pruning.', r: 'The dense network, before any pruning.' },
+  1: { t: 'One round in, 80% of the weights remain; the text states no result at this size.', r: 'One round in, 80% of the weights remain; the text states no result at this size.' },
+  3: { t: 'At P<sub>m</sub> = <span data-claim="frankle2019-lenet-pm-51">51.3</span>%, the ticket already learns faster than the dense network.',
+    r: 'Reinitialized subnetworks keep the dense accuracy only down to about P<sub>m</sub> = <span data-claim="frankle2019-reinit-dropoff">21.1</span>%.' },
+  7: { t: 'Near P<sub>m</sub> = <span data-claim="frankle2019-lenet-fast-pm">21</span>%, tickets learn fastest: early stopping comes <span data-claim="frankle2019-lenet-fast-earlier">38</span>% earlier than for the dense network.',
+    r: 'Here the ticket reaches its minimum validation loss <span data-claim="frankle2019-reinit-speed">2.51</span>x faster than the same mask reinitialized, whose accuracy starts to fall below the dense network at P<sub>m</sub> = <span data-claim="frankle2019-reinit-dropoff">21.1</span>%.' },
+  9: { t: 'At P<sub>m</sub> = <span data-claim="frankle2019-lenet-acc-pm">13.5</span>%, the ticket is more than <span data-claim="frankle2019-lenet-acc-gain">0.3</span> points more accurate than the dense network.',
+    r: 'The reinitialized network is already below the dense accuracy (its drop-off starts at P<sub>m</sub> = <span data-claim="frankle2019-reinit-dropoff">21.1</span>%).' },
+  15: { t: 'At P<sub>m</sub> = <span data-claim="frankle2019-lenet-regress-pm">3.6</span>%, the ticket is back to the dense network\'s accuracy.',
+    r: 'The reinitialized network is well below the dense accuracy.' },
+  16: { t: 'Below P<sub>m</sub> = <span data-claim="frankle2019-ticket-dropoff">2.9</span>%, even the ticket falls below the dense network.',
+    r: 'The reinitialized network is well below the dense accuracy.' },
+};
+KIT.IMP_PHASE = { train: '1. train', prune: '2. prune 20%', reset: '3. reset' };
+KIT.impText = s => {
+  const R = KIT.impRun(), r = s.round, c = R.counts[r], pm = (100 * c / R.n).toFixed(1), F = KIT.IMP_FIND[r];
+  const ph = s.round === 0 ? (s.phase === 'train' ? 'The dense network after training. ' : '') :
+    { train: `Round ${r}, step 1: train the ${R.counts[r - 1]} survivors of round ${r - 1}. `, prune: `Round ${r}, step 2: remove the 20% with the smallest trained magnitude. `,
+      reset: s.init === 'ticket' ? `Round ${r}, step 3: reset the survivors to their initial values \u03b8<sub>0</sub>. ` : `Round ${r}, step 3: control, the same mask with a new random initialization. ` }[s.phase];
+  return `${ph}Toy mask: <b>${c} of ${R.n} weights, P<sub>m</sub> = ${pm}%</b>. ` +
+    (s.init === 'ticket' ? `<b class="c-green">Ticket</b> (Frankle's LeNet): ${F.t}` : `<b class="c-brown">Reinitialized</b> (Frankle's LeNet): ${F.r}`);
+};
+KIT.imp = (el, opts = {}) => {
+  const P = KIT.IMP, R = KIT.impRun(), n = R.n;
+  const S = { round: 0, phase: 'reset', init: 'ticket', v: {}, k: {} };
+  const values = () => {
+    const r = S.round, m = S.phase === 'train' && r > 0 ? R.masks[r - 1] : R.masks[r];
+    const th = S.phase === 'reset' ? (S.init === 'ticket' || r === 0 ? R.th0 : R.re) : R.trained[Math.max(1, r)];
+    const v = {}, k = {}; for (let i = 0; i < n; i++) { v[i] = Math.min(1, Math.abs(th[i]) / 2.6); k[i] = S.phase === 'train' && r === 0 ? 1 : m[i]; }
+    return { v, k };
+  };
+  Object.assign(S, values());
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  let stop = () => {};
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = k => PE.css(k), pad = opts.bottomPad || 0, H = h - pad;
+    const C = { fg: cs('--fg'), mut: cs('--muted'), green: cs('--green'), brown: cs('--brown'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), rule: cs('--rule') };
+    const gMask = glow('mask'), gInit = glow('init'), gNet = glow('net'), gPm = glow('pm');
+    const side = narrow ? Math.min(w - 24, H * .5) : Math.min(H - 40, w * .44), gx = narrow ? (w - side) / 2 : 16, gy = 28, cell = side / P.G;
+    const cnt = R.counts[S.round], pm = 100 * cnt / n;
+    PE.label(ctx, `toy layer, ${n} weights: ${cnt} left (P_m ${pm.toFixed(1)}%)`, gx, 16, C.fg, narrow ? 11 : 12, 'left', 600);
+    for (let i = 0; i < n; i++) {
+      const x = gx + (i % P.G) * cell, y = gy + Math.floor(i / P.G) * cell, k = S.k[i];
+      ctx.globalAlpha = k * (.15 + .85 * S.v[i]); ctx.fillStyle = C.blue; ctx.fillRect(x + .5, y + .5, cell - 1, cell - 1);
+      ctx.globalAlpha = (1 - k) * (.2 + .35 * gMask); ctx.fillStyle = C.brown; ctx.fillRect(x + .5, y + .5, cell - 1, cell - 1);
+    }
+    ctx.globalAlpha = 1;
+    if (gNet > 0 || gInit > 0) { ctx.save(); ctx.strokeStyle = gInit > gNet ? C.green : C.fg; ctx.globalAlpha = Math.max(gNet, gInit); ctx.lineWidth = 3; ctx.strokeRect(gx - 3, gy - 3, side + 6, side + 6); ctx.restore(); }
+    // the loop
+    const lx = narrow ? 12 : gx + side + 30, lw = narrow ? w - 24 : w - lx - 16, ly = narrow ? gy + side + 26 : 44;
+    const bw = Math.min(narrow ? (lw - 24) / 3 : 132, (lw - 40) / 3), bh = 44, gap = (lw - 3 * bw) / 2;
+    const resetName = S.init === 'ticket' ? '3. reset to\n\u03b8\u2080 (initial)' : '3. new random\ninit (control)';
+    const names = ['1. train', '2. prune 20%\nof survivors', resetName], keys = ['train', 'prune', 'reset'];
+    PE.label(ctx, 'iterative magnitude pruning: repeat each round', lx, ly - 12, C.fg, narrow ? 11 : 12, 'left', 600);
+    keys.forEach((key, j) => {
+      const x = lx + j * (bw + gap), on = S.phase === key && !(S.round === 0 && key === 'reset');
+      const col = on ? (key === 'reset' && S.init !== 'ticket' ? C.brown : C.green) : C.mut, gl = key === 'reset' ? gInit : key === 'prune' ? gMask : 0;
+      PE.box(ctx, x, ly, bw, bh, gl > .2 ? C.green : col, narrow ? names[j].replace('of survivors', '').replace(' (initial)', '').replace(' (control)', '') : names[j], 1);
+      if (on || gl > 0) { ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = Math.max(on ? 1 : 0, gl); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.roundRect(x - 2, ly - 2, bw + 4, bh + 4, 9); ctx.stroke(); ctx.restore(); }
+      if (j < 2) PE.arrow(ctx, x + bw + 3, ly + bh / 2, x + bw + gap - 3, ly + bh / 2, C.mut, 1.5, 7);
+    });
+    const back = [[lx + 2 * (bw + gap) + bw / 2, ly + bh + 2], [lx + 2 * (bw + gap) + bw / 2, ly + bh + 14], [lx + bw / 2, ly + bh + 14]];
+    PE.polyline(ctx, back, C.mut, 1.5); PE.arrow(ctx, lx + bw / 2, ly + bh + 14, lx + bw / 2, ly + bh + 3, C.mut, 1.5, 7);
+    PE.label(ctx, 'next round', lx + bw + gap + bw / 2, ly + bh + 26, C.mut, 10, 'center', 400);
+    // findings strip: P_m on a log axis, 100% on the left
+    const sx = lx + 6, sw = lw - 12, sy = narrow ? ly + bh + 124 : Math.max(ly + bh + 120, (ly + bh + H) / 2 + 30), X = p => sx + (2 - Math.log10(p)) / 2 * sw;
+    PE.label(ctx, "Frankle's stated LeNet findings, by P_m (% of weights left)", lx, sy - 74, C.fg, narrow ? 10.5 : 12, 'left', 600);
+    PE.label(ctx, 'green: winning ticket; brown: same mask, random reinit', lx, sy - 58, C.mut, 10, 'left', 400);
+    PE.polyline(ctx, [[sx, sy], [sx + sw, sy]], C.mut, 1);
+    [100, 50, 20, 10, 5, 2, 1].forEach(p => { PE.polyline(ctx, [[X(p), sy - 3], [X(p), sy + 3]], C.mut, 1); PE.label(ctx, p + '%', X(p), sy + 15, C.mut, 10, 'center', 400); });
+    const tk = [[51.3, 'faster', 0], [21, 'fastest', 0], [13.5, '+0.3 pts', 1], [3.6, '= dense', 0], [2.9, 'drops', 1]];
+    tk.forEach(([p, t, row]) => { PE.dot(ctx, X(p), sy - 6, 4, C.green); PE.label(ctx, t, X(p), sy - 14 - row * 13, C.green, 10, 'center', 600); });
+    PE.dot(ctx, X(21.1), sy + 24, 4, C.brown);
+    PE.label(ctx, narrow ? 'drops; 2.51x slower' : 'accuracy drops; 2.51x slower than the ticket', X(21.1) + 8, sy + 28, C.brown, 10, 'left', 600);
+    const cx = X(Math.max(1, pm));
+    PE.polyline(ctx, [[cx, sy - 36], [cx, sy + 6]], C.fg, 1.5 + 2.5 * gPm, [3, 3], .9);
+    PE.label(ctx, 'toy', cx, sy - 40, C.fg, 10, 'center', 600);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.62 : .56), draw);
+  function set(next) {
+    if (next.round != null) { S.round = next.round; if (next.phase == null) S.phase = 'reset'; }
+    if (next.phase) { if (next.phase === 'prune' && S.round === 0) S.round = 1; S.phase = next.phase; }
+    if (next.init) S.init = next.init;
+    const t = values(); stop();
+    const to = {}; for (let i = 0; i < n; i++) { to['v' + i] = t.v[i]; to['k' + i] = t.k[i]; }
+    const from = {}; for (let i = 0; i < n; i++) { from['v' + i] = S.v[i]; from['k' + i] = S.k[i]; }
+    stop = KIT.tween(from, to, 700, () => { for (let i = 0; i < n; i++) { S.v[i] = from['v' + i]; S.k[i] = from['k' + i]; } cv.redraw(); });
+  }
+  return { set, state: S, text: () => KIT.impText(S), redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+
+/* viz-actsurf: a toy linear layer Y = X W shaped after SmoothQuant Fig. 4 (OPT-13B), as read off the plot: three
+   outlier channels that persist across every token (two near 78 and 72, one lower at 30), two small spikes, and a floor
+   near 1 or less. 24 tokens x 48 input channels; W is 48 input channels x 24 outputs, flat and small (|w| near 0.1, as
+   flat as Fig. 4's original weights). The arithmetic is
+   exact: per-tensor symmetric INT8 (SmoothQuant Eq. 1), LLM.int8() (vector-wise scales plus FP16 outlier channels,
+   Dettmers Eq. 7-8, threshold 6.0), and SmoothQuant smoothing s_j = max|X_j|^a / max|W_j|^(1-a) (Eq. 3-4). */
+KIT.ACT = { C: 48, T: 24, CO: 24, ridges: { 6: -78, 20: 30, 41: -72 }, spikes: { 3: 4.5, 33: 3.5 }, thr: 6 };
+KIT.actData = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const A = KIT.ACT, r = PE.rng(13), g = PE.gauss(r), X = [], W = [];
+    for (let t = 0; t < A.T; t++) {
+      const row = [];
+      for (let j = 0; j < A.C; j++) {
+        let v = g() * .45;
+        if (A.ridges[j] != null) v = A.ridges[j] * (1 + .06 * g());
+        else if (A.spikes[j] != null && r() < .3) v = A.spikes[j] * (.8 + .4 * r()) * (r() < .5 ? -1 : 1);
+        row.push(v);
+      }
+      X.push(row);
+    }
+    for (let j = 0; j < A.C; j++) { const k = .95 + .1 * r(), row = []; for (let o = 0; o < A.CO; o++) row.push((r() < .5 ? -1 : 1) * k * (.1 + .005 * g())); W.push(row); }
+    const mx = Array.from({ length: A.C }, (_, j) => Math.max(...X.map(rw => Math.abs(rw[j]))));
+    const mw = W.map(rw => Math.max(...rw.map(Math.abs)));
+    cache = { X, W, mx, mw }; return cache;
+  };
+})();
+KIT.actQ8 = (v, D) => D > 0 ? Math.max(-127, Math.min(127, Math.round(v / D))) * D : 0;
+KIT.actScale = alpha => { const { mx, mw } = KIT.actData(); return mx.map((m, j) => Math.pow(m, alpha) / Math.pow(mw[j], 1 - alpha)); };
+// mode: 'tensor' (s given, per-tensor INT8 on both) or 'int8' (LLM.int8(): s = 1, outlier channels kept in FP16).
+KIT.actStats = (mode, s) => {
+  const A = KIT.ACT, { X, W, mx } = KIT.actData(), C = A.C, T = A.T, CO = A.CO;
+  if (!s || mode === 'int8') s = mx.map(() => 1);
+  const Xh = X.map(r => r.map((v, j) => v / s[j])), Wh = W.map((r, j) => r.map(v => v * s[j]));
+  const out = new Set(mode === 'int8' ? mx.map((m, j) => m > A.thr ? j : -1).filter(j => j >= 0) : []);
+  let Xq, Wq;
+  if (mode === 'int8') {
+    Xq = Xh.map(r => { const D = Math.max(...r.filter((v, j) => !out.has(j)).map(Math.abs)) / 127; return r.map((v, j) => out.has(j) ? v : KIT.actQ8(v, D)); });
+    const Dw = Array.from({ length: CO }, (_, o) => Math.max(...Wh.filter((r, j) => !out.has(j)).map(r => Math.abs(r[o]))) / 127);
+    Wq = Wh.map((r, j) => r.map((v, o) => out.has(j) ? v : KIT.actQ8(v, Dw[o])));
+  } else {
+    const Dx = Math.max(...Xh.map(r => Math.max(...r.map(Math.abs)))) / 127, Dw = Math.max(...Wh.map(r => Math.max(...r.map(Math.abs)))) / 127;
+    Xq = Xh.map(r => r.map(v => KIT.actQ8(v, Dx))); Wq = Wh.map(r => r.map(v => KIT.actQ8(v, Dw)));
+  }
+  const rel = (a, b) => { let e = 0, p = 0; a.forEach((v, i) => { e += (v - b[i]) ** 2; p += v * v; }); return p > 0 ? Math.sqrt(e / p) : 0; };
+  const xErr = Array.from({ length: C }, (_, j) => rel(Xh.map(r => r[j]), Xq.map(r => r[j])));
+  const wErr = Wh.map((r, j) => rel(r, Wq[j]));
+  const med = a => { const b = a.slice().sort((x, y) => x - y); return (b[(b.length - 1) >> 1] + b[b.length >> 1]) / 2; };
+  let e = 0, p = 0;
+  for (let t = 0; t < T; t++) for (let o = 0; o < CO; o++) {
+    let y = 0, yq = 0; for (let j = 0; j < C; j++) { y += X[t][j] * W[j][o]; yq += Xq[t][j] * Wq[j][o]; }
+    e += (yq - y) ** 2; p += y * y;
+  }
+  const chMax = Array.from({ length: C }, (_, j) => Math.max(...Xh.map(r => Math.abs(r[j]))));
+  const xMax = Math.max(...chMax), wMax = Math.max(...Wh.map(r => Math.max(...r.map(Math.abs))));
+  // SmoothQuant Sec. 3: a channel with max m_i under a per-tensor max m gets about 2^8 m_i / m levels.
+  const levels = 256 * med(chMax) / xMax;
+  return { s, Xh, Wh, out, xErr, wErr, xMed: med(xErr), wMed: med(wErr), yErr: Math.sqrt(e / p), xMax, wMax, levels };
+};
+KIT.actsurf = (el, opts = {}) => {
+  const A = KIT.ACT, D = KIT.actData();
+  const S = { mode: 'orig', alpha: .5, lg: D.mx.map(() => 0), m8: 0 };   // lg: log s_j shown; m8: 0..1 LLM.int8() blend
+  const target = () => S.mode === 'smooth' ? KIT.actScale(S.alpha).map(Math.log) : D.mx.map(() => 0);
+  const XS = .074, X = j => (j - (A.C - 1) / 2) * XS, ZX = t => .16 + t * .064, ZW = o => -.16 - o * .064, H = 1.05;
+  const narrow = () => (el.clientWidth || 600) < 560;
+  const dist = () => opts.dist ? opts.dist(el.clientWidth || 600) : narrow() ? 7.2 : 7.0;
+  const s3 = PE3.scene(el, { aspect: opts.aspect || (w => w < 560 ? .9 : .6), yaw: -.62, pitch: .86, dist: dist(), fov: 40, items: [] });
+  let pal = {};
+  const readPal = () => { pal = { blue: PE.css('--blue'), red: PE.css('--red'), green: PE.css('--green') }; };
+  const heat = err => PE3.mix(pal.blue, pal.red, Math.pow(PE.clamp(err / .3, 0, 1), .75));
+  let info = null;
+  function build() {
+    readPal();
+    const s = S.lg.map(Math.exp), st = KIT.actStats('tensor', s), s8 = S.m8 > 0 ? KIT.actStats('int8') : null;
+    info = S.mode === 'int8' ? s8 : st;
+    const it = [];
+    // floor outlines of the two patches
+    const x0 = X(-.5), x1 = X(A.C - .5);
+    it.push({ type: 'line', pts: [[x0, 0, ZX(0)], [x1, 0, ZX(0)], [x1, 0, ZX(A.T - 1)], [x0, 0, ZX(A.T - 1)], [x0, 0, ZX(0)]], color: '--muted', width: 1, alpha: .5 });
+    it.push({ type: 'line', pts: [[x0, 0, ZW(0)], [x1, 0, ZW(0)], [x1, 0, ZW(A.CO - 1)], [x0, 0, ZW(A.CO - 1)], [x0, 0, ZW(0)]], color: '--muted', width: 1, alpha: .5 });
+    const xh = (t, j) => Math.abs(st.Xh[t][j]) / st.xMax * H, wh = (j, o) => Math.abs(st.Wh[j][o]) / st.wMax * H;
+    const keep = j => s8 && s8.out.has(j);
+    const xCol = j => keep(j) ? PE3.mix(heat(st.xErr[j]), pal.green, S.m8) : s8 ? PE3.mix(heat(st.xErr[j]), heat(s8.xErr[j]), S.m8) : heat(st.xErr[j]);
+    const wCol = j => keep(j) ? PE3.mix(heat(st.wErr[j]), pal.green, S.m8) : s8 ? PE3.mix(heat(st.wErr[j]), heat(s8.wErr[j]), S.m8) : heat(st.wErr[j]);
+    for (let t = 0; t < A.T - 1; t++) for (let j = 0; j < A.C - 1; j++) {
+      const c = Math.max(xh(t, j), xh(t, j + 1)) > .25 ? (xh(t, j) > xh(t, j + 1) ? j : j + 1) : j;
+      it.push({ type: 'quad', pts: [[X(j), xh(t, j), ZX(t)], [X(j + 1), xh(t, j + 1), ZX(t)], [X(j + 1), xh(t + 1, j + 1), ZX(t + 1)], [X(j), xh(t + 1, j), ZX(t + 1)]],
+        fill: xCol(c), link: 'act' });
+    }
+    for (let o = 0; o < A.CO - 1; o++) for (let j = 0; j < A.C - 1; j++) {
+      const c = Math.max(wh(j, o), wh(j + 1, o)) > .25 ? (wh(j, o) > wh(j + 1, o) ? j : j + 1) : j;
+      it.push({ type: 'quad', pts: [[X(j), wh(j, o), ZW(o)], [X(j + 1), wh(j + 1, o), ZW(o)], [X(j + 1), wh(j + 1, o + 1), ZW(o + 1)], [X(j), wh(j, o + 1), ZW(o + 1)]],
+        fill: wCol(c), link: 'wt' });
+    }
+    // crest lines on the outlier channels: faint, lit by the 'outlier' link, green once LLM.int8() keeps them in FP16
+    Object.keys(A.ridges).forEach(k => { const j = +k;
+      it.push({ type: 'line', pts: Array.from({ length: A.T }, (_, t) => [X(j), xh(t, j) + .01, ZX(t)]), color: S.m8 > .5 ? '--green' : '--fg', width: 2, alpha: .12 + .6 * S.m8, link: 'outlier' }); });
+    // the smoothing scale s_j, drawn along the channel axis between the two patches (log scale, 0 = no scaling)
+    const lmax = Math.max(1e-9, ...S.lg.map(Math.abs));
+    const sp = S.lg.map((l, j) => [X(j), .03 + .3 * Math.abs(l) / Math.max(lmax, Math.log(4)), 0]);
+    it.push({ type: 'line', pts: sp, color: '--fg', width: 1.6, alpha: S.mode === 'smooth' ? .85 : .25, link: 's' });
+    const lab = (at, text, color, align, size) => it.push({ type: 'label', at, text, color, align: align || 'center', font: `600 ${size || 12}px system-ui, sans-serif` });
+    const n = narrow();
+    const fx = st.xMax < 10 ? 1 : 0, fw = st.wMax < 1 ? 2 : 1;
+    lab([X(0), 0, ZX(A.T - 1) + .15], (n ? '|X|, max ' : 'activations |X|, max ') + KIT.fmt(st.xMax, fx), '--fg', 'left');
+    lab([X(0), H + .2, ZW(A.CO - 1)], (n ? '|W|, max ' : 'weights |W|, max ') + KIT.fmt(st.wMax, fw), '--fg', 'left');
+    const rj = 41, ry = Math.abs(st.Xh[A.T >> 1][rj]) / st.xMax * H;
+    lab([X(rj), ry + .32, ZX(A.T / 2)], S.mode === 'int8' ? 'kept in FP16' : n ? 'outlier' : 'outlier channel', S.mode === 'int8' ? '--green' : '--fg', 'center', 11);
+    if (S.mode === 'smooth') lab([X(14), .5, 0], 'scale s', '--fg', 'center', 11);
+    const Y0 = opts.lift || 0;
+    if (Y0) it.forEach(o => { if (o.pts) o.pts = o.pts.map(q => [q[0], q[1] + Y0, q[2]]); if (o.at) o.at = [o.at[0], o.at[1] + Y0, o.at[2]]; });
+    s3.items = it; s3.redraw();
+  }
+  build();
+  const offTheme = PE.onTheme(build);
+  let stop = () => {};
+  function set(next, ms) {
+    if (next.alpha != null) S.alpha = next.alpha;
+    if (next.mode) S.mode = next.mode;
+    const from = { lg: S.lg.slice(), m8: S.m8 }, to = { lg: target(), m8: S.mode === 'int8' ? 1 : 0 };
+    stop();
+    const step = u => { S.lg = from.lg.map((l, j) => PE.lerp(l, to.lg[j], u)); S.m8 = PE.lerp(from.m8, to.m8, u); build(); };
+    if (ms === 0) { step(1); stop = () => {}; } else stop = s3.tween(ms || 700, step);
+  }
+  const resize = () => { s3.setView({ dist: dist() }); el.style.width = 'calc(100% - 1px)'; requestAnimationFrame(() => { el.style.width = ''; }); };
+  return { set, state: S, scene: s3, info: () => Object.assign({ mode: S.mode, alpha: S.alpha }, S.mode === 'int8' ? KIT.actStats('int8') : KIT.actStats('tensor', target().map(Math.exp))),
+    redraw: () => s3.redraw(), resize, destroy: () => { stop(); offTheme(); s3.destroy(); } };
+};
+KIT.actsurfText = i => {
+  const p = v => (100 * v).toFixed(v < .1 ? 1 : 0) + '%', f = (v, d) => KIT.fmt(v, d);
+  const tail = ` Output <i>XW</i> is off by ${(100 * i.yErr).toFixed(2)}%.`;
+  if (i.mode === 'int8') return `<b class="c-green">LLM.int8()</b>: the ${i.out.size} channels with a value above <span data-claim="dettmers-outlier-threshold">6.0</span> stay in FP16; ` +
+    `the rest use one INT8 scale per token row of X and per output column of W. A typical activation channel is off by ${p(i.xMed)} of its own size, a typical weight row by ${p(i.wMed)}.` + tail + ' The price is a second, FP16 matrix multiply.';
+  if (i.mode === 'orig') return `<b>One INT8 scale per tensor, no smoothing</b>: one step is max|X| / 127 = ${f(i.xMax / 127, 2)}. ` +
+    `A typical activation channel spans about ${f(i.levels, i.levels < 10 ? 1 : 0)} of the 256 levels, so it is off by ${p(i.xMed)} of its own size. A typical weight row is off by ${p(i.wMed)}.` + tail;
+  return `<b>SmoothQuant, alpha = ${i.alpha.toFixed(2)}</b>: max|X| is now ${f(i.xMax, 1)} and max|W| is ${f(i.wMax, 2)}. ` +
+    `A typical activation channel spans about ${f(i.levels, i.levels < 10 ? 1 : 0)} of the 256 levels and is off by ${p(i.xMed)}; a typical weight row is off by ${p(i.wMed)}.` + tail;
+};
+
+/* viz-gptq: GPTQ Algorithm 1 (Frantar et al., 2210.17323v2) run exactly on a toy 8 x 16 weight block W with 64 toy
+   calibration inputs X (16 x 64; channels mix four shared signals, so H is far from diagonal). H = 2 X X^T + lambda I with
+   lambda = 1% of mean diag(H); U = upper Cholesky factor of H^-1 (H^-1 = U^T U); err = (w - q(w)) / U_jj; W[:, j:] -= err U[j, j:].
+   Grid: per-row asymmetric min-max, fixed before the loop (our reading). Blocks of B = 4 columns instead of 128; the
+   lazy batch update does not change the result (Step 2), and the toy gives identical codes for B = 1, 4 and 16. */
+KIT.GPTQ = { R: 8, C: 16, M: 64, B: 4, steps: [0, 1, 2, 4, 8, 16] };
+KIT.gptqData = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const { R, C, M } = KIT.GPTQ, r = PE.rng(21), g = PE.gauss(r);
+    const L = 4, mixw = Array.from({ length: C }, () => Array.from({ length: L }, () => g())), sc = Array.from({ length: C }, () => .5 + 1.5 * r());
+    const X = Array.from({ length: C }, () => new Array(M).fill(0)), Z = Array.from({ length: L }, () => Array.from({ length: M }, () => g()));
+    for (let i = 0; i < C; i++) for (let m = 0; m < M; m++) { let v = .35 * g(); for (let l = 0; l < L; l++) v += mixw[i][l] * Z[l][m]; X[i][m] = sc[i] * v / 2; }
+    const W = Array.from({ length: R }, () => Array.from({ length: C }, () => g() * .5));
+    cache = { X, W }; return cache;
+  };
+})();
+KIT.gptqGrid = (row, b) => { const lo = Math.min(0, ...row), hi = Math.max(0, ...row), n = (1 << b) - 1, S = (hi - lo) / n || 1; return { S, Z: Math.round(-lo / S), n }; };
+KIT.gptqQ = (v, G) => G.S * (Math.max(0, Math.min(G.n, Math.round(v / G.S) + G.Z)) - G.Z);
+KIT.gptqU = H => {
+  const n = H.length, A = H.map(r => r.slice()), I = H.map((r, i) => r.map((_, j) => +(i === j)));
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let i = c + 1; i < n; i++) if (Math.abs(A[i][c]) > Math.abs(A[p][c])) p = i;
+    [A[c], A[p]] = [A[p], A[c]]; [I[c], I[p]] = [I[p], I[c]];
+    const d = A[c][c]; for (let j = 0; j < n; j++) { A[c][j] /= d; I[c][j] /= d; }
+    for (let i = 0; i < n; i++) if (i !== c) { const f = A[i][c]; if (f) for (let j = 0; j < n; j++) { A[i][j] -= f * A[c][j]; I[i][j] -= f * I[c][j]; } }
+  }
+  const Lo = I.map(r => r.map(() => 0));
+  for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) {
+    let s = I[i][j]; for (let k = 0; k < j; k++) s -= Lo[i][k] * Lo[j][k];
+    Lo[i][j] = i === j ? Math.sqrt(s) : s / Lo[j][j];
+  }
+  return { U: Lo[0].map((_, i) => Lo.map(r => r[i])), Hinv: I };
+};
+KIT.gptqRun = (() => {
+  const cache = {};
+  return (bits, B) => {
+    B = B || KIT.GPTQ.B; const key = bits + ':' + B; if (cache[key]) return cache[key];
+    const { R, C, M } = KIT.GPTQ, { X, W: W0 } = KIT.gptqData();
+    const H = Array.from({ length: C }, (_, i) => Array.from({ length: C }, (_, j) => { let s = 0; for (let m = 0; m < M; m++) s += X[i][m] * X[j][m]; return 2 * s; }));
+    const lam = .01 * H.reduce((s, r, i) => s + r[i], 0) / C;
+    H.forEach((r, i) => { r[i] += lam; });
+    const { U } = KIT.gptqU(H), grids = W0.map(row => KIT.gptqGrid(row, bits));
+    const W = W0.map(r => r.slice()), Q = W0.map(r => r.map(() => 0)), snaps = [W.map(r => r.slice())];
+    for (let i = 0; i < C; i += B) {
+      const E = W.map(() => new Array(B).fill(0));
+      for (let j = i; j < i + B; j++) {
+        for (let r = 0; r < R; r++) { Q[r][j] = KIT.gptqQ(W[r][j], grids[r]); E[r][j - i] = (W[r][j] - Q[r][j]) / U[j][j]; }
+        for (let r = 0; r < R; r++) for (let k = j; k < i + B; k++) W[r][k] -= E[r][j - i] * U[j][k];
+        W.forEach((row, r) => { row[j] = Q[r][j]; });
+        // Snapshot with the pending lazy updates applied, so every step shows where the remaining weights end up.
+        const S = W.map(r => r.slice());
+        for (let r = 0; r < R; r++) for (let jj = i; jj <= j; jj++) for (let k = i + B; k < C; k++) S[r][k] -= E[r][jj - i] * U[jj][k];
+        snaps.push(S);
+      }
+      for (let r = 0; r < R; r++) for (let jj = 0; jj < B; jj++) for (let k = i + B; k < C; k++) W[r][k] -= E[r][jj] * U[i + jj][k];
+    }
+    const rtn = W0.map((row, r) => row.map(v => KIT.gptqQ(v, grids[r])));
+    const outErr = Wq => { let e = 0; for (let r = 0; r < R; r++) for (let m = 0; m < M; m++) { let d = 0; for (let c = 0; c < C; c++) d += (W0[r][c] - Wq[r][c]) * X[c][m]; e += d * d; } return e; };
+    const rtnSnaps = snaps.map((_, j) => W0.map((row, r) => row.map((v, k) => k < j ? rtn[r][k] : v)));
+    const res = { bits, W0, Q, snaps, rtnSnaps, U, lam, grids, rtn, errG: snaps.map(outErr), errR: rtnSnaps.map(outErr) };
+    cache[key] = res; return res;
+  };
+})();
+KIT.gptq = (el, opts = {}) => {
+  const { R, C } = KIT.GPTQ;
+  const S = { bits: 4, method: 'gptq', cols: 0, u: 1, from: null, fromCols: 0 };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const run = () => KIT.gptqRun(S.bits);
+  const mat = (method, cols) => (method === 'gptq' ? run().snaps : run().rtnSnaps)[cols];
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = n => PE.css(n), pad = opts.bottomPad || 0;
+    const P = { fg: cs('--fg'), mut: cs('--muted'), blue: cs('--blue'), yellow: cs('--yellow'), red: cs('--red'), rule: cs('--rule') };
+    const g = run(), cur = mat(S.method, S.cols), M = S.from ? S.from.map((row, r) => row.map((v, k) => PE.lerp(v, cur[r][k], S.u))) : cur;
+    const vmax = Math.max(...g.W0.flat().map(Math.abs)) * 1.05;
+    // geometry: matrix (left or top) and error chart (right or bottom)
+    const mw = narrow ? w - 24 : w * .6, cell = Math.min(mw / C, narrow ? 40 : 46), mx0 = narrow ? (w - cell * C) / 2 : 40, my0 = narrow ? 64 : 70;
+    const ch = cell * 1.05, top = my0 + 26;
+    // row of U above the matrix: how much of column j's error each later column absorbs
+    const j = S.cols - 1, gu = glow('u'), ge = glow('err');
+    PE.label(ctx, narrow ? 'row j of U' : 'row j of U, the Cholesky factor of H\u207b\u00b9', mx0, my0 - 30, gu > 0 ? P.fg : P.mut, 11, 'left', 500);
+    if (S.method === 'gptq') {
+      // before the first column, show row 0 faintly: the row the first rounding error will use
+      const jr = Math.max(0, j), faint = j < 0 ? .45 : 1, urow = g.U[jr], um = Math.max(...urow.slice(jr).map(Math.abs));
+      for (let k = jr; k < C; k++) {
+        const hh = (cell * .8) * Math.abs(urow[k]) / um, x = mx0 + k * cell + cell * .2;
+        ctx.globalAlpha = faint * (.55 + .45 * gu) + .4 * gu * (1 - faint); ctx.fillStyle = k === j ? P.fg : P.red; ctx.fillRect(x, my0 - 4 - hh * .55, cell * .6, Math.max(1, hh * .55)); ctx.globalAlpha = 1;
+      }
+      if (jr < C - 1) PE.arrow(ctx, mx0 + (jr + .5) * cell, my0 + 6, mx0 + Math.min(C - .3, jr + 4.5) * cell, my0 + 6, P.red, 2 + 2 * ge, 8, faint * .9 + .1 * ge);
+      if (!narrow || jr < C - 4) PE.label(ctx, j < 0 ? 'first column\'s error will go right' : 'error pushed right', mx0 + (jr + .7) * cell, my0 + 20, P.red, 11, 'left', 600);
+    }
+    // the matrix
+    const gw = glow('w'), gq = glow('q');
+    for (let r = 0; r < R; r++) for (let k = 0; k < C; k++) {
+      const x = mx0 + k * cell, y = top + r * ch, cy = y + ch / 2, q = k < S.cols, half = ch * .44;
+      ctx.strokeStyle = P.rule; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, cell - 1, ch - 1);
+      const v0 = g.W0[r][k] / vmax * half, v = M[r][k] / vmax * half;
+      ctx.strokeStyle = P.mut; ctx.globalAlpha = .7; ctx.strokeRect(x + cell * .24, Math.min(cy, cy - v0), cell * .52, Math.max(1, Math.abs(v0))); ctx.globalAlpha = 1;
+      const lit = q ? gq : gw;
+      ctx.fillStyle = q ? P.yellow : P.blue; ctx.globalAlpha = .85 + .15 * lit;
+      ctx.fillRect(x + cell * (.28 - .06 * lit), Math.min(cy, cy - v), cell * (.44 + .12 * lit), Math.max(1.5, Math.abs(v))); ctx.globalAlpha = 1;
+    }
+    if (j >= 0) { ctx.strokeStyle = P.fg; ctx.lineWidth = 2; ctx.strokeRect(mx0 + j * cell + 1, top + 1, cell - 2, R * ch - 2); }
+    const by = top + R * ch;
+    PE.label(ctx, `${S.cols} of ${C} columns on the ${S.bits}-bit grid`, mx0, by + 18, P.fg, 12, 'left', 600);
+    PE.label(ctx, narrow ? 'outline: original weight' : 'outline: original weight; yellow: quantized; blue: not yet', mx0, by + 34, P.mut, 11, 'left', 400);
+    // error chart: output error with the first j columns quantized, both methods
+    const gl = glow('loss');
+    const b = narrow ? { x: 46, y: by + 64, w: w - 64, h: h - by - 110 - pad } : { x: mx0 + C * cell + 70, y: top, w: w - (mx0 + C * cell + 70) - 20, h: R * ch - 4 - pad * 0 };
+    if (b.h > 40 && b.w > 60) {
+      const ymax = Math.max(...g.errR) * 1.08;
+      const A = PE.axes(ctx, b, [0, C], [0, ymax], { xt: [0, 4, 8, 12, 16], yt: [0, ymax / 2, ymax].map(v => +v.toPrecision(2)), yf: v => KIT.fmt(v, 1),
+        xl: 'columns quantized', yl: narrow ? 'output error' : 'output error ||WX - W\u2019X||\u00b2', ylo: 36 });
+      const ptsR = g.errR.map((e, k) => [A.X(k), A.Y(e)]), ptsG = g.errG.map((e, k) => [A.X(k), A.Y(e)]);
+      PE.polyline(ctx, ptsR, P.mut, 1.6 + 2 * gl, [5, 4], S.method === 'rtn' ? 1 : .8);
+      PE.polyline(ctx, ptsG, P.red, 2 + 2 * gl, null, S.method === 'gptq' ? 1 : .6);
+      const act = S.method === 'gptq' ? g.errG : g.errR;
+      PE.dot(ctx, A.X(S.cols), A.Y(act[S.cols]), 5, S.method === 'gptq' ? P.red : P.mut);
+      PE.label(ctx, 'round to nearest ' + KIT.fmt(g.errR[C], 1), A.X(C) - 4, A.Y(g.errR[C]) - 8, P.mut, 11, 'right', 600);
+      PE.label(ctx, 'GPTQ ' + KIT.fmt(g.errG[C], 2), A.X(C) - 4, A.Y(g.errG[C]) - 8, P.red, 11, 'right', 600);
+    }
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.45 : .5), draw);
+  let stop = () => {};
+  function set(next) {
+    const prev = mat(S.method, S.cols).map(r => r.slice()), changed = (next.bits && next.bits !== S.bits) || (next.method && next.method !== S.method) || (next.cols != null && next.cols !== S.cols);
+    if (next.bits) S.bits = next.bits; if (next.method) S.method = next.method; if (next.cols != null) S.cols = next.cols;
+    if (!changed) { cv.redraw(); return; }
+    stop(); S.from = prev; S.u = 0;
+    stop = PE.animate(700, u => { S.u = u; cv.redraw(); }, () => { S.from = null; S.u = 1; cv.redraw(); });
+  }
+  const info = () => { const g = run(); return { bits: S.bits, method: S.method, cols: S.cols, C, eG: g.errG[S.cols], eR: g.errR[S.cols], fG: g.errG[C], fR: g.errR[C] }; };
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.gptqText = i => {
+  const f = v => KIT.fmt(v, v < 1 ? 3 : 2), done = i.cols === i.C;
+  const lead = i.method === 'gptq' ? `<b class="c-red">GPTQ</b>, ${i.bits}-bit` : `<b>Round to nearest</b>, ${i.bits}-bit`;
+  if (i.cols === 0) return `${lead}: nothing quantized yet. Both methods use the same per-row grid; GPTQ will end at an output error of ${f(i.fG)}, round to nearest at ${f(i.fR)}.`;
+  const now = `${lead}, ${i.cols} of ${i.C} columns quantized: output error so far ${f(i.method === 'gptq' ? i.eG : i.eR)} (the other method at this point: ${f(i.method === 'gptq' ? i.eR : i.eG)}).`;
+  return done ? now + ` Final: GPTQ ${f(i.fG)} against ${f(i.fR)}, ${(i.fR / i.fG).toFixed(1)}${KIT.times} lower on the same grid.` : now;
+};
+
+/* viz-awq: AWQ's scale search (Lin et al., 2306.00978v6, Eq. 4-5) run exactly on a toy layer: W is 16 outputs x 32 input
+   channels, X is 32 channels x 64 calibration tokens, and two input channels (7 and 24, counting from 1) carry about
+   10x larger activations. s_X = mean |X| per input channel; s = s_X^alpha; W diag(s) is quantized to INT3 with one
+   symmetric max-abs scale per group of 16 input channels (group size shrunk from 128 for the toy); the loss is the
+   Frobenius norm || Q(W diag(s)) (diag(s)^-1 X) - W X ||. Delta = max|w| / (2^(N-1) - 1) is our convention: the paper
+   prints 2^(N-1), which puts the largest weight one level outside the signed INT-N range. Grid: alpha = i / 19 for
+   i = 0..19 (20 points on [0, 1]; the exact spacing is our reading). */
+KIT.AWQ = { CO: 16, CI: 32, T: 64, G: 16, bits: 3, salient: [6, 23] };
+KIT.awqData = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const A = KIT.AWQ, r = PE.rng(7), g = PE.gauss(r);
+    const mag = Array.from({ length: A.CI }, (_, i) => A.salient.includes(i) ? 8 + 2 * r() : .5 + .7 * r());
+    const X = Array.from({ length: A.CI }, (_, i) => Array.from({ length: A.T }, () => g() * mag[i]));
+    const W = Array.from({ length: A.CO }, () => Array.from({ length: A.CI }, () => g() * .4));
+    cache = { X, W, sx: X.map(row => row.reduce((s, v) => s + Math.abs(v), 0) / A.T) }; return cache;
+  };
+})();
+KIT.awqQuant = (W, bits, G) => {
+  const top = (1 << (bits - 1)) - 1;
+  return W.map(row => { const out = row.slice(); for (let g0 = 0; g0 < row.length; g0 += G) {
+    const D = Math.max(...row.slice(g0, g0 + G).map(Math.abs)) / top;
+    for (let i = g0; i < g0 + G; i++) out[i] = D > 0 ? D * Math.round(row[i] / D) : 0; } return out; });
+};
+KIT.awqEval = alpha => {
+  const A = KIT.AWQ, { X, W, sx } = KIT.awqData();
+  const s = sx.map(v => Math.pow(v, alpha));
+  const Qs = KIT.awqQuant(W.map(row => row.map((v, i) => v * s[i])), A.bits, A.G);
+  const E = Qs.map((row, o) => row.map((v, i) => v / s[i] - W[o][i]));
+  let L = 0; for (let o = 0; o < A.CO; o++) for (let t = 0; t < A.T; t++) { let d = 0; for (let i = 0; i < A.CI; i++) d += E[o][i] * X[i][t]; L += d * d; }
+  // channel i's own term ||E[:, i]|| ||X[i, :]|| (the Frobenius norm of a rank-1 product); the total also has cross terms
+  const ch = Array.from({ length: A.CI }, (_, i) => Math.sqrt(E.reduce((a, row) => a + row[i] * row[i], 0)) * Math.sqrt(X[i].reduce((a, v) => a + v * v, 0)));
+  return { alpha, s, L: Math.sqrt(L), ch };
+};
+KIT.awqGrid = (() => { let c = null; return () => c || (c = Array.from({ length: 20 }, (_, i) => KIT.awqEval(i / 19))); })();
+KIT.awqBest = () => KIT.awqGrid().reduce((a, c) => c.L < a.L ? c : a);
+KIT.awq = (el, opts = {}) => {
+  const A = KIT.AWQ, D = KIT.awqData();
+  const S = { alpha: 0, goal: 0, shown: 0, searched: false };       // shown: how many grid points are drawn (0..20)
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = w < 560, cs = n => PE.css(n), pad = opts.bottomPad || 0;
+    const P = { fg: cs('--fg'), mut: cs('--muted'), blue: cs('--blue'), green: cs('--green'), red: cs('--red'), rule: cs('--rule') };
+    const ev = KIT.awqEval(S.alpha), grid = KIT.awqGrid(), L0 = grid[0].L, Lmax = Math.max(...grid.map(e => e.L)) * 1.1;
+    const lw = narrow ? w - 56 : w * .55 - 56, lx = 44, hA = narrow ? (h - pad) * .2 : (h - pad) * .36, hB = hA;
+    const yA = 34, yB = yA + hA + 50;
+    const bw = lw / A.CI, gs = glow('sx'), gc = glow('ch');
+    // panel A: mean |X| per input channel; salient channels in green with their scale
+    const smax = Math.max(...D.sx);
+    PE.label(ctx, narrow ? 'mean |X| per input channel' : 'activation size per input channel, s_X = mean |X|', lx, yA - 12, P.fg, 12, 'left', 600);
+    D.sx.forEach((v, i) => { const hh = hA * .8 * v / smax, sal = A.salient.includes(i);
+      ctx.globalAlpha = .85 + .15 * gs; ctx.fillStyle = sal ? P.green : P.blue; ctx.fillRect(lx + i * bw + bw * .15, yA + hA - hh, bw * .7, hh); ctx.globalAlpha = 1;
+      if (sal) PE.label(ctx, '\u00d7' + ev.s[i].toFixed(ev.s[i] < 10 ? 1 : 0), lx + (i + .5) * bw, yA + hA - hh - 5, P.green, narrow ? 10 : 11, 'center', 600); });
+    ctx.strokeStyle = P.rule; ctx.beginPath(); ctx.moveTo(lx, yA + hA + .5); ctx.lineTo(lx + lw, yA + hA + .5); ctx.stroke();
+    // panel B: each channel's own output-error term at the current alpha (fixed axis: alpha = 0 maximum)
+    const cmax = Math.max(...grid[0].ch, ...grid[19].ch);
+    PE.label(ctx, narrow ? 'each channel\'s error term' : 'each input channel\'s output-error term ||E_j|| ||X_j||', lx, yB - 12, P.fg, 12, 'left', 600);
+    ev.ch.forEach((v, i) => { const hh = hB * v / cmax;
+      ctx.globalAlpha = .8 + .2 * gc; ctx.fillStyle = P.red; ctx.fillRect(lx + i * bw + bw * .15, yB + hB - hh, bw * .7, hh); ctx.globalAlpha = 1; });
+    ctx.strokeStyle = P.rule; ctx.beginPath(); ctx.moveTo(lx, yB + hB + .5); ctx.lineTo(lx + lw, yB + hB + .5); ctx.stroke();
+    PE.label(ctx, 'input channel 1 to 32', lx + lw / 2, yB + hB + 16, P.mut, 11, 'center', 400);
+    // panel C: loss against alpha
+    const gl = glow('loss'), ga = glow('alpha');
+    const b = narrow ? { x: 52, y: yB + hB + 58, w: w - 70, h: h - pad - (yB + hB + 58) - 44 } : { x: w * .55 + 40, y: yA, w: w * .45 - 60, h: h - pad - yA - 44 };
+    const ax = PE.axes(ctx, b, [0, 1], [0, Lmax], { xt: [0, .25, .5, .75, 1], yt: [0, +(Lmax / 2).toPrecision(2), +Lmax.toPrecision(2)], yf: v => KIT.fmt(v, 0),
+      xl: 'alpha (s = s_X^alpha)', yl: 'output error L', ylo: 36 });
+    const pts = grid.slice(0, S.shown);
+    if (pts.length > 1) PE.polyline(ctx, pts.map(e => [ax.X(e.alpha), ax.Y(e.L)]), P.red, 1.6 + 2 * gl, null, .8);
+    pts.forEach(e => PE.dot(ctx, ax.X(e.alpha), ax.Y(e.L), 3.2 + gl, P.red, .9));
+    if (S.searched && S.shown >= 20) { const bst = KIT.awqBest(); PE.ring(ctx, ax.X(bst.alpha), ax.Y(bst.L), 9, P.green, 2);
+      PE.label(ctx, 'best of 20: alpha ' + bst.alpha.toFixed(2), ax.X(bst.alpha), ax.Y(bst.L) + 24, P.green, 11, 'center', 600); }
+    const cx = ax.X(S.alpha), cy = ax.Y(ev.L);
+    ctx.strokeStyle = P.mut; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(cx, b.y); ctx.lineTo(cx, b.y + b.h); ctx.stroke(); ctx.setLineDash([]);
+    PE.dot(ctx, cx, cy, 6 + 2 * ga, P.fg); PE.ring(ctx, cx, cy, 10 + 5 * ga, P.fg, 1.5, .7);
+    PE.label(ctx, 'no scaling: ' + KIT.fmt(L0, 1), ax.X(0) + 16, ax.Y(L0) + 4, P.mut, 11, 'left', 500);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.55 : .5), draw);
+  let stop = () => {};
+  function set(next) {
+    stop();
+    if (next.search) {
+      if (S.searched) { cv.redraw(); return; }
+      S.searched = true; const a0 = S.alpha, best = KIT.awqBest().alpha; S.goal = best;
+      stop = PE.animate(900, u => { S.shown = Math.round(20 * Math.min(1, u * 1.5)); S.alpha = PE.lerp(a0, best, Math.max(0, (u - .5) * 2)); cv.redraw(); },
+        () => { S.shown = 20; S.alpha = best; cv.redraw(); });
+      return;
+    }
+    if (next.reset) { S.searched = false; S.shown = 0; }
+    if (next.alpha != null) {
+      S.goal = next.alpha;
+      if (next.instant) { S.alpha = next.alpha; cv.redraw(); return; }
+      const a0 = S.alpha; stop = PE.animate(500, u => { S.alpha = PE.lerp(a0, next.alpha, u); cv.redraw(); });
+    } else cv.redraw();
+  }
+  const info = () => { const e = KIT.awqEval(S.goal); return { alpha: S.goal, L: e.L, L0: KIT.awqGrid()[0].L, s: A.salient.map(i => e.s[i]), searched: S.searched, best: KIT.awqBest() }; };
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.awqText = i => {
+  if (i.alpha < 1e-6 && !i.searched) return `<b>alpha = 0</b>: s = 1 for every channel, so this is plain round to nearest on the INT3 grid. Output error L = ${i.L.toFixed(1)}.`;
+  const head = `<b>alpha = ${i.alpha.toFixed(2)}</b>: the two large-activation channels are multiplied by ${i.s.map(v => v.toFixed(1)).join(' and ')} before rounding, and their inputs divided by the same. ` +
+    `Output error L = ${i.L.toFixed(1)}, against ${i.L0.toFixed(1)} with no scaling (` + (i.L <= i.L0 ? `${(i.L0 / i.L).toFixed(2)}${KIT.times} lower).` : `${(i.L / i.L0).toFixed(2)}${KIT.times} higher: the scaled channels now set the group maximum).`);
+  return i.searched ? head + ` The grid search over 20 values of alpha picked ${i.best.alpha.toFixed(2)}.` : head;
+};
+
+/* FP8 formats. The code tables are enumerated from Micikevicius 2209.05433 Table 1 (E4M3: bias 7, no inf, NaN only
+   S.1111.111; E5M2: bias 15, inf and NaN at exponent field 31). Rounding is round-to-nearest-even with saturation,
+   as TensorRT's castToFp8. The tensors and the max scaling are ours; notes/sim-fp8.txt has the numbers. */
+KIT.FP8_FMT = { e4m3: { E: 4, M: 3, bias: 7, name: 'E4M3' }, e5m2: { E: 5, M: 2, bias: 15, name: 'E5M2' } };
+KIT.fp8Decode = (code, kind) => {
+  const F = KIT.FP8_FMT[kind], s = code >> 7, e = (code >> F.M) & ((1 << F.E) - 1), m = code & ((1 << F.M) - 1);
+  const top = (1 << F.E) - 1;
+  let v, cls;
+  if (kind === 'e4m3' && e === top && m === (1 << F.M) - 1) { v = NaN; cls = 'nan'; }
+  else if (kind === 'e5m2' && e === top) { v = m === 0 ? Infinity : NaN; cls = m === 0 ? 'inf' : 'nan'; }
+  else if (e === 0) { v = (m / (1 << F.M)) * Math.pow(2, 1 - F.bias); cls = m === 0 ? 'zero' : 'sub'; }
+  else { v = (1 + m / (1 << F.M)) * Math.pow(2, e - F.bias); cls = 'normal'; }
+  return { v: s && !isNaN(v) ? -v : v, cls, s, e, m };
+};
+KIT._fp8Grids = {};
+// Non-negative finite values with their codes, ascending (zero included).
+KIT.fp8Grid = kind => {
+  if (KIT._fp8Grids[kind]) return KIT._fp8Grids[kind];
+  const pos = [];
+  for (let c = 0; c < 128; c++) { const d = KIT.fp8Decode(c, kind); if (isFinite(d.v)) pos.push({ v: d.v, c, cls: d.cls }); }
+  pos.sort((a, b) => a.v - b.v);
+  return (KIT._fp8Grids[kind] = pos);
+};
+KIT.fp8Max = kind => { const g = KIT.fp8Grid(kind); return g[g.length - 1].v; };
+KIT.fp8Round = (x, kind) => {
+  const pos = KIT.fp8Grid(kind), a = Math.abs(x);
+  let lo = 0, hi = pos.length - 1;
+  if (a >= pos[hi].v) return x < 0 ? -pos[hi].v : pos[hi].v;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (pos[mid].v <= a) lo = mid; else hi = mid; }
+  const dl = a - pos[lo].v, dh = pos[hi].v - a;
+  const p = dl < dh ? pos[lo] : dh < dl ? pos[hi] : ((pos[lo].c & 1) ? pos[hi] : pos[lo]);
+  return x < 0 ? -p.v : p.v;
+};
+KIT.rne = x => { const f = Math.floor(x), d = x - f; return d > .5 ? f + 1 : d < .5 ? f : (f % 2 === 0 ? f : f + 1); };
+KIT.int8Round = x => Math.max(-128, Math.min(127, KIT.rne(x)));
+KIT.FP8_N = 16384;
+KIT.FP8_DISTS = {
+  uniform: { name: 'Uniform', long: 'uniform' },
+  normal: { name: 'Normal', long: 'normal (Gaussian)' },
+  student: { name: 'Student-t', long: 'Student-t with 3 degrees of freedom (heavy tails)' },
+};
+KIT._fp8Cache = {};
+KIT.fp8Sample = dist => {
+  const r = PE.rng(7), g = PE.gauss(r), n = KIT.FP8_N, nu = 3, xs = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    let x;
+    if (dist === 'uniform') x = 2 * r() - 1;
+    else if (dist === 'normal') x = g();
+    else { let c = 0; for (let k = 0; k < nu; k++) { const z = g(); c += z * z; } x = g() / Math.sqrt(c / nu); }
+    xs[i] = x;
+  }
+  let ss = 0; for (let i = 0; i < n; i++) ss += xs[i] * xs[i];
+  const rms = Math.sqrt(ss / n); for (let i = 0; i < n; i++) xs[i] /= rms;
+  return xs;
+};
+// Per-tensor max scaling: the format's largest value lands on the tensor's largest |x|.
+KIT.fp8Stats = dist => {
+  if (KIT._fp8Cache[dist]) return KIT._fp8Cache[dist];
+  const xs = KIT.fp8Sample(dist), n = xs.length;
+  let M = 0; for (let i = 0; i < n; i++) M = Math.max(M, Math.abs(xs[i]));
+  const scale = { int8: M / 127, e4m3: M / KIT.fp8Max('e4m3'), e5m2: M / KIT.fp8Max('e5m2') }, mse = {};
+  for (const k of ['int8', 'e4m3', 'e5m2']) {
+    const s = scale[k]; let e = 0;
+    for (let i = 0; i < n; i++) { const q = k === 'int8' ? KIT.int8Round(xs[i] / s) * s : KIT.fp8Round(xs[i] / s, k) * s; e += (q - xs[i]) * (q - xs[i]); }
+    mse[k] = e / n;
+  }
+  const bits = {}; for (const k in mse) bits[k] = -Math.log2(Math.sqrt(mse[k]));
+  const best = Object.keys(mse).reduce((a, b) => mse[a] <= mse[b] ? a : b);
+  return (KIT._fp8Cache[dist] = { dist, n, M, scale, mse, bits, best, xs });
+};
+KIT.FP8_AX = [Math.pow(2, -18), Math.pow(2, 6)];
+KIT.FP8_BINS = 72;
+KIT.fp8Hist = dist => {
+  const st = KIT.fp8Stats(dist), [a, b] = KIT.FP8_AX.map(Math.log2), nb = KIT.FP8_BINS, h = new Array(nb).fill(0);
+  for (const x of st.xs) { const ax = Math.abs(x); if (ax <= 0) continue; const i = Math.floor((Math.log2(ax) - a) / (b - a) * nb); if (i >= 0 && i < nb) h[i]++; }
+  return h;
+};
+KIT.fp8 = (el, opts = {}) => {
+  const S = { dist: 'normal', logM: 0, hist: [] };
+  const tgt = d => ({ logM: Math.log2(KIT.fp8Stats(d).M), hist: KIT.fp8Hist(d) });
+  Object.assign(S, tgt(S.dist));
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const NAMES = { int8: 'INT8', e4m3: 'E4M3', e5m2: 'E5M2' };
+  function codeMap(ctx, kind, x, y, w, h, C) {
+    const F = KIT.FP8_FMT[kind], cols = 1 << F.E, half = 1 << F.M, rows = 2 * half;
+    const cw = Math.min(w / cols, 26), ch = Math.max(4, Math.min(h / rows, Math.max(5, cw * .55))), mw = cw * cols, mh = ch * rows;
+    const gs = glow('sign'), ge = glow('exp'), gm = glow('mant'), gsub = glow('sub');
+    PE.label(ctx, F.name + ': all 256 codes', x, y - 6, C('--fg'), 12, 'left', 600);
+    for (let s = 0; s < 2; s++) for (let m = 0; m < half; m++) for (let e = 0; e < cols; e++) {
+      const code = (s << 7) | (e << F.M) | m, d = KIT.fp8Decode(code, kind), cx = x + e * cw, cy = y + (s * half + m) * ch;
+      ctx.save();
+      if (d.cls === 'nan') { ctx.fillStyle = C('--red'); ctx.globalAlpha = .85; ctx.fillRect(cx + .5, cy + .5, cw - 1, ch - 1); }
+      else if (d.cls === 'inf') { ctx.strokeStyle = C('--red'); ctx.lineWidth = 1.5; ctx.strokeRect(cx + 1.2, cy + 1.2, cw - 2.4, ch - 2.4); }
+      else if (d.cls === 'zero') { ctx.fillStyle = C('--muted'); ctx.globalAlpha = .6; ctx.fillRect(cx + .5, cy + .5, cw - 1, ch - 1); }
+      else { ctx.fillStyle = C('--yellow'); ctx.globalAlpha = d.cls === 'sub' ? .38 : .5 + .45 * (e / cols); ctx.fillRect(cx + .5, cy + .5, cw - 1, ch - 1); }
+      ctx.restore();
+    }
+    if (gsub > 0) { ctx.save(); ctx.strokeStyle = C('--red'); ctx.lineWidth = 1.5 + 2 * gsub; ctx.globalAlpha = gsub; ctx.strokeRect(x, y, cw, mh); ctx.restore(); }
+    if (gs > 0) { ctx.save(); ctx.strokeStyle = C('--fg'); ctx.lineWidth = 1 + 2 * gs; ctx.globalAlpha = gs;
+      ctx.strokeRect(x - 2, y - 1, mw + 4, half * ch + 1); ctx.strokeRect(x - 2, y + half * ch + 1, mw + 4, half * ch); ctx.restore(); }
+    PE.label(ctx, '+', x - 5, y + half * ch / 2 + 4, gs > 0 ? C('--fg') : C('--muted'), 12, 'right', 600);
+    PE.label(ctx, '\u2212', x - 5, y + half * ch * 1.5 + 4, gs > 0 ? C('--fg') : C('--muted'), 12, 'right', 600);
+    const lc = n => n > 0 ? C('--fg') : C('--muted');
+    const two = mw < 330;
+    PE.label(ctx, F.E + ' exponent bits: ' + cols + ' columns', x, y + mh + 14, lc(ge), 10.5, 'left', ge > 0 ? 600 : 400);
+    PE.label(ctx, F.M + ' mantissa bits: ' + half + ' rows per sign', two ? x : x + mw, y + mh + (two ? 27 : 14), lc(gm), 10.5, two ? 'left' : 'right', gm > 0 ? 600 : 400);
+    if (ge > 0) { ctx.save(); ctx.strokeStyle = C('--fg'); ctx.globalAlpha = .5 * ge; for (let e = 1; e < cols; e++) { ctx.beginPath(); ctx.moveTo(x + e * cw, y); ctx.lineTo(x + e * cw, y + mh); ctx.stroke(); } ctx.restore(); }
+    if (gm > 0) { ctx.save(); ctx.strokeStyle = C('--fg'); ctx.globalAlpha = .5 * gm; for (let r = 1; r < rows; r++) { ctx.beginPath(); ctx.moveTo(x, y + r * ch); ctx.lineTo(x + mw, y + r * ch); ctx.stroke(); } ctx.restore(); }
+    return mh + (two ? 31 : 18);
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const narrow = KIT.narrow(w), C = n => PE.css(n), H = h - (opts.bottomPad || 0);
+    const st = KIT.fp8Stats(S.dist), M = Math.pow(2, S.logM);
+    const L = narrow ? 44 : 66, R = narrow ? 10 : 170, top = narrow ? 30 : 34;
+    const hh = Math.max(56, H * (narrow ? .17 : .22)), rh = narrow ? 30 : PE.clamp(H * .06, 20, 30);
+    const b = { x: L, y: top, w: w - L - R, h: hh };
+    const [la, lb] = KIT.FP8_AX.map(Math.log2), X = v => b.x + (Math.log2(v) - la) / (lb - la) * b.w;
+    // decade grid and labels under the tick rows
+    const rowsY = b.y + hh + 10, axY = rowsY + 3 * rh;
+    ctx.save(); ctx.strokeStyle = C('--rule'); ctx.lineWidth = 1; ctx.font = '10.5px system-ui, sans-serif'; ctx.fillStyle = C('--muted'); ctx.textAlign = 'center';
+    const dec = narrow ? [1e-4, 1e-2, 1, 10] : [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10];
+    dec.forEach(v => { const x = X(v); ctx.beginPath(); ctx.moveTo(x, b.y); ctx.lineTo(x, axY); ctx.stroke(); ctx.fillText(v >= 1 ? String(v) : v >= 1e-2 ? String(v) : '1e' + Math.round(Math.log10(v)), x, axY + 13); });
+    ctx.fillText('|x|, tensor scaled to RMS 1 (log scale)', b.x + b.w / 2, axY + 27); ctx.restore();
+    // histogram of |x|
+    const mx = Math.max(...S.hist), bw = b.w / KIT.FP8_BINS;
+    ctx.save(); ctx.fillStyle = C('--blue'); ctx.globalAlpha = .75;
+    S.hist.forEach((c, i) => { if (c <= 0) return; const bh = Math.max(2, c / mx * (hh - 8)); ctx.fillRect(b.x + i * bw + .5, b.y + hh - bh, bw - 1, bh); });
+    ctx.restore();
+    PE.label(ctx, KIT.FP8_DISTS[S.dist].name + ' tensor, ' + KIT.FP8_N + ' values', b.x + 2, b.y - 8, C('--blue'), 11.5, 'left', 600);
+    // the tensor max: every format's largest value is scaled onto it
+    const gc = glow('clip'), xM = X(M);
+    PE.polyline(ctx, [[xM, b.y + 4], [xM, axY]], gc > 0 ? C('--red') : C('--fg'), 1.2 + 2.5 * gc, [4, 3], .9);
+    PE.label(ctx, 'max |x| = ' + M.toFixed(1), xM + (xM > b.x + b.w - 90 ? -4 : 4), b.y + 10, gc > 0 ? C('--red') : C('--fg'), 11, xM > b.x + b.w - 90 ? 'right' : 'left', 600);
+    // tick rows
+    const gsc = glow('scale'), gsub = glow('sub'), gex = glow('exp'), gman = glow('mant');
+    const rowsDef = [['int8', null], ['e4m3', 'e4m3'], ['e5m2', 'e5m2']];
+    const maxMse = Math.max(...Object.values(st.mse));
+    rowsDef.forEach(([k, kind], r) => {
+      const y = rowsY + r * rh + rh / 2, s = M / (kind ? KIT.fp8Max(kind) : 127);
+      PE.label(ctx, NAMES[k], b.x - (narrow ? 4 : 8), y + (narrow ? -1 : 4), C('--yellow'), narrow ? 11 : 12, 'right', 600);
+      const band = Math.max(gsc, kind === 'e4m3' ? glow('cast') : 0);
+      if (band > 0) { ctx.save(); ctx.fillStyle = C('--yellow'); ctx.globalAlpha = .16 * band; ctx.fillRect(b.x, y - rh * .5, b.w, rh); ctx.restore(); }
+      ctx.save(); ctx.strokeStyle = C('--rule'); ctx.beginPath(); ctx.moveTo(b.x, y + rh * .32); ctx.lineTo(b.x + b.w, y + rh * .32); ctx.stroke(); ctx.restore();
+      const vals = kind ? KIT.fp8Grid(kind).filter(p => p.v > 0) : Array.from({ length: 127 }, (_, i) => ({ v: i + 1, cls: 'int' }));
+      let off = 0;
+      ctx.save(); ctx.lineWidth = 1 + .8 * gsc;
+      for (const p of vals) {
+        const v = p.v * s; if (v < KIT.FP8_AX[0]) { off++; continue; }
+        const x = X(v), sub = p.cls === 'sub';
+        ctx.strokeStyle = sub && gsub > 0 ? C('--red') : C('--yellow'); ctx.globalAlpha = sub ? .45 + .55 * gsub : .85;
+        ctx.beginPath(); ctx.moveTo(x, y - rh * .32); ctx.lineTo(x, y + rh * .32); ctx.stroke();
+      }
+      ctx.restore();
+      // exponent: binade edges of this format; mantissa: the marks inside one binade
+      if (kind === 'e4m3' && (gex > 0 || gman > 0)) {
+        ctx.save();
+        for (let e = 1; e < 16; e++) { const v = Math.pow(2, e - 7) * s; if (v < KIT.FP8_AX[0]) continue;
+          if (gex > 0) { ctx.strokeStyle = C('--fg'); ctx.globalAlpha = gex; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(X(v), y - rh * .5); ctx.lineTo(X(v), y + rh * .5); ctx.stroke(); } }
+        if (gman > 0) { const lo = X(Math.pow(2, 0) * s), hi = X(Math.pow(2, 1) * s); ctx.fillStyle = C('--fg'); ctx.globalAlpha = .18 * gman; ctx.fillRect(lo, y - rh * .5, hi - lo, rh); }
+        ctx.restore();
+      }
+      if (off) { const t = '\u2190 ' + off + ' more'; ctx.save(); ctx.font = '10px system-ui, sans-serif'; const tw = ctx.measureText(t).width; ctx.fillStyle = C('--bg'); ctx.fillRect(b.x, y - 7, tw + 6, 13); ctx.restore();
+        PE.label(ctx, t, b.x + 3, y + 4, C('--muted'), 10, 'left', 600); }
+      // error column
+      const best = st.best === k, txt = 'MSE ' + st.mse[k].toExponential(1);
+      if (narrow) PE.label(ctx, st.mse[k].toExponential(1), b.x - 4, y + 11, best ? C('--green') : C('--red'), 10, 'right', 600);
+      else {
+        const bx = b.x + b.w + 16, bwid = (R - 90) * st.mse[k] / maxMse;
+        ctx.save(); ctx.fillStyle = C('--red'); ctx.globalAlpha = .8; ctx.fillRect(bx, y - 5, Math.max(2, bwid), 10); ctx.restore();
+        PE.label(ctx, txt, bx + Math.max(2, bwid) + 6, y + 4, best ? C('--green') : C('--fg'), 11, 'left', best ? 700 : 400);
+      }
+    });
+    if (!narrow) PE.label(ctx, 'error, our computation', b.x + b.w + 16, rowsY - 4, C('--muted'), 10.5, 'left', 400);
+    // code maps, then their legend
+    const my = axY + 52, avail = H - my - 46;
+    if (avail < (narrow ? 200 : 90)) return;   // short stages (the atlas on a phone) keep only the number line
+    let ly;
+    if (narrow) { const h1 = codeMap(ctx, 'e4m3', L, my, w - L - 12, avail - 125, C); ly = my + h1 + 22 + codeMap(ctx, 'e5m2', L, my + h1 + 22, w - L - 12, avail - h1 - 53, C) + 14; }
+    else { const half = (w - L - 40) / 2; ly = my + Math.max(codeMap(ctx, 'e4m3', L, my, half - 20, avail, C), codeMap(ctx, 'e5m2', L + half + 30, my, half - 10, avail, C)) + 14; }
+    let lx = L; const items = [['normal', 'n'], ['subnormal', 's'], ['zero', 'z'], ['NaN', 'nan'], ['infinity', 'inf']];
+    ctx.save(); ctx.font = '10.5px system-ui, sans-serif';
+    for (const [t, k] of items) {
+      if (k === 'inf') { ctx.strokeStyle = C('--red'); ctx.lineWidth = 1.5; ctx.strokeRect(lx + .75, ly - 9.25, 9.5, 9.5); }
+      else { ctx.fillStyle = k === 'nan' ? C('--red') : k === 'z' ? C('--muted') : C('--yellow'); ctx.globalAlpha = k === 's' ? .38 : .85; ctx.fillRect(lx, ly - 10, 11, 11); ctx.globalAlpha = 1; }
+      ctx.fillStyle = C('--muted'); ctx.fillText(t, lx + 15, ly); lx += 15 + ctx.measureText(t).width + (narrow ? 9 : 16);
+    }
+    ctx.restore();
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.6 : Math.min(.8, Math.max(.54, 330 / w + .25))), draw);
+  let stop = () => {};
+  function set(next) {
+    if (next.dist && next.dist !== S.dist) {
+      S.dist = next.dist; stop();
+      const from = { logM: S.logM, hist: S.hist.slice() }, to = tgt(S.dist);
+      stop = PE.animate(700, u => { S.logM = PE.lerp(from.logM, to.logM, u); S.hist = to.hist.map((v, i) => PE.lerp(from.hist[i] || 0, v, u)); cv.redraw(); });
+    }
+    cv.redraw();
+  }
+  const info = () => KIT.fp8Stats(S.dist);
+  return { set, info, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.fp8Text = i => {
+  const f = k => i.mse[k].toExponential(2), n = { int8: 'INT8', e4m3: 'E4M3', e5m2: 'E5M2' };
+  return `<b>${KIT.FP8_DISTS[i.dist].long}</b>: ${KIT.FP8_N} values scaled to RMS 1, largest |x| = ${i.M.toFixed(2)}. ` +
+    `Mean squared error: INT8 ${f('int8')}, E4M3 ${f('e4m3')}, E5M2 ${f('e5m2')}. ` +
+    `Lowest: <b class="c-green">${n[i.best]}</b>, about ${i.bits[i.best].toFixed(1)} bits of accuracy (our computation).`;
+};
+
+/* Inference-compiler toy: a residual block with explicit Q/DQ, rewritten by fusions that the TensorRT 11.4 docs list
+   (BN folded into conv weights, Conv+ReLU, Q/DQ fused into quantized layers, Conv+ElementWise with a trailing
+   activation). Kernel and byte counts are computed on the toy graph; tactic names and times are made up. */
+KIT.FUSE_NODES = [
+  { id: 'qx', kind: 'q', label: 'Q', slot: 0, out: 1 }, { id: 'dqx', kind: 'dq', label: 'DQ', slot: 1, out: 2 },
+  { id: 'c1', kind: 'conv', label: 'Conv', slot: 2, out: 2 }, { id: 'bn1', kind: 'bn', label: 'BN', slot: 3, out: 2 },
+  { id: 'r1', kind: 'act', label: 'ReLU', slot: 4, out: 2 }, { id: 'qa', kind: 'q', label: 'Q', slot: 5, out: 1 },
+  { id: 'dqa', kind: 'dq', label: 'DQ', slot: 6, out: 2 }, { id: 'c2', kind: 'conv', label: 'Conv', slot: 7, out: 2 },
+  { id: 'bn2', kind: 'bn', label: 'BN', slot: 8, out: 2 }, { id: 'add', kind: 'add', label: 'Add', slot: 9, out: 2 },
+  { id: 'r2', kind: 'act', label: 'ReLU', slot: 10, out: 2 }, { id: 'dqs', kind: 'dq', label: 'DQ', slot: 8, out: 2, upper: true },
+];
+KIT.FUSE_EDGES = [['qx', 'dqx'], ['dqx', 'c1'], ['c1', 'bn1'], ['bn1', 'r1'], ['r1', 'qa'], ['qa', 'dqa'], ['dqa', 'c2'], ['c2', 'bn2'], ['bn2', 'add'], ['add', 'r2'], ['dqs', 'add']];
+KIT.FUSE_K1 = ['dqx', 'c1', 'bn1', 'r1', 'qa']; KIT.FUSE_K2 = ['dqa', 'c2', 'bn2', 'dqs', 'add', 'r2'];
+KIT.FUSE_STAGES = [
+  { name: 'As exported: every node runs as its own kernel', groups: [] },
+  { name: 'BN folded into the conv weights and bias', groups: [['c1', 'bn1'], ['c2', 'bn2']] },
+  { name: 'Conv, bias and ReLU fused into one kernel', groups: [['c1', 'bn1', 'r1'], ['c2', 'bn2']] },
+  { name: 'Q/DQ absorbed: the convolutions now run in INT8', groups: [KIT.FUSE_K1, ['dqa', 'c2', 'bn2']] },
+  { name: 'Residual add and ReLU fused into the second conv', groups: [KIT.FUSE_K1, KIT.FUSE_K2] },
+  { name: 'Tactics timed on the GPU; the fastest kept', groups: [KIT.FUSE_K1, KIT.FUSE_K2] },
+];
+KIT.FUSE_LABELS = { 'c1,bn1': ['Conv+bias', 'Conv+b'], 'c2,bn2': ['Conv+bias', 'Conv+b'], 'c1,bn1,r1': ['Conv+bias+ReLU', 'Conv+b+ReLU'],
+  [KIT.FUSE_K1.join()]: ['INT8 Conv+bias+ReLU', 'INT8 Conv+b+ReLU'], 'dqa,c2,bn2': ['INT8 Conv+bias', 'INT8 Conv+b'], [KIT.FUSE_K2.join()]: ['INT8 Conv+bias+Add+ReLU', 'INT8 Conv+b+Add+ReLU'] };
+KIT.FUSE_ELEMS = 64 * 80 * 80;
+KIT.FUSE_TACTICS = [
+  { kernel: 'Q (input)', cands: [['4 values per thread', 9.0], ['8 values per thread', 7.5]] },
+  { kernel: 'INT8 Conv+bias+ReLU', cands: [['tile 64x64', 52], ['tile 128x64', 38], ['tile 128x128', 44], ['tile 256x64', 61]] },
+  { kernel: 'INT8 Conv+bias+Add+ReLU', cands: [['tile 64x64', 57], ['tile 128x64', 49], ['tile 128x128', 41], ['tile 256x64', 66]] },
+];
+// Kernels of a stage: each group plus every node not in a group. A kernel writes the output of its last node.
+KIT.fuseKernels = st => {
+  const G = KIT.FUSE_STAGES[st].groups, inG = new Set(G.flat()), N = KIT.FUSE_NODES;
+  const order = id => N.findIndex(n => n.id === id);
+  const ks = G.map(g => g.slice()).concat(N.filter(n => !inG.has(n.id)).map(n => [n.id]));
+  return ks.map(m => { const last = m.reduce((a, b) => (b === 'dqs' ? a : order(b) > order(a) ? b : a), m[0]); return { members: m, bytes: N[order(last)].out * KIT.FUSE_ELEMS }; });
+};
+KIT.fuseInfo = st => {
+  const ks = KIT.fuseKernels(st), bytes = ks.reduce((s, k) => s + k.bytes, 0), k0 = KIT.fuseKernels(0);
+  const win = KIT.FUSE_TACTICS.map(t => t.cands.reduce((a, b) => (b[1] < a[1] ? b : a)));
+  return { stage: st, name: KIT.FUSE_STAGES[st].name, kernels: ks.length, bytes, kernels0: k0.length, bytes0: k0.reduce((s, k) => s + k.bytes, 0), win, total: win.reduce((s, w) => s + w[1], 0) };
+};
+KIT.fuse = (el, opts = {}) => {
+  const S = { stage: 0, u: 1, prev: 0, race: 0 };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  const N = KIT.FUSE_NODES, byId = Object.fromEntries(N.map(n => [n.id, n]));
+  const groupOf = (st, id) => KIT.FUSE_STAGES[st].groups.find(g => g.includes(id)) || [id];
+  function geom(w, h) {
+    const narrow = KIT.narrow(w), H = h - (opts.bottomPad || 0);
+    if (!narrow) {
+      const pad = 26, sp = (w - 2 * pad) / 11, bh = 34, yM = 30 + 64, yU = 30 + 14;
+      const slotRect = (a, b, upper) => ({ x0: pad + a * sp + 3, x1: pad + (b + 1) * sp - 3, y0: (upper ? yU : yM) - bh / 2, y1: (upper ? yU : yM) + bh / 2 });
+      return { narrow, H, slotRect, graphBottom: yM + bh / 2 + 18, sp };
+    }
+    const top = 34, sp = Math.min(32, (H * .58 - top) / 11), bh = sp - 6, xL = 14, xR = w * .66;
+    const slotRect = (a, b, upper) => upper ? { x0: xR + 14, x1: w - 10, y0: top + a * sp + 3, y1: top + (b + 1) * sp - 3 }
+      : { x0: xL, x1: xR, y0: top + a * sp + 3, y1: top + (b + 1) * sp - 3 };
+    return { narrow, H, slotRect, graphBottom: top + 11 * sp + 16, sp, bh };
+  }
+  function rectAt(G, st, id) {
+    const g = groupOf(st, id), main = g.filter(m => !byId[m].upper);
+    if (!main.length) { const n = byId[id]; return G.slotRect(n.slot, n.slot, true); }
+    const sl = main.map(m => byId[m].slot); return G.slotRect(Math.min(...sl), Math.max(...sl), false);
+  }
+  const lerpR = (a, b, u) => ({ x0: PE.lerp(a.x0, b.x0, u), x1: PE.lerp(a.x1, b.x1, u), y0: PE.lerp(a.y0, b.y0, u), y1: PE.lerp(a.y1, b.y1, u) });
+  const colorOf = (g, C) => g.length > 1 ? C('--green') : ({ q: C('--yellow'), dq: C('--yellow'), bn: C('--blue'), conv: C('--blue'), act: C('--blue'), add: C('--blue') })[byId[g[0]].kind];
+  function rr(ctx, r, stroke, lw, alpha, dash) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = PE.css('--panel'); ctx.strokeStyle = stroke; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.roundRect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const C = n => PE.css(n), G = geom(w, h), u = S.u, narrow = G.narrow;
+    const R = id => lerpR(rectAt(G, S.prev, id), rectAt(G, S.stage, id), u);
+    const cx = r => (r.x0 + r.x1) / 2, cy = r => (r.y0 + r.y1) / 2;
+    // input and output arrows
+    const rq = R('qx'), rout = R('r2');
+    if (!narrow) { PE.arrow(ctx, 4, cy(rq), rq.x0 - 1, cy(rq), C('--muted'), 1.4, 7); }
+    else { PE.arrow(ctx, cx(rq), 14, cx(rq), rq.y0 - 1, C('--muted'), 1.4, 7); PE.label(ctx, 'x (FP16)', cx(rq) + 8, 22, C('--muted'), 10.5, 'left', 400); }
+    if (!narrow) PE.label(ctx, 'x (FP16)', 2, cy(rq) + 30, C('--muted'), 10.5, 'left', 400);
+    // edges that cross kernel boundaries
+    const same = (st, a, b) => groupOf(st, a).includes(b);
+    for (const [a, b] of KIT.FUSE_EDGES) {
+      const alpha = same(S.stage, a, b) ? (same(S.prev, a, b) ? 0 : 1 - u) : (same(S.prev, a, b) ? u : 1);
+      if (alpha <= .02) continue;
+      const ra = R(a), rb = R(b);
+      if (a === 'dqs') {
+        if (!narrow) PE.polyline(ctx, [[ra.x1, cy(ra)], [cx(rb), cy(ra)], [cx(rb), rb.y0 - 1]], C('--muted'), 1.4, null, alpha);
+        else PE.polyline(ctx, [[cx(ra), ra.y1], [cx(ra), cy(rb)], [rb.x1 + 1, cy(rb)]], C('--muted'), 1.4, null, alpha);
+        continue;
+      }
+      if (!narrow) PE.arrow(ctx, ra.x1, cy(ra), rb.x0 - 1, cy(rb), C('--muted'), 1.4, 7, alpha);
+      else PE.arrow(ctx, cx(ra), ra.y1, cx(rb), rb.y0 - 1, C('--muted'), 1.4, 6, alpha);
+    }
+    // skip connection: from the input Q to the skip DQ (or to the fused kernel that absorbed it)
+    { const rs = R('dqs'), upper = !narrow && cy(rs) < cy(rq) - 4;
+      if (!narrow) { const yU = rq.y0 - 30;
+        PE.polyline(ctx, upper ? [[cx(rq), rq.y0], [cx(rq), cy(rs)], [rs.x0, cy(rs)]] : [[cx(rq), rq.y0], [cx(rq), yU], [cx(rs), yU], [cx(rs), rs.y0]], C('--muted'), 1.4);
+        PE.label(ctx, 'skip', cx(rq) + 6, Math.min(cy(rs), yU) - 4, C('--muted'), 10.5, 'left', 400); }
+      else { const col = G.slotRect(0, 0, true), xc = (col.x0 + col.x1) / 2, side = cx(rs) > col.x0;
+        PE.polyline(ctx, side ? [[rq.x1, cy(rq)], [xc, cy(rq)], [xc, rs.y0]] : [[rq.x1, cy(rq)], [xc, cy(rq)], [xc, cy(rs)], [rs.x1, cy(rs)]], C('--muted'), 1.4); } }
+    if (!narrow) PE.arrow(ctx, rout.x1, cy(rout), w - 4, cy(rout), C('--muted'), 1.4, 7);
+    else PE.arrow(ctx, cx(rout), rout.y1, cx(rout), rout.y1 + 12, C('--muted'), 1.4, 6);
+    // nodes: every node draws its interpolated rectangle; members of one kernel converge on the same rectangle
+    const gl = k => glow(k), gf = glow('fuse');
+    const drawn = new Set();
+    for (const n of N) {
+      const g = groupOf(S.stage, n.id), key = g.join();
+      if (u >= 1 && drawn.has(key)) continue; drawn.add(key);
+      const r = R(n.id), col = colorOf(g, C), lit = Math.max(...g.map(m => gl(byId[m].kind))), fl = g.length > 1 ? gf : 0;
+      rr(ctx, r, col, 1.5 + 2.5 * Math.max(lit, fl), 1, byId[g[0]].kind === 'dq' && g.length === 1 ? [4, 3] : null);
+    }
+    // labels: old groups fade out, new groups fade in
+    const labelSet = (st, alpha) => {
+      const seen = new Set();
+      for (const n of N) {
+        const g = groupOf(st, n.id), key = g.join(); if (seen.has(key)) continue; seen.add(key);
+        const r = lerpR(rectAt(G, S.prev, n.id), rectAt(G, S.stage, n.id), u), col = colorOf(g, C);
+        const lab = g.length > 1 ? (KIT.FUSE_LABELS[key] || ['fused', 'fused'])[narrow || r.x1 - r.x0 < 150 ? 1 : 0] : byId[g[0]].label;
+        const fs = narrow ? 11 : (r.x1 - r.x0 < 40 ? 10.5 : 12);
+        ctx.save(); ctx.globalAlpha = alpha; PE.label(ctx, lab, cx(r), cy(r) + 4, col, fs, 'center', 600); ctx.restore();
+      }
+    };
+    if (u < 1 && S.prev !== S.stage) labelSet(S.prev, 1 - u);
+    labelSet(S.stage, u < 1 && S.prev !== S.stage ? u : 1);
+    // lower panel
+    const top = G.graphBottom + 14, H = G.H, bw = w - 24;
+    if (S.stage < 5) history(ctx, 12, top, bw, H - top - 6, C, narrow);
+    else race(ctx, 12, top, bw, H - top - 6, C, narrow);
+  }
+  function history(ctx, x, y, w, h, C, narrow) {
+    const infos = [0, 1, 2, 3, 4].map(KIT.fuseInfo), cols = narrow ? 1 : 2, pw = (w - (cols - 1) * 28) / cols;
+    const panels = [['kernels launched', i => i.kernels, v => String(v)], ['memory written per image (toy)', i => i.bytes, v => KIT.bytes(v)]];
+    const ph = narrow ? (h - 16) / 2 : h;
+    panels.forEach(([title, f, fmt], p) => {
+      const px = x + (narrow ? 0 : p * (pw + 28)), py = y + (narrow ? p * (ph + 16) : 0);
+      PE.label(ctx, title, px, py + 12, C('--fg'), 12, 'left', 600);
+      const mx = f(infos[0]), bh0 = ph - 62, sw = pw / 5;
+      infos.forEach((i, s) => {
+        const v = f(i), bh = Math.max(2, v / mx * bh0), bx = px + s * sw + sw * .2, by = py + 38 + bh0 - bh, bwid = sw * .6;
+        ctx.save();
+        if (s <= S.stage) { ctx.fillStyle = s === S.stage ? C('--green') : C('--muted'); ctx.globalAlpha = s === S.stage ? .85 : .45; ctx.fillRect(bx, by, bwid, bh); }
+        else { ctx.strokeStyle = C('--rule'); ctx.setLineDash([3, 3]); ctx.strokeRect(bx, by, bwid, bh); }
+        ctx.restore();
+        if (s <= S.stage) PE.label(ctx, fmt(v), bx + bwid / 2, by - 4, s === S.stage ? C('--green') : C('--muted'), 10.5, 'center', 600);
+        PE.label(ctx, 'step ' + s, bx + bwid / 2, py + 52 + bh0, C('--muted'), 10.5, 'center', 400);
+      });
+    });
+  }
+  function race(ctx, x, y, w, h, C, narrow) {
+    const gt = glow('tactic');
+    PE.label(ctx, narrow ? 'Tactics timed on this GPU (toy, \u00b5s)' : 'Tactic selection: each candidate kernel is timed on this GPU (toy names and times, \u00b5s)', x, y + 12, gt > 0 ? C('--green') : C('--fg'), narrow ? 10.5 : 12, 'left', 600);
+    const rows = KIT.FUSE_TACTICS.reduce((s, t) => s + t.cands.length + 1, 0), rh = Math.min(22, (h - 24) / rows);
+    const tmax = Math.max(...KIT.FUSE_TACTICS.flatMap(t => t.cands.map(c => c[1])));
+    const lw = narrow ? 112 : 150, bx = x + lw, bwid = w - lw - (narrow ? 34 : 60);
+    let yy = y + 24;
+    KIT.FUSE_TACTICS.forEach(t => {
+      const best = Math.min(...t.cands.map(c => c[1]));
+      PE.label(ctx, t.kernel, x, yy + rh * .7, C('--muted'), 10.5, 'left', 600); yy += rh;
+      t.cands.forEach(([name, ms]) => {
+        const done = S.race * tmax >= ms, len = Math.min(ms, S.race * tmax) / tmax * bwid, win = ms === best;
+        const col = S.race >= 1 ? (win ? C('--green') : C('--brown')) : C('--blue');
+        PE.label(ctx, name, x + 10, yy + rh * .68, C('--fg'), 10.5, 'left', 400);
+        ctx.save(); ctx.fillStyle = col; ctx.globalAlpha = S.race >= 1 && !win ? .5 : .85; ctx.fillRect(bx, yy + rh * .2, Math.max(1, len), rh * .6); ctx.restore();
+        if (done) PE.label(ctx, ms.toFixed(1) + (S.race >= 1 ? (win ? '  kept' : '') : ''), bx + len + 5, yy + rh * .68, S.race >= 1 && win ? C('--green') : C('--muted'), 10.5, 'left', win && S.race >= 1 ? 700 : 400);
+        yy += rh;
+      });
+    });
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.95 : .5), draw);
+  let stop = () => {};
+  function set(next) {
+    if (next.stage === undefined || next.stage === S.stage) { cv.redraw(); return; }
+    stop(); S.prev = S.stage; S.stage = next.stage; S.u = 0; S.race = 0;
+    const rs = () => { if (S.stage === 5) stop = PE.animate(900, v => { S.race = v; cv.redraw(); }); };
+    if (S.prev >= 4 && S.stage === 5) { S.u = 1; S.prev = 5; rs(); return; }
+    stop = PE.animate(800, v => { S.u = v; cv.redraw(); }, () => { S.prev = S.stage; rs(); });
+  }
+  return { set, info: () => KIT.fuseInfo(S.stage), state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+KIT.fuseText = i => {
+  const base = `<b>Step ${i.stage}: ${i.name}.</b> ${i.kernels} kernels launched, ${i.kernels} tensors written to memory, ${KIT.bytes(i.bytes)} written per image`;
+  if (i.stage === 0) return base + ' (toy tensors: 64 channels at 80x80, FP16 or INT8).';
+  if (i.stage < 5) return base + `, down from ${i.kernels0} kernels and ${KIT.bytes(i.bytes0)}.`;
+  return base + `. Kept: ${i.win.map(w => w[0] + ' (' + w[1].toFixed(1) + ' \u00b5s)').join(', ')}; toy total ${i.total.toFixed(1)} \u00b5s. The timings, and so the engine, belong to this GPU and this TensorRT version.`;
+};
+
+/* Decision guide: our reading of the sourced evidence, turned into an ordered recipe. Choices: GPU compute capability,
+   model family, accuracy budget (absolute points of mAP or mIoU), and whether fine-tuning is possible. Every number in
+   the step text is a data-claim span; KIT.guideFlow draws the same steps as a flowchart. */
+KIT.GUIDE = {
+  gpus: { cc75: 'compute capability 7.5 (T4)', cc80: 'compute capability 8.0 or 8.6 (A100, A10)', cc89: 'compute capability 8.9 (L40S)', cc90: 'compute capability 9.0 (H100)', cc100: 'compute capability 10.0 or newer (B200)' },
+  models: { cnn: 'ResNet-style CNN detector or segmenter', dw: 'depthwise-heavy model (EfficientDet, MobileNet)', yolo: 'YOLO-family detector', vit: 'transformer detector or ViT segmenter' },
+  // Expected INT8 PTQ loss in absolute points, our reading of the evidence: cnn = worst best-calibrator row of Wu Table 7
+  // (Faster R-CNN, 0.13), dw = EfficientDet-D1 per-channel W8A8 (Nagel Table 6); null = no sourced vision rows.
+  ptqLoss: { cnn: .2, dw: 1.41, yolo: null, vit: null },
+};
+KIT.cl = (id, v) => `<span data-claim="${id}">${v}</span>`;
+KIT.guideSteps = s => {
+  const G = KIT.GUIDE, cc = +s.gpu.slice(2), fp8 = cc >= 89, sparse = cc >= 80, steps = [];
+  const exp = G.ptqLoss[s.model], within = exp != null && exp <= s.budget;
+  steps.push({ key: 'base', lever: 'measure', title: 'Measure FP32, then build an FP16 engine',
+    text: 'Record accuracy on your own validation set and latency at your real batch size and input resolution. An FP16 engine is the usual first step; measure it too, since it is the baseline every later step is compared with.', ev: [] });
+  let ptq = 'Quantize weights to INT8 per output channel and activations per tensor, using images that look like deployment data for calibration (Wu et al. used ' + KIT.cl('wu20-t9-faster-r-cnn-calib-samples', '512') + ' for their detectors). Try entropy and the 99.99 to 99.9999 percentiles, and keep the best on your validation set; plain max calibration usually loses more. In TensorRT ' + KIT.cl('trt-removal-version', '11.0.0') + ' and later there are no built-in calibrators: insert quantize and dequantize (Q/DQ) nodes, for example with NVIDIA Model Optimizer.';
+  const ev2 = s.model === 'cnn' ? ['ev-wu'] : s.model === 'dw' ? ['ev-nagel'] : s.model === 'yolo' ? ['ev-yolo'] : [];
+  if (s.model === 'dw') ptq += ' Depthwise-heavy networks lose more: EfficientDet-D1 drops from ' + KIT.cl('nagel21-t6-efficientdet-d1-fp32', '40.08') + ' to ' + KIT.cl('nagel21-t6-efficientdet-d1-pc-w8a8', '38.67') + ' mAP with per-channel W8A8. Apply cross-layer equalization first (chapter 6).';
+  if (s.model === 'yolo') ptq += ' The only YOLO rows in these sources use Qualcomm tooling, not TensorRT: naive INT8 PTQ cost YoloV5 ' + KIT.cl('vb-t1-yolov5-int8', '-1.8') + ' mAP. Measure your own model.';
+  if (s.model === 'vit') ptq += ' Transformer blocks have post-softmax, post-GELU and outlier-channel activations that a uniform per-tensor grid fits badly (chapter 10). No source here measures a transformer detector in INT8: measure, and expect to keep some layers in FP16.';
+  steps.push({ key: 'ptq', lever: 'quant', title: 'INT8 post-training quantization', text: ptq, ev: ev2,
+    stop: within ? `Expected loss is within your ${s.budget}-point budget: stop here if your measurement agrees.` : null });
+  steps.push({ key: 'sens', lever: 'quant', title: 'Find the sensitive layers; keep them in FP16',
+    text: 'Quantize one layer at a time, rank layers by the accuracy each one costs, and return the worst few to FP16 (Wu et al. call this partial quantization; Nagel et al. give a debugging flow). Depthwise layers are frequent offenders: in EfficientNet b0, ' + KIT.cl('wu20-fig3-depthwise-count', '7') + ' of the ' + KIT.cl('wu20-effb0-skip', '10') + ' most sensitive layers were depthwise.', ev: ['ev-nagel'] });
+  if (s.train) steps.push({ key: 'qat', lever: 'quant', title: 'Short quantization-aware fine-tune',
+    text: 'Start from the calibrated ranges and fine-tune with fake quantization and the straight-through estimator (chapter 7). For ResNet-style detectors it rarely beats good PTQ: Faster R-CNN scored ' + KIT.cl('wu20-t7-faster-r-cnn-ptq-acc', '36.82') + ' after PTQ and ' + KIT.cl('wu20-t7-faster-r-cnn-qat-acc', '36.76') + ' after QAT. It helps more where PTQ struggles: EfficientDet-D1 W4A8 per-channel goes from ' + KIT.cl('nagel21-t6-efficientdet-d1-pc-w4a8', '35.08') + ' (PTQ) to ' + KIT.cl('nagel21-t10-efficientdet-d1-pc-w4a8', '36.75') + ' (QAT).', ev: ['ev-wu', 'ev-nagel'] });
+  else steps.push({ key: 'adv', lever: 'quant', title: 'No training? Use a stronger PTQ method',
+    text: 'AdaRound and BRECQ need only calibration images. They matter most below 8 bits: with 4-bit weights, Faster R-CNN R50 keeps ' + KIT.cl('brecq21-t5-faster-rcnn-resnet-50-brecq-w4a8', '38.29') + ' mAP with BRECQ, but only ' + KIT.cl('brecq21-t5-faster-rcnn-resnet-50-bc-w4a8', '0.25') + ' with plain rounding and bias correction.', ev: ['ev-brecq'] });
+  const more = [];
+  if (sparse && s.train) more.push('2:4 sparsity with retraining (chapter 9): COCO detectors stayed within about a point of dense, for example RetinaNet-RN50 ' + KIT.cl('mishra2021-t4-retinanet-rn50-bbox-dense-fp16', '34.8') + ' dense vs ' + KIT.cl('mishra2021-t4-retinanet-rn50-bbox-sparse-int8', '35.1') + ' sparse INT8; the paper reports up to ' + KIT.cl('mishra2021-math-speedup', '2') + 'x math throughput, not an end-to-end speedup, so measure.');
+  if (!sparse) more.push('This GPU is older than the A100 generation that Mishra et al. built 2:4 sparsity for; check its documentation before planning on sparse tensor cores.');
+  if (fp8) more.push('FP8 is available from compute capability ' + KIT.cl('trt-fp8-min-cc', '8.9') + '. For CNNs van Baalen et al. find INT8 usually as accurate, and for outlier-heavy layers they recommend 16-bit activations (W8A16) or QAT rather than FP8 alone (chapter 12). On SM89, SM90, SM120 and SM121, TensorRT falls back to FP16 or FP32 kernels for FP8 convolutions with kernel sizes larger than ' + KIT.cl('trt-fp8-conv-kernel-limit', '32') + ' (for example 7x7).');
+  if (s.train) more.push('Distill a smaller backbone (chapter 3) when even INT8 is too slow: imitating teacher features near objects lifted a halved Faster R-CNN student from ' + KIT.cl('wang-coco-fpn-r50h-ap', '31.2') + ' to ' + KIT.cl('wang-coco-fpn-r50h-i-ap', '34.8') + ' AP.');
+  more.push('Do not expect 4-bit weight-only formats (GPTQ, AWQ) to speed up a convolutional detector: they help layers whose bytes are mostly weights (chapter 1).');
+  steps.push({ key: 'more', lever: 'struct', title: 'Need more speed? Change the structure', text: more.map(t => '<span class="g-bullet">' + t + '</span>').join(' '), ev: ['ev-sparse', 'ev-other'] });
+  return { steps, exp, within };
+};
+KIT.guideHTML = s => {
+  const r = KIT.guideSteps(s), G = KIT.GUIDE;
+  const head = `<p class="g-sum"><b>${G.models[s.model]}</b> on a GPU with ${G.gpus[s.gpu]}, budget ${s.budget} point${s.budget === 1 ? '' : 's'}, ${s.train ? 'fine-tuning possible' : 'no fine-tuning'}. Our reading of the evidence below:</p>`;
+  return head + '<ol class="g-steps">' + r.steps.map(st => `<li data-step="${st.key}"><b>${st.title}.</b> ${st.text}` +
+    (st.ev.length ? ` <span class="g-ev">Evidence: ${st.ev.map(e => `<a href="#${e}">${{ 'ev-wu': 'table A', 'ev-nagel': 'table B', 'ev-brecq': 'table C', 'ev-sparse': 'table D', 'ev-yolo': 'table E', 'ev-other': 'table E' }[e]}</a>`).join(', ')}.</span>` : '') +
+    (st.stop ? `<span class="g-stop">${st.stop}</span>` : '') + '</li>').join('') + '</ol>';
+};
+KIT.guideFlow = (el, opts = {}) => {
+  const S = { gpu: 'cc75', model: 'cnn', budget: 1, train: true, u: 1 };
+  const glow = opts.fig ? PE.linkPulses(opts.fig, () => cv.redraw()) : () => 0;
+  function draw(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    const r = KIT.guideSteps(S), n = r.steps.length, narrow = w < 560, C = k => PE.css(k);
+    const col = { measure: C('--blue'), quant: C('--yellow'), struct: C('--brown') };
+    const top = 18, bot = opts.bottomPad || 0, rowH = (h - top - bot - 10) / n, bw = narrow ? w * .62 : Math.min(330, w * .42), x = narrow ? 12 : w * .08;
+    r.steps.forEach((st, i) => {
+      const y = top + i * rowH, bh = Math.min(46, rowH * .66), a = PE.clamp(S.u * n - i, 0, 1);
+      if (i) PE.arrow(ctx, x + bw / 2, y - rowH + bh + 2, x + bw / 2, y - 2, C('--muted'), 1.5, 7, a);
+      PE.box(ctx, x, y, bw, bh, col[st.lever], '', a);
+      ctx.globalAlpha = a; ctx.font = `600 ${narrow ? 11 : 12}px system-ui, sans-serif`;
+      const words = st.title.split(' '), lines = []; words.forEach(wd => { const cur = lines[lines.length - 1]; if (cur && ctx.measureText(cur + ' ' + wd).width < bw - 18) lines[lines.length - 1] = cur + ' ' + wd; else lines.push(wd); });
+      lines.slice(0, 2).forEach((ln, k) => PE.label(ctx, ln, x + bw / 2, y + bh / 2 + 4 + (k - (Math.min(2, lines.length) - 1) / 2) * 14, C('--fg'), narrow ? 11 : 12, 'center'));
+      ctx.globalAlpha = 1;
+      if (st.key === 'ptq' && !narrow) PE.label(ctx, r.exp == null ? '' : `expected INT8 loss about ${r.exp} points vs budget ${S.budget} (our reading)`, x + bw + 16, y + bh / 2 + (st.stop ? 22 : 4), C('--muted'), 11, 'left', 400);
+      if (st.stop) { const sx = x + bw + 14, sy = y + bh / 2; PE.arrow(ctx, x + bw + 2, sy, sx + (narrow ? 26 : 46), sy, C('--green'), 2 + 2 * glow('stop'), 8, a);
+        PE.label(ctx, narrow ? 'stop?' : 'within budget: stop', sx + (narrow ? 30 : 52), sy + 4, C('--green'), 12, 'left'); }
+    });
+    if (r.exp == null) PE.label(ctx, 'no sourced INT8 rows for this family: measure', narrow ? 12 : x + bw + 16, narrow ? h - bot - 4 : top + rowH * 1 + 20, C('--red'), 11, 'left', 400);
+  }
+  const cv = PE.canvas(el, opts.aspect || (w => w < 560 ? 1.05 : .5), draw);
+  let stop = () => {};
+  function set(next) { Object.assign(S, next); S.u = 0; stop(); stop = KIT.tween(S, { u: 1 }, 700, cv.redraw); }
+  return { set, state: S, redraw: cv.redraw, resize: cv.resize, destroy: () => { stop(); cv.destroy(); } };
+};
+
+SCENES.cost = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.roofline(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0 });
+  const pb = ctx.qa('[data-prec]'), lb = ctx.qa('[data-layer]');
+  const sync = () => { press(pb, b => b.dataset.prec === kit.state.prec); press(lb, b => b.dataset.layer === kit.state.sel);
+    ctx.hud(badge('toy', KIT.roofText(kit.info()))); };
+  const offs = [...pb.map(b => listen(b, 'click', () => { kit.set({ prec: b.dataset.prec }); sync(); })),
+    ...lb.map(b => listen(b, 'click', () => { kit.set({ sel: b.dataset.layer }); sync(); }))];
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.distill = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.temp(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 180 : 0 });
+  const sl = ctx.q('[data-temp]'), val = ctx.q('[data-temp-val]'), tb = ctx.qa('[data-t2]');
+  // A theme toggle remounts the scene, so start from the controls' current state.
+  const on = tb.find(b => b.getAttribute('aria-pressed') === 'true');
+  kit.set({ T: +sl.value, t2: !!on && on.dataset.t2 === 'on' });
+  const sync = () => { val.textContent = kit.state.Tt.toFixed(1); press(tb, b => (b.dataset.t2 === 'on') === kit.state.t2);
+    ctx.hud(badge('computed', KIT.tempText(kit.info()))); };
+  const offs = [listen(sl, 'input', () => { kit.set({ T: +sl.value }); val.textContent = (+sl.value).toFixed(1); }),
+    listen(sl, 'change', sync),
+    ...tb.map(b => listen(b, 'click', () => { kit.set({ t2: b.dataset.t2 === 'on' }); sync(); }))];
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.grid = ctx => {
+  const el = mkCanvas(ctx.stage);
+  let preset = 'minmax', tm = 0;
+  const show = () => ctx.hud(badge('computed', KIT.rulerText(kit.info())));
+  const kit = KIT.ruler(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0, onInput: () => { preset = ''; sync(); } });
+  const bb = ctx.qa('[data-bits]'), sb = ctx.qa('[data-sym]'), rb = ctx.qa('[data-range]');
+  const sync = () => {
+    press(bb, b => +b.dataset.bits === kit.state.bits); press(sb, b => (b.dataset.sym === '1') === kit.state.sym); press(rb, b => b.dataset.range === preset);
+    clearTimeout(tm); tm = setTimeout(show, PE.instant() ? 0 : 700);
+  };
+  const offs = [...bb.map(b => listen(b, 'click', () => { kit.set({ bits: +b.dataset.bits }); sync(); })),
+    ...sb.map(b => listen(b, 'click', () => { kit.set({ sym: b.dataset.sym === '1' }); sync(); })),
+    ...rb.map(b => listen(b, 'click', () => { const [lo, hi] = KIT.RULER_PRESETS[b.dataset.range](); preset = b.dataset.range; kit.set({ lo, hi }); sync(); }))];
+  sync(); show();
+  return { flat: true, resize: kit.resize, destroy() { clearTimeout(tm); offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.granularity = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.chanland(el, { aspect: S3ASPECT(ctx.stage) });
+  const mb = ctx.qa('[data-mode]'), zb = ctx.qa('[data-zoom]');
+  let zoom = 0;
+  const sync = () => { press(mb, b => b.dataset.mode === kit.state.mode); press(zb, b => +b.dataset.zoom === zoom); ctx.hud(badge('toy', KIT.chanlandText(kit.info()))); };
+  const offs = [...mb.map(b => listen(b, 'click', () => { kit.set({ mode: b.dataset.mode }); sync(); })),
+    ...zb.map(b => listen(b, 'click', () => { zoom = +b.dataset.zoom; kit.set({ zoom }); sync(); }))];
+  sync();
+  return { resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.calib = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.calib(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0 });
+  const mb = ctx.qa('[data-method]');
+  const sync = () => { press(mb, b => b.dataset.method === kit.state.method); ctx.hud(badge('computed', KIT.calibText(kit.info()))); };
+  const offs = mb.map(b => listen(b, 'click', () => { kit.set({ method: b.dataset.method }); sync(); }));
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.qat = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.ste(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0 });
+  const mb = ctx.qa('[data-mode]'), ab = ctx.qa('[data-act]');
+  const sync = () => { press(mb, b => b.dataset.mode === kit.state.mode); ctx.hud(badge('computed', KIT.steText(kit.info()))); };
+  const act = { step1: { step: 1 }, step5: { step: 5 }, reset: { mode: 'ste', reset: true } };
+  const offs = [...mb.map(b => listen(b, 'click', () => { kit.set({ mode: b.dataset.mode }); sync(); })),
+    ...ab.map(b => listen(b, 'click', () => { kit.set(act[b.dataset.act]); sync(); }))];
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.sparsity = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.sparse(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0 });
+  const pb = ctx.qa('[data-pattern]'), sl = ctx.q('#atlas-sparse-s'), sv = ctx.q('#atlas-sparse-s-value');
+  const sync = () => {
+    press(pb, b => b.dataset.pattern === kit.state.pattern);
+    sl.value = String(kit.state.s * 100); sl.disabled = kit.state.pattern === '24'; sv.textContent = kit.state.s * 100 + '%';
+    ctx.hud(badge('computed', KIT.sparseText(kit.info())));
+  };
+  const on = pb.find(b => b.getAttribute('aria-pressed') === 'true');
+  kit.set({ pattern: on ? on.dataset.pattern : 'unstructured', s: +sl.value / 100 });
+  const offs = [...pb.map(b => listen(b, 'click', () => { kit.set({ pattern: b.dataset.pattern }); sync(); })),
+    listen(sl, 'input', () => { kit.set({ s: +sl.value / 100 }); sv.textContent = sl.value + '%'; }),
+    listen(sl, 'change', sync)];
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.outliers = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const wide = innerWidth > 860;
+  const kit = KIT.actsurf(el, { aspect: S3ASPECT(ctx.stage), dist: w => wide ? 8.6 : 8.4, lift: wide ? .45 : .1 });
+  const mb = ctx.qa('[data-act]'), sl = ctx.q('[data-alpha]'), val = ctx.q('[data-alpha-value]');
+  const sync = () => { press(mb, b => b.dataset.act === kit.state.mode); val.textContent = (+sl.value).toFixed(2);
+    ctx.hud(badge('toy', KIT.actsurfText(kit.info()))); };
+  // a theme toggle remounts the scene; restore the state the article's controls still show
+  const was = (mb.find(b => b.getAttribute('aria-pressed') === 'true') || {}).dataset;
+  if (was && was.act === 'int8') kit.set({ mode: 'int8' }, 0);
+  else if ((was && was.act === 'smooth') || +sl.value !== .5) kit.set({ mode: 'smooth', alpha: +sl.value }, 0);
+  const offs = [...mb.map(b => listen(b, 'click', () => {
+      if (b.dataset.act === 'smooth') { sl.value = '0.5'; kit.set({ mode: 'smooth', alpha: .5 }); } else kit.set({ mode: b.dataset.act });
+      sync(); })),
+    listen(sl, 'input', () => { val.textContent = (+sl.value).toFixed(2); kit.set({ mode: 'smooth', alpha: +sl.value }, 250); }),
+    listen(sl, 'change', sync)];
+  sync();
+  return { resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.fp8 = ctx => {
+  const el = mkCanvas(ctx.stage);
+  const kit = KIT.fp8(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0 });
+  const db = ctx.qa('[data-dist]');
+  const sync = () => { press(db, b => b.dataset.dist === kit.state.dist); ctx.hud(badge('computed', KIT.fp8Text(kit.info()))); };
+  const offs = db.map(b => listen(b, 'click', () => { kit.set({ dist: b.dataset.dist }); sync(); }));
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};
+
+SCENES.guide = ctx => {
+  const el = mkCanvas(ctx.stage), txt = ctx.q('#atlas-guide-text');
+  const kit = KIT.guideFlow(el, { aspect: w => Math.max(.3, ctx.stage.clientHeight / Math.max(w, 1)), bottomPad: innerWidth > 860 ? 130 : 0 });
+  const g = ctx.qa('[data-gpu]'), m = ctx.qa('[data-model]'), b = ctx.qa('[data-budget]'), t = ctx.qa('[data-train]');
+  const sync = () => { const s = kit.state;
+    press(g, x => x.dataset.gpu === s.gpu); press(m, x => x.dataset.model === s.model); press(b, x => +x.dataset.budget === s.budget); press(t, x => (x.dataset.train === '1') === s.train);
+    txt.innerHTML = KIT.guideHTML(s).replace(/<span class="g-ev">[\s\S]*?<\/span>/g, '');
+    ctx.hud(badge('sourced', 'Our reading of the sourced evidence: ' + KIT.GUIDE.models[s.model] + '.')); };
+  const offs = [...g.map(x => listen(x, 'click', () => { kit.set({ gpu: x.dataset.gpu }); sync(); })),
+    ...m.map(x => listen(x, 'click', () => { kit.set({ model: x.dataset.model }); sync(); })),
+    ...b.map(x => listen(x, 'click', () => { kit.set({ budget: +x.dataset.budget }); sync(); })),
+    ...t.map(x => listen(x, 'click', () => { kit.set({ train: x.dataset.train === '1' }); sync(); }))];
+  sync();
+  return { flat: true, resize: kit.resize, destroy() { offs.forEach(f => f()); kit.destroy(); } };
+};

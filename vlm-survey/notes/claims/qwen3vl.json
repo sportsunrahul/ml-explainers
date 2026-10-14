@@ -1,0 +1,191 @@
+[
+ {
+  "id": "qwen3vl-dense-sizes",
+  "claim": "Dense model sizes",
+  "value": "2B / 4B / 8B / 32B",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 1 para 2; Sec. 2 LLM",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-moe-sizes",
+  "claim": "MoE variants",
+  "value": "30B-A3B and 235B-A22B (235B total, 22B activated per token)",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2 LLM",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-context",
+  "claim": "Native context window",
+  "value": "256K tokens (S3 sequence length 262,144)",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Abstract; Table training_setup",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-vit",
+  "claim": "Vision encoder and its init",
+  "value": "SigLIP-2 architecture, init from official pretrained checkpoints, continued at dynamic resolution; SO-400M default, SigLIP2-Large (300M) for 2B and 4B",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2 Vision Encoder",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-merger",
+  "claim": "Merger design",
+  "value": "two-layer MLP, 2x2 visual features -> 1 token",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2 MLP-based Vision-Language Merger",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-deepstack-levels",
+  "claim": "DeepStack takes features from this many distinct ViT levels and adds them to the hidden states of the first N LLM layers",
+  "value": "three levels -> first three LLM layers",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 (single paragraph)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-deepstack-layer-idx",
+  "claim": "Exact ViT layer indices tapped by DeepStack are not given in the paper text or figure",
+  "value": "not stated",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2",
+  "uncertain": true
+ },
+ {
+  "id": "qwen3vl-deepstack-avg",
+  "claim": "DeepStack ablation average over 11 benchmarks, baseline vs DeepStack (internal 15B-A2B LLM, 200B pretrain tokens)",
+  "value": "74.7 vs 76.0",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results, AVG column",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-deepstack-infovqa",
+  "claim": "DeepStack ablation InfoVQA, baseline vs DeepStack",
+  "value": "71.9 vs 74.2",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-deepstack-docvqa",
+  "claim": "DeepStack ablation DocVQA, baseline vs DeepStack",
+  "value": "89.5 vs 91.1",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-deepstack-ocrbench",
+  "claim": "DeepStack ablation OCRBench, baseline vs DeepStack",
+  "value": "81.0 vs 83.6",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-deepstack-textvqa",
+  "claim": "DeepStack ablation TextVQA, baseline vs DeepStack (slight drop)",
+  "value": "80.6 vs 80.5",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table deepstack_results",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-timestamp-format",
+  "claim": "Each video temporal patch is prefixed with a text timestamp, e.g.",
+  "value": "<3.0 seconds>",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.3",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-timestamp-formats",
+  "claim": "Timestamps are generated in both formats during training",
+  "value": "seconds and HMS (hours:minutes:seconds)",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.3",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-mrope-problem",
+  "claim": "Original MRoPE partitions embedding dims into t/h/w subspaces, giving an imbalanced frequency spectrum; fix interleaves t, h, w across dims for a balanced spectrum",
+  "value": "interleaved t,h,w across embedding dimensions",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-s0",
+  "claim": "Stage 0 alignment: only merger trained, tokens, sequence length",
+  "value": "merger only; 67B tokens; 8,192",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table training_setup; Sec. 3.1 Stage 0",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-s1s2s3",
+  "claim": "Later pretraining stages (all params trainable): tokens and sequence length",
+  "value": "S1 ~1T, 8,192; S2 ~1T, 32,768; S3 100B, 262,144",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Table training_setup",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-docvqa-235b",
+  "claim": "DocVQA test for Qwen3-VL-235B-A22B thinking / instruct",
+  "value": "96.5 / 97.1",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Flagship table (table_flagship_models), DocVQA_test row",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-mmmu-235b",
+  "claim": "MMMU for Qwen3-VL-235B-A22B thinking / instruct",
+  "value": "80.6 / 78.7",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Flagship table, MMMU row",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-loss",
+  "claim": "Loss changed from per-sample to square-root-normalized per-token loss",
+  "value": "square-root-normalized per-token loss",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 1 (optimization side)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen3vl-vit-patch",
+  "claim": "ViT patch size is not stated in the LaTeX text",
+  "value": "not stated",
+  "paper": "Qwen3-VL",
+  "version": "v2",
+  "loc": "Sec. 2",
+  "uncertain": true
+ }
+]

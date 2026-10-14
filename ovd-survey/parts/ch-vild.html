@@ -1,0 +1,163 @@
+<section id="ch-vild" class="chapter">
+<h2>ViLD: teach the region head to see like CLIP</h2>
+<div class="tapstrip" data-model="vild" role="img" aria-label="The image pipeline from image to score as a blue lane, with the text prompt lane above it. For ViLD the only active tap is at the score: text enters at the classifier and nowhere else."></div>
+<p class="note">Where text enters ViLD: only at the classifier. CLIP's text encoder embeds the class names once, before training, and the detector compares each region embedding with those stored vectors.</p>
+
+<p>Chapter 3 ended with a detector that boxes a forklift and then calls it background. CLIP can name that crop. ViLD (Gu et al., 2021) trains the detector's region embeddings to land where CLIP would put them, so the detector can name every proposal in one pass.</p>
+
+<figure class="viz" id="viz-vild3d" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="vild3d-canvas" role="img" aria-label="A wireframe unit sphere seen in 3D. Yellow points on it are the text embeddings of person, pallet, traffic cone and forklift; a brown point is the learned background vector. Blue points are region embeddings, two per class, and small faded blue points are CLIP's embeddings of each region's crop. Buttons move the blue points under the text loss, the image loss, or both. Drag or use the arrow keys to turn the sphere."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-vild3d-text" aria-pressed="false">Text loss only (ViLD-text)</button>
+    <button type="button" id="btn-vild3d-image" aria-pressed="false">Image loss only (ViLD-image)</button>
+    <button type="button" id="btn-vild3d-both" aria-pressed="false">Both losses (ViLD)</button>
+    <button type="button" id="btn-vild3d-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vild3d-readout" aria-live="polite"></p>
+  <div class="key"><span class="c-blue">region embedding</span><span style="color:color-mix(in srgb, var(--blue) 55%, var(--bg))">CLIP embedding of the region's crop</span><span class="c-yellow">text embedding of a name</span><span class="c-brown">learned background e_bg</span><span class="c-red">dashed: what the active loss still pulls toward</span></div>
+  <figcaption>A three-dimensional toy of an embedding space where the real one has hundreds of dimensions. All vectors have unit length, so they sit on the sphere and closeness means cosine. The forklift is a novel class: no training box is labelled forklift, and its name joins the classifier only at test time. The cosines in the readout are computed from the toy positions. Drag the sphere, or focus it and use the arrow keys.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> The forklift regions have no label in the training data. Before you press <em>Text loss only</em>, decide where that loss will send them. Then press <em>Image loss only</em> and compare.</p>
+
+<p>With the text loss alone, the forklift regions drift toward the learned background vector: a proposal that matches no labelled box is, by definition, background. The image loss uses no labels at all. It asks each region to copy CLIP's view of its crop, and CLIP's view of a forklift crop sits near the word "forklift". That is how ViLD reaches classes that no box label ever touches.</p>
+
+<h3>The slow way: ask CLIP about every box</h3>
+<p>The direct approach needs no new training. Take the class-agnostic proposals of chapter 3, crop each one out of the image, and give the crop to CLIP's image encoder (CLIP is recapped in <a href="#ch-text-classifier">chapter 1</a>). Compare the result with the text vector of every class name, and the best match names the box. ViLD tries this first, with one refinement: it embeds each box twice, once tight and once enlarged <span data-claim="vild-crop-scale">1.5x</span> for context, and adds the two:</p>
+
+<div class="eq" id="eq-vild-crop" data-build data-viz="viz-vild3d"><div class="tex tex-display">
+\htmlData{step=1, link=image}{\htmlClass{t-blue}{\mathcal{V}(\text{crop}(I, \tilde{r}_{\{1\times, 1.5\times\}}))}} = \htmlData{step=3, link=sphere}{\frac{\mathbf{v}}{\|\mathbf{v}\|}}, ~\text{where}~ \htmlData{step=2, link=image}{\mathbf{v} = \mathcal{V}(\text{crop}(I, \tilde{r}_{1\times})) + \mathcal{V}(\text{crop}(I, \tilde{r}_{1.5\times}))}
+</div></div>
+<p class="eqno">Eq. 1 in ViLD (2104.13921v3).</p>
+<ul class="gloss">
+  <li><span class="tex">I</span>: the image; <span class="tex">\tilde{r}</span>: one proposal box, computed offline.</li>
+  <li><span class="tex">\text{crop}(I, \tilde{r}_{1\times})</span>: the box itself; <span class="tex">\tilde{r}_{1.5\times}</span>: the same box enlarged for context. Each crop is resized to <span data-claim="vild-clip-input">224x224</span>.</li>
+  <li><span class="tex">\mathcal{V}</span>: CLIP's frozen image encoder (<span data-claim="vild-teacher">ViT-B/32</span>). The two embeddings are summed into <span class="tex">\mathbf{v}</span>.</li>
+  <li><span class="tex">\mathbf{v}/\|\mathbf{v}\|</span>: the sum rescaled to unit length, a point on the sphere in the figure (the small faded blue points).</li>
+</ul>
+<p>It works. On LVIS, CLIP on cropped proposals, combined with the RPN objectness score, reaches <span data-claim="vild-t3-clip-crops-apr">18.9</span> APr (mask AP, ViLD Table 3), with no rare-class label at all; CLIP alone scores <span data-claim="vild-t2-clip-noobj-apr">13.0</span> (ViLD Table 2). But every proposal is a separate CLIP forward pass, and the paper reports the runtime of this R-CNN-style method as <span data-claim="vild-runtime-630x">630x</span> that of a Mask R-CNN-style detector. CLIP's scores also ignore box quality: it often gives its highest score to a box that covers only part of an object (ViLD App. B), so the paper combines them with the RPN's objectness. ViLD's aim is to keep CLIP's knowledge and drop the per-box cost.</p>
+
+<h3>ViLD-text: the class rows become CLIP text vectors</h3>
+<p>First, replace the classifier. ViLD-text drops the learned matrix <span class="tex">W</span> and uses CLIP text embeddings of the <span data-claim="vild-lvis-base">866</span> base class names as the class rows. Each name fills <span data-claim="vild-prompt-count">63</span> prompt templates, such as <span class="prompt">a photo of {category} in the scene</span>, and the template embeddings are averaged. A projection layer resizes the region embedding to the text width. One row stays learned: background. The word "background" does not describe the clutter in unmatched proposals, so ViLD gives background its own trainable vector <span class="tex">\mathbf{e}_{bg}</span>:</p>
+
+<div class="eq" id="eq-vild-text" data-build data-viz="viz-vild3d"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=regions}{\htmlClass{t-blue}{\mathbf{e}_r} = \mathcal{R}(\phi(I), r)} \\
+&\htmlData{step=2, link=background text}{\mathbf{z}(r) = \begin{bmatrix} \mathrm{sim}(\htmlClass{t-blue}{\mathbf{e}_r}, \htmlClass{t-brown}{\mathbf{e}_{bg}}), & \mathrm{sim}(\htmlClass{t-blue}{\mathbf{e}_r}, \htmlClass{t-yellow}{\mathbf{t}_1}), & \cdots, & \mathrm{sim}(\htmlClass{t-blue}{\mathbf{e}_r}, \htmlClass{t-yellow}{\mathbf{t}_{|C_B|}}) \end{bmatrix}} \\
+&\htmlData{step=3, link=text}{\htmlClass{t-red}{\mathcal{L}_{\text{ViLD-text}}} = \frac{1}{N}\sum_{r \in P}\mathcal{L}_\text{CE}\Big(\operatorname{softmax}\big(\mathbf{z}(r) / \tau \big), y_r \Big)}
+\end{aligned}
+</div></div>
+<p class="eqno">Eq. 2 in ViLD (2104.13921v3). The first two lines are definitions; the number belongs to the loss.</p>
+<ul class="gloss">
+  <li><span class="tex">\phi(I)</span>: the backbone features; <span class="tex">r</span>: one proposal from the online RPN, out of the set <span class="tex">P</span>, with <span class="tex">N = |P|</span> per image (the paper does not give <span class="tex">N</span>).</li>
+  <li><span class="tex">\mathcal{R}</span>: the region head with its projection layer; <span class="tex">\htmlClass{t-blue}{\mathbf{e}_r}</span>: the region embedding, a blue point in the figure.</li>
+  <li><span class="tex">\mathrm{sim}(\mathbf{a}, \mathbf{b}) = \mathbf{a}^\top \mathbf{b} / (\|\mathbf{a}\|\|\mathbf{b}\|)</span>: cosine similarity.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{\mathbf{t}_i}</span>: the stored CLIP text embedding of base class <span class="tex">i</span>, one of <span class="tex">|C_B|</span> = <span data-claim="vild-lvis-base">866</span>. <span class="tex">\htmlClass{t-brown}{\mathbf{e}_{bg}}</span>: the learned background row.</li>
+  <li><span class="tex">\tau</span> = <span data-claim="vild-tau">0.01</span>: the temperature. Cosines lie between -1 and 1; dividing by it stretches the logits enough for a confident softmax.</li>
+  <li><span class="tex">y_r</span>: the base class of the labelled box that <span class="tex">r</span> matches, or background if it matches none. <span class="tex">\mathcal{L}_\text{CE}</span>: cross-entropy.</li>
+</ul>
+<p>This is chapter 1's idea applied to a two-stage detector, and it already transfers: <span data-claim="vild-t3-vildtext-apr">10.1</span> APr. But the loss only ever sees base classes. Look at <span class="tex">y_r</span>: a proposal on an unlabelled forklift gets the label background, and the loss pushes it toward <span class="tex">\mathbf{e}_{bg}</span>, as the figure shows.</p>
+
+<h3>ViLD-image: copy CLIP's view of each proposal</h3>
+<p>The second loss needs no labels. Before training, ViLD stores the CLIP embeddings (Eq. 1) of <span class="tex">M</span> proposals per training image. During training, the detector's region embedding for each of those boxes must match the stored vector:</p>
+
+<div class="eq" id="eq-vild-image" data-build data-viz="viz-vild3d"><div class="tex tex-display">
+\htmlData{step=3, link=regions}{\htmlClass{t-red}{\mathcal{L}_{\text{ViLD-image}}} = \frac{1}{M} \sum_{\tilde{r} \in \widetilde{P}} \|} \htmlData{step=1, link=image}{\htmlClass{t-blue}{\mathcal{V}(\text{crop}(I, \tilde{r}_{\{1\times, 1.5\times\}}))}} - \htmlData{step=2, link=regions}{\htmlClass{t-blue}{\mathcal{R}(\phi(I), \tilde{r})}} \htmlData{step=3, link=regions}{\|_1}
+</div></div>
+<p class="eqno">Eq. 3 in ViLD (2104.13921v3).</p>
+<ul class="gloss">
+  <li><span class="tex">\widetilde{P}</span>: the <span class="tex">M</span> offline boxes of this image, from a first-stage RPN trained on base classes (the paper does not give <span class="tex">M</span>).</li>
+  <li>The first term is the stored teacher vector from Eq. 1 (small faded blue point); the second is the student's region embedding for the same box (blue point).</li>
+  <li><span class="tex">\|\cdot\|_1</span>: the sum of absolute differences, averaged over the <span class="tex">M</span> boxes. The paper's sweep found L1 better than L2 for rare classes (<span data-claim="vild-t7-l1-0.5-apr">16.3</span> vs <span data-claim="vild-t7-l2-0.5-apr">13.7</span> APr at the same weight, Table 7).</li>
+</ul>
+<p>Those boxes come from an RPN, and chapter 3 showed that an RPN boxes novel objects too. So the image loss reaches forklifts, which no label does. ViLD-image alone reaches <span data-claim="vild-t3-vildimage-apr">11.2</span> APr. Its weakness is the frequent classes, where it drops to <span data-claim="vild-t3-vildimage-apf">11.1</span> APf, because copying CLIP ignores the base labels.</p>
+
+<h3>Both losses, and an ensemble</h3>
+<p>The full loss adds the two:</p>
+
+<div class="eq" id="eq-vild-total" data-build data-viz="viz-vild3d"><div class="tex tex-display">
+\htmlClass{t-red}{\mathcal{L}_{\text{ViLD}}} = \htmlData{step=1, link=text}{\mathcal{L}_{\text{ViLD-text}}} + \htmlData{step=2, link=image}{w \cdot \mathcal{L}_{\text{ViLD-image}}}
+</div></div>
+<p class="eqno">Eq. 4 in ViLD (2104.13921v3).</p>
+<ul class="gloss">
+  <li><span class="tex">w</span>: the weight of distillation, <span data-claim="vild-w">0.5</span> for the ResNet-50 model.</li>
+</ul>
+<p>The two terms pull the same region embedding in two directions, as <em>Both losses</em> shows: toward its class name and toward CLIP's view of its crop. The paper's sweep (Table 7, a shorter schedule of <span data-claim="vild-t7-iters">84,375</span> iterations) shows the trade. Raising <span class="tex">w</span> from 0.05 to 1.0 lifts APr from <span data-claim="vild-t7-l1-0.05-apr">12.9</span> to <span data-claim="vild-t7-l1-1.0-apr">17.3</span> and drops APf from <span data-claim="vild-t7-l1-0.05-apf">31.7</span> to <span data-claim="vild-t7-l1-1.0-apf">25.1</span>.</p>
+<p>ViLD-ensemble removes the tug of war. It trains two heads of the same shape, one per loss, and mixes their class scores with a weighted geometric mean:</p>
+
+<div class="eq" id="eq-vild-ens" data-build data-viz="viz-vild3d"><div class="tex tex-display">
+p_{i, \text{ensemble}} = \begin{cases}
+\htmlData{step=1, link=text}{p_{i, \text{ViLD-text}}^\lambda \cdot p_{i, \text{cls}}^{(1-\lambda)} \quad \text{if } i \in C_B} \\
+\htmlData{step=2, link=novel}{p_{i, \text{ViLD-text}}^{(1-\lambda)} \cdot p_{i, \text{cls}}^\lambda \quad \text{if } i \in C_N}
+\end{cases}
+</div></div>
+<p class="eqno">Eq. 5 in ViLD (2104.13921v3).</p>
+<ul class="gloss">
+  <li><span class="tex">p_{i, \text{ViLD-text}}</span>: the score for class <span class="tex">i</span> from the head trained with Eq. 2.</li>
+  <li><span class="tex">p_{i, \text{cls}}</span>: in ViLD-ensemble, the score from the head trained with Eq. 3. (The paper first defines it as CLIP's own score on the crop, which brings back the slow per-box pass.)</li>
+  <li><span class="tex">\lambda</span> = <span data-claim="vild-lambda">2/3</span>: base classes <span class="tex">C_B</span> trust the text-trained head more, novel classes <span class="tex">C_N</span> trust the distilled head more.</li>
+</ul>
+
+<h3>What it buys</h3>
+<table class="data">
+  <caption class="note" style="caption-side:bottom;text-align:left">ViLD Table 3 (2104.13921v3): LVIS v1, mask AP, ResNet-50 backbone; APr, APc and APf are the rare, common and frequent classes. All rows except Supervised-RFS train on the base classes only. ResNet-50 rows average <span data-claim="vild-t3-runs">3</span> runs.</caption>
+  <thead><tr><th>Method</th><th>APr</th><th>APc</th><th>APf</th><th>AP</th></tr></thead>
+  <tbody>
+    <tr><td>CLIP on cropped regions (R-CNN style, CLIP ViT-B/32; slow)</td><td><span data-claim="vild-t3-clip-crops-apr">18.9</span></td><td><span data-claim="vild-t3-clip-crops-apc">18.8</span></td><td><span data-claim="vild-t3-clip-crops-apf">16.0</span></td><td><span data-claim="vild-t3-clip-crops-ap">17.7</span></td></tr>
+    <tr><td>Supervised-RFS (also trained on rare labels)</td><td><span data-claim="vild-t3-rfs-apr">12.3</span></td><td><span data-claim="vild-t3-rfs-apc">24.3</span></td><td><span data-claim="vild-t3-rfs-apf">32.4</span></td><td><span data-claim="vild-t3-rfs-ap">25.4</span></td></tr>
+    <tr><td>GloVe word vectors as classifier</td><td><span data-claim="vild-t3-glove-apr">3.0</span></td><td><span data-claim="vild-t3-glove-apc">20.1</span></td><td><span data-claim="vild-t3-glove-apf">30.4</span></td><td><span data-claim="vild-t3-glove-ap">21.2</span></td></tr>
+    <tr><td>ViLD-text (Eq. 2)</td><td><span data-claim="vild-t3-vildtext-apr">10.1</span></td><td><span data-claim="vild-t3-vildtext-apc">23.9</span></td><td><span data-claim="vild-t3-vildtext-apf">32.5</span></td><td><span data-claim="vild-t3-vildtext-ap">24.9</span></td></tr>
+    <tr><td>ViLD-image (Eq. 3)</td><td><span data-claim="vild-t3-vildimage-apr">11.2</span></td><td><span data-claim="vild-t3-vildimage-apc">11.3</span></td><td><span data-claim="vild-t3-vildimage-apf">11.1</span></td><td><span data-claim="vild-t3-vildimage-ap">11.2</span></td></tr>
+    <tr><td>ViLD, w = 0.5 (Eq. 4)</td><td><span data-claim="vild-t3-vild-r50-apr">16.1</span></td><td><span data-claim="vild-t3-vild-r50-apc">20.0</span></td><td><span data-claim="vild-t3-vild-r50-apf">28.3</span></td><td><span data-claim="vild-t3-vild-r50-ap">22.5</span></td></tr>
+    <tr><td>ViLD-ensemble, w = 0.5 (Eq. 5)</td><td><span data-claim="vild-t3-ens-r50-apr">16.6</span></td><td><span data-claim="vild-t3-ens-r50-apc">24.6</span></td><td><span data-claim="vild-t3-ens-r50-apf">30.3</span></td><td><span data-claim="vild-t3-ens-r50-ap">25.5</span></td></tr>
+  </tbody>
+</table>
+<p>Read the table in three steps. The text rows matter: CLIP text gives <span data-claim="vild-t3-vildtext-apr">10.1</span> APr where GloVe word vectors, learned from text alone, give <span data-claim="vild-t3-glove-apr">3.0</span>. Distillation is what reaches the rare classes: ViLD is <span data-claim="vild-gain-vs-text">6.0</span> APr above ViLD-text and <span data-claim="vild-gain-vs-rfs">3.8</span> above a supervised model that saw the rare labels and oversampled their images (repeat factor sampling, RFS). And distillation costs the frequent classes: APf falls from <span data-claim="vild-t3-vildtext-apf">32.5</span> to <span data-claim="vild-t3-vild-r50-apf">28.3</span>.</p>
+<p>CLIP on crops stays best on rare classes, at its <span data-claim="vild-runtime-630x">630x</span> runtime. A stronger teacher closes that gap: with ALIGN as the teacher and an EfficientNet-b7 backbone, ViLD-ensemble reaches <span data-claim="vild-t3-ens-align-apr">26.3</span> APr (same table, mask AP).</p>
+
+<h3>Inside ViLD: forward, then backward</h3>
+<p>The figure below walks through one training step. Two details matter more than any layer size. The detector trains from scratch, with no ImageNet weights. And CLIP never runs during training: its outputs were computed once and stored.</p>
+
+<figure class="viz archflow" id="viz-vildflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-vildflow-offline" aria-pressed="false">1 Offline</button>
+    <button type="button" id="btn-vildflow-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-vildflow-proposals" aria-pressed="false">3 Proposals</button>
+    <button type="button" id="btn-vildflow-regions" aria-pressed="false">4 Regions</button>
+    <button type="button" id="btn-vildflow-textloss" aria-pressed="false">5 Text loss</button>
+    <button type="button" id="btn-vildflow-imageloss" aria-pressed="false">6 Image loss</button>
+    <button type="button" id="btn-vildflow-total" aria-pressed="false">7 Total</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-vildflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-vildflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <canvas id="vildflow-canvas" role="img" aria-label="ViLD's training step as a diagram. The image goes through a ResNet-50 with FPN; the RPN proposes boxes and has its own losses; RoIAlign crops features for the online proposals and for stored offline boxes; the region head and projection make region embeddings. They meet the stored CLIP text embeddings and the learned background row in the ViLD-text loss, and the stored CLIP crop embeddings in the ViLD-image L1 loss; both add into the total loss. In the backward stages red arrows reach the backbone, RPN, head and background row, and stop at the stored CLIP data."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-vildflow-prev">Previous</button>
+    <button type="button" id="btn-vildflow-next">Next</button>
+    <button type="button" id="btn-vildflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vildflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Blue boxes are the detector, yellow is stored text, red boxes are losses. Some boxes hold stored data with no weights; the backward stages mark them. Before you press <b>8 Gradients</b>, guess which boxes the gradient reaches, and whether any of them belongs to CLIP. Press <b>1 Offline</b>, then <b>Next</b>.</p></div>
+    <div data-stage="offline" hidden><h4>1. Before training: CLIP runs once</h4><p>Each base class name fills <span data-claim="vild-prompt-count">63</span> prompt templates; CLIP's text encoder embeds them and the results are averaged into one vector per class, <span data-claim="vild-lvis-base">866</span> in all. Separately, a first-stage RPN trained on base classes proposes <span class="tex">M</span> boxes per training image. Each box is cropped at 1x and <span data-claim="vild-crop-scale">1.5x</span>, resized to <span data-claim="vild-clip-input">224x224</span>, embedded by CLIP's image encoder (<span data-claim="vild-teacher">ViT-B/32</span>) and normalized (Eq. 1). Both sets are written to disk. The paper states neither <span class="tex">M</span> nor the embedding width <span class="tex">d</span>.</p></div>
+    <div data-stage="backbone" hidden><h4>2. Image and backbone</h4><p>Training images are <span data-claim="vild-input">1024x1024</span>, with large-scale jittering in the scale range <span data-claim="vild-lsj">[0.1, 2.0]</span>. The backbone is a ResNet-50 with an FPN, trained from scratch for <span data-claim="vild-iters">180,000</span> iterations; the paper uses no ImageNet initialization for ViLD.</p></div>
+    <div data-stage="proposals" hidden><h4>3. Online proposals</h4><p>The RPN proposes <span class="tex">N</span> boxes per image during training (<span class="tex">N</span> is not stated). It learns from its own objectness and box-delta losses on base-class boxes. The second stage's box and mask outputs are class-agnostic and have their own losses too; the diagram leaves them out.</p></div>
+    <div data-stage="regions" hidden><h4>4. Region embeddings</h4><p>RoIAlign crops features for two sets of boxes: the <span class="tex">N</span> online proposals and the <span class="tex">M</span> stored offline boxes. One lightweight head <span class="tex">\mathcal{R}</span> and a projection layer turn each crop into a region embedding of the text width <span class="tex">d</span>; ViLD takes "outputs before the classification layer" as region embeddings. The paper gives head widths only for its stronger teachers (both with an EfficientNet-b7 backbone and ViLD-ensemble): for CLIP ViT-L/14, with <span data-claim="vild-vitl14-dim">768</span>-dimensional embeddings, fully connected layers of <span data-claim="vild-vitl14-fc">1,024</span> and an FPN of <span data-claim="vild-vitl14-fpn">512</span>; for ALIGN, with <span data-claim="vild-align-dim">1,376</span> dimensions, <span data-claim="vild-align-fc">2,048</span> and <span data-claim="vild-align-fpn">1,024</span> (App. D).</p></div>
+    <div data-stage="textloss" hidden><h4>5. The text loss</h4><p>Each of the <span class="tex">N</span> online region embeddings is compared by cosine with <span data-claim="vild-page-rows-train">867</span> rows, the learned <span class="tex">\mathbf{e}_{bg}</span> plus the stored text vectors, divided by <span class="tex">\tau</span> = <span data-claim="vild-tau">0.01</span>, and scored with softmax cross-entropy against its matched base label or background (<a href="#eq-vild-text">Eq. 2</a>).</p></div>
+    <div data-stage="imageloss" hidden><h4>6. The image loss</h4><p>Each of the <span class="tex">M</span> offline region embeddings is compared with its stored CLIP crop embedding by L1 distance, averaged over the boxes (<a href="#eq-vild-image">Eq. 3</a>). No label enters, so boxes on novel objects count too.</p></div>
+    <div data-stage="total" hidden><h4>7. One number</h4><p>The total is the text loss plus <span class="tex">w</span> = <span data-claim="vild-w">0.5</span> times the image loss (<a href="#eq-vild-total">Eq. 4</a>). At test time the image branch is gone: the classifier gets the text vectors of all <span data-claim="vild-lvis-categories">1,203</span> LVIS classes plus <span class="tex">\mathbf{e}_{bg}</span>, and the detector keeps at most <span data-claim="vild-maxdet">300</span> detections per image.</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>From the text loss, the gradient reaches the background row, then the head and projection, and through RoIAlign into the backbone features. From the image loss, it reaches the same head and backbone. The stored text and crop embeddings are data, so the gradient stops there, and no box is brown: CLIP's encoders are not in the training graph at all. One arrow overstates: the proposal coordinates that the RPN hands to RoIAlign carry no gradient in standard Mask R-CNN training (<span class="reading">our reading</span>), so the RPN learns from its own losses only.</p></div>
+    <div data-stage="update" hidden><h4>9. The update</h4><p>Every red box takes a step: backbone, RPN, head and projection, and <span class="tex">\mathbf{e}_{bg}</span>. The batch is <span data-claim="vild-batch">256</span> images (synchronized batch norm), the initial learning rate <span data-claim="vild-lr">0.32</span>, divided by 10 three times near the end of training, with weight decay <span data-claim="vild-wd">4e-5</span>. The paper names neither the optimizer nor the hardware.</p></div>
+  </div>
+  <figcaption>Computed from the paper: the graph and losses follow ViLD Sec. 3 and Fig. 3, the config values Sec. 4 and App. D. The paper does not state <span class="tex">N</span>, <span class="tex">M</span> or the width <span class="tex">d</span>, so the shapes keep them as symbols. The 867 classifier rows are 866 class vectors plus <span class="tex">\mathbf{e}_{bg}</span> (<span class="reading">our reading</span>).</figcaption>
+</figure>
+
+<h3>Three branches</h3>
+<p><strong>OVR-CNN</strong> (Zareian et al., first posted <span data-claim="ovrcnn-published">2020-11-20</span>) came before CLIP and set up the task. It pretrains a ResNet and a vision-to-language projection on image captions, grounding caption words to image regions, with frozen BERT word embeddings. The detector then uses that projection and the word embeddings as a fixed classifier, with a fixed all-zero background vector where ViLD learns <span class="tex">\mathbf{e}_{bg}</span>. On COCO's <span data-claim="vild-coco-base">48</span> base and <span data-claim="vild-coco-novel">17</span> novel classes it reaches <span data-claim="ovrcnn-t1-gen-target">22.8</span> box AP50 on the novel classes in the generalized setting (base and novel classes scored together), the number that ViLD's Table 4 compares against.</p>
+<p><strong>RegionCLIP</strong> (Zhong et al., <span data-claim="regionclip-published">2021-12-16</span>) pretrains on region-text pairs instead of distilling into a detector. It parses <span data-claim="regionclip-concepts-cc3m">6,790</span> concepts from CC3M captions, proposes regions with an RPN, lets CLIP pick the best concept for each region as a pseudo-label, and trains a region-level image encoder, initialized from CLIP, on those pairs. That encoder becomes the detector's backbone, again with an all-zero background. Its LVIS APr is <span data-claim="regionclip-lvis-apr-r50">17.1</span> with ResNet-50 and <span data-claim="regionclip-lvis-apr-r50x4">22.0</span> with ResNet-50x4. These are box AP (<span class="reading">our reading</span>: the ViLD rows in its table equal ViLD's box AP), so the fair ViLD number is <span data-claim="vild-t8-vild-r50-box-apr">16.3</span> box APr (ViLD Table 8), not the mask <span data-claim="vild-t3-vild-r50-apr">16.1</span>; the detectors and schedules also differ.</p>
+<p><strong>Detic</strong> (Zhou et al., <span data-claim="detic-published">2022-01-07</span>) keeps the ViLD-text classifier and adds image-level labels. For an ImageNet image labelled "x", it applies the label to the largest proposal and trains only the classifier on it. No prediction decides which box gets the label: the largest proposal covers the target object in <span data-claim="detic-maxsize-cover">92.8%</span> of an annotated sample, against <span data-claim="detic-pred-cover">69.0%</span> for a prediction-based choice. In ViLD's own setting (Mask R-CNN ResNet-50, trained from scratch on LVIS base classes) and with IN-L, the <span data-claim="detic-inl-classes">997</span> ImageNet-21K classes that overlap LVIS, Detic reaches <span data-claim="detic-t2-apr">17.8</span> mask APr against ViLD's <span data-claim="vild-t3-vild-r50-apr">16.1</span>, a like-for-like comparison (Detic Table 2).</p>
+</section>

@@ -1,0 +1,126 @@
+<section id="ch-hybrid" class="chapter">
+<h2>Hybrids: a little attention goes a long way</h2>
+<p>The last chapter found the leak: a fixed state cannot hold every exact fact, and a cache can. The fix the large models settled on is to keep the state and add back a cache in just a few layers.</p>
+
+<figure class="viz" id="viz-hybrid" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="hybrid-canvas" role="img" aria-label="Top: a row of 32 layers, yellow for Mamba and brown for attention; under each attention layer hangs a brown bar, its KV cache. Bottom: KV cache size on a log scale against the share of layers that are attention. A brown line rises from one attention layer to all 32; markers show published models, with the hybrids clustered near one eighth and the Transformers at the right edge."></canvas>
+  <div class="controls">
+    <label for="hybrid-n">Attention layers of 32 <input type="range" id="hybrid-n" min="0" max="32" step="1" value="4"> <output id="hybrid-n-val">4</output></label>
+    <button type="button" id="btn-hybrid-mamba">Pure Mamba</button>
+    <button type="button" id="btn-hybrid-jamba">1:7, Jamba</button>
+    <button type="button" id="btn-hybrid-13">1:3</button>
+    <button type="button" id="btn-hybrid-attn">All attention</button>
+  </div>
+  <div class="controls">
+    <span>Context</span>
+    <button type="button" id="btn-hybrid-8k" aria-pressed="false">8K</button>
+    <button type="button" id="btn-hybrid-128k" aria-pressed="false">128K</button>
+    <button type="button" id="btn-hybrid-256k" aria-pressed="true">256K</button>
+    <button type="button" id="btn-hybrid-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="hybrid-readout" aria-live="polite"></p>
+  <figcaption>The slider counts attention layers among the 32 sequence-mixing layers of a Jamba-sized stack; the MLP and MoE layers between them are not counted. The line is computed at 16 bits with 4 KiB per token per attention layer: Jamba publishes no width or head counts, so this is back-solved from its Table 1 (<span data-claim="jamba-t1-jamba-kv">4GB</span> at 256K tokens over <span data-claim="jamba-attn-layers">4</span> attention layers, GB read as GiB; our reading). The same value follows from the Nemotron-H and NVIDIA hybrid configs (8 KV heads of 128 channels). Filled markers are the papers' own KV-cache tables (Jamba Table 1, Jamba-1.5 Table 1), reported at 256K tokens and scaled in proportion for other lengths. Hollow markers are computed from each paper's layer counts and heads (our reading). Llama-2 7B sits four times above the line because every one of its heads keeps its own keys and values (<span data-claim="page-hybrid-llama2-per-token">512 KiB</span> per token, our reading).</figcaption>
+</figure>
+
+<p>Attention layers and Mamba layers do different jobs, so a model does not need many of the expensive kind. A Mamba layer is cheap and carries a summary of everything so far. An attention layer can look back at any earlier token exactly, which is what the phone book and MQAR test. Each attention layer keeps its own cache, so the cache shrinks in proportion to how many attention layers are removed, while each removed layer is replaced by a fixed-size state.</p>
+
+<div class="eq" id="eq-hybrid" data-build data-viz="viz-hybrid"><div class="tex tex-display">
+\htmlData{step=1, link=attn}{\htmlClass{t-brown}{M_{\rm KV}} = 2\, n_{\rm attn}}
+\htmlData{step=2, link=cache}{\cdot\, d_{\rm kv} \cdot \htmlClass{t-blue}{L} \cdot b}
+\qquad
+\htmlData{step=3, link=state}{\htmlClass{t-yellow}{M_{\rm state}} = n_{\rm mamba}\, \htmlClass{t-yellow}{s},\ \text{the same at any } \htmlClass{t-blue}{L}}
+</div></div>
+<p class="eqno">Our formula, not numbered in any of the papers; Griffin writes the same cache as <span class="tex">2NTh_k d_{\rm head}</span> (App. F.4).</p>
+<ul class="gloss">
+  <li><span class="tex">n_{\rm attn}</span>: the number of attention layers; the 2 counts keys and values.</li>
+  <li><span class="tex">d_{\rm kv}</span>: channels per key (key-value heads times head size); <span class="tex">\htmlClass{t-blue}{L}</span>: tokens in the context; <span class="tex">b</span>: bytes per number, 2 at 16 bits. For Jamba, <span class="tex">d_{\rm kv}</span> = <span data-claim="jamba-kv-channels">1024</span> is back-solved (our reading).</li>
+  <li><span class="tex">n_{\rm mamba}\, \htmlClass{t-yellow}{s}</span>: each Mamba layer's state, fixed in size. Jamba does not publish <span class="tex">s</span>.</li>
+</ul>
+
+<p>Jamba keeps 4 attention layers of 32. Before you press "1:7, Jamba", guess: what fraction of the all-attention cache is left? One eighth: at 256K tokens, <span data-claim="jamba-t1-jamba-kv">4GB</span> against the <span data-claim="jamba-t1-mixtral-kv">32GB</span> Table 1 gives Mixtral, an all-attention model of the same cache per layer. That is the cost line for this chapter: the hybrid pays attention's growing bill on one layer in eight, and the paper's own words aim at "an 8x smaller KV cache" (<span data-claim="jamba-kv-8x">8x</span>).</p>
+
+<table class="data">
+  <caption class="note" style="caption-side:bottom;text-align:left">Jamba Table 1: KV cache at 256K tokens, 16-bit. The paper labels the first row LLAMA-2; it is the 7B model.</caption>
+  <thead><tr><th>Model</th><th>Parameters</th><th>Used per token</th><th>KV cache</th></tr></thead>
+  <tbody>
+    <tr><td>Llama-2 7B</td><td><span data-claim="jamba-t1-llama2-params">6.7B</span></td><td><span data-claim="jamba-t1-llama2-params">6.7B</span></td><td><span data-claim="jamba-t1-llama2-kv">128GB</span></td></tr>
+    <tr><td>Mistral</td><td><span data-claim="jamba-t1-mistral-params">7.2B</span></td><td><span data-claim="jamba-t1-mistral-params">7.2B</span></td><td><span data-claim="jamba-t1-mistral-kv">32GB</span></td></tr>
+    <tr><td>Mixtral</td><td><span data-claim="jamba-t1-mixtral-total">46.7B</span></td><td><span data-claim="jamba-t1-mixtral-active">12.9B</span></td><td><span data-claim="jamba-t1-mixtral-kv">32GB</span></td></tr>
+    <tr><td>Jamba</td><td><span data-claim="jamba-params-total">52B</span></td><td><span data-claim="jamba-params-active">12B</span></td><td><span data-claim="jamba-t1-jamba-kv">4GB</span></td></tr>
+  </tbody>
+</table>
+
+<h3>Does recall come back?</h3>
+<p>The cleanest test is NVIDIA's, because it holds everything else fixed. Its hybrid has the same width, data (<span data-claim="nvidia-tokens-max">3.5T</span> tokens) and recipe as the 8B Transformer and pure Mamba-2 of the last chapter. Of its <span data-claim="nvidia-ssm-layers">56</span> layers, <span data-claim="nvidia-hybrid-mamba">24</span> are Mamba-2 (<span data-claim="nvidia-hybrid-mamba-pct">42.9%</span>), <span data-claim="nvidia-hybrid-attn">4</span> attention (<span data-claim="nvidia-hybrid-attn-pct">7.1%</span>) and <span data-claim="nvidia-hybrid-mlp">28</span> MLP (<span data-claim="nvidia-hybrid-mlp-pct">50%</span>); the abstract rounds these to <span data-claim="nvidia-hybrid-mamba-pct-abs">43%</span>, <span data-claim="nvidia-hybrid-attn-pct-abs">7%</span> and 50%. Counted among sequence mixers only, attention is 4 of <span data-claim="page-hybrid-nv-mixers">28</span>, or <span data-claim="page-hybrid-nv-mixer-share">14.3%</span>. It beats the Transformer on all <span data-claim="nvidia-num-short-tasks">12</span> standard tasks, by <span data-claim="nvidia-hybrid-gain">2.65</span> points on average (<span data-claim="nvidia-hybrid-avg">55.82</span> against <span data-claim="nvidia-tf-avg">53.17</span>; that average counts MMLU twice, at 0 and 5 shots, our reading). On the phone book that pure Mamba-2 failed past about 1000 tokens, the 4K hybrid is perfect up to <span data-claim="nvidia-phonebook-hybrid-4k">5.5K</span> tokens, and the version extended to 128K stays perfect with phone books longer than <span data-claim="nvidia-phonebook-128k">150K</span> tokens. Generating with long contexts, the hybrid is "predicted to be up to 8x faster" (<span data-claim="nvidia-speedup">8x</span>, at batch size <span data-claim="nvidia-speedup-batch">32</span>): a prediction from a cost model, not a measurement, and not the same claim as the separate 8x speedup of Mamba-2's scan over Mamba's.</p>
+
+<p>How much attention is enough? In NVIDIA's <span data-claim="nvidia-ablation-size">130M</span>-parameter tests with 24 layers, validation loss was lowest "when roughly <span data-claim="nvidia-ablation-attn-pct">8%</span> of the layers are self-attention layers", MLP layers included in the count, and the result held at <span data-claim="nvidia-ablation-confirm">840M</span>. Mamba-2's own test has no MLP layers, so its share is directly a share of sequence mixers:</p>
+<table class="data">
+  <caption class="note" style="caption-side:bottom;text-align:left">Mamba-2 Table 2: 350M-parameter models with <span data-claim="mamba2-hyb-350m-layers">48</span> layers, validation perplexity (lower is better). The best mix, 6 of 48, is <span data-claim="page-hybrid-jamba-share">12.5%</span>, the paper's "around <span data-claim="mamba2-hyb-attn-share">10%</span>".</caption>
+  <thead><tr><th>Attention layers of 48</th><th>0</th><th>1</th><th>6</th><th>24</th><th>Transformer++</th></tr></thead>
+  <tbody><tr><td>Perplexity</td><td><span data-claim="mamba2-hyb-ppl-0">8.60</span></td><td><span data-claim="mamba2-hyb-ppl-1">8.38</span></td><td><span data-claim="mamba2-hyb-ppl-6">8.26</span></td><td><span data-claim="mamba2-hyb-ppl-24">8.50</span></td><td><span data-claim="mamba2-hyb-ppl-tpp">8.68</span></td></tr></tbody>
+</table>
+<p>At 2.7B parameters, putting <span data-claim="mamba2-hyb27-attn-layers">6</span> attention layers among <span data-claim="mamba2-cfg-2.7b-layers">64</span> lowered Mamba-2's Pile perplexity from <span data-claim="mamba2-z-27b-pile">6.09</span> to <span data-claim="mamba2-hyb27-pile">5.95</span>, against <span data-claim="mamba2-hyb27-tpp-pile">6.13</span> for a Transformer++ (Table 3). Both ends lose: no attention misses the lookups, and too much attention gives back quality as well as memory.</p>
+
+<p>Jamba tested the ratio at <span data-claim="jamba-ablation-1b3">1.3B</span> parameters and <span data-claim="jamba-ablation-1b3-tokens">250B</span> tokens. Both mixes beat pure attention and pure Mamba (score <span data-claim="jamba-t4-1to3-ollm">37.2</span> for 1:3 and <span data-claim="jamba-t4-1to7-ollm">37.2</span> for 1:7, against <span data-claim="jamba-t4-attn-ollm">36.4</span> and <span data-claim="jamba-t4-mamba-ollm">36.1</span>). In the paper's words, "the ratio of attention-to-Mamba layers may be 1:3 or 1:7 with virtually no performance difference", and "given that a 1:7 ratio is more compute-efficient and shows similar performance, we opt for it". The same runs show why one attention layer in eight matters: asked to answer a review with "Positive" or "Negative" from examples in the prompt, pure Mamba often invented its own labels and scored <span data-claim="jamba-t6-mamba-imdb">48.8</span>, the hybrid <span data-claim="jamba-t6-hybrid-imdb">90.9</span> (Table 6). In the hybrid's attention layers the authors found <span data-claim="jamba-icl-heads">12</span> heads that point back at the example labels, the kind of head that copies from context; they call this evidence anecdotal.</p>
+
+<div class="claim-card">
+  <h4>The production hybrids disagree on the details</h4>
+  <dl>
+    <dt>Which Mamba</dt><dd>Jamba-1.5 kept Mamba-1. In its tests at <span data-claim="jamba15-mamba12-sizes">350M</span> and <span data-claim="jamba15-mamba12-sizes-b">1.3B</span> parameters (<span data-claim="jamba15-mamba12-tokens">100B</span> tokens), Mamba-2 beat Mamba-1 on its own, but Mamba-1 with attention beat Mamba-2 with attention. Nemotron-H uses Mamba-2.</dd>
+    <dt>How much attention</dt><dd>Nemotron-H says "roughly <span data-claim="nemotronh-attn-share">8%</span>" attention, but it counts every FFN layer as a layer: <span data-claim="nemotronh-8b-attn">4</span> of <span data-claim="nemotronh-8b-layers">52</span> (8B) and <span data-claim="nemotronh-56b-attn">10</span> of <span data-claim="nemotronh-56b-layers">118</span> (56B). Among sequence mixers it is 4 of 28 (<span data-claim="page-hybrid-nv-mixer-share">14.3%</span>) and 10 of <span data-claim="page-hybrid-nh56-mixers">64</span> (<span data-claim="page-hybrid-nh56-mixer-share">15.6%</span>), a little more than Jamba's <span data-claim="page-hybrid-jamba-share">12.5%</span>. The figure's slider uses that denominator.</dd>
+    <dt>Scale</dt><dd>Jamba-1.5-Large has <span data-claim="jamba15-large-blocks">9</span> blocks of the same 1:7 pattern, width <span data-claim="jamba15-large-dmodel">8192</span> and <span data-claim="jamba15-large-kvheads">8</span> key-value heads; that gives <span data-claim="jamba15-large-kv-per-token">36 KiB</span> per token (our reading), exactly its Table 1 value of <span data-claim="jamba15-kv-large">9GB</span> at 256K tokens. Its <span data-claim="jamba15-large-total">398B</span> parameters, <span data-claim="jamba15-large-active">94B</span> used per token, serve on <span data-claim="jamba15-serve-8gpu">8</span> GPUs of 80GB at 256K tokens. (That table also lists LLaMA-3.1 405B at twice what its published configuration gives, so we leave that row out.)</dd>
+  </dl>
+</div>
+
+<div class="aside">
+  <h4>Griffin is a different kind of hybrid</h4>
+  <p>Griffin mixes two recurrent layers with one attention layer, but its attention is local: each token sees only the last <span data-claim="griffin-window">1024</span> tokens. Its cache therefore stops growing at the window, a third shape between the flat state and the growing cache. The price shows on the phone book: Griffin solves it perfectly only up to a context that matches its window of <span data-claim="griffin-phonebook-window">1024</span>, then degrades. Jamba, Nemotron-H and the NVIDIA hybrid use global attention, which is why they keep recalling far beyond any window.</p>
+</div>
+
+<h3>Inside a Jamba block: forward, then backward</h3>
+<p>Press through the stages for one Jamba block of 8 layers. Jamba publishes the pattern but not the widths, so its shapes stay symbolic; Jamba-1.5-Large gives a width and head counts, so its shapes are numbers. Before you reach stage 8, guess: of the 16 experts in an MoE layer, how many get a gradient from one token?</p>
+<figure class="viz archflow" id="viz-jambaflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-jambaflow-tokens" aria-pressed="false">1 Tokens</button>
+    <button type="button" id="btn-jambaflow-mamba" aria-pressed="false">2 Mamba</button>
+    <button type="button" id="btn-jambaflow-attention" aria-pressed="false">3 Attention</button>
+    <button type="button" id="btn-jambaflow-mlp" aria-pressed="false">4 MLP</button>
+    <button type="button" id="btn-jambaflow-moe" aria-pressed="false">5 MoE</button>
+    <button type="button" id="btn-jambaflow-head" aria-pressed="false">6 Head</button>
+    <button type="button" id="btn-jambaflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-jambaflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-jambaflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model">
+    <span>model</span>
+    <button type="button" id="btn-jambaflow-v01" aria-pressed="true">Jamba</button>
+    <button type="button" id="btn-jambaflow-large" aria-pressed="false">Jamba-1.5-Large</button>
+  </div>
+  <canvas id="jambaflow-canvas" role="img" aria-label="One Jamba block as a diagram: tokens become embeddings, then eight layers in a zigzag. The top row holds the sequence mixers: Mamba in layers 1 to 4 and 6 to 8, attention in layer 5. The bottom row holds the channel mixers: a dense MLP on odd layers and a mixture of experts on even layers. A head and a next-token loss close the chain. In the backward stages red arrows run from the loss back through every layer."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-jambaflow-prev">Previous</button>
+    <button type="button" id="btn-jambaflow-next">Next</button>
+    <button type="button" id="btn-jambaflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="jambaflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Each of the 8 layers is a <b class="c-yellow">sequence mixer</b> (top row) followed by a channel mixer (bottom row), each with a normalization before it and a residual connection around it. Jamba stacks <span data-claim="jamba-blocks">4</span> such blocks. Press <b>1 Tokens</b>, then <b>Next</b>.</p></div>
+    <div data-stage="tokens" hidden><h4>1. Tokens in</h4><p>A vocabulary of <span data-claim="jamba-vocab">64K</span> tokens, each digit its own token. Jamba has no position encoding at all: the paper finds that Mamba layers placed before attention give it the order of the tokens. The supported context is <span data-claim="jamba-context">256K</span> tokens.</p></div>
+    <div data-stage="mamba" hidden><h4>2. Seven Mamba layers</h4><p>Layers 1 to 4 and 6 to 8 mix the sequence with Mamba (the paper cites the original Mamba; Jamba-1.5 says Mamba-1). Each carries a fixed state forward, as in chapter 7. At the 7B-based scale, activations inside the Mamba layers grew large enough to cause loss spikes, so Jamba adds RMSNorm inside them. Neither paper gives the state size or expansion.</p></div>
+    <div data-stage="attention" hidden><h4>3. One attention layer</h4><p>Layer 5 of each block is attention with grouped-query heads: the ratio <span data-claim="jamba-ratio">1:7</span>. It is the only layer whose memory grows with the context, and the only one that can look back at an exact earlier token.</p></div>
+    <div data-stage="mlp" hidden><h4>4. Dense MLPs on odd layers</h4><p>Every mixer is followed by a channel mixer that works on each token alone. On layers 1, 3, 5 and 7 it is one ordinary MLP with SwiGLU, as in a Transformer.</p></div>
+    <div data-stage="moe" hidden><h4>5. Mixture of experts on even layers</h4><p>Every <span data-claim="jamba-moe-every">2</span> layers the MLP is replaced by <span data-claim="jamba-experts">16</span> expert MLPs. A small router scores the experts for each token and only the top <span data-claim="jamba-topk">2</span> run; their outputs are mixed by the router's weights. So the model stores <span data-claim="jamba-params-total">52B</span> parameters but uses <span data-claim="jamba-params-active">12B</span> per token.</p></div>
+    <div data-stage="head" hidden><h4>6. The head</h4><p>After the last block, a final normalization and an output matrix turn each position's vector into one score per vocabulary token.</p></div>
+    <div data-stage="loss" hidden><h4>7. What the loss grades</h4><p>At every position, the probability given to the true next token. The paper does not write the loss out; it is the standard next-token cross-entropy for a language model (our reading), plus the load-balancing term for the experts that the paper cites, which keeps the router from sending every token to the same few experts.</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>Everywhere: no part of Jamba is frozen. The one subtlety is the experts. A token's gradient reaches the router and only the 2 experts it was sent to; the other 14 in that layer get nothing from it. Each expert learns from the tokens routed to it.</p></div>
+    <div data-stage="update" hidden><h4>9. The update</h4><p>The Jamba paper does not state the optimizer, learning-rate schedule or batch size. It says the model was trained on <span data-claim="jamba-train-gpu">H100</span> GPUs with an in-house framework using data, tensor, sequence and expert parallelism. Jamba-1.5 adds a small extra loss on the size of activations, with weight <span class="tex">10^{-5}</span>, to keep them in range.</p></div>
+  </div>
+  <figcaption>Computed where the papers give numbers: the layer pattern, expert counts and parameter totals (Jamba Sec. 3.1; Jamba-1.5 Sec. 2), the 36 KiB per token of Jamba-1.5-Large from its width and heads. Jamba's width is unpublished, so its shapes use the symbol d; its 1024 key-value channels per attention layer are back-solved from Table 1 (our reading). Total layer and MoE counts are our reading of Fig. 1.</figcaption>
+</figure>
+
+<p>So the answer the field converged on is not "SSM or attention" but "mostly SSM, some attention", and it still argues about which SSM and how much attention. The last chapter maps where the field went next.</p>
+</section>

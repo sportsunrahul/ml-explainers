@@ -1,0 +1,9 @@
+[
+ {"id": "interlude-llama-vocab", "claim": "Llama 3 vocabulary size", "value": "128,000", "paper": "Llama 3", "arxiv": "2407.21783v3", "loc": "Table 3, row Vocabulary Size"},
+ {"id": "interlude-llama-ffn", "claim": "Llama 3 8B FFN dimension", "value": "14,336", "paper": "Llama 3", "arxiv": "2407.21783v3", "loc": "Table 3, row FFN Dimension, column 8B"},
+ {"id": "interlude-llama-act", "claim": "Llama 3 activation function", "value": "SwiGLU", "paper": "Llama 3", "arxiv": "2407.21783v3", "loc": "Table 3, row Activation Function"},
+ {"id": "interlude-kv-values-layer", "claim": "Numbers appended to the Llama 3 8B KV cache per layer per token", "value": "2,048", "paper": "Llama 3", "arxiv": "2407.21783v3", "loc": "computed: 2 (key, value) x 8 KV heads x 128 head dim, from Table 3", "our_reading": true},
+ {"id": "interlude-kv-per-token", "claim": "Llama 3 8B KV cache per token, 16-bit, all layers", "value": "128 KiB", "paper": "Llama 3", "arxiv": "2407.21783v3", "loc": "computed: 2 x 32 x 8 x 128 x 2 B = 131,072 B (parts/core-bill.js kvPerToken)", "our_reading": true},
+ {"id": "interlude-mamba-layer-weights", "claim": "Projection weights per Mamba 2.8B block", "value": "39.3 million", "paper": "Mamba", "arxiv": "2312.00752v2", "loc": "computed: 3 E D^2 (Sec 3.4) with E = 2, D = 2560 (README, code-only) = 39,321,600", "our_reading": true},
+ {"id": "interlude-llama-layer-weights", "claim": "Weights per Llama 3 8B layer (attention + SwiGLU MLP, no norms)", "value": "218 million", "paper": "Llama 3", "arxiv": "2407.21783v3", "loc": "computed from Table 3: 4096 x (4096 + 1024 + 1024 + 4096) + 3 x 4096 x 14336 = 218,103,808", "our_reading": true}
+]

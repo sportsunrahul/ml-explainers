@@ -1,0 +1,70 @@
+
+<section id="ch-timeline">
+<h2>Family tree</h2>
+<p>Each paper on this page answered a limitation of an earlier one. The tree places each paper at its first arXiv submission date, in one of six research lanes; each arc joins a paper to the later paper that fixed one of its limitations. Select a paper to see what it introduced, what it fixed, and what fixed it in turn.</p>
+<style>
+  #ch-timeline ul.timeline { list-style:none; padding:0; margin:1rem 0; font-size:1rem; }
+  #ch-timeline ul.timeline li { padding:.45rem 0 .45rem 7.2rem; position:relative; border-bottom:1px solid var(--rule); }
+  #ch-timeline ul.timeline .when { position:absolute; left:0; top:.5rem; font:600 .85rem system-ui, sans-serif; color:var(--muted); }
+  #ch-timeline ul.timeline .inh { display:block; font:.88rem/1.45 system-ui, sans-serif; color:var(--muted); }
+  @media (max-width: 520px) { #ch-timeline ul.timeline li { padding-left:0; } #ch-timeline ul.timeline .when { position:static; display:block; } }
+</style>
+<figure class="viz" id="viz-tree" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="tree-canvas" tabindex="0" role="img" aria-label="Family tree of sixteen vision-language papers by date and research lane, with arcs from each paper to the later paper that fixed one of its limitations. Arrow keys select a paper."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-tree-all">Show every fix</button>
+    <button type="button" id="btn-tree-spine">Show the main line</button>
+    <button type="button" id="btn-tree-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Dates are first arXiv submissions (arXiv API). The arcs are this page's reading of which earlier limitation each paper answers; most follow the later paper's own introduction. They are editorial, not a citation graph.</figcaption>
+</figure>
+
+<ul class="timeline">
+  <li><span class="when" data-claim="meta-vit-date">2020-10-22</span> <b>ViT</b>. A plain transformer on image patches (16 by 16 in its best-known models); needs very large pretraining data. <span class="inh">Fixed: vision's reliance on convolutions. <a href="#ch-patches">Chapter 3</a></span></li>
+  <li><span class="when" data-claim="meta-align-date">2021-02-11</span> <b>ALIGN</b>. Contrastive dual encoder on over a billion lightly filtered alt-text pairs; scale makes up for noise. <span class="inh">Fixed: the cost of curating image-text data. <a href="#ch-shared-space">Chapter 1</a></span></li>
+  <li><span class="when" data-claim="meta-clip-date">2021-02-26</span> <b>CLIP</b>. Match images with captions in a shared space; zero-shot classification from class names. <span class="inh">Fixed: fixed label sets. <a href="#ch-shared-space">Chapter 1</a></span></li>
+  <li><span class="when" data-claim="meta-blip-date">2022-01-28</span> <b>BLIP</b>. One model that matches and writes; CapFilt cleans web captions with synthetic ones. <span class="inh">Fixed: noisy web text; encoders that cannot generate. <a href="#ch-bootstrap">Chapter 4</a></span></li>
+  <li><span class="when" data-claim="meta-flamingo-date">2022-04-29</span> <b>Flamingo</b>. A frozen large LM reads images through zero-initialised gated cross-attention; few-shot from interleaved web pages. <span class="inh">Fixed: fine-tuning on thousands of labelled examples for every task, and contrastive models that cannot write. <a href="#ch-flamingo">Chapter 5</a></span></li>
+  <li><span class="when" data-claim="meta-blip2-date">2023-01-30</span> <b>BLIP-2</b>. A small Q-Former between a frozen encoder and a frozen LLM. <span class="inh">Fixed: Flamingo's billions of new trainable parameters. <a href="#ch-qformer">Chapter 6</a></span></li>
+  <li><span class="when" data-claim="meta-siglip-date">2023-03-27</span> <b>SigLIP</b>. A per-pair sigmoid loss instead of a batch-wide softmax. <span class="inh">Fixed: CLIP's global normalisation over the batch. <a href="#ch-sigmoid">Chapter 2</a></span></li>
+  <li><span class="when" data-claim="meta-llava-date">2023-04-17</span> <b>LLaVA</b>. A linear projection plus GPT-4-written conversations: visual instruction tuning. <span class="inh">Fixed: models that describe but do not converse. <a href="#ch-llava">Chapter 7</a></span></li>
+  <li><span class="when" data-claim="meta-qwenvl-date">2023-08-24</span> <b>Qwen-VL</b>. <span data-claim="page-resolution-qwenvl-res">448</span>-pixel input, boxes written as text, a three-stage pipeline. <span class="inh">Fixed: low resolution and no grounding. <a href="#ch-resolution">Chapter 9</a></span></li>
+  <li><span class="when" data-claim="meta-llava15-date">2023-10-05</span> <b>LLaVA-1.5</b>. MLP connector, <span data-claim="page-resolution-llava15-res">336</span> pixels, academic data with answer-format prompts. <span class="inh">Fixed: LLaVA's weakness on short-answer benchmarks. <a href="#ch-llava">Chapter 7</a></span></li>
+  <li><span class="when" data-claim="meta-florence2-date">2023-11-10</span> <b>Florence-2</b>. Every vision task as text with location tokens, trained on a model-built dataset. <span class="inh">Fixed: image-level-only understanding. <a href="#ch-grounding">Chapter 10</a></span></li>
+  <li><span class="when" data-claim="meta-idefics2-date">2024-05-03</span> <b>Idefics2</b>. Controlled ablations of VLM design choices. <span class="inh">Fixed: untested design decisions. <a href="#ch-recipes">Chapter 11</a></span></li>
+  <li><span class="when" data-claim="meta-chameleon-date">2024-05-16</span> <b>Chameleon</b>. Images as discrete tokens in one shared vocabulary; reads and writes both. <span class="inh">Fixed: late fusion's text-only output. <a href="#ch-early-fusion">Chapter 12</a></span></li>
+  <li><span class="when" data-claim="meta-qwen2vl-date">2024-09-18</span> <b>Qwen2-VL</b>. Native dynamic resolution and multimodal rotary positions. <span class="inh">Fixed: fixed-size square inputs. <a href="#ch-resolution">Chapter 9</a></span></li>
+  <li><span class="when" data-claim="meta-molmo-date">2024-09-25</span> <b>Molmo</b>. Open data collected without VLMs (spoken captions), and pointing. <span class="inh">Fixed: open models distilled from closed ones. <a href="#ch-recipes">Chapter 11</a></span></li>
+  <li><span class="when" data-claim="meta-qwen3vl-date">2025-11-26</span> <b>Qwen3-VL</b>. DeepStack, interleaved M-RoPE, text timestamps, <span data-claim="page-closing-256k">256K</span> context. <span class="inh">Fixed: vision entering the language model only at its input layer. <a href="#ch-qwen3">Chapter 13</a></span></li>
+</ul>
+</section>
+
+<section id="ch-summary">
+<h2>Summary</h2>
+<p>A vision-language model is a vision encoder, a connector and a language model, and every part of that design is a fix for something that broke earlier. Contrastive training (CLIP, ALIGN) gave encoders whose vectors already mean something in words, and SigLIP made that training cheaper by judging each image-caption pair on its own. A vision transformer sees an image as a grid of patch tokens, so the token budget, not the pixels, is what every later model negotiates. To make a model write, BLIP cleaned its own data, Flamingo dialled vision into a frozen language model through gates that start at zero, and BLIP-2 shrank the bridge to a few dozen learned queries. LLaVA showed how far a plain projection goes once the data is right (conversations about images, with the loss on the answers only), though later ablations found the connector's design still matters. After that the walls were about seeing well and pointing: Qwen2-VL fed images at their own size with two-dimensional positions, and Qwen-VL, Florence-2 and Molmo wrote boxes and points into the output sequence (digits for Qwen-VL and Molmo, location tokens for Florence-2). Idefics2 and Molmo tested which choices actually matter (backbones, resolution, data), Chameleon asked whether images could simply be words, and Qwen3-VL assembles the chain: a SigLIP-family encoder at native resolution, merged tokens, rotary positions for time and space, features injected at several depths, and a context long enough for documents and video.</p>
+</section>
+
+<section id="ch-deeper">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>CLIP (2103.00020v1)</b>: Sec. 2.3 and the Fig. 3 pseudocode for the objective; Sec. 2.5 for the temperature; Sec. 3.1.2 to 3.1.4 for zero-shot transfer and prompt engineering.</li>
+  <li><b>ALIGN (2102.05918v2)</b>: Sec. 3 for the filtering rules; Sec. 4.1, Eqs. 1 and 2 for the loss; Sec. 6.2 and Table 10 for scale versus noise.</li>
+  <li><b>SigLIP (2303.15343v4)</b>: Sec. 3.1 and 3.2 for the two losses side by side, Algorithm 1, Sec. 3.3 for the chunked implementation; Sec. 4.2 and Table 5 for batch size.</li>
+  <li><b>ViT (2010.11929v2)</b>: Sec. 3.1, Eqs. 1 to 4 for the architecture; Table 1 for model variants; Sec. 4.3 and Fig. 3 for how much data it needs.</li>
+  <li><b>BLIP (2201.12086v2)</b>: Sec. 3.2 for the three objectives and parameter sharing; Sec. 3.3 for CapFilt; the generation table for nucleus versus beam captions.</li>
+  <li><b>Flamingo (2204.14198v2)</b>: Sec. 2.1 and 2.2 with the Fig. 4 and (appendix) Fig. 5 pseudocode for gated cross-attention and the resampler; Sec. 2.3 for the image masking; Sec. 2.4, Eq. 2 for the data mixture.</li>
+  <li><b>BLIP-2 (2301.12597v3)</b>: Sec. 3.1 and 3.2 for the Q-Former and its three attention masks; Sec. 3.3 for the connection to the LLM; Table 2 for zero-shot VQA.</li>
+  <li><b>LLaVA (2304.08485v2)</b>: Sec. 3 for how GPT-4 wrote the data; Sec. 4.1 and 4.2, Eqs. 1 to 3, for the projection, the sequence format and the loss; Sec. 5.1 for the data ablation.</li>
+  <li><b>LLaVA-1.5 (2310.03744v2)</b>: Sec. 3.2 for response-format prompts; Sec. 3.3 for the MLP, resolution and data scaling; the scaling results table for each change's gain.</li>
+  <li><b>Qwen-VL (2308.12966v3)</b>: Sec. 2.1 for the adapter; Sec. 2.2 for the box format; Sec. 3 for the three training stages.</li>
+  <li><b>Qwen2-VL (2409.12191v2)</b>: Sec. 2.1 for naive dynamic resolution, M-RoPE (and its figure) and unified image and video input; Sec. 3.3 for the resolution and M-RoPE ablations.</li>
+  <li><b>Florence-2 (2311.06242v1)</b>: Sec. 3 for the task formulation and location tokens; Sec. 4 for the data engine behind FLD-5B.</li>
+  <li><b>Idefics2 (2405.02246v1)</b>: Sec. 3, Findings 1 to 6 with their ablation tables (Finding 6's is Table 9, in Sec. 4.2); the appendix for the connector and pooling comparisons.</li>
+  <li><b>Molmo (2409.17146v2)</b>: Sec. 2 for the architecture and multi-crop; Sec. 3 for PixMo and how the spoken captions were collected; the ablation tables (Tables 2 to 5).</li>
+  <li><b>Chameleon (2405.09818v2)</b>: Sec. 2.1 for the image tokenizer; Sec. 2.3 for the stability fixes (QK-Norm, z-loss, norm placement); Sec. 4.2 for the human evaluation.</li>
+  <li><b>Qwen3-VL (2511.21631v2)</b>: Sec. 2 for the architecture, then Sec. 2.1 to 2.3 for interleaved M-RoPE, DeepStack and text timestamps; the DeepStack ablation table.</li>
+</ul>
+<p>Topics this page does not cover, each with its own literature: video understanding and long-video token budgets, VLMs as GUI agents, hallucination and how it is measured, reinforcement learning for multimodal reasoning, and vision-language-action models for robots. A broad map of those areas is a good next read after this one.</p>
+</section>

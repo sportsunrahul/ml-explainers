@@ -1,0 +1,3646 @@
+[
+ {
+  "id": "pervasive-cite-title",
+  "claim": "title",
+  "value": "Pervasive Label Errors in Test Sets Destabilize Machine Learning Benchmarks",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "abs.html; paper.tex \\papertitle",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-cite-authors",
+  "claim": "authors",
+  "value": "Curtis G. Northcutt, Anish Athalye, Jonas Mueller",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2103.14749v4",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-cite-date",
+  "claim": "date of first version (v1) and of the version used (v4)",
+  "value": "v1: 26 Mar 2021; v4: 7 Nov 2021",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-cite-venue",
+  "claim": "venue",
+  "value": "35th Conference on Neural Information Processing Systems (NeurIPS 2021) Track on Datasets and Benchmarks",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "abs.html journal-ref",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-abs-avg",
+  "claim": "average share of test-set label errors across the 10 datasets (abstract wording)",
+  "value": "we estimate an average of at least 3.3% errors across the 10 datasets",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Abstract, sentence 2 (abstract.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-abs-imagenet",
+  "claim": "ImageNet validation set error share (abstract wording)",
+  "value": "label errors comprise at least 6% of the ImageNet validation set",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Abstract, sentence 2 (abstract.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-abs-51",
+  "claim": "share of CL-flagged candidates that humans confirm as errors (abstract wording)",
+  "value": "51% of the algorithmically-flagged candidates are indeed erroneously labeled, on average across the datasets",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Abstract, sentence 3 (abstract.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-abs-resnet",
+  "claim": "ImageNet rank swap stated in the abstract",
+  "value": "on ImageNet with corrected labels: ResNet-18 outperforms ResNet-50 if the prevalence of originally mislabeled test examples increases by just 6%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Abstract, sentence 6 (abstract.tex)",
+  "source": "paper",
+  "note": "Platform not named. The figure vectors show the 9% crossover (2.9% + about 6%) is PyTorch resnet18 vs Keras 2.2.4 resnet50; see pervasive-fig4-cross-9-pair."
+ },
+ {
+  "id": "pervasive-abs-vgg",
+  "claim": "CIFAR-10 rank swap stated in the abstract",
+  "value": "On CIFAR-10 with corrected labels: VGG-11 outperforms VGG-19 if the prevalence of originally mislabeled test examples increases by just 5%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Abstract, sentence 7 (abstract.tex)",
+  "source": "paper",
+  "note": "The figure crossover is at N = 5.64% from a base of 0.18% (+5.46 points); see pervasive-c10-cross-vgg11-vgg19."
+ },
+ {
+  "id": "pervasive-mean-error-derived",
+  "claim": "mean of the 10 \"% error\" values in Table 1 (backs \"at least 3.3%\")",
+  "value": "3.327%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1, column \"% error\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "(0.15+0.54+5.85+1.54+5.83+10.12+1.09+2.90+3.90+1.35)/10 = 33.27/10 = 3.327"
+ },
+ {
+  "id": "pervasive-mean-validated-derived",
+  "claim": "mean over datasets of validated / MTurk checked (backs \"51%\")",
+  "value": "51.5%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1, columns \"validated\" / \"MTurk checked\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "15/100, 54/275, 585/2235, 458/2360, 2916/5440, 1870/2500, 82/93, 725/1310, 732/1000, 275/307 = 0.150, 0.196, 0.262, 0.194, 0.536, 0.748, 0.882, 0.553, 0.732, 0.896; mean 0.515"
+ },
+ {
+  "id": "pervasive-filter-90",
+  "claim": "how much CL filtering reduces the human checking load",
+  "value": "often as much as 90%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 3, paragraph 1 (identifying.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-noise-def",
+  "claim": "this paper's noise model (the assumption inside the CL joint)",
+  "value": "Inherent in Q is the assumption that noise is class-conditional, depending only on the latent true class, not the data.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 3, paragraph 2 (identifying.tex); Q stands for the macro \\joint",
+  "source": "paper",
+  "note": "Source text: \"Inherent in $\\joint$ is the assumption that noise is class-conditional \\citep{angluin1988learning}, depending only on the latent true class, not the data.\" Errors here are natural, not synthetic: \"we do not experiment with synthetic noise but with naturally-occurring errors\" (Sec 1)."
+ },
+ {
+  "id": "pervasive-t1-mnist-modality",
+  "claim": "Table 1, MNIST, column \"Modality\"",
+  "value": "image",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"Modality\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-size",
+  "claim": "Table 1, MNIST, column \"Size\"",
+  "value": "10,000",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"Size\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-model",
+  "claim": "Table 1, MNIST, column \"Model\"",
+  "value": "2-conv CNN",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-cl",
+  "claim": "Table 1, MNIST, column \"CL guessed\"",
+  "value": "100",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"CL guessed\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-checked",
+  "claim": "Table 1, MNIST, column \"MTurk checked\"",
+  "value": "100 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"MTurk checked\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-validated",
+  "claim": "Table 1, MNIST, column \"validated\"",
+  "value": "15",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"validated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-estimated",
+  "claim": "Table 1, MNIST, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"estimated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-mnist-pct",
+  "claim": "Table 1, MNIST, column \"% error\"",
+  "value": "0.15",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"MNIST\", column \"% error\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-modality",
+  "claim": "Table 1, CIFAR-10, column \"Modality\"",
+  "value": "image",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"Modality\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-size",
+  "claim": "Table 1, CIFAR-10, column \"Size\"",
+  "value": "10,000",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"Size\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-model",
+  "claim": "Table 1, CIFAR-10, column \"Model\"",
+  "value": "VGG",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-cl",
+  "claim": "Table 1, CIFAR-10, column \"CL guessed\"",
+  "value": "275",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"CL guessed\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-checked",
+  "claim": "Table 1, CIFAR-10, column \"MTurk checked\"",
+  "value": "275 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"MTurk checked\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-validated",
+  "claim": "Table 1, CIFAR-10, column \"validated\"",
+  "value": "54",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"validated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-estimated",
+  "claim": "Table 1, CIFAR-10, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"estimated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar10-pct",
+  "claim": "Table 1, CIFAR-10, column \"% error\"",
+  "value": "0.54",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-10\", column \"% error\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-modality",
+  "claim": "Table 1, CIFAR-100, column \"Modality\"",
+  "value": "image",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"Modality\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-size",
+  "claim": "Table 1, CIFAR-100, column \"Size\"",
+  "value": "10,000",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"Size\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-model",
+  "claim": "Table 1, CIFAR-100, column \"Model\"",
+  "value": "VGG",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-cl",
+  "claim": "Table 1, CIFAR-100, column \"CL guessed\"",
+  "value": "2,235",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"CL guessed\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-checked",
+  "claim": "Table 1, CIFAR-100, column \"MTurk checked\"",
+  "value": "2,235 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"MTurk checked\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-validated",
+  "claim": "Table 1, CIFAR-100, column \"validated\"",
+  "value": "585",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"validated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-estimated",
+  "claim": "Table 1, CIFAR-100, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"estimated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-cifar100-pct",
+  "claim": "Table 1, CIFAR-100, column \"% error\"",
+  "value": "5.85",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"CIFAR-100\", column \"% error\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-caltech256-modality",
+  "claim": "Table 1, Caltech-256, column \"Modality\"",
+  "value": "image",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"Modality\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-size",
+  "claim": "Table 1, Caltech-256, column \"Size\"",
+  "value": "29,780",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"Size\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-model",
+  "claim": "Table 1, Caltech-256, column \"Model\"",
+  "value": "Wide ResNet-50-2",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"Model\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-cl",
+  "claim": "Table 1, Caltech-256, column \"CL guessed\"",
+  "value": "2,360",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"CL guessed\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-checked",
+  "claim": "Table 1, Caltech-256, column \"MTurk checked\"",
+  "value": "2,360 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"MTurk checked\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-validated",
+  "claim": "Table 1, Caltech-256, column \"validated\"",
+  "value": "458",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"validated\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-estimated",
+  "claim": "Table 1, Caltech-256, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"estimated\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-caltech256-pct",
+  "claim": "Table 1, Caltech-256, column \"% error\"",
+  "value": "1.54",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Caltech-256\", column \"% error\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-modality",
+  "claim": "Table 1, ImageNet, column \"Modality\"",
+  "value": "image",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"Modality\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-size",
+  "claim": "Table 1, ImageNet, column \"Size\"",
+  "value": "50,000",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"Size\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-model",
+  "claim": "Table 1, ImageNet, column \"Model\"",
+  "value": "ResNet-50",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"Model\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-cl",
+  "claim": "Table 1, ImageNet, column \"CL guessed\"",
+  "value": "5,440",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"CL guessed\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-checked",
+  "claim": "Table 1, ImageNet, column \"MTurk checked\"",
+  "value": "5,440 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"MTurk checked\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-validated",
+  "claim": "Table 1, ImageNet, column \"validated\"",
+  "value": "2,916",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"validated\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-estimated",
+  "claim": "Table 1, ImageNet, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"estimated\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-imagenet-pct",
+  "claim": "Table 1, ImageNet, column \"% error\"",
+  "value": "5.83",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"ImageNet\", column \"% error\"",
+  "source": "paper",
+  "note": "ILSVRC 2012 validation set used as the test set (asterisk footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-modality",
+  "claim": "Table 1, QuickDraw, column \"Modality\"",
+  "value": "image",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"Modality\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-size",
+  "claim": "Table 1, QuickDraw, column \"Size\"",
+  "value": "50,426,266",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"Size\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-model",
+  "claim": "Table 1, QuickDraw, column \"Model\"",
+  "value": "VGG",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"Model\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-cl",
+  "claim": "Table 1, QuickDraw, column \"CL guessed\"",
+  "value": "6,825,383",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"CL guessed\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-checked",
+  "claim": "Table 1, QuickDraw, column \"MTurk checked\"",
+  "value": "2,500 (0.04%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"MTurk checked\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-validated",
+  "claim": "Table 1, QuickDraw, column \"validated\"",
+  "value": "1870",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"validated\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-estimated",
+  "claim": "Table 1, QuickDraw, column \"estimated\"",
+  "value": "5,105,386",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"estimated\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-quickdraw-pct",
+  "claim": "Table 1, QuickDraw, column \"% error\"",
+  "value": "10.12",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"QuickDraw\", column \"% error\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-20news-modality",
+  "claim": "Table 1, 20news, column \"Modality\"",
+  "value": "text",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"Modality\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-size",
+  "claim": "Table 1, 20news, column \"Size\"",
+  "value": "7,532",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"Size\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-model",
+  "claim": "Table 1, 20news, column \"Model\"",
+  "value": "TFIDF + SGD",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-cl",
+  "claim": "Table 1, 20news, column \"CL guessed\"",
+  "value": "93",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"CL guessed\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-checked",
+  "claim": "Table 1, 20news, column \"MTurk checked\"",
+  "value": "93 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"MTurk checked\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-validated",
+  "claim": "Table 1, 20news, column \"validated\"",
+  "value": "82",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"validated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-estimated",
+  "claim": "Table 1, 20news, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"estimated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-20news-pct",
+  "claim": "Table 1, 20news, column \"% error\"",
+  "value": "1.09",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"20news\", column \"% error\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-modality",
+  "claim": "Table 1, IMDB, column \"Modality\"",
+  "value": "text",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"Modality\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-size",
+  "claim": "Table 1, IMDB, column \"Size\"",
+  "value": "25,000",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"Size\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-model",
+  "claim": "Table 1, IMDB, column \"Model\"",
+  "value": "FastText",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-cl",
+  "claim": "Table 1, IMDB, column \"CL guessed\"",
+  "value": "1,310",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"CL guessed\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-checked",
+  "claim": "Table 1, IMDB, column \"MTurk checked\"",
+  "value": "1,310 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"MTurk checked\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-validated",
+  "claim": "Table 1, IMDB, column \"validated\"",
+  "value": "725",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"validated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-estimated",
+  "claim": "Table 1, IMDB, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"estimated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-imdb-pct",
+  "claim": "Table 1, IMDB, column \"% error\"",
+  "value": "2.90",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"IMDB\", column \"% error\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-amazon-modality",
+  "claim": "Table 1, Amazon Reviews, column \"Modality\"",
+  "value": "text",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"Modality\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-size",
+  "claim": "Table 1, Amazon Reviews, column \"Size\"",
+  "value": "9,996,437",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"Size\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-model",
+  "claim": "Table 1, Amazon Reviews, column \"Model\"",
+  "value": "FastText",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"Model\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-cl",
+  "claim": "Table 1, Amazon Reviews, column \"CL guessed\"",
+  "value": "533,249",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"CL guessed\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-checked",
+  "claim": "Table 1, Amazon Reviews, column \"MTurk checked\"",
+  "value": "1,000 (0.2%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"MTurk checked\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-validated",
+  "claim": "Table 1, Amazon Reviews, column \"validated\"",
+  "value": "732",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"validated\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-estimated",
+  "claim": "Table 1, Amazon Reviews, column \"estimated\"",
+  "value": "390,338",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"estimated\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-amazon-pct",
+  "claim": "Table 1, Amazon Reviews, column \"% error\"",
+  "value": "3.90",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"Amazon Reviews\", column \"% error\"",
+  "source": "paper",
+  "note": "No explicit test set; the whole dataset was studied (dagger footnote)."
+ },
+ {
+  "id": "pervasive-t1-audioset-modality",
+  "claim": "Table 1, AudioSet, column \"Modality\"",
+  "value": "audio",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"Modality\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-size",
+  "claim": "Table 1, AudioSet, column \"Size\"",
+  "value": "20,371",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"Size\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-model",
+  "claim": "Table 1, AudioSet, column \"Model\"",
+  "value": "VGG",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-cl",
+  "claim": "Table 1, AudioSet, column \"CL guessed\"",
+  "value": "307",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"CL guessed\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-checked",
+  "claim": "Table 1, AudioSet, column \"MTurk checked\"",
+  "value": "307 (100%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"MTurk checked\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-validated",
+  "claim": "Table 1, AudioSet, column \"validated\"",
+  "value": "275",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"validated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-estimated",
+  "claim": "Table 1, AudioSet, column \"estimated\"",
+  "value": "-",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"estimated\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-audioset-pct",
+  "claim": "Table 1, AudioSet, column \"% error\"",
+  "value": "1.35",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 (identifying.tex), row \"AudioSet\", column \"% error\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t1-range",
+  "claim": "range of error rates named in the Table 1 caption",
+  "value": "from 0.15% (MNIST) to 10.12% (QuickDraw)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 caption",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-mturk-workers",
+  "claim": "number of MTurk workers per CL-flagged example",
+  "value": "Each CL-flagged label error was independently presented to five workers.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 4, paragraph 3 (validating.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-mturk-threshold",
+  "claim": "rule that makes a flagged example an error",
+  "value": "We consider the example validated (an \"error\") if fewer than three of the workers agree that the data point has the given label (agreement threshold = 3 of 5)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 4, paragraph 3 (validating.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-mturk-options",
+  "claim": "the four answer options shown to workers",
+  "value": "(1) given label, (2) the top CL-predicted label, (3) both labels, or (4) neither label",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 4, paragraph 2 (validating.tex)",
+  "source": "paper",
+  "note": "Source: \"whether they saw the (1) given label, (2) the top CL-predicted label, (3) both labels, or (4) neither label in the example\". The interface also showed high-confidence examples of both classes."
+ },
+ {
+  "id": "pervasive-mturk-categories",
+  "claim": "how errors are split into four categories",
+  "value": "(1) \"correctable\", where a majority agree on the CL-predicted label; (2) \"multi-label\", where a majority agree on both labels appearing; (3) \"neither\", where a majority agree on neither label appearing; and (4) \"non-agreement\", a catch-all category for when there is no majority",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 4, paragraph 3 (validating.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-mturk-sampling",
+  "claim": "which flagged examples were sent to MTurk",
+  "value": "For two large datasets with a large number of errors (QuickDraw and Amazon Reviews), we checked a random sample; for the rest, we checked all identified errors.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 4, paragraph 1 (validating.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-cifar10-non-errors",
+  "claim": "Table 2, CIFAR-10, column \"non-errors\"",
+  "value": "221",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"CIFAR-10\", column \"non-errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-cifar10-errors",
+  "claim": "Table 2, CIFAR-10, column \"errors\"",
+  "value": "54",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"CIFAR-10\", column \"errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-cifar10-non-agreement",
+  "claim": "Table 2, CIFAR-10, column \"non-agreement\"",
+  "value": "32",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"CIFAR-10\", column \"non-agreement\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-cifar10-correctable",
+  "claim": "Table 2, CIFAR-10, column \"correctable\"",
+  "value": "18",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"CIFAR-10\", column \"correctable\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-cifar10-multi-label",
+  "claim": "Table 2, CIFAR-10, column \"multi-label\"",
+  "value": "0",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"CIFAR-10\", column \"multi-label\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-cifar10-neither",
+  "claim": "Table 2, CIFAR-10, column \"neither\"",
+  "value": "4",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"CIFAR-10\", column \"neither\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-imagenet-non-errors",
+  "claim": "Table 2, ImageNet, column \"non-errors\"",
+  "value": "2524",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"ImageNet\", column \"non-errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-imagenet-errors",
+  "claim": "Table 2, ImageNet, column \"errors\"",
+  "value": "2916",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"ImageNet\", column \"errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-imagenet-non-agreement",
+  "claim": "Table 2, ImageNet, column \"non-agreement\"",
+  "value": "598",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"ImageNet\", column \"non-agreement\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-imagenet-correctable",
+  "claim": "Table 2, ImageNet, column \"correctable\"",
+  "value": "1428",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"ImageNet\", column \"correctable\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-imagenet-multi-label",
+  "claim": "Table 2, ImageNet, column \"multi-label\"",
+  "value": "597",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"ImageNet\", column \"multi-label\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t2-imagenet-neither",
+  "claim": "Table 2, ImageNet, column \"neither\"",
+  "value": "293",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 (validating.tex), row \"ImageNet\", column \"neither\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-funnel-imagenet",
+  "claim": "ImageNet funnel: val images -> CL flagged -> validated errors -> correctable",
+  "value": "50,000 -> 5,440 -> 2,916 -> 1,428",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1 row \"ImageNet\" (Size, CL guessed, validated); Table 2 row \"ImageNet\" (correctable)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-def-benign",
+  "claim": "definition of the benign set B",
+  "value": "The subset of benign test examples, comprising data that CL did not flag as likely label errors and data that was flagged but for which human reviewers agreed that the original label should be kept.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, Definition \"benign set\" (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-def-unknown",
+  "claim": "definition of the unknown-label set U",
+  "value": "The subset of CL-flagged test examples for which human labelers could not agree on a single correct label. This includes examples where human reviewers agreed that multiple classes or none of the classes are appropriate.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, Definition \"unknown-label set\" (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-def-pruned",
+  "claim": "definition of the pruned set P",
+  "value": "The remaining test data after removing U from D. (P = D \\ U)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, Definition \"pruned set\" (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-def-correctable",
+  "claim": "definition of the correctable set C",
+  "value": "The subset of CL-flagged examples for which human-validation reached consensus on a different label than the originally given label. (C = P \\ B)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, Definition \"correctable set\" (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-def-partition",
+  "claim": "how the sets relate",
+  "value": "B, C, U are disjoint with D = B \\cup C \\cup U and also P = B \\cup C",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, paragraph after the definitions (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-def-accuracies",
+  "claim": "original accuracy vs corrected accuracy",
+  "value": "original accuracy: computed with respect to the original labels present in the dataset; corrected accuracy: computed over a modified dataset in which previously identified erroneous labels have been corrected by humans to the true class when possible and removed when not",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, Definitions \"original accuracy\" and \"corrected accuracy\" (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-eq-n",
+  "claim": "noise prevalence",
+  "value": "N = \\frac{\\vert \\mathcal{C} \\vert}{\\vert \\mathcal{P} \\vert}",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5, Definition \"noise prevalence\" (unnumbered)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-eq-n-x",
+  "claim": "noise prevalence after removing a fraction x of B",
+  "value": "N = \\frac{|\\mathcal{C}|}{|\\mathcal{P}| - x|\\mathcal{B}|}",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.2, paragraph 1 (unnumbered)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-eq-a",
+  "claim": "expected accuracy of model M on the reduced test set",
+  "value": "A(x; \\mathcal{M}) = \\frac{A_\\mathcal{C}(\\mathcal{M}) \\cdot |\\mathcal{C}| + (1-x) \\cdot A_\\mathcal{B}(\\mathcal{M}) \\cdot |B|}{|\\mathcal{C}| + (1-x) \\cdot |B|}",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.2, paragraph 2 (unnumbered)",
+  "source": "paper",
+  "note": "The source writes |B| (not |\\mathcal{B}|) for the benign-set size; same set. A_C and A_B are the original or corrected accuracies on C and B before any removal."
+ },
+ {
+  "id": "pervasive-ab-same",
+  "claim": "A_B does not depend on which labels are used",
+  "value": "Here A_\\mathcal{B} = A_\\mathcal{B}^* = \\tilde{A}_\\mathcal{B} because no erroneous labels were identified in \\mathcal{B}.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.2, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-eq-a-linear",
+  "claim": "A(x;M) rewritten as a function of N: a straight line in N",
+  "value": "A(N) = N \\, A_\\mathcal{C}(\\mathcal{M}) + (1-N) \\, A_\\mathcal{B}(\\mathcal{M})",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "derived from Sec 5.2 A(x;M) and N = |C|/(|P| - x|B|)",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Set N = |C|/(|C| + (1-x)|B|); then (1-x)|B|/(|C| + (1-x)|B|) = 1-N, and A(x;M) = N A_C + (1-N) A_B. x = 0 gives N = |C|/|P|; x = 1 gives N = 1 (A = A_C)."
+ },
+ {
+  "id": "pervasive-eq-cross",
+  "claim": "noise prevalence at which models 1 and 2 swap rank",
+  "value": "N^* = \\frac{A_\\mathcal{B}(1) - A_\\mathcal{B}(2)}{(A_\\mathcal{B}(1) - A_\\mathcal{B}(2)) - (A_\\mathcal{C}(1) - A_\\mathcal{C}(2))}",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "derived from pervasive-eq-a-linear",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Solve N A_C(1) + (1-N) A_B(1) = N A_C(2) + (1-N) A_B(2) for N."
+ },
+ {
+  "id": "pervasive-interp",
+  "claim": "how the paper averages over random removals",
+  "value": "We operationalize averaging over all choices of removal by linearly interpolating from accuracies over the corrected test set (P, with corrected labels for the subset C) to accuracies over the erroneously labeled subset (C, with corrected labels).",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.2, paragraph 1",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-lower-bound",
+  "claim": "the analysis is a lower bound",
+  "value": "this analysis only presents a loose lower bound on the magnitude of these issues due to unaccounted for label errors in the non-CL-flagged data",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.2, last paragraph",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-advice-budget",
+  "claim": "recommendation on where to spend annotation budget",
+  "value": "perhaps by allocating more of an annotation budget to ensure higher quality labels in the test data",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.2, last sentence",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-advice-discussion",
+  "claim": "closing recommendation",
+  "value": "We recommend considering the distinction between corrected vs. original test accuracy and curating datasets to maximize high-quality test labels, even if budget constraints only allow for lower-quality training labels.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 7 Discussion, last sentence (conclusion.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-imagenet-c",
+  "claim": "|C| for ImageNet, agreement threshold 3 of 5",
+  "value": "1428",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 row \"ImageNet\", column \"correctable\"; Appendix F, Fig S3 caption \"Corrected test set sizes: 1428\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-imagenet-c-thresholds",
+  "claim": "|C| for ImageNet at agreement thresholds 3, 4, 5",
+  "value": "1428, 960, 468",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Fig S3 caption: \"Corrected test set sizes: 1428, 960, 468\"",
+  "source": "paper",
+  "note": "Caption gives the three sizes with marker symbols; the threshold-to-size mapping (3 -> 1428, 5 -> 468) is implied by the stricter threshold giving fewer corrections."
+ },
+ {
+  "id": "pervasive-imagenet-u-derived",
+  "claim": "|U| for ImageNet, threshold 3",
+  "value": "1488",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 row \"ImageNet\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "U = non-agreement + multi-label + neither = 598 + 597 + 293 = 1488 (= errors - correctable = 2916 - 1428)."
+ },
+ {
+  "id": "pervasive-imagenet-p-derived",
+  "claim": "|P| for ImageNet, threshold 3",
+  "value": "48512",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1/2 row \"ImageNet\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "P = D - U = 50000 - 1488 = 48512."
+ },
+ {
+  "id": "pervasive-imagenet-b-derived",
+  "claim": "|B| for ImageNet, threshold 3",
+  "value": "47084",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 1/2 row \"ImageNet\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "B = P - C = 48512 - 1428 = 47084. Cross-check: not flagged (50000 - 5440 = 44560) + flagged non-errors (2524) = 47084."
+ },
+ {
+  "id": "pervasive-imagenet-n0",
+  "claim": "base noise prevalence of the ImageNet pruned set",
+  "value": "N = 2.9%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 caption (stability.tex): \"The left-most point (N = 2.9%) on the x-axis is |C|/|P|\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-imagenet-n0-exact-derived",
+  "claim": "exact base noise prevalence for ImageNet",
+  "value": "2.9436%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 row \"ImageNet\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "1428 / 48512 = 0.029436. The Fig 4 PDF x-axis places its \"2.9%\" tick at exactly this value (tick positions 2.9%/25%/50% are collinear only for N0 = 2.9436%)."
+ },
+ {
+  "id": "pervasive-fig4-cross-9",
+  "claim": "Fig 4 caption: ResNet-18 vs ResNet-50 crossover",
+  "value": "The ResNet-50 and ResNet-18 benchmarks cross at noise prevalence N = 9%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 caption (stability.tex), bottom panel, leftmost dotted line",
+  "source": "paper",
+  "note": "Caption continues: \"implying ResNet-18 outperforms ResNet-50 when N increases by around 6% relative to the original pruned test data (N = 2.9% originally)\"."
+ },
+ {
+  "id": "pervasive-ts1-what",
+  "claim": "what Table S1 tabulates",
+  "value": "Acc@1, cAcc@1, Acc@5, cAcc@5 on the correctable set C (original vs corrected labels), and Rank@1, cRank@1, Rank@5, cRank@5, for 34 models at agreement threshold 3 of 5",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex, label tab:imagenet_benchmarking_table) header and caption",
+  "source": "paper",
+  "note": "No column gives accuracy on the benign set B, on P, or on the full val set. A_B is not tabulated anywhere in the paper."
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, Acc@1 on the correctable set",
+  "value": "6.51",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, cAcc@1 on the correctable set",
+  "value": "82.42",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, Acc@5 on the correctable set",
+  "value": "73.81",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, cAcc@5 on the correctable set",
+  "value": "99.58",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, Rank@1 on the correctable set",
+  "value": "34",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, cRank@1 on the correctable set",
+  "value": "1",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, Rank@5 on the correctable set",
+  "value": "30",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet18-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet18, cRank@5 on the correctable set",
+  "value": "1",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet18\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, Acc@1 on the correctable set",
+  "value": "13.52",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, cAcc@1 on the correctable set",
+  "value": "73.74",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, Acc@5 on the correctable set",
+  "value": "79.97",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, cAcc@5 on the correctable set",
+  "value": "98.46",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, Rank@1 on the correctable set",
+  "value": "20",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, cRank@1 on the correctable set",
+  "value": "2",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, Rank@5 on the correctable set",
+  "value": "11",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-resnet50-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 resnet50, cRank@5 on the correctable set",
+  "value": "2",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 resnet50\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, Acc@1 on the correctable set",
+  "value": "11.13",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, cAcc@1 on the correctable set",
+  "value": "72.97",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, Acc@5 on the correctable set",
+  "value": "76.26",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, cAcc@5 on the correctable set",
+  "value": "97.55",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, Rank@1 on the correctable set",
+  "value": "30",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, cRank@1 on the correctable set",
+  "value": "4",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, Rank@5 on the correctable set",
+  "value": "22",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-bn-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11_bn, cRank@5 on the correctable set",
+  "value": "15",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, Acc@1 on the correctable set",
+  "value": "14.15",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, cAcc@1 on the correctable set",
+  "value": "72.55",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, Acc@5 on the correctable set",
+  "value": "79.62",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, cAcc@5 on the correctable set",
+  "value": "98.32",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, Rank@1 on the correctable set",
+  "value": "16",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, cRank@1 on the correctable set",
+  "value": "6",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, Rank@5 on the correctable set",
+  "value": "12",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-densenet169-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 densenet169, cRank@5 on the correctable set",
+  "value": "3",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 densenet169\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, Acc@1 on the correctable set",
+  "value": "13.94",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, cAcc@1 on the correctable set",
+  "value": "70.87",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, Acc@5 on the correctable set",
+  "value": "78.85",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, cAcc@5 on the correctable set",
+  "value": "98.18",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, Rank@1 on the correctable set",
+  "value": "17",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, cRank@1 on the correctable set",
+  "value": "13",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, Rank@5 on the correctable set",
+  "value": "15",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-densenet169-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 densenet169, cRank@5 on the correctable set",
+  "value": "5",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 densenet169\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, Acc@1 on the correctable set",
+  "value": "12.96",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, cAcc@1 on the correctable set",
+  "value": "70.38",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, Acc@5 on the correctable set",
+  "value": "75.49",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, cAcc@5 on the correctable set",
+  "value": "97.27",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, Rank@1 on the correctable set",
+  "value": "25",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, cRank@1 on the correctable set",
+  "value": "17",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, Rank@5 on the correctable set",
+  "value": "27",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-vgg11-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 vgg11, cRank@5 on the correctable set",
+  "value": "18",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 vgg11\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, Acc@1 on the correctable set",
+  "value": "17.65",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, cAcc@1 on the correctable set",
+  "value": "68.28",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, Acc@5 on the correctable set",
+  "value": "82.07",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, cAcc@5 on the correctable set",
+  "value": "97.62",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, Rank@1 on the correctable set",
+  "value": "2",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, cRank@1 on the correctable set",
+  "value": "24",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, Rank@5 on the correctable set",
+  "value": "3",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-xception-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 xception, cRank@5 on the correctable set",
+  "value": "14",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 xception\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, Acc@1 on the correctable set",
+  "value": "14.85",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, cAcc@1 on the correctable set",
+  "value": "66.81",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, Acc@5 on the correctable set",
+  "value": "76.12",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, cAcc@5 on the correctable set",
+  "value": "95.73",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, Rank@1 on the correctable set",
+  "value": "9",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, cRank@1 on the correctable set",
+  "value": "28",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, Rank@5 on the correctable set",
+  "value": "23",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-resnet50-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 resnet50, cRank@5 on the correctable set",
+  "value": "28",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 resnet50\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, Acc@1 on the correctable set",
+  "value": "19.61",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, cAcc@1 on the correctable set",
+  "value": "66.32",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, Acc@5 on the correctable set",
+  "value": "84.24",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, cAcc@5 on the correctable set",
+  "value": "96.57",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, Rank@1 on the correctable set",
+  "value": "1",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, cRank@1 on the correctable set",
+  "value": "29",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, Rank@5 on the correctable set",
+  "value": "1",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-k-nasnetlarge-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), Keras 2.2.4 nasnetlarge, cRank@5 on the correctable set",
+  "value": "25",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"Keras 2.2.4 nasnetlarge\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-acc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, Acc@1 on the correctable set",
+  "value": "11.06",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-cacc1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, cAcc@1 on the correctable set",
+  "value": "58.96",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-acc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, Acc@5 on the correctable set",
+  "value": "62.61",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"Acc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-cacc5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, cAcc@5 on the correctable set",
+  "value": "89.29",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"cAcc@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-rank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, Rank@1 on the correctable set",
+  "value": "31",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-crank1",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, cRank@1 on the correctable set",
+  "value": "34",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-rank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, Rank@5 on the correctable set",
+  "value": "32",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"Rank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts1-pt-alexnet-crank5",
+  "claim": "Table S1 (ImageNet, threshold 3), PyTorch 1.0 alexnet, cRank@5 on the correctable set",
+  "value": "34",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S1 (appendix.tex), row \"PyTorch 1.0 alexnet\", column \"cRank@5\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-rank-text",
+  "claim": "rank changes on the correctable set stated in the text",
+  "value": "NASNet-large drops from ranking 1/34 -> 29/34, Xception drops from ranking 2/34 -> 24/34, ResNet-18 increases from ranking 34/34 -> 1/34, and ResNet-50 increases from ranking 20/24 -> 2/24",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.1, paragraph 1 (stability.tex)",
+  "source": "paper",
+  "note": "\"20/24 -> 2/24\" is a typo for 20/34 -> 2/34 (34 models; Table S1 PyTorch resnet50 Rank@1 20, cRank@1 2)."
+ },
+ {
+  "id": "pervasive-fig3a",
+  "claim": "removing errors leaves the full-set ranking unchanged",
+  "value": "Benchmarks are unchanged by removing label errors (a)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 3 caption (stability.tex)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ab-pt-resnet18",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), PyTorch 1.0 resnet18, ImageNet threshold 3",
+  "value": "72.13",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"PyTorch 1.0 resnet18\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 72.146, corrected panel 72.114 (mean shown). Line endpoints at N0: original-label accuracy on P 70.214, corrected 72.417. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-pt-resnet50",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), PyTorch 1.0 resnet50, ImageNet threshold 3",
+  "value": "78.63",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"PyTorch 1.0 resnet50\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 78.646, corrected panel 78.620 (mean shown). Line endpoints at N0: original-label accuracy on P 76.729, corrected 78.476. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-k-resnet50",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), Keras 2.2.4 resnet50, ImageNet threshold 3",
+  "value": "73.61",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"Keras 2.2.4 resnet50\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 73.622, corrected panel 73.594 (mean shown). Line endpoints at N0: original-label accuracy on P 71.891, corrected 73.394. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-k-nasnetlarge",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), Keras 2.2.4 nasnetlarge, ImageNet threshold 3",
+  "value": "84.27",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"Keras 2.2.4 nasnetlarge\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 84.286, corrected panel 84.258 (mean shown). Line endpoints at N0: original-label accuracy on P 82.382, corrected 83.730. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-k-densenet169",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), Keras 2.2.4 densenet169, ImageNet threshold 3",
+  "value": "77.44",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"Keras 2.2.4 densenet169\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 77.452, corrected panel 77.427 (mean shown). Line endpoints at N0: original-label accuracy on P 75.583, corrected 77.234. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-pt-vgg11",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), PyTorch 1.0 vgg11, ImageNet threshold 3",
+  "value": "71.14",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"PyTorch 1.0 vgg11\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 71.154, corrected panel 71.132 (mean shown). Line endpoints at N0: original-label accuracy on P 69.441, corrected 71.110. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-pt-alexnet",
+  "claim": "accuracy on the benign set B (A_B, top-1, %), PyTorch 1.0 alexnet, ImageNet threshold 3",
+  "value": "57.09",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 (img/noise_prevelance/benchmarks_crossover_{original,corrected}_top1_consensus3.pdf), line \"PyTorch 1.0 alexnet\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Not tabulated. Recovered from the figure PDF vector coordinates (matplotlib; 20 markers per line, exactly linear), not eyeballed. Fit A(N) = A_B + N (A_C - A_B) to each line using the gridlines for the y-scale and the 2.9%/25%/50% ticks for N. Original panel gives A_B = 57.107, corrected panel 57.083 (mean shown). Line endpoints at N0: original-label accuracy on P 55.751, corrected 57.138. Check: the same fit returns A_C equal to Table S1 Acc@1 and cAcc@1 within 0.005."
+ },
+ {
+  "id": "pervasive-ab-not-recoverable",
+  "claim": "models whose A_B cannot be recovered",
+  "value": "Keras xception, PyTorch densenet169, PyTorch vgg11_bn (and the other 24 models not plotted in Fig 4)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 legend lists only 7 models; Fig 3a plots all 34 models but labels only Nasnet, ResNet-18, AlexNet",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Fig 3a points give (original, corrected) accuracy on P for all 34 models, but unlabeled points cannot be matched to Table S1 rows uniquely (the difference only fixes cAcc@1 - Acc@1, which many rows share within plot precision)."
+ },
+ {
+  "id": "pervasive-fig4-labels",
+  "claim": "crossover values printed on Fig 4 (threshold 3)",
+  "value": "corrected panel: 9%, 31%, 43%; original panel: 13%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4, vertical dotted lines (text in the figure PDFs)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-fig4-cross-9-pair",
+  "claim": "which models cross at the printed 9% line",
+  "value": "PyTorch 1.0 resnet18 vs Keras 2.2.4 resnet50 at N = 8.66%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 bottom panel (corrected labels), first dotted line",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "From A_B (pervasive-ab-*) and Table S1 cAcc@1 via pervasive-eq-cross: (73.61 - 72.13) / ((73.61 - 72.13) - (66.81 - 82.42)) = 0.0866. PyTorch resnet18 vs PyTorch resnet50 cross only at N = 42.84%. A page that pairs the two PyTorch ResNets will not reproduce the 9% swap."
+ },
+ {
+  "id": "pervasive-fig4-cross-31-pair",
+  "claim": "which models cross at the printed 31% line",
+  "value": "PyTorch 1.0 resnet18 vs Keras 2.2.4 densenet169 at N = 31.51%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 bottom panel, second dotted line",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Same method as pervasive-fig4-cross-9-pair."
+ },
+ {
+  "id": "pervasive-fig4-cross-43-pair",
+  "claim": "which models cross at the printed 43% line",
+  "value": "Keras 2.2.4 nasnetlarge vs PyTorch 1.0 resnet18 at N = 43.00% (near-coincident: resnet18 vs PyTorch resnet50 at 42.84%, nasnetlarge vs PyTorch resnet50 at 43.18%)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 bottom panel, third dotted line",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Same method. One unmarked crossing also exists: Keras resnet50 vs PyTorch vgg11 at 40.81%."
+ },
+ {
+  "id": "pervasive-fig4-cross-13-pair",
+  "claim": "which models cross at the printed 13% line (original labels)",
+  "value": "PyTorch 1.0 resnet18 vs PyTorch 1.0 vgg11 at N = 13.33%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 top panel (original labels), dotted line",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Same method with Table S1 Acc@1 in place of cAcc@1."
+ },
+ {
+  "id": "pervasive-fig4-models",
+  "claim": "models drawn in Fig 4",
+  "value": "Keras 2.2.4 densenet169, Keras 2.2.4 nasnetlarge, Keras 2.2.4 resnet50, PyTorch 1.0 alexnet, PyTorch 1.0 resnet18, PyTorch 1.0 resnet50, PyTorch 1.0 vgg11",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 4 legend \"Platform & Model\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-c10-c",
+  "claim": "|C| for CIFAR-10 (threshold 3)",
+  "value": "n = 18",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table S2 caption; Table 2 row \"CIFAR-10\", column \"correctable\" (18)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-c10-n0",
+  "claim": "base noise prevalence of the CIFAR-10 pruned set (x-axis tick)",
+  "value": "0.2%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 x-axis, leftmost tick (cifar10_benchmarks_crossover_*_consensus3.pdf)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-c10-sizes-derived",
+  "claim": "CIFAR-10 set sizes, threshold 3",
+  "value": "|U| = 36, |P| = 9964, |B| = 9946, N0 = 0.1807%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 2 row \"CIFAR-10\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "U = 32 + 0 + 4 = 36 (= 54 - 18); P = 10000 - 36 = 9964; B = 9964 - 18 = 9946; N0 = 18/9964. The Fig 5 x-axis puts its \"0.2%\" tick at exactly 0.1807%."
+ },
+ {
+  "id": "pervasive-ts2-vgg11-bn-acc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg11_bn, Acc@1 on the correctable set",
+  "value": "27.78",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg11-bn-cacc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg11_bn, cAcc@1 on the correctable set",
+  "value": "66.67",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg11-bn-rank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg11_bn, Rank@1 on the correctable set",
+  "value": "11",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg11-bn-crank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg11_bn, cRank@1 on the correctable set",
+  "value": "1",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg11_bn\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg13-bn-acc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg13_bn, Acc@1 on the correctable set",
+  "value": "27.78",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg13_bn\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg13-bn-cacc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg13_bn, cAcc@1 on the correctable set",
+  "value": "50.00",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg13_bn\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg13-bn-rank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg13_bn, Rank@1 on the correctable set",
+  "value": "12",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg13_bn\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg13-bn-crank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg13_bn, cRank@1 on the correctable set",
+  "value": "7",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg13_bn\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg16-bn-acc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg16_bn, Acc@1 on the correctable set",
+  "value": "44.44",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg16_bn\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg16-bn-cacc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg16_bn, cAcc@1 on the correctable set",
+  "value": "44.44",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg16_bn\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg16-bn-rank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg16_bn, Rank@1 on the correctable set",
+  "value": "3",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg16_bn\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg16-bn-crank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg16_bn, cRank@1 on the correctable set",
+  "value": "8",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg16_bn\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg19-bn-acc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg19_bn, Acc@1 on the correctable set",
+  "value": "50.00",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg19_bn\", column \"Acc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg19-bn-cacc1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg19_bn, cAcc@1 on the correctable set",
+  "value": "38.89",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg19_bn\", column \"cAcc@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg19-bn-rank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg19_bn, Rank@1 on the correctable set",
+  "value": "2",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg19_bn\", column \"Rank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-ts2-vgg19-bn-crank1",
+  "claim": "Table S2 (CIFAR-10, threshold 3), PyTorch 1.0 vgg19_bn, cRank@1 on the correctable set",
+  "value": "11",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Appendix F, Table S2 (appendix.tex), row \"PyTorch 1.0 vgg19_bn\", column \"cRank@1\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-c10-legend",
+  "claim": "model names in the CIFAR-10 crossover figure vs Table S2",
+  "value": "legend: PyTorch 1.0 vgg11, vgg13, vgg16, vgg19",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 legend",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Table S2 lists only *_bn VGG variants. The A_C recovered from the Fig 5 vectors equals the *_bn rows exactly (66.67, 50.00, 44.44, 38.89 corrected; 27.78, 27.78, 44.44, 50.00 original), so the legend names are the batch-norm models."
+ },
+ {
+  "id": "pervasive-c10-ab-vgg11",
+  "claim": "CIFAR-10 accuracy on the benign set B (A_B, %), vgg11(_bn)",
+  "value": "92.46",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 vector data, line \"vgg11(_bn)\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Recovered from the figure PDF vectors as for ImageNet; both panels give the same A_B to 0.001."
+ },
+ {
+  "id": "pervasive-c10-ab-vgg13",
+  "claim": "CIFAR-10 accuracy on the benign set B (A_B, %), vgg13(_bn)",
+  "value": "94.64",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 vector data, line \"vgg13(_bn)\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Recovered from the figure PDF vectors as for ImageNet; both panels give the same A_B to 0.001."
+ },
+ {
+  "id": "pervasive-c10-ab-vgg16",
+  "claim": "CIFAR-10 accuracy on the benign set B (A_B, %), vgg16(_bn)",
+  "value": "94.25",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 vector data, line \"vgg16(_bn)\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Recovered from the figure PDF vectors as for ImageNet; both panels give the same A_B to 0.001."
+ },
+ {
+  "id": "pervasive-c10-ab-vgg19",
+  "claim": "CIFAR-10 accuracy on the benign set B (A_B, %), vgg19(_bn)",
+  "value": "94.12",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 vector data, line \"vgg19(_bn)\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "Recovered from the figure PDF vectors as for ImageNet; both panels give the same A_B to 0.001."
+ },
+ {
+  "id": "pervasive-c10-labels",
+  "claim": "crossover values printed on Fig 5 (CIFAR-10)",
+  "value": "corrected panel: 6%, 7%, 12%; original panel: 2%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 dotted lines (text in the figure PDFs)",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-c10-cross-vgg11-vgg19",
+  "claim": "VGG-11 vs VGG-19 crossover on CIFAR-10 corrected labels",
+  "value": "N = 5.64%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 5 bottom panel, dotted line labeled \"6%\"",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "vgg11 vs vgg13 at 11.58% (\"12%\"), vgg11 vs vgg16 at 7.45% (\"7%\"). 5.64 - 0.18 = +5.46 points, the abstract's \"just 5%\"."
+ },
+ {
+  "id": "pervasive-c10-text",
+  "claim": "CIFAR-10 statement in Sec 5.1",
+  "value": "VGG-11 significantly outperforms VGG-19 in terms of corrected accuracy over C",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 5.1, paragraph 1",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-mturk-nonerr",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (MTurk)\", column \"non-errors\"",
+  "value": "57.9%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (MTurk)\", column \"non-errors\"",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper: the caption says row-normalized, but Table S3 counts (481, 453, 205, 92, 53, 103 non-agreement; total 934) give these values only over 934 - 103 = 831 (e.g. 205/831 = 24.7%, 481/831 = 57.9%). Over 934: non-errors 51.5%, correctable 21.9%."
+ },
+ {
+  "id": "pervasive-t3-cl-mturk-err",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (MTurk)\", column \"errors\"",
+  "value": "42.2%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (MTurk)\", column \"errors\"",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper: the caption says row-normalized, but Table S3 counts (481, 453, 205, 92, 53, 103 non-agreement; total 934) give these values only over 934 - 103 = 831 (e.g. 205/831 = 24.7%, 481/831 = 57.9%). Over 934: non-errors 51.5%, correctable 21.9%."
+ },
+ {
+  "id": "pervasive-t3-cl-mturk-corr",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (MTurk)\", column \"correctable\"",
+  "value": "24.7%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (MTurk)\", column \"correctable\"",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper: the caption says row-normalized, but Table S3 counts (481, 453, 205, 92, 53, 103 non-agreement; total 934) give these values only over 934 - 103 = 831 (e.g. 205/831 = 24.7%, 481/831 = 57.9%). Over 934: non-errors 51.5%, correctable 21.9%."
+ },
+ {
+  "id": "pervasive-t3-cl-mturk-multi",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (MTurk)\", column \"multi-label\"",
+  "value": "11.1%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (MTurk)\", column \"multi-label\"",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper: the caption says row-normalized, but Table S3 counts (481, 453, 205, 92, 53, 103 non-agreement; total 934) give these values only over 934 - 103 = 831 (e.g. 205/831 = 24.7%, 481/831 = 57.9%). Over 934: non-errors 51.5%, correctable 21.9%."
+ },
+ {
+  "id": "pervasive-t3-cl-mturk-neither",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (MTurk)\", column \"neither\"",
+  "value": "6.4%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (MTurk)\", column \"neither\"",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper: the caption says row-normalized, but Table S3 counts (481, 453, 205, 92, 53, 103 non-agreement; total 934) give these values only over 934 - 103 = 831 (e.g. 205/831 = 24.7%, 481/831 = 57.9%). Over 934: non-errors 51.5%, correctable 21.9%."
+ },
+ {
+  "id": "pervasive-t3-cl-mturk-time",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (MTurk)\", column \"Avg. time spent\"",
+  "value": "5 seconds",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (MTurk)\", column \"Avg. time spent\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-expert-nonerr",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (expert)\", column \"non-errors\"",
+  "value": "58.7%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (expert)\", column \"non-errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-expert-err",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (expert)\", column \"errors\"",
+  "value": "41.4%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (expert)\", column \"errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-expert-corr",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (expert)\", column \"correctable\"",
+  "value": "17.7%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (expert)\", column \"correctable\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-expert-multi",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (expert)\", column \"multi-label\"",
+  "value": "13.1%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (expert)\", column \"multi-label\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-expert-neither",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (expert)\", column \"neither\"",
+  "value": "10.6%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (expert)\", column \"neither\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-cl-expert-time",
+  "claim": "Table 3 (ImageNet expert review), row \"CL (expert)\", column \"Avg. time spent\"",
+  "value": "67 seconds",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"CL (expert)\", column \"Avg. time spent\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-noncl-expert-nonerr",
+  "claim": "Table 3 (ImageNet expert review), row \"non-CL (expert)\", column \"non-errors\"",
+  "value": "84.0%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"non-CL (expert)\", column \"non-errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-noncl-expert-err",
+  "claim": "Table 3 (ImageNet expert review), row \"non-CL (expert)\", column \"errors\"",
+  "value": "16.0%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"non-CL (expert)\", column \"errors\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-noncl-expert-corr",
+  "claim": "Table 3 (ImageNet expert review), row \"non-CL (expert)\", column \"correctable\"",
+  "value": "3.2%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"non-CL (expert)\", column \"correctable\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-noncl-expert-multi",
+  "claim": "Table 3 (ImageNet expert review), row \"non-CL (expert)\", column \"multi-label\"",
+  "value": "9.1%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"non-CL (expert)\", column \"multi-label\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-noncl-expert-neither",
+  "claim": "Table 3 (ImageNet expert review), row \"non-CL (expert)\", column \"neither\"",
+  "value": "3.7%",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"non-CL (expert)\", column \"neither\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-t3-noncl-expert-time",
+  "claim": "Table 3 (ImageNet expert review), row \"non-CL (expert)\", column \"Avg. time spent\"",
+  "value": "67 seconds",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Table 3 (expert.tex), row \"non-CL (expert)\", column \"Avg. time spent\"",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-expert-design",
+  "claim": "expert review sample",
+  "value": "934 + 1,000 = 1934 images",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 6, paragraph 2 (expert.tex)",
+  "source": "paper",
+  "note": "1 CL-flagged and 1 non-CL-flagged image per class; 66 classes had no CL-flagged image. Each image reviewed by at least two experts; experts agreed on 77% of images."
+ },
+ {
+  "id": "pervasive-expert-2p6",
+  "claim": "how much more likely a CL-flagged image is to be wrong",
+  "value": "An image flagged by CL was 2.6x as likely to be erroneously labeled than an non-CL-flagged image.",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 6, paragraph 3",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-expert-20",
+  "claim": "ImageNet val set error estimate after the expert review",
+  "value": "we can more accurately estimate that the ImageNet validation set contains closer to 20% label errors (up from the 6% reported in Table 1)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 6, last paragraph",
+  "source": "paper",
+  "note": "Reasoning in the source: \"missed around 14% of the label errors in ImageNet because 89% of images were not flagged by CL and Table 3 indicates around 16% of these were mislabeled\"."
+ },
+ {
+  "id": "pervasive-expert-time",
+  "claim": "expert time per label vs MTurk",
+  "value": "13x (Sec 6) vs 14x (Appendix G)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 6 paragraph 2 (\"13x more time\"); Appendix \"Expert label review details\" (\"14x more time than MTurk workers\")",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper. 67 s / 5 s = 13.4."
+ },
+ {
+  "id": "pervasive-mturk-over-correct",
+  "claim": "MTurk vs expert disagreement pattern",
+  "value": "MTurk workers favored correcting labels in cases where experts agreed neither label was appropriate",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Sec 6, paragraph 4",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-cite-title",
+  "claim": "title",
+  "value": "Understanding deep learning requires rethinking generalization",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "abs.html; paper.pdf title",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-cite-authors",
+  "claim": "authors",
+  "value": "Chiyuan Zhang, Samy Bengio, Moritz Hardt, Benjamin Recht, Oriol Vinyals",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "abs.html citation_author; paper.pdf header",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "1611.03530v2",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "paper.pdf margin stamp \"arXiv:1611.03530v2 [cs.LG] 26 Feb 2017\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-cite-date",
+  "claim": "date of v1 and of the version used (v2)",
+  "value": "v1: 10 Nov 2016; v2: 26 Feb 2017",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-cite-venue",
+  "claim": "venue",
+  "value": "ICLR 2017",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "abs.html comments: \"Published in ICLR 2017\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-central",
+  "claim": "central finding",
+  "value": "Deep neural networks easily fit random labels.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 1.1 \"Our contributions\", paragraph \"Randomization tests\" (boxed sentence)",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-zero-train",
+  "claim": "what happens with completely random labels",
+  "value": "when trained on a completely random labeling of the true data, neural networks achieve 0 training error.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 1.1, paragraph \"Randomization tests\", sentence after the boxed finding",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-test-chance",
+  "claim": "test error on random labels",
+  "value": "The test error, of course, is no better than random chance as there is no correlation between the training labels and the test labels.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 1.1, paragraph \"Randomization tests\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-small-constant",
+  "claim": "training time on random labels vs true labels",
+  "value": "Even optimization on random labels remains easy. In fact, training time increases only by a small constant factor compared with training on the true labels.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 1.1, implication 2",
+  "source": "paper",
+  "note": "The factor is not stated as a number in the text; Fig 1b shows relative convergence time vs label corruption (plot only)."
+ },
+ {
+  "id": "zhang-noise-def-random",
+  "claim": "this paper's definition of random labels",
+  "value": "Random labels: all the labels are replaced with random ones.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 2.1, list of label/input modifications",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-noise-def-partial",
+  "claim": "this paper's definition of partial (symmetric) label corruption",
+  "value": "Partially corrupted labels: independently with probability p, the label of each image is corrupted as a uniform random class.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 2.1, list of label/input modifications",
+  "source": "paper",
+  "note": "The uniform draw can return the true class, so the share of labels that actually change is p(K-1)/K (0.9p on CIFAR-10); the paper does not state this."
+ },
+ {
+  "id": "zhang-fit-observations",
+  "claim": "three observations on fitting random labels",
+  "value": "a) we do not need to change the learning rate schedule; b) once the fitting starts, it converges quickly; c) it converges to (over)fit the training set perfectly.",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 2.1, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-gen-90",
+  "claim": "test error at full corruption",
+  "value": "As the noise level approaches 1, the generalization errors converge to 90%",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Sec 2.1, paragraph \"Partially corrupted labels\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-params",
+  "claim": "Table 1, Inception (small, CIFAR-10) parameter count",
+  "value": "1,649,402",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", column \"# params\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-aug-wd-train",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop yes, weight decay yes), train accuracy %",
+  "value": "100.0",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"yes\", weight decay \"yes\", column \"train accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-aug-wd-test",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop yes, weight decay yes), test accuracy %",
+  "value": "89.05",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"yes\", weight decay \"yes\", column \"test accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-aug-train",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop yes, weight decay no), train accuracy %",
+  "value": "100.0",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"yes\", weight decay \"no\", column \"train accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-aug-test",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop yes, weight decay no), test accuracy %",
+  "value": "89.31",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"yes\", weight decay \"no\", column \"test accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-wd-train",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop no, weight decay yes), train accuracy %",
+  "value": "100.0",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"no\", weight decay \"yes\", column \"train accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-wd-test",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop no, weight decay yes), test accuracy %",
+  "value": "86.03",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"no\", weight decay \"yes\", column \"test accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-plain-train",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop no, weight decay no), train accuracy %",
+  "value": "100.0",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"no\", weight decay \"no\", column \"train accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-true-plain-test",
+  "claim": "Table 1, Inception on CIFAR-10 true labels (random crop no, weight decay no), test accuracy %",
+  "value": "85.75",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"Inception\", random crop \"no\", weight decay \"no\", column \"test accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-random-train",
+  "claim": "Table 1, Inception fitting random labels on CIFAR-10 (no crop, no weight decay), train accuracy %",
+  "value": "100.0",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"(fitting random labels)\" under \"Inception\", column \"train accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-t1-inception-random-test",
+  "claim": "Table 1, Inception fitting random labels on CIFAR-10 (no crop, no weight decay), test accuracy %",
+  "value": "9.78",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Table 1, row \"(fitting random labels)\" under \"Inception\", column \"test accuracy\"",
+  "source": "paper"
+ },
+ {
+  "id": "zhang-imagenet-random-train",
+  "claim": "ImageNet, Inception V3 on random labels, top-1 train accuracy (no aug, no dropout, no weight decay)",
+  "value": "95.20",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Appendix B, Table 2, block \"ImageNet 1000 classes with random labels\", row \"no / no / no\", column \"top-1 train\"; quoted in Sec 2.1 as \"95.20% accuracy\"",
+  "source": "paper",
+  "note": "Sec 2.1: \"although it does not reach the perfect 100% top-1 accuracy, 95.20% accuracy is still very surprising for a million random labels from 1000 categories\". The appendix table is Table 2 (numbered in the appendix)."
+ },
+ {
+  "id": "zhang-imagenet-random-test",
+  "claim": "ImageNet, Inception V3 on random labels, top-1 test accuracy (same row)",
+  "value": "0.11",
+  "paper": "zhang",
+  "version": "1611.03530v2",
+  "loc": "Appendix B, Table 2, block \"random labels\", row \"no / no / no\", column \"top-1 test\"",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-cite-title",
+  "claim": "title",
+  "value": "A Closer Look at Memorization in Deep Networks",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-cite-authors",
+  "claim": "authors",
+  "value": "Devansh Arpit, Stanislaw Jastrzebski, Nicolas Ballas, David Krueger, Emmanuel Bengio, Maxinder S. Kanwal, Tegan Maharaj, Asja Fischer, Aaron Courville, Yoshua Bengio, Simon Lacoste-Julien",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "abs.html citation_author",
+  "source": "paper",
+  "note": "ASCII spelling; the source writes Stanislaw with a stroked l (Jastrzebski with a dotted e)."
+ },
+ {
+  "id": "arpit-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "1706.05394v2",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-cite-date",
+  "claim": "date of v1 and of the version used (v2)",
+  "value": "v1: 16 Jun 2017; v2: 1 Jul 2017",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-cite-venue",
+  "claim": "venue",
+  "value": "ICML 2017 (Proceedings of the 34th International Conference on Machine Learning)",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "abs.html comments",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-noise-def",
+  "claim": "this paper's definition of label noise (randY) and input noise (randX)",
+  "value": "we replace either (some portion of) the labels (with random labels), or the inputs (with i.i.d. Gaussian noise matching the real dataset's mean and variance) for some fraction of the training set. We use randX and randY to denote datasets with (100%, unless specified) noisy inputs and labels (respectively).",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 2 \"Experiment Details\", paragraph 2",
+  "source": "paper",
+  "note": "Follows Zhang et al. Whether a random label may equal the true label is not stated."
+ },
+ {
+  "id": "arpit-noise-fractions",
+  "claim": "noise fractions in the noise sweep",
+  "value": "datasets with 20% to 80% of the training data replaced with either input or label noise",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 4.2, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-contrib-2",
+  "claim": "second contribution",
+  "value": "DNNs learn simple patterns first, before memorizing",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 1, contribution list item 2",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s42-peak",
+  "claim": "validation peaks before training accuracy is high (randY)",
+  "value": "for randY datasets (Figures 7(b) and 8(b)), the network achieves maximum accuracy on the validation set before achieving high accuracy on the training set.",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 4.2, paragraph 3, sentence 1",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s42-patterns",
+  "claim": "interpretation of the validation peak",
+  "value": "Thus the model first learns the simple and general patterns of the real data before fitting the noise (which results in decreasing validation accuracy).",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 4.2, paragraph 3, sentence 2",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s42-lower",
+  "claim": "effect of noise level on validation accuracy",
+  "value": "The final and maximum validation accuracies are also both lower for noisier datasets, indicating that the noise examples interfere somewhat with the networks ability to learn about the real data.",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 4.2, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s5-claim",
+  "claim": "regularization claim",
+  "value": "explicit regularizations can substantially limit the speed of memorization of noise data without significantly impacting learning on real data.",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 5, paragraph 1",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s5-dropout-most",
+  "claim": "which regularizer works best against memorization",
+  "value": "different regularizers target memorization behavior to different extent -- dropout being the most effective.",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 5, paragraph 3",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s5-dropout-adv",
+  "claim": "dropout with adversarial training",
+  "value": "dropout, especially coupled with adversarial training, is best at hindering memorization without reducing the model's ability to learn.",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 5, paragraph 3",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-s5-ranges",
+  "claim": "regularizer ranges tested",
+  "value": "dropout (with dropout rates in range 0-0.9), input dropout (range 0-0.9), input Gaussian noise (with standard deviation in range 0-5), hidden Gaussian noise (range 0-0.3), weight decay (range 0-1) and additionally dropout with adversarial training (with weighting factor in range 0.2-0.7 and dropout in rate range 0.03-0.5)",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 5, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-cnn-arch",
+  "claim": "CIFAR-10 CNN architecture",
+  "value": "Input -> Crop(2,2) -> Conv(200,5,5) -> BN -> ReLU -> MaxPooling(3,3) -> Conv(200,5,5) -> BN -> ReLU -> MaxPooling(3,3) -> Dense(384) -> BN -> ReLU -> Dense(192) -> BN -> ReLU -> Dense(#classes) -> Softmax",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 2, footnote to \"small Alexnet-style CNN\"",
+  "source": "paper",
+  "note": "Source arrows are $\\rightarrow$. \"Here Crop(. , .) crops height and width from both sides with respective values.\""
+ },
+ {
+  "id": "arpit-cnn-opt",
+  "claim": "CIFAR-10 CNN optimizer",
+  "value": "trained using SGD with momentum=0.9 and learning rate of 0.01, scheduled to drop by half every 15 epochs",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 2, paragraph 1",
+  "source": "paper"
+ },
+ {
+  "id": "arpit-mlp",
+  "claim": "MNIST MLP setup",
+  "value": "the MLPs have 4096 hidden units per layer and are trained for 1000 epochs with SGD and learning rate 0.01",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Sec 2, paragraph 1",
+  "source": "paper",
+  "note": "2-layer ReLU MLPs on MNIST; \"If not stated otherwise\"."
+ },
+ {
+  "id": "arpit-fig8-epochs",
+  "claim": "epochs plotted in Fig 8 (CIFAR-10)",
+  "value": "200",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Fig 8 x-axis (fig_png/cifar10_noisey_accuracy_2.png)",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "arpit-fig8-final-val",
+  "claim": "Fig 8b (CIFAR-10 randY) final validation accuracy for label noise 0 / 0.2 / 0.4 / 0.6 / 0.8",
+  "value": "about 0.73 / 0.58 / 0.44 / 0.31 / 0.19",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Fig 8b left panel, dotted lines at epoch 200",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot (raster PNG)."
+ },
+ {
+  "id": "arpit-fig8-peak-08",
+  "claim": "Fig 8b, 80% randY: validation peak and the training accuracy at that time",
+  "value": "validation about 0.31 near epoch 7; training accuracy then about 0.2",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Fig 8b left panel, darkest dotted and solid lines",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot. The 0.2 noise curve shows no clear peak above its final value; 0.6 peaks about 0.40 near epoch 10."
+ },
+ {
+  "id": "arpit-fig8-train-full",
+  "claim": "Fig 8b: epoch by which training accuracy reaches 1.0",
+  "value": "about epoch 25 (0 noise) to about epoch 65 (0.8 noise)",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Fig 8b left panel, solid lines",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "arpit-fig7-final-val",
+  "claim": "Fig 7b (MNIST MLP randY) final validation accuracy for label noise 0.2 / 0.4 / 0.6 / 0.8",
+  "value": "about 0.89 / 0.75 / 0.55 / 0.33",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Fig 7b left panel, dotted lines at epoch 100 (fig_png/mnist_noisey_accuracy_2.png)",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot."
+ },
+ {
+  "id": "arpit-fig7-peak-08",
+  "claim": "Fig 7b, 80% randY: validation peak and the training accuracy at that time",
+  "value": "validation about 0.91 near epoch 3; training accuracy then about 0.25",
+  "paper": "arpit",
+  "version": "1706.05394v2",
+  "loc": "Fig 7b left panel, darkest lines",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot. All noise levels peak in the first few epochs, then fall: the clearest \"peak, then fall\" in the paper."
+ },
+ {
+  "id": "cifarn-cite-title",
+  "claim": "title",
+  "value": "Learning with Noisy Labels Revisited: A Study Using Real-World Human Annotations",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-cite-authors",
+  "claim": "authors",
+  "value": "Jiaheng Wei, Zhaowei Zhu, Hao Cheng, Tongliang Liu, Gang Niu, Yang Liu",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2110.12088v2",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-cite-date",
+  "claim": "date of v1 and of the version used (v2)",
+  "value": "v1: 22 Oct 2021; v2: 27 Mar 2022",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-cite-venue",
+  "claim": "venue",
+  "value": "ICLR 2022",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "abs.html comments: \"Published as a conference paper at ICLR 2022\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-collection",
+  "claim": "how CIFAR-10N labels were collected",
+  "value": "Each HIT is then randomly assigned to three independent workers.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset collection\"",
+  "source": "paper",
+  "note": "CIFAR-10 train set split into ten batches; each batch 500 HITs of 10 images; base reward $0.03 per HIT; no ground-truth labels used to approve or reject work."
+ },
+ {
+  "id": "cifarn-def-aggregate",
+  "claim": "definition of the Aggregate label set",
+  "value": "Aggregate: aggregation of three noisy labels by majority voting. If the submitted three labels are different for an image, the aggregated label will be randomly selected among the three labels.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-def-worst",
+  "claim": "definition of the Worst label set",
+  "value": "Worst: dataset with the highest noise rate. For each image, if there exist any wrongly annotated labels in three noisy labels, the worst label is randomly selected from wrong labels. Otherwise, the worst label is equal to the clean label.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-unanimous",
+  "claim": "share of CIFAR-10 train images with a unanimous label from 3 labelers",
+  "value": "60.27%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"; Appendix Table 4 row \"Consensus\", last column",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c10-aggregate",
+  "claim": "CIFAR-10N noise rate, Aggregate label set",
+  "value": "9.03%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"; Table 1 and Appendix Table 4 row \"Aggregate\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c10-random1",
+  "claim": "CIFAR-10N noise rate, Random 1 label set",
+  "value": "17.23%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"; Table 1 and Appendix Table 4 row \"Random 1\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c10-random2",
+  "claim": "CIFAR-10N noise rate, Random 2 label set",
+  "value": "18.12%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"; Table 1 and Appendix Table 4 row \"Random 2\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c10-random3",
+  "claim": "CIFAR-10N noise rate, Random 3 label set",
+  "value": "17.64%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"; Table 1 and Appendix Table 4 row \"Random 3\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c10-worst",
+  "claim": "CIFAR-10N noise rate, Worst label set",
+  "value": "40.21%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, paragraph \"Dataset statistics\"; Table 1 and Appendix Table 4 row \"Worst\"",
+  "source": "paper",
+  "note": "Table 1 names this set \"CIFAR-10N-worse\"; the text says \"Worst\"."
+ },
+ {
+  "id": "cifarn-c10-random-approx",
+  "claim": "summary of the three single-labeler sets",
+  "value": "All three random sets have approx 18% noise level.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.1, last paragraph",
+  "source": "paper",
+  "note": "Source: \"$\\approx18\\%$\"."
+ },
+ {
+  "id": "cifarn-c100-fine",
+  "claim": "CIFAR-100N noise rate, fine labels",
+  "value": "40.20%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.2, paragraph \"Dataset statistics\"; Appendix Table 7",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c100-coarse",
+  "claim": "CIFAR-100N noise rate, coarse labels",
+  "value": "25.60%",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.2, paragraph \"Dataset statistics\"; Appendix Table 7",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-c100-collection",
+  "claim": "labels per CIFAR-100N image",
+  "value": "Only one worker is assigned to each HIT.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 3.2, paragraph \"Data collection\"",
+  "source": "paper",
+  "note": "Each image gets one coarse (super-class) and one fine label from that worker."
+ },
+ {
+  "id": "cifarn-noise-def-sym",
+  "claim": "this paper's definition of symmetric noise",
+  "value": "Assume the noise level is \\epsilon, the diagonal entry of the symmetric T is denoted as T_{i, i}=1-\\epsilon. For any other off-diagonal entry T_{i, j} where i\\neq j, the corresponding element is T_{i, j}=\\frac{\\epsilon}{K-1}.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 2.1, paragraph \"Symmetric T\"",
+  "source": "paper",
+  "note": "Here epsilon is the true flip rate (the label never stays put by chance), unlike Zhang (uniform over all classes)."
+ },
+ {
+  "id": "cifarn-noise-def-asym",
+  "claim": "this paper's definition of asymmetric noise",
+  "value": "The assymetric-next T assumes that the clean label flips to the next class with probability \\epsilon, i.e, i\\to (i+1)\\mod K for i\\in [K]. The assymetric-pair T considers [\\frac{K}{2}] disjoint class pairs (i_c, j_c) where i_c<j_c. For c\\in [\\frac{K}{2}], T_{i_c, j_c}=T_{j_c, i_c}=\\epsilon, and the diagonal entries are 1-\\epsilon.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 2.1, paragraph \"Asymmetric T\"",
+  "source": "paper",
+  "note": "\"assymetric\" is the source spelling."
+ },
+ {
+  "id": "cifarn-noise-def-instance",
+  "claim": "this paper's definition of instance-dependent noise",
+  "value": "the label noise is jointly determined by feature X and clean label Y",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 2.2, sentence 1",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-synthetic-control",
+  "claim": "synthetic noise used for the controlled comparison",
+  "value": "we synthesize the class-dependent label noise with the same expected noised transition matrix T:=\\mathbb{E}[T(X)] as our human-level label noise",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 4.2.1, last paragraph",
+  "source": "paper",
+  "note": "Source writes \\E[T(X)] (macro for \\mathbb{E})."
+ },
+ {
+  "id": "cifarn-ttest-result",
+  "claim": "hypothesis test: human noise vs class-dependent synthetic noise (CIFAR-10N)",
+  "value": "p = 1.8e-36",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 4.2.2, paragraph \"Formulation\", last part; repeated in Appendix (Fig 12 discussion)",
+  "source": "paper",
+  "note": "Source LaTeX: \"$p=1.8e^{-36}$\"; two-sided t-test, significance level alpha = 0.05, on distances between per-cluster transition vectors (10 repeats with different augmentations). Conclusion in source: \"human annotated label noise in CIFAR-10N is feature-dependent\" is accepted."
+ },
+ {
+  "id": "cifarn-feature-dependent",
+  "claim": "conclusion of the test",
+  "value": "human annotated label noise in CIFAR-10N is feature-dependent",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 4.2.2, last sentence of \"Formulation\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-memorize-quote",
+  "claim": "memorization finding",
+  "value": "deep neural nets memorize features more easily when learning with real-world human annotations than synthetic ones.",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 5.2 \"Memorization effects\", paragraph 2 (italic sentence); Fig 6",
+  "source": "paper",
+  "note": "Setup: CE loss, ResNet-34, CIFAR-10N aggregate / random-1 / worst label sets vs synthetic noise with the same T; a feature counts as memorized if the model predicts some class with probability above eta = 0.95."
+ },
+ {
+  "id": "cifarn-memorize-why",
+  "claim": "stated reason",
+  "value": "human annotators are prone to providing wrong labels on more misleading/ambiguous images or complex patterns",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Sec 5.2, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-t3-ce-aggregate",
+  "claim": "Table 3: CE (Standard) test accuracy gap, synthetic minus human noise, CIFAR-10 Aggregate",
+  "value": "4.35",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Table 3, row \"CE (Standard)\", column \"Aggregate\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-t3-ce-random1",
+  "claim": "Table 3: CE (Standard) test accuracy gap, synthetic minus human noise, CIFAR-10 Random 1",
+  "value": "6.01",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Table 3, row \"CE (Standard)\", column \"Random 1\"",
+  "source": "paper"
+ },
+ {
+  "id": "cifarn-t3-ce-worst",
+  "claim": "Table 3: CE (Standard) test accuracy gap, synthetic minus human noise, CIFAR-10 Worst",
+  "value": "9.00",
+  "paper": "cifarn",
+  "version": "2110.12088v2",
+  "loc": "Table 3, row \"CE (Standard)\", column \"Worst\"",
+  "source": "paper"
+ },
+ {
+  "id": "beyer-cite-title",
+  "claim": "title",
+  "value": "Are we done with ImageNet?",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "beyer-cite-authors",
+  "claim": "authors",
+  "value": "Lucas Beyer, Olivier J. Henaff, Alexander Kolesnikov, Xiaohua Zhai, Aaron van den Oord",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "abs.html citation_author",
+  "source": "paper",
+  "note": "ASCII spelling of Henaff and Aaron."
+ },
+ {
+  "id": "beyer-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "2006.07159v1",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "beyer-cite-date",
+  "claim": "date",
+  "value": "12 Jun 2020",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "abs.html submission history (v1 only)",
+  "source": "paper"
+ },
+ {
+  "id": "beyer-cite-venue",
+  "claim": "venue",
+  "value": "arXiv preprint (no journal-ref; NeurIPS 2020 template)",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "abs.html (no journal-ref); src/neurips_2020.tex",
+  "source": "paper",
+  "uncertain": true,
+  "note": "No venue is stated on the abstract page for this version."
+ },
+ {
+  "id": "beyer-ensemble",
+  "claim": "ensemble of the three best models: original ImageNet accuracy vs ReaL accuracy",
+  "value": "89.0% vs 91.20%",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "Sec 4, paragraph after Fig 4 (\"we also created an ensemble of the three best models\")",
+  "source": "paper",
+  "note": "Source: \"The resulting model reaches 89.0% in original ImageNet accuracy, and 91.20% ReaL accuracy\". Mixed decimals as in the source."
+ },
+ {
+  "id": "beyer-slope-early",
+  "claim": "slope of ReaL accuracy vs ImageNet accuracy, first half of models",
+  "value": "slope = 0.86",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "Sec 4, paragraph 1; Fig 4 solid line",
+  "source": "paper"
+ },
+ {
+  "id": "beyer-slope-late",
+  "claim": "slope for the second (more recent) half of models",
+  "value": "slope = 0.51",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "Sec 4, paragraph 2; Fig 4 dashed line",
+  "source": "paper",
+  "note": "\"p < 0.001, Z-test on the difference in slopes\"."
+ },
+ {
+  "id": "beyer-surpass",
+  "claim": "recent models vs the original labels",
+  "value": "several models already surpass the ReaL accuracy obtained by the original ImageNet labels",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "Sec 4, paragraph 2",
+  "source": "paper"
+ },
+ {
+  "id": "beyer-labels-real",
+  "claim": "ReaL accuracy of the original ImageNet labels",
+  "value": "about 90%",
+  "paper": "beyer",
+  "version": "2006.07159v1",
+  "loc": "Fig 4, red point \"ImageNet labels\" and red dashed line",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Read from plot. The figure PDF vectors place the red point at 90.02% (y-axis gridlines 90 and 94); the text gives no number."
+ },
+ {
+  "id": "webvision-cite-title",
+  "claim": "title",
+  "value": "WebVision Database: Visual Learning and Understanding from Web Data",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "abs.html",
+  "source": "paper"
+ },
+ {
+  "id": "webvision-cite-authors",
+  "claim": "authors",
+  "value": "Wen Li, Limin Wang, Wei Li, Eirikur Agustsson, Luc Van Gool",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "abs.html citation_author",
+  "source": "paper"
+ },
+ {
+  "id": "webvision-cite-arxiv",
+  "claim": "arXiv id and version used",
+  "value": "1708.02862v1",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "abs.html submission history",
+  "source": "paper"
+ },
+ {
+  "id": "webvision-cite-date",
+  "claim": "date",
+  "value": "9 Aug 2017",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "abs.html submission history (v1 only)",
+  "source": "paper"
+ },
+ {
+  "id": "webvision-cite-venue",
+  "claim": "venue",
+  "value": "arXiv technical report (no journal-ref)",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "abs.html (no comments, no journal-ref)",
+  "source": "paper",
+  "uncertain": true,
+  "note": "No venue stated for this version."
+ },
+ {
+  "id": "webvision-train-size",
+  "claim": "size of the WebVision training set",
+  "value": "2,439,574 images",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "Sec 3.1, last paragraph (after \"Validation and Test Sets\")",
+  "source": "paper",
+  "note": "1,459,125 from Flickr and 980,449 from Google Image Search; labels come from the query synset, no human check."
+ },
+ {
+  "id": "webvision-zero-vote",
+  "claim": "share of checked web images with 0 of 3 votes (true noise)",
+  "value": "About 20%",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "Sec 3.2 \"Dataset Analysis\", paragraph \"Noisy Labels\"; Fig 4",
+  "source": "paper",
+  "note": "Source: \"About 20% of images are considered as true noisy images (i.e., \"0 vote\")\". Sample: first annotation round, 200,000 images (200 per category), 3 AMT users each."
+ },
+ {
+  "id": "webvision-inlier-66",
+  "claim": "share of checked web images counted as inliers",
+  "value": "the inlier images (i.e., \"3 votes\" and \"2 votes\") take only 66% of the total images",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "Sec 3.2, paragraph \"Noisy Labels\"",
+  "source": "paper",
+  "uncertain": true,
+  "note": "Inconsistent inside the paper: this count uses 2 or 3 votes, but both stated inlier rules require more than two votes (3 of 3); see webvision-inlier-rule-31 and webvision-inlier-rule-32."
+ },
+ {
+  "id": "webvision-inlier-rule-31",
+  "claim": "inlier rule for the validation/test sets",
+  "value": "Each image is annotated by three users, and is considered as an inlier image if more than two users agree.",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "Sec 3.1, paragraph \"Validation and Test Sets\"",
+  "source": "paper"
+ },
+ {
+  "id": "webvision-inlier-rule-32",
+  "claim": "inlier rule in the noise analysis",
+  "value": "images with more than 2 out of 3 votes are considered as true inlier images",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "Sec 3.2, paragraph \"Noisy Labels\"",
+  "source": "paper"
+ },
+ {
+  "id": "webvision-quantity",
+  "claim": "AlexNet top-1 on WebVision val: WebVision-trained vs ILSVRC 2012-trained, both with 1.28M images",
+  "value": "55.11% vs 52.58%",
+  "paper": "webvision",
+  "version": "1708.02862v1",
+  "loc": "Sec 4.2 \"Quantity vs Quality\", paragraph on Fig 6",
+  "source": "paper"
+ },
+ {
+  "id": "pervasive-fig3a-axes",
+  "claim": "what the Fig 3a points are, numerically",
+  "value": "x = original-label top-1 accuracy on P, y = corrected top-1 accuracy on P (not the full 50,000 set)",
+  "paper": "pervasive",
+  "version": "2103.14749v4",
+  "loc": "Fig 3a (img/orig_vs_corrected/orig_vs_clean_top1__5.pdf in the paper; threshold-3 version orig_vs_clean_top1__3.pdf in src)",
+  "source": "paper",
+  "uncertain": true,
+  "derived": true,
+  "note": "From the threshold-3 PDF vectors: all 7 Fig 4 models appear as Fig 3a points with exactly the Fig 4 left-end values (e.g. resnet18 70.214 / 72.417, nasnetlarge 82.382 / 83.730, alexnet 55.751 / 57.138). Axis labels read \"Top-1 Acc on original labels\" and \"(errors removed)\". The 34 points cannot be matched to Table S1 rows except the 3 labeled ones."
+ }
+]

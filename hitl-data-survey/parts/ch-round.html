@@ -1,0 +1,85 @@
+<p class="kicker"><span class="act-n">Interlude</span>Not narrated</p>
+
+<section id="ch-round" class="chapter">
+<h2>One labeling round, end to end</h2>
+<p>Part one in one place: every step of a single round, with the compute and labeling cost each step adds. Edit the settings to see the bill change.</p>
+
+<figure class="viz" id="viz-round" data-toy>
+  <span class="badge toy">Toy model</span>
+  <svg class="chart" id="round-svg" role="img" aria-label="Eight steps of one labeling round drawn as a chain of boxes: pool, score with T passes, pick a batch, remove near-duplicates, send to labelers, aggregate votes, split into training and a random evaluation slice, retrain and evaluate. The current step is highlighted."></svg>
+  <div class="controls">
+    <button type="button" id="btn-round-prev">Previous step</button>
+    <button type="button" id="btn-round-next">Next step</button>
+    <button type="button" id="btn-round-all" aria-pressed="false">Show all steps</button>
+    <button type="button" id="btn-round-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls">
+    <label>pool images <input type="number" id="round-N" value="100000" min="1000" step="1000" style="width:7rem"></label>
+    <label>dropout passes T <input type="number" id="round-T" value="10" min="1" max="100" style="width:4rem"></label>
+    <label>batch b <input type="number" id="round-b" value="200" min="1" style="width:5rem"></label>
+    <label>votes per image k <input type="number" id="round-k" value="3" min="1" max="9" style="width:4rem"></label>
+    <label>random slice <input type="number" id="round-r" value="10" min="0" max="50" style="width:4rem">%</label>
+  </div>
+  <p class="readout" id="round-readout" aria-live="polite"></p>
+  <figcaption>A toy configuration, not a measurement: the settings are made up and editable. The costs are plain arithmetic on them.</figcaption>
+</figure>
+
+<p>Each step links back to where it was argued:</p>
+<ol>
+  <li><b>Pool.</b> Every unlabeled image the system could ask about.</li>
+  <li><b>Score.</b> <span class="tex">T</span> stochastic forward passes per image give the probabilities for margin, entropy or BALD (<a href="#ch-uncertainty">chapter 2</a>, <a href="#ch-bald">chapter 3</a>). With <span class="tex">T = 1</span> only margin and entropy are available.</li>
+  <li><b>Pick.</b> Top scores, spread in feature space, or the most typical image per cluster at cold start (<a href="#ch-coreset">chapter 4</a>, <a href="#ch-random">chapter 5</a>).</li>
+  <li><b>Remove near-duplicates.</b> One frame per moment.</li>
+  <li><b>Send to labelers.</b> <span class="tex">k</span> votes per image cost <span class="tex">k</span> times as much, and buy a way to spot disagreement (<a href="#ch-benchmarks">chapter 8</a>).</li>
+  <li><b>Aggregate.</b> Majority vote, or a model of each labeler's accuracy.</li>
+  <li><b>Split.</b> Selected images go to training. A separate random slice of the stream, labeled with more votes, is the evaluation set (<a href="#ch-random">chapter 5</a>).</li>
+  <li><b>Retrain and evaluate</b> on the random slice only, and check the new labels for errors before the next round (<a href="#ch-confident">chapter 9</a>, <a href="#ch-cleaning">chapter 12</a>).</li>
+</ol>
+
+<script>
+(() => {
+  const svg = document.getElementById('round-svg'), out = document.getElementById('round-readout');
+  const STEPS = ['pool', 'score: T passes', 'pick a batch', 'drop near-copies', 'send to labelers', 'aggregate votes', 'split: train / random eval', 'retrain, evaluate'];
+  const COL = ['--brown', '--blue', '--blue', '--blue', '--yellow', '--yellow', '--green', '--blue'];
+  let cur = 0, all = false;
+  const v = id => Math.max(0, +document.getElementById('round-' + id).value || 0);
+  const fmt = n => Math.round(n).toLocaleString('en-US');
+  function cost(i) {
+    const N = v('N'), T = Math.max(1, v('T')), b = v('b'), k = Math.max(1, v('k')), r = v('r') / 100, ev = Math.round(b * r);
+    return [`${fmt(N)} unlabeled images in the pool.`,
+      `${fmt(N * T)} forward passes to score the pool (${fmt(N)} images x T = ${T}).`,
+      `${fmt(b)} images picked for labeling.`,
+      `Near-copies removed before sending; the batch stays at most ${fmt(b)}.`,
+      `${fmt(b * k)} label requests (${fmt(b)} images x ${k} votes).`,
+      `${fmt(b)} final labels; images without a majority go to review.`,
+      `${fmt(ev)} extra randomly sampled images labeled for evaluation (${(r * 100).toFixed(0)}% of the batch size), ${fmt(ev * k)} more label requests.`,
+      `Retrain on the new labels; report accuracy only on the random slice.`][i];
+  }
+  function draw() {
+    const narrow = svg.clientWidth < 520, W = narrow ? 360 : 640, cols = narrow ? 2 : 4, bw = narrow ? 150 : 132, bh = 44, gx = narrow ? 20 : 22, gy = 34;
+    const rows = Math.ceil(STEPS.length / cols), H = rows * (bh + gy) + 10;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    let s = `<defs><marker id="round-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>`;
+    const x0 = (W - (cols * bw + (cols - 1) * gx)) / 2;
+    const pos = i => { const r = Math.floor(i / cols), c0 = i % cols, c = r % 2 ? cols - 1 - c0 : c0; return [x0 + c * (bw + gx), 8 + r * (bh + gy)]; };
+    STEPS.forEach((t, i) => {
+      const [x, y] = pos(i), on = all || i === cur, done = i < cur;
+      s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="8" fill="var(--panel)" stroke="var(${COL[i]})" stroke-width="${on ? 2.6 : 1.2}" opacity="${on || done ? 1 : .45}"/>`;
+      s += `<text x="${x + bw / 2}" y="${y + bh / 2 + 5}" text-anchor="middle" font-size="12.5" fill="var(--fg)" opacity="${on || done ? 1 : .55}">${i + 1}. ${t}</text>`;
+      if (i < STEPS.length - 1) { const [x2, y2] = pos(i + 1), sameRow = Math.abs(y2 - y) < 1;
+        s += sameRow ? `<line x1="${x2 > x ? x + bw : x}" y1="${y + bh / 2}" x2="${x2 > x ? x2 - 2 : x2 + bw + 2}" y2="${y + bh / 2}" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#round-ah)"/>`
+          : `<line x1="${x + bw / 2}" y1="${y + bh}" x2="${x2 + bw / 2}" y2="${y2 - 2}" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#round-ah)"/>`; }
+    });
+    svg.innerHTML = s;
+    out.textContent = all ? STEPS.map((t, i) => `${i + 1}. ${cost(i)}`).join(' ') : `Step ${cur + 1}: ${cost(cur)}`;
+    document.getElementById('btn-round-all').setAttribute('aria-pressed', String(all));
+  }
+  document.getElementById('btn-round-next').addEventListener('click', () => { all = false; cur = Math.min(STEPS.length - 1, cur + 1); draw(); });
+  document.getElementById('btn-round-prev').addEventListener('click', () => { all = false; cur = Math.max(0, cur - 1); draw(); });
+  document.getElementById('btn-round-all').addEventListener('click', () => { all = true; draw(); });
+  document.getElementById('btn-round-reset').addEventListener('click', () => { all = false; cur = 0; draw(); });
+  ['N', 'T', 'b', 'k', 'r'].forEach(id => document.getElementById('round-' + id).addEventListener('input', draw));
+  new ResizeObserver(draw).observe(svg); draw();
+})();
+</script>
+</section>

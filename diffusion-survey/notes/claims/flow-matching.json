@@ -1,0 +1,164 @@
+[
+ {
+  "id": "flow-matching-fm-objective",
+  "claim": "Flow Matching regresses the network vector field onto the vector field that generates a target probability path",
+  "value": "L_FM(theta) = E_{t,p_t(x)} ||v_t(x) - u_t(x)||^2",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (5), Sec 3",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-marginal-vf-theorem",
+  "claim": "The posterior-weighted average of conditional vector fields generates the marginal probability path",
+  "value": "Theorem 1 (marginal VF of Eq. 8 generates marginal path of Eq. 6)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Theorem 1, Sec 3.1",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-cfm-objective",
+  "claim": "Conditional Flow Matching uses per-sample paths and vector fields, so unbiased estimates are cheap",
+  "value": "L_CFM(theta) = E_{t,q(x_1),p_t(x|x_1)} ||v_t(x) - u_t(x|x_1)||^2",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (9), Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-equal-gradients",
+  "claim": "CFM and FM losses are equal up to a theta-independent constant, so their gradients are identical",
+  "value": "grad_theta L_FM = grad_theta L_CFM (assuming p_t(x) > 0)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Theorem 2, Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-gaussian-path",
+  "claim": "Conditional probability paths are Gaussians with time-dependent mean and scalar std, from N(0,I) at t=0 to N(x_1, sigma_min^2 I) at t=1",
+  "value": "p_t(x|x_1) = N(x | mu_t(x_1), sigma_t(x_1)^2 I); mu_0=0, sigma_0=1, mu_1=x_1, sigma_1=sigma_min",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (10), Sec 4",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-conditional-vf",
+  "claim": "The unique vector field of the affine Gaussian flow psi_t(x) = sigma_t x + mu_t has closed form",
+  "value": "u_t(x|x_1) = sigma_t'(x_1)/sigma_t(x_1) (x - mu_t(x_1)) + mu_t'(x_1)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Theorem 3, Eq. (15), Sec 4",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-diffusion-special-case",
+  "claim": "VE and VP diffusion paths are special cases; the resulting VP conditional field coincides with the probability flow ODE field",
+  "value": "VP: mu_t = alpha_{1-t} x_1, sigma_t = sqrt(1 - alpha_{1-t}^2)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 4.1 Example I, Eq. (16)-(19); Appendix D",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-ot-path",
+  "claim": "The optimal transport conditional path moves mean and std linearly in time, giving straight constant-speed trajectories",
+  "value": "mu_t = t x_1, sigma_t = 1 - (1 - sigma_min) t; u_t(x|x_1) = (x_1 - (1 - sigma_min) x) / (1 - (1 - sigma_min) t)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 4.1 Example II, Eq. (20)-(21)",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-ot-cfm-loss",
+  "claim": "With the OT path the CFM regression target is constant in time",
+  "value": "target x_1 - (1 - sigma_min) x_0 at point psi_t(x_0) = (1 - (1 - sigma_min) t) x_0 + t x_1",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (22)-(23), Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-sigma-min-value",
+  "claim": "Numeric value of sigma_min used in experiments",
+  "value": "not stated in v2 (only 'set sufficiently small')",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 4 (definition); absent from Appendix E",
+  "uncertain": true
+ },
+ {
+  "id": "flow-matching-imagenet32-ot-vs-diffusion",
+  "claim": "ImageNet 32x32: OT path beats diffusion path under Flow Matching and all diffusion baselines",
+  "value": "FM-OT NLL 3.53, FID 5.02, NFE 122; FM-Diffusion 3.54, 6.37, 193; Score Matching 3.56, 5.68, 178",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 32x32 columns",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-imagenet64-ot-vs-diffusion",
+  "claim": "ImageNet 64x64: OT path best on NLL, FID and NFE",
+  "value": "FM-OT NLL 3.31, FID 14.45, NFE 138; FM-Diffusion 3.33, 16.88, 187; DDPM 3.32, 17.36, 264",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 64x64 columns",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-cifar10",
+  "claim": "CIFAR-10 with a non-CIFAR-tuned architecture",
+  "value": "FM-OT NLL 2.99, FID 6.35, NFE 142; DDPM 3.12, 7.48, 274",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, CIFAR-10 columns; Sec 6.1",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-imagenet128",
+  "claim": "Unconditional ImageNet 128x128 FID, best among the compared GANs (IC-GAN excluded)",
+  "value": "NLL 2.90, FID 20.9 (vs PGMGAN 21.7)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 right",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-imagenet128-training-budget",
+  "claim": "FM on ImageNet-128 used far fewer iterations than guided-diffusion",
+  "value": "500k iterations at batch 1.5k vs 4.36m at batch 256 (33% less image throughput)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 6.1 Faster training; Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-low-nfe-60pct",
+  "claim": "FM-OT reaches the same ODE numerical error with fewer function evaluations than diffusion models",
+  "value": "roughly 60% of the NFEs (midpoint solver, ImageNet-32)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 6.2 Low-cost samples; Figure 7 left",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-super-resolution",
+  "claim": "64 to 256 super-resolution on ImageNet validation beats SR3 on FID and IS",
+  "value": "FID 3.4, IS 200.8 (SR3 5.2, 180.1)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 2, Sec 6.3",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-eval-solver",
+  "claim": "Likelihood and samples evaluated with an adaptive solver",
+  "value": "dopri5, atol = rtol = 1e-5",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 6 intro; Appendix E.2",
+  "uncertain": false
+ }
+]

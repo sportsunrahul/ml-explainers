@@ -1,0 +1,187 @@
+<!-- ============================ ACT IV ============================ -->
+<p class="kicker"><span class="act-n">Act IV</span>Seeing sharply and pointing</p>
+<section id="ch-resolution" class="chapter">
+<h2>A fixed small square cannot read a page</h2>
+<p>Every model so far squeezes each picture into one small square before its encoder sees it: CLIP's ViT-L/14 encoder comes in <span data-claim="clip-l14-res">224 vs 336</span> pixel versions, LLaVA-1.5 uses <span data-claim="page-resolution-llava15-res">336</span> and Qwen-VL <span data-claim="page-resolution-qwenvl-res">448</span>. That is plenty for a photo of a dog and hopeless for a page of text, where the letters shrink to a pixel or two.</p>
+
+<figure class="viz" id="viz-resolution" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="resolution-canvas" tabindex="0" role="img" aria-label="Left: the test image exactly as the encoder receives it, with its patch grid. Right: a zoom on one line of small text drawn with the encoder's own pixels, and red bars comparing how many tokens each strategy hands to the language model. Left and Right arrow keys switch strategy."></canvas>
+  <div class="controls">
+    <span>Image:</span>
+    <button type="button" id="btn-resolution-doc">Document page</button>
+    <button type="button" id="btn-resolution-wide">Wide screenshot</button>
+    <button type="button" id="btn-resolution-photo">Small photo</button>
+  </div>
+  <div class="controls">
+    <span>Strategy:</span>
+    <button type="button" id="btn-resolution-fixed224">224 square</button>
+    <button type="button" id="btn-resolution-fixed336">336 square</button>
+    <button type="button" id="btn-resolution-fixed448">448 square (Qwen-VL)</button>
+    <button type="button" id="btn-resolution-tile">Tiles + thumbnail</button>
+    <button type="button" id="btn-resolution-native">Native size (Qwen2-VL)</button>
+    <button type="button" id="btn-resolution-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="resolution-readout" aria-live="polite"></p>
+  <figcaption>Predict first: for the small photo, will native resolution hand the language model more tokens than the 448 square, or fewer? The images are test pictures drawn by the page (the receipt is the one from chapter 3); every size and token count is computed from each model's published rule. The left panel is shrunk to fit your screen; the zoom panel shows the pixels the encoder actually receives. What is toy: the tiling uses Molmo's grid rule with 224-pixel crops (at most six) and LLaVA-1.5-HD's way of counting tokens (padding dropped, one row-end token per row, plus a 224-pixel thumbnail); real tiling models differ in crop size and crop count. Native size snaps each side to the nearest multiple of 28 pixels, a detail the paper does not specify.</figcaption>
+</figure>
+
+<h3>The wall: shrinking the page</h3>
+<p>Start where the last act left off. LLaVA-1.5 feeds its language model a <span data-claim="page-resolution-llava15-res">336</span>-pixel square, chosen because it is <span data-claim="page-resolution-llava336">the highest resolution available for CLIP</span>, and that square becomes <span data-computed>576</span> tokens. The figure opens there, on a report page. Its body text is set in 16-pixel type; squashed into <span data-claim="page-resolution-llava15-res">336 &times; 336</span> it arrives <span data-computed>3.8</span> pixels tall, and the zoom panel shows what that means: grey smudges where words used to be. Press <b>224 square</b> and it is worse (<span data-computed>2.6</span> pixels). Try the wide screenshot too: a square also throws away the aspect ratio, so the code is squeezed <span data-computed>1.8</span> times harder across than down.</p>
+<p>Qwen-VL's first move was the obvious one. Its authors <span data-claim="page-resolution-qwenvl-448">increase the input resolution of the visual encoder from 224 x 224 to 448 x 448, reducing the information loss caused by image down-sampling</span>. Doubling the side quadruples the patches: the encoder (initialized from <span data-claim="qwenvl-vit-init">OpenCLIP ViT-bigG</span>) now runs at <span data-claim="qwenvl-res-stage2">448x448, ViT sequence length 1024</span>. To keep the language model's share small, Qwen-VL adds an adapter in the spirit of BLIP-2's query tokens: a <span data-claim="page-resolution-qwenvl-adapter">single-layer cross-attention module initialized randomly</span>, whose <span data-claim="qwenvl-adapter-queries">256</span> learned queries read the patch features and <span data-claim="page-resolution-qwenvl-256">compresses the visual feature sequence to a fixed length of 256</span>. Because compression scrambles where things were, <span data-claim="page-resolution-qwenvl-2dabs">2D absolute positional encodings</span> are added inside that cross-attention. Press <b>448 square (Qwen-VL)</b>: the type now arrives <span data-computed>5.1</span> pixels tall, better but still blurry, for about the same number of tokens as the 224 square: <span data-computed>258</span> against <span data-computed>256</span>, because Qwen-VL brackets its <span data-claim="qwenvl-adapter-queries">256</span> outputs with the two markers <span data-claim="page-resolution-qwenvl-markers">&lt;img&gt; and &lt;/img&gt;</span>.</p>
+<p>Training runs in three stages, much like the recipes of the previous chapter: first at <span data-claim="qwenvl-res-stage1">224x224, ViT sequence length 256</span> with the language model frozen, then at <span data-claim="page-resolution-qwenvl-res">448</span> with <span data-claim="qwenvl-stage2-frozen">nothing frozen</span> on a multi-task mix, then instruction tuning for chat with the <span data-claim="qwenvl-stage3-frozen">ViT frozen</span>. On DocVQA, a benchmark of questions about scanned documents, Qwen-VL scored <span data-claim="page-resolution-qwenvl-docvqa">65.1</span>. A bigger square helps, but any fixed square is too small for some image and too big for another.</p>
+
+<h3>Tiling: more squares</h3>
+<p>A common fix, used in different forms by LLaVA-1.5-HD, Idefics2 and Molmo, keeps the encoder at its native size and gives it more squares. LLaVA-1.5-HD describes it as <span data-claim="page-resolution-hd-split">dividing the image into smaller image patches of the resolution that the vision encoder is originally trained for</span>, encoding each crop separately and stitching the features back into one large map. Seen crop by crop, the model loses the big picture, so a shrunken copy of the whole image comes along <span data-claim="page-resolution-hd-global">to provide the LLM with the global context and to reduce the artifact of the split-encode-merge operation</span>. Idefics2 turns each image into <span data-claim="page-resolution-idefics2-crops">4 crops and the original image</span>, at a cost in visual tokens per image of <span data-claim="idefics2-splitting-tokens">64 / 320</span> without and with splitting. In Molmo, <span data-claim="page-resolution-molmo-grid">the grid is chosen to require the least amount of up-scaling</span>, and neighboring crops overlap so that patches at a seam still see their neighbors.</p>
+<p>Press <b>Tiles + thumbnail</b> on the document page. The toy picks a 2 &times; 3 grid of 224-pixel crops, and the type now arrives <span data-computed>7.2</span> pixels tall: most words are legible in the zoom. The bill is <span data-computed>1,774</span> tokens (the grid's patches, one row-end token per row, and the thumbnail's <span data-computed>256</span>). Tiling works, but it is a patch on a fixed-size encoder: the crops come in a few fixed shapes, the image still gets resized to fit them, and because the crop count is capped, a big screenshot is still shrunk to about a third of its width (switch to it: the code arrives <span data-computed>5.3</span> pixels tall).</p>
+
+<h3>Native resolution: let the image keep its size</h3>
+<p>Qwen2-VL removes the square altogether. The model can <span data-claim="page-resolution-q2-any">process images of any resolution, dynamically converting them into a variable number of visual tokens</span>, using two changes to the recipe of chapter 3.</p>
+<p>First, the ViT's position table goes. A learned table has one row per slot and must be interpolated for every new grid size; Qwen2-VL modified the ViT by <span data-claim="page-resolution-q2-2drope">removing the original absolute position embeddings and introducing 2D-RoPE</span>, a rotary position code computed from each patch's row and column, so any grid size works without a table. Second, to pay for the extra patches, a small MLP after the ViT is used to <span data-claim="page-resolution-q2-merge">compress adjacent 2x2 tokens into a single token</span>. With the ViT's <span data-claim="qwen2vl-patch"><code>patch_size=14</code></span>, one language-model token now stands for a <span data-computed>28 &times; 28 = 784</span>-pixel square of the image. The paper's own example: a <span data-claim="page-resolution-q2-224">224x224</span> image <span data-claim="page-resolution-q2-66">will be compressed to 66 tokens</span>, which is <span data-computed>16 &times; 16 = 256</span> patches, merged four to one into <span data-computed>64</span>, plus two marker tokens around them. As a formula:</p>
+<div class="eq" id="eq-resolution" data-build data-viz="viz-resolution"><div class="tex tex-display">
+T = \htmlData{step=1, link=patch}{\frac{\htmlClass{t-blue}{H'}}{14}\cdot\frac{\htmlClass{t-blue}{W'}}{14}} \;\htmlData{step=2, link=merge}{\cdot\;\frac{1}{2 \times 2}} \;\htmlData{step=3, link=special}{+\;\htmlClass{t-yellow}{2}} \qquad \htmlData{step=4, link=size}{\htmlClass{t-blue}{H'} \approx H,\;\; \htmlClass{t-blue}{W'} \approx W}
+</div></div>
+<p class="eqno">Not numbered in the paper; written out from Qwen2-VL v2, Sec. 2.1 (the 224 &times; 224 &rarr; 66 tokens example).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{H'}, \htmlClass{t-blue}{W'}</span>: the image's own height and width, changed only slightly so the grids come out even. The paper does not say how it rounds; the figure snaps each side to the nearest multiple of 28.</li>
+  <li><span class="tex">\tfrac{H'}{14}\cdot\tfrac{W'}{14}</span>: the number of 14-pixel patches, each one token inside the ViT (the fine grid in the figure).</li>
+  <li><span class="tex">\tfrac{1}{2 \times 2}</span>: the MLP merge, four neighboring patch tokens into one (the heavier grid, one cell per language-model token).</li>
+  <li><span class="tex">\htmlClass{t-yellow}{+\,2}</span>: the <code>&lt;|vision_start|&gt;</code> and <code>&lt;|vision_end|&gt;</code> markers placed before and after the image's tokens (yellow in the figure's "LLM reads" row, because they are ordinary vocabulary tokens).</li>
+  <li><span class="tex">T</span>: the number of tokens the language model reads for this image. It grows with the image's area, as in chapter 3, but now at one token per <span data-computed>784</span> pixels instead of one per 14-pixel patch (<span data-computed>196</span> pixels).</li>
+</ul>
+<p>Now check your prediction. Press <b>Small photo</b>, then <b>Native size (Qwen2-VL)</b>. The <span data-computed>400 &times; 300</span> photo costs <span data-computed>156</span> tokens, fewer than the 448 square's <span data-computed>258</span>, and its encoder does less work too: <span data-computed>616</span> patches instead of <span data-computed>1,024</span>, because the square had to <em>blow the photo up</em> before cutting it. A fixed size is wrong in both directions: it blurs big images and wastes tokens on small ones. Switch to the document page and native size reads the page at full sharpness (<span data-computed>1,752</span> tokens); the wide screenshot costs <span data-computed>2,693</span>. To keep extremes in check, the paper's resolution ablation sets <span data-claim="qwen2vl-minmax-pixels"><code>min_pixels=100x28x28, max_pixels=16384x28x28</code></span>, that is, between <span data-computed>100 and 16,384</span> tokens per image; those are the ablation's settings, not stated as defaults. Images of different sizes then simply make sequences of different lengths, and at inference <span data-claim="page-resolution-q2-pack">images of varying resolutions are packed into a single sequence</span>, the packing trick of the previous chapter.</p>
+<p>Does it pay? The paper compares Qwen2-VL-7B fed a fixed number of tokens per image, resized <span data-claim="page-resolution-q2-noaspect">rather than resizing to a specific height and width, as this would distort the original aspect ratio</span>, against dynamic resolution. At fixed budgets of <span data-claim="page-resolution-q2-fixed-budgets">64 / 576 / 1600 / 3136</span> tokens, InfoVQA (questions about infographics) scores <span data-claim="qwen2vl-fixed-vs-dyn-infovqa">28.85 / 65.72 / 74.99 / 77.27 vs 75.89</span> for dynamic resolution, which used <span data-claim="page-resolution-q2-dyn-avg">1924</span> tokens on average; on OCRBench the fixed budgets score <span data-claim="qwen2vl-fixed-vs-dyn-ocrbench">572 / 828 / 824 / 786 vs 866</span>. So dynamic resolution comes within about a point and a half of the biggest fixed budget on InfoVQA with fewer tokens, and beats every fixed budget on OCRBench. The headline is DocVQA, the same benchmark as before: Qwen2-VL scores <span data-claim="qwen2vl-docvqa">96.5 / 94.5 / 90.1</span> (72B / 7B / 2B models), against Qwen-VL's <span data-claim="page-resolution-qwenvl-docvqa">65.1</span>. All three sizes share one <span data-claim="qwen2vl-vit-size">675M</span>-parameter ViT, paired with language models of <span data-claim="qwen2vl-sizes">1.5B / 7.6B / 72B</span> parameters.</p>
+
+<h3>Positions in two dimensions, and in time: M-RoPE</h3>
+<p>The language model has the same kind of position problem the ViT had. With ordinary 1D RoPE every token gets the next integer, so the document page above at native size, a <span data-computed>35 &times; 50</span> grid of image tokens, is just <span data-computed>1,750</span> consecutive positions: the token directly below another sits <span data-computed>35</span> positions away, and a big image pushes the text after it far down the number line. Qwen2-VL's Multimodal Rotary Position Embedding (M-RoPE) splits the rotary embedding into <span data-claim="page-mrope-three">temporal, height, and width</span> parts, so each token carries three ids <span class="tex">(t, h, w)</span>.</p>
+
+<figure class="viz" id="viz-mrope" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="mrope-canvas" tabindex="0" role="img" aria-label="A token sequence: text tokens (yellow pills), a 3 by 4 grid of image tokens (blue), more text, and optionally a two-frame video, each labeled with its position id; below, a bar of the position ids the sequence uses and the selected token's ids. Hover or click a token, or use Left and Right arrow keys."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-mrope-1d">1D RoPE</button>
+    <button type="button" id="btn-mrope-m">M-RoPE</button>
+    <button type="button" id="btn-mrope-video">Add a short video</button>
+    <button type="button" id="btn-mrope-novideo">Image only</button>
+    <button type="button" id="btn-mrope-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="mrope-readout" aria-live="polite"></p>
+  <figcaption>Predict first: the image here is a 3 &times; 4 grid of tokens starting at id 3. Under 1D RoPE the word "The" after it gets id 15. Under M-RoPE, which id will it get? Press M-RoPE to check, and hover over any token to read its ids. The ids follow Qwen2-VL's rule exactly. What is toy: one word is one token, the image is only 3 &times; 4 tokens and the video 2 frames of 2 &times; 3; like the paper's figure, the vision start and end markers are left out. Under M-RoPE each image cell shows its (h, w), and its header shows the t that all its cells share. The empty band in image-only mode is where the video goes.</figcaption>
+</figure>
+
+<p>The rule has three parts. For text, the three components <span data-claim="page-mrope-identical">utilize identical position IDs</span>, so a text-only prompt is numbered exactly as under 1D RoPE and the language model's reading of text is untouched. For an image, t stays constant across all its tokens, while h and w are the token's row and column. For a video, t goes up by one per frame. And across modalities, <span data-claim="page-mrope-next">position numbering for each modality is initialized by incrementing the maximum position ID of the preceding modality by one</span>. The paper's figure makes "maximum" concrete: after a video of three frames, each 3 &times; 4 tokens, numbered from 0, the text continues at <span data-claim="qwen2vl-mrope-fig-text-start">(4,4,4), then (5,5,5), (6,6,6)</span>. The largest component in the block was a width id of 3, so text resumes at 4.</p>
+<div class="eq" id="eq-mrope" data-build data-viz="viz-mrope"><div class="tex tex-display">
+\begin{aligned}
+&\htmlData{step=1, link=text}{\htmlClass{t-yellow}{\text{text token } n}:\quad (n,\; n,\; n)} \\
+&\htmlData{step=2, link=img}{\htmlClass{t-blue}{\text{image token at row } r,\ \text{column } c}:\quad (s,\; s + r,\; s + c)} \\
+&\htmlData{step=3, link=video}{\htmlClass{t-blue}{\text{video token in frame } f}:\quad (s + f,\; s + r,\; s + c)} \\
+&\htmlData{step=4, link=next}{\text{next block starts at } \max(t, h, w) + 1}
+\end{aligned}
+</div></div>
+<p class="eqno">Not an equation in the paper: the rule stated in Qwen2-VL v2, Sec. 2.1, and drawn in its M-RoPE figure.</p>
+<ul class="gloss">
+  <li><span class="tex">(t, h, w)</span>: the three ids. The rotary embedding's dimensions are split into three groups, and each group is rotated by one of the three ids instead of all by the same one.</li>
+  <li><span class="tex">n</span>: a text token's ordinary running position, used for all three parts.</li>
+  <li><span class="tex">s</span>: the first id of a visual block, one past the largest id before it. The tokens are the merged 28-pixel tokens, rows and columns counted from 0.</li>
+  <li><span class="tex">f</span>: the frame number within a video.</li>
+  <li><span class="tex">\max(t, h, w) + 1</span>: where the next block, text or visual, starts: one past the largest id used anywhere in the block, which is the block's start plus its longest side.</li>
+</ul>
+<p>So check the prediction: the image starts at 3, its largest id is a width of <span data-computed>3 + 3 = 6</span>, and "The" gets <span data-computed>7</span> under M-RoPE, not 15. The bar under the tokens shows the whole budget: under 1D RoPE the sequence uses ids <span data-computed>0 to 18</span>, under M-RoPE only <span data-computed>0 to 10</span>, because a visual block uses only as many ids as its longest side. Press <b>Add a short video</b> and the gap widens: <span data-computed>35</span> versus <span data-computed>18</span>. The same holds for real videos, which Qwen2-VL samples at <span data-claim="qwen2vl-video-fps">two frames per second</span> and encodes with a 3D convolution of <span data-claim="qwen2vl-3dconv">depth two</span>, so that pairs of frames become one slice of tokens (for consistency <span data-claim="page-mrope-two-frames">each image is treated as two identical frames</span>).</p>
+<p>Small position ids are the point: the paper credits M-RoPE with letting the model run on longer inputs than it was trained on. Trained with at most <span data-claim="qwen2vl-video-cap">16384</span> tokens per video, it keeps working on video inputs <span data-claim="qwen2vl-mrope-extrap">up to 80K tokens</span>. In the paper's ablation (a smaller model, 1D RoPE vs M-RoPE), the switch moves image scores such as <span data-claim="qwen2vl-mrope-ablation-mathvista">MathVista 39.2 vs 43.4; MMB 58.6 vs 60.6</span> and video scores such as <span data-claim="qwen2vl-mrope-ablation-video">NextQA 43.9 vs 46.0; STAR 55.5 vs 57.9</span>; several document benchmarks in the same table barely move.</p>
+
+<h3>Inside Qwen2-VL: forward, then backward</h3>
+<p>Now put the two changes back into the whole model and follow one training example through it. The line under the drawing gives the tensor shape at each stage, computed from the patch size, the merge and the paper's own example images; switch the input to watch the token count follow the image, and switch the training stage (Qwen2-VL's three, or Qwen-VL's three for comparison) to see which boxes learn.</p>
+
+<figure class="viz archflow" id="viz-qwen2vlflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-qwen2vlflow-input" aria-pressed="false">1 Input</button>
+    <button type="button" id="btn-qwen2vlflow-patch" aria-pressed="false">2 Patches</button>
+    <button type="button" id="btn-qwen2vlflow-vit" aria-pressed="false">3 ViT</button>
+    <button type="button" id="btn-qwen2vlflow-merge" aria-pressed="false">4 Merge</button>
+    <button type="button" id="btn-qwen2vlflow-splice" aria-pressed="false">5 Splice</button>
+    <button type="button" id="btn-qwen2vlflow-llm" aria-pressed="false">6 LLM</button>
+    <button type="button" id="btn-qwen2vlflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-qwen2vlflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-qwen2vlflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Input image">
+    <span>input</span>
+    <button type="button" id="btn-qwen2vlflow-photo" aria-pressed="true">224 &times; 224 photo</button>
+    <button type="button" id="btn-qwen2vlflow-strip" aria-pressed="false">Formula strip</button>
+    <button type="button" id="btn-qwen2vlflow-wide" aria-pressed="false">Landscape</button>
+    <button type="button" id="btn-qwen2vlflow-page" aria-pressed="false">Web page</button>
+    <button type="button" id="btn-qwen2vlflow-video" aria-pressed="false">16 s video</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Training stage">
+    <span>stage</span>
+    <button type="button" id="btn-qwen2vlflow-q2s1" aria-pressed="true">Qwen2-VL 1</button>
+    <button type="button" id="btn-qwen2vlflow-q2s2" aria-pressed="false">Qwen2-VL 2</button>
+    <button type="button" id="btn-qwen2vlflow-q2s3" aria-pressed="false">Qwen2-VL 3</button>
+    <button type="button" id="btn-qwen2vlflow-qvs1" aria-pressed="false">Qwen-VL 1</button>
+    <button type="button" id="btn-qwen2vlflow-qvs2" aria-pressed="false">Qwen-VL 2</button>
+    <button type="button" id="btn-qwen2vlflow-qvs3" aria-pressed="false">Qwen-VL 3</button>
+  </div>
+  <canvas id="qwen2vlflow-canvas" role="img" aria-label="Qwen2-VL's training step as a diagram: an image lane (blue) of patches and a vision transformer, a green merger, a text lane (yellow) of token embeddings, a spliced sequence, the language model and a red next-token loss. In the backward stages red arrows run from the loss back; frozen boxes are brown and dashed."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-qwen2vlflow-prev">Previous</button>
+    <button type="button" id="btn-qwen2vlflow-next">Next</button>
+    <button type="button" id="btn-qwen2vlflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="qwen2vlflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>The late-fusion shape of <a href="#ch-llava">the LLaVA chapter</a>: an image lane (<b class="c-blue">blue</b>), a small <b class="c-green">merger</b>, a text lane (<b class="c-yellow">yellow</b>), one spliced sequence, one language model, one <b class="c-red">loss</b>. What is new sits in the blue lane: nothing in it has a fixed size. Press <b>1 Input</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="input" hidden>
+      <h4>1. An image at its own size</h4>
+      <p>No resize to a square. The input buttons are the paper's own examples: the <span data-claim="page-resolution-q2-224">224x224</span> image of Sec. 2.1, and the four inputs of its framework figure, a <span data-claim="qwen2vl-arch-fig-strip">224 x 28</span> formula strip, a <span data-claim="qwen2vl-arch-fig-wide">1260 x 700</span> landscape, a <span data-claim="qwen2vl-arch-fig-page">1092 x 8204</span> web page, and a video of <span data-claim="qwen2vl-arch-fig-video">644 x 336, 16s</span> (width first, as the figure prints them). Every side is already a multiple of 28, so no rounding is needed. A video is sampled at <span data-claim="qwen2vl-video-fps">two frames per second</span>, and for consistency <span data-claim="page-mrope-two-frames">each image is treated as two identical frames</span>.</p>
+      <p>Qwen-VL, for contrast, says its <span data-claim="qwenvl-arch-resize">input images are resized to a specific resolution</span>: <span data-claim="qwenvl-res-stage1">224x224, ViT sequence length 256</span> in its first stage and <span data-claim="qwenvl-res-stage2">448x448, ViT sequence length 1024</span> after. Pick a Qwen-VL stage and every input becomes the same square.</p>
+    </div>
+    <div data-stage="patch" hidden>
+      <h4>2. Patches, two frames deep</h4>
+      <p>The image is cut into <span data-claim="qwen2vl-patch"><code>patch_size=14</code></span> squares. Because the patchifier is a 3D convolution of <span data-claim="qwen2vl-3dconv">depth two</span>, each token covers two consecutive frames: the model handles <span data-claim="qwen2vl-arch-tubes">3D tubes instead of 2D patches</span>. A tube is <span data-computed>2 &times; 14 &times; 14 &times; 3 = 1,176</span> numbers, mapped to one vector of the ViT's width, written <span class="tex">d_{\text{ViT}}</span> here because the paper does not give it. For the web page that is <span data-computed>45,708</span> patch tokens; for the video, <span data-computed>16</span> frame pairs of <span data-computed>24 &times; 46</span> patches, <span data-computed>17,664</span> tokens.</p>
+    </div>
+    <div data-stage="vit" hidden>
+      <h4>3. A ViT with no position table</h4>
+      <p>A <span data-claim="qwen2vl-vit-size">675M</span>-parameter ViT, the same for every model size. Its starting point, in short: <span data-claim="qwen2vl-vit-init">DFN ViT; fixed position embedding replaced by 2D-RoPE</span>. Rotary positions are computed from each patch's row and column, so the page's <span data-computed>586 &times; 78</span> patch grid needs no interpolated table. Shapes do not change inside the ViT. How deep and wide it is, the paper does not say.</p>
+    </div>
+    <div data-stage="merge" hidden>
+      <h4>4. Merge four into one</h4>
+      <p>Then <span data-claim="qwen2vl-arch-mlp">a simple MLP layer is employed after the ViT</span> to <span data-claim="page-resolution-q2-merge">compress adjacent 2x2 tokens into a single token</span>, at the language model's width <span class="tex">d_{\text{LLM}}</span>. One token now covers <span data-claim="qwen2vl-px-per-token">28 x 28 = 784 px</span>. The counts match every number in the figure: the page gives <span data-claim="qwen2vl-arch-fig-page-tok">11427 tokens</span>, the landscape <span data-claim="qwen2vl-arch-fig-wide-tok">1125 tokens</span>, the strip <span data-claim="qwen2vl-arch-fig-strip-tok">8 tokens</span>. The video is the exception: at two frames per second our count is <span data-computed>4,416</span>, while the figure prints <span data-claim="qwen2vl-arch-fig-video-tok">2208 tokens</span>, exactly the count for <span data-computed>16</span> frames (one per second). The paper does not say which sampling the figure used; another possible explanation is that during training <span data-claim="qwen2vl-arch-dynframe">we dynamically adjust the resolution of each video frame</span> to stay under the per-video token cap, so the figure's clip may have been drawn at a different frame size than its label.</p>
+      <p>One extreme is worth a look. The strip's <span data-computed>8</span> tokens would be upscaled under the resolution ablation's setting of <span data-claim="qwen2vl-minmax-pixels"><code>min_pixels=100x28x28, max_pixels=16384x28x28</code></span>; the figure shows it without that floor. Qwen-VL does this step differently: a <span data-claim="page-resolution-qwenvl-adapter">single-layer cross-attention module initialized randomly</span> whose <span data-claim="qwenvl-adapter-queries">256</span> learned queries read <span data-claim="qwenvl-arch-keys">the image features from the visual encoder as keys</span>, so the output is 256 tokens whatever the input.</p>
+      <p><b class="c-yellow">Text:</b> meanwhile the prompt and answer become token ids, and each id looks up a row of the language model's embedding table.</p>
+    </div>
+    <div data-stage="splice" hidden>
+      <h4>5. Splice into one sequence</h4>
+      <p>The special tokens <code>&lt;|vision_start|&gt;</code> and <code>&lt;|vision_end|&gt;</code> are <span data-claim="qwen2vl-arch-markers">placed at the beginning and end of the compressed visual tokens</span>, and the block sits in the text where the image was mentioned: the 224-pixel photo <span data-claim="page-resolution-q2-66">will be compressed to 66 tokens</span>. Each token gets its M-RoPE triple (<a href="#eq-mrope">the rule above</a>), so the page's <span data-computed>11,427</span> tokens use only <span data-computed>293</span> distinct height ids and <span data-computed>39</span> width ids. At inference, <span data-claim="page-resolution-q2-pack">images of varying resolutions are packed into a single sequence</span>.</p>
+    </div>
+    <div data-stage="llm" hidden>
+      <h4>6. The language model</h4>
+      <p>A Qwen2 decoder of <span data-claim="qwen2vl-sizes">1.5B / 7.6B / 72B</span> parameters, <span data-claim="qwen2vl-arch-llm-init">initialized using the parameters from Qwen2</span>, runs causal attention over the whole spliced sequence. Its width <span class="tex">d_{\text{LLM}}</span> is in the Qwen2 report, not this paper, so the shapes stay symbolic. Qwen-VL used <span data-claim="qwenvl-llm-init">Qwen-7B</span>.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. What the loss grades</h4>
+      <p>Cross-entropy of each next token, but not at every position: <span data-claim="qwen2vl-arch-text-sup">we only provide supervision for the text tokens</span>. The visual tokens are inputs, never targets. In instruction data (ChatML), <span data-claim="qwen2vl-arch-chatml">The sections marked in blue indicate the supervised parts</span>: the assistant's replies and the turn markers, not the user's question. Qwen-VL states the same objective, to <span data-claim="qwenvl-arch-loss">minimize the cross-entropy of the text tokens</span>, and in its multi-task data the task instruction is a <span data-claim="qwenvl-arch-prefix">prefix sequence without loss</span>.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. Where the gradient goes, stage by stage</h4>
+      <p><b>Qwen2-VL 1:</b> the paper says the stage is to <span data-claim="qwen2vl-arch-stage1">focus exclusively on training the Vision Transformer (ViT) component</span>. The language model is frozen, yet it sits between the loss and the ViT, so the gradient flows <em>through</em> it with no update: brown, "passes". The embedding table has nothing trainable upstream: "stops here". The merger is drawn trainable; that is our reading, since the paper names only the ViT and a new merger has to learn somewhere. <b>Qwen2-VL 2:</b> <span data-claim="qwen2vl-arch-stage2">unfreeze all parameters</span>. <b>Qwen2-VL 3:</b> <span data-claim="qwen2vl-arch-stage3">lock the ViT parameters and perform exclusive fine-tuning of the LLM</span>. Whether the merger trains here is not stated; we draw it frozen, taking "exclusive" at its word.</p>
+      <p><b>Qwen-VL</b> is the same pattern with its adapter: stage 1: <span data-claim="qwenvl-stage1-frozen">LLM frozen; vision encoder and VL adapter optimized</span>; stage 2: "<span data-claim="qwenvl-arch-stage2">We unlocked the large language model and trained the whole model</span>"; stage 3: they <span data-claim="qwenvl-arch-stage3">freeze the visual encoder and optimize the language model and adapter module</span>. Compare the two stage 1s: both keep the language model fixed while the vision side learns to speak its language, unlike LLaVA's first stage, which froze the encoder as well and trained only the projection.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. The update</h4>
+      <p><b>Qwen2-VL</b> reports data, not optimizer settings: stage 1 sees <span data-claim="qwen2vl-arch-s1-tokens">around 600 billion tokens</span>, stage 2 an <span data-claim="qwen2vl-arch-s2-tokens">additional 800 billion tokens of image-related data</span>, <span data-claim="qwen2vl-arch-total-tokens">1.4 trillion tokens</span> in all, then instruction data. It trains with <span data-claim="qwen2vl-arch-3dpar">3D parallelism which combines data parallelism (DP), tensor parallelism (TP) and pipeline parallelism (PP)</span> and a <span data-claim="qwen2vl-arch-zero1">zero-1 redundancy optimizer</span>. The only optimizer it names is a fused operator in its software list (<span data-claim="qwen2vl-arch-fusedadam">fused operators such as LayerNorm, RMSNorm, and Adam</span>, the Adam cited to AdamW); no learning rate or batch size is given.</p>
+      <p><b>Qwen-VL</b> gives a full table: <span data-claim="qwenvl-arch-optimizer">AdamW</span> with <span data-claim="qwenvl-arch-betas"><code>beta1=0.9, beta2=0.98, eps=1e-6</code></span>, <span data-claim="qwenvl-arch-sched">cosine decay</span> from peak learning rates of <span data-claim="qwenvl-arch-lr">2e-4 / 5e-5 / 1e-5</span> to minimums of <span data-claim="qwenvl-arch-minlr">1e-6 / 1e-5 / 1e-6</span>, weight decay <span data-claim="qwenvl-arch-wd">0.05</span>, gradient clip <span data-claim="qwenvl-arch-clip">1.0</span>, a ViT layer-wise learning-rate decay of <span data-claim="qwenvl-arch-vitdecay">0.95 / 0.95 / 0</span>, global batches of <span data-claim="qwenvl-arch-batch">30720 / 4096 / 128</span> for <span data-claim="qwenvl-arch-steps">50k / 19k / 8k</span> steps with <span data-claim="qwenvl-arch-warmup">500 / 400 / 3k</span> warm-up steps, LLM sequence lengths of <span data-claim="qwenvl-arch-llmseq">512 / 2048 / 2048</span>, in <span data-claim="qwenvl-arch-bf16">bfloat16</span>. Stage 1 alone is <span data-claim="qwenvl-arch-samples">approximately 1.5 billion image-text samples and 500 billion image-text tokens</span>; stage 2 trains <span data-claim="qwenvl-arch-7tasks">7 tasks simultaneously</span>; stage 3 uses <span data-claim="qwenvl-sft-size">350k</span> instruction examples.</p>
+    </div>
+  </div>
+  <figcaption>Computed: token counts follow the paper's rule (14-pixel patches, frame pairs, 2 &times; 2 merge, two markers) and reproduce its example of 66 tokens and every image count in its framework figure; widths the paper does not give are written <span class="tex">d_{\text{ViT}}</span>, <span class="tex">d_{\text{LLM}}</span>, and <span class="tex">L</span> is the text length. The merger's stage 1 and stage 3 status is our reading. Before you open stage 8 on <b>Qwen2-VL 1</b>, guess: the language model is frozen, so does the ViT still get a gradient?</figcaption>
+</figure>
+
+<p>Answer to the prediction: yes. Freezing a box stops its update, not the gradient; anything upstream of a frozen language model still learns through it, which is exactly what Qwen2-VL's first stage relies on. Put the two models side by side on the web page and the difference in cost is stark: Qwen-VL hands the language model <span data-computed>258</span> tokens for it at any stage, Qwen2-VL <span data-computed>11,429</span>, about <span data-computed>44</span> times more, which is why its resolution ablation caps an image at <span data-claim="qwen2vl-minmax-pixels"><code>min_pixels=100x28x28, max_pixels=16384x28x28</code></span> (video has its own, separate cap of <span data-claim="qwen2vl-video-cap">16384</span> tokens per video in training) and why the next generations work so hard on what those tokens carry.</p>
+
+<p>A model that reads the page at its own resolution, with image tokens that know their row and column, can do more than read: it can say <em>where</em>. The next chapter shows how "where" becomes just more tokens, written as coordinates in the output sequence, as plain digits or as dedicated location tokens.</p>
+</section>

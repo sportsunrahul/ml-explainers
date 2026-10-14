@@ -1,0 +1,137 @@
+{
+  "slug": "compression-survey",
+  "stage": "done",
+  "created": "2026-10-09",
+  "prompt": "Literature survey of model compression for inference on edge GPUs: KD, integer quantization from first principles, PTQ vs QAT + STE, pruning (Deep Compression, LTH, structured vs unstructured), LLM-era methods (LLM.int8, SmoothQuant, GPTQ, AWQ), FP8, TensorRT; vision running example; end with a decision guide for detection/segmentation on on-prem GPU appliances.",
+  "reader_background": "explain from scratch; assume basic deep learning only",
+  "mode": "survey",
+  "narration": "none: long page + atlas (steps 4-7 skipped; cue ids and player hooks still built)",
+  "compute": {
+    "probed": null,
+    "note": "no narration chosen; pod not probed"
+  },
+  "deployment_context": {
+    "source": "cogniac-kb repos/onnx-int8-converter.md, repos/int8-model-converter-gateway.md, repos/box-int8-runtime.md (read 2026-10-09)",
+    "facts": [
+      "onnx-int8-converter: ONNX/cognet -> TensorRT INT8 engine via trtexec or Python API with an entropy calibrator; calibration images from the consensus release; base image nvcr.io/nvidia/tensorrt:23.02-py3",
+      "int8-model-converter-gateway: default target_execution_hardware T4, inference_precision TRT_INT8",
+      "box-int8-runtime: TensorRT INT8 YOLOv3/v5 box runtime on EdgeFlow/CloudFlow",
+      "KB mentions L4 (most often) and T4 appliance GPUs"
+    ],
+    "tailor_guide": false
+  },
+  "papers_resolved": {
+    "named": {
+      "hinton2015": "1503.02531v1 (2015-03-09) Distilling the Knowledge in a Neural Network",
+      "jacob2017": "1712.05877v1 (2017-12-15) Quantization and Training of NNs for Efficient Integer-Arithmetic-Only Inference",
+      "nagel2021": "2106.08295v1 (2021-06-15) A White Paper on Neural Network Quantization",
+      "gptq": "2210.17323v2 (2022-10-31, v2 2023-03-22) GPTQ",
+      "awq": "2306.00978v6 (2023-06-01, v6 2026-04-25) AWQ"
+    }
+  },
+  "papers_proposed": {
+    "spine": [
+      "1503.02531v1",
+      "1712.05877v1",
+      "2106.08295v1",
+      "2004.09602v1",
+      "1510.00149v5",
+      "1803.03635v5",
+      "2208.07339v2",
+      "2211.10438v7",
+      "2210.17323v2",
+      "2306.00978v6",
+      "2209.05433v2"
+    ],
+    "non_arxiv_primary": [
+      "NVIDIA TensorRT Developer Guide (cite by section + version)"
+    ],
+    "branches": [
+      "1308.3432v1",
+      "1806.08342v1",
+      "1906.04721v3",
+      "2004.10568v2",
+      "2102.05426v2",
+      "2111.12293v3",
+      "1805.06085v2",
+      "1902.08153v3",
+      "1506.02626v3",
+      "1608.08710v3",
+      "1708.06519v1",
+      "2104.08378v1",
+      "1810.05270v2",
+      "2003.03033v1",
+      "1912.05671v4",
+      "2208.11580v2",
+      "2301.00774v3",
+      "2306.11695v3",
+      "2303.17951v2",
+      "1412.6550v4",
+      "1906.03609v1",
+      "2012.12877v2",
+      "1802.04799v3"
+    ],
+    "map": "arXiv title-keyword counts by year for distillation / quantization / pruning, split LLM vs detection-segmentation titles; notes/scan/"
+  },
+  "arxiv_scan": {
+    "date": "2026-10-09",
+    "status": "done 2026-10-09: 117 count rows, none missing (2026 is partial through 2026-10-09)",
+    "file": "notes/scan/arxiv-counts-2026-10-09.json"
+  },
+  "known_gaps": [
+    "YOLO deltas: only van Baalen 2303.17951 (Qualcomm tooling) has them; no TensorRT-measured YOLO numbers in the sources",
+    "2:4 sparsity support per GPU and L4 entry not in the saved TensorRT pages (3 uncertain claims in fp8-trt.json are placeholders)"
+  ],
+  "approvals": {
+    "checkpoint-0": {
+      "date": "2026-10-09",
+      "narration": "long page + atlas, no narration",
+      "tailoring": "generic GPU guide; no Cogniac service names on the page",
+      "scope": "approved as proposed: 11 spine + TensorRT guide, 23 branches, map chapter, 14 chapters, two 3D figures (SmoothQuant activation surface, per-channel weight-range landscape)"
+    },
+    "checkpoint-2": {
+      "date": "2026-10-10",
+      "outline": "approved (\"complete it\")",
+      "chapter1": "approved as built; no narration"
+    }
+  },
+  "build": {
+    "parts": "parts/ (head.html, body-top.html, kit/*.js shared with the atlas, ch-*.html, ORDER)",
+    "script": "bash build.sh [ORDER] [--no-check]",
+    "checkpoint2": "hero + ch-cost built; check-page PASS 2026-10-09",
+    "status_2026_10_10": {
+      "done": [
+        "parts/ch-cost.html",
+        "parts/ch-map.html",
+        "parts/ch-guide.html",
+        "kits 00,10,20,25,26,90",
+        "atlas: hero.html, dialogs-common.html, ORDER, meta.json, assemble.mjs, parts/cost.*",
+        "notes/build-brief.md",
+        "build.sh with OUTDIR",
+        "skill atlas shell PE: view/linkPulses/softmax added"
+      ],
+      "running": "3 builder agents (wave 1): ch-distill (+atlas distill), ch-grid+ch-granularity (+atlas grid/granularity/calib), ch-ptq+ch-qat (+atlas qat)",
+      "todo": [
+        "wave 2 builders: ch-prune+ch-lottery (kits 60-69, atlas sparsity, Act IV kicker), ch-outliers+ch-gptq-awq (70-79, atlas outliers, Act V kicker), ch-fp8+ch-tensorrt (80-89, atlas fp8, Act VI kicker before ch-tensorrt)",
+        "atlas guide stage (KIT.guideFlow on the stage)",
+        "ch-summary, ch-deeper",
+        "parts/ORDER for all chapters; full build + check-page",
+        "atlas assemble + test",
+        "fresh page-level fact check",
+        "project memory file",
+        "final report; offer jot"
+      ]
+    },
+    "final": {
+      "date": "2026-10-11",
+      "page": "explainer.html (1.5 MB, 15 parts, 313 KaTeX expressions), check-page PASS",
+      "atlas": "atlas.html (302 KB, 10 stages), atlas test 0 problems",
+      "factcheck": "notes/factcheck-page.md: 22 fixes applied; guide badge relabelled \"Our reading\"; FP8 guide sentence aligned with van Baalen"
+    }
+  },
+  "understand": {
+    "notes": "notes/papers/*.md (35), notes/understanding.md",
+    "claims": "notes/claims/*.json, 3034 claims, 23 uncertain (2026-10-09)",
+    "factcheck": "3 fresh agents running: notes/factcheck-claims-{ptq,llm,prune-fp8}.md"
+  }
+}

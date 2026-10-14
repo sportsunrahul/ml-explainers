@@ -1,0 +1,24 @@
+  <article data-chapter="s4">
+    <header class="ch-head"><span class="num">5 of 10</span><h2>S4: one system, three views</h2><p class="subhead">Fixed weights turn the recurrence into one long convolution</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">Three views</button><button type="button" role="tab" data-step="1">The kernel</button></div>
+      <button type="button" class="tool play" data-replay>Replay</button>
+    </div>
+    <div class="controls">
+      <button type="button" class="tool" data-view="all" aria-pressed="true">All three</button><button type="button" class="tool" data-view="cont" aria-pressed="false">Continuous</button><button type="button" class="tool" data-view="rec" aria-pressed="false">Recurrent</button><button type="button" class="tool" data-view="conv" aria-pressed="false">Convolutional</button>
+      <label class="slider">Step size &Delta; <input type="range" id="s4-atlas-dt" min="0" max="1000" step="1" value="500"></label>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>Drop HiPPO's time factor and keep its matrix A: the <button class="inline-term" data-open="ssm">state-space model</button> now uses the same A, B and C at every step. Then it can be computed three ways. Continuous: a differential equation. Recurrent: update the state once per token, like an RNN. Convolutional: slide one long <button class="inline-term" data-open="kernel">convolution kernel</button> over the input.</p>
+      <p>The dots (recurrent) and rings (convolution) land on exactly the same numbers. The green curve (continuous) agrees up to the small error of turning the equation into steps. Training uses the convolution, all positions at once with an <button class="inline-term" data-open="fft">FFT</button>; generation uses the recurrence, one cheap step per token.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>The yellow row is the kernel: entry j is how much the input j steps back adds to the output now. Drag the step size: a smaller &Delta; stretches the same memory over more tokens.</p>
+      <p>Building this kernel naively costs N&sup2;L operations, and HiPPO's A cannot be diagonalized safely. S4 writes A as normal plus <button class="inline-term" data-open="low-rank">low-rank</button>, works in frequency space where all the powers of A become one inverse, and gets the kernel in about N + L operations. It was the first model above chance on <button class="inline-term" data-open="lra">Path-X</button>.</p>
+    </div>
+    <p class="note">Computed on a toy: one SSM with N = 4, HiPPO-LegS's A with S4's sign, B from S4D, a random readout C, 64 tokens of our choosing, bilinear steps (S4 Eq. 3) and the kernel of S4 Eq. 5. The three views are LSSL's.</p>
+    <table class="data"><thead><tr><th>Long Range Arena</th><th>Path-X</th><th>Average</th></tr></thead>
+      <tbody><tr><td>Transformer</td><td>failed</td><td>53.66</td></tr><tr><td>S4 (updated row, v3 Table 4)</td><td>96.35</td><td>86.09</td></tr></tbody></table>
+    <p class="inscription">Same weights at every step means one kernel for the whole sequence: train it as a convolution, run it as a recurrence.</p>
+    <button type="button" class="continue" data-go="select">Continue with selection</button>
+  </article>

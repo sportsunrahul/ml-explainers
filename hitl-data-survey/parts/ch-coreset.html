@@ -1,0 +1,50 @@
+<section id="ch-coreset" class="chapter">
+<h2>A batch of near-duplicates</h2>
+<p>Retraining after every single label is too slow, so real systems label in batches. The top ten most uncertain images of one round are often ten frames of the same confusing moment.</p>
+
+<figure class="viz" id="viz-cover" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cover-canvas" role="img" aria-label="Brown points of an unlabeled pool in a two-dimensional feature space, with a tight burst of near-duplicate frames on the model's decision line. Yellow rings mark the ten points one strategy picks; yellow discs of radius delta around every labeled point show how well the labels cover the pool."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-cover-topk" aria-pressed="true">Top-10 most uncertain</button>
+    <button type="button" id="btn-cover-greedy" aria-pressed="false">Greedy k-Center</button>
+    <button type="button" id="btn-cover-random" aria-pressed="false">Random 10</button>
+    <button type="button" id="btn-cover-step">k-Center, one pick at a time</button>
+    <button type="button" id="btn-cover-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="cover-readout" aria-live="polite"></p>
+  <figcaption>Toy model. Six labeled points start the round (small rings). The "uncertainty" is closeness to the dashed boundary, which runs through the burst. Greedy k-Center is the core-set paper's rule: repeatedly label the point farthest from every labeled point. Guess before you press it: how many of its ten picks land in the burst?</figcaption>
+</figure>
+
+<p>Uncertainty scores each image on its own, so near-copies get near-identical scores and are picked together. The second copy of a frame teaches almost nothing the first did not. Sener and Savarese (2018) turned the question around: instead of "which images are hard?", ask "which batch makes every unlabeled image <em>close</em> to some labeled one?" Distance is measured in the network's own feature space (the last fully connected layer).</p>
+
+<div class="eq" id="eq-kcenter" data-build data-viz="viz-cover"><div class="tex tex-display">
+\htmlData{step=1, link=pick}{\min_{\mathbf{s}^1 : |\mathbf{s}^1| \le b}} \;\; \htmlData{step=2, link=radius}{\max_{i} \; \min_{j \in \mathbf{s}^1 \cup \mathbf{s}^0} \Delta(\mathbf{x}_i, \mathbf{x}_j)}
+</div></div>
+<p class="eqno">Sener and Savarese (2018), Eq. 5, the k-Center problem.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{s}^0</span>: the images already labeled; <span class="tex">\mathbf{s}^1</span>: the new batch, at most <span class="tex">b</span> images.</li>
+  <li>The inner part is the covering radius <span class="tex">\delta</span>: the distance from the worst-covered pool image to its nearest labeled image (the yellow discs).</li>
+</ul>
+
+<p>Their Theorem 1 explains why this is the right target: the gap between the loss on the labeled subset and the loss on the whole pool is bounded by a term proportional to <span class="tex">\delta</span>, plus a term that shrinks with the pool size. The exact problem is <span data-claim="coreset-nphard">NP-Hard</span>, but the greedy rule (always add the farthest point) gets within a factor of <span data-claim="coreset-greedy-2x">2</span> of the best radius and runs in seconds.</p>
+
+<p>Diversity alone is not the end of the story. BADGE (Ash et al., 2020) compared methods over <span data-claim="badge-settings">33</span> settings of dataset, batch size and architecture, and scored each method by how often it lost significantly to another (lower is better). Its averages: BADGE <span data-claim="badge-fig4-avg-badge">0.66</span>, margin <span data-claim="badge-fig4-avg-marg">1.56</span>, least confidence <span data-claim="badge-fig4-avg-conf">5.93</span>, random <span data-claim="badge-fig4-avg-rand">6.01</span>, core-set <span data-claim="badge-fig4-avg-coreset">6.9</span>, entropy <span data-claim="badge-fig4-avg-entropy">8.01</span>. Pure diversity and pure entropy both averaged worse than random. The fixes that held up mix the two signals. BADGE embeds each image by the gradient it would cause (large when uncertain) and spreads the batch over those embeddings. BatchBALD scores a whole batch jointly. Stochastic batch acquisition samples the batch in proportion to the scores instead of taking the top-k, at the cost of top-k itself: <span data-claim="stochbatch-t1-power">0.2 +- 0.0</span> seconds per acquisition against <span data-claim="stochbatch-t1-batchbald">566.0 +- 17.4</span> for BatchBALD in Kirsch et al.'s Table 1.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Never send a plain top-k batch from a video feed. Remove near-duplicates first, then spread the batch in feature space (or sample it in proportion to the uncertainty scores). One frame per moment is enough.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('cover-readout');
+  const f = FIG.cover(document.getElementById('cover-canvas'), { say: t => out.textContent = t });
+  const bs = ['topk', 'greedy', 'random'].map(k => document.getElementById('btn-cover-' + k));
+  bs.forEach(b => b.addEventListener('click', () => { KIT.press(bs, b); f.strategy(b.id.replace('btn-cover-', '')); }));
+  document.getElementById('btn-cover-step').addEventListener('click', () => { KIT.press(bs, bs[1]); f.step(); });
+  document.getElementById('btn-cover-reset').addEventListener('click', () => { KIT.press(bs, bs[0]); f.reset(); });
+  f.reset();
+})();
+</script>
+</section>

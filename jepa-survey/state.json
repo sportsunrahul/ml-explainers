@@ -1,0 +1,129 @@
+{
+  "slug": "jepa-survey",
+  "stage": "done",
+  "created": "2026-10-08",
+  "prompt": "literature survey of JEPA papers; nice visuals, 3D where it helps; update the skill if needed",
+  "reader_background": "explain from scratch: assume only basic deep learning; introduce masking, ViTs, EMA teachers and SSL before JEPA",
+  "compute": {
+    "probed": "2026-10-08",
+    "pod": "RTX 4090 24564 MiB, 5425 MiB used, 93% util (user job running), 42 GB RAM avail, 405G free on /root/work, HF reachable, venv ok (torch 2.11.0+cu128)",
+    "laptop": "Apple M1 16 GB, ffmpeg 8.0.1, node 24, katex+playwright present, .env ok",
+    "target": "pod (re-probed 2026-10-08 evening: 0% util, 24 GB free, models cached)"
+  },
+  "arxiv_scan": {
+    "date": "2026-10-08",
+    "queries": [
+      "ti:JEPA (max 200, capped)",
+      "abs:\"joint-embedding predictive\" OR abs:\"joint embedding predictive\" (max 300)"
+    ],
+    "unique_lower_bound": 383,
+    "note": "title query hit the 200 cap; paginate before any count goes on the page"
+  },
+  "papers_proposed": {
+    "spine": [
+      "lecun2022-openreview-BZ5a1r-kVsf",
+      "2402.11337v1",
+      "2301.08243v3",
+      "2404.08471v1",
+      "2403.00504v1",
+      "2506.09985v1",
+      "2502.11831v1",
+      "2603.14482v3",
+      "2211.10831v1",
+      "2407.03475v1",
+      "2210.07277v1",
+      "2511.08544v3",
+      "2510.05949v1",
+      "2605.26379v1",
+      "2502.14819v4",
+      "2411.04983v2",
+      "2412.03572v2",
+      "2603.19312v3",
+      "2610.06805v1"
+    ],
+    "branches": [
+      "2006.07733v3",
+      "2011.10566v1",
+      "2105.04906v3",
+      "2202.03555v3",
+      "2204.07141v1",
+      "2111.06377v3",
+      "2307.12698v1",
+      "2311.15830v3",
+      "2606.25225v1",
+      "2404.16432v6",
+      "2409.15803v1",
+      "2309.16014v3",
+      "2509.14252v2",
+      "2512.10942v2",
+      "2410.03755v2",
+      "2602.11389v2",
+      "2602.03604v3",
+      "2603.20111v2"
+    ]
+  },
+  "approvals": {
+    "checkpoint-0": {
+      "date": "2026-10-08",
+      "compute": "re-probe at checkpoint 2; Kokoro laptop fallback for previews if pod still busy; ask again before full synth",
+      "reader_background": "explain from scratch: assume only basic deep learning; introduce masking, ViTs, EMA teachers and SSL before JEPA",
+      "budget": "narrate everything, 12-14 chapters, ~25-28 min",
+      "paper_tiers": "spine/branches/map as proposed, no changes requested"
+    },
+    "checkpoint-2": {
+      "date": "2026-10-08",
+      "outline": "approved as built",
+      "voice": "A (designed male lecturer, cloned via Qwen3-TTS 1.7B Base; same reference as detr-family)",
+      "tone": "keep"
+    }
+  },
+  "build": {
+    "order": "parts/ORDER (37 parts)",
+    "html": "explainer.html, 119 KaTeX expressions",
+    "qa": "check-page PASS",
+    "claims": "1834 merged (notes/claims/*.json + scan.json)"
+  },
+  "skill_updates": [
+    "assets/pe3.js (3D canvas renderer, tested)",
+    "references/page-authoring.md: \"3D stages (pe3.js)\" section",
+    "SKILL.md: survey mode, survey budget, pe3 in the asset list",
+    "2026-10-09: atlas mode added (assets/atlas/shell.html, build.mjs, test.mjs; page-authoring.md \"Atlas mode\"; SKILL.md step 0 paragraph)"
+  ],
+  "audio": {
+    "voice": "A",
+    "backend": "Qwen3-TTS 1.7B Base clone of a VoiceDesign narrator",
+    "chapters": 13,
+    "total_seconds": 2056.8,
+    "flagged": 28,
+    "retried": 56,
+    "report": "qa_report.md"
+  },
+  "narrated": "explainer.narrated.html (inject.mjs; check-page --narrated PASS; cue-probe with sampler buttons and btn-mpc-run exempted)",
+  "factcheck": "notes/factcheck-page.md: 4 must-fix and 17 nits, all applied 2026-10-08",
+  "atlas": {
+    "file": "jepa-atlas.html",
+    "source": "atlas/ (meta.json, hero.html, chips.html, chapters.html, dialogs.html, scenes.js); build with node ~/.claude/skills/paper-explainer/assets/atlas/build.mjs ~/paper-explainers/jepa-survey",
+    "style": "project-page style after dominik-schnaus.github.io/unpaired-rosetta: one full-screen stage, chapter panel with step tabs, glossary dialogs, no narration",
+    "tests": "node ~/.claude/skills/paper-explainer/assets/atlas/test.mjs jepa-atlas.html build/atlas-shots (cwd ~/paper-explainers/.node); build/atlas-shots2.mjs for later steps",
+    "built": "2026-10-09"
+  },
+  "fixes": [
+    {
+      "date": "2026-10-09",
+      "what": "collapse toy: eta .1, init .3, 600 steps (the old .05/.05/400 never left the saddle); explainer rebuilt and re-injected"
+    }
+  ],
+  "cue_probe": {
+    "date": "2026-10-09",
+    "result": "85 cue buttons, 0 problems after exemptions",
+    "exempt_random_draw_buttons": [
+      "btn-ijmask-sample",
+      "btn-planner-sample",
+      "btn-planner-refine",
+      "btn-planner-step",
+      "btn-sigreg-dir-rand",
+      "btn-mpc-run"
+    ],
+    "command": "cd ~/paper-explainers/.node && node ~/.claude/skills/paper-explainer/assets/cue-probe.mjs ~/paper-explainers/jepa-survey --skip <list>"
+  }
+}

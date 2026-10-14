@@ -1,0 +1,50 @@
+[
+ {
+  "id": "cpc-img-batch-total",
+  "claim": "CPC image pretraining images per step (our arithmetic)",
+  "value": "512",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "derived: 32 GPUs x 16 per GPU (Sec 3.2)"
+ },
+ {
+  "id": "cpc-img-stride",
+  "claim": "CPC image patch stride (our reading of 64 px patches with 32 px overlap in a 256 px crop: (256-64)/32+1 = 7)",
+  "value": "32",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "derived from Sec 3.2, '7x7 grid of 64x64 crops with 32 pixels overlap'"
+ },
+ {
+  "id": "cpc-img-preds-per-image",
+  "claim": "CPC image: predictions per image when predicting 1 to 5 rows ahead on a 7x7 grid (our arithmetic: 7 x (6+5+4+3+2))",
+  "value": "140",
+  "paper": "CPC",
+  "arxiv": "1807.03748v2",
+  "loc": "derived from Sec 3.2 (7x7 grid, up to five rows ahead)"
+ },
+ {
+  "id": "tschannen-target-low",
+  "claim": "Lower fixed MI-bound target t in the encoder experiment (t = 2 and 4)",
+  "value": "2",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3.3"
+ },
+ {
+  "id": "tschannen-fixed-iters",
+  "claim": "Iterations after which both encoders match the target bound t",
+  "value": "7k",
+  "paper": "Tschannen et al.",
+  "arxiv": "1907.13625v2",
+  "loc": "Sec 3.3"
+ },
+ {
+  "id": "cpcv2-epochs",
+  "claim": "CPC v2 ImageNet pretraining epochs",
+  "value": "200",
+  "paper": "CPC v2",
+  "arxiv": "1905.09272v3",
+  "loc": "Appendix, optimization details (pretraining)"
+ }
+]

@@ -1,0 +1,13 @@
+  <article data-chapter="sparsity">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Sparsity</h2><p class="subhead">Zeros save time only in a shape the GPU can skip</p></header>
+    <div class="controls">
+      <div class="row"><span>Pattern</span><button type="button" class="tool" data-pattern="unstructured">Unstructured</button><button type="button" class="tool" data-pattern="24">2:4</button><button type="button" class="tool" data-pattern="chan">Whole channels</button></div>
+      <div class="row"><label class="slider"><span>Zeros <b id="atlas-sparse-s-value">50%</b></span><input id="atlas-sparse-s" type="range" min="0" max="87.5" step="12.5" value="50" aria-label="Share of weights set to zero"></label></div>
+    </div>
+    <p>The stage shows one layer: each row is an output channel, each column an input. Many trained weights are close to zero. <button type="button" class="inline-term" data-open="magnitude">Magnitude pruning</button> sets the smallest ones to exactly zero; the share of zeros is the layer's <button type="button" class="inline-term" data-open="sparsity">sparsity</button>. Green cells are kept, brown cells are pruned.</p>
+    <p>Guess before you switch patterns: at the same sparsity, which pattern keeps the most of the weights' total size, and which one does a GPU run faster? Unstructured pruning keeps the most, because it removes exactly the smallest weights. But a dense GPU kernel still multiplies every zero.</p>
+    <p>The <button type="button" class="inline-term" data-open="pattern24">2:4 pattern</button> must drop two of every four inputs, so it loses a few large weights. In return, <button type="button" class="inline-term" data-open="sparsetc">sparse tensor cores</button> skip half the multiplies. <button type="button" class="inline-term" data-open="structured">Whole channels</button> lose the most, but what is left is a smaller dense layer that any kernel runs faster.</p>
+    <p class="note">The layer is a toy with random weights. The pruning for each pattern and the kept share are computed exactly. The tensor-core facts are from Mishra et al. (NVIDIA): up to 2x math throughput for 2:4, with a 2-bit index per kept weight.</p>
+    <p class="inscription">Fewer weights is not the same as less time. Prune in a shape the hardware skips: 2:4 on newer NVIDIA GPUs, or whole channels anywhere.</p>
+    {{CONTINUE}}
+  </article>

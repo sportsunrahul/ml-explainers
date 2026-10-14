@@ -1,0 +1,170 @@
+<p class="kicker"><span class="act-n">Act III</span>Time, concepts, depth</p>
+<section id="ch-sam2" class="chapter">
+<h2>SAM 2: video is images with memory</h2>
+<p>SAM 2 treats an image as a video with one frame. It reads a video frame by frame, and before it draws a mask on a frame it looks back at what it remembers about the object.</p>
+
+<figure class="viz" id="viz-sam2" data-scene="sam2" data-toy>
+  <div class="stage" style="height:clamp(460px, 52vw, 520px)"></div>
+  <div class="controls">
+    <button type="button" data-sam2="click" id="btn-sam2-click">Click the mug on frame 1</button>
+    <button type="button" data-sam2="play" id="btn-sam2-play">Play</button>
+    <button type="button" data-sam2="correct" id="btn-sam2-correct">Correct with one click</button>
+    <button type="button" data-cue-reset id="btn-sam2-reset">Reset</button>
+  </div>
+  <div class="controls"><label>Frame <input type="range" min="0" max="23" step="1" value="0" data-sam2-frame id="sam2-frame" aria-label="Frame"></label></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model: a drawn video, not SAM 2's output. The memory bank follows the paper's rules (the 6 most recent frame memories with their temporal position, plus the memories of prompted frames, plus object pointers). The error after the occlusion is staged to show what a correction click does.</figcaption>
+</figure>
+
+<p>Press <b>Play</b> and stop on a frame where the mug is completely behind the box. Guess first: what should a segmentation model draw? A model that must always output a mask would draw something wrong. SAM 2 has an extra output, the <dfn>occlusion head</dfn>, that predicts whether the object is visible on this frame at all. When it says no, the frame gets no mask, and the model keeps tracking from memory.</p>
+<p>Memory for video segmentation is older than SAM 2. STM (2019) treated past frames and their masks as an external memory: every pixel of the new frame attends to every pixel of every stored frame, and it stored a new memory frame every <span data-claim="stm-every-n">5</span> frames. The memory grows with the video, so such models struggle on long clips. XMem (2022) split memory into <span data-claim="xmem-stores">3</span> stores, after a model of human memory: a sensory memory updated every frame, a high-resolution working memory of recent frames, and a compact long-term memory of prototypes. With a 6 GB memory budget it could process up to <span data-claim="xmem-34k">34,000</span> frames. Cutie (2023) added object-level memory on top. All three start from a full mask on the first frame. SAM 2's change is to make the memory <em>promptable</em>: any click on any frame becomes a memory.</p>
+<p>The task is called <dfn>promptable visual segmentation</dfn>. You may click, draw a box or give a mask on <em>any</em> frame. The model answers at once on that frame, then spreads the answer over the whole video as a <dfn>masklet</dfn>, one mask per frame. A later click on any frame refines the masklet. Image segmentation is the special case of a video with one frame.</p>
+<p>Four parts make this work:</p>
+<ul>
+  <li><b>A streaming image encoder.</b> A Hiera encoder (a hierarchical vision transformer pretrained with MAE) runs once per frame, as the frames arrive. Its stride-16 and stride-32 features are fused into a <span data-claim="sam2-img-emb-shape">256x64x64</span> frame embedding.</li>
+  <li><b>Memory attention.</b> <span data-claim="sam2-memattn-layers">L = 4</span> transformer blocks condition the frame embedding on the memory bank: self-attention over the frame, cross-attention to the memories, then an MLP.</li>
+  <li><b>A memory bank.</b> It holds up to <span data-claim="sam2-n-recent">6</span> memories of recent frames, each tagged with how many frames ago it was made, and the memories of frames you prompted, which carry no such tag. A memory is the predicted mask, downsampled and added to that frame's embedding, compressed to <span data-claim="sam2-mem-dim">64</span> channels.</li>
+  <li><b>Object pointers.</b> The decoder's mask token for the chosen mask is a <span data-claim="sam2-objptr-dim">256</span>-number summary of the object. It is split into <span data-claim="sam2-objptr-split">4 tokens</span> of 64 numbers and stored next to the spatial memories.</li>
+</ul>
+<p>The read itself is ordinary cross-attention. The paper prints no equation for it; in standard notation (our transcription):</p>
+<div class="eq" id="eq-memread" data-build data-viz="viz-sam2"><div class="tex tex-display">
+\htmlData{step=1, link=frame}{\htmlClass{t-blue}{X'}} = \mathrm{softmax}\!\Big(\frac{\htmlData{step=2, link=frame}{\htmlClass{t-blue}{Q_{\text{frame}}}}\,\htmlData{step=3, link=memory}{\htmlClass{t-blue}{K_{\text{mem}}}}^{\mathsf T}}{\sqrt{d}}\Big)\,\htmlData{step=4, link=memory}{\htmlClass{t-blue}{V_{\text{mem}}}}
+</div></div>
+<p class="eqno">Standard scaled dot-product cross-attention (our notation). SAM 2 v2, Sec. 4 describes it in words: self-attention, then cross-attention to the memories and object pointers, then an MLP, repeated in each of the 4 blocks.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{Q_{\text{frame}}}</span>: one query per position of the current frame's 64x64 feature map.</li>
+  <li><span class="tex">\htmlClass{t-blue}{K_{\text{mem}}, V_{\text{mem}}}</span>: keys and values from every position of every stored memory, plus the object pointer tokens.</li>
+  <li><span class="tex">\htmlClass{t-blue}{X'}</span>: the frame's features, now "knowing" where the object was. The SAM decoder then turns them into a mask exactly as in chapter 4.</li>
+</ul>
+<p>Two details carry a lot. First, a frame's memory is made <em>after</em> its mask is drawn, so mistakes can enter the bank; that is why a correction click is stored as a memory in a separate queue of prompted frames, apart from the 6 recent ones, so it is not pushed out as the video moves on (the queue size is not stated). Second, the decoder still produces several masks for an ambiguous click, but in a video only the one with the highest predicted IoU is carried forward unless a later prompt settles it.</p>
+
+<h3>An image is a video with an empty memory</h3>
+<p>With nothing in the bank, memory attention has nothing to read, and SAM 2 is a SAM. Trained only on SA-1B, the Hiera-B+ model scores <span data-claim="sam2-img-sam2-miou">58.9</span> mIoU at one click on the 23-dataset suite of chapter 7, against <span data-claim="sam2-img-sam-miou">58.1</span> for SAM's ViT-H. It runs at <span data-claim="sam2-img-sam2-fps">130.1</span> frames per second against <span data-claim="sam2-img-sam-fps">21.7</span>, about <span data-claim="sam2-img-6x">6x</span> faster. That speed-up is for images. On video, with memory, the paper reports <span data-claim="sam2-fps-video-bplus">43.8</span> frames per second for Hiera-B+ and <span data-claim="sam2-fps-video-l">30.2</span> for Hiera-L on one A100.</p>
+
+<h3>Inside SAM 2: forward, then backward</h3>
+<p>Press through the stages. The shapes are computed from the Hiera configuration of each model size. Before the backward stage, guess: does the gradient reach the image encoder, and does it reach the memory bank?</p>
+<figure class="viz archflow" id="viz-sam2flow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-sam2flow-frame" aria-pressed="false">1 Frame</button>
+    <button type="button" id="btn-sam2flow-encoder" aria-pressed="false">2 Encoder</button>
+    <button type="button" id="btn-sam2flow-memory" aria-pressed="false">3 Memory</button>
+    <button type="button" id="btn-sam2flow-attend" aria-pressed="false">4 Attend</button>
+    <button type="button" id="btn-sam2flow-decode" aria-pressed="false">5 Decode</button>
+    <button type="button" id="btn-sam2flow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-sam2flow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-sam2flow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-sam2flow-t" aria-pressed="false">Hiera-T</button>
+    <button type="button" id="btn-sam2flow-s" aria-pressed="false">Hiera-S</button>
+    <button type="button" id="btn-sam2flow-bplus" aria-pressed="true">Hiera-B+</button>
+    <button type="button" id="btn-sam2flow-l" aria-pressed="false">Hiera-L</button>
+    <button type="button" id="btn-sam2flow-ft16" aria-pressed="false">B+, 16-frame fine-tune</button>
+  </div>
+  <canvas id="sam2flow-canvas" role="img" aria-label="SAM 2's training step as a diagram: a frame goes through the Hiera encoder; stride-16 and stride-32 features are fused into a frame embedding; stride-4 and stride-8 features skip ahead to the decoder; past frames' masks go through the memory encoder into the memory bank; memory attention conditions the frame embedding on the bank; the prompt encoder and mask decoder produce masks, scores and an occlusion score; the loss compares them with the ground truth."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-sam2flow-prev">Previous</button>
+    <button type="button" id="btn-sam2flow-next">Next</button>
+    <button type="button" id="btn-sam2flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="sam2flow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>SAM's three parts are all here: an <b class="c-blue">image encoder</b>, a <b class="c-yellow">prompt encoder</b> and a <b class="c-green">mask decoder</b>. Two parts are new: a <b class="c-blue">memory encoder</b> that writes each frame's result into the <b class="c-blue">memory bank</b>, and <b class="c-blue">memory attention</b> that reads it. Training runs on clips of <span data-claim="sam2-seq-len">8</span> frames. Press <b>1 Frame</b>, then <b>Next</b>.</p></div>
+    <div data-stage="frame" hidden><h4>1. One frame at a time</h4><p>Each frame is resized to <span data-claim="sam2-res">1024</span> pixels a side. In training, a clip of 8 frames is sampled, and <span data-claim="sam2-prompted-frames">up to 2</span> of them get prompts: a ground-truth mask, a click or a box on the first, then corrective clicks.</p></div>
+    <div data-stage="encoder" hidden><h4>2. Hiera, and two exits</h4><p>Hiera has four stages at strides 4, 8, 16 and 32. The features at <span data-claim="sam2-fpn-strides">stride 16 and 32</span> are fused by a feature pyramid into the frame embedding. The features at <span data-claim="sam2-skip-strides">stride 4 and 8</span> skip memory attention entirely: they go straight to the decoder's upsampling layers, to sharpen mask edges.</p></div>
+    <div data-stage="memory" hidden><h4>3. The memory bank</h4><p>For each earlier frame, the memory encoder downsamples the predicted mask, adds it to that frame's own embedding, and compresses the result to <span data-claim="sam2-mem-dim">64</span> channels. If the occlusion head said "absent" on that frame, a learned occlusion embedding is added too. The bank keeps <span data-claim="sam2-n-recent">6</span> recent memories (with temporal position codes), the prompted frames' memories (without them), and the object pointers. The paper does not state how many prompted memories are kept.</p></div>
+    <div data-stage="attend" hidden><h4>4. Memory attention</h4><p>The 64x64 frame embedding passes <span data-claim="sam2-memattn-layers">L = 4</span> blocks of self-attention, cross-attention to the bank, and an MLP, with 2D rotary position codes. Its output has the same shape as its input.</p></div>
+    <div data-stage="decode" hidden><h4>5. SAM's decoder, plus an occlusion head</h4><p>The prompt encoder is SAM's. The mask decoder is SAM's two-way transformer with three additions: the stride-4 and stride-8 skips, an extra output token that predicts whether the object is visible, and the mask token that becomes this frame's object pointer.</p></div>
+    <div data-stage="loss" hidden><h4>6. Four losses</h4><p>Focal, dice, IoU and occlusion losses are weighted <span data-claim="sam2-loss-ratio">20:1:1:1</span>. As in SAM, only the lowest-loss mask is supervised when there are several. The IoU head is trained on all masks. On frames where the object is absent, no mask is supervised, but the occlusion head always is.</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>In the main training stage everything learns. The gradient flows from the loss into the decoder, the prompt encoder, memory attention, the frame embedding and Hiera. It also reaches the memory encoder, because the bank's memories were computed in the same clip (our reading: the paper lists no frozen part in this stage). The bank itself has no weights: it is storage. In the 16-frame fine-tune the paper freezes the image encoder to save memory, so the gradient stops at the encoder's outputs (whether the FPN counts as part of the encoder is not stated; the paper describes it inside the image-encoder paragraph).</p></div>
+    <div data-stage="update" hidden><h4>8. Update</h4><p><span data-claim="sam2-optimizer">AdamW</span>, batch <span data-claim="sam2-batch">256</span>, <span data-claim="sam2-ft-steps">~150k</span> steps of joint image and video training, with a learning rate of <span data-claim="sam2-lr-enc">6e-5</span> for the image encoder and <span data-claim="sam2-lr-other">3.0e-4</span> for the rest. Training simulates a user: <span data-claim="sam2-corr-clicks">7</span> corrective clicks (SAM used 8). An extra <span data-claim="sam2-ft16-iters">50k</span> iterations on 16-frame clips followed, with the image encoder frozen. The released model took <span data-claim="sam2-compute">256 A100 GPUs for 108 hours</span>.</p></div>
+  </div>
+  <figcaption>Computed: spatial sizes from the 1024-pixel input and the stage strides; stage widths and depths per size from the Hiera configuration that SAM 2 cites (<span data-claim="sam2-hiera-bplus-channels">[112-224-448-896]</span> for B+). The 64x64 size of a memory and the 1/4-resolution mask logits are our reading; the paper gives the memory's channels, not its spatial size.</figcaption>
+</figure>
+<script>
+(() => {
+  const x = '\u00d7';
+  const V = {
+    t: { name: 'Hiera-T', C: [96, 192, 384, 768], N: [1, 2, 7, 2] },
+    s: { name: 'Hiera-S', C: [96, 192, 384, 768], N: [1, 2, 11, 2] },
+    bplus: { name: 'Hiera-B+', C: [112, 224, 448, 896], N: [2, 3, 16, 3] },
+    l: { name: 'Hiera-L', C: [144, 288, 576, 1152], N: [2, 6, 36, 4] },
+    ft16: { name: 'Hiera-B+, 16-frame fine-tune', C: [112, 224, 448, 896], N: [2, 3, 16, 3], ft: true },
+  };
+  const sz = [256, 128, 64, 32];
+  const SH = {
+    frame: m => `3${x}1024${x}1024 per frame`, hiera: m => `${m.C[3]}${x}32${x}32 at stride 32`, fpn: () => `256${x}64${x}64`,
+    skip: m => `${m.C[0]}${x}256${x}256|${m.C[1]}${x}128${x}128`, prev: () => 'masks of earlier frames', menc: () => `64${x}64${x}64 per frame`,
+    bank: () => '6 recent + prompted|+ pointers 4' + x + '64', attn: () => `256${x}64${x}64`, prompt: () => `N${x}256 tokens`,
+    dec: () => 'masks + IoU|+ occlusion score', loss: () => '20:1:1:1' };
+  ArchFlow.mount({
+    prefix: 'sam2flow', grid: { cols: 6, rows: 3 },
+    boxes: {
+      frame: { c: 0, r: 1, lane: 'blue', title: ['frame'], glyph: 'photo', data: true },
+      hiera: { c: 1, r: 1, lane: 'blue', title: ['Hiera', 'encoder'], glyph: 'layers' },
+      fpn: { c: 2, r: 1, lane: 'blue', title: ['FPN', 'stride 16+32'], glyph: 'grid', cls: false },
+      skip: { c: 2, r: 0, lane: 'blue', title: ['stride 4, 8', 'features'], glyph: 'grid', cls: false },
+      prev: { c: 0, r: 2, lane: 'mixed', title: ['earlier', 'frames'], glyph: 'photos', data: true },
+      menc: { c: 1, r: 2, lane: 'blue', title: ['memory', 'encoder'], glyph: 'layers' },
+      bank: { c: 2, r: 2, lane: 'blue', title: ['memory', 'bank'], glyph: 'seq', pattern: 'bbbbbbyg' },
+      attn: { c: 3, r: 1, lane: 'blue', title: ['memory', 'attention x4'], glyph: 'layers' },
+      prompt: { c: 4, r: 0, lane: 'yellow', title: ['prompt', 'encoder'], glyph: 'tokens' },
+      dec: { c: 4, r: 1, lane: 'green', title: ['mask decoder', '+ occlusion'], glyph: 'layers' },
+      loss: { c: 5, r: 1, lane: 'red', title: ['focal, dice,', 'IoU, occl.'], glyph: 'loss' },
+    },
+    edges: [['frame', 'hiera'], ['hiera', 'fpn'], ['hiera', 'skip'], ['prev', 'menc'], ['menc', 'bank'], ['fpn', 'attn'], ['bank', 'attn'], ['attn', 'dec'], ['skip', 'dec'], ['prompt', 'dec'], ['dec', 'loss']],
+    stages: [
+      { key: 'frame', show: ['frame'] }, { key: 'encoder', show: ['hiera', 'fpn', 'skip'] }, { key: 'memory', show: ['prev', 'menc', 'bank'] },
+      { key: 'attend', show: ['attn'] }, { key: 'decode', show: ['prompt', 'dec'] }, { key: 'loss', show: ['loss'] },
+      { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: V, variant: 'bplus',
+    shape: (id, m) => SH[id](m),
+    sub: (id, m) => id === 'hiera' ? `stages ${m.N.join('-')} blocks` : null,
+    params: id => ({ hiera: 'all blocks', fpn: 'lateral convs', menc: 'convs, 64-ch proj.', attn: '4 blocks', prompt: 'type embeddings, mask convs', dec: 'transformer, heads, tokens' })[id] || null,
+    frozen: (id, m) => !!(m && m.ft && id === 'hiera'),
+    readout: (s, m) => ({
+      overview: `${m.name}: a 1024${x}1024 frame becomes a 256${x}64${x}64 frame embedding, conditioned on the memory bank before the SAM decoder.`,
+      frame: 'Step 1: one 3' + x + '1024' + x + '1024 frame of an 8-frame training clip.',
+      encoder: `Step 2: Hiera stages at strides 4/8/16/32 give ${m.C.map((c, i) => c + x + sz[i] + x + sz[i]).join(', ')}. Strides 16+32 go to the FPN (256${x}64${x}64); strides 4+8 skip to the decoder.`,
+      memory: 'Step 3: each earlier frame\'s mask is downsampled, added to that frame\'s embedding and compressed to 64 channels. The bank keeps 6 recent memories with temporal codes, the prompted ones without, and 4' + x + '64 pointer tokens per frame.',
+      attend: `Step 4: 4 blocks of self-attention, cross-attention to the bank, MLP. In and out: 256${x}64${x}64.`,
+      decode: 'Step 5: prompt tokens and output tokens (masks, IoU, occlusion) run through SAM\'s two-way decoder; the stride-8 then stride-4 features join the upsampling (order: our reading).',
+      loss: 'Step 6: focal 20, dice 1, IoU 1, occlusion 1; the mask loss on the lowest-loss mask only.',
+      backward: m.ft ? 'Backward (16-frame fine-tune): the image encoder is frozen, so the gradient stops at its outputs; memory attention, the memory encoder, the prompt encoder and the decoder learn.' : 'Backward: the gradient reaches the decoder, prompt encoder, memory attention, FPN and Hiera, and the memory encoder through the memories made in the same clip. The bank has no weights.',
+      update: m.ft ? 'Update: 50k iterations on 16-frame clips at half the learning rate, image encoder frozen.' : 'Update: AdamW, batch 256, about 150k steps; encoder lr 6e-5, the rest 3.0e-4.',
+    })[s],
+  });
+})();
+</script>
+
+<div class="claim-card">
+<h4>Claim card: the SA-V data engine</h4>
+<dl>
+  <dt>Claim</dt><dd>Putting SAM 2 in the annotation loop makes video masks much cheaper at comparable quality.</dd>
+  <dt>How measured</dt><dd>A controlled run of the three annotation setups on the same <span data-claim="sam2-ctrl-exp">169 videos and 452 masklets</span>: phase 1 used SAM on every frame, phase 2 added a mask-only SAM 2 to propagate, phase 3 used the full SAM 2 with clicks. Quality is the share of masks that agree with phase 1's at IoU above <span data-claim="sam2-align-iou">0.75</span>.</dd>
+  <dt>Result</dt><dd>See the table. Time per frame fell from <span data-claim="sam2-p1-time">37.8</span> to <span data-claim="sam2-p3-time">4.5</span> seconds, about <span data-claim="sam2-p3-speedup">8.4x</span> faster, while <span data-claim="sam2-p3-align">89.1</span>% of phase 3 masks still agreed with phase 1.</dd>
+  <dt>What would falsify it</dt><dd>Low agreement with phase 1, which would mean the speed came from sloppier masks.</dd>
+</dl>
+</div>
+<table class="data">
+  <thead><tr><th>Phase</th><th>Model in the loop</th><th>Seconds per frame</th><th>Edited frames (%)</th><th>Clicks per clicked frame</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>SAM on every frame</td><td><span data-claim="sam2-p1-time">37.8</span></td><td><span data-claim="sam2-p1-edited">100.00</span></td><td><span data-claim="sam2-p1-clicks">4.80</span></td></tr>
+    <tr><td>2</td><td>SAM + SAM 2 (masks only)</td><td><span data-claim="sam2-p2-time">7.4</span></td><td><span data-claim="sam2-p2-edited">23.25</span></td><td><span data-claim="sam2-p2-clicks">3.61</span></td></tr>
+    <tr><td>3</td><td>SAM 2</td><td><span data-claim="sam2-p3-time">4.5</span></td><td><span data-claim="sam2-p3-edited">19.04</span></td><td><span data-claim="sam2-p3-clicks">2.68</span></td></tr>
+  </tbody>
+</table>
+<p>The result is SA-V: <span data-claim="sam2-sav-videos">50.9K</span> videos and <span data-claim="sam2-sav-masklets-total">642.6K</span> masklets, of which <span data-claim="sam2-sav-masklets-manual">190.9K</span> were drawn by people and <span data-claim="sam2-sav-masklets-auto">451.7K</span> were generated automatically and checked. Counting the automatic masklets, that is <span data-claim="sam2-sav-53x">53x</span> more masks than any earlier video object segmentation dataset; the manual masklets alone are <span data-claim="sam2-sav-15x">15x</span> more. The paper gives the average video length as <span data-claim="sam2-sav-dur-main">14 seconds</span> in the main text and <span data-claim="sam2-sav-dur-app">13.8 seconds</span> in the appendix. Objects disappear and come back often: <span data-claim="sam2-sav-disapp">42.5</span>% of the manual masklets disappear at some point, which is exactly what the occlusion head is for.</p>
+
+<h3>What memory buys</h3>
+<ul>
+  <li><b>Fewer clicks.</b> Started with one click on the first frame and evaluated on <span data-claim="sam2-vos17-n">17</span> video datasets, SAM 2 reaches an average accuracy of <span data-claim="sam2-vos17-1click">64.7</span> against <span data-claim="sam2-vos17-cutie-1click">56.7</span> for SAM followed by the Cutie tracker. The accuracy is J&amp;F, which averages region overlap and boundary accuracy, on every dataset but VOST, where the table reports region overlap J.</li>
+  <li><b>Better tracks.</b> Given a full mask on frame 1, the standard video-segmentation setting, Hiera-B+ scores <span data-claim="sam2-sota-savtest-bplus">77.0</span> on the SA-V test set against <span data-claim="sam2-sota-savtest-cutie">62.8</span> for Cutie-base+, and <span data-claim="sam2-sota-davis-bplus">90.2</span> on DAVIS 2017.</li>
+  <li><b>Pointers help on long, hard videos; a recurrent memory does not add much.</b> In the paper's ablation setup (a smaller model at 512 px input), without object pointers SA-V val drops from <span data-claim="sam2-abl-ptr-sav">68.3</span> to <span data-claim="sam2-abl-noptr-sav">64.5</span>. Feeding memories through a GRU instead gives <span data-claim="sam2-abl-gru-sav">65.3</span>. Pointers help on SA-V val and LVOSv2, but not on the average over the nine zero-shot datasets. Six recent memories is a speed choice: eight scored <span data-claim="sam2-abl-mem8">69.0</span> but ran at <span data-claim="sam2-abl-mem8-speed">0.93</span> of the speed.</li>
+</ul>
+<p>The authors list what still breaks (SAM 2 v2, App. C). The model "may fail to segment objects across shot changes and can lose track of or confuse objects in crowded scenes, after long occlusions or in extended videos". It "struggles with accurately tracking objects with very thin or fine details especially when they are fast-moving", and it confuses "nearby objects with similar appearance". Each object is tracked separately, "without inter-object communication". Chapter 12 shows the follow-ups that attack long videos and look-alikes.</p>
+</section>

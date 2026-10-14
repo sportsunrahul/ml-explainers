@@ -1,0 +1,13 @@
+  <article data-chapter="cost">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Where the time goes</h2><p class="subhead">Every layer waits on memory or on arithmetic</p></header>
+    <div class="controls">
+      <div class="row"><span>Format</span><button type="button" class="tool" data-prec="fp32">FP32</button><button type="button" class="tool" data-prec="fp16">FP16</button><button type="button" class="tool" data-prec="int8">INT8</button><button type="button" class="tool" data-prec="w4">4-bit weights</button></div>
+      <div class="row"><span>Layer</span><button type="button" class="tool" data-layer="c3">3x3 conv</button><button type="button" class="tool" data-layer="dw">depthwise</button><button type="button" class="tool" data-layer="hd">head on 5x5</button><button type="button" class="tool" data-layer="fc">LLM, 1 token</button></div>
+    </div>
+    <p>A GPU does two jobs: arithmetic, and moving numbers between memory and its compute units. A layer takes as long as the slower job. Its <button type="button" class="inline-term" data-open="intensity">arithmetic intensity</button>, operations per byte moved, says which job that is.</p>
+    <p>Pick the 3x3 conv and step through the formats. From <button type="button" class="inline-term" data-open="fp32">FP32 to FP16</button> it gets much faster, because <button type="button" class="inline-term" data-open="tensorcore">tensor cores</button> raise the math limit. The depthwise conv gets only twice as fast: it waits on memory, and FP16 only halves its bytes.</p>
+    <p>Now guess before you press "4-bit weights" (weights stored in 4 bits, FP16 arithmetic). Only layers whose bytes are mostly weights speed up: the head conv on a small map and a language-model layer working on one token. The big conv does not change.</p>
+    <p class="note">The layer costs are computed exactly from each shape, with every tensor crossing memory once. The GPU is a toy: 500 GB/s and math limits in the ratio 1 : 8 : 16 for FP32, FP16 and INT8.</p>
+    <p class="inscription">Shorter numbers help twice: fewer bytes to move, and faster math units. Shrinking only the weights helps only layers that are mostly weights.</p>
+    {{CONTINUE}}
+  </article>

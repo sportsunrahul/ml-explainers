@@ -1,0 +1,18 @@
+<dialog id="dlg-kvcache"><h3>KV cache</h3><p>In attention, each token is turned into a query, a key and a value. A new token's query is compared with the keys of all earlier tokens, and the result weights their values. Earlier tokens never change, so their keys and values are stored instead of recomputed: that store is the KV cache.</p><p>Its size is 2 (keys and values) x layers x key-value heads x head dimension x tokens x bytes per value. It grows by the same amount for every token, and every new token must read all of it.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-token"><h3>Token</h3><p>The unit a language model reads and writes: a word, part of a word, or a punctuation mark. A sequence of length L has L tokens. In this tour "context length" means how many tokens the model has seen so far.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-ssm"><h3>State-space model (SSM)</h3><p>A sequence model that carries a hidden state h from one token to the next: h_t = A h_(t-1) + B x_t, y_t = C h_t, with matrices A, B and C. The idea comes from control theory, where the same equations describe physical systems in continuous time. S4 (2021) made it work for deep learning; Mamba (2023) made B, C and the step size depend on the input; A stays a learned parameter.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-state"><h3>State</h3><p>The fixed-size vector (or matrix) a recurrent model carries forward. Everything the model will later know about the past must be folded into it. Its size is set by the architecture, not by the length of the input, which is why the cost per token stays constant, and why the state is a lossy summary.</p><button class="btn" data-close>Close</button></dialog>
+<dialog id="dlg-papers"><h3>Papers read in full</h3><ul>
+<li><a href="https://arxiv.org/abs/2006.16236v3" target="_blank" rel="noopener">Linear attention (Transformers are RNNs), 2020</a></li>
+<li><a href="https://arxiv.org/abs/2008.07669v2" target="_blank" rel="noopener">HiPPO, 2020</a></li>
+<li><a href="https://arxiv.org/abs/2111.00396v3" target="_blank" rel="noopener">S4, 2021</a></li>
+<li><a href="https://arxiv.org/abs/2303.06349v1" target="_blank" rel="noopener">LRU (Resurrecting RNNs), 2023</a></li>
+<li><a href="https://arxiv.org/abs/2312.00752v2" target="_blank" rel="noopener">Mamba, 2023</a></li>
+<li><a href="https://arxiv.org/abs/2312.04927v1" target="_blank" rel="noopener">Zoology, 2023</a></li>
+<li><a href="https://arxiv.org/abs/2401.09417v3" target="_blank" rel="noopener">Vision Mamba (Vim), 2024</a></li>
+<li><a href="https://arxiv.org/abs/2401.10166v4" target="_blank" rel="noopener">VMamba, 2024</a></li>
+<li><a href="https://arxiv.org/abs/2402.01032v2" target="_blank" rel="noopener">Repeat After Me, 2024</a></li>
+<li><a href="https://arxiv.org/abs/2403.19887v2" target="_blank" rel="noopener">Jamba, 2024</a></li>
+<li><a href="https://arxiv.org/abs/2405.21060v1" target="_blank" rel="noopener">Mamba-2 (Transformers are SSMs), 2024</a></li>
+<li><a href="https://arxiv.org/abs/2406.07887v1" target="_blank" rel="noopener">An empirical study of Mamba-based language models, 2024</a></li>
+</ul><button class="btn" data-close>Close</button></dialog>

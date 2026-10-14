@@ -1,0 +1,24 @@
+  <article data-chapter="bill">
+    <header class="ch-head"><span class="num">1 of 10</span><h2>The bill attention sends</h2><p class="subhead">A cache that grows, against a memory that does not</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">The cache grows</button><button type="button" role="tab" data-step="1">The bill at scale</button></div>
+      <button type="button" class="tool play" data-replay>Replay</button>
+    </div>
+    <div class="controls">
+      <label class="slider">Context length <input type="range" id="bill-atlas-L" min="0" max="1000" step="1" value="500"></label>
+      <button type="button" class="tool" data-l="8192">8K</button><button type="button" class="tool" data-l="131072">128K</button><button type="button" class="tool" data-l="1048576">1M</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>To write the next word, a Transformer compares it with every word before it. To make that fast it keeps a <button class="inline-term" data-open="kvcache">KV cache</button>: a key and a value for every past <button class="inline-term" data-open="token">token</button>, in every layer. Each new token adds a column, so the cache (brown) grows for as long as the text does.</p>
+      <p>A <button class="inline-term" data-open="ssm">state-space model</button> keeps a <button class="inline-term" data-open="state">state</button> instead (yellow): a fixed set of numbers that each new token updates. It never gets bigger. It only changes.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>The same picture with real sizes. The brown line is the KV cache of Llama 3 8B: 128 KiB for every token, at 16 bits per value. The yellow line is the whole memory of Mamba 2.8B: 11.9 MiB, at any length.</p>
+      <p>Drag the slider. Near 122,000 tokens the cache of one conversation is as large as the model's weights (the dashed line). The two models differ in size; what matters is that one line rises and the other stays flat.</p>
+    </div>
+    <p class="note">Step 1 is a toy (twenty tokens, four layers). Step 2 is computed from the published configurations: Llama 3 8B has 32 layers and 8 key-value heads of dimension 128; Mamba 2.8B has 64 layers of width 2560, expanded 2 times, with a state of 16 per channel (the README default) plus the last 3 inputs of a width-4 convolution.</p>
+    <table class="data"><thead><tr><th>Context</th><th>KV cache, Llama 3 8B</th><th>State, Mamba 2.8B</th></tr></thead>
+      <tbody><tr><td>8K tokens</td><td>1 GiB</td><td>11.9 MiB</td></tr><tr><td>128K tokens</td><td>16 GiB</td><td>11.9 MiB</td></tr><tr><td>1M tokens</td><td>128 GiB</td><td>11.9 MiB</td></tr></tbody></table>
+    <p class="inscription">Attention pays for every token it has seen, every time it writes a new one. A state-space model pays the same small amount each time.</p>
+    <button type="button" class="continue" data-go="recurrence">Continue with linear recurrences</button>
+  </article>

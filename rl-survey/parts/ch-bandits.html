@@ -1,0 +1,173 @@
+<section id="ch-bandits" class="chapter">
+<h2>Explore or exploit</h2>
+<ul class="problems" aria-label="The three problems of reinforcement learning; filled tags are this chapter's topic"><li class="on">Exploration</li><li>Credit assignment</li><li>Data from your own choices</li></ul>
+<p>Start with the smallest version of the problem: one situation, a few actions, and a score right after every action. There is no state that changes and no delay, so credit assignment disappears. Exploration does not, and this chapter shows how to handle it well.</p>
+
+<h3>Play it yourself</h3>
+<p>Picture a row of five slot machines, called <em>arms</em>. Each arm has a hidden average payout. A pull pays that average plus random noise, so one pull tells you little. You have 20 pulls, and your goal is the largest total. This setting is called a <em>multi-armed bandit</em>, after the slang "one-armed bandit" for a slot machine.</p>
+
+<figure class="viz" id="viz-bandit" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Pull an arm">
+    <span class="lbl">Pull</span>
+    <button type="button" id="btn-bandit-1">Arm 1</button>
+    <button type="button" id="btn-bandit-2">Arm 2</button>
+    <button type="button" id="btn-bandit-3">Arm 3</button>
+    <button type="button" id="btn-bandit-4">Arm 4</button>
+    <button type="button" id="btn-bandit-5">Arm 5</button>
+  </div>
+  <canvas id="bandit-canvas" role="img" aria-label="Five columns, one per arm, on a vertical reward axis from minus 3 to 3. Each pull adds a yellow dot at the reward it paid. A thick blue bar marks each arm's current estimate, the average of its rewards, with the pull count n and the estimate Q printed under the column. With UCB shown, a pale blue whisker rises from each estimate to its upper confidence bound, and the arm UCB would pull next is outlined in green. After Reveal, a brown dashed line marks each arm's true mean."></canvas>
+  <div class="controls" role="group" aria-label="Helpers">
+    <button type="button" id="btn-bandit-auto">Let epsilon-greedy finish</button>
+    <button type="button" id="btn-bandit-est" aria-pressed="true">Estimates only</button>
+    <button type="button" id="btn-bandit-ucb" aria-pressed="false">Show UCB bounds</button>
+    <button type="button" id="btn-bandit-reveal">Reveal true means</button>
+    <button type="button" id="btn-bandit-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="bandit-readout" aria-live="polite"></p>
+  <figcaption>A toy bandit: five arms whose means were drawn once from a normal distribution (mean 0, spread 1) with a fixed seed, and rewards drawn around each mean with spread 1. Reset replays the same arms and the same noise. Epsilon-greedy explores with probability 0.1.</figcaption>
+</figure>
+
+<p><b>Make a guess before you start:</b> is it better to try every arm a few times, or to stay with the first arm that pays well? Play 20 pulls, then press Reveal.</p>
+<p>Most people try a few arms, find one that paid well once or twice, and stay there. Sometimes that arm is the best. Often it is a decent arm that got lucky early, and the best arm never got enough pulls to show what it can do. That is the trap this chapter is about.</p>
+
+<h3>Estimate an arm by averaging</h3>
+<p>The natural estimate of an arm's value is the average of the rewards it has paid so far. Write <span class="tex">\htmlClass{t-blue}{Q_t(a)}</span> for the estimate of arm <span class="tex">a</span> before step <span class="tex">t</span>, and <span class="tex">N_t(a)</span> for how many times it has been pulled. If arm 3 paid 1.2, 0.4 and 2.0, its estimate is <span class="tex">(1.2 + 0.4 + 2.0)/3 = 1.2</span>. In the figure the blue bar of each column is exactly this average.</p>
+<p>You do not need to store every reward to keep an average. When the <span class="tex">n</span>-th reward <span class="tex">R_n</span> arrives, move the old estimate a fraction <span class="tex">1/n</span> of the way toward it:</p>
+<div class="eq" id="eq-incr" data-build data-viz="viz-bandit"><div class="tex tex-display">
+\htmlData{step=1, link=estimate}{\htmlClass{t-blue}{Q_{n+1}}} = \htmlData{step=1, link=estimate}{\htmlClass{t-blue}{Q_n}} + \htmlData{step=2, link=count}{\frac{1}{n}}\Big[\,\htmlData{step=3, link=error}{\htmlClass{t-red}{\htmlClass{t-yellow}{R_n} - \htmlClass{t-blue}{Q_n}}}\,\Big]
+</div></div>
+<p class="eqno"><span data-claim="sb-eq-incremental-mean">Eq. 2.3</span> in Sutton and Barto (2018).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{Q_n}</span>: the estimate after <span class="tex">n - 1</span> rewards; <span class="tex">\htmlClass{t-blue}{Q_{n+1}}</span> is the estimate after one more.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{R_n}</span>: the reward just received.</li>
+  <li><span class="tex">\htmlClass{t-red}{R_n - Q_n}</span>: the error, how far the new reward is from what you expected.</li>
+  <li><span class="tex">1/n</span>: the step size. It shrinks as evidence piles up, so each new reward moves the estimate less.</li>
+</ul>
+<p>Try it with numbers. Arm 3's estimate is 1.0 after two pulls. The third pull pays 2.5. The error is <span class="tex">2.5 - 1.0 = 1.5</span>, the step size is <span class="tex">1/3</span>, so the new estimate is <span class="tex">1.0 + 1.5/3 = 1.5</span>, the same as averaging all three rewards. Hover over the terms of the equation after a pull to see each one in the figure.</p>
+<p>Look at the shape: <em>new estimate = old estimate + step size &times; (target &minus; old estimate)</em>. Sutton and Barto write it as a general rule (their <span data-claim="sb-eq-general-update">Eq. 2.4</span>), and you will meet it in almost every chapter from here on. Only the target changes: a reward here, a one-step guess in TD learning (<a href="#ch-mctd">chapter 6</a>), a guess about the best next action in Q-learning (<a href="#ch-qlearn">chapter 7</a>).</p>
+
+<h3>Greedy gets stuck</h3>
+<p>The simplest policy always pulls the arm with the highest estimate. This is the <em>greedy</em> policy, and it is pure exploitation. Its flaw is the one you may have felt in the game: once an arm looks best, the others stop getting pulled, so their estimates never improve, and a bad early estimate is never corrected.</p>
+<p>The fix is a little deliberate randomness. The <em>epsilon-greedy</em> policy picks the greedy arm most of the time, and with a small probability <span class="tex">\varepsilon</span> picks an arm at random:</p>
+<div class="eq" id="eq-egreedy" data-build data-viz="viz-testbed"><div class="tex tex-display">
+\htmlClass{t-green}{A_t} = \begin{cases} \htmlData{step=1, link=greedy}{\arg\max_a \htmlClass{t-blue}{Q_t(a)}} & \text{with probability } 1 - \varepsilon \\[2pt] \htmlData{step=2, link=e1}{\text{a random arm}} & \text{with probability } \htmlData{step=2, link=e1}{\varepsilon} \end{cases}
+</div></div>
+<p class="eqno">Our notation for the epsilon-greedy rule of Sutton and Barto, section 2.2; the greedy choice alone is their <span data-claim="sb-eq-greedy-action">Eq. 2.2</span>. Ties in the arg max are broken at random.</p>
+<p>The figure below plays the standard test for bandit methods. Each task has <span data-claim="sb-testbed-k">10</span> arms whose means are drawn from a normal distribution, and each method plays <span data-claim="sb-testbed-steps">1000</span> pulls. One task proves little, so the curves average <span data-claim="sb-testbed-problems">2000</span> tasks, as in Sutton and Barto. <b>Make a guess before you press Run:</b> after 1000 pulls, which earns more, pure greedy or epsilon-greedy with <span class="tex">\varepsilon = 0.1</span>?</p>
+
+<figure class="viz" id="viz-testbed" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Testbed">
+    <button type="button" id="btn-testbed-run">Run 2000 tasks</button>
+    <button type="button" id="btn-testbed-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="testbed-canvas" role="img" aria-label="Two line charts over 1000 steps. Left, in yellow: average reward per step. Right, in green: the fraction of steps on which the best arm was chosen. Four lines in each: greedy (dotted), epsilon 0.01 (dashed), epsilon 0.1 (solid) and UCB with c equal to 2 (thick). After a fast start greedy flattens near 1.0 reward and about a third best-arm choices; epsilon 0.1 climbs higher; UCB ends highest."></canvas>
+  <p class="readout" id="testbed-readout" aria-live="polite"></p>
+  <figcaption>Computed in your browser with a fixed seed, on the 10-armed testbed of Sutton and Barto, section 2.3: each task draws its arm means from a normal distribution with <span data-claim="sb-testbed-qstar-dist">mean 0 and variance 1</span>, and each pull pays the arm's mean plus normal noise of <span data-claim="sb-testbed-reward-dist">variance 1</span>. Estimates start at 0 and are sample averages. Lines average the tasks run so far, smoothed over windows of 5 steps.</figcaption>
+</figure>
+
+<p>Greedy rises fastest at first and then flattens near a reward of 1: it locks onto an arm that is not the best and never leaves. Sutton and Barto report that greedy found the best arm in only about <span data-claim="sb-fig22-greedy-optimal-share">one-third</span> of their tasks. Epsilon-greedy keeps sampling every arm a little, so it keeps fixing its estimates and keeps finding the best arm. The readout gives the numbers from your run.</p>
+<p>Why does <span class="tex">\varepsilon = 0.1</span> level off below 100% best-arm choices? Even when it knows the best arm, it explores on 10% of steps, and a random pick hits the best arm only 1 time in 10. So at most <span class="tex">0.9 + 0.1 \times 0.1 = 0.91</span> of its choices can be the best arm, the <span data-claim="sb-fig22-eps01-cap">91%</span> ceiling Sutton and Barto give. A smaller <span class="tex">\varepsilon = 0.01</span> learns more slowly, but its ceiling is higher, so in the long run it does better. Sutton and Barto make the same point about their version of this figure.</p>
+<p>A simple trick gives early exploration for free: start every estimate high. If every <span class="tex">Q_1(a)</span> is <span data-claim="sb-fig23-optimistic-q1">+5</span> while real rewards are near 0, each pulled arm disappoints, so the greedy policy moves on to an untried arm, and every arm gets tried. Sutton and Barto call these <em>optimistic initial values</em>; their test uses a constant step size of <span data-claim="sb-fig23-alpha">0.1</span> instead of <span class="tex">1/n</span>, so the optimism fades over several pulls instead of vanishing after the first. The trick only helps at the start, because the optimism is used up.</p>
+
+<h3>UCB: explore where you are unsure</h3>
+<p>Epsilon-greedy explores blindly: it spends exploration on arms that are clearly bad as often as on arms that might be good. A better idea is to prefer arms whose estimates are uncertain. An arm pulled only a few times could be better than it looks. So give each arm a bonus that is large when its count <span class="tex">N_t(a)</span> is small, and pick the arm with the highest estimate plus bonus. This is the <em>upper confidence bound</em> (UCB) rule:</p>
+<div class="eq" id="eq-ucb" data-build data-viz="viz-bandit"><div class="tex tex-display">
+\htmlClass{t-green}{A_t} = \htmlData{step=1, link=choice}{\arg\max_a} \Big[\, \htmlData{step=2, link=estimate}{\htmlClass{t-blue}{Q_t(a)}} + \htmlData{step=3, link=bonus}{c \sqrt{\frac{\ln t}{\htmlData{step=4, link=count}{N_t(a)}}}} \,\Big]
+</div></div>
+<p class="eqno"><span data-claim="sb-eq-ucb">Eq. 2.10</span> in Sutton and Barto (2018). An arm with <span class="tex">N_t(a) = 0</span> counts as the best choice, so every arm is tried once first.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{Q_t(a)}</span>: the estimate, the exploit part.</li>
+  <li><span class="tex">c \sqrt{\ln t / N_t(a)}</span>: the bonus, the explore part. It shrinks as the arm gets pulled. It grows slowly, as the logarithm of the step <span class="tex">t</span>, for arms that are left alone, so no arm is ignored forever.</li>
+  <li><span class="tex">c</span>: how much to value uncertainty. The testbed uses <span data-claim="sb-fig24-ucb-c">c = 2</span>.</li>
+</ul>
+<p>Try it with numbers at step <span class="tex">t = 100</span>, where <span class="tex">\ln 100 \approx 4.61</span>. An arm pulled 4 times gets a bonus of <span class="tex">2\sqrt{4.61/4} \approx 2.15</span>. An arm pulled 50 times gets only <span class="tex">2\sqrt{4.61/50} \approx 0.61</span>. So a rarely pulled arm with estimate 0.5 (total 2.65) beats a well-known arm with estimate 1.8 (total 2.41): UCB checks the uncertain arm once more. Press "Show UCB bounds" in the game to see each arm's bound and the arm UCB would pull next. In the testbed, UCB ends ahead of both epsilon-greedy curves.</p>
+
+<h3>Learn preferences, not values</h3>
+<p>There is a different way to choose. Instead of estimating each arm's value, keep a <em>preference</em> <span class="tex">H_t(a)</span> for each arm and turn the preferences into probabilities with a softmax, the same function a classifier uses for its class scores:</p>
+<div class="eq" id="eq-gradbandit"><div class="tex tex-display">
+\htmlClass{t-green}{\pi_t(a)} = \frac{e^{H_t(a)}}{\sum_{b} e^{H_t(b)}}, \qquad H_{t+1}(A_t) = H_t(A_t) + \alpha\,\big(\htmlClass{t-yellow}{R_t} - \bar R_t\big)\big(1 - \htmlClass{t-green}{\pi_t(A_t)}\big), \qquad H_{t+1}(a) = H_t(a) - \alpha\,\big(\htmlClass{t-yellow}{R_t} - \bar R_t\big)\,\htmlClass{t-green}{\pi_t(a)} \ \text{ for } a \ne A_t
+</div></div>
+<p class="eqno"><span data-claim="sb-eq-softmax">Eq. 2.11</span> and <span data-claim="sb-eq-gradient-bandit">Eq. 2.12</span> in Sutton and Barto (2018). A bandit has no next state, so their chapter 2 writes the reward of step <span class="tex">t</span> as <span class="tex">R_t</span>; from chapter 3 on it is <span class="tex">R_{t+1}</span>.</p>
+<p>After each pull, compare the reward with <span class="tex">\bar R_t</span>, the average of the rewards so far. If the reward beat the average, raise the preference of the arm you pulled and lower the others; if it fell short, do the opposite. The comparison point <span class="tex">\bar R_t</span> is called a <em>baseline</em>.</p>
+<p>Try it with numbers. Three arms start with equal preferences, so each has probability <span class="tex">1/3</span>. You pull arm 1 and it pays 2.0, while the baseline is 0.5, and <span class="tex">\alpha = 0.1</span>. Arm 1's preference rises by <span class="tex">0.1 \times 1.5 \times (1 - 1/3) = 0.1</span>. Each other preference falls by <span class="tex">0.1 \times 1.5 \times 1/3 = 0.05</span>. Arm 1 is now a little more likely to be pulled.</p>
+<p>This rule is more important than it looks. Sutton and Barto show that it is stochastic gradient ascent on the expected reward. It is the first <em>policy gradient</em> on this page: the policy is changed directly, in the direction that makes good actions more likely. <a href="#ch-pg">Chapter 10</a> builds the general version, and the PyTorch exercise below shows that autograd produces exactly this update. The baseline matters too. Sutton and Barto test it on arms whose means are shifted by <span data-claim="sb-fig25-mean-shift">+4</span>, so every reward is positive; without the baseline every pull raises the pulled arm, and they find performance "<span data-claim="sb-fig25-no-baseline">significantly degraded</span>". In the exercise below, removing it cuts how often the best arm is chosen from <span data-computed>85% to 48%</span>.</p>
+
+<details class="check">
+  <summary>Check yourself: an arm's estimate is 2.0 after 4 pulls, and the fifth pull pays 0. What is the new estimate?</summary>
+  <p><span class="tex">2.0 + \tfrac15 (0 - 2.0) = 1.6</span>. As a check, the four earlier rewards summed to 8.0, and <span class="tex">8.0/5 = 1.6</span>.</p>
+</details>
+<details class="check">
+  <summary>Check yourself: why does UCB try every arm at least once before it repeats any?</summary>
+  <p>An arm with <span class="tex">N_t(a) = 0</span> has an infinite bonus, so it beats every arm that has been pulled. Once every arm has one pull, the bonuses are finite and the estimates start to matter.</p>
+</details>
+
+<h3>Where this came from</h3>
+<p>Bandit problems began in statistics, where they fall under the "sequential design of experiments" of Thompson (<span data-claim="sb-thompson-year">1933</span>) and Robbins (<span data-claim="sb-robbins-year">1952</span>). The UCB rule above is called UCB1 and is due to Auer, Cesa-Bianchi and Fischer (<span data-claim="sb-ucb1-year">2002</span>). The term "action value", and possibly the first use of epsilon-greedy, are due to Watkins (<span data-claim="sb-action-value-term-year">1989</span>). The name "soft-max" for Eq. 2.11 comes from Bridle (<span data-claim="sb-softmax-term-year">1990</span>), and the gradient bandit is a special case of the gradient methods of Williams (<span data-claim="sb-gradient-bandit-williams-year">1992</span>), which <a href="#ch-pg">chapter 10</a> builds on. This chapter follows chapter 2 of Sutton and Barto, whose parameter study of all these methods concludes: "<span data-claim="sb-fig26-finding">UCB seems to perform best</span>" on this testbed.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why a purely greedy player can get stuck on a worse arm.</li>
+    <li>The incremental update "old + step size &times; (target &minus; old)", with a numeric example.</li>
+    <li>How epsilon-greedy and UCB explore, and why UCB wastes less exploration.</li>
+    <li>How the gradient bandit changes action probabilities directly, and what its baseline does.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>A/B tests, ad selection and recommendation are bandit problems, and UCB-style bonuses and epsilon-greedy are used there directly. In full reinforcement learning the same trade-off spans whole sequences of actions. Epsilon-greedy is still the default exploration of DQN (<a href="#ch-dqn">chapter 9</a>), and policy-gradient methods explore by keeping their action probabilities from collapsing too early (chapters <a href="#ch-ac">11</a> and <a href="#ch-continuous">13</a>).</p>
+</div>
+
+<div class="exercise pe-wide" id="ex-bandits">
+  <h4>Code it yourself</h4>
+  <p>The NumPy version runs the testbed for all 2000 tasks at once, one row per task, with epsilon-greedy and UCB. The PyTorch version writes the gradient bandit as a loss, <code>-(R - baseline) * log pi(A)</code>, lets autograd take the gradient, and checks after every step that the result equals Eq. 2.12 computed by hand.</p>
+  <div class="tabs" role="tablist" aria-label="Exercise language">
+    <button type="button" role="tab" id="btn-ex-bandits-np" aria-selected="true" aria-controls="ex-bandits-np">NumPy</button>
+    <button type="button" role="tab" id="btn-ex-bandits-pt" aria-selected="false" aria-controls="ex-bandits-pt" tabindex="-1">PyTorch</button>
+    <button type="button" class="copy" id="btn-ex-bandits-copy">Copy code</button>
+  </div>
+  <div role="tabpanel" id="ex-bandits-np" aria-labelledby="btn-ex-bandits-np">
+<!--code:ch02-bandits/numpy_ex.py-->
+    <p class="out-label">Output from our run</p>
+<!--out:ch02-bandits/numpy_ex.py-->
+  </div>
+  <div role="tabpanel" id="ex-bandits-pt" aria-labelledby="btn-ex-bandits-pt" hidden>
+<!--code:ch02-bandits/torch_ex.py-->
+    <p class="out-label">Output from our run</p>
+<!--out:ch02-bandits/torch_ex.py-->
+  </div>
+  <p class="out-label">Try this</p>
+  <ul class="tryit">
+    <li>Run the NumPy testbed for 10,000 steps instead of 1000. Predict which of <span class="tex">\varepsilon = 0.01</span> and <span class="tex">\varepsilon = 0.1</span> ends ahead, then check.</li>
+    <li>Add optimistic starts the way Sutton and Barto do: initialize <code>Q</code> to 5, replace the step <code>1 / N</code> with a constant 0.1, and run greedy. Does it beat epsilon-greedy early, late, or both?</li>
+    <li>In the PyTorch version, change <code>alpha</code> to 0.4 with and without the baseline. Which run suffers more from the larger step, and why?</li>
+  </ul>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-bandit'), out = document.getElementById('bandit-readout');
+  const kit = KIT.bandit(document.getElementById('bandit-canvas'), { fig });
+  const say = () => { out.textContent = KIT.banditText(kit.state); };
+  for (let a = 0; a < 5; a++) document.getElementById('btn-bandit-' + (a + 1)).addEventListener('click', () => { kit.pull(a); say(); });
+  document.getElementById('btn-bandit-auto').addEventListener('click', () => kit.finish(say));
+  const est = document.getElementById('btn-bandit-est'), ucb = document.getElementById('btn-bandit-ucb');
+  const setUcb = on => { kit.showUcb(on); est.setAttribute('aria-pressed', String(!on)); ucb.setAttribute('aria-pressed', String(on)); };
+  est.addEventListener('click', () => setUcb(false));
+  ucb.addEventListener('click', () => setUcb(true));
+  document.getElementById('btn-bandit-reveal').addEventListener('click', () => { kit.reveal(); say(); });
+  document.getElementById('btn-bandit-reset').addEventListener('click', () => { kit.reset(); setUcb(false); say(); });
+  say();
+
+  const tfig = document.getElementById('viz-testbed'), tout = document.getElementById('testbed-readout');
+  const tb = KIT.testbed(document.getElementById('testbed-canvas'), { fig: tfig });
+  const tsay = () => { tout.textContent = KIT.testbedText(tb.state, tb.final()); };
+  document.getElementById('btn-testbed-run').addEventListener('click', () => { tb.run(tsay); tsay(); });
+  document.getElementById('btn-testbed-reset').addEventListener('click', () => { tb.reset(); tsay(); });
+  tsay();
+})();
+</script>
+</section>

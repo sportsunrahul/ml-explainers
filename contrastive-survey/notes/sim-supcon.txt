@@ -1,0 +1,21 @@
+viz-supcon simulation (build/sim/supcon.js), 2026-10-13
+Settings: 15 images in 3 classes (class = image index mod 3), two views each = 30 angles on the unit circle; seed 5;
+view 2 = view 1 + uniform jitter of up to 0.5 rad; tau 0.3 (the paper uses 0.1); lr 0.6; plain gradient descent on the angles.
+'self' = one positive per anchor (NT-Xent, SupCon Eq. 1). 'sup' = SupCon L_out (Eq. 2), all same-class views positive.
+The figure animates 300 steps. nn-same-class = views whose nearest other view (own twin excluded) has the same class; chance is about 8/28.
+settings {"N":15,"C":3,"TAU":0.3,"LR":0.6,"STEPS":300,"SEED":5,"JIT":0.5}
+self vs ntxent: loss diff 0.0e+0 max grad diff 0.0e+0
+self s0 loss 2.102 nn-same-class 10/30 class spread deg 41/67/74 twin gap 0.293
+self s30 loss 1.804 nn-same-class 10/30 class spread deg 41/67/84 twin gap 0.000
+self s60 loss 1.779 nn-same-class 10/30 class spread deg 43/61/82 twin gap 0.000
+self s100 loss 1.772 nn-same-class 10/30 class spread deg 44/58/77 twin gap 0.000
+self s150 loss 1.770 nn-same-class 10/30 class spread deg 44/56/75 twin gap 0.000
+self s200 loss 1.770 nn-same-class 10/30 class spread deg 44/55/75 twin gap 0.000
+self s300 loss 1.770 nn-same-class 10/30 class spread deg 44/55/74 twin gap 0.000
+sup s0 loss 5.015 nn-same-class 10/30 class spread deg 41/67/74 twin gap 0.293
+sup s30 loss 2.858 nn-same-class 22/30 class spread deg 7/13/27 twin gap 0.136
+sup s60 loss 2.295 nn-same-class 30/30 class spread deg 1/5/4 twin gap 0.022
+sup s100 loss 2.239 nn-same-class 30/30 class spread deg 0/2/1 twin gap 0.007
+sup s150 loss 2.223 nn-same-class 30/30 class spread deg 0/1/0 twin gap 0.003
+sup s200 loss 2.218 nn-same-class 30/30 class spread deg 0/1/0 twin gap 0.002
+sup s300 loss 2.213 nn-same-class 30/30 class spread deg 0/0/0 twin gap 0.001

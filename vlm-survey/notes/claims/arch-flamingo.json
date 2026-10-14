@@ -1,0 +1,245 @@
+[
+ {
+  "id": "flamingo-arch-nfnet-f6",
+  "claim": "Vision encoder is a pretrained and frozen NFNet, the F6 model",
+  "value": "NFNet-F6",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.1 \"Vision Encoder: from pixels to features\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-nfnet-loss",
+  "claim": "The vision encoder is pretrained with the two-term contrastive loss from CLIP",
+  "value": "two-term contrastive loss",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.1 \"Vision Encoder\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-nfnet-data",
+  "claim": "Contrastive vision encoder pretraining datasets",
+  "value": "ALIGN and LTIP",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.3 \"Contrastive model details\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-nfnet-bert",
+  "claim": "Language encoder used only during contrastive pretraining",
+  "value": "BERT",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.3 \"Contrastive model details\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-nfnet-only-vision",
+  "claim": "Only the contrastive vision encoder weights are kept for Flamingo",
+  "value": "We only use the weights from the contrastive vision encoder",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.3",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-res-pre",
+  "claim": "Contrastive pretraining image resolution",
+  "value": "288 x 288",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.3",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-res",
+  "claim": "Flamingo training image resolution (resized preserving aspect ratio, mean-padded)",
+  "value": "320 x 320",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Data augmentation and preprocessing\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-final-stage",
+  "claim": "Encoder output used",
+  "value": "the output of the final stage, a 2D spatial grid of features that is flattened to a 1D sequence",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.1 \"Vision Encoder\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-kv-dim",
+  "claim": "Key/value dimension D/H for the Perceiver Resampler vs gated xattn-dense and frozen LM",
+  "value": "96 / 128",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4 (Table 4 text)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-ffw-4d",
+  "claim": "Hidden dimension of each feed-forward MLP",
+  "value": "4D",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4 (Table 4 text)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-sqrelu",
+  "claim": "FFW activation in the resampler and gated xattn-dense layers (frozen LM uses GeLU)",
+  "value": "Sq. ReLU",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4, Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-lm-3b",
+  "claim": "Flamingo-3B frozen LM layers / width / heads",
+  "value": "24 / 2048 / 16",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4, Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-lm-9b",
+  "claim": "Flamingo-9B frozen LM layers / width / heads",
+  "value": "40 / 4096 / 32",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4, Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-lm-80b",
+  "claim": "Flamingo-80B frozen LM layers / width / heads",
+  "value": "80 / 8192 / 64",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4, Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-xattn-same",
+  "claim": "Gated xattn-dense width and heads equal the frozen LM's in every size (Table 4 rows: 2048/16, 4096/32, 8192/64)",
+  "value": "same width and head count",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.1.4, Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-eoc",
+  "claim": "The <EOC> (end of chunk) special token",
+  "value": "added to the vocabulary and learnt",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4 \"Interleaved datasets\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-adamw",
+  "claim": "Optimizer",
+  "value": "AdamW optimizer with global norm clipping of 1",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Loss and optimisation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-wd",
+  "claim": "Weight decay",
+  "value": "no weight decay for the Perceiver Resampler and weight decay of 0.1 for the other trainable parameters",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Loss and optimisation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-lr",
+  "claim": "Peak learning rate (linear warmup from 0, then constant)",
+  "value": "10^-4",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Loss and optimisation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-warmup",
+  "claim": "Warmup length",
+  "value": "5000 steps",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Loss and optimisation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-steps",
+  "claim": "Training length",
+  "value": "500k steps",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Loss and optimisation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-ablation-batch",
+  "claim": "Per-dataset batch sizes in the ablation setting (M3W / ALIGN / LTIP / VTP)",
+  "value": "256 / 512 / 512 / 64",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.3.1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-smaller-batch",
+  "claim": "Ablations vs final models",
+  "value": "smaller batch sizes and a shorter training schedule compared to the final models",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 3.3",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-precision",
+  "claim": "Precision",
+  "value": "All trained parameters and optimizer accumulators are stored and updated in float32; all activations and gradients are computed in bfloat16",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Infrastructure and implementation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-frozen-bf16",
+  "claim": "Frozen weights precision",
+  "value": "Frozen parameters are stored and applied in bfloat16",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 \"Infrastructure and implementation\"",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-moderate-cost",
+  "claim": "Cost of the 320 px training resolution (no backprop through the frozen encoder)",
+  "value": "only a moderate computational and memory cost",
+  "loc": "App. B.1.2 \"Data augmentation and preprocessing\"",
+  "paper": "Flamingo",
+  "version": "v2",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-arch-text-added",
+  "claim": "Additional learned parameters stated in the text for Flamingo-3B / 9B (Table 5 lists 1.2B / 1.6B for the xattn-dense layers; the difference matches the 194M resampler)",
+  "value": "1.4B / 1.8B",
+  "loc": "App. B.1.1",
+  "paper": "Flamingo",
+  "version": "v2",
+  "uncertain": false
+ }
+]

@@ -1,0 +1,38 @@
+  <article data-chapter="prompts" data-chip="Visual prompts">
+    <header class="ch-head"><span class="num"></span><h2>Show, do not tell: visual prompts</h2><p class="subhead">When a part has no good name, box an example</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Visual prompts">
+        <button type="button" role="tab" data-step="0">Name it</button>
+        <button type="button" role="tab" data-step="1">Show it</button>
+        <button type="button" role="tab" data-step="2">What the benchmarks say</button>
+      </div>
+    </div>
+    <div class="controls"><div class="row"><span>Prompt</span><button type="button" class="tool" data-vpmode="text" aria-pressed="true">Name</button><button type="button" class="tool" data-vpmode="box" aria-pressed="false">Box</button><button type="button" class="tool" data-vpmode="both" aria-pressed="false">Both, averaged</button></div></div>
+    <div class="step-text" data-step="0">
+      <h3>The best name you have</h3>
+      <p>The tray holds three copies of an odd part that has no common name. The closest word is <span class="prompt">bracket</span>. A text encoder trained on web captions knows what "bracket" means on the web: the angle bracket. So the prompt claims the angle bracket and misses all three odd parts.</p>
+      <p class="note">The stage is a toy: each part has a made-up embedding, and a score above one half claims the box. Click any part to look for it instead; its everyday name becomes the prompt. The washer, the nut and the bolt have good names, and the names work.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Draw a box around one example</h3>
+      <p>A <button class="inline-term" data-open="vp-visual-prompt">visual prompt</button> is a box on one example. The model turns the image inside the box into a prompt vector, in the same space as the name vectors, and scores every other box against it. The odd part that looks like the example is found. The dark one, turned on its side, is missed: one example shows one look.</p>
+      <p class="note">Averaging the name vector and the box vector, as T-Rex2 does, finds the third part and lifts the angle bracket a little. Press <em>Both, averaged</em>, then click a washer and try all three: for a part with a good name, the name alone is best. The stage is still the toy.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Not a free win</h3>
+      <p>T-Rex2 reports box prompts beating names on rare classes. Its boxes are not one example, though: it averages 16 labelled boxes per class from the benchmark's training set, so it is an <button class="inline-term" data-open="vp-in-context">in-context, few-shot</button> setting. And the win depends on the split: on the smaller minival split of <button class="inline-term" data-open="lvis">LVIS</button>, the names win.</p>
+      <p>A different visual-prompt model, MQ-GLIP, given 10 image examples per class, lost to plain names on two <button class="inline-term" data-open="vp-benchmarks">harder benchmarks</button>, most of all on the rarest classes. Adding the name back to the images helped or changed nothing.</p>
+      <table class="data">
+        <thead><tr><th>Test (metric)</th><th>Examples per class</th><th class="n">Name</th><th class="n">Box</th></tr></thead>
+        <tbody>
+          <tr><td>T-Rex2, LVIS val rare (APr)</td><td>16 boxes</td><td class="n">29.0</td><td class="n">32.4</td></tr>
+          <tr><td>T-Rex2, LVIS minival rare (APr)</td><td>16 boxes</td><td class="n">37.4</td><td class="n">29.9</td></tr>
+          <tr><td>MQ-GLIP, RF100-VL all (AP)</td><td>10 images</td><td class="n">12.2</td><td class="n">6.4</td></tr>
+          <tr><td>MQ-GLIP, nuImages rarest (AP)</td><td>10 images</td><td class="n">8.41</td><td class="n">3.34</td></tr>
+        </tbody>
+      </table>
+      <p class="note">The stage plots these numbers and more as printed (T-Rex2 Tables 1 and 8, RF100-VL Table 2, FSOD-VLM Table 3). Each panel has its own axis; compare bars inside a group only.</p>
+      <p class="inscription">A box helps when the name fails, but only with a good box encoder and enough examples to cover how the part varies. Test the model you will deploy, on your own parts.</p>
+    </div>
+    <button type="button" class="continue" data-go="overview">Continue</button>
+  </article>

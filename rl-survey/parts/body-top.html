@@ -1,0 +1,87 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="A five by four grid world. A robot starts in the bottom-left cell. The charger, worth plus one, is in the top-right cell, and a stairwell, worth minus one, is just below it; one cell is a wall. The robot runs many short episodes. After each move its value estimates update, so blue shading spreads back from the charger across the grid and green arrows settle into a path that goes around the stairwell. At the end a loop diagram appears: the agent sends an action to the environment, which returns a reward and the next state."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge computed" style="top:.6rem;right:.75rem">Computed</span>
+  </div>
+  <h1>Learning from a score</h1>
+  <p class="hook">A classifier is told the right answer. A reinforcement learning agent is only told how well it did, often much later, about situations its own choices led it into. This course builds reinforcement learning from that one difference: from a row of slot machines to the algorithm that fine-tunes chat models. Every figure runs the real algorithm, and every chapter ends with NumPy and PyTorch code that we ran.</p>
+  <p class="papers-note">The main sources, each linked to the version this page was checked against. Every other source is linked where it is used and listed in <a href="#ch-deeper">Where to go deeper</a>.</p>
+  <ul class="papers" aria-label="Main sources">
+    <li><a href="http://incompleteideas.net/book/the-book-2nd.html" title="Sutton and Barto, 2nd edition, 2018">Sutton and Barto, Reinforcement Learning (2nd ed.)</a></li>
+    <li><a href="http://incompleteideas.net/papers/sutton-88-with-erratum.pdf" title="Machine Learning, 1988">TD learning (Sutton 1988)</a></li>
+    <li><a href="https://link.springer.com/article/10.1007/BF00992698" title="Machine Learning, 1992">Q-learning (Watkins and Dayan 1992)</a></li>
+    <li><a href="https://link.springer.com/article/10.1007/BF00992696" title="Machine Learning, 1992">REINFORCE (Williams 1992)</a></li>
+    <li><a href="https://www.nature.com/articles/nature14236" title="Nature, 2015">DQN (Mnih et al. 2015)</a></li>
+    <li><a href="https://arxiv.org/abs/1509.06461v3" title="arXiv 1509.06461v3">Double DQN</a></li>
+    <li><a href="https://arxiv.org/abs/1710.02298v1" title="arXiv 1710.02298v1">Rainbow</a></li>
+    <li><a href="https://arxiv.org/abs/1502.05477v5" title="arXiv 1502.05477v5">TRPO</a></li>
+    <li><a href="https://arxiv.org/abs/1506.02438v6" title="arXiv 1506.02438v6">GAE</a></li>
+    <li><a href="https://arxiv.org/abs/1707.06347v2" title="arXiv 1707.06347v2">PPO</a></li>
+    <li><a href="https://arxiv.org/abs/1509.02971v6" title="arXiv 1509.02971v6">DDPG</a></li>
+    <li><a href="https://arxiv.org/abs/1802.09477v3" title="arXiv 1802.09477v3">TD3</a></li>
+    <li><a href="https://arxiv.org/abs/1801.01290v2" title="arXiv 1801.01290v2">SAC</a></li>
+    <li><a href="https://arxiv.org/abs/1912.01603v3" title="arXiv 1912.01603v3">Dreamer</a></li>
+    <li><a href="https://arxiv.org/abs/1911.08265v2" title="arXiv 1911.08265v2">MuZero</a></li>
+    <li><a href="https://arxiv.org/abs/2203.02155v1" title="arXiv 2203.02155v1">InstructGPT</a></li>
+    <li><a href="https://arxiv.org/abs/2402.03300v3" title="arXiv 2402.03300v3">GRPO (DeepSeekMath)</a></li>
+    <li><a href="https://arxiv.org/abs/2305.18290v3" title="arXiv 2305.18290v3">DPO</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: the problem</li>
+    <li value="1"><a href="#ch-score" data-rail="A score">Learning from a score, not an answer</a></li>
+    <li><a href="#ch-bandits" data-rail="Bandits">Explore or exploit</a></li>
+    <li class="act">Act II: values and planning</li>
+    <li value="3"><a href="#ch-mdp" data-rail="MDPs">MDPs, returns and discount</a></li>
+    <li><a href="#ch-bellman" data-rail="Bellman">Bellman equations</a></li>
+    <li><a href="#ch-dp" data-rail="Planning">Dynamic programming</a></li>
+    <li class="act">Act III: learning from experience</li>
+    <li value="6"><a href="#ch-mctd" data-rail="MC vs TD">Monte Carlo vs temporal difference</a></li>
+    <li><a href="#ch-qlearn" data-rail="Q-learning">SARSA vs Q-learning</a></li>
+    <li class="act">Act IV: deep RL with values</li>
+    <li value="8"><a href="#ch-approx" data-rail="Deadly triad">Function approximation and the deadly triad</a></li>
+    <li><a href="#ch-dqn" data-rail="DQN">DQN and its family</a></li>
+    <li class="act">Act V: learning the policy</li>
+    <li value="10"><a href="#ch-pg" data-rail="Policy gradient">Policy gradients</a></li>
+    <li><a href="#ch-ac" data-rail="Actor-critic">Actor-critic and GAE</a></li>
+    <li><a href="#ch-ppo" data-rail="PPO">TRPO to PPO</a></li>
+    <li><a href="#ch-continuous" data-rail="Continuous">Continuous actions: DDPG, TD3, SAC</a></li>
+    <li class="act">Act VI: bridges</li>
+    <li value="14"><a href="#ch-model" data-rail="Model-based">Model-based RL</a></li>
+    <li><a href="#ch-llm" data-rail="LLMs">RL for language models</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-step">Interlude: one PPO update</a></li><li><a href="#ch-guide">RL in practice</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Every figure on this page uses the same five colors, and each color means one thing everywhere:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">value estimates: V, Q, the critic</span>
+  <span class="c-yellow">rewards and returns: the score</span>
+  <span class="c-green">the policy and its actions</span>
+  <span class="c-red">errors and losses: TD error, gradient</span>
+  <span class="c-brown">fixed parts: walls, hazards, frozen networks</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means the figure runs the real algorithm, usually on a small world, live in your browser or recorded from our own run. <b>Toy model</b> means an illustration of the mechanism. <b>Sourced</b> means what is drawn comes from the papers. Live figures are seeded: Reset replays the same run. In an equation, hover over or tap a term that names part of a figure, and that part lights up. Each chapter starts with three tags for the three problems of reinforcement learning (chapter 1 explains them); a filled tag marks the problem the chapter works on. Each chapter ends with a self-check, a recap, and code in NumPy (from scratch) and PyTorch (with Gymnasium environments). Related pages: <a href="../post-training/Post-training%20and%20alignment,%20explained%20in%203D.html">post-training and alignment</a> for RLHF in depth, and <a href="../world-models/World%20models%20and%20video%20generation,%20explained%20in%203D.html">world models</a> for model-based agents.</p>
+
+<details class="notation">
+  <summary>Notation used on this page</summary>
+  <table>
+    <tr><td><span class="tex">S_t, A_t, R_{t+1}</span></td><td>the state at step <span class="tex">t</span>, the action taken there, and the reward that follows it</td></tr>
+    <tr><td><span class="tex">\gamma</span></td><td>the discount factor, between 0 and 1</td></tr>
+    <tr><td><span class="tex">G_t</span></td><td>the return: the discounted sum of the rewards after step <span class="tex">t</span></td></tr>
+    <tr><td><span class="tex">\pi(a \mid s)</span></td><td>the policy: the probability of action <span class="tex">a</span> in state <span class="tex">s</span>; <span class="tex">\pi_\theta</span> when it has weights <span class="tex">\theta</span></td></tr>
+    <tr><td><span class="tex">v_\pi(s),\ q_\pi(s,a)</span></td><td>the true values of a state and of a state-action pair under <span class="tex">\pi</span>; <span class="tex">V</span> and <span class="tex">Q</span> are our estimates of them</td></tr>
+    <tr><td><span class="tex">v_*,\ q_*</span></td><td>the optimal values: the best any policy can do</td></tr>
+    <tr><td><span class="tex">\delta_t</span></td><td>the TD error: how far a one-step target is from the current estimate</td></tr>
+    <tr><td><span class="tex">\hat A_t</span></td><td>an advantage estimate: how much better an action did than expected (the hat keeps it apart from the action <span class="tex">A_t</span>)</td></tr>
+    <tr><td><span class="tex">\theta,\ w</span></td><td>the weights of a policy, and of a value estimate</td></tr>
+    <tr><td><span class="tex">\alpha,\ \varepsilon</span></td><td>a step size, and an exploration rate (PPO reuses <span class="tex">\varepsilon</span> for its clip range, a different thing)</td></tr>
+  </table>
+  <p>This page follows Sutton and Barto: the reward after action <span class="tex">A_t</span> is <span class="tex">R_{t+1}</span>. Most deep RL papers (DQN, PPO) write the same reward as <span class="tex">r_t</span>, one index lower, and PPO also writes <span class="tex">r_t(\theta)</span> for a probability ratio. Chapters that quote those papers say so.</p>
+</details>

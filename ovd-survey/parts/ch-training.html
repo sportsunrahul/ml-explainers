@@ -1,0 +1,81 @@
+<style>
+/* gdino interlude: stage chips and stage text of the training-step stepper. */
+.train-stages { display:flex; flex-wrap:wrap; gap:.3rem; margin:0 0 .6rem; padding-right:6.5rem; font:.85rem system-ui, sans-serif; counter-reset:trs; }
+.train-stages button { counter-increment:trs; font:inherit; color:var(--muted); background:var(--bg); border:1px solid var(--rule); border-radius:999px; padding:.22rem .6rem; cursor:pointer; }
+.train-stages button::before { content:counter(trs) "\00a0"; font-weight:700; }
+.train-stages button.done { color:var(--fg); border-color:var(--blue); }
+.train-stages button[aria-current="step"] { color:var(--bg); background:var(--blue); border-color:var(--blue); }
+.train-stages button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.train-text { font:.95rem/1.55 system-ui, sans-serif; margin:.7rem 0 0; min-height:9em; max-width:var(--measure, 40rem); }
+.train-text h3 { font:600 1rem/1.35 system-ui, sans-serif; margin:0 0 .3rem; }
+.train-text p { margin:0 0 .5rem; }
+@media (max-width: 520px) { .train-stages { padding-right:0; margin-top:1.8rem; } }
+</style>
+<p class="kicker">Interlude: one training step (not narrated)</p>
+<section id="ch-training" class="chapter">
+<h2>One Grounding DINO training step, end to end</h2>
+<p>Chapter 9 introduced each part of Grounding DINO. Here they run together in one training step on one GPU: a batch of images and prompts goes through both backbones, the enhancer, query selection and the decoder, gets matched to its ground truth, and becomes one loss and one weight update. Click a stage or press <b>Next</b>, or <b>Run a step</b> to watch the whole pass. <b>New batch</b> draws new images and prompts, and every tensor shape in the readout updates with them.</p>
+
+<figure class="viz" id="viz-train-step" data-computed data-toy>
+  <span class="badge computed">Computed</span><span class="badge toy" style="right:7.5rem">Toy scene</span>
+  <div class="train-stages" id="train-stages" aria-label="Training step stages">
+    <button type="button" id="btn-train-s0">Batch and prompts</button>
+    <button type="button" id="btn-train-s1">Swin</button>
+    <button type="button" id="btn-train-s2">BERT</button>
+    <button type="button" id="btn-train-s3">Enhancer</button>
+    <button type="button" id="btn-train-s4">Query selection</button>
+    <button type="button" id="btn-train-s5">Decoder</button>
+    <button type="button" id="btn-train-s6">Matching</button>
+    <button type="button" id="btn-train-s7">Loss and update</button>
+  </div>
+  <canvas id="train-canvas" role="img" aria-label="Drawing of the current stage of one Grounding DINO training step on one GPU's two images and their prompts."></canvas>
+  <p class="readout" id="train-shape" aria-live="polite"></p>
+  <div class="train-text">
+    <div data-stage="0">
+      <h3>Batch: images, boxes and one prompt per image</h3>
+      <p>Grounding DINO T trains on <span data-claim="gdino-t-gpus">16 Nvidia V100</span> GPUs with a total batch of <span data-claim="gdino-t-batch">32</span> images, so each GPU holds <span data-claim="page-gdino-per-gpu-t">2</span> (<span class="reading">our reading</span>). The paper gives no training image size. The figure resizes each image to <span data-claim="page-ovdino-input">[800, 1333]</span> (short side 800, long side at most 1333), the input resolution that OV-DINO, a related DINO-based open-vocabulary detector, states for its pre-training (Table 3). The two images are then zero-padded to one common size (<span class="c-brown">brown hatching</span>).</p>
+      <p>Each image gets its own prompt. For detection data the category names are joined with " . ", and the paper samples them "from all categories in a dataset on the fly" (App. B), so names that are not in the image act as negatives (<span class="reading">our reading</span>). The paper gives no count. MM-Grounding-DINO, an open re-implementation, joins names "randomly sampled from other images as negative examples" to the true ones; OV-DINO allows up to <span data-claim="ovdino-max-prompts">150</span> names per image. The toy draws two to four negatives (dashed chips).</p>
+    </div>
+    <div data-stage="1" hidden>
+      <h3>Image backbone: four feature maps, one list of tokens</h3>
+      <p>Swin-T returns feature maps at strides <span data-claim="page-gdino-scales-t">8x to 32x</span>, and a strided copy of the last map adds one at <span data-claim="page-gdino-scale-t-extra">64x</span>. Each map is projected to d = <span data-claim="gdino-d">256</span> channels (the projection is <span class="reading">our reading</span>), flattened, and the four are joined into one list of image tokens: more than <span data-claim="gdino-ni">10,000</span> per image, as the readout computes for this batch. The backbone is not frozen; it trains at learning rate <span data-claim="gdino-lr-img-backbone">1e-5</span>.</p>
+    </div>
+    <div data-stage="2" hidden>
+      <h3>Text backbone: one feature per token, names kept apart</h3>
+      <p><span data-claim="gdino-text-backbone">BERT-base</span> tokenizes each prompt, at most <span data-claim="gdino-max-text-tokens">256</span> tokens, and returns one feature per token, projected to d = 256 (<span class="reading">our reading</span>). The <a href="#gdino-subsentence">sub-sentence mask</a> stops each category name's words from attending to other names. BERT trains too, at learning rate <span data-claim="gdino-lr-text-backbone">1e-5</span>. The toy tokenizer gives one token per word; the real one splits rare words into pieces.</p>
+    </div>
+    <div data-stage="3" hidden>
+      <h3>Feature enhancer: image and text read each other</h3>
+      <p><span data-claim="gdino-enh-layers">6</span> layers. The paper's Fig. 3 orders each layer as self-attention (deformable for the image, ordinary for the text), then image-to-text and text-to-image cross-attention, then one FFN per side. MM-Grounding-DINO's Algorithm 1, read from the released test code, puts the cross-attention first. The figure follows Fig. 3. The cross-attention compares every text token with every image token, so its cost grows with the product of the two counts (readout).</p>
+    </div>
+    <div data-stage="4" hidden>
+      <h3>Query selection: the prompt picks the starting boxes</h3>
+      <p><a href="#eq-gdino-qsel">Eq. 1</a> from chapter 9: score every image token against every text token, keep each image token's best score, and take the top <span data-claim="gdino-nq">900</span>. Each selected token's encoder output gives an anchor box; the content queries are learned vectors. The encoder outputs get their own auxiliary loss at the end of the step.</p>
+    </div>
+    <div data-stage="5" hidden>
+      <h3>Decoder: the queries read the image and the text</h3>
+      <p><span data-claim="gdino-dec-layers">6</span> layers. Each runs self-attention among the queries, deformable cross-attention into the image tokens, cross-attention into the text tokens, and an FFN, and each refines the boxes. After every layer, each query predicts a box and one logit per text token. The paper does not say whether DINO's denoising queries stay in training, so the figure draws only selected queries.</p>
+    </div>
+    <div data-stage="6" hidden>
+      <h3>Matching: one query per object, no gradients</h3>
+      <p>The Hungarian matching from your <a href="../detr-family/explainer.html#ch-matching">DETR explainer</a> pairs each ground-truth object with one query. The cost adds a class term, box L1 at weight <span data-claim="gdino-w-l1">5.0</span> and GIoU at weight <span data-claim="gdino-w-giou">2.0</span>. The class weight is <span data-claim="gdino-match-cost-cls-text">2.0</span> in Sec. 4.1 but <span data-claim="gdino-match-cost-cls-table8">1.0</span> in Table 8; the readout says whether that changes this toy's assignment. Matching runs for each image and each prediction set: the six decoder layers and the encoder outputs.</p>
+      <p>A matched query's target is 1 on the tokens of its object's name and 0 on the others, the token-level target from GLIP (<a href="#ch-glip">chapter 7</a>). Every other query's target is 0 on all tokens (<span class="reading">our reading</span> of a focal-loss setup), so negative names in the prompt teach the model to leave them dark.</p>
+    </div>
+    <div data-stage="7" hidden>
+      <h3>Loss and update</h3>
+      <p>A focal loss on every query-token logit, the contrastive classification taken from GLIP, plus L1 at weight <span data-claim="gdino-w-l1">5.0</span> and GIoU at weight <span data-claim="gdino-w-giou">2.0</span> on the matched boxes. The class loss weight is <span data-claim="gdino-loss-cls-text">1.0</span> in Sec. 4.1 and <span data-claim="gdino-loss-cls-table8">2.0</span> in Table 8. The loss is summed over the six decoder layers and the encoder outputs.</p>
+      <p>One backward pass reaches every part with weights, both backbones included. Gradients are clipped at max norm <span data-claim="gdino-clip-norm">0.1</span>, then one <span data-claim="gdino-optimizer">AdamW</span> step runs with learning rate <span data-claim="gdino-lr">1e-4</span> (<span data-claim="gdino-lr-img-backbone">1e-5</span> for the backbones) and weight decay <span data-claim="gdino-wd">0.0001</span>.</p>
+    </div>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-train-prev">Previous</button>
+    <button type="button" id="btn-train-next">Next</button>
+    <button type="button" id="btn-train-run" aria-pressed="false">Run a step</button>
+    <button type="button" id="btn-train-batch">New batch</button>
+    <button type="button" id="btn-train-reset" data-cue-reset>Reset</button>
+  </div>
+  <figcaption>Computed: the padded batch size, the four feature-map sizes, the token counts and every tensor shape in the readout follow from the image sizes, the paper's strides, width, query count and layer counts. The image size comes from OV-DINO, a related DINO-based detector, not from Grounding DINO, and the rounding of map sizes is our reading. Toy: the aspect ratios, the scenes, the category names, the number of negatives, the token heat, the predicted boxes and their scores, and the loss bar lengths. The matching in stage 7 is solved exactly on those toy boxes, and only 12 of the <span data-claim="gdino-nq">900</span> queries are drawn.</figcaption>
+</figure>
+
+<p>The paper stops there: it gives no pre-training epochs and no learning-rate schedule. MM-Grounding-DINO's re-implementation trains for <span data-claim="mmgdino-epochs">30</span> epochs at a total batch of <span data-claim="mmgdino-batch">128</span> on <span data-claim="mmgdino-gpus">32 NVIDIA 3090</span> GPUs, but that is its own schedule, not the original one. At inference there is no matching and no loss. Keep the last layer's queries, read each one's box and token logits, and keep the boxes whose phrase scores clear a threshold that you choose.</p>
+</section>

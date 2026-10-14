@@ -1,0 +1,41 @@
+  <article data-chapter="yoloworld" data-chip="YOLO-World">
+    <header class="ch-head"><span class="num"></span><h2>YOLO-World: fold the vocabulary into the weights</h2><p class="subhead">A real-time detector that reads a prompt</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="YOLO-World">
+        <button type="button" role="tab" data-step="0">Dense YOLO</button>
+        <button type="button" role="tab" data-step="1">Text in the neck</button>
+        <button type="button" role="tab" data-step="2">Fold into weights</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Prompts</span><button type="button" class="tool" data-vocab="4" aria-pressed="true">All four</button><button type="button" class="tool" data-vocab="3">Drop forklift</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>Every cell predicts</h3>
+      <p><button class="inline-term" data-open="yolow-yolo">YOLO</button> ("You Only Look Once") has no proposal stage. A backbone turns the image into three grids of feature vectors, a path aggregation network (the <button class="inline-term" data-open="yolow-pan">PAN neck</button>) mixes the grids, and every cell predicts one box and its class scores. At a 640 by 640 input that is 8400 predictions per image (our reading of the YOLOv8 convention; the paper states no input size).</p>
+      <p>During training, <button class="inline-term" data-open="yolow-tal">task-aligned assignment</button> picks the few cells that should fire for each object (green dots). The class scores come from fixed rows, so the forklift finds no row and counts as background.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>The prompts gate the neck</h3>
+      <p>YOLO-World replaces the class rows with the vectors of a frozen CLIP text encoder. During training each mosaic of 4 images gets its own vocabulary of at most 80 nouns.</p>
+      <p>Inside the neck, every cell's features are multiplied by a gate: the sigmoid of the cell's best similarity to any prompt. The blue fill on the stage is that gate. Press <b>Drop forklift</b>: the forklift's cells lose their best match and the neck damps them before the head sees them. The image features now depend on the prompt.</p>
+      <p>The text also looks back: it attends to 27 tokens, the three maps max-pooled to 3 by 3 each.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Run the text encoder once</h3>
+      <p>At deployment the vocabulary is fixed for a while, so the text encoder runs once, offline. Its vectors become the weights of a <button class="inline-term" data-open="yolow-conv">1x1 convolution</button> in the gate and of the classifier. The gate of every cell stays the same number; only the text encoder leaves the per-image path.</p>
+      <p>One part still reads each image: the small attention over 27 pooled tokens. On one V100 GPU without TensorRT, YOLO-World-L runs at 52.0 frames per second folded and 17.6 unfolded, at 35.0 zero-shot Fixed AP (average precision) on <button class="inline-term" data-open="lvis">LVIS</button> minival.</p>
+    </div>
+    <p class="note">The stage is a toy: a coarse 16 by 10 grid stands for one of the three feature maps, and the similarities and scores are made up. Click a cell to see what it computes. The speeds and AP in the table are YOLO-World's Table 2, all measured by its authors on one V100 without TensorRT.</p>
+    <table class="data">
+      <thead><tr><th>Zero-shot, LVIS minival</th><th class="n">FPS</th><th class="n">Fixed AP</th></tr></thead>
+      <tbody>
+        <tr><td>Grounding DINO-T</td><td class="n">1.5</td><td class="n">25.6</td></tr>
+        <tr><td>DetCLIP-T</td><td class="n">2.3</td><td class="n">34.4</td></tr>
+        <tr><td>YOLO-World-L, original</td><td class="n">17.6</td><td class="n">35.0</td></tr>
+        <tr class="ours"><td>YOLO-World-L, folded</td><td class="n">52.0</td><td class="n">35.0</td></tr>
+      </tbody>
+    </table>
+    <p class="inscription">Put the text into the neck while training; at deployment, turn the prompts into weights and drop the text encoder.</p>
+    <button type="button" class="continue" data-go="x">Continue</button>
+  </article>

@@ -1,0 +1,17 @@
+  <article data-chapter="split">
+    <header class="ch-head"><span class="num">9 of 9</span><h2>Train through the noise</h2><p class="subhead">Co-teaching and DivideMix</p></header>
+    <div class="tools"><div class="seg" role="tablist" aria-label="Two methods">
+      <button type="button" role="tab" data-step="0">Co-teaching</button>
+      <button type="button" role="tab" data-step="1">DivideMix</button>
+    </div></div>
+    <div class="step-text" data-step="0">
+      <p>Train only on the small-loss part of each batch, and let two networks pick for each other so neither trains on its own mistakes. In our run, the kept set was 92.9% clean at epoch 10 and averaged 78.56% test accuracy over the last ten epochs, against 60.58% for plain training.</p>
+      <p class="note">Computed: one real batch of 32 images sorted by each network's loss at epoch 10; the kept images are outlined, flipped labels carry a red strike.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>Fit two bumps to the loss histogram. Images in the low bump keep their label; images in the high bump lose the label but keep the image, and semi-supervised learning guesses a label for them. DivideMix reached 94.6% on CIFAR-10 with 50% symmetric noise (best epoch).</p>
+      <p class="note">Computed: 1,500 losses from our plain run at epoch 10, with a two-component mixture fitted live; the yellow line is the clean-probability threshold.</p>
+    </div>
+    <p class="inscription">Use the early window: keep training while the review queue is open, and send the doubted images to a person.</p>
+    <a class="continue" href="explainer.html">Read the full explainer</a>
+  </article>

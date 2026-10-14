@@ -1,0 +1,149 @@
+<section id="ch-patches" class="chapter">
+<h2>How an encoder sees: images as tokens</h2>
+<p>A transformer reads a sequence of vectors; a photo is a grid of pixels. The Vision Transformer (ViT) joins the two in the bluntest way available: cut the image into small squares and treat each square as one token.</p>
+
+<style>
+@media (max-width: 640px) { #viz-tokens { padding-top: 2.3rem; } }
+</style>
+<figure class="viz" id="viz-tokens" data-computed>
+  <span class="badge computed">Computed, toy parts</span>
+  <canvas id="tokens-canvas" tabindex="0" role="img" aria-label="A photo of a cafe receipt cut into a grid of square patches. Beside it, one selected patch is flattened into a strip of numbers, multiplied by the matrix E, given a position vector and placed in the token sequence; a red bar shows the number of attention pairs. Click a patch or use the arrow keys to select one."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-tokens-b32">ViT-B/32 at 224 px</button>
+    <button type="button" id="btn-tokens-b16">ViT-B/16 at 224 px</button>
+    <button type="button" id="btn-tokens-clip336">CLIP ViT-L/14 at 336 px</button>
+    <button type="button" id="btn-tokens-h14ft">ViT-H/14 fine-tuned at 518 px</button>
+    <button type="button" id="btn-tokens-flatten">Flatten one patch</button>
+    <button type="button" id="btn-tokens-reset" data-cue-reset>Reset</button>
+    <label for="rng-tokens-res">resolution <input type="range" id="rng-tokens-res" min="28" max="672" step="2" value="224"> <span id="tokens-res-val">224 px</span></label>
+    <label for="rng-tokens-patch">patch size <input type="range" id="rng-tokens-patch" min="0" max="2" step="1" value="1"> <span id="tokens-patch-val">16 px</span></label>
+  </div>
+  <p class="readout" id="tokens-readout" aria-live="polite"></p>
+  <figcaption>Predict first: at 224 pixels, going from 32-pixel patches (ViT-B/32) to 16-pixel patches (ViT-B/16) halves the side of each square. How many times more tokens does the transformer get, and how many times more attention pairs? Press the two buttons to check. Token counts and pair counts are computed from the paper's formula; the resolution snaps to a whole number of patches. What is toy: the receipt is a test image drawn by the page (resized the way an encoder's input is), the matrix E here is random rather than trained, and only 16 of its D output numbers are drawn.</figcaption>
+</figure>
+
+<h3>Cut, flatten, project</h3>
+<p>ViT takes an image of <span class="tex">H \times W</span> pixels with <span class="tex">C</span> color channels and cuts it into squares of <span class="tex">P \times P</span> pixels. That gives <span data-claim="vit-n-formula"><code>N = HW/P^2</code></span> patches, and <span class="tex">N</span> is the length of the sequence the transformer reads. Each patch is then flattened: its pixels are laid end to end into one long list of <span class="tex">P^2 C</span> numbers (the strip in the figure). A single <span data-claim="page-tokens-linear">trainable linear projection</span>, the matrix <span class="tex">E</span>, maps every strip to a vector of width <span class="tex">D</span>. From here on a patch is just a token, and the rest of the model is an ordinary transformer encoder. Press <b>Flatten one patch</b> to follow one square through these steps; click any other patch (or use the arrow keys on the figure) to follow that one instead.</p>
+<p>The grid is the whole story of the cost. At the standard pretraining size of <span data-claim="vit-train-res">224</span> pixels with 16-pixel patches, the image becomes <span data-computed>14 &times; 14 = 196</span> tokens. The paper spells out the consequence: the sequence length is <span data-claim="vit-seqlen">inversely proportional to the square of the patch size</span>. So check your prediction. Halving the patch side from 32 to 16 multiplies the token count by four, from <span data-computed>49 to 196</span>, and because attention compares every token with every other, the number of pairs grows by sixteen, from <span data-computed>2,401 to 38,416</span>. Raising the resolution does the same thing from the other side: double the image side at a fixed patch size and you again get four times the tokens and sixteen times the pairs.</p>
+<p>Now drag the resolution slider down. The big <b>TOTAL</b> line survives to quite low resolutions, but the fine print under it (the card number) dissolves into grey long before that; drag the slider up and the fine print comes back, while the red bar shoots toward the millions. That is the trade every later model on this page negotiates: sharp enough to read, few enough tokens to afford. Keep this receipt in mind; it comes back in Act IV, when models start reading documents.</p>
+
+<h3>Equation 1, term by term</h3>
+<p>The paper writes the whole input side of the model in one line. Each term is one of the steps you just watched:</p>
+<div class="eq" id="eq-tokens" data-build data-viz="viz-tokens"><div class="tex tex-display">
+\begin{gathered}
+\htmlClass{t-blue}{\mathbf{z}_0} = \big[\, \htmlData{step=3, link=cls}{\htmlClass{t-blue}{\mathbf{x}_{\text{class}}}};\; \htmlData{step=1, link=patch}{\htmlClass{t-blue}{\mathbf{x}^1_p}}\htmlData{step=2, link=proj}{\mathbf{E}};\; \htmlData{step=2, link=proj}{\htmlClass{t-blue}{\mathbf{x}^2_p}\mathbf{E};\; \cdots;\; \htmlClass{t-blue}{\mathbf{x}^N_p}\mathbf{E}}\,\big] + \htmlData{step=4, link=pos}{\mathbf{E}_{pos}} \\
+\htmlData{step=5}{\mathbf{E} \in \mathbb{R}^{(P^2 \cdot C) \times D},\;\; \mathbf{E}_{pos} \in \mathbb{R}^{(N+1) \times D}}
+\end{gathered}
+</div></div>
+<p class="eqno">Eq. 1 in ViT v2 (Sec. 3.1).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{\mathbf{x}^i_p}</span>: patch number <span class="tex">i</span>, flattened into a row of <span class="tex">P^2 \cdot C</span> numbers. For 16-pixel RGB patches that is <span data-computed>16 &times; 16 &times; 3 = 768</span> numbers.</li>
+  <li><span class="tex">\mathbf{E}</span>: one matrix, shared by every patch, with <span class="tex">P^2 \cdot C</span> rows and <span class="tex">D</span> columns. It turns each strip into a <span class="tex">D</span>-dimensional patch embedding. Only this matrix depends on the patch size; the transformer after it does not.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mathbf{x}_{\text{class}}}</span>: one extra learned vector put in front of the patches, the <code>[class]</code> token (slot 0 in the figure's sequence). It sees no pixels of its own; after the last layer, its output is the summary of the whole image that a classifier reads.</li>
+  <li><span class="tex">\mathbf{E}_{pos}</span>: the position embeddings, a learned table with one row for each of the <span class="tex">N+1</span> slots, added to the tokens. Attention by itself treats its input as an unordered set, so without this table the model could not tell the top-left patch from the bottom-right one.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mathbf{z}_0}</span>: the resulting sequence of <span class="tex">N+1</span> vectors, which goes into a standard transformer (the paper's Eq. 2 and 3 are the usual pre-norm attention and MLP blocks, and Eq. 4 reads the image representation off the <code>[class]</code> token).</li>
+</ul>
+<p>Two details of that position table matter later. First, it is one-dimensional: ViT uses <span data-claim="vit-pos-emb">standard learnable 1D</span> position embeddings, simply numbering the patches in reading order, and at the start of training they <span data-claim="page-tokens-no2d">carry no information about the 2D positions of the patches</span>; which patches are neighbors has to be learned from data. Second, it has a fixed number of rows. The transformer itself <span data-claim="page-tokens-arbitrary">can handle arbitrary sequence lengths (up to memory constraints)</span>, but a bigger image needs more rows than the table has, so to fine-tune at a higher resolution ViT performs <span data-claim="page-tokens-interp">2D interpolation of the pre-trained position embeddings</span>, stretching the table to the new grid. Act IV meets a model that throws this table away.</p>
+
+<h3>Names and sizes</h3>
+<p>ViT names its models by size and patch: <span data-claim="page-tokens-l16-name">ViT-L/16 means the "Large" variant with 16x16 input patch size</span>. The three sizes, borrowed from BERT except for the added Huge, have <span data-claim="page-tokens-base-params">86M</span> (Base), <span data-claim="page-tokens-large-params">307M</span> (Large) and <span data-claim="page-tokens-huge-params">632M</span> (Huge) parameters. ViT-Base has width <span class="tex">D =</span> <span data-claim="page-tokens-base-d">768</span>, which for 16-pixel RGB patches happens to equal the length of a flattened patch, so its <span class="tex">\mathbf{E}</span> is square.</p>
+<p>All ViT pretraining runs at <span data-claim="vit-train-res">224</span> pixels, but the best results come from fine-tuning at <span data-claim="vit-ft-res">512 and 518</span> pixels (for L/16 and H/14). Press <b>ViT-H/14 fine-tuned at 518 px</b>: the same model now reads <span data-computed>37 &times; 37 = 1,369</span> patch tokens, seven times the tokens of the 224-pixel B/16, and about <span data-computed>1.9 million</span> attention pairs. CLIP, from chapter 1, trained its ViT-L/14 at two input sizes, <span data-claim="clip-l14-res">224 vs 336</span> pixels, which is <span data-computed>256 vs 576</span> patch tokens. The 336-pixel one is the encoder that LLaVA-1.5 later plugs into a language model, and <span data-computed>576</span> tokens per image is the price it pays.</p>
+
+<h3>No built-in eyes, so it needs data</h3>
+<p>A convolutional network is built on assumptions about images: nearby pixels matter together, and a cat is a cat wherever it appears. ViT has almost none of that. Only the cut into patches (and the stretching of the position table when the resolution changes) knows the image is two-dimensional; everything else, down to which patches are neighbors, is learned. The price shows up on small datasets: trained on ImageNet alone, ViTs land <span data-claim="vit-imagenet-only">a few percentage points below ResNets of comparable size</span>. The paper's appendix makes the point with the same models pretrained on three datasets of growing size:</p>
+<table class="data">
+  <thead><tr><th>Pretrained on</th><th>ViT-B/16</th><th>ViT-L/16</th><th>ViT-H/14</th></tr></thead>
+  <tbody>
+    <tr><td>ImageNet (<span data-claim="vit-in1k-size">1k classes, 1.3M images</span>)</td><td><span data-claim="page-tokens-b16-in1k">77.91</span></td><td><span data-claim="page-tokens-l16-in1k">76.53</span></td><td>not run</td></tr>
+    <tr><td>ImageNet-21k (<span data-claim="vit-in21k-size">21k classes, 14M images</span>)</td><td><span data-claim="page-tokens-b16-in21k">83.97</span></td><td><span data-claim="page-tokens-l16-in21k">85.15</span></td><td><span data-claim="page-tokens-h14-in21k">85.13</span></td></tr>
+    <tr><td>JFT-300M (<span data-claim="vit-jft-size">18k classes, 303M high-resolution images</span>)</td><td><span data-claim="page-tokens-b16-jft">84.15</span></td><td><span data-claim="page-tokens-l16-jft">87.12</span></td><td><span data-claim="page-tokens-h14-jft">88.04</span></td></tr>
+  </tbody>
+</table>
+<p class="eqno">ImageNet top-1 accuracy (%) after fine-tuning at <span data-claim="page-tokens-ft384">384</span> pixels; appendix Table 5 of ViT v2.</p>
+<p>Read it by rows. With ImageNet alone, the bigger model is <em>worse</em>: Large scores below Base. The paper points to overfitting: on ImageNet, Large trails Base "<span data-claim="page-tokens-large-below-base">despite (moderate) regularization</span>", and a second experiment on subsets of JFT finds that ViTs <span data-claim="page-tokens-overfit">overfit more than ResNets with comparable computational cost on smaller datasets</span>; a bigger ViT has more room to do it. With ImageNet-21k (ten times the images), Large moves ahead of Base by about a point. Only with JFT-300M do the big models pull clearly ahead, by about three points for Large and nearly four for Huge. The paper's summary is that <span data-claim="page-tokens-trumps">large scale training trumps inductive bias</span>. That lesson shapes the rest of this page: most vision encoders in the chapters that follow were pretrained on hundreds of millions of image-text pairs with the matching game of chapter 1 (BLIP, next, is an exception: it starts from a ViT pre-trained on ImageNet).</p>
+
+<h3>Inside ViT: forward, then backward</h3>
+<p>Equation 1 was only the entrance. Below is one full training step of ViT, shape by shape, for the three sizes of Table 1 at pre-training and for the two big models at their high-resolution fine-tune; watch what changes when the resolution goes up.</p>
+
+<figure class="viz archflow" id="viz-vitflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-vitflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-vitflow-patches" aria-pressed="false">2 Patches</button>
+    <button type="button" id="btn-vitflow-embed" aria-pressed="false">3 Embed</button>
+    <button type="button" id="btn-vitflow-encode" aria-pressed="false">4 Blocks</button>
+    <button type="button" id="btn-vitflow-pool" aria-pressed="false">5 [class]</button>
+    <button type="button" id="btn-vitflow-head" aria-pressed="false">6 Head</button>
+    <button type="button" id="btn-vitflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-vitflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-vitflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model and training stage">
+    <span>pre-train</span>
+    <button type="button" id="btn-vitflow-b16" aria-pressed="true">B/16</button>
+    <button type="button" id="btn-vitflow-l16" aria-pressed="false">L/16</button>
+    <button type="button" id="btn-vitflow-h14" aria-pressed="false">H/14</button>
+    <span>fine-tune</span>
+    <button type="button" id="btn-vitflow-l16ft" aria-pressed="false">L/16 at 512 px</button>
+    <button type="button" id="btn-vitflow-h14ft" aria-pressed="false">H/14 at 518 px</button>
+  </div>
+  <canvas id="vitflow-canvas" role="img" aria-label="ViT's training step as a diagram: one vision lane (blue) from images through flattened patches, the patch projection with class token and position embeddings, the stack of transformer blocks, the class token output, and the head, into a loss (red). In the backward stages red arrows run from the loss back through every box."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-vitflow-prev">Previous</button>
+    <button type="button" id="btn-vitflow-next">Next</button>
+    <button type="button" id="btn-vitflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="vitflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map: one lane</h4>
+      <p>ViT is not a two-tower model. It is a single <b class="c-blue">vision</b> lane that ends in a classifier, trained on labelled images; the matching game of chapter 1 comes later, when CLIP and SigLIP reuse this lane as their image tower. Pick a model, press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of labelled images</h4>
+      <p>Pre-training uses a batch of <span data-claim="vit-arch-batch">4096</span> images, all at <span data-claim="vit-train-res">224</span> pixels; the biggest runs use JFT-300M, <span data-claim="vit-jft-size">18k classes, 303M high-resolution images</span>. Fine-tuning uses batches of <span data-claim="vit-arch-ftbatch">512</span> on the downstream set, here ImageNet (<span data-claim="vit-in1k-size">1k classes, 1.3M images</span>), at a higher resolution.</p>
+    </div>
+    <div data-stage="patches" hidden>
+      <h4>2. Cut and flatten</h4>
+      <p>The step from the figure at the top of this chapter: <span data-claim="vit-n-formula"><code>N = HW/P^2</code></span> squares, each laid out as <span class="tex">P^2 \cdot C</span> numbers. At 224 pixels that is <span data-computed>196</span> patches for the /16 models and <span data-computed>256</span> for H/14; nothing here has weights.</p>
+    </div>
+    <div data-stage="embed" hidden>
+      <h4>3. Project, prepend, position</h4>
+      <p>Equation 1: every patch times <span class="tex">\mathbf{E}</span>, the <code>[class]</code> vector in front, and one learned row of <span class="tex">\mathbf{E}_{pos}</span> added per slot, with <span class="tex">\mathbf{E} \in \mathbb{R}^{(P^2 \cdot C) \times D}</span> and <span class="tex">\mathbf{E}_{pos} \in \mathbb{R}^{(N+1) \times D}</span>. Switch to a <b>fine-tune</b> variant: the grid is bigger, but <span class="tex">\mathbf{E}_{pos}</span> was learned for the 224-pixel grid, so ViT performs <span data-claim="page-tokens-interp">2D interpolation of the pre-trained position embeddings</span> to get one row per new slot. No weight matrix changes shape; only <span class="tex">\mathbf{E}_{pos}</span> gets new rows, interpolated from the old ones (all weights keep training during fine-tuning).</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>4. L identical blocks</h4>
+      <p>Eq. 2 and 3, repeated <span class="tex">L</span> times: <span data-claim="vit-arch-preln">Layernorm (LN) is applied before every block, and residual connections after every block</span>; each block is multi-head self-attention (head width <span data-claim="vit-arch-dh">D/k</span> for <span class="tex">k</span> heads) followed by an MLP ("<span data-claim="vit-arch-gelu">The MLP contains two layers with a GELU non-linearity</span>"). Table 1: Base <span data-claim="vit-arch-base-layers">12</span> layers, width <span data-claim="page-tokens-base-d">768</span>, MLP <span data-claim="vit-arch-base-mlp">3072</span>, <span data-claim="vit-arch-base-heads">12</span> heads; Large <span data-claim="vit-arch-large-layers">24</span>, <span data-claim="vit-arch-large-d">1024</span>, <span data-claim="vit-arch-large-heads">16</span> heads; Huge <span data-claim="vit-arch-huge-layers">32</span>, <span data-claim="vit-arch-huge-d">1280</span>. The shape never changes inside the stack; the readout gives the attention-map size, which is what the fine-tune resolution multiplies.</p>
+    </div>
+    <div data-stage="pool" hidden>
+      <h4>5. Read off one token</h4>
+      <p>Eq. 4: <span class="tex">\mathbf{y} = \mathrm{LN}(\mathbf{z}_L^0)</span>, the <code>[class]</code> token's final state, <span data-claim="vit-class-token">whose state at the output of the Transformer encoder</span> is the image representation. All the patch outputs are discarded.</p>
+    </div>
+    <div data-stage="head" hidden>
+      <h4>6. The head, and the head swap</h4>
+      <p>The classification head is <span data-claim="vit-arch-head">a MLP with one hidden layer at pre-training time and by a single linear layer at fine-tuning time</span>; the pre-training MLP has <span data-claim="vit-arch-tanh">tanh as non-linearity in the single hidden layer</span> (its hidden width is not stated). To fine-tune, the authors <span data-claim="vit-arch-remove-head">remove the pre-trained prediction head</span> and attach a <span data-claim="vit-arch-zerohead">zero-initialized D x K feedforward layer</span>, with <span class="tex">K</span> the number of new classes. Toggle a pre-train and a fine-tune variant to see the head box change.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. What the loss grades</h4>
+      <p>One vector of class scores per image, graded against that image's label(s), averaged over the batch. Only one position of the sequence is graded: <span data-claim="vit-arch-attached">a classification head is attached to</span> <span class="tex">\mathbf{z}_L^0</span>, the <code>[class]</code> slot. The paper never names the loss function, so the drawing just says "loss vs class labels".</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. Every box learns, and the patches learn through [class]</h4>
+      <p>Nothing is frozen, in pre-training or in fine-tuning: all boxes get red outlines, from the head down to <span class="tex">\mathbf{E}</span>, the <code>[class]</code> vector and <span class="tex">\mathbf{E}_{pos}</span>. The route is narrow, though. The patch tokens' outputs at the top are thrown away, so gradient reaches a patch position only by way of attention: because <code>[class]</code> read it at some layer, directly or through other patches that <code>[class]</code> later read.</p>
+      <p>The fine-tune head adds one wrinkle (derived, not in the paper): with the head <span class="tex">W = 0</span>, the gradient passed down to <span class="tex">\mathbf{y}</span> is <span class="tex">W^{\top}\delta = 0</span>, so at the first step only the head moves; the backbone starts learning once <span class="tex">W</span> is no longer zero. Our reading: the backbone's first updates are then steered by a head that has already started to fit the new classes, rather than by a random one.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. Two optimizers</h4>
+      <p><b>Pre-training:</b> <span data-claim="vit-arch-adam">Adam</span> with <span data-claim="vit-arch-betas">beta_1 = 0.9, beta_2 = 0.999</span>, weight decay <span data-claim="vit-arch-wd">0.1</span>, <span data-claim="vit-arch-warmup">10k steps</span> of warm-up then <span data-claim="vit-arch-decay">linear</span> decay, dropout <span data-claim="vit-arch-dropout">0.0</span> on JFT. Base learning rate and epochs: B/16 <span data-claim="vit-arch-lr-b">8 x 10^-4</span> for <span data-claim="vit-arch-ep-b">7</span>, L/16 <span data-claim="vit-arch-lr-l16">4 x 10^-4</span> for <span data-claim="vit-arch-ep-l16">7/14</span>, H/14 <span data-claim="vit-arch-lr-h14">3 x 10^-4</span> for <span data-claim="vit-arch-ep-h14">14</span>. The H/14 run cost <span data-claim="vit-h14-cost">2.5k TPUv3-core-days</span>.</p>
+      <p><b>Fine-tuning:</b> <span data-claim="vit-arch-sgd">SGD with a momentum of 0.9</span>, with <span data-claim="vit-arch-ftset">cosine learning rate decay, a batch size of 512, no weight decay, and grad clipping at global norm 1</span>; ImageNet runs <span data-claim="vit-arch-ft-steps">20,000</span> steps, with the learning rate picked by a small sweep (the table lists <span data-claim="vit-arch-ft-lr">{0.003, 0.01, 0.03, 0.06}</span> for ImageNet, but the text says the 0.06 value was added for ResNets and hybrids, so for ViT it is 0.003 to 0.03). The headline models fine-tune at <span data-claim="vit-ft-res">512 and 518</span> pixels and keep a Polyak average of the weights with factor <span data-claim="vit-arch-polyak">0.9999</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: shapes from each model's patch size and Table 1 widths, the pre-training batch and resolution, and the fine-tune batch and resolutions; step counts from 303M images, the epochs and the batch. Before you press <b>H/14 at 518 px</b> on stage 4, guess: how many times larger is each attention map than at 224 px?</figcaption>
+</figure>
+
+<p>Check the guess: H/14's grid goes from <span data-computed>16 &times; 16</span> to <span data-computed>37 &times; 37</span>, so the sequence grows from <span data-computed>257 to 1,370</span> tokens and every attention map from <span data-computed>66,049</span> to <span data-computed>1,876,900</span> entries, about <span data-computed>28</span> times, in every head of every block. No weight matrix changes shape; only <span class="tex">\mathbf{E}_{pos}</span> gets new rows, interpolated. That asymmetry, weight shapes fixed and a sequence length set by the input, is what every later model on this page exploits when it feeds a ViT bigger images.</p>
+
+<p>That closes Act I. We now have eyes: a ViT that turns an image into a few hundred tokens, trained with CLIP's or SigLIP's loss so that its vectors already line up with the vectors of matching words. But these models can only compare an image with a caption someone else wrote; they cannot write one. Act II is about making a model write, and it starts with a problem you already met in chapter 1: the captions on the web are noisy.</p>
+</section>

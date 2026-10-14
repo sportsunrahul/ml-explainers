@@ -1,0 +1,107 @@
+{
+ "slug": "detr-family",
+ "stage": "done",
+ "approvals": {
+  "checkpoint-0": {
+   "install": true,
+   "fold_dn_detr": true,
+   "budget": "9 chapters ~15 min",
+   "uv_separate_env": true
+  },
+  "checkpoint-2": {
+   "outline": "approved as proposed"
+  },
+  "page": "built; QA pass; fresh-agent fact check applied (4 must-fix, 9 nits); interlude ch-training (one training step, end to end) added 2026-09-29 after the run, fresh-agent fact check applied (2 must-fix, 9 nits); 2026-10-01 design pass (skill 'Design: a beautiful, interactive web page'): page-chrome rail, hero animation, numbered acts, paper chips, every click animates, SVG family tree, narrow chart layouts; build via build/build.sh; pre-redesign copy in build/archive-2026-10-01/",
+  "checkpoint-4": {
+   "tone": "approved",
+   "voice": "A (designed male lecturer, cloned via Qwen3-TTS 1.7B Base)",
+   "pace": "keep natural (~170 wpm)"
+  }
+ },
+ "prompt": "comfortable with CNNs and transformers",
+ "papers": [
+  {
+   "name": "DETR",
+   "arxiv": "2005.12872v3",
+   "title": "End-to-End Object Detection with Transformers",
+   "published": "2020-05-26",
+   "repo": "github.com/facebookresearch/detr"
+  },
+  {
+   "name": "Deformable DETR",
+   "arxiv": "2010.04159v4",
+   "title": "Deformable DETR: Deformable Transformers for End-to-End Object Detection",
+   "published": "2020-10-08",
+   "repo": "github.com/fundamentalvision/Deformable-DETR"
+  },
+  {
+   "name": "DAB-DETR",
+   "arxiv": "2201.12329v4",
+   "title": "DAB-DETR: Dynamic Anchor Boxes are Better Queries for DETR",
+   "published": "2022-01-28",
+   "repo": "github.com/IDEA-Research/DAB-DETR"
+  },
+  {
+   "name": "DN-DETR",
+   "arxiv": "2203.01305v3",
+   "title": "DN-DETR: Accelerate DETR Training by Introducing Query DeNoising",
+   "published": "2022-03-02",
+   "repo": "github.com/IDEA-Research/DN-DETR"
+  },
+  {
+   "name": "DINO",
+   "arxiv": "2203.03605v4",
+   "title": "DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection",
+   "published": "2022-03-07",
+   "repo": "github.com/IDEA-Research/DINO"
+  },
+  {
+   "name": "RT-DETR",
+   "arxiv": "2304.08069v3",
+   "title": "DETRs Beat YOLOs on Real-time Object Detection",
+   "published": "2023-04-17",
+   "repo": "github.com/lyuwenyu/RT-DETR"
+  },
+  {
+   "name": "RF-DETR",
+   "arxiv": "2511.09554v2",
+   "title": "RF-DETR: Neural Architecture Search for Real-Time Detection Transformers",
+   "published": "2025-11-12",
+   "repo": "github.com/roboflow/rf-detr"
+  }
+ ],
+ "compute": {
+  "target": "pod",
+  "gpu": "RTX 4090 24564 MiB, 1 MiB used, 0% util",
+  "ram_avail_gb": 33,
+  "disk_free": "467G",
+  "pod_env": "/root/work/paper-explainer/venv (uv, py3.12, torch 2.11.0+cu128, qwen-tts 0.1.1)",
+  "models": {
+   "Qwen3-TTS-12Hz-1.7B-VoiceDesign": "5ecdb67327fd37bb2e042aab12ff7391903235d3",
+   "Qwen3-TTS-12Hz-1.7B-Base": "fd4b254389122332181a7c3db7f27e918eec64e3",
+   "Qwen3-TTS-12Hz-1.7B-CustomVoice": "0c0e3051f131929182e2c023b9537f8b1c68adfe",
+   "faster-whisper-large-v3": "edaa852ec7e145841d8ffdb056a99866b5f0a478",
+   "spkrec-ecapa-voxceleb": "0f99f2d0ebe89ac095bcc5903c4dd8f72b367286"
+  },
+  "smoke": "all 3 qwen modes OK, deterministic by seed, RTF~2.5, WER 0, ECAPA clone 0.80 vs other 0.14"
+ },
+ "backend": "qwen3",
+ "notes": {
+  "claims": 678,
+  "uncertain": 40,
+  "fact_checked": true
+ },
+ "voice": {
+  "backend": "qwen3",
+  "name": "A",
+  "instruct": "A warm, curious male lecturer in his forties, unhurried pace, mid-low pitch, clear diction, a light smile in the voice."
+ },
+ "result": {
+  "narrated": "explainer.narrated.html",
+  "mb": 9.23,
+  "audio_min": 14.2,
+  "chapters": 9,
+  "qa": "193 sentences, 19 retried, 12 flagged (see qa_report.md)",
+  "model_revision_base": "fd4b254389122332181a7c3db7f27e918eec64e3"
+ }
+}

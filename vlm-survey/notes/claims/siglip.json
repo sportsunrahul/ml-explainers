@@ -1,0 +1,281 @@
+[
+ {
+  "id": "siglip-init-t",
+  "claim": "Initial value of t' (t = exp(t'))",
+  "value": "log 10 (t = 10)",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 3.2 para 2; Sec. 4.9",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-init-b",
+  "claim": "Initial value of the learnable bias b",
+  "value": "-10",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 3.2 para 2; Sec. 4.9",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-memory-full",
+  "claim": "Memory of the vanilla loss matrix at any moment vs chunked",
+  "value": "from |B|^2 to b^2 (b = |B|/D per-device batch)",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 3.3",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-no-allgather",
+  "claim": "Chunked sigmoid loss needs no all-gathers; only a b x b block materialised at a time",
+  "value": "no all-gathers; 4 x 4 block in 3-device, batch-12 mock",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Fig. 1 caption",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-fit-4chips",
+  "claim": "Largest batch on four TPU-v4 chips, Base SigLIP vs CLIP",
+  "value": "4096 vs 2048",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-gap-threshold",
+  "claim": "Batch size below which sigmoid clearly beats softmax",
+  "value": "smaller than 16 k",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 1; Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-saturate-32k",
+  "claim": "Batch size at which performance saturates (SigLiT and SigLIP)",
+  "value": "32 k",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 1; Sec. 4.1; Conclusion",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-siglip-peak",
+  "claim": "SigLIP peak batch size vs softmax peak (9B examples)",
+  "value": "sigmoid 32 k (73.4); softmax 98 k (73.2)",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 5 9B column; Sec. 4.2/Fig. 2 mid text",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-1m-batch",
+  "claim": "SigLiT batch size pushed to the extreme; peak batch",
+  "value": "1 M trained; model peaks at 256 k",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-1m-acc",
+  "claim": "SigLiT ImageNet 0-shot at 1024k batch, 18B examples (sigmoid)",
+  "value": "84.7",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-siglit-best-b",
+  "claim": "Best SigLiT with B-sized text model, ImageNet 0-shot (LiT reports 85.2% with 10x larger g text model)",
+  "value": "84.7%",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-s512-3b",
+  "claim": "SigLIP 3B examples, batch 512, ImageNet 0-shot sigmoid vs softmax",
+  "value": "51.5 vs 47.7",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-s8k-9b",
+  "claim": "SigLIP 9B examples, batch 8k, ImageNet 0-shot sigmoid vs softmax",
+  "value": "70.6 vs 69.4",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-s32k-9b",
+  "claim": "SigLIP 9B examples, batch 32k, ImageNet 0-shot sigmoid vs softmax",
+  "value": "73.4 vs 72.9",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-s98k-9b",
+  "claim": "SigLIP 9B examples, batch 98k, sigmoid vs softmax",
+  "value": "73.0 vs 73.2",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-s307k-9b",
+  "claim": "SigLIP 9B examples, batch 307k, sigmoid vs softmax",
+  "value": "71.6 vs 72.6",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-lit-512-3b",
+  "claim": "SigLiT 3B examples, batch 512, sigmoid vs softmax",
+  "value": "77.2 vs 74.6",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-lit-2k-18b",
+  "claim": "SigLiT 18B examples, batch 2k, sigmoid vs softmax",
+  "value": "82.2 vs 81.2",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-lit-32k-18b",
+  "claim": "SigLiT 18B examples, batch 32k, sigmoid vs softmax",
+  "value": "84.6 vs 84.4",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-msiglip-32k",
+  "claim": "mSigLIP (30B examples) ImageNet 0-shot at 16k/32k/64k/128k/240k",
+  "value": "71.6 / 73.2 / 73.2 / 73.2 / 73.1",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-msiglip-xm",
+  "claim": "mSigLIP XM3600 T->I avg over 36 languages at 16k/32k/64k/128k/240k",
+  "value": "34.8 / 34.9 / 34.4 / 33.6 / 32.7",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-t1-siglit-b8",
+  "claim": "Table 1 SigLiT frozen B/8, L* text (12 layers), batch 32k, 4 TPUv4, 1 day, INet-0 (caption and text say 79.7%)",
+  "value": "79.8 (table cell) vs 79.7% (caption/text)",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 1 row 1 vs caption; Sec. 4.4",
+  "uncertain": true
+ },
+ {
+  "id": "siglip-t1-siglit-g14",
+  "claim": "Table 1 SigLiT frozen g/14, L text, batch 20k, 4 TPUv4, 2 days",
+  "value": "84.5",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 1 row 2; Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-t1-siglip-unlocked",
+  "claim": "Table 1 SigLIP pretrained unlocked B/16, B text, batch 16k, 16 TPUv4, 3 days",
+  "value": "71.0",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 1 row 3",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-t1-siglip-2d",
+  "claim": "Table 1 SigLIP from scratch B/16, batch 32k, 32 TPUv4, 2 days",
+  "value": "72.1",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 1 row 4",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-t1-siglip-5d",
+  "claim": "Table 1 SigLIP from scratch B/16, batch 32k, 32 TPUv4, 5 days",
+  "value": "73.4",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 1 row 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-neg-count",
+  "claim": "Negatives vs positives per batch at 16k",
+  "value": "268 M negatives for 16 k positives",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.8",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-beta2",
+  "claim": "Adam/Adafactor beta2 changed for stability",
+  "value": "0.999 -> 0.95",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.7",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-bias-ablation",
+  "claim": "Base, 8k batch, 900M examples ImageNet 0-shot: no bias vs b=-10 (t'=log 10)",
+  "value": "62.0 vs 63.0",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-liT-steps",
+  "claim": "SigLiT B/8 + L* text: total steps at batch 32k",
+  "value": "65 000 steps (just under one day)",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.4",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-clip-cost",
+  "claim": "CLIP cost for 72.6% ImageNet 0-shot, per SigLIP paper citing [30]",
+  "value": "approx. 2500 TPUv3-days",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "Sec. 4.5",
+  "uncertain": true
+ }
+]

@@ -1,0 +1,108 @@
+<section id="ch-anomalyclip" class="chapter">
+<h2>Prompts that know "damaged", not "which object"</h2>
+<p>WinCLIP's hand-written prompts name the product, and words alone are a weak signal for small local defects. AnomalyCLIP learns two prompts once, on a labelled dataset of other products, and reuses them unchanged on products it has never seen.</p>
+
+<figure class="viz" id="viz-anomalyclip" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <div id="svgwrap-anomalyclip"></div>
+  <div class="controls" role="group" aria-label="View">
+    <span>View</span>
+    <button type="button" id="btn-aclip-transfer" aria-pressed="true">Transfer to unseen products</button>
+    <button type="button" id="btn-aclip-agnostic" aria-pressed="false">Object-agnostic vs object-aware</button>
+  </div>
+  <div class="controls" role="group" aria-label="Metric">
+    <span>Metric</span>
+    <button type="button" id="btn-aclip-img" aria-pressed="true">Image AUROC</button>
+    <button type="button" id="btn-aclip-pix" aria-pressed="false">Pixel AUROC</button>
+    <button type="button" id="btn-aclip-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Sourced from AnomalyCLIP v12, Table 1 and Fig. 5 and Fig. 8. Green bars: AnomalyCLIP, one pair of prompts for every category of the target dataset. Brown marks: WinCLIP, no training and hand prompts with the product name; "copied" means AnomalyCLIP copied WinCLIP's own number, "re-run" means AnomalyCLIP ran it. Only the marked datasets have a WinCLIP number to compare. The gains in the second view are printed in the paper only as differences.</figcaption>
+</figure>
+
+<p>Before you look at the numbers, predict: <em>prompts trained on VisA, with its circuit boards, candles and capsules, then tested on MVTec AD's screws, carpets and bottles: will they still work?</em> The top row answers. On MVTec AD they reach <span data-claim="anomalyclip-mvtec-img-auroc">91.5</span> image AUROC, next to WinCLIP's <span data-claim="anomalyclip-t1-winclip-mvtec-img-auroc">91.8</span>, which used the product names. On pixels they reach <span data-claim="anomalyclip-mvtec-pix-auroc">91.1</span> against WinCLIP's <span data-claim="anomalyclip-t1-winclip-mvtec-pix-auroc">85.1</span>. Switch to <b>Pixel AUROC</b>: the gap is largest on localization, which is what the learned prompts and the training on masks were for. WinCLIP still leads on MVTec AD image AUROC, by <span data-computed>0.3</span> points.</p>
+
+<h3>Learned prompts</h3>
+<p>A prompt reaches CLIP's text encoder as a sequence of word embeddings, one vector per token. "Prompt learning" (as in CoOp, an earlier method for CLIP) replaces some of those vectors with free vectors and trains them by gradient descent, while every CLIP weight stays frozen. The words are gone; only the vectors remain, and they can sit anywhere in the embedding space, not only at real words.</p>
+<p>AnomalyCLIP (<span data-claim="anomalyclip-venue">ICLR 2024</span>, arXiv v1 of <span data-claim="anomalyclip-v1-published">2023-10-29</span>; this page cites v12 of <span data-claim="anomalyclip-v12-published">2026-01-01</span>) learns two such prompts. The only fixed words are "object" and "damaged".</p>
+
+<div class="eq" id="eq-aclip-prompts" data-build data-viz="viz-anomalyclip"><div class="tex tex-display">
+\htmlData{step=1, link=prompt-n}{\htmlClass{t-blue}{g_n} = [\htmlClass{t-green}{V_1}][\htmlClass{t-green}{V_2}]\dots[\htmlClass{t-green}{V_E}]}\htmlData{step=3, link=object}{[\text{object}]}, \qquad \htmlData{step=2, link=prompt-a}{\htmlClass{t-red}{g_a} = [\htmlClass{t-green}{W_1}][\htmlClass{t-green}{W_2}]\dots[\htmlClass{t-green}{W_E}][\text{damaged}]}\htmlData{step=4, link=object}{[\text{object}]}
+</div></div>
+<p class="eqno">Object-agnostic templates, AnomalyCLIP v12 Sec. 3.2 (unnumbered). The object-aware version puts the product name [cls] where these say [object].</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{V_i}</span> and <span class="tex">\htmlClass{t-green}{W_i}</span> are learned word embeddings, <span class="tex">E</span> = <span data-claim="anomalyclip-E">12</span> per prompt. They are the main trained weights.</li>
+  <li><span class="tex">\htmlClass{t-blue}{g_n}</span> and <span class="tex">\htmlClass{t-red}{g_a}</span> are what the frozen text encoder makes of each prompt: one "normal" and one "abnormal" embedding, used exactly as in WinCLIP's two-class softmax.</li>
+  <li>"object" replaces the product name, which, in the paper's words, blocks out the class semantics of objects. The prompts must then encode what damage looks like on anything.</li>
+</ul>
+<p>The paper also adds learned tokens deeper in the text encoder: <span data-claim="anomalyclip-deep-tokens">4</span> fresh vectors overwrite the first positions of each of the first <span data-claim="anomalyclip-deep-layers">9</span> text layers, and the encoder's outputs at those positions are thrown away. This lets the prompt shape the text embedding at several depths, not only at the input.</p>
+<p>How much does the word "object" matter by itself? Less than the headline suggests. The paper prints the gain of object-agnostic over object-aware prompt learning as differences only (Fig. 5): <span data-claim="anomalyclip-gain-agnostic-mvtec-img-auroc">0.8</span> points of image AUROC on MVTec AD and <span data-claim="anomalyclip-gain-agnostic-visa-img-auroc">0.3</span> on VisA, but <span data-claim="anomalyclip-gain-agnostic-mpdd-img-auroc">4.4</span> on MPDD. A second test (Fig. 8) trains with "object" and puts the product name back at test time: MVTec AD image AUROC falls from <span data-claim="anomalyclip-mvtec-img-auroc">91.5</span> to <span data-claim="anomalyclip-re-mvtec-img-auroc">89.1</span>. Switch the figure to its second view to see both. The large jump in the paper's module ablation, from <span data-claim="anomalyclip-abl-base-mvtec-img">66.3</span> to <span data-claim="anomalyclip-abl-t2-mvtec-img">90.8</span> (Table 4), adds learned prompts and the agnostic wording in one step, so it does not measure the wording alone.</p>
+
+<h3>Zero-shot still needs labelled anomalies from somewhere</h3>
+<p>The prompts are trained on an auxiliary dataset with defect masks, and tested on a different one. To test on MVTec AD, AnomalyCLIP trains on the VisA test split (<span data-claim="anomalyclip-aux-visa-normal">962</span> normal and <span data-claim="anomalyclip-aux-visa-anom">1200</span> anomalous images). To test on everything else, it trains on the MVTec AD test split (<span data-claim="anomalyclip-aux-mvtec-normal">467</span> normal and <span data-claim="anomalyclip-aux-mvtec-anom">1258</span> anomalous images). So "zero-shot" means zero images of the target products, but it uses thousands of labelled images of other products. One pair of prompts then serves every category of the target dataset; the paper evaluates <span data-claim="anomalyclip-datasets">17</span> datasets, including medical ones.</p>
+
+<h3>Making CLIP's patch tokens local again</h3>
+<p>To draw a map, AnomalyCLIP compares the text embeddings with every patch token, not only the class token. The last chapter showed why that fails in plain CLIP: its last-layer patch tokens are not local. In CLIP's attention, many patches attend to the same few tokens, so each patch's output is mostly someone else's content. The fix, DPAM (diagonally prominent attention map), changes how attention weights are computed and adds no weights at all:</p>
+<div class="eq"><div class="tex tex-display">
+a_{ij} = e^{\,q_i k_j^{\top}/\sqrt{D}} \;\longrightarrow\; a^{vv}_{ij} = e^{\,v_i v_j^{\top}/\sqrt{D}}
+</div></div>
+<p class="eqno">Standard attention weights and the V-V weights DPAM uses, AnomalyCLIP v12 Appendix C (unnumbered).</p>
+<p>The paper argues that a value vector, which takes no part in the original attention map, scores highest with itself, so <span class="tex">a^{vv}_{ii}</span> tends to dominate its row: each patch mostly keeps its own content, and the attention map becomes diagonally prominent. DPAM runs from the <span data-claim="anomalyclip-dpam-start">6th</span> visual layer. In the paper's overview figure it sits in a separate path that feeds only the patch tokens, and the class token keeps the original attention (our reading of that figure). In the module ablation, DPAM alone raises MVTec AD pixel AUROC from <span data-claim="anomalyclip-abl-base-mvtec-pix">46.8</span> to <span data-claim="anomalyclip-abl-dpam-mvtec-pix">68.4</span> and leaves image AUROC unchanged, as it should.</p>
+
+<h3>The loss grades the image and every pixel</h3>
+<div class="eq" id="eq-aclip-loss" data-build data-viz="viz-aclipflow"><div class="tex tex-display">
+\htmlData{step=1, link=total}{L_{total}} = \htmlData{step=2, link=global}{L_{global}} + \htmlData{step=3, link=local}{\lambda \textstyle \sum_{M_l \in \mathcal{M}} L_{local}^{M_l}}, \qquad \htmlData{step=4, link=local}{L_{local} = \mathrm{Focal}\big(\mathrm{Up}([S_{n}, S_{a}]), S\big) + \mathrm{Dice}\big(\mathrm{Up}(S_{n}), I - S\big) + \mathrm{Dice}\big(\mathrm{Up}(S_{a}), S\big)}
+</div></div>
+<p class="eqno">Eq. 2 and the unnumbered local loss, AnomalyCLIP v12 Sec. 3.3 (layer superscripts dropped in the second part). Hover a term to open that stage of the diagram below.</p>
+<ul class="gloss">
+  <li><span class="tex">L_{global}</span> is a cross-entropy between the image-level probability of "abnormal" and the image label. The paper describes it in words only.</li>
+  <li><span class="tex">S_n, S_a</span> are the per-patch probabilities of normal and abnormal, upsampled (Up) to the image size; <span class="tex">S</span> is the ground-truth defect mask and <span class="tex">I</span> a matrix of ones.</li>
+  <li>Focal loss copes with the imbalance (defects are small); the two Dice terms ask the normal map to cover the normal region and the abnormal map to cover the defect. <span class="tex">\lambda</span> = <span data-claim="anomalyclip-lambda">4</span>.</li>
+</ul>
+<p>Both terms matter. Trained with the global loss only, MVTec AD pixel AUROC is <span data-claim="anomalyclip-abl-global-only-mvtec-pix">80.3</span>; with the local loss only, <span data-claim="anomalyclip-abl-local-only-mvtec-pix">91.0</span> (Table 5). Plain prompt learning that optimizes the global image match, as CoOp does, reaches <span data-claim="anomalyclip-t1-coop-mvtec-img-auroc">88.8</span> image AUROC but only <span data-claim="anomalyclip-t1-coop-mvtec-pix-auroc">33.3</span> pixel AUROC on MVTec AD.</p>
+
+<table class="data">
+  <thead><tr><th>Zero-shot, AnomalyCLIP v12 Table 1</th><th>Image AUROC</th><th>Image AP</th><th>Pixel AUROC</th><th>PRO</th></tr></thead>
+  <tbody>
+    <tr><td>MVTec AD (prompts trained on VisA)</td><td><span data-claim="anomalyclip-mvtec-img-auroc">91.5</span></td><td><span data-claim="anomalyclip-mvtec-img-ap">96.2</span></td><td><span data-claim="anomalyclip-mvtec-pix-auroc">91.1</span></td><td><span data-claim="anomalyclip-mvtec-pro">81.4</span></td></tr>
+    <tr><td>VisA (prompts trained on MVTec AD)</td><td><span data-claim="anomalyclip-visa-img-auroc">82.1</span></td><td><span data-claim="anomalyclip-visa-img-ap">85.4</span></td><td><span data-claim="anomalyclip-visa-pix-auroc">95.5</span></td><td><span data-claim="anomalyclip-visa-pro">87.0</span></td></tr>
+  </tbody>
+</table>
+<p>Compare with care. AnomalyCLIP uses CLIP <span data-claim="anomalyclip-backbone">ViT-L/14@336px</span> at <span data-claim="anomalyclip-input-res">518</span> pixels; WinCLIP uses <span data-claim="winclip-backbone">ViT-B/16+</span> at <span data-claim="winclip-input-res">240</span>. AnomalyCLIP trains on another dataset's labelled test split; WinCLIP trains nothing but uses the product name. The paper reports no speed numbers. On the other hand, it scores a whole image in one forward pass, where WinCLIP needs one pass per window.</p>
+
+<h3>Inside AnomalyCLIP: forward, then backward</h3>
+<figure class="viz archflow" id="viz-aclipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-aclipflow-prompts" aria-pressed="false">1 Prompts</button>
+    <button type="button" id="btn-aclipflow-text" aria-pressed="false">2 Text encoder</button>
+    <button type="button" id="btn-aclipflow-image" aria-pressed="false">3 Image</button>
+    <button type="button" id="btn-aclipflow-vision" aria-pressed="false">4 Image encoder</button>
+    <button type="button" id="btn-aclipflow-scores" aria-pressed="false">5 Scores</button>
+    <button type="button" id="btn-aclipflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-aclipflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-aclipflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <canvas id="aclipflow-canvas" role="img" aria-label="AnomalyCLIP training as a diagram. Green learned prompt tokens and deep tokens enter the brown, frozen CLIP text encoder, which gives the normal and abnormal embeddings. An auxiliary image goes through the brown, frozen CLIP image encoder with DPAM, giving a class token and patch tokens. Scores meet the label and mask in the loss. In the backward stages red arrows run from the loss back through the frozen text encoder into the green prompt tokens; the image encoder receives no gradient."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-aclipflow-prev">Previous</button>
+    <button type="button" id="btn-aclipflow-next">Next</button>
+    <button type="button" id="btn-aclipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="aclipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>All of CLIP is frozen. The only trained weights are green: the two prompts and the deep text tokens. Predict before you press <b>7 Gradients</b>: <em>which boxes will the gradient reach?</em></p></div>
+    <div data-stage="prompts" hidden><h4>1. Two learned prompts</h4><p><span data-claim="anomalyclip-E">12</span> learned vectors, then "object" (normal prompt), or 12 learned vectors, then "damaged object" (abnormal prompt). Also <span data-claim="anomalyclip-deep-tokens">4</span> learned tokens for each of the first <span data-claim="anomalyclip-deep-layers">9</span> text layers.</p></div>
+    <div data-stage="text" hidden><h4>2. The frozen text encoder</h4><p>It turns each prompt into one embedding: <b class="c-blue">g_n</b> and <b class="c-red">g_a</b>. Its weights never change, but its output depends on the learned tokens.</p></div>
+    <div data-stage="image" hidden><h4>3. An auxiliary image</h4><p>A batch of <span data-claim="anomalyclip-batch">8</span> images from the other dataset's test split, resized to <span data-claim="anomalyclip-input-res">518</span> pixels on each side, each with its image label and defect mask.</p></div>
+    <div data-stage="vision" hidden><h4>4. The frozen image encoder</h4><p><span data-claim="anomalyclip-backbone">ViT-L/14@336px</span>. The class token comes from the original attention; the patch tokens come from a DPAM path (V-V attention from the <span data-claim="anomalyclip-dpam-start">6th</span> layer). With 14-pixel patches, a <span data-claim="anomalyclip-input-res">518</span>-pixel image gives a <span data-computed>37 by 37</span> grid (our computation).</p></div>
+    <div data-stage="scores" hidden><h4>5. Scores</h4><p>The image probability of "abnormal" from the class token, and the two maps <span class="tex">S_n, S_a</span> from the patch tokens, each a softmax over the two text embeddings.</p></div>
+    <div data-stage="loss" hidden><h4>6. Loss</h4><p><b data-link="total">One number:</b> <b data-link="global">a cross-entropy on the image label</b>, plus <b data-link="local">four times the focal and Dice losses on the upsampled maps against the defect mask</b>.</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>From the loss into the scores, then into <b class="c-blue">g_n</b> and <b class="c-red">g_a</b>. Those are outputs of the frozen text encoder, so the gradient flows back through every frozen text layer, changing none of them, and lands on the green tokens. This is "frozen, but the gradient passes through". The image encoder is frozen and nothing trainable sits behind it, so the gradient stops there: the image features act as constants. This path is our reading of the paper, which states that all CLIP parameters are frozen and that only the prompts and deep tokens are learned.</p></div>
+    <div data-stage="update" hidden><h4>8. Update</h4><p>Adam with a learning rate of <span data-claim="anomalyclip-lr">0.001</span>, for <span data-claim="anomalyclip-epochs">15</span> epochs, on one <span data-claim="anomalyclip-gpu">RTX 3090</span>. At test time the map is smoothed with a Gaussian of sigma <span data-claim="anomalyclip-sigma">4</span>.</p></div>
+  </div>
+  <figcaption>Computed from the paper's configuration (prompt length, deep-token layers, input size, batch). The <span data-computed>37 by 37</span> patch grid and the depth of the text encoder are our reading; the paper states neither.</figcaption>
+</figure>
+</section>

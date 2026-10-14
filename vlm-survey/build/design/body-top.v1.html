@@ -1,0 +1,43 @@
+<body>
+<main>
+<header class="hero">
+  <h1>Vision-language models, intuition first</h1>
+  <p class="hook">How machines learned to read pictures and talk about them: a chain of fixes, where every paper broke through the wall the one before it hit.</p>
+  <p class="papers">Papers covered (arXiv id, version read): ViT 2010.11929v2, CLIP 2103.00020v1, ALIGN 2102.05918v2, SigLIP 2303.15343v4, BLIP 2201.12086v2, Flamingo 2204.14198v2, BLIP-2 2301.12597v3, LLaVA 2304.08485v2, LLaVA-1.5 2310.03744v2, Qwen-VL 2308.12966v3, Florence-2 2311.06242v1, Qwen2-VL 2409.12191v2, Idefics2 2405.02246v1, Molmo 2409.17146v2, Chameleon 2405.09818v2, Qwen3-VL 2511.21631v2.</p>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: a shared space for pictures and words</li>
+    <li value="1"><a href="#ch-shared-space">Classifiers only know their labels (CLIP, ALIGN)</a></li>
+    <li><a href="#ch-sigmoid">The softmax needs the whole batch (SigLIP)</a></li>
+    <li><a href="#ch-patches">How an encoder sees: images as tokens (ViT)</a></li>
+    <li class="act">Act II: teaching a language model to see</li>
+    <li value="4"><a href="#ch-bootstrap">Web captions are noisy (BLIP)</a></li>
+    <li><a href="#ch-flamingo">Don't break the language model (Flamingo)</a></li>
+    <li><a href="#ch-qformer">A small bridge between two frozen giants (BLIP-2)</a></li>
+    <li class="act">Act III: from describing to conversing</li>
+    <li value="7"><a href="#ch-llava">Chat needs conversations to learn from (LLaVA, LLaVA-1.5)</a></li>
+    <li><a href="#ch-training-step">One training step, end to end (how images and text train together)</a></li>
+    <li class="act">Act IV: seeing sharply and pointing</li>
+    <li value="9"><a href="#ch-resolution">A fixed small square cannot read a page (Qwen-VL, Qwen2-VL)</a></li>
+    <li><a href="#ch-grounding">Say where, not just what (Qwen-VL, Florence-2, Molmo)</a></li>
+    <li class="act">Act V: what actually matters</li>
+    <li value="11"><a href="#ch-recipes">Most design choices were never tested (Idefics2, Molmo)</a></li>
+    <li class="act">Act VI: other paths, and where it lands</li>
+    <li value="12"><a href="#ch-early-fusion">Why not make images words? (Chameleon)</a></li>
+    <li><a href="#ch-qwen3">Putting it together (Qwen3-VL)</a></li>
+  </ol>
+  <a href="#ch-timeline">Family tree</a> &middot; <a href="#ch-summary">Summary</a> &middot; <a href="#ch-deeper">Where to go deeper</a>
+</nav>
+
+<p>Almost every model on this page has the same three parts: a <b class="c-blue">vision encoder</b> that turns pixels into vectors, a <b class="c-green">connector</b> that hands those vectors over, and a <b class="c-yellow">language model</b> that reads them and writes. One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">vision: pixels, patches, image embeddings</span>
+  <span class="c-yellow">language: text tokens, captions, the LLM</span>
+  <span class="c-green">the bridge, a correct match</span>
+  <span class="c-red">loss, error, cost</span>
+  <span class="c-brown">frozen weights, negatives, background</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means a real formula from a paper, evaluated directly or run on a small toy. <b>Toy model</b> means an illustration of the mechanism, not the paper's numbers. <b>Sourced</b> means what is drawn comes from the papers themselves: numbers from their tables, or structure and dates as they state them (the family tree's arcs are the page's own reading).</p>

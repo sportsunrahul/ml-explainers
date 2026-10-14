@@ -1,0 +1,150 @@
+<p class="kicker"><span class="act-n">Act III</span>Fewer bits</p>
+<section id="ch-grid" class="chapter">
+<h2>Numbers on a grid: scale and zero-point</h2>
+<p>To store a tensor in 8 bits, lay a ruler with 256 evenly spaced marks over the range of its values and replace each value by the number of its nearest mark. Everything in this act is a choice about that ruler: where its ends go, how far apart its marks are, and which mark stands for zero.</p>
+
+<figure class="viz" id="viz-ruler" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Bit-width and grid type">
+    <span class="lbl">Bits</span>
+    <button type="button" id="btn-ruler-b8" aria-pressed="true">8</button>
+    <button type="button" id="btn-ruler-b4" aria-pressed="false">4</button>
+    <button type="button" id="btn-ruler-b2" aria-pressed="false">2</button>
+    <span class="lbl">Grid</span>
+    <button type="button" id="btn-ruler-asym" aria-pressed="true" data-link="zero">asymmetric</button>
+    <button type="button" id="btn-ruler-sym" aria-pressed="false">symmetric</button>
+  </div>
+  <canvas id="ruler-canvas" role="img" aria-label="A number line with a histogram of toy activation values in blue above it and the same values after quantization in yellow below it. Yellow tick marks show the grid. The range ends can be dragged; values outside the range are shaded red as clipped. Two red bars at the bottom show the rounding and clipping error on a log scale."></canvas>
+  <div class="controls" role="group" aria-label="Range">
+    <span class="lbl">Range</span>
+    <button type="button" id="btn-ruler-tight" aria-pressed="false">tight [&minus;0.5, 1.6]</button>
+    <button type="button" id="btn-ruler-minmax" aria-pressed="true">min to max</button>
+    <button type="button" id="btn-ruler-wide" aria-pressed="false">wide [&minus;2.5, 7.5]</button>
+    <button type="button" id="btn-ruler-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ruler-readout" aria-live="polite"></p>
+  <figcaption>The 4000 values are a toy sample with a long right tail, like the input to a layer after a residual add. The quantizer, S, Z and both errors are computed exactly on that sample. Drag the white knobs to move the range ends, or focus the chart and use the arrow keys (up and down switch ends). Asymmetric grids use unsigned codes and a zero-point; symmetric grids use signed codes in [&minus;(2<sup>b&minus;1</sup>&minus;1), 2<sup>b&minus;1</sup>&minus;1] and Z = 0, as in Wu Eq. 6-7. A clipped value's error is measured to the last grid point; both errors are averaged over all 4000 values.</figcaption>
+</figure>
+
+<p>The blue histogram is the data: real numbers that a layer produced. The yellow ticks are the marks of the ruler. Below the axis, each yellow block shows how many values landed on that mark. At 8 bits the yellow shape copies the blue one closely. At 2 bits there are only four marks, and the shape collapses into four blocks.</p>
+<p>Two different errors appear. A value inside the range moves to its nearest mark, so it is off by at most half a mark spacing: that is <em>rounding error</em>. A value outside the range is pushed to the end mark, however far away it was: that is <em>clipping error</em>. The two red bars measure each one as a mean squared error over the sample.</p>
+<p><b>Make a guess before you press "wide".</b> Press "tight" first and look at the two bars. A wider range clips nothing, but its marks are farther apart. Which bar grows and which shrinks? Is wider always better? Then try the same three ranges at 2 bits.</p>
+<p>At 8 bits the clipping bar dominates the tight range, so covering every value wins: min to max gives the smallest total. At 2 bits the order flips. The marks are so coarse that rounding error swamps everything, and the tight range has the smaller total (<span data-toy>0.12 against 0.44</span> in this toy). The best range depends on the bit-width. Chapter 5 turns that trade into a rule for choosing it.</p>
+
+<h3>The ruler as an equation</h3>
+<p>Jacob and colleagues at Google wrote the ruler as one affine map from an integer code back to a real number. The scale says how far apart the marks are, and the zero-point says which code means 0.0.</p>
+<div class="eq" id="eq-grid-affine" data-build data-viz="viz-ruler"><div class="tex tex-display">
+\htmlData{step=1, link=real}{\htmlClass{t-blue}{r}} = \htmlData{step=2, link=scale}{\htmlClass{t-yellow}{S}}\,(\htmlData{step=3, link=code}{\htmlClass{t-yellow}{q}} - \htmlData{step=4, link=zero}{\htmlClass{t-yellow}{Z}})
+</div></div>
+<p class="eqno">Eq. 1 in Jacob et al., arXiv 1712.05877v1 ("our quantization scheme").</p>
+<ul class="gloss">
+  <li><span class="tex">r</span>: the real value that the code stands for (blue histogram).</li>
+  <li><span class="tex">S</span>: the <em>scale</em>, the real distance between two neighboring marks. It is a positive real number.</li>
+  <li><span class="tex">q</span>: the integer code. Jacob uses unsigned 8-bit codes, 0 to 255. The readout shows one code as its bit pattern.</li>
+  <li><span class="tex">Z</span>: the <em>zero-point</em>, the code that represents real 0.0 exactly. It has the same integer type as <span class="tex">q</span>.</li>
+</ul>
+<p>Why insist that 0.0 is exact? Convolutions pad the border of a feature map with zeros, and ReLU produces many exact zeros. If 0.0 fell between two marks, every padded pixel would carry a small error. So the range is nudged until 0.0 lands exactly on a mark. In the figure the yellow triangle marks that code.</p>
+<p>Going the other way, from a real value to a code, means dividing by the scale, rounding, shifting by the zero-point and clamping to the codes that exist. Krishnamoorthi's 2018 whitepaper writes it in two lines, with <span class="tex">\Delta</span> for the scale and <span class="tex">z</span> for the zero-point:</p>
+<div class="eq" id="eq-grid-quant" data-build data-viz="viz-ruler"><div class="tex tex-display">
+\htmlData{step=1, link=round}{x_{int}= round\big(\frac{\htmlClass{t-blue}{x}}{\htmlClass{t-yellow}{\Delta}}\big)} \htmlData{step=2, link=zero}{+\,\htmlClass{t-yellow}{z}} \qquad \htmlData{step=3, link=clip}{\htmlClass{t-yellow}{x_Q}=clamp(0,N_{levels} - 1, x_{int})}
+</div></div>
+<p class="eqno">Eq. 1-2 in Krishnamoorthi, arXiv 1806.08342v1.</p>
+<ul class="gloss">
+  <li><span class="tex">round(x/\Delta)</span>: snap the value to the nearest mark. The difference is the rounding error, at most <span class="tex">\Delta/2</span>.</li>
+  <li><span class="tex">+\,z</span>: shift so that real 0.0 maps to code <span class="tex">z</span>.</li>
+  <li><span class="tex">clamp(0, N_{levels}-1, \cdot)</span>: codes outside the ruler are forced to its ends. This is where clipping error comes from. <span class="tex">N_{levels}</span> is <span data-claim="jacob-levels-8bit">256</span> for 8 bits.</li>
+</ul>
+<p>Jacob's own quantizer, Eq. 12, says the same thing in terms of a range <span class="tex">[a; b]</span> and a number of levels <span class="tex">n</span>, and returns a real number on the grid. We quote it as printed; the <span class="tex">x</span> inside the clamp is the source's typo for <span class="tex">r</span>:</p>
+<div class="eq"><div class="tex tex-display">
+\operatorname{clamp}(r;a,b) \coloneqq \min\left(\max(x, a), b\right), \quad s(a,b,n) \coloneqq \frac{b - a}{n - 1}, \quad q(r;a,b,n) \coloneqq \left\lfloor \frac{\operatorname{clamp}(r;a,b) - a}{s(a,b,n)} \right\rceil s(a,b,n) + a
+</div></div>
+<p class="eqno">Eq. 12 in Jacob et al., arXiv 1712.05877v1, as printed. Eq. 13 maps it to S = s(a, b, n) and Z = z(a, b, n).</p>
+
+<h3>Symmetric or asymmetric</h3>
+<p>Press "symmetric". A symmetric grid fixes Z = 0 and uses signed codes, so its range is always [&minus;m, m]. That is simpler arithmetic, but this data is mostly positive: the codes on the far left stand for values that never occur. The grid spends them anyway, so its marks are farther apart and the rounding bar grows. An asymmetric grid fits [min, max] instead and uses more of its codes on real data.</p>
+<p>The zero-point is not free, though. The next section shows the extra integer work it causes, and why GPU toolchains avoid it for weights.</p>
+
+<h3>Integer-only arithmetic</h3>
+<p>Quantization saves memory only if the arithmetic also stays in integers. Jacob shows that a whole convolution can: multiply the codes as integers, correct for the zero-points with a few sums, and rescale once at the end. Step through one output value of a 3x3 convolution.</p>
+
+<figure class="viz" id="viz-intmm" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Step">
+    <span class="lbl">Step</span>
+    <button type="button" id="btn-intmm-s1" aria-pressed="true">1 real numbers</button>
+    <button type="button" id="btn-intmm-s2" aria-pressed="false" data-link="codes">2 uint8 codes</button>
+    <button type="button" id="btn-intmm-s3" aria-pressed="false" data-link="core">3 int32 sum</button>
+    <button type="button" id="btn-intmm-s4" aria-pressed="false" data-link="cross">4 zero-points</button>
+    <button type="button" id="btn-intmm-s5" aria-pressed="false" data-link="mult">5 requantize</button>
+  </div>
+  <canvas id="intmm-canvas" role="img" aria-label="Two 3 by 3 grids, weights and inputs, show real numbers that turn into 8-bit integer codes. A ledger beside them adds the integer product sum, the zero-point correction terms and the bias, then rescales the result to an 8-bit output code and compares it with the floating-point answer."></canvas>
+  <div class="controls" role="group" aria-label="Reset">
+    <button type="button" id="btn-intmm-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="intmm-readout" aria-live="polite"></p>
+  <figcaption>Toy weights, pixels, bias and ranges; the integer arithmetic is computed exactly as in Jacob Sec. 2.2-2.4 and App. B: uint8 codes, an int32 accumulator, the zero-point terms of Eq. 7-8, an int32 bias, and requantization by an integer multiply and a rounding shift (ties away from zero). Each weight, input and output tensor has one scale and one zero-point, as in the paper.</figcaption>
+</figure>
+
+<p>Substitute <span class="tex">r = S(q - Z)</span> for weights (1), inputs (2) and the output (3) into a dot product, and solve for the output code. Jacob's Eq. 7 is the result:</p>
+<div class="eq" id="eq-intmm-expand" data-build data-viz="viz-intmm"><div class="tex tex-display">
+\htmlData{step=1, link=zout}{\htmlClass{t-yellow}{q_3^{(i, k)}} = Z_3} + \htmlData{step=2, link=mult}{\htmlClass{t-green}{M}} \Big( \htmlData{step=3, link=const}{\htmlClass{t-red}{NZ_1 Z_2}} \htmlData{step=4, link=cross}{\htmlClass{t-red}{- Z_1 a_2^{(k)} - Z_2 \bar a_1^{(i)}}} + \htmlData{step=5, link=core}{\htmlClass{t-yellow}{\sum_{j=1}^N q_1^{(i, j)}q_2^{(j, k)}}}\Big)
+</div></div>
+<p class="eqno">Eq. 7 in Jacob et al., arXiv 1712.05877v1, joined on one line; the sums <span class="tex">a_2</span> and <span class="tex">\bar a_1</span> are Eq. 8.</p>
+<ul class="gloss">
+  <li><span class="tex">\sum_j q_1 q_2</span>: the core, a plain integer dot product of weight codes and input codes, accumulated in 32 bits (<span class="tex">\texttt{int32 += uint8 * uint8}</span>, Eq. 10). For a matrix product it costs <span class="tex">2N^3</span> operations.</li>
+  <li><span class="tex">a_2^{(k)} = \sum_j q_2^{(j,k)}</span> and <span class="tex">\bar a_1^{(i)} = \sum_j q_1^{(i,j)}</span>: the sum of the input codes and the sum of the weight codes. Each is multiplied by the other side's zero-point. These cost only <span class="tex">2N^2</span> additions.</li>
+  <li><span class="tex">N Z_1 Z_2</span>: a constant. <span class="tex">N</span> is the length of the dot product, 9 for one 3x3 output.</li>
+  <li><span class="tex">M</span>: the only number that is not an integer.</li>
+</ul>
+<div class="eq" id="eq-intmm-mult" data-build data-viz="viz-intmm"><div class="tex tex-display">
+\htmlData{step=1, link=mult}{\htmlClass{t-green}{M} \coloneqq \frac{S_1 S_2}{S_3}} \qquad \htmlData{step=2, link=shift}{\htmlClass{t-green}{M} = 2^{-n} M_0}
+</div></div>
+<p class="eqno">Eq. 5 and Eq. 6 in Jacob et al., arXiv 1712.05877v1.</p>
+<ul class="gloss">
+  <li><span class="tex">S_1, S_2, S_3</span>: the scales of the weights, the inputs and the output. They are known before inference, so <span class="tex">M</span> is computed offline.</li>
+  <li><span class="tex">M_0</span>: <span class="tex">M</span> scaled up into <span data-claim="jacob-m0-interval">[0.5, 1)</span> and stored as a 32-bit integer, which keeps at least <span data-claim="jacob-m0-int32-bits">30</span> bits of relative accuracy. Jacob found <span class="tex">M</span> always lies in <span data-claim="jacob-m-interval">(0, 1)</span>.</li>
+  <li><span class="tex">2^{-n}</span>: a right shift by <span class="tex">n</span> bits, with rounding to nearest. Jacob notes that a shift which rounds ties upward biases the outputs and costs accuracy.</li>
+</ul>
+<p>The bias joins the accumulator as a 32-bit integer whose scale is <span class="tex">S_1 S_2</span> and whose zero-point is 0 (Eq. 11), so adding it is one integer add. In step 5 the error against floating point is smaller than half an output step: the integer pipeline loses nothing beyond the rounding of the final code.</p>
+<p>Now look at step 4 again. The term <span class="tex">Z_2 \bar a_1</span> depends only on the weights, so it can be folded into the bias offline. But <span class="tex">Z_1 a_2</span> depends on the input, so it must be computed at run time for every output. If the weights have <span class="tex">Z_1 = 0</span>, that term disappears. This is why Wu and colleagues at NVIDIA, and Nagel and colleagues at Qualcomm, recommend symmetric weights and allow a zero-point only for activations (Wu Eq. 11, Nagel Eq. 13).</p>
+
+<h3>Where these numbers were measured</h3>
+<p>Jacob's results are for phones, not GPUs. The integer kernels ran on ARM CPU cores of a <span data-claim="jacob-hw-s835">Snapdragon 835</span>, one thread, with one scale per tensor and training that simulates the rounding (chapter 7). On COCO, a MobileNet SSD detector at <span data-claim="jacob-coco-input">320</span>x320 went from <span data-claim="jacob-coco-dm100-fp-map">22.1</span> mAP in floating point to <span data-claim="jacob-coco-dm100-int8-map">21.7</span> in 8 bits. The half-width model ran in <span data-claim="jacob-coco-dm50-int8-big">61</span> ms instead of <span data-claim="jacob-coco-dm50-fp-big">121</span> ms on a big core, the paper's "up to a <span data-claim="jacob-coco-runtime-cut">50%</span> reduction in running time". The model also gets <span data-claim="jacob-model-size-cut">4</span>x smaller.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>TensorRT, the usual GPU path for a detector, uses a symmetric scheme: no zero-point, and INT8 codes in <span data-claim="trt-int8-range">[-128,127]</span> with a single scale per tensor or per channel. So on a GPU the real decision is the scale, which means the range. A detector's activations have long tails, like the toy above, so the range you pick trades clipping against rounding. <a href="#ch-granularity">Chapter 5</a> shows how calibration picks it, and why weights get one scale per output channel.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-ruler'), out = document.getElementById('ruler-readout');
+  const kit = KIT.ruler(document.getElementById('ruler-canvas'), { fig, onInput: () => sync('drag') });
+  const bitB = [8, 4, 2].map(b => document.getElementById('btn-ruler-b' + b));
+  const symB = ['asym', 'sym'].map(k => document.getElementById('btn-ruler-' + k));
+  const rngB = ['tight', 'minmax', 'wide'].map(k => document.getElementById('btn-ruler-' + k));
+  let preset = 'minmax';
+  const sync = p => {
+    if (p) preset = p;
+    bitB.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-ruler-b' + kit.state.bits)));
+    symB.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-ruler-' + (kit.state.sym ? 'sym' : 'asym'))));
+    rngB.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-ruler-' + preset)));
+    setTimeout(() => { out.innerHTML = KIT.rulerText(kit.info()); }, PE.instant() ? 0 : 700);
+  };
+  bitB.forEach(b => b.addEventListener('click', () => { kit.set({ bits: +b.id.slice(11) }); sync(); }));
+  symB.forEach(b => b.addEventListener('click', () => { kit.set({ sym: b.id.endsWith('-sym') }); sync(); }));
+  rngB.forEach(b => b.addEventListener('click', () => { const k = b.id.slice(10), [lo, hi] = KIT.RULER_PRESETS[k](); kit.set({ lo, hi }); sync(k); }));
+  document.getElementById('btn-ruler-reset').addEventListener('click', () => { const [lo, hi] = KIT.RULER_PRESETS.minmax(); kit.set({ lo, hi, bits: 8, sym: false }); sync('minmax'); });
+  out.innerHTML = KIT.rulerText(kit.info());
+})();
+(() => {
+  const fig = document.getElementById('viz-intmm'), out = document.getElementById('intmm-readout');
+  const kit = KIT.intmm(document.getElementById('intmm-canvas'), { fig });
+  const btns = [1, 2, 3, 4, 5].map(n => document.getElementById('btn-intmm-s' + n));
+  const go = n => { kit.set({ step: n }); btns.forEach((b, i) => b.setAttribute('aria-pressed', String(i + 1 === n))); out.innerHTML = KIT.intmmText(kit.info()); };
+  btns.forEach((b, i) => b.addEventListener('click', () => go(i + 1)));
+  document.getElementById('btn-intmm-reset').addEventListener('click', () => go(1));
+  out.innerHTML = KIT.intmmText(kit.info());
+})();
+</script>
+</section>

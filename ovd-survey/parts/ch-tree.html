@@ -1,0 +1,31 @@
+<section id="ch-tree" class="chapter">
+<h2>Family tree</h2>
+<p>Six papers carried this page, and a family grew around them. Here are 22 of them on one time axis: each sits at the date of its first arXiv version, in a lane for where text enters the network.</p>
+
+<figure class="viz" id="viz-tree">
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="tree-svg" tabindex="0" role="img" aria-label="Family tree of open-vocabulary detectors from 2020 to 2025, placed by first arXiv date and sorted into lanes by where text enters: classifier only (OVR-CNN, ViLD, RegionCLIP, Detic, OWL-ViT, OWLv2, YOLOE), visual prompts (T-Rex2), neck fusion folded for deployment (YOLO-World), deep fusion (MDETR, GLIP, GLIPv2), fusion plus query selection plus decoder (Grounding DINO, MM-Grounding-DINO, Grounding DINO 1.5, OV-DINO, DINO-X, LLMDet), and evidence papers (D3, OVDEval, FSOD-VLM, Roboflow100-VL). Lines join each paper to the earlier papers it builds on."></svg>
+  <div class="tree-tip" id="tree-tip" hidden></div>
+  <div class="controls">
+    <button type="button" id="btn-tree-spine" aria-pressed="false">Spine only</button>
+    <button type="button" id="btn-tree-branches" aria-pressed="false">Add the branches</button>
+    <button type="button" id="btn-tree-all" aria-pressed="true">All, with the evidence</button>
+    <button type="button" id="btn-tree-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Dates are each paper's first arXiv version (v1 on its abs page). The lanes follow the tap strip at the top of each model chapter, and a deeper yellow means text reaches more of the network; a ring marks the six papers with their own chapter. A line joins a paper to an earlier one only where the later paper says it builds on it, in this page's reading of its notes; it is not a citation graph. Point at a paper or tap it, or focus the chart and use the arrow keys.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> Between 2021 and 2025, did text move deeper into the detector, or back out of it? Press <em>Spine only</em>, then <em>Add the branches</em>, and read each lane from left to right.</p>
+
+<p>It did both. From 2021 to 2023 the grounding line pushed text deep into the network: MDETR (<span data-claim="mdetr-v1-date">2021-04-26</span>) reads image and text tokens in one joint encoder, GLIP (<span data-claim="glip-v1-date">2021-12-07</span>) fuses them in its top encoder layers, and Grounding DINO (<span data-claim="gdino-v1-date">2023-03-09</span>) adds text at three places. Then the cost of fusion pulled text back out. YOLO-World (<span data-claim="yoloworld-v1-date">2024-01-30</span>) folds its neck fusion into ordinary weights, OV-DINO (<span data-claim="ovdino-v1-date">2024-07-10</span>) keeps Grounding DINO's query selection but takes text out of the encoder (the hollow dot), and YOLOE (<span data-claim="yoloe-v1-date">2025-03-10</span>) removes YOLO-World's neck fusion and keeps text at the classifier only <span class="reading">our reading</span>.</p>
+<p>The classifier-only lane never went away. It runs from OVR-CNN (<span data-claim="ovrcnn-published">2020-11-20</span>), which named the task, through ViLD and Detic to OWL-ViT and OWLv2. These models pay the least for a new prompt, because the text encoder runs once per class name, whatever the image. The grey squares are not detectors: they are the tests that chapters 11 to 13 rely on, and all four came out after Grounding DINO.</p>
+
+<details class="tree-table">
+  <summary>Table view: the 22 papers in the tree</summary>
+  <table class="data" id="tree-table">
+    <thead><tr><th>Paper</th><th>First version</th><th>Where text enters</th><th>Builds on</th><th>The idea in one line</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</details>
+</section>

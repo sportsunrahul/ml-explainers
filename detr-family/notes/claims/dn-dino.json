@@ -1,0 +1,912 @@
+[
+ {
+  "id": "dn-500ep",
+  "claim": "DETR usually needs this many epochs on COCO vs 12 for original Faster R-CNN",
+  "value": "500 epochs vs 12 epochs",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "dn-is-objects-per-image",
+  "claim": "COCO 2017 val average objects per image",
+  "value": "7.36",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 3.1, last para",
+  "uncertain": false
+ },
+ {
+  "id": "dn-is-max",
+  "claim": "Largest possible IS on COCO val",
+  "value": "7.36 x 2 = 14.72",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 3.1, last para",
+  "uncertain": false
+ },
+ {
+  "id": "dn-is-fig",
+  "claim": "IS of DAB-DETR vs DN-DETR, both trained 12 epochs, measured between consecutive epochs on val; DN-DETR lower. Per-epoch values not stated in text",
+  "value": "12 epochs (curve values only in figure)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Fig. 2 caption (PDF); body text mis-refers to it as Fig. 3",
+  "uncertain": true
+ },
+ {
+  "id": "dn-dist-fig",
+  "claim": "Mean l1 distance between initial anchors and matched GT in last decoder layer is smaller for DN-DETR than DAB-DETR; values only in plot (y-axis 0.08-0.15; read-off DAB-DETR ~0.146 at epoch 1 to ~0.096 at epoch 12, DN-DETR ~0.110 to ~0.082)",
+  "value": "smaller (plot only; DAB ~0.146->0.096, DN ~0.110->0.082 over 12 epochs)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 3.2; Fig. 3",
+  "uncertain": true
+ },
+ {
+  "id": "dn-no-test-cost",
+  "claim": "Denoising part removed at inference; no computation overhead for testing",
+  "value": "0 test overhead",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.3 last line; Sec. 4.4 last para",
+  "uncertain": false
+ },
+ {
+  "id": "dn-uniform-noise",
+  "claim": "Box noise is uniform",
+  "value": "uniform",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.1 Implementation Details; Sec. 6 Limitations",
+  "uncertain": false
+ },
+ {
+  "id": "dn-lambda1",
+  "claim": "Center shifting noise scale lambda_1 (|dx|<lambda_1 w/2, |dy|<lambda_1 h/2, lambda_1 in (0,1))",
+  "value": "0.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.3 (definition); Sec. 5.1 (value)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-lambda2",
+  "claim": "Box scaling noise scale lambda_2 (w in [(1-lambda_2)w,(1+lambda_2)w], same for h, lambda_2 in (0,1))",
+  "value": "0.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.3 (definition); Sec. 5.1 (value)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-gamma",
+  "claim": "Label flipping ratio gamma",
+  "value": "0.2",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.3 (definition); Sec. 5.1 (value)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-repo-box-noise",
+  "claim": "[repo] DN-DETR code: offset = Uniform[-1,1) * (w/2, h/2, w, h) * box_noise_scale on (cx,cy,w,h), clamp [0,1]; default box_noise_scale 0.4, label_noise_scale 0.2",
+  "value": "box_noise_scale=0.4, label_noise_scale=0.2",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "[repo] IDEA-Research/DN-DETR main: models/dn_dab_deformable_detr/dn_components.py lines 103-109; main.py argparse defaults",
+  "uncertain": true
+ },
+ {
+  "id": "dn-groups-default",
+  "claim": "Default number of denoising groups",
+  "value": "5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.1 Implementation Details",
+  "uncertain": false
+ },
+ {
+  "id": "dn-groups-variants",
+  "claim": "Denoising groups: DN-Deformable-DETR 10, DN-Deformable-DETR++ 5, Faster R-CNN 10, Anchor DETR 5, DINO/Mask DINO/Mask2Former 5",
+  "value": "10 / 5 / 10 / 5 / 5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.1, paragraphs after Implementation Details",
+  "uncertain": false
+ },
+ {
+  "id": "dn-gflops-text",
+  "claim": "Training GFLOPs with 5 denoising groups, DAB-DETR R50",
+  "value": "94.4 -> 94.6",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 4.4 last para",
+  "uncertain": false
+ },
+ {
+  "id": "dn-train-gflops-table",
+  "claim": "Training GFLOPs in wall-clock table: DAB-DETR-R50 vs DN-DAB-DETR-R50",
+  "value": "94.4 vs 94.5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2b (second 'TABLE 2', p. 11)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-setup",
+  "claim": "6 enc/6 dec layers, hidden 256, lr 1e-4, drop x0.1 at epoch 40 (50-ep) / 11 (12-ep), AdamW wd 1e-4, 8 A100, batch 16",
+  "value": "6/6, 256, 1e-4, 40/11, 1e-4, 8 A100, 16",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.1 Implementation Details",
+  "uncertain": false
+ },
+ {
+  "id": "dn-queries",
+  "claim": "All DETR-like models except DETR use 300 queries; DETR 100",
+  "value": "300 / 100",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1 caption (p. 7)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1-r50",
+  "claim": "DN-DETR-R50 50 epochs vs DAB-DETR-R50; 94 GFLOPs, 44M",
+  "value": "44.1 (+1.9) vs 42.2",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1 (p. 7), rows DAB-DETR-R50 / DN-DETR-R50",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1-r101",
+  "claim": "DN-DETR-R101 50 epochs vs DAB-DETR-R101",
+  "value": "45.2 (+1.7) vs 43.5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1 (p. 7), R101 rows",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1-dc5r50",
+  "claim": "DN-DETR-DC5-R50 50 epochs vs DAB-DETR-DC5-R50",
+  "value": "46.3 (+1.8) vs 44.5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1 (p. 7), DC5-R50 rows",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1-dc5r101",
+  "claim": "DN-DETR-DC5-R101 50 epochs vs DAB-DETR-DC5-R101",
+  "value": "47.3 (+1.5) vs 45.8",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1 (p. 7), DC5-R101 rows",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t2-dc5r50",
+  "claim": "12 epochs: DN-DETR-DC5-R50 vs DAB-DETR-DC5-R50 (Table 2 and Table 4 models use 3 pattern embeddings per Sec. 5.1, though rows are unstarred)",
+  "value": "41.7 (+3.7) vs 38.0",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2 (p. 8, 1x setting)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t2-dc5r101",
+  "claim": "12 epochs: DN-DETR-DC5-R101 vs DAB-DETR-DC5-R101 (Table 2 and Table 4 models use 3 pattern embeddings per Sec. 5.1, though rows are unstarred)",
+  "value": "42.8 (+2.5) vs 40.3",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t2-deform",
+  "claim": "12 epochs: DN-Deformable-DETR-R50 (Table 2 and Table 4 models use 3 pattern embeddings per Sec. 5.1, though rows are unstarred)",
+  "value": "43.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t2-deformpp",
+  "claim": "12 epochs: DN-Deformable-DETR-R50++ (Table 2 and Table 4 models use 3 pattern embeddings per Sec. 5.1, though rows are unstarred)",
+  "value": "46.0",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t2-r101-vs-frcnn",
+  "claim": "DN-Deformable-DETR-R101 at 12 epochs vs Faster R-CNN R101 FPN at 108 epochs, '9x faster' (the DN model here uses 3 pattern embeddings per Sec. 5.1; rows are unstarred)",
+  "value": "44.1 vs 44.0 (108 epochs)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2 (p. 8); Sec. 5.3",
+  "uncertain": false
+ },
+ {
+  "id": "dn-abs-46-49.5",
+  "claim": "Abstract R50 headline: 46.0 AP at 12 epochs and 49.5 AP at 50 epochs; these are DN-Deformable-DETR-R50++ rows",
+  "value": "46.0 (12 ep), 49.5 (50 ep)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Abstract; Table 2 and Table 4 '++' rows",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t4-deform",
+  "claim": "50 epochs multi-scale R50: DN-Deformable-DETR vs DAB-Deformable-DETR (Table 2 and Table 4 models use 3 pattern embeddings per Sec. 5.1, though rows are unstarred)",
+  "value": "48.6 vs 46.9 (+1.7)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 4 (p. 9); Sec. 5.5",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t4-deformpp",
+  "claim": "50 epochs: DN-Deformable-DETR-R50++ (Table 2 and Table 4 models use 3 pattern embeddings per Sec. 5.1, though rows are unstarred)",
+  "value": "49.5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 4 (p. 9)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t4-dynamic",
+  "claim": "vs Dynamic DETR-R50 (test-dev, 5 scales + FPN)",
+  "value": "47.2; +1.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 4 (p. 9); Sec. 5.5",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1b-dc5r50",
+  "claim": "Speedup: DN-DETR-DC5-R50 25 epochs vs DAB-DETR-DC5-R50 50 epochs",
+  "value": "44.4 vs 44.5",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1b (second 'TABLE 1', p. 11)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1b-deform",
+  "claim": "Speedup: DN-Deformable-DETR-R50 25 ep vs DAB-Deformable-DETR-R50 50 ep",
+  "value": "46.8 vs 46.9",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1b (p. 11)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1b-deformpp",
+  "claim": "Speedup: DN-Deformable-DETR-R50++ 25 ep vs DAB-Deformable-DETR-R50++ 50 ep",
+  "value": "48.4 vs 48.7",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1b (p. 11)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t1b-vanilla",
+  "claim": "Speedup: DN-Vanilla-DETR-R50 250 ep vs Vanilla-DETR-R50 500 ep",
+  "value": "42.2 vs 42.0",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 1b (p. 11)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-fig7a",
+  "claim": "Before lr drop, DN-DETR (DC5-R50) reaches 40 AP in 20 epochs; DAB-DETR needs 40",
+  "value": "40 AP: 20 vs 40 epochs",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Fig. 7 caption (a)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-fig7b",
+  "claim": "With lr drop, DN-Deformable-DETR reaches 47.8 AP in 30 epochs, 0.9 AP above converged DAB-Deformable-DETR",
+  "value": "47.8 AP @ 30 ep, +0.9",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Fig. 7 caption (b)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t2b-time",
+  "claim": "Total training time: DAB-DETR-R50 50 ep vs DN-DAB-DETR-R50 25 ep",
+  "value": "2555 min vs 1443 min",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 2b (second 'TABLE 2', p. 11)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-epoch-time",
+  "claim": "Per-epoch time DAB-DETR-R50 vs DN-DAB-DETR-R50",
+  "value": "51.1 min vs 57.7 min",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.6.4",
+  "uncertain": false
+ },
+ {
+  "id": "dn-abl-full",
+  "claim": "Ablation (R50, 50 ep, 1 group): box + label denoising + attention mask",
+  "value": "43.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 5 row 1",
+  "uncertain": false
+ },
+ {
+  "id": "dn-abl-box",
+  "claim": "Box denoising + mask, no label denoising",
+  "value": "43.0",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 5 row 2",
+  "uncertain": false
+ },
+ {
+  "id": "dn-abl-none",
+  "claim": "Mask only, no denoising",
+  "value": "42.2",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 5 row 3",
+  "uncertain": false
+ },
+ {
+  "id": "dn-abl-nomask",
+  "claim": "Box + label denoising without attention mask",
+  "value": "24.0",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 5 row 4",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t6-r50",
+  "claim": "Groups none/1/5, R50",
+  "value": "42.2 / 43.4 / 44.1",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 6 row R50",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t6-r50dc5",
+  "claim": "Groups none/1/5, R50-DC5",
+  "value": "44.5 / 45.6 / 46.3",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 6 row R50-DC5",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t6-r101",
+  "claim": "Groups none/1/5, R101",
+  "value": "43.5 / 45.0 / 45.2",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 6 row R101",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t6-r101dc5",
+  "claim": "Groups none/1/5, R101-DC5",
+  "value": "45.8 / 46.5 / 47.3",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 6 row R101-DC5",
+  "uncertain": false
+ },
+ {
+  "id": "dn-fig8",
+  "claim": "Noise-scale sweep (20 ep, batch 64, R50, no lr drop, other scale fixed at 0.4): annotated peaks 35.5 AP at lambda_1=0.2 and 35.7 AP at lambda_2=0.4; x-axis 0.0 to 0.8",
+  "value": "35.5 @ lambda_1=0.2; 35.7 @ lambda_2=0.4",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Fig. 8 (image annotations, cvpr2022/resources/noise.png); setup in Sec. 5.6.2",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-anchor",
+  "claim": "12 ep: Anchor-DETR-DC5-R50 -> DN-Anchor-DETR",
+  "value": "38.2 -> 39.4 (+1.2)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-group",
+  "claim": "12 ep: Group-DAB-DETR-DC5-R50 -> with DN (from Group DETR paper)",
+  "value": "41.9 -> 44.5 (+2.6)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-frcnn",
+  "claim": "12 ep: Faster R-CNN-FPN-R50 -> DN-Faster R-CNN",
+  "value": "37.9 -> 38.4 (+0.5)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-sam",
+  "claim": "12 ep: SAM-DETR++-R50 -> with DN",
+  "value": "43.2 -> 44.8 (+1.6)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-dino",
+  "claim": "12 ep: DINO-R50 w/o DN -> w/ DN (plain DN, no CDN)",
+  "value": "46.0 -> 47.4 (+1.4)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8); Sec. 5.1 'DINO' para",
+  "uncertain": false,
+  "note": "Value matches DN-DETR Table 3. DINO's own Table 7 gives 45.1 for 'No DN' (46.0 there is the '10 DN' row), so the two papers' w/o-DN baselines differ"
+ },
+ {
+  "id": "dn-t3-vanilla",
+  "claim": "300 ep: Vanilla-DETR-R50 -> DN-Vanilla-DETR",
+  "value": "40.6 -> 42.6 (+2.0)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-maskdino",
+  "claim": "12 ep: Mask DINO-R50 w/o mask DN -> w/ mask DN",
+  "value": "40.7 -> 41.4 (+0.7)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-m2f",
+  "claim": "12 ep: Mask2Former-R50 -> DN-Mask2Former",
+  "value": "38.7 -> 39.7 (+1.0)",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Table 3 (p. 8)",
+  "uncertain": false
+ },
+ {
+  "id": "dn-t3-range",
+  "claim": "Improvement for DETR-like detectors under 12-epoch setting",
+  "value": "1.2-2.6 AP",
+  "paper": "DN-DETR",
+  "version": "v3",
+  "loc": "Sec. 5.4",
+  "uncertain": false
+ },
+ {
+  "id": "dino-900q",
+  "claim": "Decoder queries: 300 x 3 patterns = 900, same computation cost as DN-DETR",
+  "value": "900",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.3 Basic hyper-parameters; Table 8 num_queries",
+  "uncertain": false
+ },
+ {
+  "id": "dino-shared-head",
+  "claim": "Shared prediction head across decoder layers saves about one million parameters",
+  "value": "about one million",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.3 Detailed model components",
+  "uncertain": false
+ },
+ {
+  "id": "dino-dyn-groups",
+  "claim": "Dynamic DN groups: fix number of DN queries, set groups per image from object count; COCO images have 1 to 80 objects",
+  "value": "1 to 80 objects",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.1",
+  "uncertain": false
+ },
+ {
+  "id": "dino-cdn-lambdas",
+  "claim": "CDN thresholds: positive noise < lambda_1, negative between lambda_1 and lambda_2, lambda_1 < lambda_2",
+  "value": "lambda_1=1.0, lambda_2=2.0",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Sec. 3.3 Implementation (definition); App. D.3 Multi-scale setting (values)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-cdn-pairs",
+  "claim": "Number of CDN pairs (R50 models)",
+  "value": "100 pairs = 100 positive + 100 negative queries",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.3 Multi-scale setting; Table 7 caption",
+  "uncertain": false
+ },
+ {
+  "id": "dino-swinl-dn",
+  "claim": "DN queries for the large SwinL model",
+  "value": "1000",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.2",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t8-noise",
+  "claim": "Table 8 lists dn_box_noise_scale and dn_label_noise_ratio",
+  "value": "0.4 and 0.5",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 8 (hyperparameters)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-repo-cdn-noise",
+  "claim": "[repo] CDN box noise: corners (x1,y1,x2,y2) shifted by sign*u*(w/2 or h/2)*box_noise_scale, u~U[0,1) positive, U[1,2) negative, clamp [0,1]; with box_noise_scale 0.4 positives shift each corner coord < 0.2w (0.2h), negatives 0.2w to 0.4w. Interpretation that lambda_1=1.0/lambda_2=2.0 are multipliers on 0.4 is derived from code; paper does not define the noise-scale norm, and main-branch code may differ from the code behind the paper's numbers",
+  "value": "positive |shift| < 0.2w; negative in [0.2w, 0.4w)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "[repo] IDEA-Research/DINO main: models/dino/dn_components.py prepare_for_cdn; config/DINO/DINO_4scale.py dn_box_noise_scale=0.4, dn_number=100",
+  "uncertain": true
+ },
+ {
+  "id": "dino-label-noise",
+  "claim": "[repo] Label flip: config dn_label_noise_ratio=0.5 but code flips when p < 0.5*0.5, effective 0.25; paper gives only 0.5",
+  "value": "0.25 effective (config 0.5)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "[repo] models/dino/dn_components.py prepare_for_cdn; paper Table 8",
+  "uncertain": true
+ },
+ {
+  "id": "dino-fig8-dup",
+  "claim": "With DN instead of CDN queries, the boy has this many duplicate boxes",
+  "value": "3",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Sec. 3.3 Analysis; Fig. 8 caption",
+  "uncertain": false
+ },
+ {
+  "id": "dino-cdn-aps",
+  "claim": "CDN vs DN on small objects, 12 epochs, R50 multi-scale",
+  "value": "+1.3 AP_S",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Sec. 3.3 Effectiveness; Fig. 4(c)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-lr-sched",
+  "claim": "lr 1e-4 dropped x0.1 at epoch 11/20/30 for 12/24/36-epoch settings; AdamW wd 1e-4; batch 16",
+  "value": "11 / 20 / 30",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.3 Basic hyper-parameters",
+  "uncertain": false
+ },
+ {
+  "id": "dino-scales",
+  "claim": "4-scale: backbone stages 2,3,4 + downsampled extra; 5-scale adds stage 1",
+  "value": "4 or 5 scales",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.3 Multi-scale setting",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t1-4s",
+  "claim": "R50 12 ep DINO-4scale: AP, AP_S, GFLOPS, params, FPS",
+  "value": "49.0 (+5.6), AP_S 32.0 (+7.2), 279, 47M, 24",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1, row DINO-4scale",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t1-5s",
+  "claim": "R50 12 ep DINO-5scale: AP, AP_S, GFLOPS, params, FPS",
+  "value": "49.4 (+6.0), AP_S 32.3 (+7.5), 860, 47M, 10",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1, row DINO-5scale; Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t1-dn",
+  "claim": "Baseline for Table 1 deltas: DN-Deformable-DETR(4scale) 12 ep",
+  "value": "43.4",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1, row DN-Deformable-DETR(4scale)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t1-others",
+  "claim": "12 ep: Deformable DETR(4scale), Dynamic DETR(5scale), Dynamic Head, HTC, Faster-RCNN",
+  "value": "41.1, 42.9, 43.0, 42.3, 37.9",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t1-dn-gflops",
+  "claim": "DN-Deformable-DETR GFLOPS as measured in DINO Table 1, vs 195 in DN-DETR paper Table 2/Table 4; the paper does not explain the difference (DINO's row is daggered: 900 queries or 300 x 3 patterns)",
+  "value": "265 (DINO) vs 195 (DN-DETR paper)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1, row DN-Deformable-DETR(4scale)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-4v5-gap",
+  "claim": "5-scale minus 4-scale AP at 12 epochs",
+  "value": "0.4 (49.4 vs 49.0)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 1 (derived)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t2-24",
+  "claim": "R50 24 ep: DINO-4scale and DINO-5scale",
+  "value": "50.4 (+1.8), 51.3 (+2.7)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 2; Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t2-36",
+  "claim": "R50 36 ep: DINO-4scale and DINO-5scale",
+  "value": "50.9 (+2.3), 51.2 (+2.6)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t2-baseline",
+  "claim": "Table 2 deltas are vs DN-Deformable-DETR trained 50 epochs",
+  "value": "48.6 (50 epochs)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 2, row DN-Deformable-DETR",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t3-val",
+  "claim": "DINO-SwinL (218M, IN-22K-14M backbone pretrain, Objects365 detection pretrain) COCO val2017 w/o and w/ TTA. EXTRA DATA",
+  "value": "63.1 w/o TTA, 63.2 w/ TTA",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 3, row DINO-SwinL; App. D.3 Training augmentation",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t3-testdev",
+  "claim": "DINO-SwinL (Objects365 pretrain) COCO test-dev w/o and w/ TTA. EXTRA DATA",
+  "value": "63.2 w/o TTA, 63.3 w/ TTA",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 3, row DINO-SwinL; Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t3-params",
+  "claim": "DINO-SwinL parameter count",
+  "value": "218M",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t3-others",
+  "claim": "test-dev w/ TTA: SwinV2-G (3.0B) 63.1, Florence-CoSwin-H 62.4, GLIP 61.5, Soft Teacher+SwinL 61.3, DyHead 60.6, SwinL 58.7",
+  "value": "63.1, 62.4, 61.5, 61.3, 60.6, 58.7",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "dino-tta-gain",
+  "claim": "TTA gain for DINO-SwinL on val and test-dev",
+  "value": "0.1 AP",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 3 (derived: 63.2-63.1, 63.3-63.2)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-ratios",
+  "claim": "Model size 1/15 of SwinV2-G; backbone pretrain data 1/60 and detection pretrain data 1/5 of Florence",
+  "value": "1/15, 1/60, 1/5",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Sec. 1; Sec. 4.3",
+  "uncertain": false
+ },
+ {
+  "id": "dino-o365-size",
+  "claim": "Objects365 size",
+  "value": "1.7M annotated train images; 80,000 val images",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Sec. 2.3; App. D.2",
+  "uncertain": false
+ },
+ {
+  "id": "dino-swinl-recipe",
+  "claim": "O365 pretrain 26 ep on 64 A100; COCO fine-tune 18 ep on 16 A100; 1 image per GPU; 1.5x image size (max 1200x2000) adds about 0.5 AP; first 5,000 of 80,000 O365 val kept for val",
+  "value": "26 ep / 64 GPU; 18 ep / 16 GPU; +0.5 AP; 5,000",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.2",
+  "uncertain": false
+ },
+ {
+  "id": "dino-readme-swinl-noextra",
+  "claim": "[repo] README: SwinL 5-scale without O365, large image size, or multi-scale test gets 58.5 AP on COCO val (not in paper)",
+  "value": "58.5",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "[repo] IDEA-Research/DINO README, news entry 2022/8/6",
+  "uncertain": true
+ },
+ {
+  "id": "dino-abl-setting",
+  "claim": "Table 4 ablation setting (epochs/scales) not stated; full model 47.9 matches Table 5 (12 epochs) and Table 7 (100 CDN), so inferred 12 epochs, likely 4-scale",
+  "value": "inferred 12 epochs",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 caption; cross-ref Table 5, Table 7",
+  "uncertain": true
+ },
+ {
+  "id": "dino-abl-1",
+  "claim": "Ablation row 1 DN-DETR",
+  "value": "43.4",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 1",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-2",
+  "claim": "Ablation row 2 optimized DN-DETR",
+  "value": "44.9",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 2",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-3",
+  "claim": "Ablation row 3 strong baseline (+ pure query selection)",
+  "value": "46.5",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 3",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-4",
+  "claim": "Ablation row 4 (+ mixed query selection)",
+  "value": "47.0",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 4",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-5",
+  "claim": "Ablation row 5 (+ look forward twice)",
+  "value": "47.4",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 5",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-6",
+  "claim": "Ablation row 6 DINO (+ contrastive DN)",
+  "value": "47.9",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 row 6",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-deltas",
+  "claim": "Per-step deltas rows 1->6",
+  "value": "+1.5, +1.6, +0.5, +0.4, +0.5",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 (derived)",
+  "uncertain": false
+ },
+ {
+  "id": "dino-abl-aps",
+  "claim": "AP_S rows 4, 5, 6",
+  "value": "31.1, 29.9, 31.2",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 4 AP_S column",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t7",
+  "claim": "AP by denoising queries: 100 CDN, 1000 DN, 200 DN, 100 DN, 50 DN, 10 DN, no DN",
+  "value": "47.9, 47.6, 47.4, 47.4, 46.7, 46.0, 45.1",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 7",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t6",
+  "claim": "AP by enc/dec layers 6/6, 4/6, 3/6, 2/6, 6/4, 6/2, 2/4, 2/2 (12 ep, 100 DN no negatives)",
+  "value": "47.4, 46.2, 45.8, 45.4, 46.0, 44.4, 44.1, 41.2",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t6-drop",
+  "claim": "Decoder 6->2 drop for DINO vs Dynamic DETR",
+  "value": "3.0 AP vs 13.8 AP (42.9 vs 29.1)",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. C",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t5",
+  "claim": "Training cost R50, 8 A100: DINO batch 2/GPU ~55 min/ep 16GB 12 ep 47.9; Deformable DETR (vanilla, no two-stage or box refinement) batch 2 ~55 min/ep 16GB 50 ep 45.4; DETR batch 8 ~16 min/ep 26GB 300 ep 41.2; Faster RCNN batch 8 ~60 min/ep 13GB 108 ep 42.0",
+  "value": "47.9 / 45.4 / 41.2 / 42.0",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "dino-t8",
+  "claim": "Loss/matching: focal alpha 0.25 gamma 2; loss coefs cls 1.0 L1 5.0 GIoU 2.0; matching cost cls 2.0 bbox 5.0 GIoU 2.0; 8 heads; FFN 2048; dropout 0.0; 4 enc/dec points",
+  "value": "see claim",
+  "paper": "DINO",
+  "version": "v4",
+  "loc": "App. D.3 Loss function; Table 8",
+  "uncertain": false
+ }
+]

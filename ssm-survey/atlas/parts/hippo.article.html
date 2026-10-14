@@ -1,0 +1,23 @@
+  <article data-chapter="hippo">
+    <header class="ch-head"><span class="num">4 of 10</span><h2>HiPPO: memory as compression</h2><p class="subhead">Keep the best polynomial fit of everything seen so far</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">The coefficients</button><button type="button" role="tab" data-step="1">Rebuild the past</button></div>
+    </div>
+    <div class="controls">
+      <label class="slider">State size N <input type="range" id="hippo-atlas-N" min="4" max="64" step="1" value="16"></label>
+      <button type="button" class="tool" data-sig="paper" aria-pressed="true">Test function</button><button type="button" class="tool" data-sig="steps" aria-pressed="false">Steps</button><button type="button" class="tool" data-sig="chirp" aria-pressed="false">Chirp</button><button type="button" class="tool" data-sig="noise" aria-pressed="false">Noise</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>What should a fixed-size <button class="inline-term" data-open="state">state</button> hold? HiPPO's answer is <button class="inline-term" data-open="online-approximation">online function approximation</button>: at every moment, fit the whole input history with a polynomial of degree below N, written in <button class="inline-term" data-open="legendre">Legendre polynomials</button>, and keep its N coefficients.</p>
+      <p>The surface shows those coefficients over time: one row per degree n, height = value. The yellow line is the state now. As the history grows, the fit changes smoothly, and the change turns out to be a fixed linear equation with a specific matrix A. Raise N: the old rows do not move, new ones appear behind them, because A is lower triangular.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>The state is only useful if the past can be read back. Sum the Legendre polynomials weighted by the N coefficients and you get the yellow line, drawn over the true history in blue; red is the error.</p>
+      <p>With N = 4 only the slow trend survives. With N = 16 the two slow waves come back. With N = 64 even the fast wiggle does. A KV cache would keep all 1,000 samples; this state keeps N numbers.</p>
+    </div>
+    <p class="note">Computed: HiPPO-LegS's matrices A and B (Theorem 2), the bilinear update the paper uses, and its reconstruction formula, on 1,000 samples. The test function is the paper's; the other signals are ours. HiPPO writes the input as f and the state as c; here they are x and h.</p>
+    <table class="data"><thead><tr><th>State size N</th><th>Error of the rebuilt history (RMSE, test function)</th></tr></thead>
+      <tbody><tr><td>4</td><td>0.750</td></tr><tr><td>16</td><td>0.234</td></tr><tr><td>64</td><td>0.0133</td></tr></tbody></table>
+    <p class="inscription">The state is a compressed copy of the whole past, kept optimal as the past grows. Bigger N, sharper memory; never a growing cache.</p>
+    <button type="button" class="continue" data-go="s4">Continue with S4</button>
+  </article>

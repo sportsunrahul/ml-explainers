@@ -1,0 +1,205 @@
+<section id="ch-qformer" class="chapter">
+<h2>A small bridge between two frozen giants</h2>
+<p>Flamingo kept its language model frozen, but it still had to thread new cross-attention layers through it, and those layers alone run to billions of trainable parameters. BLIP-2 leaves both giants untouched: a small transformer with a few dozen learned "query" vectors reads the frozen image encoder, and its outputs are handed to a frozen language model as if they were the first words of the prompt.</p>
+
+<figure class="viz" id="viz-qformer" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="qformer-canvas" tabindex="0" role="img" aria-label="Left: the Q-Former's self-attention mask over eight query tokens and five text tokens, switchable between the ITC, ITM and ITG objectives, or the stage 2 pipeline into a frozen language model. Right: trainable and total parameter counts for BLIP-2 and Flamingo80B on a log scale."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-qformer-itm" aria-pressed="true">ITM mask</button>
+    <button type="button" id="btn-qformer-itc" aria-pressed="false">ITC mask</button>
+    <button type="button" id="btn-qformer-itg" aria-pressed="false">ITG mask</button>
+    <button type="button" id="btn-qformer-dec" aria-pressed="false">Stage 2: decoder-only LLM</button>
+    <button type="button" id="btn-qformer-encdec" aria-pressed="false">Stage 2: encoder-decoder LLM</button>
+    <button type="button" id="btn-qformer-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="qformer-readout" aria-live="polite"></p>
+  <figcaption>The masks follow BLIP-2's Sec. 3.2 and the mask panel of its Fig. 2, drawn with 8 of the real <span data-claim="page-qformer-queries">32</span> queries and a five-token caption; the stage 2 pipeline follows Sec. 3.3. The bars are the paper's own counts: <span data-claim="page-qformer-xxl-trainable">108M</span> trainable of <span data-claim="page-qformer-xxl-total">12.1B</span> total for its largest model (Table 2, ViT-g with FlanT5-XXL), <span data-claim="blip2-qformer-params">188M</span> for the whole Q-Former (Sec. 3.1), and <span data-claim="page-qformer-flamingo-trainable">10.2B</span> trainable of <span data-claim="page-qformer-flamingo-total">80B</span> for Flamingo80B as BLIP-2's Table 2 lists it.</figcaption>
+</figure>
+
+<h3>The wall: the bridge is where the cost goes</h3>
+<p>By now there are excellent parts on the shelf: image encoders trained the CLIP way, and large language models that already write, reason and answer. Neither has ever met the other. Flamingo, in the previous chapter, showed one way to connect them without breaking the language model: freeze it, and grow gated cross-attention layers inside it, fed by a Perceiver Resampler that squeezes the image into <span data-claim="flamingo-latents">64</span> tokens. It works, but the new layers sit inside the LM, and every one of them is trained.</p>
+<p>BLIP-2 asks for less. Keep the image encoder frozen <em>and</em> the language model frozen, and train only a small module in between, the Querying Transformer or Q-Former, whose job is to pull out of the image exactly what the language model will need. The hard part is that the frozen LLM has never seen an image, so whatever the bridge produces must already look like something a language model can use. BLIP-2 gets there in two stages: first teach the bridge to extract visual features that are about text (stage 1, with the frozen image encoder only), then teach it to speak to the LLM (stage 2).</p>
+
+<h3>Thirty-two questions for the image</h3>
+<p>The Q-Former is a BERT-sized transformer, initialized from <span data-claim="page-qformer-init">BERT-base</span> with freshly initialized cross-attention layers, <span data-claim="blip2-qformer-params">188M</span> parameters in all. Its input is not the image and not a caption but a small set of learned vectors, the <b class="c-green">queries</b>: <span data-claim="page-qformer-queries">32</span> of them, each <span data-claim="page-qformer-dim">768</span> numbers wide. They are parameters, trained like weights, and the same for every image. In each block they talk to each other through self-attention, and in <span data-claim="blip2-xattn-freq">every other transformer block</span> they look at the frozen image features through cross-attention: each query asks the image a question it has learned to ask.</p>
+<p>That makes the Q-Former a bottleneck by design. A frozen ViT-L/14 hands over <span data-claim="page-qformer-feat-tokens">257</span> feature vectors of width <span data-claim="page-qformer-feat-dim">1024</span>; the Q-Former hands on <span data-claim="page-qformer-queries">32</span> of width <span data-claim="page-qformer-dim">768</span>, and that number does not change with the image's resolution. Whatever the language model will learn about the picture must fit through those vectors, which is the point: the training objectives force them to carry what is most relevant to text. (The frozen encoders are CLIP's ViT-L/14 and the larger <span data-claim="page-qformer-evaclip">ViT-g/14 from EVA-CLIP</span>, with the last layer removed; the Q-Former reads the <span data-claim="page-qformer-penultimate">second last layer</span>.)</p>
+
+<h3>One transformer, three masks</h3>
+<p>Stage 1 borrows BLIP's three objectives from two chapters back, with a twist. The Q-Former has an image half (the queries, which see the image) and a text half (which reads a caption), and the two halves <em>share the same self-attention layers</em>. Queries and words sit in one sequence, so whether they can see each other is decided entirely by the self-attention mask. The figure starts on the simplest one.</p>
+<p><b>ITM, image-text matching</b>, uses a <b>bi-directional</b> mask: every query and every word may look at every other. The queries' outputs now mix the image with the caption, and each one goes through a two-class linear classifier; the average of the logits over all queries is the match score. Hard negatives are mined the BLIP way.</p>
+<p><b>ITC, image-text contrastive</b>, is the chapter 1 game again, so the two sides must be encoded <em>apart</em>. Press <b>ITC mask</b>: the <b>uni-modal</b> mask blanks both off-diagonal blocks, queries see only queries and words see only words. If they could see each other, the image side could simply copy the caption, and matching would be trivial; the paper calls this avoiding information leak. The image-text similarity is then the highest of the <span data-claim="page-qformer-queries">32</span> query-output similarities with the caption's <code>[CLS]</code> vector. Because the image encoder is frozen, more pairs fit on each GPU, so BLIP-2 uses plain in-batch negatives instead of BLIP's momentum queue.</p>
+<p><b>ITG, image-grounded text generation</b>, trains the Q-Former to write the caption. Predict before you press <b>ITG mask</b>: the words must now predict the next word, so which cells have to go dark? In particular, may the queries look at the text?</p>
+<p>They may not. Each word may look at all the queries and at the words before it, a triangle in the text block, like any decoder. But the queries must stay blind to the text: a query that had read the whole caption would pass the fourth word to the first. And since the text half has no cross-attention of its own, the only way image information reaches the words is <em>through the queries</em>, which forces them to capture everything the caption needs. The first text token becomes <code>[DEC]</code> to signal the task. The paper calls this a <b>multimodal causal</b> mask, after UniLM.</p>
+<p>All three objectives run on the same weights; only the mask changes. In equation form, the mask is added to the attention scores before the softmax:</p>
+<div class="eq" id="eq-qformer" data-build data-viz="viz-qformer"><div class="tex tex-display">
+\htmlData{step=1, link=open}{s_{ij} = \frac{q_i^{\top} k_j}{\sqrt{d}}} \qquad \htmlData{step=2, link=mask}{\htmlClass{t-brown}{M_{ij}} = \begin{cases} 0 & \text{if token } i \text{ may look at token } j \\ -\infty & \text{otherwise} \end{cases}} \qquad \htmlData{step=3, link=queries}{h_i = \sum_{j} \operatorname{softmax}_j\big(s_{ij} + \htmlClass{t-brown}{M_{ij}}\big)\, v_j}
+</div></div>
+<p class="eqno">Standard masked self-attention. BLIP-2 v3 describes its three masks in prose (Sec. 3.2) and draws them in Fig. 2; it has no numbered equation for them.</p>
+<ul class="gloss">
+  <li><span class="tex">i</span>, <span class="tex">j</span>: positions in the sequence [queries | text], the rows and columns of the grid.</li>
+  <li><span class="tex">q_i, k_j, v_j</span>: the usual attention query, key and value vectors at those positions (not to be confused with the Q-Former's learned <b class="c-green">queries</b>, which are the tokens in the first block).</li>
+  <li><span class="tex">\htmlClass{t-brown}{M_{ij}}</span>: the mask, a lit cell (0) or a dark one (minus infinity). Adding minus infinity gives that pair zero weight after the softmax, so token <span class="tex">i</span> simply cannot see token <span class="tex">j</span>.</li>
+  <li><span class="tex">h_i</span>: the new representation of token <span class="tex">i</span>, built only from what it was allowed to see.</li>
+</ul>
+
+<h3>Stage 2: hand the queries to a frozen LLM</h3>
+<p>After stage 1 the queries carry text-relevant visual information, but in the Q-Former's own vector space. Stage 2 plugs the Q-Former (with its frozen image encoder still attached) into a frozen language model through one fully connected layer, which linearly projects the query outputs to the LLM's embedding size. The projected vectors are placed <em>in front of</em> the text embeddings, where they act as <span data-claim="page-qformer-soft-prompt">soft visual prompts</span>: a prefix of "words" that no tokenizer could produce, which the LLM reads like any other input. Press <b>Stage 2: decoder-only LLM</b>.</p>
+<div class="eq" id="eq-qformer-prompt" data-build data-viz="viz-qformer"><div class="tex tex-display">
+\htmlData{step=1, link=queries}{\htmlClass{t-green}{Z} \in \mathbb{R}^{32 \times 768}} \qquad \htmlData{step=2, link=prompt}{\htmlClass{t-green}{P} = \htmlClass{t-green}{Z W_{\text{FC}} + b}} \qquad \htmlData{step=3, link=text}{\text{LLM input} = \big[\, \htmlClass{t-green}{P} \,;\, \htmlClass{t-yellow}{e(w_1), \dots, e(w_n)} \,\big]}
+</div></div>
+<p class="eqno">Written from the prose of BLIP-2 v3 Sec. 3.3 (no numbered equation).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{Z}</span>: the Q-Former's output, one row per query.</li>
+  <li><span class="tex">\htmlClass{t-green}{W_{\text{FC}}}, b</span>: the fully connected layer, the only new weights in stage 2; its output width is the frozen LLM's embedding size.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{e(w_k)}</span>: the frozen LLM's own embedding of text token <span class="tex">w_k</span>. The semicolon means "placed in sequence": the visual prompt first, then the text.</li>
+</ul>
+<p>What is learned from depends on the LLM. With a decoder-only model (OPT), the loss is ordinary language modeling: the frozen LLM must generate the text given the visual prompt. With an encoder-decoder model (FlanT5), the text is cut in two; the prompt plus the first part (the prefix) go into the encoder, and the decoder must generate the rest (the suffix). Press <b>Stage 2: encoder-decoder LLM</b> and watch the red loss line move to the suffix. In both cases the image encoder and the LLM stay frozen, so gradients flow back through the LLM only to reach the FC layer and the Q-Former. The paper argues that because the Q-Former already filters the image down to language-relevant information, the LLM has less to adapt to, <span data-claim="page-qformer-forgetting">mitigating the catastrophic forgetting problem</span> that plagues fine-tuning a language model on images.</p>
+
+<h3>Inside BLIP-2: forward, then backward</h3>
+<p>The two stages train different graphs, so here they are as two steppers, one slide per stage of the pipeline. The line under each drawing gives tensor shapes computed from the paper's <span data-claim="blip2-arch-res">224</span>-pixel images, patch size <span data-computed>14</span> and <span data-claim="page-qformer-queries">32</span> queries of width <span data-claim="page-qformer-dim">768</span>; widths the paper does not print stay symbolic.</p>
+
+<figure class="viz archflow" id="viz-blip2flow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Stage 1 pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-blip2flow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-blip2flow-vit" aria-pressed="false">2 Frozen ViT</button>
+    <button type="button" id="btn-blip2flow-inputs" aria-pressed="false">3 Queries + text</button>
+    <button type="button" id="btn-blip2flow-qformer" aria-pressed="false">4 Q-Former</button>
+    <button type="button" id="btn-blip2flow-heads" aria-pressed="false">5 Heads</button>
+    <button type="button" id="btn-blip2flow-loss" aria-pressed="false">6 Losses</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-blip2flow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-blip2flow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Frozen image encoder">
+    <span>image encoder</span>
+    <button type="button" id="btn-blip2flow-l" aria-pressed="false">ViT-L/14</button>
+    <button type="button" id="btn-blip2flow-g" aria-pressed="true">ViT-g/14</button>
+  </div>
+  <canvas id="blip2flow-canvas" role="img" aria-label="BLIP-2 stage 1 as a diagram: photos go through a frozen (brown) image encoder into the green Q-Former, which also takes the learned queries and the caption tokens; three heads (ITC similarity, ITM classifier, ITG next word) feed three red losses summed into one. In the backward stages red arrows reach the heads, the Q-Former, the queries and the word embeddings, and stop at the frozen encoder."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-blip2flow-prev">Previous</button>
+    <button type="button" id="btn-blip2flow-next">Next</button>
+    <button type="button" id="btn-blip2flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="blip2flow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>Stage 1: teach the queries to read the image</h4>
+      <p>No language model yet. A frozen image encoder (<b class="c-brown">brown</b>), the Q-Former with its learned queries (<b class="c-green">green</b>), a caption lane (<b class="c-yellow">yellow</b>) and three objectives, BLIP's three jobs, run as three passes through one set of weights with a different attention mask per pass. Press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of pairs</h4>
+      <p><span class="tex">N</span> image-caption pairs from the <span data-claim="page-qformer-data">129M images</span>, the web images each with one of the two captions kept by CapFilt, sampled anew each step (CapFilt is applied to the web images; our reading is that COCO and Visual Genome keep their human captions). Images are <span data-claim="blip2-arch-res">224</span> &times; 224 after <span data-claim="blip2-arch-aug">random resized cropping and horizontal flipping</span>. The batch is <span data-claim="blip2-arch-batch1-l">2320</span> with ViT-L and <span data-claim="blip2-arch-batch1-g">1680</span> with ViT-g.</p>
+    </div>
+    <div data-stage="vit" hidden>
+      <h4>2. The frozen image encoder</h4>
+      <p>Either CLIP's ViT-L/14 or the <span data-claim="page-qformer-evaclip">ViT-g/14 from EVA-CLIP</span>, with its last layer removed so that the Q-Former reads the <span data-claim="page-qformer-penultimate">second last layer</span>. A <span data-claim="blip2-arch-res">224</span>-pixel image at patch size 14 gives <span data-computed>16 &times; 16 = 256</span> patches plus <code>[CLS]</code>, <span data-computed>257</span> rows, which matches the paper's <span data-claim="page-qformer-feat-tokens">257</span> &times; <span data-claim="page-qformer-feat-dim">1024</span> for ViT-L/14. BLIP-2 does not print ViT-g's width, so we write it <span class="tex">d_g</span>. The encoder is held in <span data-claim="blip2-arch-fp16">FP16</span>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>3. The learned queries, and the caption</h4>
+      <p>The image half of the Q-Former does not start from the image: it starts from <span data-claim="page-qformer-queries">32</span> vectors of <span data-claim="page-qformer-dim">768</span> numbers, the same for every image, and <span data-claim="blip2-arch-queries-params">the queries are considered as model parameters</span>. The text half starts from the caption as BERT tokens and BERT's word embeddings, headed by <code>[CLS]</code>, or by <span data-claim="blip2-arch-dec-token">[DEC]</span> for generation.</p>
+    </div>
+    <div data-stage="qformer" hidden>
+      <h4>4. One Q-Former, three masks</h4>
+      <p>The Q-Former is <span data-claim="blip2-arch-two-halves">two transformer submodules that share the same self-attention layers</span>, initialized from <span data-claim="page-qformer-init">BERT-base</span>, while <span data-claim="blip2-arch-xattn-random">the cross-attention layers are randomly initialized</span>. Queries and words sit in one sequence; only the queries have cross-attention, in <span data-claim="blip2-xattn-freq">every other transformer block</span>, with the image rows as keys and values. What queries and words may see of each other is set by the mask of each objective (the <a href="#viz-qformer">mask figure</a> above), so each objective is its own pass through the same weights.</p>
+    </div>
+    <div data-stage="heads" hidden>
+      <h4>5. Three heads</h4>
+      <p><b>ITC</b> (uni-modal mask): each of the <span data-claim="page-qformer-queries">32</span> rows of <span class="tex">Z</span> is compared with the text <code>[CLS]</code>, and the model will <span data-claim="blip2-arch-itc-max">select the highest one as the image-text similarity</span>. <b>ITM</b> (bi-directional mask): each query row goes through a two-class linear classifier, and the model will <span data-claim="blip2-arch-itm-avg">average the logits across all queries as the output matching score</span>; pairs come from the BLIP-style <span data-claim="blip2-arch-itm-hardneg">hard negative mining strategy</span>. <b>ITG</b> (multimodal causal mask): each word predicts the next one. The paper does not print the output layer; our reading is that it is BERT's usual word-prediction head.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>6. Three losses, one number</h4>
+      <p>ITC grades the <span class="tex">N \times N</span> table with <span data-claim="blip2-arch-itc-inbatch">in-batch negatives instead of the momentum queue in BLIP</span>. ITM grades one match / no-match answer per pair. ITG grades every caption position's next word, and because words can reach the image only through the queries, <span data-claim="blip2-arch-itg-through-queries">the information required for generating the text must be first extracted by the queries</span>. The paper says it will <span data-claim="blip2-arch-joint">jointly optimize three pre-training objectives that share the same input format and model parameters</span>, with no printed weights; we draw a plain sum.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>7. The gradient stops at the image encoder</h4>
+      <p>Every loss flows back into the Q-Former and, through it, into the <span data-claim="page-qformer-queries">32</span> query vectors themselves: the gradient of the loss with respect to the queries is what teaches them which questions to ask. Look at where it ends. The image encoder is <b class="c-brown">brown</b> and nothing to its left trains, so the backward pass has no reason to go through it: "gradient stops here". The paper names the payoff: "<span data-claim="blip2-arch-fit-more">Due to the use of a frozen image encoder, we can fit more samples per GPU</span>", which is part of why <span data-claim="page-qformer-machine">a single 16-A100(40G) machine</span> does the job.</p>
+      <p>One route is special (derived from the masks, not stated in the paper): the ITG loss reaches the cross-attention layers only through the queries, because words attend to queries but have no cross-attention of their own.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>8. One optimizer step</h4>
+      <p><span data-claim="blip2-arch-optim">AdamW</span> with &beta;<sub>1</sub> = <span data-claim="blip2-arch-beta1">0.9</span>, &beta;<sub>2</sub> = <span data-claim="blip2-arch-beta2">0.98</span> (the paper prints both as &beta;<sub>1</sub>, a typo) and weight decay <span data-claim="blip2-arch-wd">0.05</span>; a <span data-claim="blip2-arch-cosine">cosine learning rate decay</span> with peak <span data-claim="blip2-arch-lr">1e-4</span> after a linear warm-up of <span data-claim="blip2-arch-warmup">2k steps</span>. Stage 1 runs <span data-claim="page-qformer-steps1">250k</span> steps; for the largest model that took <span data-claim="page-qformer-days1">less than 6 days</span>. <span data-claim="blip2-arch-same-hparams">The same set of pre-training hyper-parameters are used for all models</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: token counts from the <span data-claim="blip2-arch-res">224</span>-pixel images and patch size 14; the Q-Former's width is the paper's <span data-claim="page-qformer-dim">768</span>; <span class="tex">N'</span> (pairs for ITM), <span class="tex">L</span> (caption length) and <span class="tex">d_g</span> stay symbolic. Before stage 7, guess: the image encoder is frozen; will the backward pass go through it?</figcaption>
+</figure>
+
+<p>Stage 2 swaps the three heads for a frozen language model. Now the gradient has to get <em>through</em> something frozen to reach anything it can change, and that is the difference to watch.</p>
+
+<figure class="viz archflow" id="viz-blip2flow-s2" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Stage 2 pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-blip2flow-s2-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-blip2flow-s2-extract" aria-pressed="false">2 ViT + Q-Former</button>
+    <button type="button" id="btn-blip2flow-s2-project" aria-pressed="false">3 FC</button>
+    <button type="button" id="btn-blip2flow-s2-splice" aria-pressed="false">4 Splice text</button>
+    <button type="button" id="btn-blip2flow-s2-llm" aria-pressed="false">5 Frozen LLM</button>
+    <button type="button" id="btn-blip2flow-s2-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-blip2flow-s2-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-blip2flow-s2-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Frozen language model">
+    <span>LLM</span>
+    <button type="button" id="btn-blip2flow-s2-opt" aria-pressed="true">OPT</button>
+    <button type="button" id="btn-blip2flow-s2-t5" aria-pressed="false">FlanT5</button>
+  </div>
+  <canvas id="blip2flow-s2-canvas" role="img" aria-label="BLIP-2 stage 2 as a diagram: photos through the frozen (brown) image encoder into the green Q-Former with its learned queries, then an FC layer into a frozen (brown) LLM, which also reads the caption through its frozen token embeddings; the LLM feeds the red LM loss. In the backward stages red arrows pass through the frozen LLM to the FC layer, the Q-Former and the queries, and stop at the image encoder and the token embeddings."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-blip2flow-s2-prev">Previous</button>
+    <button type="button" id="btn-blip2flow-s2-next">Next</button>
+    <button type="button" id="btn-blip2flow-s2-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="blip2flow-s2-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>Stage 2: teach the queries to speak to the LLM</h4>
+      <p>Two frozen giants (<b class="c-brown">brown</b>) and a short green bridge between them: the stage-1 Q-Former plus one new FC layer. The only loss is the language model's own. Press <b>1 Batch</b>, then <b>Next</b>; the buttons on the second row switch between the two LLM families.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. The same pairs</h4>
+      <p>The same images and captions as stage 1, now in batches of <span data-claim="blip2-arch-batch2-opt">1920</span> for OPT and <span data-claim="blip2-arch-batch2-t5">1520</span> for FlanT5.</p>
+    </div>
+    <div data-stage="extract" hidden>
+      <h4>2. Image to 32 query vectors</h4>
+      <p>The Q-Former comes <span data-claim="blip2-arch-attached">with the frozen image encoder attached</span>. Only its image half runs: the <span data-claim="page-qformer-queries">32</span> queries cross-attend to the frozen features and come out as <span class="tex">Z</span>. The caption does not enter the Q-Former in this stage (it goes to the LLM instead), so, our reading, the text half's own weights sit idle and get no gradient.</p>
+    </div>
+    <div data-stage="project" hidden>
+      <h4>3. One linear map to the LLM's width</h4>
+      <p>A <span data-claim="blip2-arch-fc">fully-connected (FC) layer</span> <span data-claim="blip2-arch-fc-dims">adapts from the output dimension of the Q-Former to the input dimension of the chosen LLM</span>: <span data-claim="page-qformer-dim">768</span> in, <span class="tex">d_{\text{LLM}}</span> out. The paper does not list the LLMs' widths, so the readout keeps <span class="tex">d_{\text{LLM}}</span>. This is the only new weight matrix of stage 2.</p>
+    </div>
+    <div data-stage="splice" hidden>
+      <h4>4. Put the prompt in front of the words</h4>
+      <p>The projected queries are <span data-claim="blip2-arch-prepend">prepended to the input text embeddings</span>, the LLM's own frozen embeddings of the caption. With <span data-claim="blip2-arch-flant5">FlanT5</span> the caption is first cut in two, a prefix that joins the prompt and a suffix that becomes the target. Press <b>FlanT5</b> to see the labels change.</p>
+    </div>
+    <div data-stage="llm" hidden>
+      <h4>5. The frozen language model reads it</h4>
+      <p><span data-claim="blip2-arch-opt">OPT</span> is decoder-only: one causal stack over [prompt; caption]. FlanT5 is an encoder-decoder: the encoder reads [prompt; prefix] and the decoder writes the suffix. Either way its weights are held fixed, in <span data-claim="blip2-arch-fp16">FP16</span> for OPT and <span data-claim="blip2-arch-bf16">BFloat16</span> for FlanT5.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>6. What the loss grades</h4>
+      <p>With OPT, the <span data-claim="blip2-arch-lm-loss">language modeling loss</span>: the LLM must generate the caption conditioned on the visual prompt, so every caption token is graded (our reading: the <span data-claim="page-qformer-queries">32</span> prompt positions have no target, since there is no token to predict there). With FlanT5, the <span data-claim="blip2-arch-prefix-lm">prefix language modeling loss</span>: <span data-claim="blip2-arch-suffix">The suffix text is used as the generation target for the LLM's decoder</span>, so only the suffix is graded.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>7. Through the frozen LLM, not into it</h4>
+      <p>Two kinds of brown now. The <b class="c-brown">LLM</b> is frozen, but the loss sits at its output and the trainable FC layer sits at its input, so backpropagation has to run through every one of its layers, computing gradients with respect to its activations while updating none of its weights: "gradient passes, no update". Our reading: skipping the weight gradients makes this roughly half the cost of a full backward pass through the LLM, but it is far from free. The <b class="c-brown">image encoder</b> and the LLM's <b class="c-brown">token table</b> have nothing trainable behind them, so the gradient stops there. What does get updated is small: the FC layer, the Q-Former and the queries.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>8. One optimizer step</h4>
+      <p>The same AdamW settings as stage 1, peak learning rate <span data-claim="blip2-arch-lr">1e-4</span>, with a minimum learning rate of <span data-claim="blip2-arch-minlr2">5e-5</span> in this stage. Stage 2 runs <span data-claim="page-qformer-steps2">80k</span> steps, <span data-claim="page-qformer-days2">less than 3 days</span> for the largest model (ViT-g with FlanT5-XXL) on the same machine. For that model the paper counts <span data-claim="page-qformer-xxl-trainable">108M</span> trainable parameters out of <span data-claim="page-qformer-xxl-total">12.1B</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: shapes from the <span data-claim="page-qformer-queries">32</span> &times; <span data-claim="page-qformer-dim">768</span> query output; <span class="tex">d_v</span> (the frozen ViT's width), <span class="tex">d_{\text{LLM}}</span>, and the caption lengths stay symbolic because the paper does not print them. Before stage 7, guess: the LLM is frozen too; does the gradient stop at it, as it did at the image encoder?</figcaption>
+</figure>
+
+<h3>What it costs, and what it buys</h3>
+<p>BLIP-2 pre-trains on the same <span data-claim="page-qformer-data">129M images</span> as BLIP, cleaned by BLIP's own CapFilt trick, turned up: BLIP's large captioner writes <span data-claim="page-qformer-capfilt-n">10 captions</span> for each web image, a CLIP ViT-L/14 ranks them together with the original web caption, and the <span data-claim="page-qformer-capfilt-keep">top-two captions per image</span> are kept. Stage 1 runs <span data-claim="page-qformer-steps1">250k</span> steps and stage 2 <span data-claim="page-qformer-steps2">80k</span>. Because both giants are frozen, the largest model trains on <span data-claim="page-qformer-machine">a single 16-A100(40G) machine</span> in <span data-claim="page-qformer-days1">less than 6 days</span> for stage 1 and <span data-claim="page-qformer-days2">less than 3 days</span> for stage 2.</p>
+<p>The headline comparison is with Flamingo80B. On zero-shot VQAv2 (test-dev), BLIP-2's largest model scores <span data-claim="page-qformer-vqa-blip2">65.0</span> against Flamingo80B's <span data-claim="page-qformer-vqa-flamingo">56.3</span>, a gain of <span data-claim="page-qformer-gain">8.7</span> points. The paper writes this as "<span data-claim="page-qformer-gain">8.7</span>%", but it is an absolute difference in accuracy points, not a relative one.</p>
+<p>The paper also says it does this with <span data-claim="page-qformer-54x">54x</span> fewer trainable parameters. That ratio divides Flamingo80B's <span data-claim="page-qformer-flamingo-trainable">10.2B</span> trainable parameters by the Q-Former's <span data-claim="blip2-qformer-params">188M</span>. Yet the paper's own Table 2 lists <span data-claim="blip2-blip2-trainable-range">103M to 108M</span> trainable parameters for its BLIP-2 models, and dividing by <span data-claim="page-qformer-xxl-trainable">108M</span> instead would give <span data-computed>about 94x</span>. The paper does not reconcile the two counts; one plausible reading (ours, not the paper's) is that <span data-claim="blip2-qformer-params">188M</span> counts the whole Q-Former including its text half, which stage 2 does not use. Either way the right panel makes the point that matters: by either count BLIP-2 trains far fewer parameters than Flamingo80B, and both train a small fraction of what they run.</p>
+<p>Frozen giants have limits too. On OK-VQA, whose questions need outside knowledge, Flamingo80B still leads, <span data-claim="page-qformer-okvqa-flamingo">50.6</span> to <span data-claim="page-qformer-okvqa-blip2">45.9</span>; the paper's explanation is that Flamingo's much larger frozen language model simply knows more. The bridge can only deliver the picture; the facts have to be in the LLM already.</p>
+<p>BLIP-2 still needs a <span data-claim="blip2-qformer-params">188M</span>-parameter bridge, three pre-training objectives and two stages, and it was pre-trained only on images with captions, never on conversations. The next chapter goes the other way on both counts: the simplest possible bridge, a single linear layer, and all the effort spent on the data, conversations written for the purpose.</p>
+</section>

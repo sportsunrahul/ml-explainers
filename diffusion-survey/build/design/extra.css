@@ -1,0 +1,10 @@
+.hero-cap { font:.82rem/1.5 system-ui, sans-serif; color:var(--muted); margin:-.6rem 0 1.3rem; max-width:var(--measure, 40rem); }
+/* The family tree is a real sequence in time: a dated line with one node per paper. */
+ul.timeline { list-style:none; margin:1.4rem 0 1.8rem; padding:0; }
+ul.timeline li { position:relative; padding:0 0 1.15rem 1.7rem; }
+ul.timeline li::before { content:""; position:absolute; left:.2rem; top:.45rem; width:.6rem; height:.6rem; border-radius:50%; background:var(--bg); border:1.5px solid var(--muted); z-index:1; }
+ul.timeline li::after { content:""; position:absolute; left:calc(.5rem - 1px); top:1.1rem; bottom:-.3rem; width:2px; background:var(--rule); }
+ul.timeline li:last-child::after { display:none; }
+ul.timeline .when { display:block; font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); font-variant-numeric:tabular-nums; }
+ul.timeline .inh { display:block; font:.92rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.2rem; }
+ul.deeper li { margin:.45rem 0; }

@@ -1,0 +1,88 @@
+<p class="kicker"><span class="act-n">Close</span>Putting it to work</p>
+<section id="ch-guide" class="chapter">
+<h2>When to reach for it</h2>
+<p>You now know how contrastive learning works and where it breaks. The last question is the practical one: you have a vision problem and some data, so which of these ideas should you use first?</p>
+
+<figure class="viz" id="viz-guide" data-toy>
+  <span class="badge toy">Our reading</span>
+  <div class="controls fig-top" role="group" aria-label="Your situation">
+    <span class="lbl">Your situation</span>
+    <button type="button" id="btn-guide-search" aria-pressed="false">Find similar images, few labels</button>
+    <button type="button" id="btn-guide-text" aria-pressed="false">Search or classify with words</button>
+    <button type="button" id="btn-guide-dense" aria-pressed="false">Segment or detect</button>
+    <button type="button" id="btn-guide-own" aria-pressed="false">Pretrain on my own unlabeled images</button>
+    <button type="button" id="btn-guide-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="guide-recipe" id="guide-recipes">
+    <div data-recipe="none">
+      <p class="g-sum">Pick the situation closest to yours. Each recipe names the chapter that explains why it works.</p>
+    </div>
+    <div data-recipe="search" hidden>
+      <p class="g-sum">Goal: embeddings where images of the same kind sit close, with only a few labelled examples per class.</p>
+      <ol class="g-steps">
+        <li>Start from a pretrained encoder; do not train from scratch. Check how far plain nearest-neighbour search gets you before any training.</li>
+        <li>If you have labels, try fine-tuning with a supervised contrastive loss or a triplet loss: every same-class image is a positive (<a href="#ch-supcon">chapter 9</a>). This step is our reading. SupCon's evidence comes from training on all ImageNet labels from scratch (<span data-claim="supcon-r50-top1">78.7</span> top-1 with a ResNet-50, against <span data-claim="supcon-ce-r50-autoaug-published">78.2</span> for the published cross-entropy baseline) and from better robustness to corruptions. The paper did not test few-label fine-tuning, and its transfer features were not better than cross-entropy's.</li>
+        <li>Normalize the embeddings and compare them by cosine similarity, the geometry the loss was trained in (<a href="#ch-sphere">chapter 6</a>).</li>
+      </ol>
+    </div>
+    <div data-recipe="text" hidden>
+      <p class="g-sum">Goal: find or label images by typing what you want, with no labelled training set.</p>
+      <ol class="g-steps">
+        <li>Use a pretrained image-text model (the CLIP or SigLIP family) and score each image against text prompts (<a href="#ch-clip">chapter 10</a>). Zero-shot, the best original CLIP model reached <span data-claim="clip-zs-best">76.2</span> top-1 on ImageNet without seeing a single ImageNet label.</li>
+        <li>If you train or fine-tune such a model yourself on a modest batch, prefer the sigmoid loss: it does not need the whole batch to normalize each score.</li>
+        <li>Check the prompts on a small labelled sample first; zero-shot accuracy depends on wording.</li>
+      </ol>
+    </div>
+    <div data-recipe="dense" hidden>
+      <p class="g-sum">Goal: features that are good at every pixel, for segmentation or detection.</p>
+      <ol class="g-steps">
+        <li>Start from a self-distillation backbone (the DINOv2 or DINOv3 family) rather than a contrastive image-text one. With frozen features and a linear head on ADE20k segmentation, DINOv2 ViT-g/14 scored <span data-claim="dinov2-ade-linear">49.0</span> mIoU against <span data-claim="dinov2-openclip-ade">39.3</span> for OpenCLIP ViT-G/14, as printed in the DINOv2 paper; DINOv3 reports <span data-claim="dinov3-ade-linear">55.9</span> against <span data-claim="dinov3-siglip2-ade">42.7</span> for SigLIP 2.</li>
+        <li>Image-level contrastive losses grade the whole image, so they teach little about where things are. Self-distillation is introduced in <a href="#ch-beyond">chapter 8</a>.</li>
+      </ol>
+    </div>
+    <div data-recipe="own" hidden>
+      <p class="g-sum">Goal: pretrain on many unlabeled images from your own domain.</p>
+      <ol class="g-steps">
+        <li>Choose augmentations for your domain before anything else (<a href="#ch-simclr">chapter 5</a>). The network learns to ignore whatever you change. If color carries the signal you care about, strong color jitter teaches the network to throw it away.</li>
+        <li>Get enough negatives: a large batch, or a momentum queue if memory is short (<a href="#ch-moco">chapter 4</a>). Tune the temperature; it sets how hard the loss pushes on near neighbours (<a href="#ch-sphere">chapter 6</a>).</li>
+        <li>With few classes in your data, many in-batch negatives are false negatives (<a href="#ch-negatives">chapter 7</a>). Consider a debiased loss, or a method without negatives (<a href="#ch-beyond">chapter 8</a>).</li>
+        <li>Watch for collapse: check the spread of the embeddings and the singular values of their covariance during training (<a href="#ch-beyond">chapter 8</a>).</li>
+      </ol>
+    </div>
+  </div>
+  <p class="readout" id="guide-readout" aria-live="polite"></p>
+  <figcaption>Our reading of the chapters, not a benchmark. The numbers are each paper's own results under its own protocol; the chapters give the details and caveats.</figcaption>
+</figure>
+
+<p>Notice a pattern in the four recipes. Contrastive learning rarely appears as "train SimCLR from scratch" any more. It appears as a <em>loss you fine-tune with</em> (supervised contrastive, triplet). It appears as the <em>pretraining of an image-text model</em> you download (CLIP, SigLIP). And it appears as the <em>lesson behind the methods that replaced it</em>: augmentations decide what is learned, and something must always stop collapse.</p>
+
+<details class="check">
+  <summary>Check yourself: why might a model pretrained with strong color jitter be a poor choice for telling ripe from unripe fruit?</summary>
+  <p>Color jitter changes the colors of one view and asks the network to call both views the same. The network learns to ignore color. Ripeness is mostly color, so the feature that separates the classes has been trained away. Pick augmentations that change what your task does not care about.</p>
+</details>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Which kind of pretrained model to start from for similarity search, text queries and dense prediction.</li>
+    <li>Why augmentation choice is a modelling decision, not a detail.</li>
+    <li>What to watch for when you pretrain contrastively on your own data.</li>
+  </ul>
+</div>
+
+<script>
+(() => {
+  const keys = ['search', 'text', 'dense', 'own'], out = document.getElementById('guide-readout');
+  const names = { search: 'Find similar images, few labels', text: 'Search or classify with words', dense: 'Segment or detect', own: 'Pretrain on my own unlabeled images' };
+  const blocks = [...document.querySelectorAll('#guide-recipes [data-recipe]')];
+  const go = k => {
+    blocks.forEach(b => { b.hidden = b.dataset.recipe !== k; });
+    keys.forEach(x => document.getElementById('btn-guide-' + x).setAttribute('aria-pressed', String(x === k)));
+    out.textContent = k === 'none' ? '' : 'Showing the recipe for: ' + names[k] + '.';
+  };
+  keys.forEach(k => document.getElementById('btn-guide-' + k).addEventListener('click', () => go(k)));
+  document.getElementById('btn-guide-reset').addEventListener('click', () => go('none'));
+  go('none');
+})();
+</script>
+</section>

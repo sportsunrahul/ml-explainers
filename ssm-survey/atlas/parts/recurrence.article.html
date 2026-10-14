@@ -1,0 +1,41 @@
+  <article data-chapter="recurrence">
+    <header class="ch-head"><span class="num">2 of 10</span><h2>Linear recurrences</h2><p class="subhead">Why RNNs were dropped, and the change that brings them back</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">One number remembers</button><button type="button" role="tab" data-step="1">Unrolled into a sum</button><button type="button" role="tab" data-step="2">LRU's recipe</button></div>
+    </div>
+    <div class="controls">
+      <label class="slider"><span>Size r of λ <b id="recurrence-atlas-r-val">0.90</b></span><input type="range" id="recurrence-atlas-r" min="0" max="1.1" step="0.005" value="0.9"></label>
+      <label class="slider"><span>Angle θ of λ (radians per step) <b id="recurrence-atlas-theta-val">0.00</b></span><input type="range" id="recurrence-atlas-theta" min="0" max="3.14" step="0.01" value="0"></label>
+      <div class="row"><span>Presets</span><button type="button" class="tool" data-preset="fast">Fast decay</button><button type="button" class="tool" data-preset="long">Long memory</button><button type="button" class="tool" data-preset="ring">Ringing</button><button type="button" class="tool" data-preset="explode">Exploding</button><button type="button" class="tool" data-preset="reset">Reset</button></div>
+      <div class="row"><span>Cell</span><button type="button" class="tool" data-mode="linear" aria-pressed="true">Linear</button><button type="button" class="tool" data-mode="tanh" aria-pressed="false">Nonlinear tanh RNN</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>A <button class="inline-term" data-open="rnn">recurrent neural network</button> (RNN) keeps a <button class="inline-term" data-open="state">state</button> and updates it once per <button class="inline-term" data-open="token">token</button>. Every token costs the same, at any length, and nothing grows. It is the cheapest memory a sequence model can have.</p>
+      <p>Strip it to one cell: h<sub>t</sub> = λ h<sub>t-1</sub> + b x<sub>t</sub>. Each step multiplies what the cell holds by λ, then adds the new token. So a token that arrived k steps ago has been multiplied by λ k times. The chart is that <button class="inline-term" data-open="impulse-response">impulse response</button>: with |λ| below 1 the token fades, above 1 it grows without limit.</p>
+      <p>λ is an <button class="inline-term" data-open="eigenvalue">eigenvalue</button> of the recurrence, and it can be a <button class="inline-term" data-open="complex">complex number</button> r e<sup>iθ</sup>. Then the cell also turns by θ each step, and its real part rings (try Ringing). With r = 0.9, only 0.52% of a token is left after 50 steps.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>Press <b>Nonlinear tanh RNN</b>. Classic RNNs pass each update through a squashing function. Then no token has a fixed weight in the state, and step t cannot start before step t-1 is done: a sequence of length L takes L steps, one after another, even in training.</p>
+      <p>The repeated multiplication also hits training. The gradient back to an old token is multiplied at every step, so it shrinks or explodes: the <button class="inline-term" data-open="vanishing-gradient">vanishing gradient</button> problem. Press Exploding while in tanh mode: the state stays bounded, yet the red gradient line dies within 17 steps.</p>
+      <p>Press <b>Linear</b>. Without tanh, the recurrence unrolls into a weighted sum, h<sub>t</sub> = Σ λ<sup>t-k</sup> b x<sub>k</sub>, and the bars are its weights. They depend only on how long ago a token came, so they are known in advance, and every state can be computed at once with a <button class="inline-term" data-open="parallel-scan">parallel scan</button>. That is what Transformers offered: every position trains in parallel.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <p>LRU (2023) started from a plain deep RNN and changed one thing at a time: make it linear; make it diagonal and complex, so each cell updates on its own; write λ so that |λ| stays below 1 whatever training does; start the cells near |λ| = 1 for long memory; and normalize.</p>
+      <p>Why normalize? Near |λ| = 1 a cell adds up many tokens at almost full weight. Under random input its variance grows by 1/(1-|λ|²), the red bar: 5.3 at r = 0.9, about 500 at r = 0.999. LRU scales each cell's input by √(1-|λ|²) to cancel it.</p>
+      <p>Test accuracy (%) on three of the six <button class="inline-term" data-open="lra">Long Range Arena</button> tasks, as each step is added:</p>
+      <table class="data"><thead><tr><th>Recurrent layer</th><th class="n">sCIFAR</th><th class="n">Pathfinder</th><th class="n">PathX</th></tr></thead>
+        <tbody>
+          <tr><td>tanh RNN</td><td class="n">69.9</td><td class="n">chance</td><td class="n">chance</td></tr>
+          <tr><td>linear</td><td class="n">72.2</td><td class="n">chance</td><td class="n">chance</td></tr>
+          <tr><td>diagonal, complex</td><td class="n">86.5</td><td class="n">chance</td><td class="n">chance</td></tr>
+          <tr><td>exponential</td><td class="n">85.4</td><td class="n">65.4</td><td class="n">chance</td></tr>
+          <tr><td>stable exponential</td><td class="n">87.2</td><td class="n">93.5</td><td class="n">chance</td></tr>
+          <tr><td>+ ring start</td><td class="n">88.1</td><td class="n">94.4</td><td class="n">chance</td></tr>
+          <tr class="ours"><td>+ normalization = LRU</td><td class="n">89.0</td><td class="n">95.1</td><td class="n">94.2</td></tr>
+          <tr><td>S4, its own results</td><td class="n">91.1</td><td class="n">94.2</td><td class="n">96.4</td></tr>
+        </tbody></table>
+    </div>
+    <p class="note">The stage is a toy, computed exactly: one cell, b = 1, and a single token of size 1 at step 0. The tanh cell is the same λ as a 2-by-2 rotation and scaling, passed through tanh; its red gradient line is the exact derivative of this toy (our reading), not a paper's number. The noise gain is LRU Eq. 6. The table is sourced from LRU Tables 1 to 3 (mean of 3 seeds); LRU reports no average. LRU's sCIFAR images are in color; the S4 row's 91.1 is S4's sequential CIFAR result, not its grayscale LRA image score (88.65), and in our reading (LRU App D.4, S4D App B) it is the same colored task, so LRU trails S4 there by 2.1 points.</p>
+    <p class="inscription">A linear recurrence keeps the RNN's fixed memory and drops its two faults: its weights are known in advance, so training runs in parallel, and |λ| can be placed exactly where memory needs it.</p>
+    <button type="button" class="continue" data-go="continuous">Continue with continuous time</button>
+  </article>

@@ -1,0 +1,59 @@
+[
+ {
+  "id": "page-hippo-year",
+  "claim": "HiPPO v1 submission year",
+  "value": "2020",
+  "paper": "HiPPO",
+  "arxiv": "2008.07669v2",
+  "loc": "abs.html submission history, v1 2020-08-17"
+ },
+ {
+  "id": "page-hippo-rmse-4",
+  "claim": "LegS reconstruction RMSE at N = 4, t = 100, bilinear (test function)",
+  "value": "0.750",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; bilinear update; App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; RMSE over all 1000 samples at t = 100"
+ },
+ {
+  "id": "page-hippo-rmse-16",
+  "claim": "LegS reconstruction RMSE at N = 16, t = 100, bilinear (test function)",
+  "value": "0.234",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; bilinear update; App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; RMSE over all 1000 samples at t = 100"
+ },
+ {
+  "id": "page-hippo-rmse-64",
+  "claim": "LegS reconstruction RMSE at N = 64, t = 100, bilinear (test function)",
+  "value": "0.0133",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; bilinear update; App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; RMSE over all 1000 samples at t = 100"
+ },
+ {
+  "id": "page-hippo-rmse-16-t20",
+  "claim": "LegS reconstruction RMSE at N = 16, t = 20 (first 200 samples), bilinear",
+  "value": "0.0118",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; bilinear update; App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; RMSE over the 200 samples seen at t = 20"
+ },
+ {
+  "id": "page-hippo-euler-64",
+  "claim": "LegS reconstruction RMSE at N = 64, t = 100, forward Euler (test function)",
+  "value": "0.296",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; forward Euler update c_{k+1} = (I - A/k) c_k + B f_k / k (HiPPO Eq. 4); App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; RMSE over all 1000 samples at t = 100"
+ },
+ {
+  "id": "page-hippo-euler-peak",
+  "claim": "Peak coefficient magnitude under forward Euler at N = 64 (test function), reached at step 46",
+  "value": "1.0e44",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; forward Euler update (HiPPO Eq. 4); max |c_n| over all steps and n < 64; App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; RMSE over all 1000 samples at t = 100"
+ },
+ {
+  "id": "page-hippo-exact-gap",
+  "claim": "Max |c_n - exact projection| at t = 100, N = 64, bilinear (test function)",
+  "value": "0.0047",
+  "our_reading": true,
+  "loc": "Computed in node with parts/core-hippo.js: HiPPO-LegS Theorem 2 A, B; bilinear update; App. F.8 test function f(x) = sin(x)/4 + sin(x/3)/2 + sin(x/7), 1000 samples on [0, 100], start c_1 = f_0 e_0, sample j read as past time j; exact coefficients by midpoint quadrature (40,000 points) of (1/t) int_0^t f(x) sqrt(2n+1) P_n(2x/t - 1) dx (HiPPO App. E.1)"
+ }
+]

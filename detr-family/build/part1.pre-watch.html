@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The DETR Family</title>
+<meta name="description" content="An intuition-first explainer of DETR, Deformable DETR, DAB-DETR, DN-DETR, DINO, RT-DETR and RF-DETR.">
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--fg);
+  font:1.125rem/1.65 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:75ch; margin:0 auto; padding:0 16px 4rem; }
+header.hero { padding:3.5rem 0 1.5rem; }
+header.hero h1 { font-size:2.3rem; line-height:1.15; margin:0 0 .6rem; }
+header.hero p.hook { font-size:1.2rem; color:var(--muted); margin:0 0 1rem; }
+.papers { font-size:.9rem; color:var(--muted); font-family:system-ui, sans-serif; }
+h2 { font-size:1.6rem; line-height:1.25; margin:3.2rem 0 .8rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+h3 { font-size:1.15rem; margin:1.8rem 0 .4rem; }
+a { color:var(--blue); }
+p { margin:0 0 1rem; }
+.kicker { font:600 .8rem/1 system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:2.2rem 0 -.2rem; }
+nav.toc { font-family:system-ui, sans-serif; font-size:.95rem; background:var(--panel); border-radius:10px; padding:.8rem 1.1rem; margin:1rem 0 2rem; }
+nav.toc ol { margin:.3rem 0; padding-left:1.4rem; }
+nav.toc li { margin:.15rem 0; }
+.key { display:flex; flex-wrap:wrap; gap:.4rem .9rem; font:.9rem system-ui, sans-serif; margin:.4rem 0 1rem; }
+.key span::before { content:""; display:inline-block; width:.8em; height:.8em; border-radius:2px; margin-right:.35em; vertical-align:-.05em; background:currentColor; }
+.c-blue{color:var(--blue)} .c-yellow{color:var(--yellow)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-brown{color:var(--brown)}
+.t-blue{color:var(--blue)} .t-yellow{color:var(--yellow)} .t-green{color:var(--green)} .t-red{color:var(--red)} .t-brown{color:var(--brown)}
+b.c-blue, b.c-yellow, b.c-green, b.c-red, b.c-brown { font-weight:700; }
+figure.viz { margin:1.4rem -8px; padding:.9rem; background:var(--panel); border-radius:12px; position:relative; }
+figure.viz canvas, figure.viz svg.chart { display:block; width:100%; border-radius:8px; background:var(--bg); touch-action:none; }
+figure.viz canvas:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.7rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:6px; padding:.32rem .7rem; cursor:pointer; }
+.controls button:hover { border-color:var(--blue); }
+.controls button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+.readout { font:.92rem/1.45 system-ui, sans-serif; color:var(--fg); margin:.5rem 0 0; min-height:1.4em; }
+figcaption { font:.86rem/1.45 system-ui, sans-serif; color:var(--muted); margin-top:.5rem; }
+.badge { position:absolute; top:.6rem; right:.7rem; font:600 .72rem/1 system-ui, sans-serif; letter-spacing:.05em; text-transform:uppercase; padding:.28rem .5rem; border-radius:999px; border:1px solid currentColor; background:var(--panel); z-index:2; }
+.badge.toy { color:var(--brown); } .badge.computed { color:var(--blue); } .badge.sourced { color:var(--green); }
+.eq { overflow-x:auto; overflow-y:hidden; margin:.6rem 0 1rem; padding:.2rem 0; }
+.gloss { font-size:1rem; margin:-.3rem 0 1.2rem; padding-left:1rem; border-left:3px solid var(--rule); }
+.gloss li { margin:.2rem 0; }
+.note { font:.9rem/1.5 system-ui, sans-serif; color:var(--muted); background:var(--panel); border-radius:8px; padding:.6rem .8rem; margin:1rem 0; }
+table.data { border-collapse:collapse; font:.88rem system-ui, sans-serif; width:100%; margin:.6rem 0 1rem; }
+table.data th, table.data td { border-bottom:1px solid var(--rule); padding:.3rem .4rem; text-align:right; }
+table.data th:first-child, table.data td:first-child { text-align:left; }
+.matrix { overflow-x:auto; }
+.matrix table { border-collapse:separate; border-spacing:3px; font:.85rem system-ui, sans-serif; margin:.4rem auto; }
+.matrix th { font-weight:600; padding:.2rem .4rem; }
+.matrix td button { font:inherit; width:4.1rem; padding:.35rem .1rem; border-radius:5px; border:1px solid var(--rule); background:var(--bg); color:var(--fg); cursor:pointer; font-variant-numeric:tabular-nums; }
+.matrix td button.sel { background:var(--green); color:var(--bg); border-color:var(--green); font-weight:700; }
+.matrix td button.opt { box-shadow:0 0 0 2px var(--yellow) inset; }
+.matrix td button:focus-visible { outline:2px solid var(--yellow); outline-offset:1px; }
+.timeline { list-style:none; padding:0; margin:1rem 0; border-left:3px solid var(--rule); }
+.timeline li { position:relative; padding:0 0 1.1rem 1.2rem; }
+.timeline li::before { content:""; position:absolute; left:-.5rem; top:.45rem; width:.7rem; height:.7rem; border-radius:50%; background:var(--blue); }
+.timeline .when { font:600 .85rem system-ui, sans-serif; color:var(--muted); }
+.timeline .inh { font-size:.95rem; color:var(--muted); }
+.deeper li { margin:.35rem 0; }
+.katex { font-size:1.05em; }
+.tex-display .katex-display { margin:.4rem 0; }
+@media (max-width: 520px) {
+  header.hero h1 { font-size:1.8rem; }
+  figure.viz { margin:1.2rem -12px; padding:.7rem; border-radius:0; }
+  .matrix td button { width:3.3rem; font-size:.78rem; }
+}
+</style>
+<script>
+/* Shared helpers for all interactives. */
+const PE = (() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.cueReplay === '1';
+  const redrawers = [];
+  const onTheme = fn => { redrawers.push(fn); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => redrawers.forEach(f => f()));
+  // Canvas sized to its box, DPR-aware; draw(ctx, w, h) gets CSS-pixel dimensions.
+  function canvas(el, aspect, draw) {
+    const ctx = el.getContext('2d');
+    const state = { w: 0, h: 0 };
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * aspect), r = devicePixelRatio || 1;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); state.w = w; state.h = h; draw(ctx, w, h);
+    }
+    new ResizeObserver(resize).observe(el);
+    onTheme(() => draw(ctx, state.w, state.h));
+    return { redraw: () => draw(ctx, state.w, state.h), state, ctx };
+  }
+  function animate(ms, step, done) {
+    if (instant()) { step(1); done && done(); return () => {}; }
+    let t0 = null, id = 0, stop = false;
+    const f = t => { if (stop) return; if (t0 === null) t0 = t; const u = Math.min(1, (t - t0) / ms);
+      step(u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2); if (u < 1) id = requestAnimationFrame(f); else done && done(); };
+    id = requestAnimationFrame(f);
+    return () => { stop = true; cancelAnimationFrame(id); };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Boxes are {x1,y1,x2,y2} in [0,1].
+  const area = b => Math.max(0, b.x2 - b.x1) * Math.max(0, b.y2 - b.y1);
+  function iou(a, b) { const i = area({ x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), x2: Math.min(a.x2, b.x2), y2: Math.min(a.y2, b.y2) });
+    return i / (area(a) + area(b) - i); }
+  function giou(a, b) { const i = area({ x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), x2: Math.min(a.x2, b.x2), y2: Math.min(a.y2, b.y2) });
+    const u = area(a) + area(b) - i, c = area({ x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) });
+    return i / u - (c - u) / c; }
+  const cxcywh = b => [(b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, b.x2 - b.x1, b.y2 - b.y1];
+  const fromC = (cx, cy, w, h) => ({ x1: cx - w / 2, y1: cy - h / 2, x2: cx + w / 2, y2: cy + h / 2 });
+  function strokeBox(ctx, b, W, H, color, lw = 2, dash = null, alpha = 1) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.strokeRect(b.x1 * W, b.y1 * H, (b.x2 - b.x1) * W, (b.y2 - b.y1) * H); ctx.restore(); }
+  function label(ctx, text, x, y, color, size = 12) {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; ctx.fillStyle = color; ctx.fillText(text, x, y); ctx.restore(); }
+  function scene(ctx, W, H) { // calm toy "street" background
+    ctx.fillStyle = css('--bg'); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = css('--panel2'); ctx.fillRect(0, H * .78, W, H * .22);
+  }
+  function person(ctx, b, W, H, color) {
+    const [cx, , w, h] = cxcywh(b); ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .55;
+    ctx.beginPath(); ctx.arc(cx * W, (b.y1 + h * .14) * H, Math.min(w * W, h * H) * .22, 0, 7); ctx.fill();
+    ctx.fillRect((cx - w * .28) * W, (b.y1 + h * .3) * H, w * .56 * W, h * .7 * H); ctx.restore(); }
+  function thing(ctx, b, W, H, color) {
+    ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .45; const r = 6;
+    const x = b.x1 * W + 4, y = b.y1 * H + 4, w = (b.x2 - b.x1) * W - 8, h = (b.y2 - b.y1) * H - 8;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); ctx.restore(); }
+  // Hungarian (Kuhn-Munkres) for a square cost matrix; returns col index per row.
+  function hungarian(C) {
+    const n = C.length, INF = 1e18, u = Array(n + 1).fill(0), v = Array(n + 1).fill(0), p = Array(n + 1).fill(0), way = Array(n + 1).fill(0);
+    for (let i = 1; i <= n; i++) { p[0] = i; let j0 = 0; const minv = Array(n + 1).fill(INF), used = Array(n + 1).fill(false);
+      do { used[j0] = true; const i0 = p[j0]; let d = INF, j1 = 0;
+        for (let j = 1; j <= n; j++) if (!used[j]) { const cur = C[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; } if (minv[j] < d) { d = minv[j]; j1 = j; } }
+        for (let j = 0; j <= n; j++) if (used[j]) { u[p[j]] += d; v[j] -= d; } else minv[j] -= d; j0 = j1; } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0); }
+    const a = Array(n); for (let j = 1; j <= n; j++) if (p[j]) a[p[j] - 1] = j - 1; return a;
+  }
+  // Keyboard + pointer dragging of a point in [0,1]^2 on a canvas.
+  function draggable(el, get, set) {
+    let drag = false;
+    const pos = e => { const r = el.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };
+    el.addEventListener('pointerdown', e => { drag = true; el.setPointerCapture(e.pointerId); set(...pos(e)); });
+    el.addEventListener('pointermove', e => { if (drag) set(...pos(e)); });
+    el.addEventListener('pointerup', () => { drag = false; });
+    el.addEventListener('keydown', e => { const [x, y] = get(), s = e.shiftKey ? .05 : .015;
+      const m = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
+      if (m) { e.preventDefault(); e.stopPropagation(); set(x + m[0], y + m[1]); } });
+  }
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  return { css, instant, onTheme, canvas, animate, rng, iou, giou, cxcywh, fromC, strokeBox, label, scene, person, thing, hungarian, draggable, clamp };
+})();
+</script>
+</head>
+<body>
+<main>
+<header class="hero">
+  <h1>The DETR family, intuition first</h1>
+  <p class="hook">How object detection became a set-prediction problem, why that first version trained so slowly, and how six follow-ups made it fast to train and then fast to run.</p>
+  <p class="papers">Papers covered (arXiv id, version read): DETR 2005.12872v3, Deformable DETR 2010.04159v4, DAB-DETR 2201.12329v4, DN-DETR 2203.01305v3, DINO 2203.03605v4, RT-DETR 2304.08069v3, RF-DETR 2511.09554v2.</p>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li><a href="#ch-set-problem">Detection is a set problem</a></li>
+    <li><a href="#ch-matching">One prediction per object: Hungarian matching</a></li>
+    <li><a href="#ch-queries">Object queries and a decoder that talks to itself</a></li>
+    <li><a href="#ch-detr-limits">What it cost: long training and small objects</a></li>
+    <li><a href="#ch-deformable">Deformable DETR: look at a few points</a></li>
+    <li><a href="#ch-anchor-queries">DAB-DETR: a query is a box</a></li>
+    <li><a href="#ch-denoising">DN-DETR and DINO: teach with noisy answers</a></li>
+    <li><a href="#ch-rt-detr">RT-DETR: count the NMS</a></li>
+    <li><a href="#ch-rf-detr">RF-DETR: train once, pick your latency</a></li>
+  </ol>
+  <a href="#ch-timeline">Family tree</a> &middot; <a href="#ch-summary">Summary</a> &middot; <a href="#ch-deeper">Where to go deeper</a>
+</nav>
+
+<p>One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">predictions and queries</span>
+  <span class="c-yellow">ground truth</span>
+  <span class="c-green">matched, kept, positive</span>
+  <span class="c-red">cost, loss, removed, negative</span>
+  <span class="c-brown">"no object", background, baseline models</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Toy</b> means an illustrative model, not the paper's network. <b>Computed</b> means a real formula from the paper evaluated on toy inputs. <b>Sourced</b> means the numbers come from the paper's tables. Numbers in the text link to a sourced claim list kept with this page.</p>
+
+<!-- ============================ ACT I ============================ -->
+<p class="kicker">Act I: DETR</p>
+<section id="ch-set-problem" class="chapter">
+<h2>Detection is a set problem</h2>
+<p>Ask a person what is in a photo and you get a short list: two people, one dog, a car. No order, no duplicates. That list is a <em>set</em> of (class, box) pairs, and it is exactly what an object detector is supposed to produce.</p>
+<p>Classic detectors never produce that set directly. They lay down thousands of candidate boxes (anchors, proposals, or a grid of centers), score every one, and end up with a cloud of overlapping guesses around each object. A cleanup step called <b>non-maximum suppression</b> (NMS) then keeps the highest-scoring box and deletes any other box that overlaps it by more than a threshold.</p>
+<p>That threshold is a hand-set guess about what "duplicate" means. Push two people close together and see what it does.</p>
+
+<figure class="viz" id="viz-nms-overlap" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="nms-canvas" aria-label="Two people with clouds of candidate boxes; NMS keeps or deletes boxes" role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-nms-apart">People apart</button>
+    <button type="button" id="btn-nms-close">People overlapping</button>
+    <button type="button" id="btn-nms-run">Run NMS</button>
+    <button type="button" id="btn-nms-low">Threshold 0.3</button>
+    <button type="button" id="btn-nms-high">Threshold 0.8</button>
+    <label>IoU threshold <input type="range" id="nms-iou" min="0.3" max="0.9" step="0.05" value="0.5"><span id="nms-iou-val">0.50</span></label>
+    <button type="button" id="btn-nms-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="nms-readout" aria-live="polite"></p>
+  <figcaption>Toy model: two ground-truth people (yellow) and a cloud of scored candidate boxes (blue). NMS keeps boxes in green and deletes overlapping ones in red. With the people overlapping, a low threshold (0.3) deletes the second person, and a high threshold (0.8) leaves duplicates.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('nms-canvas'), out = document.getElementById('nms-readout');
+  const iouIn = document.getElementById('nms-iou'), iouVal = document.getElementById('nms-iou-val');
+  const S = { gap: 0.30, target: 0.30, nms: false };
+  const base = [{ cx: .5, cy: .52, w: .16, h: .5 }, { cx: .5, cy: .55, w: .15, h: .46 }];
+  function gts() { return [PE.fromC(base[0].cx - S.gap / 2, base[0].cy, base[0].w, base[0].h), PE.fromC(base[1].cx + S.gap / 2, base[1].cy, base[1].w, base[1].h)]; }
+  function candidates() {
+    const r = PE.rng(7), out = [];
+    gts().forEach((g, gi) => { const [cx, cy, w, h] = PE.cxcywh(g);
+      for (let k = 0; k < 7; k++) { const j = k === 0 ? 0 : 1;
+        out.push({ b: PE.fromC(cx + j * (r() - .5) * w * .5, cy + j * (r() - .5) * h * .25, w * (1 + j * (r() - .5) * .45), h * (1 + j * (r() - .5) * .25)),
+          s: k === 0 ? (gi ? .86 : .93) : .35 + r() * .45, gt: gi }); } });
+    return out.sort((a, b) => b.s - a.s);
+  }
+  function nms(c, thr) { const keep = []; c.forEach(x => { x.kept = !keep.some(k => PE.iou(k.b, x.b) > thr); if (x.kept) keep.push(x); }); return keep; }
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); const g = gts(), c = candidates();
+    g.forEach(b => PE.person(ctx, b, W, H, PE.css('--yellow')));
+    let keep = null; if (S.nms) keep = nms(c, +iouIn.value);
+    c.forEach(x => { if (!S.nms) PE.strokeBox(ctx, x.b, W, H, PE.css('--blue'), 1.4, null, .75);
+      else PE.strokeBox(ctx, x.b, W, H, x.kept ? PE.css('--green') : PE.css('--red'), x.kept ? 2.6 : 1, x.kept ? null : [4, 4], x.kept ? 1 : .45); });
+    g.forEach(b => PE.strokeBox(ctx, b, W, H, PE.css('--yellow'), 1.5, [2, 3]));
+    if (!S.nms) { out.textContent = `${c.length} candidate boxes for 2 people. Press "Run NMS".`; return; }
+    const found = new Set(keep.filter(k => PE.iou(k.b, g[k.gt]) > .5).map(k => k.gt)), dups = keep.length - found.size;
+    out.textContent = `NMS kept ${keep.length} box${keep.length === 1 ? '' : 'es'}: ${found.size} of 2 people found, ${Math.max(0, dups)} duplicate${dups === 1 ? '' : 's'} left.`;
+  });
+  let stop = () => {};
+  function moveTo(gap) { stop(); const g0 = S.gap; S.target = gap; stop = PE.animate(700, u => { S.gap = g0 + (gap - g0) * u; cv.redraw(); }); }
+  document.getElementById('btn-nms-apart').onclick = () => moveTo(0.30);
+  document.getElementById('btn-nms-close').onclick = () => moveTo(0.04);
+  document.getElementById('btn-nms-run').onclick = () => { S.nms = true; cv.redraw(); };
+  document.getElementById('btn-nms-reset').onclick = () => { stop(); S.gap = 0.30; S.nms = false; iouIn.value = 0.5; iouVal.textContent = '0.50'; cv.redraw(); };
+  iouIn.oninput = () => { iouVal.textContent = (+iouIn.value).toFixed(2); cv.redraw(); };
+  const setThr = v => { iouIn.value = v; iouIn.oninput(); };
+  document.getElementById('btn-nms-low').onclick = () => setThr(0.3);
+  document.getElementById('btn-nms-high').onclick = () => setThr(0.8);
+})();
+</script>
+
+<p>With the people apart, any threshold up to about 0.5 works. Overlapping, a threshold of 0.3 deletes the second person entirely, because their best box overlaps the first person's best box, and NMS cannot tell "another person" from "the same person again". Raise it to 0.8 and a pile of duplicates survives. A middle value happens to work for this toy image, but the right setting depends on how crowded the scene is, and it is chosen by hand. The detector itself never learned to avoid duplicates; a heuristic cleans up after it.</p>
+<p>DETR's question is simple: can the network output the final set directly, with no duplicates and no cleanup step?</p>
+</section>
+
+<section id="ch-matching" class="chapter">
+<h2>One prediction per object: Hungarian matching</h2>
+<p>DETR predicts a fixed number of slots, <span data-claim="pg-detr-n">N = 100</span>, all at once. Each slot outputs a class (including a special <b class="c-brown">"no object"</b> class) and a box. A typical COCO image has far fewer objects than that, so most slots should say "no object".</p>
+<p>Training needs to know which slot is responsible for which object. DETR pads the ground-truth list with "no object" up to N entries and finds the <b>one-to-one</b> assignment between slots and entries that costs the least. Here is the trick: because each object can be claimed by exactly one slot, a second slot sitting on the same object gets assigned "no object", and the loss then trains it to say so. Duplicates become expensive during training, so no NMS is needed afterwards.</p>
+<p>Try it. Each row is a <b class="c-blue">predicted slot</b>, each column a <b class="c-yellow">ground-truth object</b> (or a "no object" pad). Click one cell per row to build an assignment and compare your total with the optimum.</p>
+
+<figure class="viz" id="viz-match-matrix">
+  <span class="badge computed">Computed</span>
+  <canvas id="match-canvas" aria-label="Toy image with three ground-truth objects and five predicted boxes, with lines for the current assignment" role="img"></canvas>
+  <div class="matrix" id="match-matrix"></div>
+  <div class="controls">
+    <button type="button" id="btn-match-optimal">Show optimal matching</button>
+    <button type="button" id="btn-match-dup">Highlight the duplicate</button>
+    <button type="button" id="btn-match-reset" data-cue-reset>Clear</button>
+  </div>
+  <p class="readout" id="match-readout" aria-live="polite"></p>
+  <figcaption>Computed: the cost of pairing a prediction with a real object is <span class="c-red">minus its probability for the object's class, plus 5 x the L1 box distance, plus 2 x the GIoU loss</span>, DETR's matching cost and weights. Pairing with "no object" costs 0. The boxes and probabilities are a toy example. Solved with the Hungarian algorithm.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('match-canvas'), mt = document.getElementById('match-matrix'), out = document.getElementById('match-readout');
+  const GT = [{ n: 'car', b: { x1: .06, y1: .45, x2: .36, y2: .8 } }, { n: 'person', b: { x1: .46, y1: .2, x2: .58, y2: .8 } }, { n: 'dog', b: { x1: .7, y1: .55, x2: .9, y2: .8 } }];
+  const P = [ // toy predictions: box + class probabilities
+    { b: { x1: .07, y1: .47, x2: .35, y2: .79 }, p: { car: .84, person: .02, dog: .03 } },
+    { b: { x1: .10, y1: .43, x2: .39, y2: .76 }, p: { car: .71, person: .03, dog: .04 } },
+    { b: { x1: .47, y1: .22, x2: .59, y2: .79 }, p: { car: .02, person: .9, dog: .02 } },
+    { b: { x1: .69, y1: .52, x2: .88, y2: .81 }, p: { car: .05, person: .03, dog: .78 } },
+    { b: { x1: .30, y1: .05, x2: .44, y2: .22 }, p: { car: .05, person: .06, dog: .04 } } ];
+  const COLS = [...GT.map(g => g.n), 'no obj', 'no obj'];
+  const l1 = (a, b) => { const A = PE.cxcywh(a), B = PE.cxcywh(b); return A.reduce((s, v, i) => s + Math.abs(v - B[i]), 0); };
+  const C = P.map(p => COLS.map((c, j) => j < 3 ? -p.p[GT[j].n] + 5 * l1(p.b, GT[j].b) + 2 * (1 - PE.giou(p.b, GT[j].b)) : 0));
+  const OPT = PE.hungarian(C), optCost = OPT.reduce((s, j, i) => s + C[i][j], 0);
+  const S = { a: Array(5).fill(-1), showOpt: false, dup: false };
+  let html = '<table><thead><tr><th scope="col">slot</th>' + COLS.map(c => `<th scope="col" class="${c === 'no obj' ? 'c-brown' : 'c-yellow'}">${c}</th>`).join('') + '</tr></thead><tbody>';
+  C.forEach((row, i) => { html += `<tr><th scope="row" class="c-blue">p${i + 1}</th>` + row.map((v, j) => `<td><button type="button" id="btn-cell-${i}-${j}" aria-label="assign p${i + 1} to ${COLS[j]} ${j > 2 ? j - 2 : ''}, cost ${v.toFixed(2)}">${v.toFixed(2)}</button></td>`).join('') + '</tr>'; });
+  mt.innerHTML = html + '</tbody></table>';
+  function assign(i, j) { const k = S.a.indexOf(j); if (k >= 0 && k !== i) S.a[k] = S.a[i]; S.a[i] = j; render(); }
+  C.forEach((r, i) => r.forEach((v, j) => document.getElementById(`btn-cell-${i}-${j}`).onclick = () => { S.showOpt = false; assign(i, j); }));
+  const cv = PE.canvas(el, .45, (ctx, W, H) => {
+    PE.scene(ctx, W, H);
+    GT.forEach(g => PE.thing(ctx, g.b, W, H, PE.css('--yellow')));
+    GT.forEach((g, j) => { PE.strokeBox(ctx, g.b, W, H, PE.css('--yellow'), 1.5, [3, 3]); PE.label(ctx, g.n, g.b.x1 * W + 3, g.b.y2 * H + 13, PE.css('--yellow')); });
+    P.forEach((p, i) => { const j = S.a[i], isDup = S.dup && i === 1;
+      const col = j < 0 ? PE.css('--blue') : j > 2 ? PE.css('--brown') : PE.css('--green');
+      PE.strokeBox(ctx, p.b, W, H, isDup ? PE.css('--red') : col, isDup ? 3 : 2, j > 2 ? [5, 3] : null);
+      PE.label(ctx, `p${i + 1}`, p.b.x1 * W + 3, p.b.y1 * H + 13, isDup ? PE.css('--red') : col); });
+  });
+  function render() {
+    C.forEach((r, i) => r.forEach((v, j) => { const b = document.getElementById(`btn-cell-${i}-${j}`);
+      b.classList.toggle('sel', S.a[i] === j); b.classList.toggle('opt', S.showOpt && OPT[i] === j); }));
+    cv.redraw();
+    const done = S.a.every(j => j >= 0), cost = S.a.reduce((s, j, i) => s + (j >= 0 ? C[i][j] : 0), 0);
+    out.textContent = done ? `Your total cost ${cost.toFixed(2)}; optimum ${optCost.toFixed(2)}${Math.abs(cost - optCost) < 1e-9 ? ': you found it.' : '.'}`
+      : `${S.a.filter(j => j >= 0).length} of 5 slots assigned. Optimum total cost: ${optCost.toFixed(2)}.`;
+    if (S.dup) out.textContent += ' p2 is a second box on the car: the optimum sends it to "no object", so training teaches it to be silent.';
+  }
+  document.getElementById('btn-match-optimal').onclick = () => { S.a = OPT.slice(); S.showOpt = true; render(); };
+  document.getElementById('btn-match-dup').onclick = () => { S.dup = true; render(); };
+  document.getElementById('btn-match-reset').onclick = () => { S.a = Array(5).fill(-1); S.showOpt = false; S.dup = false; render(); };
+  render();
+})();
+</script>
+
+<p>Now the math, which says exactly what you just did. First, choose the cheapest one-to-one assignment <span class="tex">\hat\sigma</span> of the N padded ground-truth entries to the N slots (DETR Eq. 1):</p>
+<div class="eq"><div class="tex tex-display">\hat{\sigma} = \arg\min_{\sigma\in\mathfrak{S}_N} \sum_{i}^{N} \htmlClass{t-red}{\mathcal{L}_{\rm match}}\big(\htmlClass{t-yellow}{y_i}, \htmlClass{t-blue}{\hat{y}_{\sigma(i)}}\big)</div></div>
+<ul class="gloss">
+  <li><span class="tex">\mathfrak{S}_N</span>: every possible way to pair the N entries with the N slots.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{y_i}</span>: ground-truth entry i, a real object or a "no object" pad.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\hat{y}_{\sigma(i)}}</span>: the prediction in the slot that assignment <span class="tex">\sigma</span> gives to entry i.</li>
+</ul>
+<p>The cost of one pairing is what the matrix cells show:</p>
+<div class="eq"><div class="tex tex-display">\htmlClass{t-red}{\mathcal{L}_{\rm match}} = -\mathbb{1}_{\{c_i\neq\varnothing\}}\,\htmlClass{t-blue}{\hat{p}_{\sigma(i)}(c_i)} + \mathbb{1}_{\{c_i\neq\varnothing\}}\,\mathcal{L}_{\rm box}\big(\htmlClass{t-yellow}{b_i}, \htmlClass{t-blue}{\hat{b}_{\sigma(i)}}\big)</div></div>
+<ul class="gloss">
+  <li>For a real object: minus how much probability the slot puts on the right class, plus how far its box is from the true box.</li>
+  <li>For a "no object" entry the indicator is 0, so the cost is zero whatever the slot predicts.</li>
+</ul>
+<p>With the assignment fixed, the training loss (the paper's "Hungarian loss", Eq. 2) trains every slot's class, real or "no object", with cross-entropy, and trains the box only for slots matched to real objects:</p>
+<div class="eq"><div class="tex tex-display">\mathcal{L}_{\rm Hungarian} = \sum_{i=1}^{N}\Big[-\log \htmlClass{t-blue}{\hat{p}_{\hat\sigma(i)}(c_i)} + \mathbb{1}_{\{c_i\neq\varnothing\}}\,\mathcal{L}_{\rm box}\big(\htmlClass{t-yellow}{b_i}, \htmlClass{t-blue}{\hat{b}_{\hat\sigma(i)}}\big)\Big]</div></div>
+<p>The box loss mixes two distances: <span class="tex">\mathcal{L}_{\rm box} = \lambda_{\rm iou}\,\mathcal{L}_{\rm GIoU} + \lambda_{\rm L1}\,\lVert b - \hat b\rVert_1</span>, with <span data-claim="pg-detr-lambda-l1">lambda_L1 = 5</span> and <span data-claim="pg-detr-lambda-iou">lambda_iou = 2</span>. L1 alone would treat a 10-pixel error the same on a tiny box and a huge one; the GIoU (generalized intersection over union) term is scale-invariant and still gives a signal when two boxes do not overlap at all. Because most slots are "no object", their class term is down-weighted by a <span data-claim="pg-detr-noobj">factor 10</span>.</p>
+</section>
+
+<section id="ch-queries" class="chapter">
+<h2>Object queries and a decoder that talks to itself</h2>
+<p>Where do the 100 slots come from? The architecture is almost boring, which is the point. A ResNet turns the image into a coarse grid of features, a transformer encoder lets every grid cell attend to every other, and a transformer decoder reads that grid through 100 learned input vectors called <b class="c-blue">object queries</b>. Each query becomes one slot's (class, box).</p>
+<p>The decoder has two kinds of attention. Cross-attention lets each query read the image. Self-attention lets the queries read <em>each other</em>, and that is how they coordinate: if two queries are drifting toward the same car, self-attention gives them a way to notice, and the matching loss gives one of them a reason to back off.</p>
+<p>The paper tests this directly. It attaches the prediction heads after every decoder layer and runs classic NMS on each layer's output. NMS helps the first layer, which still produces duplicates, but the benefit fades with depth and slightly hurts at the last layers. From the first decoder layer to the last, AP rises by <span data-claim="pg-detr-decoder-gain">+8.2 AP</span>.</p>
+
+<figure class="viz" id="viz-decoder-layers" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="dec-canvas" aria-label="Predicted boxes per decoder layer; duplicates fade layer by layer" role="img"></canvas>
+  <div class="controls">
+    <label>Decoder layer <input type="range" id="dec-layer" min="1" max="6" step="1" value="1"><span id="dec-layer-val">1</span></label>
+    <button type="button" id="btn-dec-l1">Layer 1</button>
+    <button type="button" id="btn-dec-l6">Layer 6</button>
+    <button type="button" id="btn-dec-play">Play layers 1 to 6</button>
+    <button type="button" id="btn-dec-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="dec-readout" aria-live="polite"></p>
+  <figcaption>Toy model of the paper's qualitative finding: early decoder layers leave several confident slots on the same object; later layers settle on one slot per object while the others drift to "no object" (brown, faded). The animation is illustrative; only the first-to-last-layer AP gain quoted above is from the paper.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('dec-canvas'), out = document.getElementById('dec-readout');
+  const rng = document.getElementById('dec-layer'), rv = document.getElementById('dec-layer-val');
+  const OBJ = [{ x1: .08, y1: .35, x2: .34, y2: .82 }, { x1: .44, y1: .18, x2: .56, y2: .82 }, { x1: .66, y1: .5, x2: .92, y2: .82 }];
+  const r = PE.rng(11), SL = [];
+  OBJ.forEach((o, oi) => { const [cx, cy, w, h] = PE.cxcywh(o);
+    for (let k = 0; k < 3; k++) SL.push({ o: oi, win: k === 0, j: [(r() - .5) * w * .5, (r() - .5) * h * .3, 1 + (r() - .5) * .5, 1 + (r() - .5) * .3], b0: [cx, cy, w, h] }); });
+  let L = 1;
+  function conf(s, l) { const t = (l - 1) / 5; return s.win ? .55 + .4 * t : Math.max(.03, .6 - .62 * t); }
+  const cv = PE.canvas(el, .45, (ctx, W, H) => {
+    PE.scene(ctx, W, H); OBJ.forEach(o => { PE.thing(ctx, o, W, H, PE.css('--yellow')); PE.strokeBox(ctx, o, W, H, PE.css('--yellow'), 1.2, [3, 3]); });
+    const t = (L - 1) / 5; let shown = 0;
+    SL.forEach(s => { const [cx, cy, w, h] = s.b0, k = s.win ? 1 - t : 1 - .3 * t;
+      const b = PE.fromC(cx + s.j[0] * k, cy + s.j[1] * k, w * (1 + (s.j[2] - 1) * k), h * (1 + (s.j[3] - 1) * k)), c = conf(s, L);
+      const on = c > .3; if (on) shown++;
+      const col = s.win && t > .6 ? PE.css('--green') : PE.css('--blue');
+      PE.strokeBox(ctx, b, W, H, on ? col : PE.css('--brown'), on ? 2.2 : 1, on ? null : [3, 4], on ? 1 : .4);
+      if (on) PE.label(ctx, c.toFixed(2), b.x1 * W + 3, b.y1 * H + 12, col, 11); });
+    out.textContent = `Layer ${L}: ${shown} confident boxes for 3 objects (${shown - 3} duplicate${shown - 3 === 1 ? '' : 's'}).`;
+  });
+  function setL(l) { L = l; rng.value = String(Math.round(l)); rv.textContent = String(Math.round(l)); cv.redraw(); }
+  let stop = () => {};
+  rng.oninput = () => { stop(); setL(+rng.value); };
+  document.getElementById('btn-dec-l1').onclick = () => { stop(); setL(1); };
+  document.getElementById('btn-dec-l6').onclick = () => { stop(); setL(6); };
+  document.getElementById('btn-dec-play').onclick = () => { stop(); stop = PE.animate(3000, u => setL(1 + 5 * u)); };
+  document.getElementById('btn-dec-reset').onclick = () => { stop(); setL(1); };
+})();
+</script>
+
+<p>Two details matter for what comes next. First, the object queries are just learned vectors; they do not depend on the image, and nothing in them says "I am a box at this position". Second, because attention is blind to order, DETR adds its positional information at every attention layer, not only once at the input: sine encodings of pixel position on the image side, and the learned object queries on the decoder side. Keep both in mind: the follow-up papers are largely about what an object query should really be.</p>
+</section>

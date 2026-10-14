@@ -1,0 +1,110 @@
+<style>
+#ch-s4 #s4flow-canvas { margin-top:.2rem; }
+</style>
+<section id="ch-s4" class="chapter">
+<h2>S4: structure and the convolution view</h2>
+<p>Drop the <span class="tex">1/t</span> from HiPPO and the memory becomes time-invariant: the same <span class="tex">A</span>, <span class="tex">B</span> and <span class="tex">C</span> at every step. Then one system can be computed in three ways, and one of them trains like a convolutional network, every position at once.</p>
+
+<figure class="viz" id="viz-s4-views">
+  <span class="badge computed">Computed</span>
+  <canvas id="s4-views-canvas" role="img" aria-label="Top: a sequence of blue input tokens and the green output of one small state-space model, computed three ways: a continuous curve, dots from the recurrence, and rings from the convolution, all on top of each other. Bottom: the yellow convolution kernel, a row of weights that decay with the lag."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-s4-all" data-view="all" aria-pressed="true">All three</button>
+    <button type="button" id="btn-s4-cont" data-view="cont" aria-pressed="false">Continuous</button>
+    <button type="button" id="btn-s4-rec" data-view="rec" aria-pressed="false">Recurrent</button>
+    <button type="button" id="btn-s4-conv" data-view="conv" aria-pressed="false">Convolutional</button>
+    <label for="s4-k">Output position <input type="range" id="s4-k" min="0" max="63" step="1" value="44"></label>
+  </div>
+  <div class="controls">
+    <label for="s4-dt">Step size &Delta; <input type="range" id="s4-dt" min="0" max="1000" step="1" value="500"></label>
+    <button type="button" id="btn-s4-dt-small">Small &Delta;</button>
+    <button type="button" id="btn-s4-dt-large">Large &Delta;</button>
+    <button type="button" id="btn-s4-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="s4-readout" aria-live="polite"></p>
+  <figcaption>Computed on a toy: one state-space model with <span class="tex">N = 4</span>, HiPPO-LegS's <span class="tex">A</span> with S4's sign (S4 Eq. (<span data-claim="s4-eq-hippo">2</span>)), <span class="tex">B_n = \sqrt{2n+1}</span>, a readout <span class="tex">C</span> drawn once from a standard normal (the initialization S4D describes), and 64 input tokens of our choosing. The recurrence uses the bilinear rule of S4 Eq. (<span data-claim="s4-eq-bilinear">3</span>) and the kernel is S4 Eq. (<span data-claim="s4-eq-kernel">5</span>). The continuous curve is the exact solution of the differential equation with each token held for one step of length <span class="tex">\Delta</span>. The three views follow LSSL's Fig. 1.</figcaption>
+</figure>
+
+<p>The three views come from <a href="https://arxiv.org/abs/2110.13985v1">LSSL</a>, the paper between HiPPO and <a href="https://arxiv.org/abs/2111.00396v3">S4</a> (<span data-claim="page-s4-year">2021</span>). S4 writes the input as <span class="tex">u</span> and the state as <span class="tex">x</span>; here they stay <span class="tex">\htmlClass{t-blue}{x}</span> and <span class="tex">\htmlClass{t-yellow}{h}</span>. The <b>continuous</b> view is the differential equation <span class="tex">h'(t) = A\,h(t) + B\,x(t)</span> from two chapters ago. The <b>recurrent</b> view samples it every <span class="tex">\Delta</span> and steps the state forward one token at a time, like an RNN. The <b>convolutional</b> view unrolls that recurrence. Because <span class="tex">A</span>, <span class="tex">B</span> and <span class="tex">C</span> are the same at every step, the input from <span class="tex">j</span> steps ago always reaches the output with the same weight, <span class="tex">C\bar A^{\,j}\bar B</span>. Line those weights up and you have one long filter, the kernel <span class="tex">\bar K</span>, and the whole output is the input convolved with it.</p>
+
+<div class="eq" id="eq-s4-rec" data-build data-viz="viz-s4-views"><div class="tex tex-display">
+\htmlData{step=1, link=state}{\htmlClass{t-yellow}{h_k} = \bar A\, \htmlClass{t-yellow}{h_{k-1}}} \htmlData{step=2, link=input}{+ \bar B\, \htmlClass{t-blue}{x_k}}, \qquad \htmlData{step=3, link=output}{\htmlClass{t-green}{y_k} = C\, \htmlClass{t-yellow}{h_k}}, \qquad \htmlData{step=4, link=delta}{\bar A = \big(I - \tfrac{\Delta}{2} A\big)^{-1}\big(I + \tfrac{\Delta}{2} A\big),\;\; \bar B = \big(I - \tfrac{\Delta}{2} A\big)^{-1} \Delta B}
+</div></div>
+<p class="eqno">The recurrent view with the bilinear rule: S4 Eq. (<span data-claim="s4-eq-bilinear">3</span>); LSSL Eqs. (4) and (5).</p>
+<div class="eq" id="eq-s4-kernel" data-build data-viz="viz-s4-views"><div class="tex tex-display">
+\htmlData{step=1, link=kernel}{\bar K = \big(C\bar B,\; C\bar A\bar B,\; C\bar A^{2}\bar B,\; \dots,\; C\bar A^{L-1}\bar B\big)} \qquad \htmlData{step=2, link=output input}{\htmlClass{t-green}{y} = \bar K \ast \htmlClass{t-blue}{x}}
+</div></div>
+<p class="eqno">The convolutional view: S4 Eqs. (<span data-claim="s4-eq-conv">4</span>) and (<span data-claim="s4-eq-kernel">5</span>); LSSL Eqs. <span data-claim="lssl-eq-conv">(6)</span> and <span data-claim="lssl-eq-krylov">(7)</span>, where Eq. (6) drops a <span class="tex">C</span> by a typo.</p>
+<ul class="gloss">
+  <li><span class="tex">\bar A, \bar B</span>: the continuous <span class="tex">A, B</span> turned into a per-token step of size <span class="tex">\Delta</span>. S4 uses the bilinear rule, as HiPPO did; Mamba will use a different one (zero-order hold).</li>
+  <li><span class="tex">\htmlClass{t-yellow}{h_k}</span>: the state after token <span class="tex">k</span>, the four yellow cells that ride along in the recurrent view.</li>
+  <li><span class="tex">\bar K</span>: entry <span class="tex">j</span> says how much the input <span class="tex">j</span> steps back adds to the output now. It is the yellow row at the bottom: the state's memory, unrolled.</li>
+  <li><span class="tex">\ast</span>: convolution. Output <span class="tex">k</span> is the sum of <span class="tex">\bar K_j\, x_{k-j}</span> over <span class="tex">j</span>: slide the flipped kernel along the input.</li>
+</ul>
+
+<p>The dots and the rings in the figure sit on each other exactly: the recurrent and convolutional views are the same arithmetic in a different order, and they agree to the last digit of a floating-point number. The continuous curve passes through them only up to the error of the bilinear step, <span data-claim="page-s4-cont-gap">0.0054</span> at the default <span class="tex">\Delta</span>, and the gap shrinks as <span class="tex">\Delta</span> does. Each view has a job. The convolution trains: all outputs at once, with no loop over time. The recurrence generates: one constant-cost step per new token. The continuous view sets the clock.</p>
+
+<p>Before you drag the step size: if each token covers less continuous time (a smaller <span class="tex">\Delta</span>), does the kernel get longer or shorter? Press <b>Small &Delta;</b>. It gets longer: at <span class="tex">\Delta = 0.03</span> the kernel stays above 5% of its peak for <span data-claim="page-s4-kernel-width-003">42</span> steps, against <span data-claim="page-s4-kernel-width-01">13</span> at <span class="tex">0.1</span> and <span data-claim="page-s4-kernel-width-03">4</span> at <span class="tex">0.3</span>. The same continuous memory, read with finer steps, spans more tokens. LSSL puts it this way: the length of dependencies a layer captures is roughly proportional to <span class="tex">1/\Delta</span>, so <span class="tex">\Delta</span> sets the width of the convolution.</p>
+
+<p>Against attention, this is the payoff. Training a layer is one fast Fourier transform (FFT) convolution per channel, about <span class="tex">L \log L</span> work instead of attention's <span class="tex">L^2</span> scores, and generating is one <span class="tex">O(N)</span> step per token (<span data-claim="s4-thm-recurrence">Theorem 2</span>) with no cache. In S4's own benchmark at length 4,096, S4 trained <span data-claim="s4-t3-s4-speed-4096">5.19</span> times as fast as a Transformer of the same size, in <span data-claim="s4-t3-s4-mem-4096">0.091</span> of its memory (Table 3); as a generator it was <span data-claim="s4-gen-speedup">60x</span> faster (abstract).</p>
+
+<h3>The hard part: computing the kernel</h3>
+<p>The convolution is only cheap if <span class="tex">\bar K</span> is. Building it the obvious way, multiplying by <span class="tex">\bar A</span> once per lag, costs <span class="tex">O(N^2 L)</span> operations and <span class="tex">O(NL)</span> memory, and LSSL paid exactly that. The usual fix for powers of a matrix is to diagonalize it, but HiPPO's <span class="tex">A</span> cannot be diagonalized safely: its eigenvector matrix has entries as large as <span class="tex">2^{4N/3}</span>, far beyond what floating point survives (S4 Lemma 3.2).</p>
+<p>S4's way around it, in plain words. HiPPO's <span class="tex">A</span> is <b>normal plus low rank</b>: a well-behaved matrix that a stable change of basis makes diagonal, plus one outer product <span class="tex">P Q^{\top}</span> (rank <span data-claim="s4-nplr-rank-legs">r=1</span> for LegS, <span data-claim="s4-thm-nplr">Theorem 1</span>). Next, S4 does not compute the kernel lag by lag. It computes the kernel's Fourier transform at <span class="tex">L</span> frequencies, where all the powers of <span class="tex">\bar A</span> collapse into a single matrix inverse. The Woodbury identity, a standard formula for inverting "easy matrix plus low rank", splits that inverse into the diagonal part and a small correction. For a diagonal matrix, each frequency is a sum over the <span class="tex">N</span> eigenvalues <span class="tex">\lambda_j</span> of terms shaped like <span class="tex">1/(\omega - \lambda_j)</span>, a Cauchy kernel, a well-studied computation. One inverse FFT turns the <span class="tex">L</span> values back into <span class="tex">\bar K</span> (<span data-claim="s4-alg">Algorithm 1</span>). The theory cost is <span class="tex">\tilde O(N + L)</span> operations (<span data-claim="s4-thm-convolution">Theorem 3</span>, the tilde hiding log factors); the released code runs the simple Cauchy loop instead, <span class="tex">O(NL)</span> time and <span class="tex">O(N + L)</span> memory (S4 Appendix A). Each channel trains <span data-claim="s4-trainable-5n">5N</span> complex numbers for this: the eigenvalues, <span class="tex">P</span>, <span class="tex">Q</span>, <span class="tex">B</span> and <span class="tex">C</span>, plus its step <span class="tex">\Delta</span>. You do not need to follow each step; the point is that HiPPO's memory became a layer whose kernel costs about as much to build as to apply.</p>
+
+<div class="aside">
+  <h4>Branch: is the low-rank part needed? (S4D)</h4>
+  <p><a href="https://arxiv.org/abs/2206.11893v2">S4D</a> drops the low-rank term and keeps only a diagonal <span class="tex">A</span>; the kernel becomes "<span data-claim="s4d-two-lines">2 lines of code</span>". It works, but only when the diagonal starts from HiPPO. On Path-X, S4D-LegS (HiPPO's diagonal part) reaches <span data-claim="s4d-lra-legs-pathx">91.95</span>% and S4D-Inv (a closed-form fit to it) <span data-claim="s4d-lra-inv-pathx">92.80</span>%, while S4D-Lin, a plain Fourier-like spread, fails (S4D Table 5). S4D's ablations also find random diagonal initializations clearly worse than HiPPO-based ones. S4's own ablation says the same of the full model: with <span class="tex">A</span> trained, random and HiPPO starts all fit the training set, but validation accuracy differs by over <span data-claim="s4-ablation-gap">15%</span> (S4 Sec. 4.4). The structure makes S4 fast; the HiPPO start makes it remember.</p>
+</div>
+
+<p>The test S4 was built for is the Long Range Arena (LRA): six classification tasks with inputs of <span data-claim="s4-lra-lengths">1K-16K</span> tokens. Its hardest task, Path-X, shows a 128 by 128 image as one sequence of <span data-claim="s4-pathx-length">16384</span> pixels and asks whether two marked dots are connected by a path. Every model before S4 scored at chance, <span data-claim="s4-pathx-random">50%</span>.</p>
+<table class="data"><thead><tr><th>Model</th><th>ListOps</th><th>Text</th><th>Retrieval</th><th>Image</th><th>Pathfinder</th><th>Path-X</th><th>Average</th></tr></thead><tbody>
+  <tr><td>Transformer</td><td><span data-claim="s4-lra-transformer-listops">36.37</span></td><td><span data-claim="s4-lra-transformer-text">64.27</span></td><td><span data-claim="s4-lra-transformer-retrieval">57.46</span></td><td><span data-claim="s4-lra-transformer-image">42.44</span></td><td><span data-claim="s4-lra-transformer-pathfinder">71.40</span></td><td>failed</td><td><span data-claim="s4-lra-transformer-avg">53.66</span></td></tr>
+  <tr><td>S4, updated row</td><td><span data-claim="s4-lra-s4-listops">59.60</span></td><td><span data-claim="s4-lra-s4-text">86.82</span></td><td><span data-claim="s4-lra-s4-retrieval">90.90</span></td><td><span data-claim="s4-lra-s4-image">88.65</span></td><td><span data-claim="s4-lra-s4-pathfinder">94.20</span></td><td><span data-claim="s4-lra-s4-pathx">96.35</span></td><td><span data-claim="s4-lra-s4-avg">86.09</span></td></tr>
+</tbody></table>
+<p class="note">Accuracy in percent, S4 v3 Table 4 (Transformer row as reported there). The S4 row is the updated one; its Appendix D.5 says it comes from the S4D setup (bidirectional, GLU mixing, small changes to hyperparameters). S4 v3's prose still quotes the original numbers: an average of <span data-claim="s4-lra-avg-text">80.48%</span> and <span data-claim="s4-pathx-text">88%</span> on Path-X (Table 10's "original" row). Both rows beat chance on Path-X, the first models to do so.</p>
+
+<h3>Inside an S4 layer: forward, then backward</h3>
+<p>One S4 layer is <span class="tex">H</span> copies of the toy above, one per feature channel, each with its own <span class="tex">N</span>-dimensional state and its own <span class="tex">\Delta</span>, followed by a step that mixes the channels. The stepper uses the Path-X configuration, so every shape is the paper's.</p>
+<figure class="viz archflow" id="viz-s4flow">
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-s4flow-input" aria-pressed="false">1 Input</button>
+    <button type="button" id="btn-s4flow-kernel" aria-pressed="false">2 Kernel</button>
+    <button type="button" id="btn-s4flow-conv" aria-pressed="false">3 Convolution</button>
+    <button type="button" id="btn-s4flow-skip" aria-pressed="false">4 Skip</button>
+    <button type="button" id="btn-s4flow-act" aria-pressed="false">5 Mixing</button>
+    <button type="button" id="btn-s4flow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-s4flow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-s4flow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Configuration">
+    <span>config</span>
+    <button type="button" id="btn-s4flow-upd" aria-pressed="true">Updated (S4D)</button>
+    <button type="button" id="btn-s4flow-orig" aria-pressed="false">Original (S4 v3)</button>
+  </div>
+  <canvas id="s4flow-canvas" role="img" aria-label="An S4 layer as a diagram: pixels are mapped to H channels; per-channel SSM parameters generate a kernel; an FFT convolution applies it; a D skip is added; a nonlinearity and a channel-mixing map follow; after six layers a mean pool and head feed the loss. In the backward stages red arrows run from the loss back through every box to the SSM parameters."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-s4flow-prev">Previous</button>
+    <button type="button" id="btn-s4flow-next">Next</button>
+    <button type="button" id="btn-s4flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="s4flow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>A <b class="c-blue">sequence</b> of pixels comes in. Each channel's <b class="c-yellow">SSM parameters</b> become a kernel, the kernel is applied by FFT convolution, and a <b class="c-green">mixing</b> step lets the channels talk. Six such layers, then one score per class and a <b class="c-red">loss</b>. Press <b>1 Input</b>, then <b>Next</b>. Before the backward stages: which boxes will the gradient reach?</p></div>
+    <div data-stage="input" hidden><h4>1. Pixels become channels</h4><p>A Path-X image is <span data-claim="s4-pathx-grid">128 x 128</span> pixels, read in order as a sequence of <span data-claim="s4-pathx-length">16384</span>. A batch holds <span data-claim="s4-cfg-pathx-batch">32</span> of them. Each pixel is mapped to <span data-claim="s4-cfg-pathx-h">256</span> features; S4 does not describe this input map, so its form here is our reading.</p></div>
+    <div data-stage="kernel" hidden><h4>2. Every channel builds its kernel</h4><p>Each of the 256 channels has its own SSM with state size <span data-claim="s4-cfg-lra-n">N=64</span>, stored in the normal-plus-low-rank form: <span data-claim="s4-trainable-5n">5N</span> complex numbers and a step <span class="tex">\Delta</span>. Algorithm 1 turns them into a kernel as long as the whole sequence. The updated configuration is bidirectional: two kernels per channel placed back to back, one reading forward and one backward (S4D Appendix B).</p></div>
+    <div data-stage="conv" hidden><h4>3. One long convolution</h4><p>Each channel's input is convolved with its kernel by FFT, padded so the convolution does not wrap around (S4 calls it a non-circular convolution). The kernel spans all 16,384 positions, so one layer can connect the first pixel to the last. S4's Fig. 2 shows learned Path-X kernels: local in the first layer, spanning the whole image in the last.</p></div>
+    <div data-stage="skip" hidden><h4>4. The D skip</h4><p>S4 adds <span class="tex">D\,u</span>, the channel's own input times a learned number, which its paper sets aside as "a skip connection" that "is easy to compute". One <span class="tex">D</span> per channel is our reading of the shapes.</p></div>
+    <div data-stage="act" hidden><h4>5. Nonlinearity and mixing</h4><p>So far the 256 channels never met. In the original configuration a pointwise nonlinearity follows (S4 v3 does not say which) and then a position-wise linear map <span class="tex">W</span> mixes them. In the updated one both jobs are done by a gated linear unit (GLU), <span class="tex">(W_1 y) \circ \sigma(W_2 y)</span>: the sigmoid gate is the nonlinearity and <span class="tex">W_1</span> mixes. Switch the configuration to compare the shapes.</p></div>
+    <div data-stage="loss" hidden><h4>6. Six layers, then one score per class</h4><p>The layer repeats <span data-claim="s4-cfg-pathx-depth">6</span> times, with batch normalization before each. After the last one the outputs are averaged over all positions (S4 Appendix D.2) and a head gives two scores: connected or not. The loss compares them with the label; the paper does not name it, and the standard choice, cross-entropy, is our reading.</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>Everywhere. From the loss back through the head, every mixing map and gate, every <span class="tex">D</span>, through each FFT convolution into its kernel, and through the kernel algorithm (inverse FFT, Woodbury, Cauchy sums) into the eigenvalues, <span class="tex">P</span>, <span class="tex">Q</span>, <span class="tex">B</span>, <span class="tex">C</span> and <span class="tex">\Delta</span>. So <span class="tex">A</span> is trained, through its structured form, and it starts at HiPPO. Nothing is frozen; LSSL had also tried a frozen <span class="tex">A</span>.</p></div>
+    <div data-stage="update" hidden><h4>8. The step</h4><p><span data-claim="s4-cfg-optimizer">AdamW</span> moves every weight. Path-X used learning rate <span data-claim="s4-cfg-pathx-lr">0.0005</span> for <span data-claim="s4-cfg-pathx-epochs">100</span> epochs in the original run, and <span data-claim="page-s4-s4d-pathx-lr">0.0005</span> for <span data-claim="page-s4-s4d-pathx-epochs">50</span> epochs with weight decay <span data-claim="page-s4-s4d-pathx-wd">0.05</span> and a cosine schedule in the updated one, where each <span class="tex">\Delta</span> starts between <span data-claim="s4d-dt-pathx">(0.0001, 0.01)</span>. The learning rate on the SSM parameters is capped at <span data-claim="s4-cfg-hippo-lr">0.001</span>, "since the HiPPO equation is crucial to performance" (S4 Appendix D.2).</p></div>
+  </div>
+  <figcaption>Computed: shapes from the Path-X rows of S4 Table 11 (original: <span data-claim="s4-cfg-pathx-depth">6</span> layers, <span data-claim="s4-cfg-pathx-h">256</span> channels) and S4D Table 12 (updated: <span data-claim="page-s4-s4d-pathx-depth">6</span> layers, <span data-claim="page-s4-s4d-pathx-h">256</span> channels, state size <span data-claim="page-s4-s4d-pathx-n">64</span>, batch <span data-claim="page-s4-s4d-pathx-batch">32</span>). The input map, one <span class="tex">D</span> per channel, the residual connections and the loss's name are our reading.</figcaption>
+</figure>
+
+<p>S4 made the HiPPO memory fast and trainable. But look again at the kernel: once training ends it is fixed. Every input, a key word or filler, is weighed by its distance alone. The next act starts there.</p>
+</section>

@@ -1,0 +1,149 @@
+<p class="kicker"><span class="act-n">Act I</span>The problem</p>
+<section id="ch-score" class="chapter">
+<h2>Learning from a score, not an answer</h2>
+<ul class="problems" aria-label="The three problems of reinforcement learning; filled tags are this chapter's topic"><li class="on">Exploration</li><li class="on">Credit assignment</li><li class="on">Data from your own choices</li></ul>
+<p>You know how to train a classifier: show it an image, tell it the right label, and nudge the weights toward that label. This chapter asks what changes when nobody can tell the model the right answer, only how well it did. The answer has three parts, and they give this whole course its shape.</p>
+
+<h3>The loop</h3>
+<p>Reinforcement learning has two players. The <em>agent</em> is the learner, the thing you train. The <em>environment</em> is everything else: a game, a robot's body and its room, a person using an app. They take turns. At each step <span class="tex">t</span> the agent sees the <em>state</em> <span class="tex">S_t</span>, a description of the situation, and picks an <em>action</em> <span class="tex">A_t</span>. The environment answers with a <b class="c-yellow">reward</b> <span class="tex">R_{t+1}</span>, a single number, and the next state <span class="tex">S_{t+1}</span>. Then the loop repeats. The <a href="#hero-canvas">figure at the top of the page</a> ends on this loop.</p>
+<p>The rule the agent uses to pick actions is its <b class="c-green">policy</b>, written <span class="tex">\pi</span>. Training means changing the policy so that the rewards add up to more. That is the whole job. The difficulty is in what the reward does not tell you.</p>
+
+<h3>Same task, two kinds of feedback</h3>
+<p>The figure below is a tiny world. A robot stands in the middle of a track of seven cells. A charger is at one end, and the robot has five moves to reach it. You are the agent: pick a kind of feedback, then press Left and Right.</p>
+
+<figure class="viz" id="viz-track" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Kind of feedback">
+    <span class="lbl">Feedback</span>
+    <button type="button" id="btn-track-sup" aria-pressed="false">Supervised</button>
+    <button type="button" id="btn-track-rl" aria-pressed="false">Reinforcement</button>
+  </div>
+  <canvas id="track-canvas" role="img" aria-label="A track of seven cells with a white robot in the middle cell. In supervised mode a green arrow labelled teacher points toward the charger, which is drawn with a yellow ring and +1, and each move in the row of move boxes gets a green tick or a red cross. In reinforcement mode both ends show a question mark, the move boxes get no marks, and a yellow score appears only when the episode ends. Below, a strip counts how many times each cell has been visited, and a line lists the scores of past episodes."></canvas>
+  <div class="controls" role="group" aria-label="Moves">
+    <button type="button" id="btn-track-left">Left</button>
+    <button type="button" id="btn-track-right">Right</button>
+    <button type="button" id="btn-track-new">New episode</button>
+    <button type="button" id="btn-track-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="track-readout" aria-live="polite"></p>
+  <figcaption>A toy world: seven cells, start in the middle, five moves, +1 for reaching the charger and 0 for everything else. Each kind of feedback has its own fixed world, and Reset does not move the charger, just as a real environment keeps its rules while you learn them.</figcaption>
+</figure>
+
+<p><b>Make a guess before you start.</b> Play one episode with each kind of feedback. After which one could you say exactly which move was wrong?</p>
+<p>With <b>Supervised</b> feedback, a teacher shows the right move before each press and grades it after. This is how you train a classifier: every input comes with its correct answer. With <b>Reinforcement</b> feedback, there is no teacher. You press, nothing is said, and when the episode ends you get one number: +1 if you reached the charger, 0 if not. Play a few reinforcement episodes. Three things go wrong that never go wrong for a classifier.</p>
+
+<h3>Problem 1: the score does not say what would have been better</h3>
+<p>A score of 0 says only "that did not work". It does not say which way the charger was. The only way to find out is to try the other way. Trying actions you are unsure about, to learn what they are worth, is called <em>exploration</em>. Exploration has a price: while you explore, you are not doing what you currently think is best. Doing the best-looking thing is called <em>exploitation</em>. Sutton and Barto put the tension bluntly: "<span data-claim="sb-explore-exploit-dilemma">neither exploration nor exploitation can be pursued exclusively without failing at the task</span>". It runs through the whole course.</p>
+<p>Think of choosing a restaurant. Your favorite is reliable. A new place might be better or worse. If you never try new places, you never find a better one. If you always try new places, you rarely eat well.</p>
+
+<h3>Problem 2: the score comes late</h3>
+<p>When an episode scores 0 after five moves, which move was the mistake? Maybe the first move went the wrong way. Maybe every move did. The score is one number for the whole episode, and it does not say which actions earned it. Deciding how much credit or blame each earlier action deserves is the <em>credit assignment</em> problem. In chess the only score is the result at the end, after dozens of your moves.</p>
+
+<h3>Problem 3: your data comes from your own choices</h3>
+<p>Look at the strip "cells you have seen". If you always press Right, you never see the left end of the track, so you never learn what is there. A classifier's training set is fixed before training starts. An agent's data is produced by its own policy: change the policy and the data changes with it. So the data is correlated (each state looks like the one before), and it shifts while you train. Much of chapters 7 to 12 is about living with this.</p>
+
+<h3>The goal as one equation</h3>
+<p>The sum of the rewards in an episode is its <b class="c-yellow">return</b>, <span class="tex">G</span>. A policy is good if its return is high on average over many episodes. Read the equation as "the score of a policy is its average return".</p>
+<div class="eq" id="eq-objective" data-build data-viz="viz-track"><div class="tex tex-display">
+\htmlData{step=1, link=policy}{\htmlClass{t-green}{J(\pi)}} = \htmlData{step=2, link=avg}{\mathbb{E}_{\pi}}\big[\,\htmlData{step=3, link=return}{\htmlClass{t-yellow}{G}}\,\big], \qquad \htmlClass{t-yellow}{G} = \htmlData{step=4, link=return}{\htmlClass{t-yellow}{R_1 + R_2 + \cdots + R_T}}
+</div></div>
+<p class="eqno">Our notation for the objective. The return here is Sutton and Barto's <span data-claim="sb-eq-episodic-return">Eq. 3.7</span>; chapter 3 adds a discount factor (their <span data-claim="sb-eq-discounted-return">Eq. 3.8</span>).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{J(\pi)}</span>: the objective, one number that says how good the policy <span class="tex">\pi</span> is.</li>
+  <li><span class="tex">\mathbb{E}_\pi</span>: the average over episodes in which the agent follows <span class="tex">\pi</span>. Episodes differ because the policy can be random and because the environment can be.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{G}</span>: the return of one episode, all its rewards added up.</li>
+  <li><span class="tex">R_1, \dots, R_T</span>: the rewards of one episode, which ends at step <span class="tex">T</span>.</li>
+</ul>
+<p>Try it on the track, with the charger on the right.</p>
+<ul>
+  <li>Right, Right, Right reaches the charger. The rewards are 0, 0, +1, so <span class="tex">G = 1</span>.</li>
+  <li>An episode that runs out of moves has five rewards of 0, so <span class="tex">G = 0</span>.</li>
+  <li>A policy that presses at random needs three more Rights than Lefts within five moves. That happens with Right, Right, Right (1 chance in 8) or with one Left among the first three presses and four Rights (3 sequences, each 1 chance in 32). So <span class="tex">J = 4/32 + 3/32 = 7/32 \approx 0.22</span>, derived here. The exercise below measures <span data-computed>0.216</span> by simulation.</li>
+  <li>"Always press Right" has <span class="tex">J = 1</span> here, and <span class="tex">J = 0</span> if the charger is on the left.</li>
+</ul>
+<p>You might think a reward is a kind of label. It is not. A label says what the right output was. A reward says how good the output you chose was, and it says nothing about the outputs you did not choose. In Sutton and Barto's words, the training signal "<span data-claim="sb-evaluative-feedback">evaluates the actions taken rather than instructs by giving correct actions</span>". So a classifier gets a gradient toward the right answer from every example, while an agent must find out, by trying, which direction is better.</p>
+
+<details class="check">
+  <summary>Check yourself: an agent plays a game that gives +1 at step 50 and 0 at every other step. Which of the three problems does this create?</summary>
+  <p>Credit assignment, above all. Fifty actions came before the score, and the score does not say which of them mattered. The agent must spread the credit back over time; chapters 3 to 6 build the tools for that. Exploration is involved too: an agent that never reaches step 50 by chance never sees a reward at all.</p>
+</details>
+<details class="check">
+  <summary>Check yourself: a recommender learns only from clicks on the items it chose to show. Which problem is that?</summary>
+  <p>Data from your own choices. The system never sees how people would react to items it never showed, so its data is shaped by its own policy. It is also an exploration problem: to learn about other items, it must sometimes show them.</p>
+</details>
+
+<h3>The road map</h3>
+<p>Each later chapter gives you a tool for one of the three problems. The tags under each chapter title mark which ones.</p>
+<table class="data">
+  <thead><tr><th>Problem</th><th style="text-align:left">Tools on this page</th></tr></thead>
+  <tbody>
+    <tr><td>Exploration</td><td style="text-align:left">epsilon-greedy and UCB (<a href="#ch-bandits">chapter 2</a>), exploring while you learn to control (<a href="#ch-qlearn">chapter 7</a>), entropy bonuses (chapters <a href="#ch-ac">11</a> and <a href="#ch-continuous">13</a>)</td></tr>
+    <tr><td>Credit assignment</td><td style="text-align:left">returns and discounting (<a href="#ch-mdp">chapter 3</a>), values and the Bellman equation (chapters <a href="#ch-bellman">4</a> and <a href="#ch-dp">5</a>), TD learning (<a href="#ch-mctd">chapter 6</a>), advantages and GAE (<a href="#ch-ac">chapter 11</a>)</td></tr>
+    <tr><td>Data from your own choices</td><td style="text-align:left">on- and off-policy learning (<a href="#ch-qlearn">chapter 7</a>), the deadly triad (<a href="#ch-approx">chapter 8</a>), replay buffers (<a href="#ch-dqn">chapter 9</a>), trust regions and PPO (<a href="#ch-ppo">chapter 12</a>)</td></tr>
+  </tbody>
+</table>
+
+<h3>Where this came from</h3>
+<p>Learning from consequences is older than computers. Thorndike's experiments with cats in puzzle boxes (<span data-claim="sb-thorndike-puzzle-box-year">1898</span>) led to his Law of Effect (<span data-claim="sb-law-of-effect-year">1911</span>): of the responses an animal makes in a situation, those closely followed by satisfaction become more firmly connected with that situation. Minsky named the credit-assignment problem in <span data-claim="sb-minsky-credit-assignment-year">1961</span> with one question: "<span data-claim="sb-credit-assignment-question">How do you distribute credit for success among the many decisions that may have been involved in producing it?</span>" In engineering, Bellman built dynamic programming and the Markov decision process in <span data-claim="sb-bellman-dp-year">1957</span>; they are the math of chapters 3 to 5. Sutton and Barto, whose textbook this course follows, describe how these threads came together in the <span data-claim="sb-threads-joined">late 1980s</span>, with Watkins's Q-learning (<span data-claim="sb-watkins-qlearning-year">1989</span>) as the join. They call "<span data-claim="sb-rl-two-features">trial-and-error search and delayed reward</span>" the two most important features of reinforcement learning: our exploration and credit-assignment problems. The third problem is this page's framing of what happens when the data comes from your own policy, the theme of the deep RL chapters.</p>
+<p>The same loop now trains game players and language models. Starting from random play and given only the rules, AlphaZero reached superhuman play in chess, shogi and Go within <span data-claim="az-24h">24 hours</span>. And people preferred the answers of a <span data-claim="igpt-small-model">1.3B</span>-parameter model fine-tuned with reinforcement learning from human feedback over those of the <span data-claim="igpt-large-model">175B</span>-parameter GPT-3 (<a href="#ch-llm">chapter 15</a>).</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>What the agent, the environment, a state, an action, a reward and a policy are.</li>
+    <li>Why a reward is not a label.</li>
+    <li>The three problems of reinforcement learning, with one example each: exploration, credit assignment, and data from your own choices.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>If you can get labels, use them: supervised learning is far cheaper and more stable. Reach for reinforcement learning when the only feedback is a score that comes from acting, such as a game result, a robot reaching a goal, a person's rating, or a test that passes. Many real systems use both: a model is first trained with labels, then fine-tuned with rewards (<a href="#ch-llm">chapter 15</a>).</p>
+</div>
+
+<div class="exercise pe-wide" id="ex-score">
+  <h4>Code it yourself</h4>
+  <p>Write the loop yourself before you read ours: an environment with <code>reset</code> and <code>step</code>, a policy, and a running sum of rewards. The NumPy version uses the track from the figure. The PyTorch version runs the same loop on Gymnasium's CartPole (keep a pole upright on a moving cart; +1 per step, up to 500) with an untrained policy network.</p>
+  <div class="tabs" role="tablist" aria-label="Exercise language">
+    <button type="button" role="tab" id="btn-ex-score-np" aria-selected="true" aria-controls="ex-score-np">NumPy</button>
+    <button type="button" role="tab" id="btn-ex-score-pt" aria-selected="false" aria-controls="ex-score-pt" tabindex="-1">PyTorch</button>
+    <button type="button" class="copy" id="btn-ex-score-copy">Copy code</button>
+  </div>
+  <div role="tabpanel" id="ex-score-np" aria-labelledby="btn-ex-score-np">
+<!--code:ch01-score/numpy_ex.py-->
+    <p class="out-label">Output from our run</p>
+<!--out:ch01-score/numpy_ex.py-->
+  </div>
+  <div role="tabpanel" id="ex-score-pt" aria-labelledby="btn-ex-score-pt" hidden>
+    <p class="kit-note">Needs <code>pip install torch "gymnasium[classic-control]"</code>.</p>
+<!--code:ch01-score/torch_ex.py-->
+    <p class="out-label">Output from our run</p>
+<!--out:ch01-score/torch_ex.py-->
+  </div>
+  <p class="out-label">Try this</p>
+  <ul class="tryit">
+    <li>Add a policy that presses Right in even episodes and Left in odd ones. Predict its average return on each track before you run it.</li>
+    <li>Give the robot 7 moves instead of 5. Which policy gains, and why does only that one gain?</li>
+    <li>In the PyTorch version, replace the network with a one-line rule: push the cart toward the side the pole leans, <code>action = 1 if obs[2] &gt; 0 else 0</code>. Predict whether it beats the untrained network, then run it.</li>
+  </ul>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-track'), out = document.getElementById('track-readout');
+  const kit = KIT.track(document.getElementById('track-canvas'), { fig });
+  const modes = { sup: document.getElementById('btn-track-sup'), rl: document.getElementById('btn-track-rl') };
+  const say = () => { out.textContent = KIT.trackText(kit.state); };
+  const setMode = m => { kit.set(m); Object.entries(modes).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === m))); say(); };
+  modes.sup.addEventListener('click', () => setMode('sup'));
+  modes.rl.addEventListener('click', () => setMode('rl'));
+  document.getElementById('btn-track-left').addEventListener('click', () => { kit.act(0); say(); });
+  document.getElementById('btn-track-right').addEventListener('click', () => { kit.act(1); say(); });
+  document.getElementById('btn-track-new').addEventListener('click', () => { kit.newEpisode(); say(); });
+  document.getElementById('btn-track-reset').addEventListener('click', () => {
+    kit.reset(); Object.values(modes).forEach(b => b.setAttribute('aria-pressed', 'false')); say();
+  });
+  say();
+})();
+</script>
+</section>

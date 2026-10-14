@@ -1,0 +1,344 @@
+[
+ {
+  "id": "blip2-arch-two-halves",
+  "claim": "Q-Former structure",
+  "value": "two transformer submodules that share the same self-attention layers",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-queries-params",
+  "claim": "Status of the learned queries",
+  "value": "the queries are considered as model parameters",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-xattn-random",
+  "claim": "Cross-attention initialisation",
+  "value": "the cross-attention layers are randomly initialized",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-res-indep",
+  "claim": "Output count vs resolution",
+  "value": "independent of input image resolution",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-itc-max",
+  "claim": "ITC similarity over queries",
+  "value": "select the highest one as the image-text similarity",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITC paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-itc-inbatch",
+  "claim": "ITC negatives",
+  "value": "in-batch negatives instead of the momentum queue in BLIP",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITC paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-itm-avg",
+  "claim": "ITM score",
+  "value": "average the logits across all queries as the output matching score",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITM paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-itm-hardneg",
+  "claim": "ITM negatives",
+  "value": "hard negative mining strategy",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITM paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-dec-token",
+  "claim": "ITG first text token",
+  "value": "[DEC]",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITG paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-itg-through-queries",
+  "claim": "Why ITG forces the queries to carry the caption",
+  "value": "the information required for generating the text must be first extracted by the queries",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITG paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-joint",
+  "claim": "How stage-1 objectives are combined",
+  "value": "jointly optimize three pre-training objectives that share the same input format and model parameters",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-attached",
+  "claim": "Stage-2 setup",
+  "value": "with the frozen image encoder attached",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-fc",
+  "claim": "Stage-2 connector",
+  "value": "fully-connected (FC) layer",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-fc-dims",
+  "claim": "FC input and output widths",
+  "value": "adapts from the output dimension of the Q-Former to the input dimension of the chosen LLM",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Fig. 3 caption",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-prepend",
+  "claim": "Where the projected queries go",
+  "value": "prepended to the input text embeddings",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-opt",
+  "claim": "Decoder-based frozen LLM family",
+  "value": "OPT",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-trained image encoder and LLM",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-flant5",
+  "claim": "Encoder-decoder frozen LLM family",
+  "value": "FlanT5",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-trained image encoder and LLM",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-lm-loss",
+  "claim": "Stage-2 loss, decoder LLM",
+  "value": "language modeling loss",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-prefix-lm",
+  "claim": "Stage-2 loss, encoder-decoder LLM",
+  "value": "prefix language modeling loss",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-suffix",
+  "claim": "Prefix LM target",
+  "value": "The suffix text is used as the generation target for the LLM's decoder",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-batch1-l",
+  "claim": "Stage-1 batch size, ViT-L",
+  "value": "2320",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-batch1-g",
+  "claim": "Stage-1 batch size, ViT-g",
+  "value": "1680",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-batch2-opt",
+  "claim": "Stage-2 batch size, OPT",
+  "value": "1920",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-batch2-t5",
+  "claim": "Stage-2 batch size, FlanT5",
+  "value": "1520",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-fp16",
+  "claim": "Precision of frozen ViTs and LLMs (except FlanT5)",
+  "value": "FP16",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-bf16",
+  "claim": "Precision of frozen FlanT5",
+  "value": "BFloat16",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-optim",
+  "claim": "Optimizer",
+  "value": "AdamW",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-beta1",
+  "claim": "AdamW beta_1",
+  "value": "0.9",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-beta2",
+  "claim": "AdamW second beta (the paper prints it as beta_1 = 0.98, a typo)",
+  "value": "0.98",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-wd",
+  "claim": "Weight decay",
+  "value": "0.05",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-lr",
+  "claim": "Peak learning rate (both stages)",
+  "value": "1e-4",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-warmup",
+  "claim": "Linear warm-up",
+  "value": "2k steps",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-cosine",
+  "claim": "Schedule",
+  "value": "cosine learning rate decay",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-minlr2",
+  "claim": "Minimum learning rate, stage 2",
+  "value": "5e-5",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-res",
+  "claim": "Pre-training image size (square)",
+  "value": "224",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-aug",
+  "claim": "Augmentation",
+  "value": "random resized cropping and horizontal flipping",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-same-hparams",
+  "claim": "Hyper-parameters across models",
+  "value": "The same set of pre-training hyper-parameters are used for all models",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 Pre-training settings",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-arch-fit-more",
+  "claim": "Effect of the frozen image encoder on batch fit",
+  "value": "Due to the use of a frozen image encoder, we can fit more samples per GPU",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITC paragraph",
+  "uncertain": false
+ }
+]

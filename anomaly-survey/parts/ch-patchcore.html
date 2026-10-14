@@ -1,0 +1,146 @@
+<section id="ch-patchcore" class="chapter">
+<h2>A memory bank, thinned to a coreset</h2>
+<p>PatchCore keeps every normal patch feature in one memory bank that any test patch may search, so it assumes no shape and no fixed position. To keep the search fast, it then keeps only a small subset of the bank that still covers the whole cloud.</p>
+
+<figure class="viz" id="viz-patchcore" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-patchcore" class="pe3" tabindex="0" aria-label="A three-dimensional cloud of toy patch features from twenty good caps. Large blue points are the coreset that greedy selection keeps; faint blue points are the rest of the memory bank. A red segment marks the coverage radius: the bank point farthest from every kept point. The yellow point is the worst patch of the cap under inspection, with a dashed blue line to its nearest neighbor in the full bank and a red line to its nearest kept point. Drag or use the arrow keys to turn the cloud."></canvas>
+  <canvas id="cv-patchcore-side" role="img" aria-label="Left: the camera view of the cap under inspection with a red heat map of its patch scores against the kept points. Right: the coverage radius against the percentage of the bank kept, on a log axis, with the current choice marked and a dashed line at the scratch patch's distance to the full bank."></canvas>
+  <div class="controls" role="group" aria-label="Coreset size">
+    <span>Keep</span>
+    <button type="button" id="btn-patchcore-pct-100" aria-pressed="false">100% (full bank)</button>
+    <button type="button" id="btn-patchcore-pct-25" aria-pressed="false">25%</button>
+    <button type="button" id="btn-patchcore-pct-10" aria-pressed="true">10%</button>
+    <button type="button" id="btn-patchcore-pct-1" aria-pressed="false">1%</button>
+    <label>or slide <input type="range" id="rng-patchcore-pct" min="0" max="7" step="1" value="4" aria-label="Percentage of the bank to keep"> <output id="out-patchcore-pct">10%</output></label>
+  </div>
+  <div class="controls" role="group" aria-label="Greedy selection and cap under inspection">
+    <button type="button" id="btn-patchcore-run">Run greedy selection</button>
+    <span>Inspect</span>
+    <button type="button" id="btn-patchcore-good" aria-pressed="false">A good cap</button>
+    <button type="button" id="btn-patchcore-scratch" aria-pressed="true">A scratched cap</button>
+    <button type="button" id="btn-patchcore-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy data, real algorithm. The cloud holds all 4,500 patch features of twenty toy caps (three features each: horizontal against vertical edges, diagonal edges, brightness). Selection is PatchCore's greedy rule, seeded the way the official code seeds it (distance to ten random points). With three toy features there is nothing to project, so the random projection is skipped. On twenty test caps per defect type, the toy detects the scratch perfectly (image AUROC 1.000) from 5% kept upward, reaches 0.998 at 2%, and falls to 0.593 at 1%, where the coverage radius grows past the scratch (build/toy-patchcore.mjs).</figcaption>
+</figure>
+
+<p>Press <b>Run greedy selection</b> and watch the rule work: every new point is the bank point that is farthest from everything kept so far, and the red coverage radius shrinks with each pick. Now predict: <em>how few points can we keep before the radius jumps?</em> Slide down to 1%. The radius grows past the scratch's own distance, the good cap's worst patch scores as high as the scratch, and the two caps can no longer be told apart. Above a few percent, the coreset covers the cloud almost as well as the full bank, at a fraction of the search cost. In the paper's real setting the bank is far larger, so even <span data-claim="patchcore-pct-1">1%</span> keeps enough points.</p>
+
+<h3>Why keep every patch?</h3>
+<p>PaDiM (chapter 5) fits one Gaussian per patch position. That assumes the parts are aligned, and it forces every position's normal variation into one ellipse. SPADE (chapter 4) keeps raw features, but its pixel memory is too large to search, so it first picks the nearest training images with a coarse global feature. PatchCore drops both shortcuts. It stores every patch feature of every normal image in one bank, and each test patch searches all of it. A scratch at any position can match normal metal from any position; a patch matches only if something like it was seen somewhere.</p>
+<p>The features come from the middle of a frozen ImageNet network: the outputs of blocks <span data-claim="patchcore-layers">2 and 3</span> of a <span data-claim="patchcore-backbone">WideResNet50</span>, on images resized to <span data-claim="patchcore-resize">256</span> and center-cropped to <span data-claim="patchcore-crop">224</span> pixels. The paper argues that the deepest layers have low resolution and are biased toward ImageNet's object classes, while the earliest layers are too generic and too local; its layer ablation (Fig. 4) finds the best balance in the middle. Each feature is also made <em>locally aware</em>: it is averaged with its neighbors in a <span data-claim="patchcore-patchsize-p">3</span> by 3 window, so a patch knows a little about its surroundings without losing resolution.</p>
+
+<div class="eq" id="eq-pc-agg"><div class="tex tex-display">
+\phi_{i,j}\big(\mathcal{N}_p^{(h,w)}\big) = f_\text{agg}\Big(\big\{\phi_{i,j}(a,b) \;\big|\; (a,b)\in\mathcal{N}_p^{(h,w)}\big\}\Big), \qquad \htmlClass{t-blue}{\mathcal{M}} = \bigcup_{x_i\in\mathcal{X}_N} \mathcal{P}_{s,p}\big(\phi_j(x_i)\big)
+</div></div>
+<p class="eqno">Eq. 2 and Eq. 4 in PatchCore v2</p>
+<ul class="gloss">
+  <li><span class="tex">\phi_{i,j}(a,b)</span> is the feature vector of image <span class="tex">x_i</span> at layer <span class="tex">j</span> and grid cell <span class="tex">(a,b)</span>; <span class="tex">\mathcal{N}_p^{(h,w)}</span> is the <span class="tex">p \times p</span> block of cells around <span class="tex">(h,w)</span>.</li>
+  <li><span class="tex">f_\text{agg}</span> is adaptive average pooling: the block's vectors become one vector.</li>
+  <li><span class="tex">\mathcal{P}_{s,p}</span> collects these vectors at every cell (stride <span class="tex">s</span> = <span data-claim="patchcore-stride-s">1</span>), and the memory bank <span class="tex">\htmlClass{t-blue}{\mathcal{M}}</span> is the union over all normal training images <span class="tex">\mathcal{X}_N</span>.</li>
+</ul>
+<p>How do layers 2 and 3 become one vector? The paper says the layer-3 grid is rescaled to the layer-2 grid and the two are aggregated. The official code makes this concrete (code-only): layer 3 is upsampled bilinearly to layer 2's <span data-claim="patchcore-patch-grid">28 x 28</span> grid, each layer's neighborhood is average-pooled to <span data-claim="patchcore-pretrain-dim">1024</span> numbers, and the two vectors, laid end to end, are average-pooled again to a final <span data-claim="patchcore-target-dim">1024</span>. That last pooling averages neighboring numbers within each layer's half, so in effect the final vector is 512 numbers from layer 2 followed by 512 from layer 3 (our reading of PyTorch's adaptive pooling windows). There is no learned projection. The interlude after this chapter steps through every shape.</p>
+
+<h3>The coreset: cover the cloud with few points</h3>
+<p>A category with a few hundred training images gives a bank of hundreds of thousands of vectors (our computation for the <span data-claim="patchcore-mvtec-classes">15</span> MVTec AD categories: <span data-claim="patchcore-bank-total-full">2,845,136</span> in all). Searching it for every test patch is slow. Random subsampling is fast but leaves holes: rare normal patches lose all their neighbors and start to look anomalous. PatchCore instead asks for the subset with the best <em>coverage</em>, the one whose worst-covered bank point is as close as possible to a kept point.</p>
+
+<div class="eq" id="eq-pc-coreset" data-build data-viz="viz-patchcore"><div class="tex tex-display">
+\htmlData{step=1, link=core}{\htmlClass{t-blue}{\mathcal{M}_C^*} = \operatorname*{arg\,min}_{\mathcal{M}_C\subset\mathcal{M}}} \;\htmlData{step=2, link=bank}{\max_{\htmlClass{t-blue}{m}\in\htmlClass{t-blue}{\mathcal{M}}}}\;\htmlData{step=3, link=radius}{\htmlClass{t-red}{\min_{n\in\mathcal{M}_C} \lVert m - n \rVert_2}}
+</div></div>
+<p class="eqno">Eq. 5 in PatchCore v2 (minimax facility location)</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{\mathcal{M}_C}</span> is a candidate coreset of the target size: the large points in the figure.</li>
+  <li>For each bank point <span class="tex">\htmlClass{t-blue}{m}</span>, the inner <span class="tex">\min</span> is its distance to the nearest kept point. The <span class="tex">\max</span> takes the worst such point: that distance is the red coverage radius.</li>
+  <li>The best coreset <span class="tex">\mathcal{M}_C^*</span> makes the coverage radius as small as possible.</li>
+</ul>
+<p>Finding the exact best subset is NP-hard, so PatchCore uses the greedy approximation from active learning. Start with an empty coreset and add, one at a time, the bank point that is farthest from the coreset so far:</p>
+<div class="eq" id="eq-pc-greedy" data-build data-viz="viz-patchcore"><div class="tex tex-display">
+\htmlData{step=1, link=pick}{m_i \leftarrow \operatorname*{arg\,max}_{m\in\mathcal{M}-\mathcal{M}_C}}\; \htmlData{step=2, link=radius}{\htmlClass{t-red}{\min_{n\in\mathcal{M}_C} \lVert \psi(m) - \psi(n) \rVert_2}}, \qquad \htmlData{step=3, link=core}{\htmlClass{t-blue}{\mathcal{M}_C} \leftarrow \htmlClass{t-blue}{\mathcal{M}_C} \cup \{m_i\}}
+</div></div>
+<p class="eqno">Algorithm 1 in PatchCore v2</p>
+<ul class="gloss">
+  <li><span class="tex">m_i</span> is the next pick: the white point in the figure, sitting at the far end of the red radius.</li>
+  <li><span class="tex">\psi</span> is a random linear projection to fewer dimensions, used only to make the distance computations cheaper. The official code projects to <span data-claim="patchcore-proj-dim">128</span> dimensions (code-only). The coreset stores the original vectors, not the projected ones.</li>
+  <li>The loop stops at the target size: <span data-claim="patchcore-pct-25">25%</span>, <span data-claim="patchcore-pct-10">10%</span> or <span data-claim="patchcore-pct-1">1%</span> of the bank in the paper's tables. The paper does not say how the first point is chosen; the code starts from the mean distance to <span data-claim="patchcore-coreset-start-points">10</span> random points (code-only).</li>
+</ul>
+
+<h3>Scoring a test image</h3>
+<p>At test time the image goes through the same frozen path, and every patch finds its nearest neighbor in the coreset. The worst patch decides the image:</p>
+<div class="eq" id="eq-pc-score" data-build data-viz="viz-patchcore"><div class="tex tex-display">
+\htmlData{step=1, link=test}{\htmlClass{t-yellow}{m^{\text{test},*}}, m^* = \operatorname*{arg\,max}_{\htmlClass{t-yellow}{m^\text{test}}\in\mathcal{P}(x^\text{test})}}\;\htmlData{step=2, link=nn}{\operatorname*{arg\,min}_{m\in\mathcal{M}} \lVert \htmlClass{t-yellow}{m^\text{test}} - m\rVert_2}, \qquad \htmlData{step=3, link=nn}{\htmlClass{t-red}{s^*} = \lVert \htmlClass{t-yellow}{m^{\text{test},*}} - m^* \rVert_2}
+</div></div>
+<p class="eqno">Eq. 6 in PatchCore v2 (here <span class="tex">\mathcal{M}</span> is the coreset)</p>
+<ul class="gloss">
+  <li><span class="tex">\mathcal{P}(x^\text{test})</span> is the set of patch features of the test image; each one's nearest-neighbor distance is its patch score, and these scores form the anomaly map.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{m^{\text{test},*}}</span> is the test patch with the largest score (the yellow point), <span class="tex">m^*</span> its nearest kept neighbor, and <span class="tex">\htmlClass{t-red}{s^*}</span> their distance (the red line).</li>
+</ul>
+<p>The paper then reweights <span class="tex">s^*</span>: if the nearest normal neighbor <span class="tex">m^*</span> is itself far from its own neighbors in the bank, it was a rare normal pattern, and the score goes up.</p>
+<div class="eq" id="eq-pc-reweight"><div class="tex tex-display">
+s = \left(1-\frac{\exp \lVert m^{\text{test}, *} - m^* \rVert_2}{\sum_{m \in \mathcal{N}_b(m^*)} \exp \lVert m^{\text{test},*} - m \rVert_2}\right) \cdot s^*
+</div></div>
+<p class="eqno">Eq. 7 in PatchCore v2</p>
+<p>Here <span class="tex">\mathcal{N}_b(m^*)</span> is the set of the <span class="tex">b</span> bank points nearest to <span class="tex">m^*</span>. Two caveats matter if you use the method. The paper never states <span class="tex">b</span>. And the official code does not implement this step at all: its image score is the plain maximum of the patch scores, each the squared distance (faiss returns squared L2) to the <span data-claim="patchcore-knn-k">1</span> nearest bank vector (code-only). The anomaly map is the grid of patch scores, upsampled to the input size and smoothed with a Gaussian of width <span data-claim="patchcore-sigma">4</span> pixels, a value the paper says it did not tune.</p>
+
+<h3>What it scores</h3>
+<p>On MVTec AD (one model per category, all training images, <span data-claim="patchcore-crop">224</span>-pixel crops), PatchCore reached an image AUROC of <span data-claim="patchcore-mvtec-img-auroc-25pct">99.1</span> with <span data-claim="patchcore-pct-25">25%</span> of the bank kept, and <span data-claim="patchcore-mvtec-img-auroc-1pct">99.0</span> with only <span data-claim="patchcore-pct-1">1%</span>, a <span data-claim="patchcore-pct-1-reduction">100x</span> smaller bank. That is the coreset's whole argument in one row.</p>
+<table class="data">
+  <thead><tr><th>MVTec AD, mean over <span data-claim="patchcore-mvtec-classes">15</span> categories</th><th>Image AUROC</th><th>Pixel AUROC</th><th>PRO</th></tr></thead>
+  <tbody>
+    <tr><td>PatchCore-25%</td><td><span data-claim="patchcore-mvtec-img-auroc-25pct">99.1</span></td><td><span data-claim="patchcore-mvtec-pix-auroc-25pct">98.1</span></td><td><span data-claim="patchcore-mvtec-pro-25pct">93.4</span></td></tr>
+    <tr><td>PatchCore-10%</td><td><span data-claim="patchcore-mvtec-img-auroc-10pct">99.0</span></td><td><span data-claim="patchcore-mvtec-pix-auroc-10pct">98.1</span></td><td><span data-claim="patchcore-mvtec-pro-10pct">93.5</span></td></tr>
+    <tr><td>PatchCore-1%</td><td><span data-claim="patchcore-mvtec-img-auroc-1pct">99.0</span></td><td><span data-claim="patchcore-mvtec-pix-auroc-1pct">98.0</span></td><td><span data-claim="patchcore-mvtec-pro-1pct">93.1</span></td></tr>
+    <tr><td>PaDiM (copied from its paper)</td><td><span data-claim="patchcore-t1-padim-img-auroc">95.3</span></td><td><span data-claim="patchcore-t2-padim-pix-auroc">97.5</span></td><td><span data-claim="patchcore-t3-padim-pro">92.1</span></td></tr>
+    <tr><td>SPADE (copied from its paper)</td><td><span data-claim="patchcore-t1-spade-img-auroc">85.5</span></td><td><span data-claim="patchcore-t2-spade-pix-auroc">96.0</span></td><td><span data-claim="patchcore-t3-spade-pro">91.7</span></td></tr>
+  </tbody>
+</table>
+<p class="note">Source: PatchCore v2, Tables 1, 2 and 3. The baseline rows are copied from the original papers. PaDiM's best published variant, with a backbone chosen per problem, reported <span data-claim="patchcore-t1-padim-star-img-auroc">97.9</span>; the PatchCore authors say they could not reproduce it. Measured against that number, PatchCore-25% cuts the image-level error by <span data-claim="patchcore-err-reduction">57%</span>.</p>
+<p>Speed comes from the same table that re-runs the baselines on one backbone (Table 5, WideResNet50, mean time per image including the backbone, on hardware the paper prints as "<span data-claim="patchcore-hardware">Nvidia Tesla V4</span>"; batch size not stated): PatchCore with the full bank took <span data-claim="patchcore-t5-100pct-time">0.6</span> s per image, with <span data-claim="patchcore-pct-10">10%</span> <span data-claim="patchcore-t5-10pct-time">0.22</span> s, and with <span data-claim="patchcore-pct-1">1%</span> <span data-claim="patchcore-t5-1pct-time">0.17</span> s. The re-run SPADE took <span data-claim="patchcore-t5-spade-rerun-time">0.66</span> s at an image AUROC of <span data-claim="patchcore-t5-spade-rerun-img-auroc">85.3</span>, and the re-run PaDiM <span data-claim="patchcore-t5-padim-rerun-time">0.19</span> s at <span data-claim="patchcore-t5-padim-rerun-img-auroc">95.4</span>. Chapter 15 puts these next to the faster families.</p>
+<p>Two ablations support the design. Thinning the bank by striding over the grid instead of by coreset loses accuracy fast: stride 2 gives an image AUROC of <span data-claim="patchcore-stride2-auroc">97.6%</span> and stride 3 <span data-claim="patchcore-stride3-auroc">96.8%</span>. And with few training images the memory bank still works: with 16 normal images per category, PatchCore-10% reached <span data-claim="patchcore-lowshot-img-pc10-16">95.4</span>, against <span data-claim="patchcore-lowshot-img-padim-16">85.5</span> for PaDiM and <span data-claim="patchcore-lowshot-img-spade-16">78.9</span> for SPADE (re-run, Table S5). Chapter 14 returns to this few-shot regime with a stronger backbone. With larger backbones and images, an ensemble of three networks at 320 pixels reached <span data-claim="patchcore-t4-ens320-img-auroc">99.6</span> (Table 4).</p>
+<p>The paper names its own limit: everything depends on how well ImageNet features transfer to the product. Position-free search has a second, quieter limit. A defect that looks like a normal structure somewhere else on the part (a drilled hole where a bolt hole should not be) finds a close match and stays quiet; PaDiM's per-position model can catch it. Later work adapts the features to the target data (CFA, ReConPatch) or adds position and neighborhood information back (PNI); see the family tree at the end.</p>
+
+<h3>Inside PatchCore: forward, then backward</h3>
+<figure class="viz archflow" id="viz-pcflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>fit</span>
+    <button type="button" id="btn-pcflow-images" aria-pressed="false">1 Images</button>
+    <button type="button" id="btn-pcflow-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-pcflow-features" aria-pressed="false">3 Patch features</button>
+    <button type="button" id="btn-pcflow-bank" aria-pressed="false">4 Memory bank</button>
+    <button type="button" id="btn-pcflow-coreset" aria-pressed="false">5 Coreset</button>
+    <span>test</span>
+    <button type="button" id="btn-pcflow-test" aria-pressed="false">6 Test image</button>
+    <button type="button" id="btn-pcflow-nn" aria-pressed="false">7 Nearest neighbor</button>
+    <button type="button" id="btn-pcflow-score" aria-pressed="false">8 Score</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-pcflow-backward" aria-pressed="false">9 Gradients</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Coreset size">
+    <span>coreset (bottle category)</span>
+    <button type="button" id="btn-pcflow-p25" aria-pressed="false">25%</button>
+    <button type="button" id="btn-pcflow-p10" aria-pressed="true">10%</button>
+    <button type="button" id="btn-pcflow-p1" aria-pressed="false">1%</button>
+  </div>
+  <canvas id="pcflow-canvas" role="img" aria-label="PatchCore as a diagram. Normal images and the test image both pass through a frozen WideResNet50 to locally aware patch features. The normal features fill a memory bank, which greedy selection thins to a coreset. Each test patch finds its nearest coreset vector, and the distances give the anomaly score and map. In the backward stage no arrow appears: nothing is trained."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-pcflow-prev">Previous</button>
+    <button type="button" id="btn-pcflow-next">Next</button>
+    <button type="button" id="btn-pcflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="pcflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Two paths share one frozen network. Fit: normal images become patch features, the features fill a <b class="c-brown">memory bank</b>, and greedy selection keeps a <b class="c-brown">coreset</b>. Test: the <b class="c-yellow">test image</b> takes the same path, and each of its patches looks up its nearest stored neighbor. There is no loss and no training. Press <b>1 Images</b>, then <b>Next</b>.</p></div>
+    <div data-stage="images" hidden><h4>1. Normal images</h4><p>All defect-free training images of one category, here the bottle category with <span data-claim="patchcore-train-bottle">209</span> images. Each is resized to <span data-claim="patchcore-resize">256</span> and center-cropped to <span data-claim="patchcore-crop">224</span> pixels; no augmentation.</p></div>
+    <div data-stage="backbone" hidden><h4>2. A frozen backbone</h4><p>An ImageNet-pretrained <span data-claim="patchcore-backbone">WideResNet50</span>, run without gradients. PatchCore reads the outputs of blocks <span data-claim="patchcore-layers">2 and 3</span>: <span data-claim="patchcore-shape-layer2">512 x 28 x 28</span> and <span data-claim="patchcore-shape-layer3">1024 x 14 x 14</span> per image (our computation from the standard network).</p></div>
+    <div data-stage="features" hidden><h4>3. Locally aware patch features</h4><p>Each cell is averaged with its <span data-claim="patchcore-patchsize-p">3</span> by 3 neighborhood, layer 3 is upsampled to the layer-2 grid, and each layer is average-pooled and the two are pooled together into one <span data-claim="patchcore-target-dim">1024</span>-number vector, in effect half from each layer (code-only). One image gives <span data-claim="patchcore-patches-per-image">784</span> patch features, a <span data-claim="patchcore-patch-grid">28 x 28</span> grid (our computation).</p></div>
+    <div data-stage="bank" hidden><h4>4. The memory bank</h4><p>Every patch feature of every training image: for bottle, <span data-claim="patchcore-bank-bottle-full">163,856</span> vectors, about <span data-claim="patchcore-bank-bottle-full-mb">671.2</span> MB as 32-bit floats (our computation). Any test patch may match any of them, whatever its position.</p></div>
+    <div data-stage="coreset" hidden><h4>5. Greedy coreset</h4><p>Farthest-point selection (Algorithm 1), with distances measured after a random projection to <span data-claim="patchcore-proj-dim">128</span> dimensions (code-only). The kept vectors stay full size. For bottle: <span data-claim="patchcore-bank-bottle-25pct">40,964</span> vectors at 25%, <span data-claim="patchcore-bank-bottle-10pct">16,385</span> at 10% (<span data-claim="patchcore-bank-bottle-10pct-mb">67.1</span> MB), <span data-claim="patchcore-bank-bottle-1pct">1,638</span> at 1% (our computation).</p></div>
+    <div data-stage="test" hidden><h4>6. The test image</h4><p>Same crop, same frozen network, same aggregation: <span data-claim="patchcore-shape-patch-features">784 x 1024</span> patch features.</p></div>
+    <div data-stage="nn" hidden><h4>7. Nearest neighbor</h4><p>Each test patch finds its nearest coreset vector (the code uses exact search with the faiss library and <span data-claim="patchcore-knn-k">1</span> neighbor, code-only). The 784 (squared) distances are the patch scores.</p></div>
+    <div data-stage="score" hidden><h4>8. Image score and map</h4><p>The image score is the largest patch score (the paper then applies Eq. 7, which the official code skips). The anomaly map is the 28 by 28 score grid, upsampled to 224 by 224 and smoothed with a Gaussian of width <span data-claim="patchcore-sigma">4</span>.</p></div>
+    <div data-stage="backward" hidden><h4>9. Where the gradient goes</h4><p>Nowhere. There is no loss to differentiate: the backbone is frozen, the bank is a store, and the coreset is chosen by a search, not by an optimizer. "Fitting" PatchCore means one forward pass over the training images plus the greedy selection. This is why fitting a new product needs no training run, and also why it cannot fix features that ImageNet never learned.</p></div>
+  </div>
+  <figcaption>Computed: bank and coreset sizes are the bottle category's <span data-claim="patchcore-train-bottle">209</span> training images (MVTec AD paper, Table 1) times 784 patches, with the code's rounding down; feature-map shapes are our computation for the standard WideResNet50 at 224 pixels; the 1024-number width, the 128-dimension projection and the single neighbor are from the official code.</figcaption>
+</figure>
+</section>

@@ -1,0 +1,182 @@
+<style>
+#ch-ssd .controls .grp { color:var(--muted); font-size:.86rem; margin-right:-.1rem; }
+#ch-ssd .controls .brk { flex-basis:100%; height:0; }
+#ch-ssd .claim-card { background:var(--panel); border-radius:12px; padding:.9rem 1.1rem; margin:1.4rem 0; font-size:1rem; max-width:var(--stage, 60rem); }
+#ch-ssd .claim-card h4 { font:600 1rem/1.4 system-ui, sans-serif; margin:0 0 .6rem; }
+#ch-ssd .claim-card dl { display:grid; grid-template-columns:max-content 1fr; gap:.35rem 1rem; margin:0; }
+#ch-ssd .claim-card dt { font:600 .88rem/1.6 system-ui, sans-serif; color:var(--muted); }
+#ch-ssd .claim-card dd { margin:0; min-width:0; }
+#ch-ssd .aside.notation { border-left-color:var(--yellow); }
+#ch-ssd .aside.notation dl { display:grid; grid-template-columns:max-content 1fr; gap:.2rem .9rem; margin:.4rem 0 0; font-size:.95rem; }
+#ch-ssd .aside.notation dt { font-weight:600; }
+#ch-ssd .aside.notation dd { margin:0; }
+@media (max-width: 520px) { #ch-ssd .claim-card dl, #ch-ssd .aside.notation dl { grid-template-columns:1fr; } #ch-ssd .claim-card dt { margin-top:.4rem; } }
+</style>
+<section id="ch-ssd" class="chapter">
+<h2>Mamba-2: linear attention and state-space duality</h2>
+<p>Attention and Mamba look like opposites: one keeps every token and compares them all, the other folds the past into a small state. Below is the one object both compute, a <span class="tex">T \times T</span> matrix <span class="tex">M</span> with <span class="tex">\htmlClass{t-green}{y} = M \htmlClass{t-blue}{x}</span>, drawn for three layers on the same random inputs; press the three buttons from left to right.</p>
+
+<figure class="viz" id="viz-ssd">
+  <span class="badge computed">Computed</span>
+  <canvas id="ssd-canvas" role="img" aria-label="A lower-triangular field of columns on a square floor, one column per matrix entry: row t runs toward the viewer, column s to the right. Blue lollipops along the back edge are the inputs, green lollipops along the right edge the outputs. Along the front edge sits the memory: brown key and value cubes for softmax attention, or a yellow decay line and a small yellow state grid for linear attention and SSD. A chunk overlay outlines diagonal blocks in brown and colors the blocks below them yellow or red."></canvas>
+  <div class="controls">
+    <span class="grp">Matrix</span>
+    <button type="button" id="btn-ssd-softmax">Softmax attention</button>
+    <button type="button" id="btn-ssd-linattn">Linear attention</button>
+    <button type="button" id="btn-ssd-ssd">SSD: decay mask</button>
+    <span class="brk"></span>
+    <span class="grp">Compute</span>
+    <button type="button" id="btn-ssd-whole">Whole matrix</button>
+    <button type="button" id="btn-ssd-q1">Chunks of 1</button>
+    <button type="button" id="btn-ssd-q4">Chunks of 4</button>
+    <button type="button" id="btn-ssd-q8">Chunks of 8</button>
+    <span class="brk"></span>
+    <span class="grp">Length</span>
+    <button type="button" id="btn-ssd-t16">T = 16</button>
+    <button type="button" id="btn-ssd-t32">T = 32</button>
+    <button type="button" id="btn-ssd-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ssd-readout" aria-live="polite"></p>
+  <figcaption>Computed on random toy inputs: one head with state size <span class="tex">N = 2</span>, head dimension <span class="tex">P = 2</span> and length <span class="tex">T = 16</span> or <span class="tex">32</span>. Each column is one entry <span class="tex">M_{ts}</span>, the weight of input <span class="tex">s</span> in output <span class="tex">t</span>. All three matrices use the same queries <span class="tex">C</span> and keys <span class="tex">B</span> (Mamba-2's letters). Softmax attention normalizes <span class="tex">\exp(c_t \cdot b_s / \sqrt{N})</span> along each row, so its first rows, with few tokens, stand tall. Linear attention and SSD apply the feature map <span class="tex">\phi = \mathrm{elu} + 1</span> to both (Mamba-2 itself uses SiLU, the sigmoid linear unit, on <span class="tex">B</span> and <span class="tex">C</span>, Sec 7.3), share one height scale, and leave out linear attention's normalizer. The decay <span class="tex">a_t</span> is drawn between <span class="tex">0.62</span> and <span class="tex">0.98</span>, except one token with <span class="tex">a = 0.12</span>. The chunked computation runs the four steps of Mamba-2's reference code (Listing 1); in SSD mode the readout compares its output with the other two.</figcaption>
+</figure>
+
+<p>Every layer in this chapter has the same form. Stack the inputs into <span class="tex">\htmlClass{t-blue}{x}</span>; the outputs are <span class="tex">\htmlClass{t-green}{y} = M\htmlClass{t-blue}{x}</span> for a lower-triangular matrix <span class="tex">M</span>. Row <span class="tex">t</span> says how much each earlier input contributes to output <span class="tex">t</span>, and the triangle is causality: nothing reads the future. The layers differ only in how they build <span class="tex">M</span>. That decides how much work it takes to apply <span class="tex">M</span>, and what the model must keep in memory to produce the next row.</p>
+
+<p>Softmax attention builds each entry from its own query-key pair, <span class="tex">M_{ts} = \exp(q_t \cdot k_s)</span> divided by the row's sum. There is no shorter description. To produce row <span class="tex">t</span> the model needs every key and value before it, which is the <b class="c-brown">KV cache</b> along the front edge of the figure: one key and one value per token, growing with <span class="tex">T</span>.</p>
+
+<h3>Linear attention, built from zero</h3>
+<p>In 2020, Katharopoulos and colleagues asked what happens if the exponential goes. They replace the similarity <span class="tex">\exp(q \cdot k)</span> with a dot product of features, <span class="tex">\phi(q) \cdot \phi(k)</span>, where <span class="tex">\phi</span> is a fixed function applied to each vector (their Eq. <span data-claim="linattn-eq-kernel">4</span>). They pick <span class="tex">\phi(x) = \mathrm{elu}(x) + 1</span> (Eq. <span data-claim="linattn-eq-elu">7</span>): the exponential linear unit is <span class="tex">x</span> for positive <span class="tex">x</span> and <span class="tex">e^x - 1</span> below zero, so <span class="tex">\phi</span> is always positive, like <span class="tex">\exp</span>. Now the score matrix is a product of two thin matrices, and a product of three matrices can be grouped either way:</p>
+
+<div class="eq" id="eq-ssd-assoc" data-build data-viz="viz-ssd"><div class="tex tex-display">
+\htmlData{step=1, link=scores}{\big(\phi(Q)\,\phi(K)^{\top}\big)\,\htmlClass{t-blue}{V}} \;=\; \htmlData{step=2, link=state}{\phi(Q)\,\big(\phi(K)^{\top}\htmlClass{t-blue}{V}\big)}
+</div></div>
+<p class="eqno">Eq. <span data-claim="linattn-eq-vectorized">6</span> in linear attention (Katharopoulos et al. 2020); rows of <span class="tex">Q</span>, <span class="tex">K</span>, <span class="tex">V</span> are tokens.</p>
+<ul class="gloss">
+  <li>Left: first the <span class="tex">T \times T</span> matrix of scores (the columns in the figure), then the product with the values. The work grows with <span class="tex">T^2</span>.</li>
+  <li>Right: first <span class="tex">\phi(K)^{\top}\htmlClass{t-blue}{V}</span>, a small matrix (feature size by value size) that sums over all tokens, then one product per query. The work grows with <span class="tex">T</span>.</li>
+</ul>
+
+<p>With a causal mask, query <span class="tex">i</span> may use only keys up to <span class="tex">i</span>, so the small matrix becomes a running sum. Call it the <b class="c-yellow">state</b>. Each token adds one outer product to it, and the output reads it with the query:</p>
+
+<div class="eq" id="eq-ssd-rnn" data-build data-viz="viz-ssd"><div class="tex tex-display">
+\htmlData{step=1, link=state inputs}{\htmlClass{t-yellow}{s_i} = \htmlClass{t-yellow}{s_{i-1}} + \phi(k_i)\,\htmlClass{t-blue}{v_i}^{\top}} \qquad
+\htmlData{step=2, link=norm}{\htmlClass{t-yellow}{z_i} = \htmlClass{t-yellow}{z_{i-1}} + \phi(k_i)} \qquad
+\htmlData{step=3, link=output}{\htmlClass{t-green}{y_i} = \frac{\phi(q_i)^{\top}\htmlClass{t-yellow}{s_i}}{\phi(q_i)^{\top}\htmlClass{t-yellow}{z_i}}}
+</div></div>
+<p class="eqno">Eqs. <span data-claim="linattn-eq-rnn-s-update">18</span>, <span data-claim="linattn-eq-rnn-z-update">19</span> and <span data-claim="linattn-eq-rnn-output">20</span> in linear attention, with <span class="tex">s_0 = 0</span> and <span class="tex">z_0 = 0</span>; in Eq. 20 the layer also adds the residual and its feedforward network. The sums they unroll are Eqs. <span data-claim="linattn-eq-state-S">10</span> to <span data-claim="linattn-eq-output">12</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{s_i}</span>, the "attention memory": a matrix of feature size by value size, the same size at every step. Writing a token means adding the outer product of its key features and its value <span class="tex">\htmlClass{t-blue}{v_i}</span>.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{z_i}</span>, the "normalizer memory": a running sum of key features. Dividing by <span class="tex">\phi(q_i)^{\top}\htmlClass{t-yellow}{z_i}</span> does the job of softmax's row sum.</li>
+  <li><span class="tex">\htmlClass{t-green}{y_i}</span>: the memory read with the query's features. Constant work and constant memory per generated token, which is the paper's title: Transformers are RNNs.</li>
+</ul>
+
+<p>Press <b>Linear attention</b>. The matrix keeps its full triangle, so where did the KV cache go? Look at the front edge before you read on. The brown cubes are gone; a yellow <span class="tex">2 \times 2</span> state and its normalizer replace them. The yellow line along the front edge shows how much of each token is still in the state at the last step, and it is flat at 1. Linear attention never forgets: every token stays in the sum with full weight.</p>
+
+<div class="aside notation">
+  <h4>A note on letters</h4>
+  <p>The linear attention paper writes <span class="tex">N</span> for the sequence length, so its "<span class="tex">O(N)</span>" means linear in length. Mamba-2, and this page, write <span class="tex">T</span> for the length and <span class="tex">N</span> for the state size.</p>
+  <dl>
+    <dt>Linear attention</dt><dd>Mamba-2 and this page</dd>
+    <dt>sequence length <span class="tex">N</span></dt><dd>length <span class="tex">T</span></dd>
+    <dt>feature size <span class="tex">C</span></dt><dd>state size <span class="tex">N</span></dd>
+    <dt>state <span class="tex">S_i</span> (Eqs. 10 to 12), <span class="tex">s_i</span> (Eqs. 16 to 20)</dt><dd>state <span class="tex">\htmlClass{t-yellow}{h_t}</span></dd>
+    <dt><span class="tex">\phi(q)</span>, <span class="tex">\phi(k)</span>, <span class="tex">v</span></dt><dd><span class="tex">C</span>, <span class="tex">B</span>, <span class="tex">\htmlClass{t-blue}{x}</span> (Mamba-2's dictionary, Fig 4)</dd>
+  </dl>
+</div>
+
+<div class="aside">
+  <h4>How much faster, against which baseline</h4>
+  <p>The linear attention paper generates images <span data-claim="linattn-mnist-speedup">317x</span> (MNIST) and <span data-claim="linattn-cifar-speedup">4,462x</span> (CIFAR-10) faster than softmax attention. Both baselines recompute attention over the whole prefix for every new pixel: they keep no KV cache. Against a softmax baseline that does cache keys and values (its appendix calls it "stateful softmax"), linear attention is still more than <span data-claim="linattn-vs-stateful-cifar">50x</span> faster on CIFAR-10. That is the fair number for a reader who knows the KV cache. Quality was close on images (<span data-claim="linattn-cifar-bpd-softmax">3.47</span> bits per dimension for softmax, <span data-claim="linattn-cifar-bpd-linear">3.40</span> for linear) and worse on speech (phone error rate <span data-claim="linattn-asr-per-softmax">5.12</span> for softmax, <span data-claim="linattn-asr-per-linear">8.08</span> for linear).</p>
+</div>
+
+<h3>Mamba-2: the same matrix, with a decay</h3>
+<p>Now come from the other side. Take Mamba's selective SSM and restrict its state matrix to one number times the identity, <span class="tex">A_t = a_t I</span>, with <span class="tex">a_t</span> between 0 and 1 and set by the input. For a head with <span class="tex">P</span> channels the state is an <span class="tex">N \times P</span> matrix, and the update is</p>
+<div class="tex tex-display">
+\htmlClass{t-yellow}{h_t} = a_t\, \htmlClass{t-yellow}{h_{t-1}} + B_t\, \htmlClass{t-blue}{x_t}^{\top}, \qquad \htmlClass{t-green}{y_t} = C_t^{\top}\, \htmlClass{t-yellow}{h_t}
+</div>
+<p class="eqno">Mamba-2 Eq. <span data-claim="mamba2-eq-selective">2</span> with <span class="tex">A_t = a_t I</span>, written for <span class="tex">P</span> channels at once.</p>
+<p>Set <span class="tex">a_t = 1</span> and this is the linear attention recurrence above, with <span class="tex">C</span> as the query features, <span class="tex">B</span> as the key features and <span class="tex">\htmlClass{t-blue}{x}</span> as the value, minus the normalizer. Linear attention is an SSM that never forgets. Unroll the recurrence and each output is a weighted sum of the inputs, <span class="tex">\htmlClass{t-green}{y_t} = \sum_{s \le t} C_t^{\top} (a_t \cdots a_{s+1}) B_s \htmlClass{t-blue}{x_s}</span> (Eq. <span data-claim="mamba2-eq-matrix-form">3</span>): a score <span class="tex">C_t^{\top} B_s</span> times a decay <span class="tex">a_t \cdots a_{s+1}</span>. As one matrix:</p>
+
+<div class="eq" id="eq-ssd-matrix" data-build data-viz="viz-ssd"><div class="tex tex-display">
+\htmlData{step=1, link=output}{\htmlClass{t-green}{y}} = \big(\htmlData{step=2, link=decay}{\htmlClass{t-yellow}{L}} \circ \htmlData{step=3, link=scores}{\htmlClass{t-brown}{C B^{\top}}}\big)\, \htmlData{step=4, link=inputs}{\htmlClass{t-blue}{x}}, \qquad \htmlData{step=2, link=decay}{\htmlClass{t-yellow}{L_{ts}} = a_t \cdots a_{s+1} \ \ (t \ge s)}
+</div></div>
+<p class="eqno">Mamba-2 Sec 5.1, where this matrix form is not numbered; its contraction form is Eq. <span data-claim="mamba2-eq-ssd-quadratic">16</span>, the entry formula Eq. 3 and the mask <span class="tex">L</span> Eq. <span data-claim="mamba2-eq-1ss">6</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{y}</span>: the outputs, the green lollipops on the right.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{L}</span>: the decay mask, 1 on the diagonal and below it the product of the decays between <span class="tex">s</span> and <span class="tex">t</span>. Hover it and the surface shows <span class="tex">L</span> alone.</li>
+  <li><span class="tex">\htmlClass{t-brown}{C B^{\top}}</span>: the scores, with <span class="tex">C</span> as queries and <span class="tex">B</span> as keys, the same kind of matrix as linear attention's. Hover it and the surface shows the scores alone.</li>
+  <li><span class="tex">\htmlClass{t-blue}{x}</span>: the inputs, the blue lollipops at the back. The circle <span class="tex">\circ</span> multiplies entry by entry.</li>
+</ul>
+
+<p>Press <b>SSD: decay mask</b>. The scores are linear attention's, but each column now shrinks with its distance from the diagonal, and the token with <span class="tex">a = 0.12</span> cuts a step into the surface: almost nothing before it survives. That is Mamba's selection, written as a mask on attention. The paper calls the equivalence state-space duality (SSD): read one way the layer is an SSM, read the other way it is masked attention (Corollary <span data-claim="mamba2-cor-duality">5.1</span>). The link also runs in reverse. Theorem <span data-claim="mamba2-thm-efficient-ar">5.2</span> proves that any masked kernel attention that runs as a recurrence with a bounded state must use a semiseparable mask, so every such linear attention is an SSM.</p>
+
+<p>The price is expressiveness. Mamba gives every channel its own decay; Mamba-2 shares one decay per head, which the paper calls "slightly decreasing the expressive power in return for significant training efficiency improvements" (Sec 2.4). And SSD cannot express softmax attention, whose exponential has no finite feature map (Sec 10.3).</p>
+
+<h3>One matrix, two algorithms, and the mix</h3>
+<p>Because <span class="tex">M</span> has this structure, there are two ways to apply it. The quadratic way builds <span class="tex">M</span>, as attention does, and multiplies: work grows with <span class="tex">T^2</span>, but all of it is matrix multiplication, which GPUs run on dedicated matrix-multiply units called tensor cores. The recurrent way carries the state forward: work grows with <span class="tex">T</span>, but in <span class="tex">T</span> sequential steps of small vector updates that leave the tensor cores idle. That was Mamba's position, a scan that is linear in length but "does not leverage matrix multiplication units" (Sec 2.1).</p>
+
+<p>The SSD algorithm (Sec 6) cuts <span class="tex">M</span> into chunks of <span class="tex">Q</span> tokens. Each diagonal block is a small attention problem: compute it the quadratic way, all chunks in parallel. Every block below the diagonal has rank at most <span class="tex">N</span>, because <span class="tex">M</span> is <span class="tex">N</span>-semiseparable (Definition <span data-claim="mamba2-def-semiseparable">3.1</span>): each such block factors through an <span class="tex">N</span>-dimensional bottleneck, and that bottleneck is the state. Those blocks take three batched matrix products: each chunk's final state from its own inputs, a short scan that hands the state from chunk to chunk (<span class="tex">T/Q</span> steps instead of <span class="tex">T</span>), and each chunk's outputs from the state that entered it.</p>
+
+<p>Before you press <b>Chunks of 1</b>: which entries will still be computed the quadratic way? Only the diagonal. With chunks of one token every other entry goes through the state, so the chunked algorithm with <span class="tex">Q = 1</span> is the recurrence, and with a single chunk of length <span class="tex">T</span> it is attention. <span class="tex">Q</span> slides between the two. Now pick chunks of 4 or 8 and switch back to softmax attention. The same blocks turn red: their rank equals their size, so no small state can stand in for them. Chunking works for linear attention and SSD because of the low rank, not because of the block shapes.</p>
+
+<p>With <span class="tex">N = P = Q</span> every piece is a batch of <span class="tex">N \times N</span> matrix multiplications, and the total work is <span class="tex">O(TN^2)</span> (Theorem <span data-claim="mamba2-thm-algorithm">6.1</span>). At <span class="tex">T = 4096</span> and <span class="tex">N = P = Q = 64</span>, our count from the Sec 6.3 cost list gives <span data-claim="ssd-work-quad-4k">2.1 billion</span> multiply-adds per head for the quadratic way, <span data-claim="ssd-work-chunk-4k">67 million</span> for the chunked one (<span data-claim="ssd-work-chunk-mm-4k">99.6%</span> of it in matrix products) and <span data-claim="ssd-work-rec-4k">50 million</span> for the recurrence. Against attention, the paper's Sec 6.3 table puts training work at <span class="tex">T^2 N</span> for attention and <span class="tex">TN^2</span> for SSD, the work per generated token at <span class="tex">TN</span> against <span class="tex">N^2</span>, and the state at <span class="tex">T</span> entries against <span class="tex">N</span>.</p>
+
+<p>Does the saving show on a GPU? Measured on an <span data-claim="mamba2-bench-gpu">A100 80GB PCIe</span> with state size <span data-claim="mamba2-bench-state-dim">64</span>, the SSD layer runs <span data-claim="mamba2-speedup-scan">2-8x</span> faster than Mamba's fused scan, and faster than FlashAttention-2 (a fast exact attention kernel) from sequence length <span data-claim="mamba2-fa2-crossover">2K</span> on, <span data-claim="mamba2-fa2-16k-speedup">6x</span> faster at 16K (Fig 10 and Sec 1). Because the work is in matrix products, the state can also grow: the paper allows states <span data-claim="mamba2-state-8x">8x</span> Mamba's size with little slowdown. Mamba-2 uses <span class="tex">N</span> "around <span data-claim="mamba2-head-dim">64 or 128</span>" (Sec 7.2), where Mamba's experiments used <span data-claim="mamba-state-n">16</span>; <span data-claim="mamba2-mqar-n-max">N=256</span> appears only in the recall test below and in ablations. One caveat from the paper: a whole Mamba-2 model may still train slower than a Transformer at length 2K, because half of a Transformer's layers are MLP (multilayer perceptron) layers, which are pure matrix multiplication (Sec 9.3).</p>
+
+<h3>Inside a Mamba-2 block: forward, then backward</h3>
+<p>The Mamba-2 block keeps Mamba's outline: widen, a short convolution, the SSM, a gate, narrow again. It changes how the SSM's inputs are made and adds one normalization. Step through it; the shapes are computed from the paper's configurations.</p>
+
+<figure class="viz archflow" id="viz-mamba2flow">
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-mamba2flow-input" aria-pressed="false">1 Input</button>
+    <button type="button" id="btn-mamba2flow-project" aria-pressed="false">2 Projection</button>
+    <button type="button" id="btn-mamba2flow-conv" aria-pressed="false">3 Conv, decay</button>
+    <button type="button" id="btn-mamba2flow-ssd" aria-pressed="false">4 SSD</button>
+    <button type="button" id="btn-mamba2flow-gate" aria-pressed="false">5 Gate, norm</button>
+    <button type="button" id="btn-mamba2flow-output" aria-pressed="false">6 Output, loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-mamba2flow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-mamba2flow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-mamba2flow-m125" aria-pressed="true">125M</button>
+    <button type="button" id="btn-mamba2flow-m360" aria-pressed="false">360M</button>
+    <button type="button" id="btn-mamba2flow-m27" aria-pressed="false">2.7B</button>
+  </div>
+  <canvas id="mamba2flow-canvas" role="img" aria-label="The Mamba-2 block as a diagram: the input u enters one projection, which fans out into the gate branch z, the heads X, and B, C and delta. X passes a convolution, delta becomes a decay, and both feed the yellow SSD box. Its output is gated by z, normalized, projected back to the model width and graded by the next-token loss. In the backward stages red arrows run from the loss back to every box with weights."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-mamba2flow-prev">Previous</button>
+    <button type="button" id="btn-mamba2flow-next">Next</button>
+    <button type="button" id="btn-mamba2flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="mamba2flow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One projection fans out into four tensors. The <b class="c-yellow">SSD layer</b> mixes information along time; a gate, a normalization and a projection bring the result back to the residual stream, and the <b class="c-red">loss</b> grades the next-token prediction at the top of the stack. Press <b>1 Input</b>, then <b>Next</b>.</p></div>
+    <div data-stage="input" hidden><h4>1. The input</h4><p><span class="tex">u</span> is the residual stream: <span class="tex">T</span> tokens of model width <span class="tex">D</span>. As in Mamba, the block works at a wider width inside, expanded by a factor that is "typically <span data-claim="mamba2-expand">2</span>" (Sec 8.1).</p></div>
+    <div data-stage="project" hidden><h4>2. One projection, in parallel</h4><p>Mamba made <span class="tex">X</span> first and then computed <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span> from it with a second projection, a chain of two steps. Mamba-2 makes <span class="tex">z</span>, <span class="tex">X</span>, <span class="tex">B</span>, <span class="tex">C</span> and <span class="tex">\Delta</span> from <span class="tex">u</span> with one matrix in one step, the way attention makes <span class="tex">Q</span>, <span class="tex">K</span> and <span class="tex">V</span> (Sec 7.1). That saves parameters (<span data-claim="mamba2-abl-block-params-par">126.5M</span> against <span data-claim="mamba2-abl-block-params-seq">129.3M</span> in Table 4) and lets tensor parallelism split a block with one synchronization between GPUs instead of two (Sec 8.1). <span class="tex">B</span> and <span class="tex">C</span> have a single head shared by all the <span class="tex">X</span> heads, the pattern of multi-value attention (Eq. <span data-claim="mamba2-eq-mva">20</span>); a model split across GPUs uses a few such groups.</p></div>
+    <div data-stage="conv" hidden><h4>3. A short convolution, and the decay</h4><p><span class="tex">X</span> passes a causal depthwise convolution and SiLU. Its width is not in the paper; the code's example uses <span data-claim="mamba2-readme-dconv">d_conv=4</span> (code-only). Fig 6 draws <span class="tex">B</span> and <span class="tex">C</span> leaving the convolution together with <span class="tex">X</span>, while the equations of Sec 8.1 apply it to <span class="tex">x</span> only. The paper does not reconcile the two; this diagram follows the equations. <span class="tex">\Delta</span> and a learned scalar <span class="tex">A</span> per head give the decay <span class="tex">a = \exp(\Delta A)</span>, following Mamba's parameterization and discretization (Remark 1).</p></div>
+    <div data-stage="ssd" hidden><h4>4. SSD</h4><p>Each head runs <span class="tex">y = (L \circ C B^{\top})\,x</span> on its own <span class="tex">P</span> channels, with its own decay and the shared <span class="tex">B</span> and <span class="tex">C</span>, using the chunked algorithm above (the reference code's default chunk is <span data-claim="mamba2-listing-chunk">64</span>). The state per layer is <span class="tex">H \times P \times N</span> numbers: <span data-claim="ssd-state-125m">98,304</span> for the 125M model, as much as an attention layer of the same width caches for just <span data-claim="ssd-state-tokens">64</span> tokens (our reading). That is the bill against attention: the state keeps that size at any length, while the cache grows by <span class="tex">2D</span> numbers with every token.</p></div>
+    <div data-stage="gate" hidden><h4>5. Gate, then the extra norm</h4><p>The output is multiplied by <span class="tex">\mathrm{SiLU}(z)</span>, as in Mamba. Then comes Mamba-2's addition: a normalization layer right before the output projection, after the gate (Sec 7.1). In early experiments, larger models were prone to instabilities without it. In the 125M ablation of Table 4, the parallel projection and the norm together take perplexity from <span data-claim="mamba2-abl-block-mamba1">11.76</span> to <span data-claim="mamba2-abl-block-mamba2">11.49</span>. Linear attention divided by <span class="tex">\phi(q)^{\top} z</span> instead; Mamba-2 drops that denominator, which "introduced instabilities to most variants" in its ablations (Sec 9.4.3), and normalizes here.</p></div>
+    <div data-stage="output" hidden><h4>6. Back to the stream, then the loss</h4><p><span class="tex">\texttt{out\_proj}</span> maps the inner width back to <span class="tex">D</span>, and the result is added to the residual stream. Blocks repeat; at the top, the language-model head predicts the next token, and the loss is the cross-entropy at every position (Sec 9.2).</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>Will the gradient reach the <span class="tex">B</span> and <span class="tex">C</span> rows of the projection, through an SSD layer that has no weights of its own? Yes. From the loss it crosses <span class="tex">\texttt{out\_proj}</span> and the norm, splits at the gate into the <span class="tex">z</span> branch and the SSD output, runs back through SSD to <span class="tex">X</span>, <span class="tex">B</span>, <span class="tex">C</span> and the decay, and meets again at the one input projection. Every box with weights is red: the projection, the convolution, <span class="tex">A</span>, the norm and <span class="tex">\texttt{out\_proj}</span>. Nothing is frozen. The paper gives no parameter table, so this list is our reading of Fig 6 and Remark 1.</p></div>
+    <div data-stage="update" hidden><h4>8. The optimizer step</h4><p>AdamW with gradient clip <span data-claim="ssd-clip">1.0</span>, weight decay <span data-claim="mamba2-cfg-wd">0.1</span> and no dropout; linear warmup, then cosine decay to <span data-claim="ssd-lr-final">1e-5</span> from a peak of <span data-claim="mamba2-cfg-lr-mult">5x</span> the GPT-3 learning rate; batches of <span data-claim="mamba2-cfg-batch">0.5M tokens</span> in the scaling runs (App D.2). The models for downstream evaluation trained on <span data-claim="mamba2-lm-tokens">300B</span> tokens of the Pile.</p></div>
+  </div>
+  <figcaption>Computed: shapes from Table 5 for 125M and 360M (<span data-claim="mamba2-abl-heads-125m-heads">24</span> heads and <span data-claim="ssd-t5-125m-layers">24</span> layers; <span data-claim="ssd-t5-360m-heads">32</span> heads and <span data-claim="ssd-t5-360m-layers">48</span> layers; <span class="tex">N = P =</span> <span data-claim="ssd-t5-np">64</span>; <span data-claim="ssd-t5-bc-heads">1</span> head for <span class="tex">B</span> and <span class="tex">C</span>) and from App D.3 for 2.7B (width <span data-claim="mamba2-cfg-2.7b-dmodel">2560</span>, <span data-claim="mamba2-cfg-2.7b-layers">64</span> layers). The widths <span data-claim="ssd-125m-dmodel">768</span> and <span data-claim="ssd-360m-dmodel">1024</span> follow from heads times head size over the expansion of 2, and the <span data-claim="ssd-27b-heads">80</span> heads at 2.7B assume <span class="tex">P = 64</span>; both are our reading, and 2.7B also assumes <span class="tex">N = 64</span> and one <span class="tex">B</span>, <span class="tex">C</span> group. The convolution width is code-only.</figcaption>
+</figure>
+
+<div class="claim-card" id="ssd-mqar-card">
+  <h4>Claim: a bigger state recalls more, and with a large enough state Mamba-2 beats attention on a hard recall test at small model width</h4>
+  <dl>
+    <dt>Source</dt><dd>Mamba-2 Sec 9.1, Fig 8 and App D.1.</dd>
+    <dt>How measured</dt><dd>Multi-query associative recall (MQAR): the model reads many key-value pairs, then must produce the value whenever a key appears again. Mamba-2 makes the usual version harder: a quarter as many pairs as tokens, sequences up to <span data-claim="mamba2-mqar-max-len">1024</span> long, a vocabulary of <span data-claim="mamba2-mqar-vocab">8192</span>, filler tokens replaced by random ones. Every model has <span data-claim="mamba2-mqar-layers">2</span> layers; the model width is swept from <span data-claim="ssd-mqar-dmin">32</span> to <span data-claim="ssd-mqar-dmax">256</span>. Baselines: softmax attention (with positional embeddings), Based, and Mamba with <span data-claim="mamba2-mqar-n-min">N=16</span>. About <span data-claim="mamba2-mqar-examples">270M</span> training examples.</dd>
+    <dt>Result</dt><dd>Mamba fails almost everywhere. Mamba-2 does better even at the same <span class="tex">N = 16</span>, and going from <span class="tex">N = 16</span> to <span data-claim="mamba2-mqar-n-mid">N=64</span> to <span data-claim="mamba2-mqar-n-max">N=256</span> consistently improves accuracy. In the hardest panel (length 1024, width 32), Mamba-2 with <span class="tex">N = 256</span> answers roughly half the queries correctly while attention answers almost none (read from the plot, so approximate).</dd>
+    <dt>Would have failed if</dt><dd>accuracy had not risen with <span class="tex">N</span>, or Mamba-2 at <span class="tex">N = 16</span> had been no better than Mamba.</dd>
+  </dl>
+  <p class="note">The paper is "not sure which aspect of the architecture is the predominant factor" in the gain over Mamba at equal state size (Sec 9.1). The win is at small widths: at width 256, attention solves the task too. Chapter 11, <a href="#ch-recall">Where SSMs still lose</a>, takes this up: a fixed state loses once what must be recalled outgrows it.</p>
+</div>
+
+<p>Every model so far reads a sequence from left to right. Images have no single order, and the next chapter shows how Mamba was taught to scan them.</p>
+</section>

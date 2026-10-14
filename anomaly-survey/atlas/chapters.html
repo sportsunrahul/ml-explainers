@@ -1,0 +1,273 @@
+  <article data-chapter="problem">
+    <header class="ch-head"><span class="num">1 of 9</span><h2>Learn normal, measure surprise</h2><p class="subhead">You cannot train on defects you do not have</p></header>
+    <div class="tools"><button type="button" class="tool" data-act="reset">Reset</button></div>
+    <div class="controls">
+      <div class="row"><span>Good caps in memory</span><button type="button" class="tool" data-bank="1">1</button><button type="button" class="tool" data-bank="5">5</button><button type="button" class="tool" data-bank="20" aria-pressed="true">20</button></div>
+      <div class="row"><span>Inspect</span><button type="button" class="tool" data-test="good" aria-pressed="true">A good cap</button><button type="button" class="tool" data-test="scratch">A scratched cap</button></div>
+      <label class="slider"><span>Threshold <b id="cloud-tau-value">0.30</b></span><input id="cloud-tau" type="range" min="0.1" max="0.6" step="0.01" value="0.3"></label>
+    </div>
+    <p>On a production line almost every part is good. The rare bad part carries a defect of a kind nobody photographed before: a scratch today, a crack or a missing screw next month. A supervised classifier needs many examples of each kind. <strong class="key">Anomaly detection</strong> trains on good parts only (the <button class="inline-term" data-open="oneclass">one-class setting</button>) and flags whatever is far from them.</p>
+    <p>Most methods cut the image into small patches and turn each patch into a <button class="inline-term" data-open="feature">feature vector</button>. The <button class="inline-term" data-open="score">anomaly score</button> of a patch is its distance to the nearest remembered <span class="c-blue">normal</span> patch. The worst patch gives the image score, and a <button class="inline-term" data-open="threshold">threshold</button> on that score gives the verdict: pass or reject. The patch scores, laid back over the image, give a <span class="c-red">heat map</span> of where the defect is.</p>
+    <div class="eq">s(p) = min over normal m of ||phi(p) - m||<br>S(image) = max over patches p of s(p)</div>
+    <p class="note">Toy model. Left: a toy cap under inspection, red where its patches score above the threshold. Right: one dot per 16 by 16 pixel patch of the toy caps, with features computed from the toy images (diagonal edges and brightness). Blue dots are patches of good caps in memory, and the faint blue area is everything within the threshold of them. Yellow dots are the patches of the cap under inspection. Drag in the feature space to move a probe patch.</p>
+    <p>Inspect a good cap and predict: with only one good cap in memory, will a second good cap pass? Press 1. It fails. Nothing is wrong with the cap; memory has gaps, and normal patches that fall into a gap look surprising. Five caps fill most of the gaps.</p>
+    <h3>What the survey found</h3>
+    <ul>
+      <li>Pretrained features and a <button class="inline-term" data-open="knn">nearest-neighbor</button> search are hard to beat. PatchCore trains nothing and reaches 99.1 image <button class="inline-term" data-open="auroc">AUROC</button> on <button class="inline-term" data-open="mvtec">MVTec AD</button>.</li>
+      <li>MVTec AD is saturated: the strong one-class methods in this tour land between 98.0 and 99.4 image AUROC. On the harder MVTec AD 2, the best <button class="inline-term" data-open="aupro">AU-PRO</button> is 58.7%.</li>
+      <li>One model can now serve many products: Dinomaly reaches 99.6 image AUROC with one model for all MVTec AD categories, against 96.5 for UniAD.</li>
+      <li>With no image of the product at all, AnomalyCLIP still reaches 91.5 image AUROC on MVTec AD (<button class="inline-term" data-open="zeroshot">zero-shot</button>).</li>
+      <li>In the industrial subset of an arXiv scan, the field grew from 9 papers first posted in 2019 to 201 in 2025.</li>
+    </ul>
+    <p class="inscription">A detector is only as good as its picture of normal. Every method in this tour is a different picture of normal, and a different way to measure distance from it.</p>
+    <button type="button" class="continue" data-go="benchmark">Continue with how a detector is graded</button>
+  </article>
+
+  <article data-chapter="benchmark">
+    <header class="ch-head"><span class="num">2 of 9</span><h2>How a detector is graded</h2><p class="subhead">Three metrics answer three different questions</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Metrics">
+        <button type="button" role="tab" data-step="0">Image AUROC</button>
+        <button type="button" role="tab" data-step="1">Pixel AUROC</button>
+        <button type="button" role="tab" data-step="2">AU-PRO</button>
+        <button type="button" role="tab" data-step="3">After saturation</button>
+      </div>
+      <button type="button" class="tool" data-act="reset">Reset</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Detector</span><button type="button" class="tool" data-miss="0" aria-pressed="true">Finds both defects</button><button type="button" class="tool" data-miss="2">Misses the tiny hole</button><button type="button" class="tool" data-miss="1">Misses the large stain</button></div>
+      <label class="slider"><span>Threshold <b id="bench-t-value">0.10</b></span><input id="bench-t" type="range" min="0" max="100" step="0.5" value="29.4"></label>
+    </div>
+    <p>Every method in this tour reports its scores on the same benchmarks, mostly <button class="inline-term" data-open="mvtec">MVTec AD and VisA</button>. To read a score, you must know what the metric counts and what it ignores.</p>
+    <div class="step-text" data-step="0">
+      <h3>Image AUROC: is every bad part above every good part?</h3>
+      <p>The detector gives each part one image score: the dots on the strip, <span class="c-blue">blue</span> for good parts and <span class="c-red">red</span> for defective ones. Sweep the <span class="c-yellow">threshold</span> from high to low. Each threshold rejects some defective parts (true positives) and some good parts (false positives). The ROC curve plots the two rates against each other, and the area under it is the image <button class="inline-term" data-open="auroc">AUROC</button>.</p>
+      <p>The area has a plain meaning: it is the chance that a random defective part scores above a random good part. It does not tell you which threshold to use.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Pixel AUROC: is every defect pixel above every good pixel?</h3>
+      <p>Pixel AUROC is the same area over pixels instead of parts. The trap is the count. A large defect holds most of the defect pixels, so finding it lifts the curve, and a tiny defect hardly counts. Press "Misses the tiny hole": the toy pixel AUROC barely moves. MVTec AD 2 says it directly: the true positive rate is "dominated by large anomalies".</p>
+      <p>A second trap is the ocean of normal pixels. In a toy example from the VisA paper, a detector raises 10 false alarms for every true hit among 100,000 normal pixels, and still scores 99.5% pixel AUROC.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>AU-PRO: is every defect found, big or small?</h3>
+      <p>PRO, the per-region overlap, splits the ground truth into connected defect regions, measures the share of each region that is flagged, and averages over the regions. Every region counts the same. <button class="inline-term" data-open="aupro">AU-PRO</button> integrates PRO while the false positive rate on good pixels goes from 0 to 30%, and rescales the area to a maximum of 1.</p>
+      <p>Press "Misses the tiny hole" again: now the toy AU-PRO drops by about a tenth, because the hole is one of ten toy defect regions. MVTec AD 2 shows the same effect with three regions of 4, 2 and 20 pixels: miss only the large one, and PRO is 0.67 while the pixel true positive rate is 0.23.</p>
+    </div>
+    <div class="step-text" data-step="3">
+      <h3>After saturation: harder scenes and logical defects</h3>
+      <p>On MVTec AD the strong methods now differ by less than a point, so the benchmark no longer separates them. MVTec AD 2 (2025) is harder: 8,004 images of eight scenarios, at 2.6 to 5 megapixels, under at least four lighting conditions. In its re-runs, the mean AU-PRO of seven methods falls from 92.4 on MVTec AD to 52.6 on MVTec AD 2, and the best method, EfficientAD, reaches 58.7%.</p>
+      <p>MVTec LOCO adds <strong>logical anomalies</strong>: missing, misplaced, or surplus objects, where every patch can look normal. In the EfficientAD paper's re-runs, PatchCore scores 75.8 image AUROC on logical anomalies against 84.8 on structural ones such as stains and scratches. EfficientAD-M scores 86.8 against 94.7.</p>
+    </div>
+    <p class="note">The first three tabs are a toy model: a toy detector (nearest-neighbor distance on toy features) graded on 16 toy test parts, 8 good and 8 defective. The featured part has a large stain and a tiny hole; dotted outlines are the true defect regions, and red pixels are over the threshold. The last step plots the papers' numbers: AU-PRO up to a false positive rate of 0.3 from MVTec AD 2 Table 1, and MVTec LOCO image AUROC from EfficientAD Table 2.</p>
+    <p class="inscription">Read every score with its metric in mind. Image AUROC asks whether bad parts outrank good ones, pixel AUROC is dominated by big defects, and AU-PRO counts every defect the same.</p>
+    <button type="button" class="continue" data-go="memory">Continue with remembering normal</button>
+  </article>
+
+  <article data-chapter="memory">
+    <header class="ch-head"><span class="num">3 of 9</span><h2>Remember normal</h2><p class="subhead">Store good features, then measure the distance</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Methods">
+        <button type="button" role="tab" data-step="0">SPADE</button>
+        <button type="button" role="tab" data-step="1">PaDiM</button>
+        <button type="button" role="tab" data-step="2">PatchCore</button>
+      </div>
+      <button type="button" class="tool play" data-play>Play</button>
+      <button type="button" class="tool" data-act="reset">Reset</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Inspect</span><button type="button" class="tool" data-test="scratch" aria-pressed="true">Scratched cap</button><button type="button" class="tool" data-test="hole">Cap with a hole</button><button type="button" class="tool" data-test="good">Good cap</button></div>
+      <div class="row"><span>SPADE</span><button type="button" class="tool" data-spade="image">Image stage</button><button type="button" class="tool" data-spade="pixel" aria-pressed="true">Pixel stage</button></div>
+      <div class="row"><span>PaDiM</span><button type="button" class="tool" data-dist="maha" aria-pressed="true">Mahalanobis</button><button type="button" class="tool" data-dist="euclid">Euclidean</button><button type="button" class="tool" data-probe>Probe on the thin axis</button></div>
+      <div class="row"><span>PatchCore</span><button type="button" class="tool" data-keep="1">Keep 1%</button><button type="button" class="tool" data-keep="10" aria-pressed="true">10%</button><button type="button" class="tool" data-keep="25">25%</button><button type="button" class="tool" data-keep="100">100%</button></div>
+    </div>
+    <p>The simplest model of normal is a memory: keep the features of good patches, and score each test patch by its distance to them. The features come from a <button class="inline-term" data-open="backbone">pretrained backbone</button>, a network trained on ImageNet photos and then frozen. It never saw a defect, but it describes patches well enough that "unlike anything normal" shows up as distance. Nothing here is trained: fitting means storing features or averaging them.</p>
+    <div class="step-text" data-step="0">
+      <h3>SPADE: nearest neighbors, first images, then pixels</h3>
+      <p>SPADE (2020) first finds the 50 good training images nearest to the test image by one pooled feature vector; the mean squared distance to them is the image score. Then it matches every test pixel against the pixel features of those retrieved images only. The distance to the <button class="inline-term" data-open="knn">nearest one</button> is the pixel score.</p>
+      <p>Click a patch on the camera view to see its best match. Then inspect the cap with a hole and predict: will SPADE flag it? It does not. The hole matches a bolt hole on another cap almost perfectly. SPADE asks only "does this patch look like some normal patch?", never "does it belong here?".</p>
+      <p>On MVTec AD, SPADE reaches 96.0 pixel AUROC but only 85.5 image AUROC, and in PaDiM's re-run each image takes 7.10 seconds on a CPU.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>PaDiM: one Gaussian per patch position</h3>
+      <p>On an aligned part, the patch at one position always shows the same thing: a bolt hole here, plain metal there. PaDiM (2020) fits one <button class="inline-term" data-open="gaussian">Gaussian</button> to the good features at each position, a mean and a covariance, with 0.01 added to every variance so that the covariance can be inverted. It scores a test patch by its <button class="inline-term" data-open="mahalanobis">Mahalanobis distance</button> from the Gaussian at its own position.</p>
+      <p>The hole now stands out: at its position, good patches are plain metal. Press "Probe on the thin axis". The probe is no farther from the mean than many good patches in Euclidean terms, yet it lies far outside the narrow side of the bell. Press "Euclidean" to see the round rings that miss it. Click the small camera view to pick another position.</p>
+      <p>On MVTec AD, PaDiM reaches 95.3 image AUROC, 97.5 pixel AUROC and 92.1 AU-PRO, at 0.95 seconds per image on a CPU.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>PatchCore: one memory bank, thinned to a coreset</h3>
+      <p>PatchCore (2021) keeps every good patch feature, from every position, in one memory bank, so it assumes no shape and no position. To keep the search fast, it keeps only a <button class="inline-term" data-open="coreset">coreset</button>: a small subset that still covers the whole cloud. Greedy selection adds, one at a time, the bank point farthest from everything kept so far.</p>
+      <p>Press Play to watch the greedy rule; the red line is the coverage radius. Predict: how few points can you keep before the radius jumps? Press "Keep 1%". In the toy, the radius grows past the scratch's own distance, and the good and scratched caps can no longer be told apart. The real bank is far larger, so even 1% keeps enough points. The hole fools PatchCore as it fools SPADE: neither knows where a patch belongs.</p>
+      <p>On MVTec AD, PatchCore reaches 99.1 image AUROC with 25% of the bank and 99.0 with 1%, a 100x smaller bank.</p>
+    </div>
+    <table class="data"><tr><th>MVTec AD (own papers)</th><th class="n">Image AUROC</th><th class="n">Pixel AUROC</th><th class="n">AU-PRO</th></tr><tr><td>SPADE</td><td class="n">85.5</td><td class="n">96.0</td><td class="n">91.7</td></tr><tr><td>PaDiM (WR50, 550 dims)</td><td class="n">95.3</td><td class="n">97.5</td><td class="n">92.1</td></tr><tr class="ours"><td>PatchCore (25% coreset)</td><td class="n">99.1</td><td class="n">98.1</td><td class="n">93.4</td></tr></table>
+    <p class="note">All three tabs are a toy model on the toy cap. SPADE shows two of the three toy features (diagonal edges, brightness), with 12 toy caps in memory and the 3 nearest retrieved. PaDiM fits one Gaussian per position to 20 toy caps and draws it in units of its own spread; the small toy camera view picks the position. PatchCore uses all three toy features of 20 toy caps, and greedy selection starts as in the official code. Drag the PaDiM and PatchCore stages to turn them.</p>
+    <p class="inscription">SPADE, PaDiM and PatchCore train nothing. They differ in what they remember: images to search, one Gaussian per position, or a thinned bank of every patch.</p>
+    <button type="button" class="continue" data-go="flows">Continue with normalizing flows</button>
+  </article>
+
+  <article data-chapter="flows">
+    <header class="ch-head"><span class="num">4 of 9</span><h2>Turn normal into a perfect Gaussian</h2><p class="subhead">A normalizing flow gives every feature an exact likelihood</p></header>
+    <div class="tools"><button type="button" class="tool play" data-play>Warp all layers</button><button type="button" class="tool" data-act="reset">Reset</button></div>
+    <div class="controls">
+      <div class="row"><span>Layers applied</span><button type="button" class="tool" data-layer="0" aria-pressed="true">0</button><button type="button" class="tool" data-layer="1">1</button><button type="button" class="tool" data-layer="2">2</button><button type="button" class="tool" data-layer="3">3</button><button type="button" class="tool" data-layer="4">4</button></div>
+      <div class="row"><span>Test feature</span><button type="button" class="tool" data-ff="anomaly" aria-pressed="true">From a scratch</button><button type="button" class="tool" data-ff="normal">From a good part</button></div>
+    </div>
+    <p>PaDiM forces normal features into one Gaussian per position, and PatchCore keeps raw examples. A <button class="inline-term" data-open="flow">normalizing flow</button> learns an invertible warp that bends the real, oddly shaped cloud of normal features into a standard Gaussian. Then the likelihood of any feature is an exact number, and a low likelihood means an anomaly.</p>
+    <p>At layer 0, the <span class="c-blue">blue surface</span> is the density of normal features: a twisted crescent that no single Gaussian fits. Predict before you press 4: once normal is a round bell, where will the <span class="c-yellow">feature from a scratch</span> land? Each layer is one <button class="inline-term" data-open="coupling">affine coupling</button>: it keeps one coordinate and scales and shifts the other by an amount computed from the first. The scratch feature rides along and ends far out in the tail.</p>
+    <div class="eq">log p(x) = log N(f(x); 0, I) + log |det df/dx|</div>
+    <p>Watch the readout while you step. The log-likelihood of the test feature never changes. Only its split changes: the height of the surface under the point, plus the log-determinant, the correction for how much the warp has stretched the plane so far. The yellow ring around the point shows that stretching.</p>
+    <p>FastFlow (2021) makes the flow two-dimensional. Its scale and shift networks are convolutions over the whole feature map, so one pass gives a likelihood for every position at once. The <span class="c-brown">backbone stays frozen</span>; only the <span class="c-green">flow</span> is trained, by maximizing the likelihood of normal features. On MVTec AD it reaches 99.4 image AUROC and 98.5 pixel AUROC with a CaiT backbone.</p>
+    <p class="note">Toy model, with exact densities. The toy data distribution is defined as a standard Gaussian pushed through four affine couplings, so the toy flow that undoes them is exact, and so is every intermediate surface on the stage. The small dots are toy normal features, carried through the warp. Drag the stage to turn it.</p>
+    <p class="inscription">A flow does not measure distance to examples. It warps normal into a standard Gaussian, where a likelihood is easy to read.</p>
+    <button type="button" class="continue" data-go="synthetic">Continue with fake defects</button>
+  </article>
+
+  <article data-chapter="synthetic">
+    <header class="ch-head"><span class="num">5 of 9</span><h2>Make fake defects</h2><p class="subhead">Turn anomaly detection into supervised learning</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Methods">
+        <button type="button" role="tab" data-step="0">CutPaste</button>
+        <button type="button" role="tab" data-step="1">DRAEM</button>
+      </div>
+      <button type="button" class="tool" data-act="reset">Reset</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Product</span><button type="button" class="tool" data-product="mesh" aria-pressed="true">Woven mesh</button><button type="button" class="tool" data-product="cap">Machined cap</button></div>
+      <div class="row"><span>CutPaste</span><button type="button" class="tool" data-cp="large" aria-pressed="true">Large patch</button><button type="button" class="tool" data-cp="scar">Thin scar</button></div>
+      <div class="row"><span>DRAEM</span><button type="button" class="tool" data-noise>New noise</button></div>
+    </div>
+    <p>If you have no defects, manufacture plausible ones. Paste fake damage onto good images and train a network to find it. The risk: the network may learn your fakes instead of real defects.</p>
+    <div class="step-text" data-step="0">
+      <div class="controls">
+        <label class="slider"><span>Patch area <b id="cp-area-value">6%</b></span><input id="cp-area" type="range" min="2" max="15" step="1" value="6"></label>
+        <label class="slider"><span>Aspect ratio <b id="cp-aspect-value">1.6</b></span><input id="cp-aspect" type="range" min="0.3" max="3.3" step="0.1" value="1.6"></label>
+      </div>
+      <h3>CutPaste: learn to spot an edit</h3>
+      <p>CutPaste (2021) cuts a rectangle out of a good image and pastes it somewhere else in the same image, slightly brightened. A classifier learns two classes: the original and the edited copy. To spot a seam in a weave, it must learn what a regular weave looks like. Drag the dashed source and the yellow target on the stage.</p>
+      <p>Then the classifier is thrown away and only its features are kept. CutPaste fits one Gaussian to the features of good images and scores a test image by how unlikely its feature is under it: the same Mahalanobis distance as PaDiM. With three classes (normal, large patch, thin scar), it reaches 95.2 image AUROC on MVTec AD.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <div class="controls">
+        <label class="slider"><span>Noise threshold <b id="dr-thr-value">0.72</b></span><input id="dr-thr" type="range" min="0.55" max="0.85" step="0.01" value="0.72"></label>
+        <label class="slider"><span>Opacity beta <b id="dr-beta-value">0.60</b></span><input id="dr-beta" type="range" min="0.1" max="1" step="0.05" value="0.6"></label>
+      </div>
+      <h3>DRAEM: repair the fake, then compare</h3>
+      <p>DRAEM (2021) makes a blob-shaped mask from <button class="inline-term" data-open="perlin">Perlin noise</button> and paints a foreign texture into it, at an opacity beta drawn from 0.1 to 1.0. A reconstructive network learns to repair the fake back to the clean image. A discriminative network looks at the input and its repair side by side and outputs a pixel map of where they disagree.</p>
+      <p>So the segmenter does not learn what a fake looks like. It learns how far an image is from its own repaired version, and that gap also exists for real defects. On MVTec AD, DRAEM reaches 98.0 image AUROC and 97.3 pixel AUROC.</p>
+    </div>
+    <p class="note">Toy model: the fakes on the stage are made from the toy images with each paper's recipe. CutPaste copies a rectangle within the same toy image with a small brightness jitter. DRAEM blends a texture into a thresholded Perlin mask with DRAEM's Eq. 4; a procedural marbled toy texture stands in for the Describable Textures Dataset. No network is trained on the stage.</p>
+    <p class="inscription">Fake defects turn the problem into supervised learning. They work when the network learns irregularity in general, not the look of one kind of fake.</p>
+    <button type="button" class="continue" data-go="studentteacher">Continue with student and teacher</button>
+  </article>
+
+  <article data-chapter="studentteacher">
+    <header class="ch-head"><span class="num">6 of 9</span><h2>A student that fails only on defects</h2><p class="subhead">EfficientAD: fast, and it sees logical defects too</p></header>
+    <div class="tools"><button type="button" class="tool" data-act="reset">Reset</button></div>
+    <div class="controls">
+      <div class="row"><span>Inspect</span><button type="button" class="tool" data-case="good" aria-pressed="true">Good cap</button><button type="button" class="tool" data-case="scratch">Scratched cap</button><button type="button" class="tool" data-case="extra">Cap with an extra hole</button></div>
+      <label class="slider"><span>Hard feature quantile p_hard <b id="ead-ph-value">0.999</b></span><input id="ead-ph" type="range" min="0" max="5" step="1" value="3"></label>
+    </div>
+    <p><button class="inline-term" data-open="distill">Knowledge distillation</button> trains a <span class="c-green">student</span> network to copy the outputs of a fixed <span class="c-brown">teacher</span>. EfficientAD (2023) shows the student only good parts. On a good part the student has learned to match the teacher. On a defect it was never trained, so its output drifts, and the gap between the two is the anomaly map.</p>
+    <p>Both networks are a patch description network (PDN) of four convolutional layers, so the method is fast: 2.2 ms per image for EfficientAD-S on one desktop GPU. Two tricks stop the student from imitating too well. A hard feature loss trains only on the largest teacher-student differences, those at or above the p_hard <button class="inline-term" data-open="quantile">quantile</button> (0.999 by default). A penalty pushes the student's output on random ImageNet images toward zero.</p>
+    <p>Logical defects need a global view: an extra hole looks like every other hole, patch by patch. So EfficientAD adds an <button class="inline-term" data-open="autoencoder">autoencoder</button> that squeezes the whole image through a code of 64 numbers and rebuilds the teacher's features. It cannot store where each detail sits, so where the part breaks the usual layout, its output disagrees with the student. Predict before you press "Cap with an extra hole": which map will catch it?</p>
+    <p>The two maps are calibrated on held-out good images (the 0.9 quantile maps to 0, the 0.995 quantile to 0.1), then averaged; the maximum is the image score. On MVTec LOCO, EfficientAD-M scores 90.7 image AUROC against 80.3 for PatchCore, in the EfficientAD paper's re-runs.</p>
+    <table class="data" id="ead-table"><tr><th>p_hard (EfficientAD Table 3)</th><th class="n">0</th><th class="n">0.9</th><th class="n">0.99</th><th class="n">0.999</th><th class="n">0.9999</th><th class="n">0.99999</th></tr><tr><td>EfficientAD-M image AUROC</td><td class="n" data-ph="0">94.9</td><td class="n" data-ph="1">94.9</td><td class="n" data-ph="2">95.7</td><td class="n" data-ph="3">96.0</td><td class="n" data-ph="4">95.8</td><td class="n" data-ph="5">95.7</td></tr></table>
+    <p class="note">Toy model. The toy teacher is the toy's three patch features; the toy student is a nearest-neighbor regressor fitted on 40 good toy caps, so like a small network trained on good parts it imitates well only near what it has seen. The toy autoencoder is a principal component analysis of the whole toy feature map. The toy maps use EfficientAD's quantile calibration on held-out good toy caps. Yellow squares on the camera view mark the toy elements the hard feature loss would train on; the slider sets p_hard.</p>
+    <p class="inscription">A student taught only on good parts fails exactly where the part is not good. An autoencoder adds the global view that a single patch never has.</p>
+    <button type="button" class="continue" data-go="multiclass">Continue with one model for all</button>
+  </article>
+
+  <article data-chapter="multiclass">
+    <header class="ch-head"><span class="num">7 of 9</span><h2>One model for every product</h2><p class="subhead">UniAD, and the shortcut that copies defects</p></header>
+    <div class="tools"><button type="button" class="tool" data-act="reset">Reset</button></div>
+    <div class="controls">
+      <div class="row"><span>Attention</span><button type="button" class="tool" data-mode="full" aria-pressed="true">Full attention</button><button type="button" class="tool" data-mode="mask">Neighbor mask</button><button type="button" class="tool" data-mode="query">Learned query</button></div>
+    </div>
+    <p>Every method so far trains one model per product, and a factory has hundreds of products. UniAD (2022) trains one model on the good images of all 15 MVTec AD categories at once, with no category label: the <button class="inline-term" data-open="multiclass">multi-class setting</button>.</p>
+    <p>UniAD is a reconstruction method. A transformer learns to rebuild the frozen backbone's features of good images, and whatever it fails to rebuild is anomalous. The danger is the identical shortcut: a network that simply copies its input rebuilds defects too, and the error map goes blank.</p>
+    <p>Click a token on the scratch with full <button class="inline-term" data-open="attention">attention</button>. Predict: if a token may look at itself, where will it look? At itself. Now press "Neighbor mask": a token may not attend to keys in its own 7 by 7 neighborhood, so it must rebuild itself from look-alikes elsewhere. Normal texture has look-alikes everywhere; the scratch has none, so it lights up.</p>
+    <p>UniAD also gives each decoder layer its own learned query and adds noise to the input features during training. In its ablation on MVTec AD, the transformer scores 69.5 image AUROC with no query and 96.5 with all three fixes. Dinomaly (2024) later reaches 99.6 with one model for all categories, close to its own 99.7 with one model per category.</p>
+    <table class="data"><tr><th>MVTec AD image AUROC (UniAD Table 1)</th><th class="n">One model per category</th><th class="n">One model for all</th></tr><tr><td>PaDiM</td><td class="n">95.5</td><td class="n">84.2</td></tr><tr><td>CutPaste</td><td class="n">96.1</td><td class="n">77.5</td></tr><tr><td>DRAEM</td><td class="n">98.0</td><td class="n">88.1</td></tr><tr class="ours"><td>UniAD</td><td class="n">96.6</td><td class="n">96.5</td></tr></table>
+    <p class="note">Toy model: one attention layer rebuilds the 15 by 15 feature tokens of a scratched toy mesh. Blue squares show where the selected token (yellow) looks. Full attention uses the token itself as the query. The neighbor mask hides the token's 7 by 7 window. The learned query asks with the mean good-mesh feature at each position, fitted on 20 good toy meshes. In the table, the one-model-for-all column for the other methods is UniAD's re-run with public code.</p>
+    <p class="inscription">One model for every product works only if the model cannot copy. Hide each token from itself, and defects can no longer be rebuilt.</p>
+    <button type="button" class="continue" data-go="zeroshot">Continue with no training images</button>
+  </article>
+
+  <article data-chapter="zeroshot">
+    <header class="ch-head"><span class="num">8 of 9</span><h2>No images, or only a few</h2><p class="subhead">Ask CLIP about damage, or bring nearest neighbors back</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Methods">
+        <button type="button" role="tab" data-step="0">WinCLIP</button>
+        <button type="button" role="tab" data-step="1">AnomalyCLIP</button>
+        <button type="button" role="tab" data-step="2">AnomalyDINO</button>
+      </div>
+      <button type="button" class="tool play" data-play>Play</button>
+      <button type="button" class="tool" data-act="reset">Reset</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Windows</span><button type="button" class="tool" data-scale="small" aria-pressed="true">2 x 2 patches</button><button type="button" class="tool" data-scale="mid">3 x 3</button><button type="button" class="tool" data-scale="img">Whole image</button><button type="button" class="tool" data-scale="all">All three</button></div>
+      <div class="row"><span>Combine</span><button type="button" class="tool" data-harm="1" aria-pressed="true">Harmonic mean</button><button type="button" class="tool" data-harm="0">Arithmetic mean</button></div>
+      <div class="row"><span>Part</span><button type="button" class="tool" data-part="mesh" aria-pressed="true">Mesh</button><button type="button" class="tool" data-part="cap">Cap</button></div>
+      <div class="row"><span>Dataset</span><button type="button" class="tool" data-ds="mvtec" aria-pressed="true">MVTec AD</button><button type="button" class="tool" data-ds="visa">VisA</button></div>
+      <div class="row"><span>Metric</span><button type="button" class="tool" data-metric="img" aria-pressed="true">Image AUROC</button><button type="button" class="tool" data-metric="pix">Pixel AUROC</button><button type="button" class="tool" data-metric="pro">AU-PRO</button></div>
+    </div>
+    <p>Every method so far needed good images of the product. <button class="inline-term" data-open="clip">CLIP</button> already pairs images with words such as "flawless" and "damaged", so a model can judge a part it has never seen: the <button class="inline-term" data-open="zeroshot">zero-shot</button> setting. With a handful of good images, the <button class="inline-term" data-open="fewshot">few-shot</button> setting, the old nearest-neighbor idea returns.</p>
+    <div class="step-text" data-step="0">
+      <h3>WinCLIP: ask CLIP, window by window</h3>
+      <p>WinCLIP (2023) compares each image window with two text <button class="inline-term" data-open="prompt">prompts</button>, normal and anomalous, and takes a two-class softmax over the similarities. Each prompt is an average over an ensemble: 7 normal states (such as "flawless") and 4 anomalous states (such as "damaged") in 22 sentence templates. Windows of 32 and 48 pixels slide over the image, and each pixel's score combines the windows that cover it with a <button class="inline-term" data-open="harmonic">harmonic mean</button>.</p>
+      <p>Press Play, then "Whole image": one scratch is a small part of the whole image, so the whole-image window says "flawless". Compare the harmonic and arithmetic means: the arithmetic mean smears a damaged window over all its pixels. Then try the cap: a generic idea of "damaged" also flags the designed rim. Zero-shot on MVTec AD, WinCLIP reaches 91.8 image AUROC and 85.1 pixel AUROC; without the harmonic mean, 81.5.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>AnomalyCLIP: learn "damaged", not "which object"</h3>
+      <p>Hand-written prompts name the product. AnomalyCLIP (2023) learns two prompts instead: 12 learned vectors followed by "object", and 12 followed by "damaged object". The vectors are trained once, on a labelled dataset of other products, while every CLIP weight stays <span class="c-brown">frozen</span>. Then the same two prompts serve every product of a new dataset.</p>
+      <p>To test on MVTec AD, the prompts are trained on the VisA test split (962 normal and 1200 anomalous images). They reach 91.5 image AUROC, next to WinCLIP's 91.8 with product names, and 91.1 pixel AUROC against 85.1. So zero-shot means zero images of the target product, not zero labelled images.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <div class="controls"><label class="slider"><span>Good images per product <b id="dino-k-value">1</b></span><input id="dino-k" type="range" min="0" max="4" step="1" value="0"></label></div>
+      <h3>AnomalyDINO: PatchCore with better features</h3>
+      <p>AnomalyDINO (2024) is PatchCore's nearest-neighbor search on <button class="inline-term" data-open="dinov2">DINOv2</button> patch features (a ViT-S backbone), with a memory of only a few good images and no training or prompts. With one good image, it reaches 96.5 image AUROC on MVTec AD, against 93.1 for WinCLIP+, the few-shot version of WinCLIP. It takes about 60 ms per image on one GPU.</p>
+      <p>Switch to VisA and the picture changes: with one image, APRIL-GAN, trained on MVTec AD, wins image AUROC with 91.2 against 87.4. AnomalyDINO still wins every pixel metric there.</p>
+    </div>
+    <p class="note">The WinCLIP tab is a toy model: each toy window's p(damaged) is a logistic function of its mean diagonal-edge energy, a fixed stand-in for CLIP's two-class softmax that uses no normal image of the product. The AnomalyCLIP and AnomalyDINO tabs plot the papers' numbers: AnomalyCLIP Table 1 (WinCLIP rows copied from WinCLIP's paper), and AnomalyDINO Tables 2 to 4 (baseline rows copied from their papers; WinCLIP+ at 8 and 16 images is AnomalyDINO's re-implementation, drawn hollow).</p>
+    <p class="inscription">With no images, a model that already knows the word "damaged" gets surprisingly far. With a few images, nearest neighbors on strong features win again.</p>
+    <button type="button" class="continue" data-go="speed">Continue with speed and the scoreboard</button>
+  </article>
+
+  <article data-chapter="speed">
+    <header class="ch-head"><span class="num">9 of 9</span><h2>Speed, and the scoreboard</h2><p class="subhead">Choose by what you have: images, products, hardware</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Views">
+        <button type="button" role="tab" data-step="0">Speed vs accuracy</button>
+        <button type="button" role="tab" data-step="1">Scoreboard</button>
+      </div>
+      <button type="button" class="tool" data-act="reset">Reset</button>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Device</span><button type="button" class="tool" data-view="desktop" aria-pressed="true">Desktop GPU</button><button type="button" class="tool" data-view="jetson">Jetson boards</button><button type="button" class="tool" data-view="cpu">CPUs</button></div>
+      <div class="row"><span>Scoreboard</span><button type="button" class="tool" data-sb="mvtec" aria-pressed="true">MVTec AD</button><button type="button" class="tool" data-sb="visa">VisA</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <div class="controls"><label class="slider"><span>Line speed <b id="speed-v-value">10 parts per second</b></span><input id="speed-v" type="range" min="0" max="100" step="1" value="50"></label></div>
+      <h3>Every millisecond is a part on the line</h3>
+      <p>Accuracy tables hide the other half of the choice. A fast line leaves each part only a few tens of milliseconds. Move the line speed: every method to the right of the red budget line cannot inspect every part.</p>
+      <p>On one desktop GPU, the EfficientAD paper's re-runs time PatchCore-Ens at 147.6 ms per image, PatchCore at 32.0 ms and EfficientAD-S at 2.2 ms. Latency follows from the model of normal: a memory bank pays for a nearest-neighbor search, a student-teacher pair needs only two small networks, and vision-language methods carry a large backbone.</p>
+      <p>On a <button class="inline-term" data-open="jetson">Jetson</button> Orin Nano, one benchmark times EfficientAD at 34.7 ms and PatchCore with a ResNet-18 at 119.0 ms; their accuracy there comes from a <button class="inline-term" data-open="continual">continual-learning protocol</button>, so read it with care. EdgeZSAD runs zero-shot at 32.83 ms on a Jetson Orin Nano Super and reaches 91.6 image AUROC on MVTec AD. Compression is not free: <button class="inline-term" data-open="quantize">quantizing</button> the student of reverse distillation cuts its latency from 166.60 ms to 19.68 ms on a Jetson Xavier NX, but its AUROC falls from 0.96 to 0.82.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>The scoreboard</h3>
+      <p>One chart for the methods in this tour, each with its own paper's numbers, grouped by setting. Compare only within a setting: a zero-shot score and a score from a model trained on the product answer different questions.</p>
+      <p>Three things stand out. On MVTec AD, the strong one-class methods on this chart land between 98.0 and 99.4 image AUROC, so the benchmark no longer separates them. AU-PRO sits lower and spreads wider than pixel AUROC: WinCLIP scores 85.1 pixel AUROC but 64.6 AU-PRO. And the zero-shot rows trail the trained rows, most of all on AU-PRO.</p>
+    </div>
+    <h3>If you have this, start here</h3>
+    <ul>
+      <li><b>Hundreds of good images and a desktop GPU.</b> Start with PatchCore: 99.1 image AUROC on MVTec AD with nothing to train. For a fast line, EfficientAD-S gives 98.8 at 2.2 ms. If defects can be logical, prefer EfficientAD: 90.7 on MVTec LOCO against 80.3 for PatchCore.</li>
+      <li><b>Many products, one model.</b> Dinomaly: 99.6 image AUROC with one model for all MVTec AD categories, against 96.5 for UniAD.</li>
+      <li><b>A handful of good images.</b> AnomalyDINO with one image per product: 96.5 on MVTec AD and 85.6 on VisA, against 93.1 and 83.8 for WinCLIP+.</li>
+      <li><b>No image of the product.</b> AnomalyCLIP (91.5 image AUROC, 91.1 pixel AUROC on MVTec AD) localizes better than WinCLIP (91.8 and 85.1). Treat either as a start, and collect good images.</li>
+      <li><b>A Jetson at line speed.</b> EfficientAD at 34.7 ms, or EdgeZSAD at 32.83 ms for zero-shot. Measure accuracy again after every export or quantization.</li>
+    </ul>
+    <p class="note">The stage plots each paper's own numbers. Speed: latency per image on a log axis against MVTec AD image AUROC. The desktop points are the EfficientAD paper's re-runs on one GPU; the Jetson and CPU points come from five papers with different protocols, shown by marker shape. Ticks on the floor are latencies with no accuracy for that run. Scoreboard: image AUROC (dot), pixel AUROC (ring) and AU-PRO (square); on VisA, hollow or grey marks are re-runs by a later paper.</p>
+    <p class="inscription">There is no single best detector. Start from what you have: how many good images, how many products, and how many milliseconds per part.</p>
+    <div class="end-links"><a class="btn" href="explainer.html">Open the full explainer</a><button class="btn" type="button" data-open="papers">Paper list</button></div>
+  </article>

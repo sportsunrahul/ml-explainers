@@ -1,0 +1,43 @@
+# sim-grid: node runs of the ch-grid / ch-granularity toys (build/test-grid/tools/*.mjs, kits 40-43 loaded with head.html's PE)
+
+## viz-ruler (40-ruler.js): 4000 samples, seed 41, 80% N(0.5, 0.55) + 20% 0.3 + Exp(mean 0.9); errors = sum over samples / N
+sample 4000 min -1.605 max 5.667
+tight 8 asym S 0.00824 Z 61 round 5.1e-6 clip 0.062 nclip 374 used 256/256
+tight 8 sym  S 0.0126 Z 0 round 1.2e-5 clip 0.059 nclip 259 used 211/255
+tight 4 asym S 0.140 Z 4 round 0.0015 clip 0.066 nclip 328 used 16/16
+tight 4 sym  S 0.229 Z 0 round 0.0042 clip 0.059 nclip 205 used 15/15
+tight 2 asym S 0.700 Z 1 round 0.04 clip 0.077 nclip 198 used 4/4
+tight 2 sym  S 1.60 Z 0 round 0.23 clip 0.053 nclip 59 used 3/3
+minmax 8 asym S 0.0285 Z 56 round 6.8e-5 clip 0 nclip 0 used 167/256
+minmax 8 sym  S 0.0446 Z 0 round 1.7e-4 clip 0 nclip 0 used 118/255
+minmax 4 asym S 0.485 Z 3 round 0.019 clip 0 nclip 0 used 16/16
+minmax 4 sym  S 0.810 Z 0 round 0.056 clip 0 nclip 0 used 10/15
+minmax 2 asym S 2.42 Z 1 round 0.44 clip 0 nclip 0 used 4/4
+minmax 2 sym  S 5.67 Z 0 round 0.74 clip 0 nclip 0 used 2/3
+wide 8 asym S 0.0392 Z 64 round 1.3e-4 clip 0 nclip 0 used 130/256
+wide 8 sym  S 0.0591 Z 0 round 2.9e-4 clip 0 nclip 0 used 97/255
+wide 4 asym S 0.667 Z 4 round 0.039 clip 0 nclip 0 used 12/16
+wide 4 sym  S 1.07 Z 0 round 0.1 clip 0 nclip 0 used 7/15
+wide 2 asym S 3.33 Z 1 round 0.6 clip 0 nclip 0 used 3/4
+wide 2 sym  S 7.50 Z 0 round 0.79 clip 0 nclip 0 used 2/3
+
+## viz-intmm (41-intmm.js)
+{"A1":{"S":0.007058823529411765,"Z":142},"A2":{"S":0.00784313725490196,"Z":128},"A3":{"S":0.023529411764705882,"Z":85},"q1":[54,149,243,17,159,254,75,138,219],"q2":[78,141,188,83,146,193,87,150,182],"N":9,"core":211635,"sum1":1308,"sum2":1248,"t1":-177216,"t2":-167424,"t3":163584,"Sb":0.000055363321799307956,"qb":2709,"acc":33288,"M":0.002352941176470588,"n":8,"M0":0.6023529411764705,"M0i":1293543092,"hi":20051,"sh":78,"q3raw":163,"q3":163,"yhat":1.8352941176470587,"yf":1.83674,"err":-0.0014458823529412967}
+check acc 33288 33288 exact 163.32470588235293
+
+## viz-chanland (42-chanland.js): asymmetric 8-bit min-max grids, 32 x 9 toy weights, seed 5
+tensor S 0.6078431372549019 mse 0.030374364289891723 medLevels 7 min 3 nSmall 23 medRel 0.20746565085051977
+1:-3.0/1.9=9 2:-2.2/1.2=7 3:-1.5/0.9=6 4:-6.5/16.0=38 5:-25.0/67.0=152 6:-1.3/1.0=5 7:-1.5/2.7=7 8:-0.9/1.8=5 9:-3.3/2.4=11 10:-1.0/1.9=6 11:0.0/0.0=1 12:-1.9/1.7=7 13:-2.0/3.2=9 14:-2.2/1.9=8 15:-46.0/59.0=174 16:-60.0/63.0=204 17:-1.3/1.8=6 18:-1.0/1.1=5 19:-1.7/1.8=7 20:-0.9/1.3=5 21:-0.5/1.0=4 22:-2.0/1.6=7 23:0.0/0.0=1 24:-0.5/0.5=3 25:-0.8/0.4=3 26:-0.5/0.6=3 27:-1.3/0.8=4 28:-29.0/95.0=205 29:-45.0/54.0=164 30:-57.0/94.0=250 31:-3.1/4.0=13 32:-0.9/0.5=4
+channel S 0.6078431372549019 mse 0.0037170069185579607 medLevels 256 min 256 nSmall 0 medRel 0.003959327653116944
+1:-3.0/1.9=256 2:-2.2/1.2=256 3:-1.5/0.9=256 4:-6.5/16.0=256 5:-25.0/67.0=256 6:-1.3/1.0=256 7:-1.5/2.7=256 8:-0.9/1.8=256 9:-3.3/2.4=256 10:-1.0/1.9=256 11:0.0/0.0=1 12:-1.9/1.7=256 13:-2.0/3.2=256 14:-2.2/1.9=256 15:-46.0/59.0=256 16:-60.0/63.0=256 17:-1.3/1.8=256 18:-1.0/1.1=256 19:-1.7/1.8=256 20:-0.9/1.3=256 21:-0.5/1.0=256 22:-2.0/1.6=256 23:0.0/0.0=1 24:-0.5/0.5=256 25:-0.8/0.4=256 26:-0.5/0.6=256 27:-1.3/0.8=256 28:-29.0/95.0=256 29:-45.0/54.0=256 30:-57.0/94.0=256 31:-3.1/4.0=256 32:-0.9/0.5=256
+
+## viz-calib (43-calib.js): 100,000 samples, seed 17, ReLU of 97% N(0.1, 0.3) + 3% 0.2 + 0.5 g^2-ish tail; symmetric 8-bit, S = T/127
+KL: 2048 bins over [0, max] of nonzero values, candidates i = 128..2048, 128 merged groups (our reading of Wu Sec. 3.4; bin counts are toy settings)
+MSE: 100 coarse + 100 fine candidates, exact MSE on all samples (Nagel Eq. 16)
+ms 2066 N 100000 zeros 35775 max 3.730801364480766
+p99 0.8538010409068137 p99.9 1.494761998849493
+max 3.7308 round 4.6e-5 clip 0 mse 4.6e-5 nclip 0
+p9999 2.5143 round 2.1e-5 clip 3.2e-5 mse 5.3e-5 nclip 9
+entropy 2.7617 round 2.5e-5 clip 1.4e-5 mse 4.0e-5 nclip 7
+mse 3.0682 round 3.1e-5 clip 4.7e-6 mse 3.6e-5 nclip 3
+KL argmin index 1516 of 2048, kl 0.00461 kl at max 0.00486

@@ -1,0 +1,625 @@
+{
+ "source": "OWLv2 (Minderer, Gritsenko, Houlsby), arXiv 2306.09683v3",
+ "loc": "Appendix A.8.2, Table A4 (PDF p17); LaTeX src/odinw_table.tex, label app:tab:odinw-full-results",
+ "metric": "Zero-shot AP on each ODinW dataset (paper: \"Zero-shot AP of the models in Table 1 on all 35 ODinW datasets\"); mean13 = mean over the 13-dataset subset from GLIP (bold in the table); mean35/median35 over all 35",
+ "caption_note": "Row numbers refer to Table 1 (main table). Last row (no number) = OWL-ST/FT ens: weight-space ensemble of the checkpoints after self-training and after fine-tuning of the model in row 21, fine-tuned weight 0.4; paper calls it the best model by ODinW13.",
+ "odinw13_subset": [
+  "Aerial Maritime Drone Large",
+  "Aquarium",
+  "Cottontail Rabbits",
+  "Ego Hands Generic",
+  "North America Mushrooms",
+  "Packages",
+  "Pascal VOC",
+  "Pistols",
+  "Pothole",
+  "Raccoon",
+  "Shellfish OpenImages",
+  "Thermal Dogs And People",
+  "Vehicles OpenImages"
+ ],
+ "datasets": [
+  {
+   "name": "Aerial Maritime Drone Large",
+   "odinw13": true
+  },
+  {
+   "name": "Aerial Maritime Drone Tiled",
+   "odinw13": false
+  },
+  {
+   "name": "American Sign Language",
+   "odinw13": false
+  },
+  {
+   "name": "Aquarium",
+   "odinw13": true
+  },
+  {
+   "name": "BCCD",
+   "odinw13": false
+  },
+  {
+   "name": "Boggle Boards",
+   "odinw13": false
+  },
+  {
+   "name": "Brackish Underwater",
+   "odinw13": false
+  },
+  {
+   "name": "Chess Pieces",
+   "odinw13": false
+  },
+  {
+   "name": "Cottontail Rabbits",
+   "odinw13": true
+  },
+  {
+   "name": "Dice Medium Color",
+   "odinw13": false
+  },
+  {
+   "name": "Drone Control",
+   "odinw13": false
+  },
+  {
+   "name": "Ego Hands Generic",
+   "odinw13": true
+  },
+  {
+   "name": "Ego Hands Specific",
+   "odinw13": false
+  },
+  {
+   "name": "Hard Hat Workers",
+   "odinw13": false
+  },
+  {
+   "name": "Mask Wearing",
+   "odinw13": false
+  },
+  {
+   "name": "Mountain Dew Commercial",
+   "odinw13": false
+  },
+  {
+   "name": "North America Mushrooms",
+   "odinw13": true
+  },
+  {
+   "name": "Open Poetry Vision",
+   "odinw13": false
+  },
+  {
+   "name": "Oxford Pets By Breed",
+   "odinw13": false
+  },
+  {
+   "name": "Oxford Pets By Species",
+   "odinw13": false
+  },
+  {
+   "name": "Packages",
+   "odinw13": true
+  },
+  {
+   "name": "Pascal VOC",
+   "odinw13": true
+  },
+  {
+   "name": "Pistols",
+   "odinw13": true
+  },
+  {
+   "name": "Pk Lot",
+   "odinw13": false
+  },
+  {
+   "name": "Plantdoc",
+   "odinw13": false
+  },
+  {
+   "name": "Pothole",
+   "odinw13": true
+  },
+  {
+   "name": "Raccoon",
+   "odinw13": true
+  },
+  {
+   "name": "Selfdriving Car",
+   "odinw13": false
+  },
+  {
+   "name": "Shellfish OpenImages",
+   "odinw13": true
+  },
+  {
+   "name": "Thermal Cheetah",
+   "odinw13": false
+  },
+  {
+   "name": "Thermal Dogs And People",
+   "odinw13": true
+  },
+  {
+   "name": "Uno Cards Raw",
+   "odinw13": false
+  },
+  {
+   "name": "Vehicles OpenImages",
+   "odinw13": true
+  },
+  {
+   "name": "Website Screenshots",
+   "odinw13": false
+  },
+  {
+   "name": "Wildfire Smoke",
+   "odinw13": false
+  }
+ ],
+ "rows": [
+  {
+   "row": "11",
+   "method": "OWL-ST",
+   "backbone": "CLIP B/16",
+   "section": "open vocabulary",
+   "mean13": 48.8,
+   "mean35": 22.1,
+   "median35": 11.6,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 11.6,
+    "Aerial Maritime Drone Tiled": 19.4,
+    "American Sign Language": 1.1,
+    "Aquarium": 33.2,
+    "BCCD": 11.6,
+    "Boggle Boards": 0.3,
+    "Brackish Underwater": 4.8,
+    "Chess Pieces": 4.1,
+    "Cottontail Rabbits": 85.5,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 2.7,
+    "Ego Hands Generic": 46.9,
+    "Ego Hands Specific": 5.5,
+    "Hard Hat Workers": 2.0,
+    "Mask Wearing": 0.4,
+    "Mountain Dew Commercial": 22.0,
+    "North America Mushrooms": 33.9,
+    "Open Poetry Vision": 0.4,
+    "Oxford Pets By Breed": 2.7,
+    "Oxford Pets By Species": 3.4,
+    "Packages": 75.9,
+    "Pascal VOC": 52.7,
+    "Pistols": 60.1,
+    "Pk Lot": 0.1,
+    "Plantdoc": 4.8,
+    "Pothole": 19.2,
+    "Raccoon": 66.6,
+    "Selfdriving Car": 5.5,
+    "Shellfish OpenImages": 40.1,
+    "Thermal Cheetah": 19.1,
+    "Thermal Dogs And People": 51.1,
+    "Uno Cards Raw": 1.0,
+    "Vehicles OpenImages": 57.2,
+    "Website Screenshots": 1.8,
+    "Wildfire Smoke": 25.4
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 5,
+    "n_datasets_ap_below_5": 15,
+    "n_datasets_ap_below_10": 17
+   }
+  },
+  {
+   "row": "12",
+   "method": "OWL-ST",
+   "backbone": "CLIP L/14",
+   "section": "open vocabulary",
+   "mean13": 53.0,
+   "mean35": 24.4,
+   "median35": 16.2,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 19.9,
+    "Aerial Maritime Drone Tiled": 21.2,
+    "American Sign Language": 1.1,
+    "Aquarium": 32.3,
+    "BCCD": 16.2,
+    "Boggle Boards": 0.2,
+    "Brackish Underwater": 5.9,
+    "Chess Pieces": 7.8,
+    "Cottontail Rabbits": 84.9,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 4.7,
+    "Ego Hands Generic": 47.1,
+    "Ego Hands Specific": 3.5,
+    "Hard Hat Workers": 1.9,
+    "Mask Wearing": 0.5,
+    "Mountain Dew Commercial": 27.3,
+    "North America Mushrooms": 76.6,
+    "Open Poetry Vision": 0.6,
+    "Oxford Pets By Breed": 3.1,
+    "Oxford Pets By Species": 2.7,
+    "Packages": 70.9,
+    "Pascal VOC": 53.9,
+    "Pistols": 62.6,
+    "Pk Lot": 0.0,
+    "Plantdoc": 4.4,
+    "Pothole": 27.5,
+    "Raccoon": 63.8,
+    "Selfdriving Car": 4.9,
+    "Shellfish OpenImages": 35.0,
+    "Thermal Cheetah": 25.5,
+    "Thermal Dogs And People": 55.6,
+    "Uno Cards Raw": 1.1,
+    "Vehicles OpenImages": 58.5,
+    "Website Screenshots": 1.8,
+    "Wildfire Smoke": 31.1
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 5,
+    "n_datasets_ap_below_5": 15,
+    "n_datasets_ap_below_10": 17
+   }
+  },
+  {
+   "row": "13",
+   "method": "OWL-ST",
+   "backbone": "SigLIP G/14",
+   "section": "open vocabulary",
+   "mean13": 49.9,
+   "mean35": 22.9,
+   "median35": 17.5,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 22.0,
+    "Aerial Maritime Drone Tiled": 17.5,
+    "American Sign Language": 2.0,
+    "Aquarium": 36.7,
+    "BCCD": 21.4,
+    "Boggle Boards": 0.2,
+    "Brackish Underwater": 3.3,
+    "Chess Pieces": 5.6,
+    "Cottontail Rabbits": 88.1,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 4.9,
+    "Ego Hands Generic": 37.8,
+    "Ego Hands Specific": 4.3,
+    "Hard Hat Workers": 1.4,
+    "Mask Wearing": 0.2,
+    "Mountain Dew Commercial": 22.6,
+    "North America Mushrooms": 42.4,
+    "Open Poetry Vision": 0.5,
+    "Oxford Pets By Breed": 3.0,
+    "Oxford Pets By Species": 3.2,
+    "Packages": 62.8,
+    "Pascal VOC": 53.4,
+    "Pistols": 58.4,
+    "Pk Lot": 0.1,
+    "Plantdoc": 6.5,
+    "Pothole": 25.7,
+    "Raccoon": 63.9,
+    "Selfdriving Car": 5.8,
+    "Shellfish OpenImages": 42.5,
+    "Thermal Cheetah": 25.0,
+    "Thermal Dogs And People": 56.6,
+    "Uno Cards Raw": 1.2,
+    "Vehicles OpenImages": 58.1,
+    "Website Screenshots": 2.0,
+    "Wildfire Smoke": 23.4
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 5,
+    "n_datasets_ap_below_5": 14,
+    "n_datasets_ap_below_10": 17
+   }
+  },
+  {
+   "row": "14",
+   "method": "OWL-ST+FT",
+   "backbone": "CLIP B/16",
+   "section": "open vocabulary",
+   "mean13": 48.6,
+   "mean35": 20.8,
+   "median35": 6.0,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 13.7,
+    "Aerial Maritime Drone Tiled": 16.6,
+    "American Sign Language": 0.2,
+    "Aquarium": 35.8,
+    "BCCD": 3.9,
+    "Boggle Boards": 0.1,
+    "Brackish Underwater": 4.2,
+    "Chess Pieces": 3.1,
+    "Cottontail Rabbits": 85.5,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 0.9,
+    "Ego Hands Generic": 50.7,
+    "Ego Hands Specific": 1.3,
+    "Hard Hat Workers": 2.7,
+    "Mask Wearing": 0.5,
+    "Mountain Dew Commercial": 16.0,
+    "North America Mushrooms": 37.4,
+    "Open Poetry Vision": 0.2,
+    "Oxford Pets By Breed": 1.9,
+    "Oxford Pets By Species": 2.1,
+    "Packages": 71.3,
+    "Pascal VOC": 57.4,
+    "Pistols": 59.4,
+    "Pk Lot": 0.2,
+    "Plantdoc": 2.7,
+    "Pothole": 7.6,
+    "Raccoon": 61.7,
+    "Selfdriving Car": 6.0,
+    "Shellfish OpenImages": 42.5,
+    "Thermal Cheetah": 15.3,
+    "Thermal Dogs And People": 45.6,
+    "Uno Cards Raw": 1.3,
+    "Vehicles OpenImages": 62.8,
+    "Website Screenshots": 1.2,
+    "Wildfire Smoke": 15.8
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 7,
+    "n_datasets_ap_below_5": 17,
+    "n_datasets_ap_below_10": 19
+   }
+  },
+  {
+   "row": "15",
+   "method": "OWL-ST+FT",
+   "backbone": "CLIP L/14",
+   "section": "open vocabulary",
+   "mean13": 50.1,
+   "mean35": 22.3,
+   "median35": 6.3,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 20.6,
+    "Aerial Maritime Drone Tiled": 16.3,
+    "American Sign Language": 0.2,
+    "Aquarium": 37.4,
+    "BCCD": 4.0,
+    "Boggle Boards": 0.1,
+    "Brackish Underwater": 5.1,
+    "Chess Pieces": 5.6,
+    "Cottontail Rabbits": 83.4,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 4.8,
+    "Ego Hands Generic": 58.5,
+    "Ego Hands Specific": 2.2,
+    "Hard Hat Workers": 2.1,
+    "Mask Wearing": 0.6,
+    "Mountain Dew Commercial": 28.5,
+    "North America Mushrooms": 42.2,
+    "Open Poetry Vision": 0.3,
+    "Oxford Pets By Breed": 2.5,
+    "Oxford Pets By Species": 1.9,
+    "Packages": 65.5,
+    "Pascal VOC": 58.9,
+    "Pistols": 63.7,
+    "Pk Lot": 0.2,
+    "Plantdoc": 1.5,
+    "Pothole": 9.1,
+    "Raccoon": 57.2,
+    "Selfdriving Car": 6.3,
+    "Shellfish OpenImages": 43.0,
+    "Thermal Cheetah": 24.7,
+    "Thermal Dogs And People": 47.7,
+    "Uno Cards Raw": 1.3,
+    "Vehicles OpenImages": 64.3,
+    "Website Screenshots": 1.8,
+    "Wildfire Smoke": 20.3
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 6,
+    "n_datasets_ap_below_5": 15,
+    "n_datasets_ap_below_10": 19
+   }
+  },
+  {
+   "row": "16",
+   "method": "OWL-ST+FT",
+   "backbone": "SigLIP G/14",
+   "section": "open vocabulary",
+   "mean13": 50.1,
+   "mean35": 22.5,
+   "median35": 9.5,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 21.3,
+    "Aerial Maritime Drone Tiled": 16.5,
+    "American Sign Language": 0.3,
+    "Aquarium": 39.8,
+    "BCCD": 9.5,
+    "Boggle Boards": 0.3,
+    "Brackish Underwater": 5.6,
+    "Chess Pieces": 5.8,
+    "Cottontail Rabbits": 82.5,
+    "Dice Medium Color": 0.0,
+    "Drone Control": 3.6,
+    "Ego Hands Generic": 50.9,
+    "Ego Hands Specific": 0.5,
+    "Hard Hat Workers": 1.7,
+    "Mask Wearing": 0.2,
+    "Mountain Dew Commercial": 25.5,
+    "North America Mushrooms": 44.9,
+    "Open Poetry Vision": 0.2,
+    "Oxford Pets By Breed": 2.8,
+    "Oxford Pets By Species": 2.3,
+    "Packages": 68.1,
+    "Pascal VOC": 56.4,
+    "Pistols": 58.5,
+    "Pk Lot": 0.7,
+    "Plantdoc": 5.3,
+    "Pothole": 17.4,
+    "Raccoon": 58.3,
+    "Selfdriving Car": 6.1,
+    "Shellfish OpenImages": 42.7,
+    "Thermal Cheetah": 23.6,
+    "Thermal Dogs And People": 47.9,
+    "Uno Cards Raw": 1.9,
+    "Vehicles OpenImages": 61.9,
+    "Website Screenshots": 1.9,
+    "Wildfire Smoke": 23.9
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 7,
+    "n_datasets_ap_below_5": 13,
+    "n_datasets_ap_below_10": 18
+   }
+  },
+  {
+   "row": "20",
+   "method": "OWL-ST+FT",
+   "backbone": "CLIP B/16",
+   "section": "human-curated vocabulary",
+   "mean13": 48.9,
+   "mean35": 21.7,
+   "median35": 6.8,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 16.7,
+    "Aerial Maritime Drone Tiled": 17.2,
+    "American Sign Language": 0.3,
+    "Aquarium": 35.3,
+    "BCCD": 4.5,
+    "Boggle Boards": 0.1,
+    "Brackish Underwater": 4.6,
+    "Chess Pieces": 4.4,
+    "Cottontail Rabbits": 85.1,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 2.4,
+    "Ego Hands Generic": 51.8,
+    "Ego Hands Specific": 0.9,
+    "Hard Hat Workers": 2.9,
+    "Mask Wearing": 0.4,
+    "Mountain Dew Commercial": 27.3,
+    "North America Mushrooms": 36.9,
+    "Open Poetry Vision": 0.3,
+    "Oxford Pets By Breed": 2.1,
+    "Oxford Pets By Species": 2.5,
+    "Packages": 71.3,
+    "Pascal VOC": 59.0,
+    "Pistols": 61.3,
+    "Pk Lot": 0.4,
+    "Plantdoc": 2.7,
+    "Pothole": 9.6,
+    "Raccoon": 58.7,
+    "Selfdriving Car": 6.8,
+    "Shellfish OpenImages": 42.0,
+    "Thermal Cheetah": 20.0,
+    "Thermal Dogs And People": 45.7,
+    "Uno Cards Raw": 1.2,
+    "Vehicles OpenImages": 62.6,
+    "Website Screenshots": 1.5,
+    "Wildfire Smoke": 20.6
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 7,
+    "n_datasets_ap_below_5": 17,
+    "n_datasets_ap_below_10": 19
+   }
+  },
+  {
+   "row": "21",
+   "method": "OWL-ST+FT",
+   "backbone": "CLIP L/14",
+   "section": "human-curated vocabulary",
+   "mean13": 48.7,
+   "mean35": 21.9,
+   "median35": 7.0,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 18.8,
+    "Aerial Maritime Drone Tiled": 17.5,
+    "American Sign Language": 0.2,
+    "Aquarium": 36.4,
+    "BCCD": 5.3,
+    "Boggle Boards": 0.1,
+    "Brackish Underwater": 5.4,
+    "Chess Pieces": 5.7,
+    "Cottontail Rabbits": 85.1,
+    "Dice Medium Color": 0.1,
+    "Drone Control": 4.9,
+    "Ego Hands Generic": 53.9,
+    "Ego Hands Specific": 2.5,
+    "Hard Hat Workers": 2.2,
+    "Mask Wearing": 0.3,
+    "Mountain Dew Commercial": 28.8,
+    "North America Mushrooms": 41.2,
+    "Open Poetry Vision": 0.3,
+    "Oxford Pets By Breed": 2.4,
+    "Oxford Pets By Species": 2.1,
+    "Packages": 61.1,
+    "Pascal VOC": 59.2,
+    "Pistols": 65.7,
+    "Pk Lot": 0.1,
+    "Plantdoc": 1.8,
+    "Pothole": 9.5,
+    "Raccoon": 57.9,
+    "Selfdriving Car": 7.0,
+    "Shellfish OpenImages": 44.0,
+    "Thermal Cheetah": 23.8,
+    "Thermal Dogs And People": 36.8,
+    "Uno Cards Raw": 0.9,
+    "Vehicles OpenImages": 63.2,
+    "Website Screenshots": 1.6,
+    "Wildfire Smoke": 20.7
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 7,
+    "n_datasets_ap_below_5": 14,
+    "n_datasets_ap_below_10": 19
+   }
+  },
+  {
+   "row": null,
+   "method": "OWL-ST/FT ens",
+   "backbone": "CLIP L/14",
+   "section": "human-curated vocabulary",
+   "mean13": 56.3,
+   "mean35": 25.6,
+   "median35": 10.6,
+   "per_dataset": {
+    "Aerial Maritime Drone Large": 21.7,
+    "Aerial Maritime Drone Tiled": 20.0,
+    "American Sign Language": 1.0,
+    "Aquarium": 39.1,
+    "BCCD": 10.6,
+    "Boggle Boards": 0.2,
+    "Brackish Underwater": 7.6,
+    "Chess Pieces": 7.0,
+    "Cottontail Rabbits": 87.0,
+    "Dice Medium Color": 0.0,
+    "Drone Control": 6.1,
+    "Ego Hands Generic": 53.1,
+    "Ego Hands Specific": 3.2,
+    "Hard Hat Workers": 2.1,
+    "Mask Wearing": 0.3,
+    "Mountain Dew Commercial": 31.3,
+    "North America Mushrooms": 80.6,
+    "Open Poetry Vision": 0.4,
+    "Oxford Pets By Breed": 3.1,
+    "Oxford Pets By Species": 2.9,
+    "Packages": 66.3,
+    "Pascal VOC": 61.8,
+    "Pistols": 66.2,
+    "Pk Lot": 0.1,
+    "Plantdoc": 4.0,
+    "Pothole": 26.0,
+    "Raccoon": 65.4,
+    "Selfdriving Car": 6.2,
+    "Shellfish OpenImages": 45.1,
+    "Thermal Cheetah": 24.1,
+    "Thermal Dogs And People": 56.7,
+    "Uno Cards Raw": 1.1,
+    "Vehicles OpenImages": 63.3,
+    "Website Screenshots": 1.9,
+    "Wildfire Smoke": 30.9
+   },
+   "our_reading_counts": {
+    "n_datasets_ap_below_1": 5,
+    "n_datasets_ap_below_5": 13,
+    "n_datasets_ap_below_10": 17
+   }
+  }
+ ],
+ "check": "our reading: mean13, mean35 and median35 recomputed from the per-dataset values reproduce the printed aggregates for all 9 rows (to rounding)."
+}

@@ -1,0 +1,254 @@
+[
+ {
+  "id": "chameleon-img-tokenizer",
+  "claim": "Image tokenizer: resolution, tokens per image, codebook",
+  "value": "512x512 image -> 1024 discrete tokens, codebook size 8192",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.1 Image Tokenization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-bpe-vocab",
+  "claim": "Text BPE tokenizer vocabulary size (includes the image codes)",
+  "value": "65,536, which includes the 8192 image codebook tokens",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.1 Tokenizer paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-sizes",
+  "claim": "Model sizes",
+  "value": "7B and 34B",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table llama_models",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-tokens-seen",
+  "claim": "Total tokens seen in pre-training",
+  "value": "9.2 trillion (2.1 epochs)",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-tokens-fig1",
+  "claim": "Figure 1 caption tokens",
+  "value": "~10T tokens",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Figure 1 caption",
+  "uncertain": true
+ },
+ {
+  "id": "chameleon-tokens-table",
+  "claim": "Tokens column for Chameleon 7B and 34B",
+  "value": "4.4T",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table llama_models",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-data-stage1",
+  "claim": "Stage-1 data: text-only / text-image / interleaved",
+  "value": "2.9 trillion tokens / 1.4 billion pairs = 1.5 trillion tokens / 400 billion tokens",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.2 First Stage",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-stages",
+  "claim": "Pre-training stage split",
+  "value": "first 80% stage 1, last 20% stage 2",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.2",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-qknorm-fail",
+  "claim": "Chameleon-7B without QK-Norm",
+  "value": "diverges after approximately 20% of a training epoch",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3, Fig. qknorm",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-divergence-late",
+  "claim": "Divergence timing",
+  "value": "divergences can manifest after as much as even 20-30% of training progress",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Architecture",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-instability-scale",
+  "claim": "When instability appears",
+  "value": "above 8B parameters and 1T tokens, often only arising very late in training",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 first para",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-norm-growth",
+  "claim": "Diagnostic for divergence",
+  "value": "uncontrolled growth of output norms is strongly correlated with predicting future loss divergence",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3, Fig. output_norms",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-no-imagegen",
+  "claim": "Ablation without image generation",
+  "value": "did not diverge",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Fig. no_imagegen caption",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-norm-reorder",
+  "claim": "34B norm placement",
+  "value": "h = x + attention_norm(attention(x)); output = h + ffn_norm(feed_forward(h)) (Llama2: h = x + attention(attention_norm(x)))",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3, unnumbered equations",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-zloss",
+  "claim": "z-loss regularizer",
+  "value": "adds 10^-5 log^2 Z to the loss, Z = sum_i e^{x_i}",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-dropout-7b-34b",
+  "claim": "Dropout 7B vs 34B; z-loss and QK-Norm",
+  "value": "7B 0.1, 34B 0.0; z-loss 1e-5 and QK-Norm in both",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table llama_models",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-stability-need",
+  "claim": "Which fixes were needed",
+  "value": "7B: dropout and z-loss (plus QK-Norm); 34B: z-loss only, plus QK-Norm and norm reordering",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3 Optimization",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-batch",
+  "claim": "Global batch size 7B / 34B",
+  "value": "2^23 (~8M) / 3 x 2^22 (~12M) tokens",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 2.3",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-gpu-hours",
+  "claim": "Pre-training GPU hours 7B / 34B",
+  "value": "856,481 (1024 GPUs) / 4,282,407 (3072 GPUs)",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table resource_usage",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-prompts",
+  "claim": "Human eval prompt set",
+  "value": "1,048 prompts: 441 (42.1%) mixed-modal, 607 (57.9%) text-only",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-baselines",
+  "claim": "Human eval baselines",
+  "value": "Gemini Pro and GPT-4V, plus Gemini+ and GPT-4V+ (captions rendered by DALL-E 3)",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 4.2",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-headline",
+  "claim": "Chameleon-34B pairwise win rate vs Gemini+ and GPT-4V+ as stated in the text [paper text says 60.4%; win-rate table Overall row is 58.8%; 60.4% is the mixed-modal-prompt row]",
+  "value": "60.4% and 51.6%",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 4.2.2 Relative Evaluation",
+  "uncertain": true
+ },
+ {
+  "id": "chameleon-he-table-gemini+",
+  "claim": "Chameleon vs Gemini+ wins/ties/loses and overall win rate in the table (60.4% is the mixed-modal-prompt row)",
+  "value": "435 / 362 / 251, 58.8%",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table complete_win_rates, Overall row",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-table-gpt4v+",
+  "claim": "Chameleon vs GPT-4V+ wins/ties/loses and win rate",
+  "value": "375 / 331 / 342, 51.6%",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Table complete_win_rates",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-raw",
+  "claim": "Win rate vs original Gemini and GPT-4V (text-only outputs)",
+  "value": "69.1% and 61.7%",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 4.2.2",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-metric",
+  "claim": "Win-rate definition",
+  "value": "1 point for a win and 0.5 points for a tie",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 4.2.2 footnote",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-he-fulfill",
+  "claim": "Task fulfillment (fully): Chameleon / Gemini+ / GPT-4V+ ; Gemini / GPT-4V originals",
+  "value": "55.2% / 37.6% / 44.7% ; 17.6% / 23.1%",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 4.2.1 Absolute Evaluation",
+  "uncertain": false
+ },
+ {
+  "id": "chameleon-mmlu",
+  "claim": "MMLU Chameleon-34B vs Mixtral 8x7B / Gemini-Pro",
+  "value": "65.8 vs 70.6/71.8",
+  "paper": "Chameleon",
+  "version": "v2",
+  "loc": "Sec. 5 text benchmarks",
+  "uncertain": false
+ }
+]

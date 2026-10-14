@@ -1,0 +1,1479 @@
+[
+ {
+  "id": "ader-visa-test-anomaly",
+  "field": "value",
+  "old": "962",
+  "new": "1,200",
+  "reason": "ADer Table 2 swaps the VisA Anomaly/Normal test columns; the true split is 962 normal, 1,200 anomalous. ADer secs/3_method.tex:74,79 (columns \"Anomaly | Normal\"; VisA row 962 | 1,200); VisA paper src line 184 (9,621 normal, 1,200 anomalous) and line 194 (1-class protocol: 90% of normals to train, 10% of normals + all anomalies to test, so 8,659 / 962 / 1,200); AnomalyCLIP Table 6 \"(Normal, anomalous) = (962, 1200)\""
+ },
+ {
+  "id": "ader-visa-test-anomaly",
+  "field": "claim",
+  "old": "VisA test anomalous images (ADer Table 2)",
+  "new": "VisA test anomalous images (ADer Table 2 prints this number under its Normal column; labels swapped)",
+  "reason": "Keep the id meaning and record the ADer misprint"
+ },
+ {
+  "id": "ader-visa-test-anomaly",
+  "field": "loc",
+  "old": "Table 2 (p. 4), row VisA",
+  "new": "Table 2 (p. 4), row VisA. ADer prints 962 under \"Anomaly\" and 1,200 under \"Normal\"; these labels are swapped (VisA paper Sec. 4.1: 1-class test = 962 normal + 1,200 anomalous; AnomalyCLIP Table 6 agrees)",
+  "reason": "Record where each number is printed"
+ },
+ {
+  "id": "ader-visa-test-normal",
+  "field": "value",
+  "old": "1,200",
+  "new": "962",
+  "reason": "ADer Table 2 swaps the VisA Anomaly/Normal test columns; the true split is 962 normal, 1,200 anomalous. ADer secs/3_method.tex:74,79 (columns \"Anomaly | Normal\"; VisA row 962 | 1,200); VisA paper src line 184 (9,621 normal, 1,200 anomalous) and line 194 (1-class protocol: 90% of normals to train, 10% of normals + all anomalies to test, so 8,659 / 962 / 1,200); AnomalyCLIP Table 6 \"(Normal, anomalous) = (962, 1200)\""
+ },
+ {
+  "id": "ader-visa-test-normal",
+  "field": "claim",
+  "old": "VisA test normal images (ADer Table 2)",
+  "new": "VisA test normal images (ADer Table 2 prints this number under its Anomaly column; labels swapped)",
+  "reason": "Keep the id meaning and record the ADer misprint"
+ },
+ {
+  "id": "ader-visa-test-normal",
+  "field": "loc",
+  "old": "Table 2 (p. 4), row VisA",
+  "new": "Table 2 (p. 4), row VisA. ADer prints 962 under \"Anomaly\" and 1,200 under \"Normal\"; these labels are swapped (VisA paper Sec. 4.1: 1-class test = 962 normal + 1,200 anomalous; AnomalyCLIP Table 6 agrees)",
+  "reason": "Record where each number is printed"
+ },
+ {
+  "id": "uniad-img-us-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the DRAEM paper (UniAD: \"the metric of US borrowed from [DRAEM]\")",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-img-psvdd-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the PSVDD paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-img-padim-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the PaDiM paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-img-mkd-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the MKD paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-img-draem-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the DRAEM paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-img-cutpaste-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the CutPaste paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-pix-us-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the DRAEM paper (UniAD: \"the metric of US borrowed from [DRAEM]\")",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-pix-psvdd-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the PSVDD paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-pix-padim-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the PaDiM paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-pix-mkd-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the MKD paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-pix-draem-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the DRAEM paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM"
+ },
+ {
+  "id": "uniad-pix-fcdd-separate",
+  "field": "protocol",
+  "old": "separate (one model per class), number copied from the method's own paper (US from the DRAEM paper)",
+  "new": "separate (one model per class), copied from the FCDD paper",
+  "reason": "Template text \"(US from the DRAEM paper)\" pasted into every column; Sec. 4.2 Baselines: separate-case metrics are from each paper, except US, which is from DRAEM ; FCDD per Sec. 4.3"
+ },
+ {
+  "id": "uniad-img-us-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-img-psvdd-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-img-padim-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-img-mkd-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-img-draem-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-img-cutpaste-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-pix-us-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-pix-psvdd-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-pix-padim-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-pix-mkd-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-pix-draem-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-pix-fcdd-unified",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code, 224x224",
+  "new": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with the public implementation; resolution of the re-runs not stated",
+  "reason": "UniAD states 224x224 only for its own model (Sec. 4.2 Setup) and for the FLOPs table (App. complexity); the Baselines paragraph gives no resolution for the public-code re-runs"
+ },
+ {
+  "id": "uniad-t4-intra-det",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code",
+  "new": "unified (one model for all 15 MVTec AD classes); UniAD does not say how these unified numbers were obtained (re-run or other)",
+  "reason": "Sec. 4.5 and the supplement give no provenance for the InTra / VT-ADL / AnoViT unified numbers; \"re-run with public code\" is stated only for the Table 1-2 baselines"
+ },
+ {
+  "id": "uniad-t4-intra-loc",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code",
+  "new": "unified (one model for all 15 MVTec AD classes); UniAD does not say how these unified numbers were obtained (re-run or other)",
+  "reason": "Sec. 4.5 and the supplement give no provenance for the InTra / VT-ADL / AnoViT unified numbers; \"re-run with public code\" is stated only for the Table 1-2 baselines"
+ },
+ {
+  "id": "uniad-t4-vtadl-det",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code",
+  "new": "unified (one model for all 15 MVTec AD classes); UniAD does not say how these unified numbers were obtained (re-run or other)",
+  "reason": "Sec. 4.5 and the supplement give no provenance for the InTra / VT-ADL / AnoViT unified numbers; \"re-run with public code\" is stated only for the Table 1-2 baselines"
+ },
+ {
+  "id": "uniad-t4-vtadl-loc",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code",
+  "new": "unified (one model for all 15 MVTec AD classes); UniAD does not say how these unified numbers were obtained (re-run or other)",
+  "reason": "Sec. 4.5 and the supplement give no provenance for the InTra / VT-ADL / AnoViT unified numbers; \"re-run with public code\" is stated only for the Table 1-2 baselines"
+ },
+ {
+  "id": "uniad-t4-anovit-det",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code",
+  "new": "unified (one model for all 15 MVTec AD classes); UniAD does not say how these unified numbers were obtained (re-run or other)",
+  "reason": "Sec. 4.5 and the supplement give no provenance for the InTra / VT-ADL / AnoViT unified numbers; \"re-run with public code\" is stated only for the Table 1-2 baselines"
+ },
+ {
+  "id": "uniad-t4-anovit-loc",
+  "field": "protocol",
+  "old": "unified (one model for all 15 MVTec AD classes), re-run by UniAD with public code",
+  "new": "unified (one model for all 15 MVTec AD classes); UniAD does not say how these unified numbers were obtained (re-run or other)",
+  "reason": "Sec. 4.5 and the supplement give no provenance for the InTra / VT-ADL / AnoViT unified numbers; \"re-run with public code\" is stated only for the Table 1-2 baselines"
+ },
+ {
+  "id": "uniad-tokens",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "Flag vocabulary: note says \"our reading\"; add the our_reading flag the page lint expects"
+ },
+ {
+  "id": "uniad-stage-channels",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "Flag vocabulary: note says \"our reading\"; add the our_reading flag the page lint expects"
+ },
+ {
+  "id": "uniad-drop-padim-img",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "Flag vocabulary: note says \"our reading\"; add the our_reading flag the page lint expects"
+ },
+ {
+  "id": "uniad-drop-draem-img",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "Flag vocabulary: note says \"our reading\"; add the our_reading flag the page lint expects"
+ },
+ {
+  "id": "uniad-drop-padim-pix",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "Flag vocabulary: note says \"our reading\"; add the our_reading flag the page lint expects"
+ },
+ {
+  "id": "uniad-drop-draem-pix",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "Flag vocabulary: note says \"our reading\"; add the our_reading flag the page lint expects"
+ },
+ {
+  "id": "im-iad-algorithms",
+  "field": "uncertain",
+  "old": null,
+  "new": true,
+  "reason": "Paper is internally inconsistent: Abstract and Conclusion say 19 algorithms; Sec. 1 contributions (\"We examine 16 IAD methods on 7 benchmark datasets, resulting in a total of 17,017 instances\") and Sec. Baseline Methods (\"Table II lists 16 IAD algorithms\") say 16"
+ },
+ {
+  "id": "im-iad-algorithms",
+  "field": "claim",
+  "old": "IM-IAD algorithms benchmarked (on seven datasets)",
+  "new": "IM-IAD algorithms benchmarked per the Abstract and Conclusion (19); Sec. 1 contributions and Table II say 16",
+  "reason": "Same inconsistency; the page should not state 19 without the caveat"
+ },
+ {
+  "id": "april-gan-venue",
+  "field": "value",
+  "old": "technical report, CVPR 2023 VAND workshop challenge (per title)",
+  "new": "CVPR 2023 VAND workshop challenge",
+  "reason": "Value is a prose sentence, not a lintable short string; title says \"for CVPR 2023 VAND Workshop Challenge Tracks 1&2\"; the paper calls itself a technical report (Abstract)"
+ },
+ {
+  "id": "anomalygpt-mvtec-mc-img-auroc",
+  "field": "protocol",
+  "old": "multi-class, trained on MVTec AD normal images (not zero/few-shot)",
+  "new": "multi-class (one model for all MVTec AD classes), trained on MVTec AD normal images plus synthesized anomalies (the paper calls this \"unsupervised\"); not zero/few-shot",
+  "reason": "AnomalyGPT trains the decoder and prompt learner on simulated anomaly data (Sec. 1, Sec. 3); \"trained on normal images\" alone hides the synthetic-anomaly supervision"
+ },
+ {
+  "id": "ader-mvtec-img-auroc-patchcore-100e",
+  "field": "protocol",
+  "old": "multi-class, ADer protocol, 256x256, 100 epochs, final epoch, one L40S GPU",
+  "new": "multi-class, ADer protocol, 256x256, training-free (no epochs; Table 3 caption: PatchCore results are shared across the 100/300 epoch settings), one L40S GPU",
+  "reason": "PatchCore trains nothing; Table 3 caption (secs/4_experiment.tex:4) says its result is shared across epoch settings, so \"100 epochs, final epoch\" misdescribes it"
+ },
+ {
+  "id": "ader-mvtec-pix-auroc-patchcore-100e",
+  "field": "protocol",
+  "old": "multi-class, ADer protocol, 256x256, 100 epochs, final epoch, one L40S GPU",
+  "new": "multi-class, ADer protocol, 256x256, training-free (no epochs; Table 3 caption: PatchCore results are shared across the 100/300 epoch settings), one L40S GPU",
+  "reason": "PatchCore trains nothing; Table 3 caption (secs/4_experiment.tex:4) says its result is shared across epoch settings, so \"100 epochs, final epoch\" misdescribes it"
+ },
+ {
+  "id": "ader-mvtec-aupro-patchcore-100e",
+  "field": "protocol",
+  "old": "multi-class, ADer protocol, 256x256, 100 epochs, final epoch, one L40S GPU",
+  "new": "multi-class, ADer protocol, 256x256, training-free (no epochs; Table 3 caption: PatchCore results are shared across the 100/300 epoch settings), one L40S GPU",
+  "reason": "PatchCore trains nothing; Table 3 caption (secs/4_experiment.tex:4) says its result is shared across epoch settings, so \"100 epochs, final epoch\" misdescribes it"
+ },
+ {
+  "id": "ader-mvtec-mad-patchcore-100e",
+  "field": "protocol",
+  "old": "multi-class, ADer protocol, 256x256, 100 epochs, final epoch, one L40S GPU",
+  "new": "multi-class, ADer protocol, 256x256, training-free (no epochs; Table 3 caption: PatchCore results are shared across the 100/300 epoch settings), one L40S GPU",
+  "reason": "PatchCore trains nothing; Table 3 caption (secs/4_experiment.tex:4) says its result is shared across epoch settings, so \"100 epochs, final epoch\" misdescribes it"
+ },
+ {
+  "id": "winclip-t2-patchcore-full-ac",
+  "field": "protocol",
+  "old": "full-shot, copied from the cited paper (not re-run), MVTec AD",
+  "new": "full-shot, MVTec AD; provenance not stated by WinCLIP (our reading: value matches PatchCore's best variant, PatchCore-1% ensemble DenseNet-201 + ResNeXt-101 + WRN-101 at 320px, PatchCore Tab. 'sota_optimized'), not standard PatchCore at 224px",
+  "reason": "WinCLIP Table 2 gives no provenance; the number is PatchCore's ensemble result"
+ },
+ {
+  "id": "winclip-t2-patchcore-full-as",
+  "field": "protocol",
+  "old": "full-shot, copied from the cited paper (not re-run), MVTec AD",
+  "new": "full-shot, MVTec AD; provenance not stated by WinCLIP (our reading: value matches PatchCore's best variant, PatchCore-1% ensemble DenseNet-201 + ResNeXt-101 + WRN-101 at 320px, PatchCore Tab. 'sota_optimized'), not standard PatchCore at 224px",
+  "reason": "WinCLIP Table 2 gives no provenance; the number is PatchCore's ensemble result"
+ },
+ {
+  "id": "winclip-t2-cutpaste-full-ac",
+  "field": "protocol",
+  "old": "full-shot, copied from the cited paper (not re-run), MVTec AD",
+  "new": "full-shot, MVTec AD; provenance not stated by WinCLIP (our reading: matches CutPaste 3-way from-scratch average 95.2, CutPaste Table 1)",
+  "reason": "WinCLIP does not say whether baselines in Table 2 were copied"
+ },
+ {
+  "id": "winclip-t2-regad-4agg-ac",
+  "field": "protocol",
+  "old": "aggregated few-shot, copied from the cited paper (not re-run), MVTec AD",
+  "new": "aggregated few-shot (all other-class training data + 4 target-class shots), MVTec AD; provenance not stated by WinCLIP; RegAD paper not in sources",
+  "reason": "WinCLIP does not say whether Table 2 baselines were copied"
+ },
+ {
+  "id": "anomalyclip-t1-vand-mvtec-img-auroc",
+  "field": "protocol",
+  "old": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)",
+  "new": "zero-shot on MVTec AD; VAND linear layers trained on VisA test set (APRIL-GAN 2305.17382 Sec. 4); copied by AnomalyCLIP from the VAND paper (dagger)",
+  "reason": "auxiliary training set missing on a zero-shot baseline"
+ },
+ {
+  "id": "anomalyclip-t1-vand-mvtec-pix-auroc",
+  "field": "protocol",
+  "old": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)",
+  "new": "zero-shot on MVTec AD; VAND linear layers trained on VisA test set (APRIL-GAN 2305.17382 Sec. 4); copied by AnomalyCLIP from the VAND paper (dagger)",
+  "reason": "auxiliary training set missing on a zero-shot baseline"
+ },
+ {
+  "id": "anomalyclip-t1-vand-mvtec-pro",
+  "field": "protocol",
+  "old": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)",
+  "new": "zero-shot on MVTec AD; VAND linear layers trained on VisA test set (APRIL-GAN 2305.17382 Sec. 4); copied by AnomalyCLIP from the VAND paper (dagger)",
+  "reason": "auxiliary training set missing on a zero-shot baseline"
+ },
+ {
+  "id": "anomalyclip-t1-vand-visa-img-auroc",
+  "field": "protocol",
+  "old": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)",
+  "new": "zero-shot on VisA; VAND linear layers trained on MVTec AD test set (APRIL-GAN 2305.17382 Sec. 4); copied by AnomalyCLIP from the VAND paper (dagger)",
+  "reason": "auxiliary training set missing on a zero-shot baseline"
+ },
+ {
+  "id": "anomalyclip-t1-vand-visa-pix-auroc",
+  "field": "protocol",
+  "old": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)",
+  "new": "zero-shot on VisA; VAND linear layers trained on MVTec AD test set (APRIL-GAN 2305.17382 Sec. 4); copied by AnomalyCLIP from the VAND paper (dagger)",
+  "reason": "auxiliary training set missing on a zero-shot baseline"
+ },
+ {
+  "id": "anomalyclip-t1-vand-visa-pro",
+  "field": "protocol",
+  "old": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)",
+  "new": "zero-shot on VisA; VAND linear layers trained on MVTec AD test set (APRIL-GAN 2305.17382 Sec. 4); copied by AnomalyCLIP from the VAND paper (dagger)",
+  "reason": "auxiliary training set missing on a zero-shot baseline"
+ },
+ {
+  "id": "anomalyclip-t1-coop-mvtec-img-auroc",
+  "field": "protocol",
+  "old": "zero-shot; run by AnomalyCLIP authors (no dagger)",
+  "new": "zero-shot; run by AnomalyCLIP authors (no dagger); auxiliary training set for industrial rows not stated (presumably the same cross-dataset split as AnomalyCLIP)",
+  "reason": "trained baseline without a stated auxiliary set"
+ },
+ {
+  "id": "anomalyclip-t1-coop-mvtec-pix-auroc",
+  "field": "protocol",
+  "old": "zero-shot; run by AnomalyCLIP authors (no dagger)",
+  "new": "zero-shot; run by AnomalyCLIP authors (no dagger); auxiliary training set for industrial rows not stated (presumably the same cross-dataset split as AnomalyCLIP)",
+  "reason": "trained baseline without a stated auxiliary set"
+ },
+ {
+  "id": "anomalyclip-t1-coop-visa-img-auroc",
+  "field": "protocol",
+  "old": "zero-shot; run by AnomalyCLIP authors (no dagger)",
+  "new": "zero-shot; run by AnomalyCLIP authors (no dagger); auxiliary training set for industrial rows not stated (presumably the same cross-dataset split as AnomalyCLIP)",
+  "reason": "trained baseline without a stated auxiliary set"
+ },
+ {
+  "id": "anomalyclip-backbone",
+  "field": "loc",
+  "old": "Sec. 4.1 Implementation details; App. A",
+  "new": "Sec. 4.1 Implementation details; App. A (printed as \\verb'VIT-L/14@336px', capital I; value normalizes case)",
+  "reason": "script check misses the value because of case"
+ },
+ {
+  "id": "winclip-normal-prompts",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "computed by the extractor; arithmetic verified"
+ },
+ {
+  "id": "winclip-anomalous-prompts",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "computed by the extractor; arithmetic verified"
+ },
+ {
+  "id": "winclip-windows-small",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "computed by the extractor; arithmetic verified"
+ },
+ {
+  "id": "winclip-windows-mid",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "computed by the extractor; arithmetic verified"
+ },
+ {
+  "id": "anomalyclip-patch-grid",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "computed by the extractor; arithmetic verified"
+ },
+ {
+  "id": "winclip-abl-vitb16plus-ac-noMC",
+  "field": "our_reading",
+  "old": null,
+  "new": true,
+  "reason": "our reading: 'noMC' is inferred because 90.8 equals Table 3 row (c) (before multi-crop); the paper does not explain the gap to 91.8. The inference is encoded in the id."
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-rd4ad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-simplenet-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-destseg-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-destseg-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-destseg-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-uniad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; 96.5 (image) and 96.8 (pixel) equal UniAD's own Tables 1-2 (2206.03687v3, 224x224); the full 7-metric row equals MambaAD v4 Table 1; differs from ADer v6 (UniAD MVTec image AUROC 92.5/96.8); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-mvtec-uniad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; 96.5 (image) and 96.8 (pixel) equal UniAD's own Tables 1-2 (2206.03687v3, 224x224); the full 7-metric row equals MambaAD v4 Table 1; differs from ADer v6 (UniAD MVTec image AUROC 92.5/96.8); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-mvtec-uniad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; UniAD's own paper reports no AP or AU-PRO; value equals MambaAD v4 Table 1 (DiAD's UniAD re-run prints AP 43.4 but PRO 90.4); differs from ADer v6; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-mvtec-recontrast-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-recontrast-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-recontrast-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-diad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals DiAD's own paper (2312.06607v1: Table 1 image AUROC 97.2, Table 2 pixel AUROC 96.8, PRO table 90.7) and MambaAD v4 Table 1, which repeats them; differs from ADer v6 (DiAD MVTec image AUROC 88.9/92.0); 256x256 in DiAD; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-mvtec-diad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals DiAD's own paper (2312.06607v1: Table 1 image AUROC 97.2, Table 2 pixel AUROC 96.8, PRO table 90.7) and MambaAD v4 Table 1, which repeats them; differs from ADer v6 (DiAD MVTec image AUROC 88.9/92.0); 256x256 in DiAD; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-mvtec-diad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals DiAD's own paper (2312.06607v1: Table 1 image AUROC 97.2, Table 2 pixel AUROC 96.8, PRO table 90.7) and MambaAD v4 Table 1, which repeats them; differs from ADer v6 (DiAD MVTec image AUROC 88.9/92.0); 256x256 in DiAD; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-mvtec-vitad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in MambaAD Table 1 and differs from ADer v6 Table 3 (ViTAD MVTec 98.3/98.4, AUPRO 92.0/91.7); equals Dinomaly Table A10 row ViTAD-dagger ('their original setting', DINO, 256x256); our reading: ViTAD's own paper numbers",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-vitad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in MambaAD Table 1 and differs from ADer v6 Table 3 (ViTAD MVTec 98.3/98.4, AUPRO 92.0/91.7); equals Dinomaly Table A10 row ViTAD-dagger ('their original setting', DINO, 256x256); our reading: ViTAD's own paper numbers",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-vitad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in MambaAD Table 1 and differs from ADer v6 Table 3 (ViTAD MVTec 98.3/98.4, AUPRO 92.0/91.7); equals Dinomaly Table A10 row ViTAD-dagger ('their original setting', DINO, 256x256); our reading: ViTAD's own paper numbers",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-mambaad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-mambaad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-mvtec-mambaad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-rd4ad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-simplenet-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-simplenet-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-simplenet-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-destseg-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-destseg-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-destseg-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-uniad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-uniad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-uniad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-recontrast-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-recontrast-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-recontrast-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-diad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals DiAD's own VisA tables (2312.06607v1: image AUROC 86.8, pixel AUROC 96.0, PRO 75.2) and MambaAD v4 Table 1, which repeats them; differs from ADer v6 (DiAD VisA image AUROC 84.8/90.5); 256x256 in DiAD; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-visa-diad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals DiAD's own VisA tables (2312.06607v1: image AUROC 86.8, pixel AUROC 96.0, PRO 75.2) and MambaAD v4 Table 1, which repeats them; differs from ADer v6 (DiAD VisA image AUROC 84.8/90.5); 256x256 in DiAD; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-visa-diad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals DiAD's own VisA tables (2312.06607v1: image AUROC 86.8, pixel AUROC 96.0, PRO 75.2) and MambaAD v4 Table 1, which repeats them; differs from ADer v6 (DiAD VisA image AUROC 84.8/90.5); 256x256 in DiAD; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-visa-vitad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in MambaAD Table 1 and differs from ADer v6 Table 4 (VisA; ViTAD 90.4/90.3); source not stated and not in local sources; our reading: ViTAD's own paper numbers, 256x256",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-vitad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in MambaAD Table 1 and differs from ADer v6 Table 4 (VisA; ViTAD 90.4/90.3); source not stated and not in local sources; our reading: ViTAD's own paper numbers, 256x256",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-vitad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in MambaAD Table 1 and differs from ADer v6 Table 4 (VisA; ViTAD 90.4/90.3); source not stated and not in local sources; our reading: ViTAD's own paper numbers, 256x256",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-mambaad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-mambaad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-visa-mambaad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-rd4ad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-simplenet-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-destseg-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-destseg-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-destseg-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-uniad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-uniad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-uniad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; Dinomaly App. B says most compared MUAD results are drawn from ADer (2406.03262, version not stated), but this row equals MambaAD (2404.06564v4) Table 1 exactly and differs from ADer v6 Tables 3-5; MambaAD resized all inputs to 256x256; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-recontrast-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-recontrast-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-recontrast-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; not in ADer v6 or MambaAD Table 1; source not stated; our reading: probably Dinomaly's own run (Table 5 shows Dinomaly ran ReContrast at 256/320/384 with 256 marked default)",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-diad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals both MambaAD (2404.06564v4) Table 1 and ADer v6 Table 5 (Real-IAD, 100 epochs, 256x256); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-diad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals both MambaAD (2404.06564v4) Table 1 and ADer v6 Table 5 (Real-IAD, 100 epochs, 256x256); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-diad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals both MambaAD (2404.06564v4) Table 1 and ADer v6 Table 5 (Real-IAD, 100 epochs, 256x256); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-vitad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals ADer v6 Table 5 (Real-IAD, 100 epochs, 256x256); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-vitad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals ADer v6 Table 5 (Real-IAD, 100 epochs, 256x256); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-vitad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; equals ADer v6 Table 5 (Real-IAD, 100 epochs, 256x256); not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-mambaad-img-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-mambaad-pix-auroc",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-realiad-mambaad-aupro",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; MambaAD's own result as printed in MambaAD (2404.06564v4) Table 1 (+-std dropped), 256x256; differs from ADer v6 Tables 3-5; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121."
+ },
+ {
+  "id": "dinomaly-uniad-mvtec-pix-ap",
+  "field": "protocol",
+  "old": "multi-class; copied by Dinomaly from the ADer benchmark (2406.03262), not re-run; method's own default input size",
+  "new": "multi-class; UniAD's own paper reports no AP or AU-PRO; value equals MambaAD v4 Table 1 (DiAD's UniAD re-run prints AP 43.4 but PRO 90.4); differs from ADer v6; not re-run by Dinomaly",
+  "reason": "Values match Table 1 exactly, but the provenance is wrong: Dinomaly says only 'Most' baseline results come from ADer, and the printed values do not match ADer v6 (the version in sources). See Dinomaly X_suppl.tex:94 and 462; MambaAD 4_experiments.tex:45-64; ADer 4_experiment.tex:26-30,62-67,110-121. Cross-check (coordinator): DiAD and MambaAD cells equal each method's own paper; UniAD's own paper has only MVTec image/pixel AUROC, so the rest of its row traces to MambaAD v4 Table 1 (diad/src/arxiv.tex tab:mvtecsp, tab:mvtecpx, tab:pro, VisA tables lines 687/717; mambaad 4_experiments.tex:46-63; ader 4_experiment.tex:26-30,62-67)."
+ },
+ {
+  "id": "dinomaly-seeds-img",
+  "field": "protocol",
+  "old": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; 5 seeds",
+  "new": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px; mean +- std over seeds 1-5",
+  "reason": "Protocol says 'seed 1; 5 seeds'; Table A12 mean+-std row is over seeds 1-5, not seed 1."
+ },
+ {
+  "id": "dinomaly-seeds-img-std",
+  "field": "protocol",
+  "old": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px, seed 1; 5 seeds",
+  "new": "multi-class (one model for all classes), ViT-B DINOv2-R, 392px crop, pixel metrics at 256px; mean +- std over seeds 1-5",
+  "reason": "Same as dinomaly-seeds-img."
+ },
+ {
+  "id": "dinomaly-la-phi",
+  "field": "claim",
+  "old": "Linear attention feature map",
+  "new": "Linear attention feature map (the paper says phi is 'usually' elu(x)+1; it does not state its own choice)",
+  "reason": "Sec. 3.3 (3_method.tex:66) reads 'usually $\\phi(x) = \\text{elu}(x)+1$' as a general description of Linear Attention, not as Dinomaly's setting."
+ },
+ {
+  "id": "dinomaly-pixel-eval-size",
+  "field": "claim",
+  "old": "Localization evaluated at this size for all methods",
+  "new": "Localization evaluated at this size in all Dinomaly experiments",
+  "reason": "X_suppl.tex:214 says 'All experiments evaluate localization performance in a unified size of 256x256'; baseline rows copied from other papers are not covered by this statement."
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-16shot",
+  "field": "protocol",
+  "old": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=16; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 16-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-img-auroc-8shot",
+  "field": "protocol",
+  "old": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=8; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 8-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-16shot",
+  "field": "protocol",
+  "old": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=16; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 16-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pix-auroc-8shot",
+  "field": "protocol",
+  "old": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=8; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 8-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-16shot",
+  "field": "protocol",
+  "old": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=16; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 16-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-mvtec-aprilgan-pro-8shot",
+  "field": "protocol",
+  "old": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=8; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 8-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-16shot",
+  "field": "protocol",
+  "old": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=16; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 16-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-img-auroc-8shot",
+  "field": "protocol",
+  "old": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=8; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 8-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-16shot",
+  "field": "protocol",
+  "old": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=16; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 16-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pix-auroc-8shot",
+  "field": "protocol",
+  "old": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=8; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 8-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-16shot",
+  "field": "protocol",
+  "old": "few-shot k=16; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=16; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 16-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-visa-aprilgan-pro-8shot",
+  "field": "protocol",
+  "old": "few-shot k=8; copied by AnomalyDINO from the APRIL-GAN publication (2305.17382); meta-trained on the other dataset, not re-run",
+  "new": "few-shot k=8; APRIL-GAN row in AnomalyDINO's table; source not stated: APRIL-GAN 2305.17382v3 reports only 0/1/2/4-shot, so this 8-shot number is not from that paper (possibly an AnomalyDINO re-run); meta-trained on the other dataset",
+  "reason": "APRIL-GAN arXiv v3 has no 8- or 16-shot results; provenance claim is unsupported"
+ },
+ {
+  "id": "anomalydino-membank-1shot",
+  "field": "protocol",
+  "old": "1-shot, ViT-S, 448px, agnostic; single NVIDIA A40, GPU warmup + CUDA sync, mean over 1725 MVTec AD test images, per-sample (batch size not stated)",
+  "new": "1-shot, ViT-S, 448px, agnostic; single NVIDIA A40, GPU warmup + CUDA sync; mean of the per-object time to populate the memory bank over the 15 MVTec AD categories",
+  "reason": "Table 9 caption: memory-bank time is per object, not per test image"
+ },
+ {
+  "id": "anomalydino-cable-swap",
+  "field": "protocol",
+  "old": "1-shot, MVTec AD Cable, cable swap only",
+  "new": "MVTec AD Cable, cable swap only; mean +- std (4.9) over 3 runs; shot count not stated in the sentence (our reading: 1-shot, from the Fig. cable_swap caption)",
+  "reason": "shot count is inferred, not stated"
+ },
+ {
+  "id": "anomalydino-backbone-gain",
+  "field": "claim",
+  "old": "DINOv2 vs ImageNet ViT-B/L AUROC gain",
+  "new": "DINOv2 vs ImageNet ViT-B/L AUROC gain (paper: 'at least +4%' on MVTec AD and VisA)",
+  "reason": "wording is a lower bound"
+ },
+ {
+  "id": "anomalydino-speedup-claim",
+  "field": "claim",
+  "old": "AnomalyDINO vs SOTA one-shot competitors, inference speed",
+  "new": "AnomalyDINO vs SOTA one-shot competitors, inference speed (paper: 'at least one order of magnitude faster')",
+  "reason": "wording is a lower bound"
+ },
+ {
+  "id": "paste-venue",
+  "field": "loc",
+  "old": "2603.20288v1 bib barusco2025paste; 2605.24251v2 main.bib barusco_paste_2025 (secondary source)",
+  "new": "2605.24251v2 main.bib barusco_paste_2025 (booktitle 'CVPR Workshops (CVPRW)' 2025, VAND workshop URL); 2603.20288v1 main.bbl barusco2025paste says only 'Proceedings of the Computer Vision and Pattern Recognition Conference, 2025, pp. 4026--4035' (both secondary sources; PaSTe abs.html has no venue)",
+  "reason": "PatchCore-Lite bbl does not say Workshops"
+ },
+ {
+  "id": "paste-venue",
+  "field": "secondary_source",
+  "old": null,
+  "new": true,
+  "reason": "venue comes from other papers' bibliographies, not the PaSTe source"
+ },
+ {
+  "id": "edgezsad-copied-winclip-mvtec-img",
+  "field": "claim",
+  "old": "winclip MVTec AD image AUROC as re-reported by VisualAD (also Tab. 4 host column for the matching backbone family)",
+  "new": "winclip MVTec AD image AUROC as re-reported by VisualAD",
+  "reason": "Tab. 4 CLIP-family host value is 92.2 (VisualAD CLIP), not this baseline"
+ },
+ {
+  "id": "edgezsad-copied-anomalyclip-mvtec-img",
+  "field": "claim",
+  "old": "anomalyclip MVTec AD image AUROC as re-reported by VisualAD (also Tab. 4 host column for the matching backbone family)",
+  "new": "anomalyclip MVTec AD image AUROC as re-reported by VisualAD",
+  "reason": "Tab. 4 CLIP-family host value is 92.2 (VisualAD CLIP), not this baseline"
+ },
+ {
+  "id": "edgezsad-copied-winclip-mvtec-img",
+  "field": "protocol",
+  "old": "zero-shot, baseline copied from VisualAD (hou2026visualad), not re-run",
+  "new": "zero-shot, baseline copied from VisualAD (hou2026visualad), not re-run; EdgeZSAD Tab. 1 lists the WinCLIP backbone as CLIP-L, unlike WinCLIP's own ViT-B/16+ setting, so this is not WinCLIP's self-reported number",
+  "reason": "avoid confusing with WinCLIP's own Table numbers (winclip main.tex:621 default backbone ViT-B/16+)"
+ },
+ {
+  "id": "edgezsad-mvtec-img",
+  "field": "protocol",
+  "old": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs",
+  "new": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs; our reading: Real-IAD (source of Real-IAD-DR, 30 categories) shares category names with MVTec AD (toothbrush, transistor, zipper) and VisA (pcb); paper states no target-benchmark sample is seen",
+  "reason": "zero-shot claim should carry the category-name overlap caveat"
+ },
+ {
+  "id": "edgezsad-mvtec-pix",
+  "field": "protocol",
+  "old": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs",
+  "new": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs; our reading: Real-IAD (source of Real-IAD-DR, 30 categories) shares category names with MVTec AD (toothbrush, transistor, zipper) and VisA (pcb); paper states no target-benchmark sample is seen",
+  "reason": "zero-shot claim should carry the category-name overlap caveat"
+ },
+ {
+  "id": "edgezsad-mvtec-pro",
+  "field": "protocol",
+  "old": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs",
+  "new": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs; our reading: Real-IAD (source of Real-IAD-DR, 30 categories) shares category names with MVTec AD (toothbrush, transistor, zipper) and VisA (pcb); paper states no target-benchmark sample is seen",
+  "reason": "zero-shot claim should carry the category-name overlap caveat"
+ },
+ {
+  "id": "edgezsad-visa-img",
+  "field": "protocol",
+  "old": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs",
+  "new": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs; our reading: Real-IAD (source of Real-IAD-DR, 30 categories) shares category names with MVTec AD (toothbrush, transistor, zipper) and VisA (pcb); paper states no target-benchmark sample is seen",
+  "reason": "zero-shot claim should carry the category-name overlap caveat"
+ },
+ {
+  "id": "edgezsad-visa-pix",
+  "field": "protocol",
+  "old": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs",
+  "new": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs; our reading: Real-IAD (source of Real-IAD-DR, 30 categories) shares category names with MVTec AD (toothbrush, transistor, zipper) and VisA (pcb); paper states no target-benchmark sample is seen",
+  "reason": "zero-shot claim should carry the category-name overlap caveat"
+ },
+ {
+  "id": "edgezsad-visa-pro",
+  "field": "protocol",
+  "old": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs",
+  "new": "zero-shot (trained on Real-IAD-DR source, target classes unseen), 512px, mean of 3 runs; our reading: Real-IAD (source of Real-IAD-DR, 30 categories) shares category names with MVTec AD (toothbrush, transistor, zipper) and VisA (pcb); paper states no target-benchmark sample is seen",
+  "reason": "zero-shot claim should carry the category-name overlap caveat"
+ },
+ {
+  "id": "unifiedq-xnx-stfpm-fp16-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT FP-16",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT FP-16; mixed precision: teacher stays FP-32, only the student(s) is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-stfpm-fp16-auroc",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-stfpm-fp16-mb",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-stfpm-int8-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT INT-8",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT INT-8; mixed precision: teacher stays FP-32, only the student(s) is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-stfpm-int8-auroc",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-stfpm-int8-mb",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-rd-fp16-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT FP-16",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT FP-16; mixed precision: teacher (encoder) stays FP-32, only the bottleneck + decoder is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-rd-fp16-auroc",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher (encoder) stays FP-32, only the bottleneck + decoder is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-rd-fp16-mb",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher (encoder) stays FP-32, only the bottleneck + decoder is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-rd-int8-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT INT-8",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT INT-8; mixed precision: teacher (encoder) stays FP-32, only the bottleneck + decoder is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-rd-int8-auroc",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher (encoder) stays FP-32, only the bottleneck + decoder is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-rd-int8-mb",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher (encoder) stays FP-32, only the bottleneck + decoder is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-us-fp16-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT FP-16",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT FP-16; mixed precision: teacher stays FP-32, only the student(s) is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-us-fp16-auroc",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-us-fp16-mb",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is FP-16 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-us-int8-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT INT-8",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Jetson Xavier NX 16GB, 30 W mode; batch not stated; TensorRT INT-8; mixed precision: teacher stays FP-32, only the student(s) is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-us-int8-auroc",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-xnx-us-int8-mb",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; mixed precision: teacher stays FP-32, only the student(s) is INT-8 (Tab. 5 caption)",
+  "reason": "precision label alone overstates the quantization"
+ },
+ {
+  "id": "unifiedq-cpu-us-fp32-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Intel Xeon W-2265 CPU (12 cores, 3.56 GHz); PyTorch FP-32; batch not stated",
+  "reason": "latency protocol must name device and precision"
+ },
+ {
+  "id": "unifiedq-cpu-rd-fp32-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Intel Xeon W-2265 CPU (12 cores, 3.56 GHz); PyTorch FP-32; batch not stated",
+  "reason": "latency protocol must name device and precision"
+ },
+ {
+  "id": "unifiedq-cpu-stfpm-fp32-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Intel Xeon W-2265 CPU (12 cores, 3.56 GHz); PyTorch FP-32; batch not stated",
+  "reason": "latency protocol must name device and precision"
+ },
+ {
+  "id": "unifiedq-cpu-rd-qat-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Intel Xeon W-2265 CPU (12 cores, 3.56 GHz); PyTorch QAT INT-8 (student only, FBGEMM; teacher FP-32); batch not stated",
+  "reason": "latency protocol must name device and precision"
+ },
+ {
+  "id": "unifiedq-cpu-stfpm-qat-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Intel Xeon W-2265 CPU (12 cores, 3.56 GHz); PyTorch QAT INT-8 (student only, FBGEMM; teacher FP-32); batch not stated",
+  "reason": "latency protocol must name device and precision"
+ },
+ {
+  "id": "unifiedq-cpu-us-qat-ms",
+  "field": "protocol",
+  "old": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated",
+  "new": "MVTec AD, 15-class MULTI-CLASS model, 256px; 'Mean AUROC' level (image vs pixel) not stated; Intel Xeon W-2265 CPU (12 cores, 3.56 GHz); PyTorch QAT INT-8 (students only, FBGEMM; teacher FP-32); batch not stated",
+  "reason": "latency protocol must name device and precision"
+ },
+ {
+  "id": "pclite-patchcore-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-patchcore-edge-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-patchcore-lite-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-padim-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-padim-edge-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-padim-lite-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-stfpm-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-stfpm-edge-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "pclite-paste-peak-mb",
+  "field": "protocol",
+  "old": null,
+  "new": "Intel Core i5-9600K CPU @ 3.70GHz; average peak memory per single test image (Sec. 4.3); framework, precision, resolution not stated",
+  "reason": "memory protocol must name device"
+ },
+ {
+  "id": "rcad-dinosaur-rho",
+  "field": "loc",
+  "old": "Sec. 5.4; App. B DINOSaur",
+  "new": "Sec. 5.5 Analysis and Discussion (DINOSaur Hyperparameter Sensitivity, Tab. 5); Sec. 5.2; App. B DINOSaur",
+  "reason": "rho=10% selection is in Sec. 5.5, not 5.4 (Computational Efficiency)"
+ },
+ {
+  "id": "paste-train-ram-stfpm",
+  "field": "protocol",
+  "old": null,
+  "new": "MobileNetV2 backbone, WideResNet50-equivalent layers, PaSTe frozen up to layer 6 (Tab. 2 caption); MVTec AD; peak training RAM; no device stated",
+  "reason": "memory protocol should say no device is given"
+ },
+ {
+  "id": "paste-train-ram-paste",
+  "field": "protocol",
+  "old": null,
+  "new": "MobileNetV2 backbone, WideResNet50-equivalent layers, PaSTe frozen up to layer 6 (Tab. 2 caption); MVTec AD; peak training RAM; no device stated",
+  "reason": "memory protocol should say no device is given"
+ },
+ {
+  "id": "paste-train-ram-reduction",
+  "field": "protocol",
+  "old": null,
+  "new": "MobileNetV2 backbone, WideResNet50-equivalent layers, PaSTe frozen up to layer 6 (Tab. 2 caption); MVTec AD; peak training RAM; no device stated",
+  "reason": "memory protocol should say no device is given"
+ }
+]

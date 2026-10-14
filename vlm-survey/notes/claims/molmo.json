@@ -1,0 +1,272 @@
+[
+ {
+  "id": "molmo-pixmocap-size",
+  "claim": "PixMo-Cap size",
+  "value": "712k distinct images with 1.3M transcripts and captions",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3 PixMo-Cap",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-pixmocap-len",
+  "claim": "Average caption length: PixMo-Cap vs COCO vs Localized Narratives",
+  "value": "196 words vs 11 words vs 37 words",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3 PixMo-Cap",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-pixmocap-speech",
+  "claim": "How PixMo-Cap descriptions were collected",
+  "value": "annotators speak for at least 60 seconds (3 annotators/image initially); later one annotator per image with a 90-second minimum; audio transcribed, LLM merges/cleans",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Intro para 5 (\"describe images in speech for 60 to 90 seconds\"; para 4 is \"High-quality multimodal data...\")",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-pixmocap-topics",
+  "claim": "Topic diversity of PixMo-Cap images",
+  "value": "~70 diverse topics; annotators answer 7 prompt questions",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3 PixMo-Cap; Appendix Data Details",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-ama-size",
+  "claim": "PixMo-AskModelAnything size",
+  "value": "162k question-answer pairs on 73k images",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3 PixMo-AskModelAnything",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-points-size",
+  "claim": "PixMo-Points size (main text)",
+  "value": "2.3M question-points pairs from 223k images (appendix: 229k images, 1.98M referring expressions)",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3 PixMo-Points; Appendix Data Details PixMo-Points",
+  "uncertain": true
+ },
+ {
+  "id": "molmo-points-expl",
+  "claim": "Point-explanation annotations",
+  "value": "79k annotations on 14k images",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3 PixMo-Points",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-other-pixmo",
+  "claim": "Other PixMo sizes",
+  "value": "CapQA 214k QA/165k images; Docs 255k images, 2.3M QA; Clocks 826k examples; Count 36k train images",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 3",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-point-format",
+  "claim": "Point output coordinate scale and format",
+  "value": "plain-text coordinates normalized 0 to 100: <point x=\"10.0\" y=\"10.0\" alt=\"alt text\">Inline text</point>; multiple: <points x1=... y1=... x2=... alt=...>",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix B.2 Fine-Tuning Task Details, paragraph \"Pointing\" (A is Model Details)",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-point-order",
+  "claim": "Multiple points ordering",
+  "value": "top-down, left-to-right, each point numbered (last number = count)",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 4 Fine-tuning; Appendix Pointing",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-no-distill",
+  "claim": "No-VLM-distillation statement",
+  "value": "all collected without the use of external VLMs; \"without any reliance on synthetic data from other VLMs, including proprietary ones\"",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Abstract; Sec. 1 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-encoder",
+  "claim": "Default vision encoder",
+  "value": "OpenAI ViT-L/14 336px CLIP",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 2",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-llms",
+  "claim": "LLM choices",
+  "value": "OLMo-7B-1024-preview, OLMoE-1B-7B, Qwen2 7B, Qwen2 72B",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 2",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-overlap",
+  "claim": "Crop overlap margin and crop counts",
+  "value": "overlap 4 patches (56 pixels); typically 12 high-res crops, 12x12 = 144 pooled patches per crop",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix Image Encoding",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arch-pool",
+  "claim": "Connector pooling",
+  "value": "2x2 patch windows pooled to one vector by multi-head attention with mean query; features concatenated from third-to-last and tenth-from-last ViT layers; then MLP",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 2 Vision-language connector",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-abl-crop",
+  "claim": "Cropping ablation (cap F1 / 11-avg)",
+  "value": "single 46.7/62.8; multi no-overlap 53.4/75.7; multi overlap 54.1/76.9",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 2d",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-abl-pool",
+  "claim": "2x2 pooling ablation (cap F1 / 11-avg)",
+  "value": "stacking 53.7/76.1; attention 54.1/76.9",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 2f",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-abl-enc-full",
+  "claim": "Vision encoder ablation full row values",
+  "value": "CLIP 336px 54.1/76.9; MetaCLIP 336px 54.1/77.2; SigLIP-So400m 384px 54.4/77.1; DINOv2 336px 53.2/75.6",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 2a",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-abl-cap-scale",
+  "claim": "PixMo-Cap scaling (cap F1 / 11-avg)",
+  "value": "0: -/74.9; 89k: 49.6/75.5; 178k: 51.6/76.3; 356k: 52.6/76.2; 712k: 54.1/76.9",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 3a",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-abl-pretrain-data",
+  "claim": "Pre-training data ablation (cap F1 / 11-avg)",
+  "value": "ShareGPT4V+o 158k images 36.3/74.9; PixMo cleaned+raw 54.1/76.9; PixMo images captioned by GPT-4o 52.9/77.5; LAION connector stage 53.9/76.9",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 3b",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-abl-sft",
+  "claim": "Fine-tuning data ablation (11-avg)",
+  "value": "academic only 72.5; +PixMo-Docs 74.0; full PixMo+academic 76.9; remove pointing 76.2; remove Docs 75.8",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 3c",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-cnt-strategy",
+  "claim": "Counting strategy, CountBenchQA / PixMo-Count val",
+  "value": "count only 87.9/80.2; point then count 89.4/86.3; count then point 81.5/77.6; pointing+regex 88.4/85.4",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 4a",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-cnt-order",
+  "claim": "Point order ablation, CBQA / PCQA",
+  "value": "ordered 89.4/86.3; unordered 85.4/74.1",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 4b",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-cnt-tokens",
+  "claim": "Point encoding ablation, CBQA / PCQA",
+  "value": "plain-text 89.4/86.3; special tokens 85.8/80.9 (1000 special point tokens tried)",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 4d",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-cnt-main",
+  "claim": "Counting benchmarks CountBenchQA / PixMo-Count test",
+  "value": "Molmo-72B 91.2/85.2; GPT-4o 87.9/59.6; Gemini 1.5 Pro 85.8/64.3; Claude-3.5 Sonnet 89.7/58.3",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-elo-main",
+  "claim": "Human-preference Elo (authors' own study, ~870 annotators, 15k prompts)",
+  "value": "GPT-4o-0513 1079; Molmo-72B 1077; Gemini 1.5 Pro 1074; Claude-3.5 Sonnet 1069; Gemini 1.5 Flash 1054; GPT-4V 1041",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 1; Sec. 5; Appendix Human evaluation",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-avg-main",
+  "claim": "Average over 11 academic benchmarks",
+  "value": "Molmo-72B 81.2; GPT-4o 78.5; Gemini 1.5 Pro 78.3; Claude-3.5 Sonnet 76.7; Gemini 1.5 Flash 75.1",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 1, Average column",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-elo-abl",
+  "claim": "Ablation Elo and win% vs Molmo-7B-D default (ties excluded)",
+  "value": "Claude-3.5 Sonnet 1047/65%; PixMo-Cap w/ GPT-4o captions 1018/55%; default 1014; GPT-4V 1010/47%; no PixMo-Cap 990/35%; academic only 897/17%",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Table 5 (Table 6 is hyperparameters)",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-point-eval",
+  "claim": "Pointing benchmark F1 (493 pairs)",
+  "value": "Molmo-72B 75.2; Molmo-7B-D 74.3; 7B-D with 36 test crops (trained on 12) 58.1",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Appendix Pointing table",
+  "uncertain": false
+ },
+ {
+  "id": "molmo-arena",
+  "claim": "Independent Chatbot Arena result",
+  "value": "Molmo-72B outperforms all open models but ranks lower than several proprietary models (e.g. GPT-4o, Claude 3.5 Sonnet)",
+  "paper": "Molmo",
+  "version": "v2",
+  "loc": "Sec. 5 para after key highlights; Appendix Chatbot Arena",
+  "uncertain": false
+ }
+]

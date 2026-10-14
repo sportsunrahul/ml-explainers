@@ -1,0 +1,93 @@
+<section id="ch-vjepa2" class="chapter">
+<h2>V-JEPA 2: scale, then act</h2>
+<p>V-JEPA 2 (Assran et al., <span data-claim="vjepa2-arxiv-version">2506.09985v1</span>, June 2025) is two papers in one. The first scales the V-JEPA recipe until a frozen encoder understands video well enough to anticipate what a person will do next. The second freezes that encoder, bolts on a small predictor that reads robot actions, trains it on under <span data-claim="vjepa2-ac-droid-hours">62 hours</span> of robot video, and plans with it on a real arm in a lab the model had never seen. The second part is where the predictor becomes a world model you can <em>use</em>.</p>
+
+<h3>Part A: four ways to scale</h3>
+<figure class="viz" id="viz-scale" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="scale-chart" viewBox="0 0 640 230" role="img" aria-label="A staircase of five bars: the V-JEPA baseline at 84.2 average accuracy, then data, model, longer training and higher resolution each adding a step, ending at 88.2."></svg>
+  <div class="controls">
+    <button type="button" id="btn-scale-0" data-step="0" aria-pressed="true">Baseline</button>
+    <button type="button" id="btn-scale-1" data-step="1" aria-pressed="false">+ data</button>
+    <button type="button" id="btn-scale-2" data-step="2" aria-pressed="false">+ model</button>
+    <button type="button" id="btn-scale-3" data-step="3" aria-pressed="false">+ longer training</button>
+    <button type="button" id="btn-scale-4" data-step="4" aria-pressed="false">+ resolution</button>
+    <button type="button" id="btn-scale-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="scale-readout" aria-live="polite"></p>
+  <figcaption>Sourced from V-JEPA 2's Fig. 3: average frozen-probe accuracy over six tasks. The steps mix model sizes: the baseline and the data step are a ViT-L, the later steps a ViT-g; Fig. 5 reports the model step as <span data-claim="vjepa2-ablation-delta-model-alt">1.7</span> under a different protocol.</figcaption>
+</figure>
+<p>From <span data-claim="vjepa2-videos-2m-baseline">2 million</span> to <span data-claim="vjepa2-videos-22m">22 million</span> samples (over <span data-claim="vjepa2-video-hours">1 million hours</span> of video, including <span data-claim="vjepa2-image-count">1M</span> images tiled into still clips): <span data-claim="vjepa2-ablation-baseline">84.2</span> to <span data-claim="vjepa2-ablation-data">85.2</span>. A ViT-g encoder of <span data-claim="vjepa2-vitg-params">1B</span> parameters instead of ViT-L: <span data-claim="vjepa2-ablation-model">86.7</span>. Training for <span data-claim="vjepa2-iterations-total">252K</span> steps instead of <span data-claim="vjepa2-iterations-baseline">90K</span>, with a learning rate held constant until the probes stop improving: <span data-claim="vjepa2-ablation-long">87.5</span>. Then the trick that makes the last step affordable: only the final <span data-claim="vjepa2-cooldown-steps">12K</span> "cooldown" steps are run at <span data-claim="vjepa2-frames-cooldown">64</span> frames (<span data-claim="vjepa2-clip-seconds-cooldown">16 seconds</span> at 4 fps) and <span data-claim="vjepa2-res-from-to">384</span> pixels: <span data-claim="vjepa2-ablation-res">88.2</span>. Training at that size throughout would have cost roughly <span data-claim="vjepa2-gpu-years-fullres">60 GPU-years</span>; progressive resolution is <span data-claim="vjepa2-progressive-speedup">8.4x</span> cheaper. The recipe underneath is V-JEPA's: tubelets of <span data-claim="vjepa2-tubelet">2x16x16</span>, 3D rotary positions, masks spanning all frames, an L1 loss on masked tokens, a fixed EMA momentum of <span data-claim="vjepa2-ema">0.99925</span>, and a predictor of <span data-claim="vjepa2-predictor-params">22M</span> parameters that stays the same size for every encoder.</p>
+<p>The frozen ViT-g at 384 pixels reads motion better than anything before it: <span data-claim="vjepa2-ssv2-vitg384">77.3</span> on Something-Something v2 and <span data-claim="vjepa2-diving48-vitg384">90.2</span> on Diving-48 (Table 4). On Epic-Kitchens action anticipation (what will this person do <span data-claim="vjepa2-ek100-anticipation-time">1 second</span> from now, judged by recall at 5), the encoder plus its predictor scores <span data-claim="vjepa2-ek100-vitg384">39.7</span> against <span data-claim="vjepa2-ek100-plausivl">27.6</span> for the best prior model, a <span data-claim="vjepa2-ek100-relative-gain">44%</span> relative gain (Table 5). Attached to a language model (<span data-claim="vjepa2-vidqa-llm-sota">Llama 3.1 8B</span>, <span data-claim="vjepa2-vidqa-align-samples">88.5 million</span> alignment samples) it averages <span data-claim="vjepa2-vidqa-avg">59.5</span> across seven video question-answering benchmarks (Table 8), though an image-text-trained encoder still wins two of them.</p>
+
+<div class="aside">
+  <h4>Claim card: intuitive physics emerges from video prediction (Garrido et al., <span data-claim="intphys-arxiv-version">2502.11831v1</span>; tests V-JEPA, 2024, not V-JEPA 2)</h4>
+  <p><b>Claim.</b> A video JEPA, with no training on physics, can be read as a "surprise" meter: run it over a clip, measure the error between its predicted and actual future embeddings, and physically impossible clips surprise it more. This is the violation-of-expectation protocol used on infants.</p>
+  <p><b>How it was measured.</b> Pairs of videos that differ only in one physical violation (an object vanishing behind an occluder, passing through a wall, changing shape), from three benchmarks: IntPhys (<span data-claim="intphys-dataset-intphys-properties">3</span> properties, synthetic), GRASP (<span data-claim="intphys-dataset-grasp-properties">10</span> properties, synthetic) and InfLevel (real videos). The metric is how often the impossible video of a pair gets the higher surprise; chance is <span data-claim="intphys-chance">50</span>%. Baselines: a pixel-prediction model (<span data-claim="intphys-pixel-baseline">VideoMAEv2</span>), two multimodal LLMs, and <span data-claim="intphys-untrained-n">20</span> untrained networks.</p>
+  <p><b>Result.</b> V-JEPA ViT-H: <span data-claim="intphys-acc-intphys">98%</span> on IntPhys, <span data-claim="intphys-acc-grasp">66%</span> on GRASP, <span data-claim="intphys-acc-inflevel">62%</span> on InfLevel; the only method significantly above untrained networks on all three (their Fig. 1). On the IntPhys private test set its pairwise error on object permanence is <span data-claim="intphys-test-objperm-err-h-avg">0.28%</span> against <span data-claim="intphys-test-objperm-err-human">12.5%</span> for human raters (Table S4). A model trained on only <span data-claim="intphys-data-128h">128h</span> of video keeps over <span data-claim="intphys-data-128h-acc">70%</span>.</p>
+  <p><b>What would falsify it.</b> The pixel-prediction baseline or the untrained networks matching V-JEPA on IntPhys, or surprise failing to separate the pairs once the context length is fixed rather than tuned per property (the paper checks this: a fixed context of <span data-claim="intphys-fixed-context">2 frames</span> still works).</p>
+</div>
+
+<h3>Part B: V-JEPA 2-AC, a predictor that reads actions</h3>
+<p>Now freeze the ViT-g and throw away its mask-filling predictor. In its place train a new predictor of <span data-claim="vjepa2-ac-predictor-params">300M</span> parameters (<span data-claim="vjepa2-ac-predictor-layers">24</span> layers, width <span data-claim="vjepa2-ac-predictor-hidden">1024</span>) on the Droid dataset: <span data-claim="vjepa2-ac-trajectories">23k</span> robot trajectories, successes and failures alike, no labels, no rewards, cut into <span data-claim="vjepa2-ac-clip-seconds">4 second</span> clips of 16 frames. Each frame goes through the frozen encoder on its own and comes out as a <span data-claim="vjepa2-ac-featmap">16x16x1408</span> feature map. Each time step also contributes the arm's end-effector state (a <span data-claim="vjepa2-ac-state-dim">7D</span> vector: position, orientation, gripper) and the action, which is the change in that state to the next frame. The predictor's job: given everything up to step <span class="tex">k</span>, predict the encoder's feature map of frame <span class="tex">k+1</span>:</p>
+<div class="eq" id="eq-ac" data-build data-viz="viz-acflow"><div class="tex tex-display">
+\htmlData{step=1, link=loss}{\mathcal{L}_{\text{teacher-forcing}}(\phi) = \frac{1}{T}\sum_{k=1}^{T}} \big\lVert \htmlData{step=2, link=pred}{\htmlClass{t-green}{P_\phi\big((a_t, s_t, E(x_t))_{t \le k}\big)}} - \htmlData{step=3, link=enc}{\htmlClass{t-brown}{E(x_{k+1})}} \big\rVert_1, \qquad \mathcal{L}_{\text{rollout}}(\phi) = \big\lVert P_\phi(a_{1:T}, s_1, z_1) - z_{T+1} \big\rVert_1
+</div></div>
+<p class="eqno">Eqs. 2 and 3 in V-JEPA 2, Sec. 3.1; summed as the objective, minimised over the predictor's weights <span class="tex">\phi</span> only. Teacher forcing feeds the true feature maps as inputs with <span class="tex">T</span> = <span data-claim="vjepa2-ac-tf-steps">15</span>; the rollout term feeds the predictor its own output, with <span class="tex">T</span> = <span data-claim="vjepa2-ac-rollout-steps">2</span> so the gradient crosses one recurrent step. There is no EMA teacher here: the target is the same frozen encoder.</p>
+<ul class="gloss">
+  <li><span class="tex">E</span>: the frozen V-JEPA 2 encoder, brown. It never changes in this stage.</li>
+  <li><span class="tex">a_t, s_t</span>: action and end-effector state at step <span class="tex">t</span>; each becomes one token through its own small linear map.</li>
+  <li><span class="tex t-green">P_\phi</span>: the action-conditioned predictor; attention is <em>block-causal</em>, so step <span class="tex">k</span>'s tokens see steps up to <span class="tex">k</span> only.</li>
+</ul>
+
+<figure class="viz archflow" id="viz-acflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-acflow-clip" aria-pressed="false">1 Clip</button>
+    <button type="button" id="btn-acflow-encode" aria-pressed="false">2 Frozen encoder</button>
+    <button type="button" id="btn-acflow-tokens" aria-pressed="false">3 Action tokens</button>
+    <button type="button" id="btn-acflow-predict" aria-pressed="false">4 Predictor</button>
+    <button type="button" id="btn-acflow-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-acflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-acflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Stage"><span>stage</span><button type="button" id="btn-acflow-tf" aria-pressed="true">teacher forcing</button><button type="button" id="btn-acflow-roll" aria-pressed="false">rollout</button></div>
+  <canvas id="acflow-canvas" role="img" aria-label="V-JEPA 2-AC as a diagram: frames enter a brown frozen encoder; actions and states become tokens; the green predictor reads them block-causally and its output meets the frozen encoder's next-frame features in a red L1 loss. In the backward stages only the predictor is outlined in red."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-acflow-prev">Previous</button>
+    <button type="button" id="btn-acflow-next">Next</button>
+    <button type="button" id="btn-acflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="acflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Everything the pretraining stage trained is now <b class="c-brown">frozen</b>. The only new thing is the <b class="c-green">predictor</b>, and it is the only thing the <b class="c-red">loss</b> can move. Before you reach stage 6, guess: does any gradient reach the encoder?</p></div>
+    <div data-stage="clip" hidden><h4>1. A robot clip</h4><p>Sixteen frames at <span data-claim="vjepa2-ac-fps">4 frames-per-second</span> from Droid's left camera, resized to <span data-claim="vjepa2-ac-resolution">256x256</span>, with the <span data-claim="vjepa2-ac-robot-dof">7-DoF</span> arm's end-effector state at every frame. Batch <span data-claim="vjepa2-ac-batch">256</span>.</p></div>
+    <div data-stage="encode" hidden><h4>2. Each frame through the frozen encoder</h4><p>The ViT-g processes frames independently (as an image encoder) into <span data-claim="vjepa2-ac-featmap">16x16x1408</span> feature maps. No gradient will ever flow here.</p></div>
+    <div data-stage="tokens" hidden><h4>3. Actions and states become tokens</h4><p>Each 7D action and each 7D state passes through its own linear map to the predictor width of <span data-claim="vjepa2-ac-predictor-hidden">1024</span>; so does each of the 256 patch features. Per step: one action token, one state token, 256 patch tokens, interleaved in time, with rotary positions.</p></div>
+    <div data-stage="predict" hidden><h4>4. The predictor rolls time forward</h4><p><span data-claim="vjepa2-ac-predictor-layers">24</span> layers, <span data-claim="vjepa2-ac-predictor-heads">16</span> heads, block-causal attention. Its output at step <span class="tex">k</span> is mapped back to 1408 channels: the predicted feature map of frame <span class="tex">k+1</span>. In the rollout stage the prediction is fed back in as the next input.</p></div>
+    <div data-stage="loss" hidden><h4>5. L1 to the next frame's frozen features</h4><p>Teacher forcing: averaged over <span data-claim="vjepa2-ac-tf-steps">15</span> steps with true inputs. Rollout: the prediction after <span data-claim="vjepa2-ac-rollout-steps">2</span> self-fed steps against the true features two frames ahead. The two are added.</p></div>
+    <div data-stage="backward" hidden><h4>6. Only the predictor</h4><p>The gradient runs from the loss into the predictor's output map, through its 24 layers to its three input maps. The encoder's features are constants on both sides of the loss, so the gradient stops at the predictor's input. Nothing brown moves.</p></div>
+    <div data-stage="update" hidden><h4>7. Update</h4><p>AdamW on <span class="tex">\phi</span>: learning rate from <span data-claim="vjepa2-ac-lr-start">7.5e-5</span> up to <span data-claim="vjepa2-ac-lr-peak">4.25e-4</span> over <span data-claim="vjepa2-ac-warmup">4500</span> steps, held for <span data-claim="vjepa2-ac-constant">85500</span>, then decayed; weight decay <span data-claim="vjepa2-ac-weight-decay">0.04</span>.</p></div>
+  </div>
+  <figcaption>Computed from Sec. 3 and Appendix B of V-JEPA 2. The predictor's output map and the two linear maps for action and state are described in words in the paper; their exact shapes are our reading.</figcaption>
+</figure>
+
+<h3>Planning: search the actions, not the pixels</h3>
+<p>To act, the robot is given a goal <em>image</em>. Encode the current frame and the goal with the frozen encoder; then search for the action whose predicted next feature map is closest, in L1, to the goal's feature map. The search is the Cross-Entropy Method: sample <span data-claim="vjepa2-cem-samples">800</span> candidate actions from a Gaussian, keep the <span data-claim="vjepa2-cem-elites">top 10</span>, refit the Gaussian, repeat <span data-claim="vjepa2-cem-iterations">10</span> times, execute the mean, then look again. The horizon in the robot experiments is <span data-claim="vjepa2-cem-horizon">1</span> step (longer "worked reasonably well" but costs time); each decision takes <span data-claim="vjepa2-plan-time">16 sec</span> on one <span data-claim="vjepa2-plan-gpu">RTX 4090</span>.</p>
+<figure class="viz" id="viz-planner" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="planner-canvas" role="img" aria-label="A three-dimensional embedding space with a floor grid. A blue point is the current state, a yellow point the goal. Faint dashed lines are candidate action sequences imagined by a toy world model; after each refinement the fan of candidates narrows around the one whose end lands closest to the goal, drawn solid in green."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-planner-sample">Sample 60 candidates</button>
+    <button type="button" id="btn-planner-refine">Refine (keep the best 6)</button>
+    <button type="button" id="btn-planner-step">Execute first action, replan</button>
+    <label>horizon <input type="range" id="planner-horizon" min="1" max="6" step="1" value="3"></label>
+    <button type="button" id="btn-planner-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="planner-readout" aria-live="polite"></p>
+  <figcaption>Toy model of the same algorithm: the "world model" is a hand-written smooth map from (state, action) to the next state in a three-dimensional latent space, and the energy is the distance between the imagined end state and the goal. V-JEPA 2-AC uses 800 samples, 10 elites and a 1408-channel feature map; the toy uses 60 and 6 so you can see them. Before pressing "Refine", guess which candidates survive.</figcaption>
+</figure>
+<p>In <span data-claim="vjepa2-robot-labs">two</span> labs the model had never seen, with <span data-claim="vjepa2-robot-trials">10 trials</span> per task (Table 2): reaching, <span data-claim="vjepa2-robot-reach-ac">100%</span>; grasping a cup, <span data-claim="vjepa2-robot-grasp-cup-ac-avg">65%</span>; grasping a box, <span data-claim="vjepa2-robot-grasp-box-ac-avg">25%</span>; pick-and-place of the cup, <span data-claim="vjepa2-robot-pnp-cup-ac-avg">80%</span>, of the box, <span data-claim="vjepa2-robot-pnp-box-ac-avg">65%</span>. Pick-and-place is given two sub-goal images on the way. Octo, a behaviour-cloning policy pretrained on <span data-claim="vjepa2-octo-trajectories">1M trajectories</span>, grasps the cup <span data-claim="vjepa2-robot-grasp-cup-octo-avg">15%</span> of the time in the same setting; a planner built on Cosmos, a pixel-generating video model, takes <span data-claim="vjepa2-cosmos-plan-time">4 min</span> per decision and grasps the cup <span data-claim="vjepa2-robot-grasp-cup-cosmos">0%</span> of the time (Table 3). Zero-shot here means no data from these labs; the arm, a Franka, is the one in Droid. The limits are honest too: the inferred actions rotate with the camera angle (about <span data-claim="vjepa2-camera-error-cm">1.6</span> cm of error on 5 cm moves), and the goal must be given as an image.</p>
+</section>

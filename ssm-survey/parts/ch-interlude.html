@@ -1,0 +1,40 @@
+<p class="kicker">Interlude: one generated token, end to end</p>
+<section id="ch-interlude" class="interlude">
+<h2>One token through two models</h2>
+<p>Every chapter so far looked at one piece. Here is the whole path of a single generated token, through a Mamba-2.8B-sized model running its recurrence beside a Llama-3-8B-sized Transformer reading its KV cache. Press through the stages and change the context length: watch which memory changes size.</p>
+
+<figure class="viz" id="viz-interlude" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="interlude-canvas" role="img" aria-label="Two columns of boxes. Left, Mamba 2.8B: token, embedding, then a layer repeated 64 times with projections, a selective state update beside a fixed yellow block of state, and an output projection; then the output head and the next token. Right, Llama 3 8B: the same path with attention beside a brown KV cache block whose width grows with the context length, and an MLP."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-interlude-token" aria-pressed="false">1 Token in</button>
+    <button type="button" id="btn-interlude-proj" aria-pressed="false">2 Projections</button>
+    <button type="button" id="btn-interlude-memory" aria-pressed="false">3 Memory step</button>
+    <button type="button" id="btn-interlude-out" aria-pressed="false">4 Out and MLP</button>
+    <button type="button" id="btn-interlude-layers" aria-pressed="false">5 Every layer</button>
+    <button type="button" id="btn-interlude-next" aria-pressed="false">6 Next token</button>
+  </div>
+  <div class="controls">
+    <span style="color:var(--muted)">context</span>
+    <button type="button" id="btn-interlude-1k" aria-pressed="false">1K</button>
+    <button type="button" id="btn-interlude-8k" aria-pressed="true">8K</button>
+    <button type="button" id="btn-interlude-128k" aria-pressed="false">128K</button>
+    <button type="button" id="btn-interlude-1m" aria-pressed="false">1M</button>
+    <button type="button" id="btn-interlude-prev">Previous</button>
+    <button type="button" id="btn-interlude-fwd">Next</button>
+    <button type="button" id="btn-interlude-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="interlude-readout" aria-live="polite"></p>
+  <div class="interlude-text">
+    <div data-stage="0"><p>Both models turn one token into one vector, push it through a stack of identical layers, and turn the result into a score for every possible next token. They differ in one box per layer: what each layer remembers about the past. Press <b>1 Token in</b>.</p></div>
+    <div data-stage="1" hidden><p><b>1. The token arrives.</b> Its id picks one row of an embedding table: a vector of width <span data-claim="mamba-cfg-2p8b-dmodel">2560</span> in Mamba (code-only: the README's configuration), <span data-claim="llama3-8b-dim">4,096</span> in Llama 3 8B. Llama 3's vocabulary has <span data-claim="interlude-llama-vocab">128,000</span> tokens; Mamba uses the <span data-claim="mamba-train-tokenizer">GPT-NeoX</span> tokenizer, whose size the paper does not state.</p></div>
+    <div data-stage="2" hidden><p><b>2. Into a layer: projections.</b> Mamba projects the vector into two branches of width <span data-claim="mamba-2p8b-inner-width">5120</span> (expansion <span data-claim="mamba-expand-e">2</span>): one feeds the state update, the other becomes a gate (<a href="#ch-mamba">the Mamba chapter</a>). Llama computes a query of width 4,096 and a key and a value for each of its <span data-claim="llama3-8b-kvheads">8</span> key-value heads of dimension <span data-claim="bill-headdim">128</span>.</p></div>
+    <div data-stage="3" hidden><p><b>3. The memory step.</b> Mamba runs a short convolution over its last <span data-claim="mamba-conv-width">4</span> inputs (code-only), computes <span class="tex">\Delta</span>, <span class="tex">B</span> and <span class="tex">C</span> from the token (<a href="#ch-mamba">selection</a>), discretizes (<a href="#ch-continuous">continuous time</a>), and takes one step <span class="tex">h_t = \overline{A}_t h_{t-1} + \overline{B}_t x_t</span>, <span class="tex">y_t = C_t h_t</span> (<a href="#ch-recurrence">the recurrence</a>): it reads and overwrites <span data-claim="mamba-2p8b-ssm-state-per-layer">81,920</span> state numbers and <span data-claim="mamba-2p8b-conv-state-per-layer">15,360</span> convolution inputs, whatever the context length. No parallel scan here: <a href="#ch-scan">the scan</a> is for training on whole sequences; generation takes one step per token. Llama appends <span data-claim="interlude-kv-values-layer">2,048</span> numbers (one key and one value per head) to the cache, then scores its query against every cached key and sums every cached value (<a href="#ch-bill">the bill</a>).</p></div>
+    <div data-stage="4" hidden><p><b>4. Out, and the MLP.</b> Mamba multiplies its output by the gate branch and projects back to width 2560; there is no separate MLP, since the Mamba block merges the two. Llama projects back to 4,096, then runs a <span data-claim="interlude-llama-act">SwiGLU</span> MLP of width <span data-claim="interlude-llama-ffn">14,336</span>. Both add the result to the residual stream.</p></div>
+    <div data-stage="5" hidden><p><b>5. Every layer.</b> Mamba repeats this <span data-claim="mamba-cfg-2p8b-layers">64</span> times (code-only), Llama <span data-claim="llama3-8b-layers">32</span> times. Every token also reads every weight once: about <span data-claim="interlude-mamba-layer-weights">39.3 million</span> projection weights per Mamba layer and <span data-claim="interlude-llama-layer-weights">218 million</span> per Llama layer (our arithmetic). At short context the weights dominate the bytes read for both models; at long context the cache does, and unlike weights the cache cannot be shared across a batch of conversations.</p></div>
+    <div data-stage="6" hidden><p><b>6. The next token.</b> A final norm and the output head score every token in the vocabulary; one is sampled and fed back in as the next input. Mamba's memory is still <span data-claim="mamba-2p8b-state-mib-2byte">11.875</span> MiB; Llama's cache has grown by <span data-claim="interlude-kv-per-token">128 KiB</span>.</p></div>
+  </div>
+  <figcaption>Computed from the two configurations of the first chapter, at 16 bits per value: Llama 3 8B from its paper's Table 3, Mamba 2.8B's layer count, width and convolution width from the official README (code-only), state size 16 our reading of the README default. Weight counts are our arithmetic (Mamba's <span class="tex">3ED^2</span> per block, Sec 3.4; Llama's attention plus a three-matrix SwiGLU MLP). Norms, biases and Mamba's small projections for <span class="tex">\Delta</span>, <span class="tex">B</span>, <span class="tex">C</span> are left out.</figcaption>
+</figure>
+<p>The two columns differ in exactly one box per layer, and that box is the subject of this page: a memory of fixed size that is updated, against one that keeps everything and is reread. The <a href="#ch-ssd">next chapter</a> shows the two are closer relatives than they look.</p>
+</section>

@@ -1,0 +1,182 @@
+
+<!-- ============================ ACT I ============================ -->
+<p class="kicker"><span class="act-n">Act I</span>A shared space for pictures and words</p>
+<section id="ch-shared-space" class="chapter">
+<h2>Classifiers only know their labels</h2>
+<p>A classic image classifier can only answer with one of the labels it was trained on; to teach it a new concept you collect new labeled photos. CLIP's fix was to stop predicting labels and instead play a matching game: given a pile of photos and a pile of captions, say which caption goes with which photo.</p>
+
+<figure class="viz" id="viz-contrastive" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="contrastive-canvas" tabindex="0" role="img" aria-label="Five photo points (blue) and five caption points (yellow) on a circle, with a five by five similarity table and a loss bar. Drag points; arrow keys select and rotate."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-contrastive-before">Scrambled start</button>
+    <button type="button" id="btn-contrastive-train">Train</button>
+    <button type="button" id="btn-contrastive-hot">Train hot (&tau; = 1)</button>
+    <button type="button" id="btn-contrastive-cold">Train cold (&tau; = 0.07)</button>
+    <button type="button" id="btn-contrastive-zeroshot">Zero-shot a new photo</button>
+    <button type="button" id="btn-contrastive-reset" data-cue-reset>Reset</button>
+    <label for="rng-contrastive-tau">temperature <input type="range" id="rng-contrastive-tau" min="-150" max="0" step="1" value="-115"> <span id="contrastive-tau-val">0.07</span></label>
+  </div>
+  <p class="readout" id="contrastive-readout" aria-live="polite"></p>
+  <figcaption>Before you press Train, guess: which way will the dog photo move, and what happens to the photos that are sitting next to the wrong caption? The loss is CLIP's real symmetric loss, and training is real gradient descent on it. What is toy: the embedding space is a circle (two dimensions) instead of hundreds, and there are five pairs instead of tens of thousands. A circle is cramped: from <span data-computed>about half</span> of random starts, cold training jams pairs on top of each other; the real space, with hundreds of dimensions, has far more room.</figcaption>
+</figure>
+
+<h3>The wall: a fixed list of answers</h3>
+<p>Before CLIP, the strongest vision models were trained to pick one entry from a predetermined list of object categories. The CLIP paper names the cost directly: this <span data-claim="clip-fixed-set">restricted form of supervision limits their generality and usability since additional labeled data is needed to specify any other visual concept</span>. A model that knows "dog" and "cat" has nothing to say about "a corgi wearing sunglasses", and it cannot even be asked.</p>
+<p>The internet, meanwhile, is full of images that already come with text: alt-text, titles, captions. That text is messy, but it describes an open-ended world. CLIP gathered <span data-claim="clip-dataset-size">400 million (image, text) pairs</span> from the internet, found by searching for <span data-claim="clip-queries">500,000</span> different queries, and asked a model to learn from the text directly.</p>
+
+<h3>The matching game</h3>
+<p>CLIP has two encoders. The image encoder (a ResNet or a vision transformer) turns a photo into a vector; the text encoder (a transformer) turns a caption into a vector. A learned linear projection maps both into the same space, and each vector is scaled to length one, so every photo and every caption becomes a <em>direction</em>. In the figure the space is a circle and each direction is a point on it: <b class="c-blue">blue dots</b> are photos, <b class="c-yellow">yellow diamonds</b> are captions.</p>
+<p>How similar two directions are is measured by the cosine of the angle between them: 1 when they point the same way, 0 at right angles, -1 when opposite. Take a batch of <span class="tex">N</span> photo-caption pairs and compute the cosine of every photo against every caption. That is the <span class="tex">N \times N</span> table on the right. The correct answers are all on the <b class="c-green">diagonal</b>: photo 1 goes with caption 1, and so on. Every off-diagonal cell is a <b class="c-brown">negative</b>, a pairing that is wrong, and the batch provides them for free.</p>
+<p>The task is then a classification problem inside each row: out of the <span class="tex">N</span> captions, pick the one that belongs to this photo. And the same inside each column: out of the <span class="tex">N</span> photos, pick the one that belongs to this caption. Press <b>Train</b>. Every point moves at once. Each photo is pulled toward its own caption and pushed away from all the others, so the pairs close up and spread apart around the circle. The lines show, for each photo, which caption it currently sits closest to: <b class="c-green">green</b> if that is its own caption, <b class="c-red">red</b> dashes if not.</p>
+<p>CLIP played this game with a batch of <span data-claim="clip-batch-size">32,768</span>, so each training step filled in a table of <span data-computed>32,768 &times; 32,768 &asymp; 1.07 billion</span> similarities, almost all of them negatives. Keep that number in mind: the next chapter is about what it costs.</p>
+
+<h3>The loss, term by term</h3>
+<p>For one row (one photo), turn the row's similarities into probabilities with a softmax and ask for a high probability on the correct caption. The loss for photos is the average, over all rows, of the negative log of that probability:</p>
+<div class="eq" id="eq-clip" data-build data-viz="viz-contrastive"><div class="tex tex-display">
+\htmlData{step=4}{\htmlClass{t-red}{\mathcal{L}_{\text{img}}} = -\frac{1}{N}\sum_{i=1}^{N}} \log \frac{\htmlData{step=1, link=pos}{\htmlClass{t-green}{\exp(s_{ii}/\tau)}}}{\htmlData{step=2, link=neg}{\sum_{j=1}^{N} \exp(s_{ij}/\tau)}} \qquad \htmlData{step=5}{\htmlClass{t-red}{\mathcal{L}} = \tfrac{1}{2}\big(\htmlClass{t-red}{\mathcal{L}_{\text{img}}} + \htmlClass{t-red}{\mathcal{L}_{\text{txt}}}\big)} \qquad \htmlData{step=3, link=sim}{s_{ij} = \htmlClass{t-blue}{u_i}^{\top}\htmlClass{t-yellow}{v_j}}
+</div></div>
+<p class="eqno">Written out from the Fig. 3 pseudocode of CLIP v1, which has no numbered equation; ALIGN v2 Eq. 1 and 2 are the two halves in the same form.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{u_i}</span>, <span class="tex">\htmlClass{t-yellow}{v_j}</span>: the unit-length embeddings of photo <span class="tex">i</span> and caption <span class="tex">j</span> (a blue dot and a yellow diamond).</li>
+  <li><span class="tex">s_{ij}</span>: their cosine similarity, the number printed in cell <span class="tex">(i, j)</span> of the table.</li>
+  <li><span class="tex">\htmlClass{t-green}{\exp(s_{ii}/\tau)}</span>: the score of the correct pair, the green diagonal cell.</li>
+  <li>The denominator: the same score summed over every caption in the row, the right one and all the negatives. The fraction is the softmax probability of the correct caption; it reaches 1 only when the right caption beats every wrong one by a wide margin.</li>
+  <li><span class="tex">\tau</span>: the temperature, which divides every similarity before the softmax (below).</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{\text{txt}}}</span>: the same thing down each column (for each caption, find its photo). CLIP averages the two: <span data-claim="clip-loss-line"><code>loss = (loss_i + loss_t)/2</code></span>.</li>
+</ul>
+<p>Notice what the denominator does: the loss for photo <span class="tex">i</span> depends on its similarity to <em>every</em> caption in the batch. That coupling is what makes the game informative, and, as the next chapter shows, what makes it expensive.</p>
+
+<h3>Temperature: how sharp the verdict is</h3>
+<p>Cosines only range from -1 to 1, so a softmax over raw cosines is mushy: even a perfect layout gives the right caption only a modest lead. Dividing by a small temperature <span class="tex">\tau</span> stretches the gaps before the softmax. Drag the temperature slider and watch the table's colors: at high temperature every row is washed out; at low temperature each row snaps to its best match.</p>
+<p>Now predict, then check: what will training do differently when it is hot? Press <b>Train hot</b>, then <b>Train cold</b>. Hot, the pairs still end up on top of their captions, but the loss stalls high and the table stays washed out: when cosines are divided by 1, even a perfect layout cannot earn a confident probability. Cold, the loss falls to almost zero within a few dozen steps; once every photo's own caption wins clearly, the gradient all but vanishes, so from this start two pairs (car and pizza) are still slightly open when the run ends (their diagonal cells read <span data-computed>0.91</span>, not 1.00). CLIP does not hand-tune this: the temperature is <span data-claim="clip-temp-param">directly optimized during training as a log-parameterized multiplicative scalar</span>, starting from the <span data-claim="clip-temp-init">equivalent of 0.07</span> and <span data-claim="clip-temp-clip">clipped to prevent scaling the logits by more than 100</span>.</p>
+
+<h3>Inside CLIP: one forward pass, shape by shape</h3>
+<p>So far the encoders were black boxes that output dots on a circle. Open them up: below is one training step of the real model, as a slide per stage. Step through it with <b>Next</b>; the line under the drawing gives the exact tensor shapes, computed from the model sizes in CLIP's appendix table (pick a model to change them).</p>
+
+<figure class="viz archflow" id="viz-clipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-clipflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-clipflow-tokens" aria-pressed="false">2 Tokens</button>
+    <button type="button" id="btn-clipflow-encode" aria-pressed="false">3 Encoders</button>
+    <button type="button" id="btn-clipflow-pool" aria-pressed="false">4 Pool</button>
+    <button type="button" id="btn-clipflow-embed" aria-pressed="false">5 Project</button>
+    <button type="button" id="btn-clipflow-sim" aria-pressed="false">6 Logits</button>
+    <button type="button" id="btn-clipflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-clipflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-clipflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-clipflow-b32" aria-pressed="false">ViT-B/32</button>
+    <button type="button" id="btn-clipflow-b16" aria-pressed="false">ViT-B/16</button>
+    <button type="button" id="btn-clipflow-l14" aria-pressed="true">ViT-L/14</button>
+    <button type="button" id="btn-clipflow-l336" aria-pressed="false">ViT-L/14@336px</button>
+  </div>
+  <canvas id="clipflow-canvas" role="img" aria-label="CLIP's training step as a diagram: an image lane (blue) and a text lane (yellow), each going through tokens, an encoder, pooling and a projection, meeting in an N by N logits table (green diagonal) and a loss (red). In the backward stages red arrows run from the loss back through both lanes."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-clipflow-prev">Previous</button>
+    <button type="button" id="btn-clipflow-next">Next</button>
+    <button type="button" id="btn-clipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="clipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Two lanes that never touch until the end: the image lane (<b class="c-blue">blue</b>) and the text lane (<b class="c-yellow">yellow</b>). Each lane turns its input into tokens, runs a transformer, keeps one vector, projects it and scales it to length one. The lanes meet only in the similarity table (<b class="c-green">green</b> diagonal) and the loss (<b class="c-red">red</b>). Press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of pairs</h4>
+      <p>Draw <span data-claim="clip-batch-size">32,768</span> (image, caption) pairs from the web set. Each image is resized and randomly cropped to a square; <span data-claim="clip-aug">A random square crop from resized images is the only data augmentation used during training</span>. Captions stay as raw strings for now. We call the batch size <span class="tex">N</span>; the drawing shows four pairs.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>2. Both inputs become token sequences</h4>
+      <p><b class="c-blue">Image:</b> the ViT recipe (<a href="#ch-patches">the patches chapter</a>, two chapters on, takes it apart). Cut the image into <span class="tex">P \times P</span> patches, flatten each patch into <span class="tex">P \cdot P \cdot 3</span> numbers, multiply by a learned matrix <span class="tex">E</span> to get one vector per patch, prepend a learned <code>[class]</code> token, and add learned position embeddings. CLIP's main change to ViT, besides that they <span data-claim="clip-vit-init">use a slightly different initialization scheme</span>, is <span data-claim="clip-vit-extra-ln">adding an additional layer normalization to the combined patch and position embeddings before the transformer</span>.</p>
+      <p><b class="c-yellow">Text:</b> a <span data-claim="clip-lowercase">lower-cased byte pair encoding</span> splits the caption into subword ids from a vocabulary of <span data-claim="clip-bpe-vocab">49,152</span> (the appendix table lists <span data-claim="clip-vocab-table">49408</span>; the paper does not explain the gap). The ids are bracketed with <span data-claim="clip-sos-eos">[SOS] and [EOS]</span>, the length is <span data-claim="clip-ctx-len">capped at 76</span>, and each id looks up a learned row of the token embedding table.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>3. Two transformers, side by side</h4>
+      <p>Each lane runs its own stack of transformer layers; nothing is shared between them. The line under the drawing gives each encoder's depth, width and heads for the chosen model. The text encoder's base size is a <span data-claim="clip-text-base">63M-parameter 12-layer 512-wide model with 8 attention heads</span>, and it only gets wider for bigger models. <span data-claim="clip-masked-attn">Masked self-attention was used in the text encoder</span>: each token sees only itself and the tokens to its left, as in a language model, to <span data-claim="clip-masked-why">preserve the ability to initialize with a pre-trained language model or add language modeling as an auxiliary objective</span>.</p>
+      <p>Both encoders start from random weights: <span data-claim="clip-from-scratch">We train CLIP from scratch without initializing the image encoder with ImageNet weights or the text encoder with pre-trained weights</span>.</p>
+    </div>
+    <div data-stage="pool" hidden>
+      <h4>4. Keep one vector per example</h4>
+      <p><b class="c-blue">Image:</b> as in ViT, keep the <code>[class]</code> token, <span data-claim="vit-class-token">whose state at the output of the Transformer encoder</span> serves as the image representation, after one more layer norm (ViT's Eq. 4). It holds no patch of its own; attention let it gather information from every patch.</p>
+      <p><b class="c-yellow">Text:</b> the <span data-claim="clip-eos-feature">activations of the highest layer of the transformer at the [EOS] token are treated as the feature representation of the text which is layer normalized and then linearly projected</span>. Why the last token? Our reading: because attention is masked, <code>[EOS]</code> is the only position that has seen every word of the caption.</p>
+    </div>
+    <div data-stage="embed" hidden>
+      <h4>5. Project into the shared space, then normalize</h4>
+      <p>Each lane has one matrix, <span class="tex">W_i</span> or <span class="tex">W_t</span>, that maps its feature to the shared width. CLIP uses <span data-claim="clip-linear-proj">only a linear projection to map from each encoder's representation to the multi-modal embedding space</span>: no extra MLP head. Then every row is divided by its length, so each photo and each caption is a unit vector: a point on the circle of the first figure, in hundreds of dimensions instead of two. Now a dot product <em>is</em> a cosine.</p>
+    </div>
+    <div data-stage="sim" hidden>
+      <h4>6. The similarity table</h4>
+      <p>One matrix multiply compares every photo with every caption: <span data-claim="clip-logits-line"><code>logits = np.dot(I_e, T_e.T) * np.exp(t)</code></span>. The factor <span class="tex">e^{t}</span> is <span class="tex">1/\tau</span>; storing its log keeps it positive, and it is capped so that logits are never scaled by more than <span data-claim="clip-max-temp">100.0</span>. The table is <span class="tex">N \times N</span> and is never held by one GPU: <span data-claim="clip-sharded-sim">individual GPUs computing only the subset of the pairwise similarities necessary for their local batch of embeddings</span>.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. One number</h4>
+      <p>Cross-entropy down each row (for photo <span class="tex">i</span>, which caption?) and down each column (for caption <span class="tex">j</span>, which photo?), with the diagonal as the right answer, then <span data-claim="clip-loss-line"><code>loss = (loss_i + loss_t)/2</code></span>. That is <a href="#eq-clip">the equation above</a>, term by term.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. The gradient runs the same road backwards</h4>
+      <p>Backpropagation starts at the loss and retraces every arrow in reverse. First into the table: each logit gets <span class="tex">\tfrac{1}{2N}\big[(p_{ij} - \delta_{ij}) + (q_{ij} - \delta_{ij})\big]</span>, where <span class="tex">p</span> and <span class="tex">q</span> are the row and column softmax. Then the table splits it: photo <span class="tex">i</span> receives a weighted sum of all caption vectors, caption <span class="tex">j</span> a weighted sum of all photo vectors (the next figure draws this). Through the normalization, through <span class="tex">W_i</span> and <span class="tex">W_t</span>, down every layer of both transformers, to the patch matrix <span class="tex">E</span> and the token embedding table. The temperature gets a gradient too.</p>
+      <p>Look at the colors: nothing is <b class="c-brown">brown</b>. In CLIP every weight learns. From Act II on, most models freeze big parts, and the brown boxes will show where the gradient is stopped.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p>All the red-outlined parameters move at once: the <span data-claim="clip-optimizer">Adam optimizer with decoupled weight decay regularization applied to all weights that are not gains or biases</span>, weight decay <span data-claim="clip-wd">0.2</span>, <span data-claim="clip-warmup">2000</span> warm-up iterations, then a <span data-claim="clip-cosine">cosine schedule</span>; the learning rate for ViT-L/14 is <span data-claim="clip-vitl14-lr">4 x 10^-4</span>. Then the next batch, for <span data-claim="clip-epochs">32 epochs</span>. The ViT-L/14@336px model is not a separate run: after those epochs the authors <span data-claim="clip-l14-336">pre-train at a higher 336 pixel resolution for one additional epoch</span>, at a learning rate of <span data-claim="clip-l336-lr">2 x 10^-5</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: every shape comes from the model's input resolution, patch size and widths in CLIP's appendix table ("CLIP-ViT hyperparameters"); the drawing uses four pairs instead of <span class="tex">N</span>, and text shapes use the paper's length cap of 76. Before you open stage 8, guess: which boxes will the gradient reach, and which will it skip?</figcaption>
+</figure>
+
+<p>Some arithmetic makes the training run concrete. At <span data-claim="clip-batch-size">32,768</span> pairs per step, one pass over <span data-claim="clip-dataset-size">400 million (image, text) pairs</span> is <span data-computed>about 12,200</span> steps, and <span data-claim="clip-epochs">32 epochs</span> is <span data-computed>about 390,000</span> optimizer steps. To fit that in memory the authors used <span data-claim="clip-mixed-precision">Mixed-precision</span> training plus <span data-claim="clip-memory-tricks">gradient checkpointing, half-precision Adam statistics, and half-precision stochastically rounded text encoder weights</span>. The largest vision transformer took <span data-claim="clip-vit-compute">12 days on 256 V100 GPUs</span>.</p>
+
+<h3>Backward: where the gradient goes</h3>
+<p>Stage 8 said the gradient "splits" at the table. Here is what that means for one photo. The arrows show which way training pushes the dog photo's vector, one arrow per caption.</p>
+
+<figure class="viz" id="viz-clipgrad" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="clipgrad-canvas" tabindex="0" role="img" aria-label="The dog photo (blue) on a circle of five captions (yellow), with a green arrow pulling it toward its own caption and brown arrows pushing it away from confusable captions. Drag the photo, or focus the canvas and use the left and right arrow keys."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-clipgrad-far">Far from its caption</button>
+    <button type="button" id="btn-clipgrad-confused">Sitting on "cat"</button>
+    <button type="button" id="btn-clipgrad-solved">Next to its caption</button>
+    <button type="button" id="btn-clipgrad-radial">Apply the normalization</button>
+    <button type="button" id="btn-clipgrad-descend">Take gradient steps</button>
+    <button type="button" id="btn-clipgrad-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="clipgrad-readout" aria-live="polite"></p>
+  <figcaption>Before you press <b>Sitting on "cat"</b>, guess: four captions are wrong for this photo; which of them will push it, and how hard? The arrows are the exact gradient of CLIP's symmetric loss at temperature 0.07 on the dog photo's vector, with the shared factor <span class="tex">1/(N\tau)</span> left out. What is toy: two dimensions, five pairs, and the other four photos held still.</figcaption>
+</figure>
+
+<p>Press <b>Sitting on "cat"</b>. Only one caption pushes: <b class="c-brown">"cat"</b>, the one the photo is currently confused with. The other three wrong captions barely register, because their softmax probability is already close to zero. The loss spends its effort on the negatives that are hard <em>right now</em>, and (our reading) that is one reason a huge batch helps: more captions per step means more chances that one of them is a hard negative for each photo. Press <b>Next to its caption</b>: once the right caption wins its row and column, the pull shrinks to almost nothing too.</p>
+
+<div class="eq" id="eq-clip-grad" data-build data-viz="viz-clipgrad"><div class="tex tex-display">
+\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-blue}{u_i}} = \htmlData{step=3, link=tau}{\frac{1}{N\tau}} \sum_{j=1}^{N} \Big( \htmlData{step=2, link=neg}{\htmlClass{t-brown}{\tfrac{p_{ij} + q_{ij}}{2}}} \htmlData{step=1, link=pos}{\htmlClass{t-green}{{} - \delta_{ij}}} \Big)\, \htmlClass{t-yellow}{v_j} \qquad \htmlData{step=4, link=radial}{\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial x_i} = \frac{1}{\lVert x_i \rVert}\big(I - \htmlClass{t-blue}{u_i}\htmlClass{t-blue}{u_i}^{\top}\big)\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-blue}{u_i}}}
+</div></div>
+<p class="eqno">Derived here from the loss above (CLIP v1 prints no gradient); <span class="tex">u_i = x_i / \lVert x_i \rVert</span>, where <span class="tex">x_i</span> is photo <span class="tex">i</span>'s vector before normalization.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{-\delta_{ij}}</span>: minus one for the photo's own caption (<span class="tex">j = i</span>), zero otherwise. Gradient descent moves against the gradient, so this term <em>pulls</em> <span class="tex">u_i</span> toward its own caption <span class="tex">v_i</span>: the <b class="c-green">green</b> arrow.</li>
+  <li><span class="tex">\htmlClass{t-brown}{p_{ij}}</span>: the probability that photo <span class="tex">i</span>'s row gives to caption <span class="tex">j</span>. <span class="tex">\htmlClass{t-brown}{q_{ij}}</span>: the probability that caption <span class="tex">j</span>'s column gives to photo <span class="tex">i</span>. Caption <span class="tex">j</span> <em>pushes</em> the photo away in proportion to how confused the two are: <span class="tex">p_{ij}</span> is how much of the photo's row the wrong caption steals, <span class="tex">q_{ij}</span> how much of that caption's column the photo steals. These are the <b class="c-brown">brown</b> arrows. All the arrows shrink toward zero as the photo wins its own row and column outright.</li>
+  <li><span class="tex">1/(N\tau)</span>: the same for every arrow. A small temperature enlarges this factor, but it also saturates the softmax, so easy pairs get almost no gradient. (The paper's stated reason for capping the logit scale is only that it was <em>necessary to prevent training instability</em>.)</li>
+  <li>The second formula is the normalization step on the way back. The factor <span class="tex">I - u_i u_i^{\top}</span> deletes the part of the gradient that points along <span class="tex">u_i</span> itself: changing a vector's length cannot change a cosine. Press <b>Apply the normalization</b>: the dashed arrow is the raw sum, the grey arrow is the part that gets deleted, and the bold arrow is what is left, which can only slide the photo around the circle.</li>
+</ul>
+<p>From <span class="tex">\partial\mathcal{L}/\partial x_i</span> on it is ordinary backpropagation: <span class="tex">x_i = W_i^{\top} f_i</span>, so <span class="tex">W_i</span> gets <span class="tex">\sum_{n=1}^{N} f_n\,(\partial\mathcal{L}/\partial x_n)^{\top}</span>, and each <span class="tex">f_n</span> (the <code>[class]</code> output) passes the rest down through the vision transformer. Captions get the mirror image: each <span class="tex">v_j</span> is pulled toward its own photo and pushed by the photos it is confused with (the same <span class="tex">p</span> and <span class="tex">q</span> terms, seen from the caption's side), and that gradient flows down the text lane to the <code>[EOS]</code> position and, through masked attention, to every word before it. The temperature's gradient is the sum over the whole table of each logit's gradient times the logit itself: it gets sharper when sharpening would lower the loss.</p>
+<p>Press <b>Take gradient steps</b> from any starting point. The photo slides around the circle toward its caption and slows as it arrives, the same saturating gradient as the cold training run in the first figure.</p>
+
+<h3>Zero-shot: the text is the classifier</h3>
+<p>Here is the payoff. To classify a photo into any set of classes, write one caption per class, embed the captions, and pick the caption whose direction is closest to the photo. No new training, no labeled examples: the class names themselves become the classifier. Press <b>Zero-shot a new photo</b>: an unseen photo lands near the trained dog photo (that placement is the toy's assumption, standing in for a trained image encoder), and the bars show its softmax over the five prompts.</p>
+<p>The wording of those captions matters. Alt-text is rarely a single word, so CLIP wraps each class name in a sentence. The template <span data-claim="clip-prompt-template"><code>A photo of a {label}.</code></span> alone <span data-claim="clip-prompt-gain">improves accuracy on ImageNet by 1.3%</span>, and averaging the embeddings of <span data-claim="clip-ensemble-n">80</span> differently worded prompts per class adds a further <span data-claim="clip-ensemble-gain">3.5%</span>.</p>
+<p>The headline: with no ImageNet training images at all, CLIP's best model (ViT-L/14 at 336 pixels) reaches <span data-claim="clip-zs-imagenet">76.2</span>% top-1 zero-shot on ImageNet, which <span data-claim="clip-matches-rn50">matches the performance of the original ResNet-50 despite using none of the 1.28 million crowd-labeled training examples</span> that ResNet-50 was trained on. The 336-pixel version is the 224-pixel model with one extra step: the authors <span data-claim="clip-l14-336">pre-train at a higher 336 pixel resolution for one additional epoch</span>, an early sign of how much input resolution will matter later on this page.</p>
+
+<div class="aside">
+  <h4>ALIGN: the same game on noisier data</h4>
+  <p>In the same month, Google's ALIGN played the same game with far less cleaning. It used <span data-claim="align-dataset-size">1.8B image-text pairs</span> of raw alt-text with only simple frequency filters, for example <span data-claim="align-filter-txt-share">exclude alt-texts shared by more than 10 images</span> and <span data-claim="align-filter-txt-len">discard texts shorter than 3 unigrams or longer than 20 unigrams</span>. Its point was that the <em>scale of the corpus can make up for its noise</em>: in a controlled comparison, its noisy <span data-claim="align-scale-vs-noise">data outperforms Conceptual Captions with only 4x size</span>, and it edged CLIP on zero-shot ImageNet, <span data-claim="align-zs-imagenet">76.4 vs 76.2</span>.</p>
+  <p>The loss is the same shape with small differences: the ALIGN authors <span data-claim="align-loss-combo">minimize the sum of two losses</span> rather than their average, add label smoothing of <span data-claim="align-label-smooth">0.1</span>, and learn the temperature from an initial <span data-claim="align-temp-init">1.0</span> (in the paper's ablations, on a smaller EfficientNet-B5 and BERT-Base model, it converged to <span data-claim="align-temp-converged">about 1/64</span>).</p>
+</div>
+
+<p>What CLIP and ALIGN leave behind is an image encoder whose vectors <em>already mean something in words</em>. Almost every later model on this page starts from an encoder trained this way; the exceptions are BLIP (Act II), whose ViT starts from weights pre-trained on ImageNet, and Chameleon (Act VI), which has no image encoder at all. But the matching game only ever says "which caption?"; it cannot write a sentence. Getting from matching to talking is Act II. First, the loss itself hit a wall.</p>
+</section>

@@ -1,0 +1,25 @@
+  <article data-chapter="scan">
+    <header class="ch-head"><span class="num">7 of 10</span><h2>The parallel scan</h2><p class="subhead">All the states of a recurrence, in a few rounds instead of one per token</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">The scan tree</button><button type="button" role="tab" data-step="1">Where the state lives</button></div>
+      <button type="button" class="tool play" data-replay>Play</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <div class="controls"><div class="row"><span>Tokens</span><button type="button" class="tool" data-n="8" aria-pressed="true">8</button><button type="button" class="tool" data-n="16" aria-pressed="false">16</button></div>
+        <div class="row"><span>Step</span><button type="button" class="tool" data-dir="-1">Previous</button><button type="button" class="tool" data-dir="1">Next level</button><button type="button" class="tool" data-dir="0">Start</button></div></div>
+      <p>Selection makes the recurrence change at every token, so the convolution trick of S4 is gone. A plain loop computes the states one after another: L tokens, L steps in a row. But every step is still "keep a of the old state, add b", and two such steps merge into one: (a1, b1) then (a2, b2) is (a1 a2, a2 b1 + b2). That merge is an <button class="inline-term" data-open="associative">associative operator</button>, so the states can be computed as a <button class="inline-term" data-open="scan">scan</button>, on a tree.</p>
+      <p>Going up, neighbours merge in parallel until the root holds the whole sequence. Going down, each node receives the state just before its span (yellow). One last merge per token gives every state. For 16 tokens: 9 rounds instead of 16, for about three times the arithmetic. At 2,048 tokens: 23 rounds instead of 2,048.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <div class="controls"><div class="row"><span>Kernel</span><button type="button" class="tool" data-mode="fused" aria-pressed="true">Fused (Mamba)</button><button type="button" class="tool" data-mode="standard" aria-pressed="false">Standard</button></div>
+        <div class="row"><span>Stage</span><button type="button" class="tool" data-stage="1">Read</button><button type="button" class="tool" data-stage="2">Expand</button><button type="button" class="tool" data-stage="3">Scan</button><button type="button" class="tool" data-stage="4">Read out</button><button type="button" class="tool" data-stage="5">Backward</button></div></div>
+      <p>Each token's state has D x N numbers, N = 16 times more than the layer's input and output. Writing all of it to the GPU's main memory and reading it back would cost more than computing it, because moving bytes, not arithmetic, is the bottleneck (see <button class="inline-term" data-open="sram-hbm">SRAM vs HBM</button>).</p>
+      <p>Mamba uses <button class="inline-term" data-open="fusion">kernel fusion</button>: the expanded state lives only in fast on-chip memory, one chunk at a time, and only inputs and outputs travel. For the backward pass it uses <button class="inline-term" data-open="recomputation">recomputation</button> instead of storing the states. In our count for one layer of Mamba 2.8B at 2,048 tokens, that is about 33 times less memory traffic.</p>
+    </div>
+    <p class="note">The tree is a toy with exact arithmetic: one state cell, random decays, checked against the plain loop. The memory picture is computed: one layer, 2,048 tokens, inner width 5,120, state size 16, 16-bit values; the bytes per stage are our count of the reads and writes Mamba's appendix describes.</p>
+    <table class="data"><thead><tr><th>Measured (Mamba, A100)</th><th class="n">Result</th></tr></thead>
+      <tbody><tr><td>Fused scan vs standard PyTorch scan</td><td class="n">20-40x faster</td></tr><tr><td>vs FlashAttention-2</td><td class="n">faster beyond 2K</td></tr><tr><td>Training memory, batch 8 (Transformer / Mamba)</td><td class="n">11.5 / 12.3 GB</td></tr></tbody></table>
+    <p>The tree is not always worth it: on 16-step sequences Martin and Cundy's parallel kernel ran at 0.06 times the serial speed, and Griffin found the tree slower than a sequential scan on TPU-v3.</p>
+    <p class="inscription">A linear recurrence can be computed like a sum: in log-depth rounds on a tree, with the big state kept in fast memory and never written out.</p>
+    <button type="button" class="continue" data-go="ssd">Continue with Mamba-2 and state-space duality</button>
+  </article>

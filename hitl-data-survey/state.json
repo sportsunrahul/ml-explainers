@@ -1,0 +1,144 @@
+{
+  "slug": "hitl-data-survey",
+  "stage": "done",
+  "created": "2026-10-09",
+  "prompt": "Literature survey of human-in-the-loop data work: choosing what to label (active learning) and training when labels are wrong (label noise). Tie each method to a concrete labeling decision on a CV platform with human feedback loops.",
+  "reader_background": "explain from scratch; assume basic deep learning only",
+  "narration": "long page without narration (cue ids + player hooks built for later) + atlas page",
+  "compute": {
+    "probed": "2026-10-09",
+    "pod": "not probed (narration not chosen yet)",
+    "laptop": "katex + playwright in ~/paper-explainers/.node, ~/paper-explainers/.env python 3.12, Homebrew ffmpeg, node present"
+  },
+  "named_papers": {
+    "coreset": "1708.00489v4",
+    "dbal": "1703.02910v1",
+    "confident-learning": "1911.00068v6",
+    "coteaching": "1804.06872v3",
+    "dividemix": "2002.07394v1",
+    "pervasive-label-errors": "2103.14749v4"
+  },
+  "arxiv_scan": {
+    "date": "2026-10-09",
+    "status": "done: active-learning 3179 records, label-noise 2729, overlap 66; notes/scan/*.json",
+    "queries": {
+      "active-learning": "(ti:\"active learning\" OR abs:\"active learning\") AND (cat:cs.LG OR cat:cs.CV OR cat:stat.ML OR cat:cs.AI)",
+      "label-noise": "(ti/abs \"noisy labels\" | \"noisy label\" | \"label noise\", abs \"label errors\" | \"mislabeled\") AND (cat:cs.LG OR cat:cs.CV OR cat:stat.ML OR cat:cs.AI)"
+    },
+    "out": "notes/scan/<name>.json"
+  },
+  "platform_notes": "notes/platform-tie-ins.md: KB-level background only; user chose generic wording, so nothing Cogniac-specific goes on the page",
+  "approvals": {
+    "checkpoint-0": {
+      "date": "2026-10-09",
+      "pages": "long page (no narration) + atlas; steps 4-7 skipped",
+      "scope": "approved as proposed: 10 spine, ~25 branches, 13 chapters incl. interlude and arXiv map",
+      "platform": "generic only: no Cogniac names or internals; tie each method to a generic labeling decision",
+      "3d": "both: entropy dome over the 3-class simplex (BALD) + per-example loss ridge over epochs from a real CIFAR-10 40% symmetric-noise run"
+    },
+    "checkpoint-2": {
+      "date": "2026-10-10",
+      "note": "user said \"complete it\": build straight through without the checkpoint-2 pause"
+    }
+  },
+  "papers_proposed": {
+    "spine": [
+      "1703.02910v1",
+      "1708.00489v4",
+      "2002.09564v3",
+      "2202.02794v4",
+      "1706.05394v2",
+      "2103.14749v4",
+      "1911.00068v6",
+      "1804.06872v3",
+      "2002.07394v1",
+      "2109.00574v2"
+    ],
+    "branches": [
+      "1112.5745v1",
+      "1506.02142v6",
+      "1906.08158v2",
+      "1906.03671v2",
+      "1904.00370v3",
+      "1905.03677v1",
+      "1912.05361v1",
+      "2106.15324v3",
+      "2106.12059v3",
+      "2205.11320v3",
+      "2301.10625v3",
+      "2009.00236v2",
+      "1611.03530v2",
+      "1609.03683v2",
+      "1712.05055v2",
+      "1805.07836v4",
+      "1901.04215v3",
+      "1905.02249v2",
+      "2007.00151v2",
+      "2110.12088v2",
+      "2006.07159v1",
+      "2101.05022v2",
+      "2210.06812v2",
+      "2007.08199v7",
+      "1708.02862v1"
+    ],
+    "non_arxiv": [
+      "Lewis & Gale 1994 SIGIR (uncertainty sampling)",
+      "Settles 2009 AL survey, UW-Madison TR 1648"
+    ]
+  },
+  "progress_2026_10_09": {
+    "done": [
+      "sources fetched for 36 arXiv papers + Settles PDF (sources/<slug>/)",
+      "skim notes for all spine + branch papers (notes/skim/)",
+      "outline.md (12 chapters + interlude + family/summary/deeper; atlas 9 stages)",
+      "notes/design.md",
+      "run A (CE, 40% sym noise, 200 ep) pulled to out/; packaged by build/prep_runA.py -> build/data/runA.json; claims in notes/claims/our-run-a.json",
+      "toy pool for ch-uncertainty: parts/toy-pool.js, simulated over 20 pools by build/sim-pool2.mjs (entropy below random at 8 labels; margin reaches 99% at 23 labels vs random 48)",
+      "hero tiles: build/data/hero.webp (+ hero.json, 48 CIFAR-10 train images, 8 mislabeled)"
+    ],
+    "running_when_stopped": [
+      "pod: job/run_noise.py coteach cv (detached; writes out/coteach_sym40.*, out/cv_asym40.*, then RUN_DONE in job/run.log)",
+      "4 extraction agents writing notes/claims/{al-select,al-random,noise-evidence,noise-methods}.json and notes/understanding/*.md"
+    ],
+    "next": [
+      "check that the 4 claims files and understanding files exist and are valid JSON; concatenate notes/understanding/*.md into notes/understanding.md",
+      "pull runs B and C from the pod; plausibility bracket for B vs Co-teaching Table 5 (74.02 sym-50, 82.32 sym-20); compute CL on run C and check its precision vs the paper before designing viz-cl",
+      "fresh general-purpose agent fact-checks claims.json against sources",
+      "checkpoint-2 build: explainer.head.part adapted from jepa-survey, parts/body-top.html, lib-page-chrome.js, lib-pe3.js, parts/kit.js (reviewer marks), viz-hero, ch-loop, ch-uncertainty; build.sh adapted from jepa-survey; atlas shell with first 2 stages; check-page clean; then show the user and wait"
+    ],
+    "notes": [
+      "uncertain values go in data-approx spans, never data-claim",
+      "figure code shared between pages must use only PE functions common to both: css, instant, onTheme, canvas, animate, rng, gauss, label, clamp, lerp, mix, dot, arrow, polyline, axes"
+    ]
+  },
+  "progress_2026_10_10": {
+    "done": [
+      "runs B and C pulled (md5 verified) and packaged: build/data/runB.json, runC.json; claims notes/claims/our-run-bc.json",
+      "run B: Co-teaching last-10 78.56% (bracket 74.02-82.32 OK); run C: CL flags precision 55.7% recall 61%; matching cells 97.5-98.6% errors, reverse cells 0%",
+      "thumbnails: build/data/hero.webp, tiles2.webp (+ .json with given/true labels)",
+      "notes/claims/al-random.json (246 claims) written",
+      "build/build.py (long page: python3 build/build.py; atlas: python3 build/build.py --atlas)",
+      "parts: kit.js, toy-pool.js, fig-hero.js, viz-hero.js, ch-loop.html, fig-pool.js, ch-uncertainty.html, body-top.html, explainer.head.part, ORDER",
+      "atlas: meta, hero, chips (9 stages), parts/01-loop, 02-ask, glue/01-loop, 02-ask, dialogs/core.html"
+    ],
+    "running_when_stopped": [
+      "3 extraction agents (al-select, noise-evidence, noise-methods) may or may not have written notes/claims/*.json"
+    ],
+    "next": [
+      "check which claims files exist; rerun missing extraction groups",
+      "replace placeholder ?lewisgale-500fold in ch-uncertainty with the real claim id",
+      "build ch-bald (3D dome), ch-coreset, ch-random, ch-round, ch-memorize (3D ridge from runA), ch-benchmarks, ch-confident (runC cells), ch-coteach (runB batch + archflow), ch-dividemix (GMM + archflow), ch-cleaning (runC review curves + decision table), ch-map (scan), ch-family, ch-summary, ch-deeper; plan: fork 5 builders, each owns its parts/fig-*.js + ch-*.html + atlas parts/glue",
+      "atlas stages 3-9 (disagree, cover, budget, memorize, audit, find, split); atlas test currently fails only because those articles do not exist yet",
+      "fresh-agent fact-check of claims and of the page; check-page clean; report"
+    ]
+  },
+  "done_2026_10_11": {
+    "pages": [
+      "explainer.html (963 KB, 13 chapters + interlude, family, summary, deeper; no narration, cue ids kept)",
+      "hitl-atlas.html (364 KB, 9 stages)"
+    ],
+    "qa": "check-page pass; atlas test 0 problems; fresh-agent fact-check applied (14 items)",
+    "claims": 1504,
+    "published": "no (offer jot)"
+  }
+}

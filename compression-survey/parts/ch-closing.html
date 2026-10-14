@@ -1,0 +1,20 @@
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>A layer's time on a GPU is set by whichever is slower: its arithmetic or its memory traffic. Four levers attack those two costs. Distillation trains a smaller student, which needs feature imitation, not only soft labels, when the student is a detector. Quantization stores numbers on a grid set by a scale and a zero-point. For convolutional detectors and segmenters, 8-bit weights per channel and 8-bit activations calibrated by percentile or entropy cost only tenths of a point in the sourced rows. Depthwise-heavy models and 4-bit weights are where post-training tools (equalization, AdaRound, BRECQ) and quantization-aware training earn their keep. Pruning only speeds up a GPU when its zeros come in a shape the hardware can skip, such as whole channels or the 2:4 pattern. The LLM-era methods (LLM.int8(), SmoothQuant, GPTQ, AWQ) fix outlier activations and weight-bound decoding, which matter for transformers more than for CNN detectors. A compiler such as TensorRT turns all of this into speed by fusing layers, timing kernels on your GPU and running the precision your network specifies. Since version 11, that precision comes from explicit Q/DQ nodes rather than built-in calibrators.</p>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>Distillation:</b> Hinton et al. 1503.02531v1, Sec. 2 (Eq. 1-4, the T<sup>2</sup> remark); Wang et al. 1906.03609v1, Sec. 3.1 (imitation mask) and Table 5.</li>
+  <li><b>Scale, zero-point, integer matmul:</b> Jacob et al. 1712.05877v1, Sec. 2 (integer-only inference) and Sec. 3 (simulated quantization, BN folding).</li>
+  <li><b>Calibration and per-channel weights on detectors:</b> Wu et al. 2004.09602v1, Sec. 3.4 (calibrators), Tables 5 and 7, Sec. 5.1 (partial quantization), Sec. 5.2 (QAT) and the recommended workflow in Sec. 6.</li>
+  <li><b>The PTQ and QAT pipelines, with a debugging flow:</b> Nagel et al. 2106.08295v1, Sec. 3.5 (standard PTQ pipeline, Fig. 8), Sec. 3.7 (debugging flow, Fig. 9), Sec. 4 (QAT), Tables 6 and 10.</li>
+  <li><b>4-bit PTQ without training:</b> AdaRound 2004.10568v2; BRECQ 2102.05426v2 (Table 5).</li>
+  <li><b>Pruning:</b> Deep Compression 1510.00149v5 (Table 8 for timing); lottery tickets 1803.03635v5 and rewinding 1912.05671v4; 2:4 sparsity 2104.08378v1 (Sec. 3.1-3.2 pattern and math throughput, Table 4).</li>
+  <li><b>Outliers:</b> LLM.int8() 2208.07339v2 (Eq. 7-8); SmoothQuant 2211.10438v7 (Eq. 2-4).</li>
+  <li><b>4-bit weights:</b> GPTQ 2210.17323v2 (Algorithm 1); AWQ 2306.00978v6 (Eq. 1-5).</li>
+  <li><b>FP8:</b> Micikevicius et al. 2209.05433v2 (Table 1); van Baalen et al. 2303.17951v2 (conclusions, Table 1).</li>
+  <li><b>TensorRT:</b> the 11.4 documentation sections "How TensorRT works", "Fusion catalog", "Working with quantized types", and the 11.0.0 release notes on removed features.</li>
+</ul>
+</section>

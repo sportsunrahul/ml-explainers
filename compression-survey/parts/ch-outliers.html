@@ -1,0 +1,133 @@
+<p class="kicker"><span class="act-n">Act V</span>The LLM era</p>
+<section id="ch-outliers" class="chapter">
+<h2>Outliers: LLM.int8() and SmoothQuant</h2>
+<p>Large language models (LLMs) grow a few activation channels that are far larger than all the others, and those channels are large in almost every token. One INT8 scale for the whole tensor then spends nearly all of its 256 levels on those few channels, and every other channel rounds to almost nothing.</p>
+
+<figure class="viz" id="viz-actsurf" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Quantization method">
+    <span class="lbl">Method</span>
+    <button type="button" id="btn-actsurf-orig" aria-pressed="true">One scale per tensor</button>
+    <button type="button" id="btn-actsurf-int8" aria-pressed="false">LLM.int8()</button>
+    <button type="button" id="btn-actsurf-smooth" aria-pressed="false">SmoothQuant, alpha 0.5</button>
+  </div>
+  <canvas id="actsurf-canvas" role="img" aria-label="Two 3D surfaces side by side along a shared channel axis. In front, the activation magnitude of a toy layer input over tokens and channels, with three tall ridges that run through every token. Behind it, the magnitude of the layer's weights over channels and outputs, flat. Colour runs from blue to red with each channel's rounding error under 8-bit quantization."></canvas>
+  <div class="controls" role="group" aria-label="Migration strength">
+    <label for="actsurf-alpha">Migration strength alpha <input type="range" id="actsurf-alpha" min="0" max="1" step="0.05" value="0.5"></label>
+    <output id="actsurf-alpha-out" for="actsurf-alpha">0.50</output>
+    <button type="button" id="btn-actsurf-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="actsurf-readout" aria-live="polite"></p>
+  <figcaption>Toy data, exact arithmetic. The activations X (24 tokens by 48 channels) are invented and shaped after SmoothQuant Fig. 4 (an OPT-13B layer), read off the plot: three channels that stay large in every token, two small spikes, and a floor near 1. The weights W (48 channels by 24 outputs) are small and flat. Heights are drawn relative to each tensor's own maximum, which is what a per-tensor quantizer sees. Colour is each channel's rounding error under symmetric INT8 (blue small, red large; green means kept in FP16). The quantizers, the LLM.int8() split and the smoothing formula are the papers' own. Drag to turn the view.</figcaption>
+</figure>
+
+<p>The front surface is the input of one linear layer: one row per token, one column per channel. Three ridges run through every token. With one scale for the whole tensor, the step between levels is set by the tallest ridge, and a typical channel spans only <span data-toy>about 3</span> of the 256 levels. SmoothQuant computes the same quantity for a real layer and gets <span data-claim="xiao-effective-levels">2-3</span> levels for the non-outlier channels (Sec. 3). That is why a typical channel in the toy is off by almost half its own size, and why the floor of the surface is red.</p>
+<p>How large are the outliers? The two papers measure different models and say it differently, so here are both, unmerged. Dettmers et al. find feature dimensions <span data-claim="dettmers-magnitude-up-to">up to 20x</span> larger than the others, which "usually have a range of <span data-claim="dettmers-other-dims-range">[-3.5, 3.5]</span>" (<span data-claim="dettmers-magnitude-ratio">3-20x</span> in their Table 4). Xiao et al. (SmoothQuant) write that outliers are "<span data-claim="xiao-outlier-ratio">~100x</span> larger than most of the activation values", and their Fig. 4 shows channels "greater than <span data-claim="xiao-fig4-outlier-magnitude">70</span>" in <span data-claim="xiao-fig4-model">OPT-13B</span>.</p>
+
+<div class="aside claim">
+  <h4>Claim card: outliers emerge with scale</h4>
+  <dl>
+    <dt>Claim</dt><dd>Transformers develop a few fixed feature dimensions with very large values. In the 6.7B model they hold about <span data-claim="dettmers-outliers-per-seq-6.7b">150k</span> outliers per 2048-token sequence, all in <span data-claim="dettmers-dims-6.7b">6</span> hidden dimensions. Measured by parameter count, they spread to every layer suddenly at <span data-claim="dettmers-emergence-size">6.7B</span>: from <span data-claim="dettmers-emergence-layers-before">65</span>% to <span data-claim="dettmers-emergence-layers-after">100</span>% of layers, and from <span data-claim="dettmers-emergence-seqdims-before">35</span>% to <span data-claim="dettmers-emergence-seqdims-after">75</span>% of tokens.</dd>
+    <dt>Their reading</dt><dd>Plotted against perplexity instead of size, the rise is smooth, and the number of outlier dimensions grows steadily as perplexity falls. The authors conclude that perplexity, not model size alone, decides when the phase shift happens (Sec. 4.2).</dd>
+    <dt>Definition</dt><dd>A dimension counts as an outlier if a value reaches at least <span data-claim="dettmers-def-magnitude">6.0</span>, in the same dimension in at least <span data-claim="dettmers-def-layers">25</span>% of layers and at least <span data-claim="dettmers-def-seqdims">6</span>% of tokens.</dd>
+    <dt>Evidence</dt><dd>Setting the outlier dimensions to zero drops the mean top-1 softmax probability from about <span data-claim="dettmers-top1-with-outliers">40</span>% to about <span data-claim="dettmers-top1-without-outliers">20</span>% and raises perplexity by <span data-claim="dettmers-ppl-increase-removal">600-1000</span>%. Zeroing the same number of random dimensions raises it by only <span data-claim="dettmers-random-ppl-increase">0.1</span>%.</dd>
+    <dt>Caveats</dt><dd>The thresholds were tuned so that the 125M model shows one outlier. The analysis stops at <span data-claim="dettmers-analysis-max-size">13B</span>. Our reading: the step to 6.7B also switches model family (GPT-J to fairseq), which could explain part of the jump.</dd>
+  </dl>
+</div>
+
+<h3>Fix one: keep the outliers in 16-bit floating point (LLM.int8())</h3>
+<p>Dettmers et al. first make the scales finer. A matrix multiply is many independent dot products, one per row of X and column of W, so each token row gets its own scale and each output column of W gets its own scale. This is <em>vector-wise</em> quantization:</p>
+<div class="eq" id="eq-actsurf-vecwise" data-build data-viz="viz-actsurf"><div class="tex tex-display">
+\begin{aligned} \htmlData{step=3, link=act wt}{\mathbf{C}_{f_{16}}} &\approx \frac{1}{\htmlData{step=1, link=act}{\htmlClass{t-blue}{\mathbf{c}_{x_{f16}}}}\otimes \htmlData{step=2, link=wt}{\htmlClass{t-blue}{\mathbf{c}_{w_{f16}}}}} \htmlData{step=3, link=act wt}{\htmlClass{t-yellow}{\mathbf{C}_{i32}}} = S\cdot\mathbf{C}_{i32} \\ &= \mathbf{S}\cdot\mathbf{A}_{i8}\mathbf{B}_{i8} = \htmlData{step=4, link=act wt}{\mathbf{S}\cdot \htmlClass{t-yellow}{Q(\mathbf{A}_{f16})\phantom{.} Q(\mathbf{B}_{f16})}}, \end{aligned}
+</div></div>
+<p class="eqno">Eq. 7 in Dettmers et al., arXiv 2208.07339v2.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{c}_{x_{f16}}</span>: one scaling constant per row of X (per token), from that row's largest magnitude.</li>
+  <li><span class="tex">\mathbf{c}_{w_{f16}}</span>: one scaling constant per column of W (per output).</li>
+  <li><span class="tex">\otimes</span>: the outer product, which gives one rescaling factor for each entry of the output.</li>
+  <li><span class="tex">\mathbf{C}_{i32}</span>: the integer result of the INT8 multiply, accumulated in 32 bits; <span class="tex">Q</span> is the absmax quantizer and <span class="tex">\mathbf{S}</span> undoes both scales.</li>
+</ul>
+<p>Per-token scales do not help with the problem in the figure, though. The outliers live in columns of X (channels), and every token row contains them. So the second step splits the multiply by channel:</p>
+<div class="eq" id="eq-actsurf-decomp" data-build data-viz="viz-actsurf"><div class="tex tex-display">
+\mathbf{C}_{f16} \approx \htmlData{step=1, link=outlier}{\htmlClass{t-green}{\sum\limits_{h\in O} \mathbf{X}_{f16}^h \mathbf{W}_{f16}^h}} + \htmlData{step=2, link=act}{\mathbf{S}_{f16} \cdot  \htmlClass{t-yellow}{\sum\limits_{h\not\in O} \mathbf{X}_{i8}^h \mathbf{W}_{i8}^h}}
+</div></div>
+<p class="eqno">Eq. 8 in Dettmers et al., arXiv 2208.07339v2 (the mixed-precision decomposition).</p>
+<ul class="gloss">
+  <li><span class="tex">O</span>: the set of feature dimensions h that hold at least one value larger than a threshold, <span data-claim="dettmers-outlier-threshold">6.0</span> in the paper. They are multiplied in FP16 (green).</li>
+  <li><span class="tex">h \not\in O</span>: all other dimensions, multiplied in INT8 with the vector-wise scales of Eq. 7 (yellow).</li>
+  <li><span class="tex">\mathbf{X}^h, \mathbf{W}^h</span>: column h of X and row h of W, so each sum is one partial matrix multiply.</li>
+</ul>
+<p>Press <b>LLM.int8()</b> in the figure. The three ridges turn green and leave the INT8 grid, and the rest of the tensor gets per-token scales. A typical channel's error falls from almost half its size to <span data-toy>under 2%</span>. In a real model the set O is tiny: at most <span data-claim="dettmers-outlier-dims-max">7</span> dimensions up to 13B parameters, about <span data-claim="dettmers-outlier-dim-fraction">0.1</span>% of all dimensions. So more than <span data-claim="dettmers-int8-share">99.9</span>% of the values are still multiplied in 8 bits.</p>
+<p>The method is about memory first. It cuts the footprint of BLOOM-176B by <span data-claim="dettmers-bloom-memory-factor">1.96</span>x and lets OPT-175B run on <span data-claim="dettmers-tbl2-rtx3090-server">8x RTX 3090</span> consumer GPUs. The paper states no degradation up to <span data-claim="dettmers-zero-degradation-scale">175B</span>. Its own evidence at that size is a zero-shot accuracy plot (Fig. 1); its perplexity table stops at 13B, where LLM.int8() matches 32-bit exactly (<span data-claim="dettmers-tbl1-llmint8-13b">12.45</span> against <span data-claim="dettmers-tbl1-fp32-13b">12.45</span> on C4). An independent check comes from SmoothQuant's Table 3 on OPT-175B: average zero-shot accuracy <span data-claim="xiao-tbl3-llmint8-avg">66.7</span> against <span data-claim="xiao-tbl3-fp16-avg">66.9</span> for FP16, so "near-zero" is the safer word.</p>
+<p>Speed is the weak point. The FP16 side multiply and the splitting cost time. In the paper's own matrix-multiply benchmark (Table 5, GPU not stated), LLM.int8() runs at <span data-claim="dettmers-tbl5-llmint8-6.7b">0.86</span>x the speed of FP16 for a layer of the 6.7B model's size, and is faster only from 13B-sized layers up (<span data-claim="dettmers-tbl5-llmint8-13b">1.22</span>x, then <span data-claim="dettmers-tbl5-llmint8-175b">1.81</span>x at 175B size). SmoothQuant measured whole models: OPT-13B in PyTorch on an A100, batch 4, 256 tokens, takes <span data-claim="xiao-tbl11-llmint8-13b">237.1</span> ms with LLM.int8() against <span data-claim="xiao-tbl11-fp16-13b">152.6</span> ms in FP16 (Table 11).</p>
+
+<h3>Fix two: move the difficulty into the weights (SmoothQuant)</h3>
+<p>If the trouble is that channels differ, why not give each activation channel its own scale, as <a href="#ch-granularity">chapter 5</a> did for weights? SmoothQuant's Table 1 shows that this would work: simulated per-channel INT8 activations keep OPT-175B at <span data-claim="xiao-tbl1-opt175-perchannel">71.4</span> average accuracy against <span data-claim="xiao-tbl1-opt175-fp16">71.6</span> in FP16, where per-tensor activations fall to <span data-claim="xiao-tbl1-opt175-pertensor">32.3</span>. The problem is the integer matrix multiply:</p>
+<div class="eq" id="eq-actsurf-outer" data-build data-viz="viz-actsurf"><div class="tex tex-display">
+\mathbf{Y} = \htmlData{step=1, link=act}{\htmlClass{t-blue}{\text{diag}(\mathbf{\Delta}_{\mathbf{X}}^{\text{FP16}})}} \cdot \htmlData{step=3, link=act wt}{(\htmlClass{t-yellow}{\mathbf{\bar{X}}^{\text{INT8}}\cdot \mathbf{\bar{W}}^{\text{INT8}}})} \cdot \htmlData{step=2, link=wt}{\htmlClass{t-blue}{\text{diag}(\mathbf{\Delta}_{\mathbf{W}}^{\text{FP16}})}}
+</div></div>
+<p class="eqno">Eq. 2 in Xiao et al. (SmoothQuant), arXiv 2211.10438v7.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{\Delta}_{\mathbf{X}}</span>: one step size per token (a row of X). It multiplies whole rows of the output, so it can be applied after the integer multiply.</li>
+  <li><span class="tex">\mathbf{\Delta}_{\mathbf{W}}</span>: one step size per output channel (a column of W), applied after the multiply in the same way.</li>
+  <li><span class="tex">\mathbf{\bar{X}}^{\text{INT8}}\cdot \mathbf{\bar{W}}^{\text{INT8}}</span>: the integer multiply. Each output sums over the input channels, so a different scale per input channel would sit inside that sum and cannot be pulled out.</li>
+</ul>
+<p>So SmoothQuant changes the tensors instead of the scales. Divide each input channel j of X by a number <span class="tex">s_j</span> and multiply row j of W by the same number. The product does not change:</p>
+<div class="eq" id="eq-actsurf-smooth" data-build data-viz="viz-actsurf"><div class="tex tex-display">
+\mathbf{Y} = \htmlData{step=1, link=act}{\htmlClass{t-blue}{(\mathbf{X}\text{diag}(\mathbf{s})^{-1})}} \cdot \htmlData{step=2, link=wt}{\htmlClass{t-blue}{(\text{diag}(\mathbf{s})\mathbf{W})}} = \htmlData{step=3, link=act wt}{\hat{\mathbf{X}} \hat{\mathbf{W}}}
+</div></div>
+<p class="eqno">Eq. 3 in Xiao et al., arXiv 2211.10438v7.</p>
+<div class="eq" id="eq-actsurf-alpha" data-build data-viz="viz-actsurf"><div class="tex tex-display">
+\htmlData{step=3, link=s}{\mathbf{s}_j} =  \htmlData{step=1, link=act}{\htmlClass{t-red}{\max(|\mathbf{X}_j|)^{\alpha}}} / \htmlData{step=2, link=wt}{\htmlClass{t-blue}{\max(|\mathbf{W}_j|) ^{1-\alpha}}}
+</div></div>
+<p class="eqno">Eq. 4 in Xiao et al., arXiv 2211.10438v7.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{s}_j</span>: the smoothing factor of input channel j, drawn as the line between the two surfaces. It is computed once, offline, and folded into the layer that produces X (for example the LayerNorm before it), so it costs nothing at run time.</li>
+  <li><span class="tex">\max(|\mathbf{X}_j|)</span>: the largest magnitude of channel j over calibration data (<span data-claim="xiao-calibration">512</span> random sentences from the Pile in the paper).</li>
+  <li><span class="tex">\max(|\mathbf{W}_j|)</span>: the largest magnitude in row j of W, the weights that multiply channel j.</li>
+  <li><span class="tex">\alpha</span>: the migration strength. At 1, all the difficulty goes to the weights (every channel of X ends with maximum 1); at 0, all of it stays with the activations (every row of W ends with maximum 1).</li>
+</ul>
+<p><b>Make a guess before you drag alpha to 1.</b> The weights started flat and easy. Where do the three ridges go? They move into the weights: the activation surface goes flat and blue, and three red ridges rise in the weight surface, because those rows now carry the large values. At 0.5 the two errors are both <span data-toy>a few percent</span> per channel. The paper uses <span data-claim="xiao-default-alpha">0.5</span> for all OPT and BLOOM models and finds a sweet spot of <span data-claim="xiao-sweet-spot">0.4-0.6</span> on OPT-175B; other model families need more, for example <span data-claim="xiao-llama2-70b-alpha">0.9</span> for Llama-2-70B. In the toy, the three big channels dominate the output, so the output error stays small in every setting; it still falls to <span data-toy>under a third</span> from no smoothing to alpha 0.5.</p>
+<p>The rescaling algebra is the same one that cross-layer equalization uses for weights in <a href="#ch-ptq">chapter 6</a> (our reading); SmoothQuant applies it across the activation and the weight of one layer.</p>
+<p>Because the scales fold away, every linear layer stays a plain INT8 matrix multiply, and the method needs no FP16 side path. On OPT-175B:</p>
+<table class="data">
+  <caption>SmoothQuant Table 3 (arXiv 2211.10438v7): OPT-175B, average accuracy over 7 zero-shot tasks (higher is better) and WikiText perplexity (lower is better), evaluated by the authors with lm-eval-harness. W8A8 is naive per-tensor INT8 for weights and activations; O3 is SmoothQuant with per-tensor static activation scales.</caption>
+  <thead><tr><th>Model, method</th><th>Avg. accuracy</th><th>WikiText ppl</th></tr></thead>
+  <tbody>
+    <tr><td>OPT-175B, FP16</td><td><span data-claim="xiao-tbl3-fp16-avg">66.9</span></td><td><span data-claim="xiao-tbl3-fp16-wiki">10.99</span></td></tr>
+    <tr><td>OPT-175B, W8A8 per-tensor</td><td><span data-claim="xiao-tbl3-w8a8-avg">35.5</span></td><td><span data-claim="xiao-tbl3-w8a8-wiki">93080</span></td></tr>
+    <tr><td>OPT-175B, LLM.int8()</td><td><span data-claim="xiao-tbl3-llmint8-avg">66.7</span></td><td><span data-claim="xiao-tbl3-llmint8-wiki">11.10</span></td></tr>
+    <tr><td>OPT-175B, SmoothQuant-O3</td><td><span data-claim="xiao-tbl3-o3-avg">66.8</span></td><td><span data-claim="xiao-tbl3-o3-wiki">11.17</span></td></tr>
+  </tbody>
+</table>
+<p>And it is faster than FP16, not slower. All speed results are on <span data-claim="xiao-hw">A100 80GB</span> GPUs. In PyTorch, OPT-13B at batch 4 and 256 tokens takes <span data-claim="xiao-tbl11-o3-13b">112.1</span> ms, against <span data-claim="xiao-tbl11-fp16-13b">152.6</span> ms in FP16 (Table 11). The best cases are <span data-claim="xiao-speedup-pytorch">1.51</span>x in PyTorch and <span data-claim="xiao-speedup-ft">1.56</span>x in FasterTransformer when processing the prompt, and <span data-claim="xiao-memory-pytorch">1.96</span>x less memory. When generating one token at a time (OPT-30B, batch 1), the speedup is <span data-claim="xiao-tbl8-opt30-bs1-speedup">1.35</span>x. That last step is memory-bound, which is where <a href="#ch-gptq-awq">the next chapter</a> starts.</p>
+
+<h3>Vision transformers have a different problem</h3>
+<p>Vision transformers (ViTs) are not known to grow LLM-style ridges in the sources here. Their trouble is the <em>shape</em> of two distributions. After the softmax in attention, almost every value is near 0 and a few are near 1; after the GELU activation, the values are lopsided, with large positives and a small negative tail. One uniform grid fits neither. PTQ4ViT (Yuan et al., arXiv 2111.12293v3) gives each of these tensors two ranges with two scales. With it, DeiT-S at 8-bit weights and activations keeps <span data-claim="yuan-deits-ptq4vit-w8a8">79.47</span>% ImageNet top-1 against <span data-claim="yuan-deits-fp32">79.80</span>% in FP32, where a plain post-training baseline reaches <span data-claim="yuan-deits-base-w8a8">77.65</span>%. The paper reports image classification only, with no detection results.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>None of these sources measures LLM-style outlier channels in a convolutional detector, so treat this as a diagnosis to run, not a result. Record the per-channel maximum of each layer input over your calibration images. If a few channels are tens of times larger than the rest, per-tensor INT8 activations will fail in that layer as they do here. The two fixes are the ones in this chapter: keep that layer in FP16, or fold a per-channel scale into the previous layer. For a ViT or transformer-based detector, check the softmax and GELU outputs first. <a href="#ch-guide">The decision guide</a> puts this into the INT8 debugging steps.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-actsurf'), out = document.getElementById('actsurf-readout');
+  const kit = KIT.actsurf(document.getElementById('actsurf-canvas'), { fig });
+  const slider = document.getElementById('actsurf-alpha'), val = document.getElementById('actsurf-alpha-out');
+  const btns = ['orig', 'int8', 'smooth'].map(k => document.getElementById('btn-actsurf-' + k));
+  const sync = () => {
+    btns.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-actsurf-' + kit.state.mode && (kit.state.mode !== 'smooth' || Math.abs(kit.state.alpha - .5) < 1e-9))));
+    val.textContent = (+slider.value).toFixed(2);
+    out.innerHTML = KIT.actsurfText(kit.info());
+  };
+  btns[0].addEventListener('click', () => { kit.set({ mode: 'orig' }); sync(); });
+  btns[1].addEventListener('click', () => { kit.set({ mode: 'int8' }); sync(); });
+  btns[2].addEventListener('click', () => { slider.value = '0.5'; kit.set({ mode: 'smooth', alpha: .5 }); sync(); });
+  slider.addEventListener('input', () => { val.textContent = (+slider.value).toFixed(2); kit.set({ mode: 'smooth', alpha: +slider.value }, 250); });
+  slider.addEventListener('change', sync);
+  document.getElementById('btn-actsurf-reset').addEventListener('click', () => { slider.value = '0.5'; kit.set({ mode: 'orig', alpha: .5 }); sync(); });
+  sync();
+})();
+</script>
+</section>

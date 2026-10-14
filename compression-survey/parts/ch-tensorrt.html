@@ -1,0 +1,87 @@
+<p class="kicker"><span class="act-n">Act VI</span>Deployment</p>
+<section id="ch-tensorrt" class="chapter">
+<h2>What an inference compiler does</h2>
+<p>A trained network arrives as a graph of small operations, and running each one as its own GPU kernel wastes time on kernel launches and on writing every intermediate tensor to memory. An inference compiler such as TensorRT rewrites the graph into fewer, larger kernels, then times several implementations of each kernel on your GPU and keeps the fastest.</p>
+
+<figure class="viz" id="viz-fuse" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Compiler step">
+    <span class="lbl">Step</span>
+    <button type="button" id="btn-fuse-s0" aria-pressed="true">Exported graph</button>
+    <button type="button" id="btn-fuse-s1" aria-pressed="false">Fold BN</button>
+    <button type="button" id="btn-fuse-s2" aria-pressed="false">Fuse conv+bias+ReLU</button>
+    <button type="button" id="btn-fuse-s3" aria-pressed="false">Absorb Q/DQ</button>
+    <button type="button" id="btn-fuse-s4" aria-pressed="false">Fuse residual add</button>
+    <button type="button" id="btn-fuse-s5" aria-pressed="false">Time tactics</button>
+    <button type="button" id="btn-fuse-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="fuse-canvas" role="img" aria-label="A residual block drawn as a graph: Q, DQ, Conv, BN, ReLU, Q, DQ, Conv, BN, Add, ReLU, with a skip connection from the input Q through its own DQ to the Add. Each step merges boxes into fewer green kernels. Below, bar charts count the kernels launched and the bytes written at each step; at the last step, candidate kernels for each fused layer race and the fastest is kept."></canvas>
+  <p class="readout" id="fuse-readout" aria-live="polite"></p>
+  <figcaption>Toy graph; the rewrite rules are sourced. The block is the kind of residual unit found in a detector's backbone, with quantize (Q) and dequantize (DQ) nodes as a quantization tool exports them. Each step applies one fusion that the TensorRT 11.4 documentation lists (sources in the text below). Counts are computed on the toy: each kernel writes one output tensor of 64 channels at 80x80, in FP16 (2 bytes per value) or INT8 (1 byte). Weights are constants folded at build time and are not counted. The tactic names and times are made up.</figcaption>
+</figure>
+
+<p>Step through the buttons from left to right. Blue boxes are full-precision operations, yellow boxes are Q and DQ nodes, and green boxes are fused kernels. The bars below the graph keep score: how many kernels the GPU launches for one image, and how many bytes they write to memory.</p>
+<p><b>Make a guess before you press "Absorb Q/DQ".</b> Folding batch normalization removed two kernels. Will absorbing the Q and DQ nodes save more memory traffic, or less? It saves more: <span data-toy>6.25 MiB</span> becomes <span data-toy>3.91 MiB</span> in the toy, while folding BN saved only <span data-toy>1.56 MiB</span>. Each DQ node writes a full FP16 copy of an INT8 tensor that the next convolution could have read directly. Once the convolution reads INT8 and writes INT8, those copies are gone, and the tensor that crosses memory is half the size.</p>
+
+<h3>The build phase</h3>
+<p>TensorRT works in two phases. In the build phase, "a builder compiles your network and selects the fastest available kernel (a low-level GPU function) for each layer on your target GPU"; the result is a serialized <em>engine</em>, also called a plan file. In the runtime phase, the application loads the engine and runs it (architecture, how TensorRT works). Between those two sentences sits most of the work: "The builder eliminates dead computations, folds constants, reorders, and combines operations to run more efficiently on the GPU" (capabilities, the build phase).</p>
+<p>Fusion helps in two ways. It removes kernel launches, which cost "typically <span data-claim="trt-launch-overhead">5-15</span> us per launch on the host", and it "avoids materializing intermediate tensors in DRAM" (performance, enabling layer fusion). The four steps in the figure are fusions from that documentation:</p>
+<ol>
+  <li><b>Fold batch normalization.</b> At inference, batch normalization is a fixed per-channel multiply and add, so it can be moved into the convolution's weights and bias. The docs say TensorRT "combines weights, such as convolution with batch normalization", and list a Conv+Scale fusion done by "adjusting the convolution weights".</li>
+  <li><b>Fuse conv, bias and activation.</b> Conv+ReLU is in the fusion catalog for any convolution, and a bias is part of the convolution itself.</li>
+  <li><b>Absorb Q/DQ.</b> "TensorRT expects a Q/DQ layer pair on each input of quantizable layers." A convolution fuses with the DQ on its input and the Q on its output and becomes a quantized layer that reads and writes INT8 (explicit quantization).</li>
+  <li><b>Fuse the residual add.</b> Conv+ElementWise is in the catalog, and a trailing activation fuses after it. For this to happen in INT8, the docs say to quantize the residual input of the skip connection. One more rule: "The precision of the first input to the element-wise addition layer determines the fusion output's precision."</li>
+</ol>
+
+<div class="eq" id="eq-fuse-bnfold" data-build data-viz="viz-fuse"><div class="tex tex-display">
+\htmlData{step=1, link=bn}{\gamma\,\frac{(W * x + b) - \mu}{\sqrt{\sigma^2+\epsilon}} + \beta} \;=\; \htmlData{step=2, link=conv}{\underbrace{\htmlClass{t-blue}{\frac{\gamma}{\sqrt{\sigma^2+\epsilon}}\,W}}_{W'} * x} \;+\; \htmlData{step=3, link=conv}{\underbrace{\htmlClass{t-blue}{\frac{\gamma\,(b-\mu)}{\sqrt{\sigma^2+\epsilon}} + \beta}}_{b'}}
+</div></div>
+<p class="eqno">Batch normalization after a convolution, folded into new weights and bias. Our notation and algebra; the TensorRT docs state only that the weights are combined.</p>
+<ul class="gloss">
+  <li><span class="tex">W * x + b</span>: the convolution, with weights <span class="tex">W</span> and bias <span class="tex">b</span>.</li>
+  <li><span class="tex">\mu, \sigma^2</span>: the per-channel mean and variance that batch normalization stored during training. At inference they are constants.</li>
+  <li><span class="tex">\gamma, \beta</span>: the learned per-channel scale and shift; <span class="tex">\epsilon</span> is a small constant that avoids division by zero.</li>
+  <li><span class="tex">W', b'</span>: the folded weights and bias. One convolution with these gives the same output as the convolution and the batch normalization together.</li>
+</ul>
+
+<h3>Explicit Q/DQ and strongly typed networks</h3>
+<p>A Q node and a DQ node are the two halves of the quantizer from <a href="#ch-grid">chapter 4</a>, with the zero-point fixed at zero. TensorRT defines them like this:</p>
+<div class="eq" id="eq-fuse-qdq" data-build data-viz="viz-fuse"><div class="tex tex-display">
+\htmlData{step=1, link=q}{\htmlClass{t-yellow}{x_{q}} = \mathrm{quantize}(\htmlClass{t-blue}{x}, s) = \mathrm{roundWithTiesToEven}\big(\mathrm{clip}(\tfrac{\htmlClass{t-blue}{x}}{s}, -128, 127)\big)} \qquad \htmlData{step=2, link=dq}{\htmlClass{t-blue}{x} = \mathrm{dequantize}(\htmlClass{t-yellow}{x_{q}}, s) = \htmlClass{t-yellow}{x_{q}} \ast s}
+</div></div>
+<p class="eqno">TensorRT 11.4 documentation, quantized types schemes, INT8 (function names set upright).</p>
+<ul class="gloss">
+  <li><span class="tex">x</span>: a full-precision value; <span class="tex">x_q</span>: its 8-bit integer code in <span data-claim="trt-int8-range">[-128,127]</span>.</li>
+  <li><span class="tex">s</span>: the scale, an FP32, FP16 or BF16 number that a calibration tool wrote into the Q/DQ pair before the model reached TensorRT.</li>
+</ul>
+<p>In the exported graph, a Q followed by a DQ only simulates quantization: the tensor goes to INT8 and straight back. TensorRT turns this simulation into real INT8 arithmetic. It moves Q nodes backward and DQ nodes forward, "so quantization happens as early as possible" and "dequantization happens as late as possible", and then fuses them into the neighbouring convolutions. The docs warn that this has a cost if it fails: "Performance can decrease if TensorRT cannot fuse the operations with the surrounding Q/DQ layers, so be conservative when adding Q/DQ nodes". They also recommend per-tensor scales for activations and per-channel scales for weights, as in <a href="#ch-granularity">chapter 5</a>.</p>
+<p>Since TensorRT <span data-claim="trt-removal-version">11.0.0</span>, explicit Q/DQ is the only way in. The release notes say: "Implicit quantization has been removed. The IInt8Calibrator class and all subclasses (IInt8EntropyCalibrator, IInt8EntropyCalibrator2, IInt8MinMaxCalibrator, IInt8LegacyCalibrator), setInt8Calibrator(), setDynamicRange(), resetDynamicRange(), and all related calibration and dynamic-range APIs have been removed. Use explicit quantization with Q/DQ nodes instead. Models can be quantized using the TensorRT Model Optimizer or by manually inserting Q/DQ nodes." The same release made networks strongly typed: "Strongly typed networks are now the default: createNetworkV2() produces a strongly typed network by default in TensorRT <span data-claim="trt-removal-version">11.0.0</span>. Weak typing is no longer supported."</p>
+<p>Weak typing was the old convenience: builder flags such as kFP16 and kINT8 let TensorRT pick a lower precision layer by layer. Those flags are gone too. Now the model states the type of every tensor, so even an FP16 engine needs an FP16 model (the migration guide points to Model Optimizer's AutoCast for that conversion). TensorRT no longer calibrates. Calibration happens before export, in Model Optimizer or another quantization tool, and "the resulting scales are embedded directly into the Q/DQ nodes". The compiler's job is now fusion and kernel choice, not precision choice.</p>
+
+<h3>Tactic selection</h3>
+<p>Press "Time tactics". For every fused layer, TensorRT has several implementations, called <em>tactics</em>, that differ in tiling, data layout and other details. It does not predict which is fastest; it measures: "TensorRT runs through all the possible tactics in the engine-building phase and selects the fastest ones." By default each tactic runs for at least <span data-claim="trt-timing-iterations">four</span> iterations and the times are averaged. The search effort is set by the builder optimization level, whose default is <span data-claim="trt-opt-level-default">3</span>.</p>
+<p>Because the winners are measured, they belong to the GPU they were measured on. "By default, TensorRT engines are specific to both the TensorRT version and the GPU on which they were created." Timing is also noisy: "Running the builder in parallel with other GPU work can perturb the timings, resulting in poor optimization." A timing cache stores the winners so that a rebuild picks the same tactics, but the cache is itself specific to the device, the CUDA and TensorRT versions, and the builder settings. Across major versions, only <span data-claim="trt-vc-cross-major">TensorRT 10</span> version-compatible engines run on a TensorRT 11 runtime; a TensorRT 8 engine does not.</p>
+
+<h3>The open analogue: TVM</h3>
+<p>TVM (Chen et al. 2018, arXiv 1802.04799v3) is an open-source compiler that does the same two jobs in a different way. For fusion it sorts operators into <span data-claim="tvm-op-categories">four</span> categories: injective (one-to-one, such as add), reduction (such as sum), complex-out-fusable (such as conv2d, which can absorb element-wise operations on its output) and opaque (such as sort, which cannot fuse). Conv+ReLU in TensorRT is the complex-out-fusable rule. On an NVIDIA Titan X, TVM's fused operators ran <span data-claim="tvm-fusion-speedup">1.2x to 2x</span> faster than unfused ones (Sec. 3; the batch size is not stated). For kernel choice, TVM does not time every candidate. A learned cost model, <span data-claim="tvm-default-cost-model">gradient tree boosting</span> by default, predicts which schedules will be fast, and only the promising ones are measured on the device. Unlike a library, TVM generates code for each fused operator itself, so it does not need a hand-written kernel for every combination.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>Build the engine on the same GPU model, with the same TensorRT version, that will run it, and on an otherwise idle GPU. Quantize the detector with a tool that writes Q/DQ nodes into the exported ONNX file (ONNX is the common exchange format for trained networks): per-channel for weights, per-tensor for activations, and on the residual inputs of skip connections so that the adds fuse. A calibration flow that relied on TensorRT's own calibrators has no equivalent in TensorRT 11, and TensorRT 11 also removed <span data-claim="trt-removed-plugins">16</span> older plugins, among them BatchedNMS_TRT, NMS_TRT and EfficientNMS_ONNX_TRT, so check the non-maximum-suppression step of an older export. <a href="#ch-guide">The decision guide</a> puts these steps in order.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-fuse'), out = document.getElementById('fuse-readout');
+  const kit = KIT.fuse(document.getElementById('fuse-canvas'), { fig });
+  const btns = [0, 1, 2, 3, 4, 5].map(k => document.getElementById('btn-fuse-s' + k));
+  const sync = () => {
+    btns.forEach((b, i) => b.setAttribute('aria-pressed', String(i === kit.state.stage)));
+    out.innerHTML = KIT.fuseText(kit.info());
+  };
+  btns.forEach((b, i) => b.addEventListener('click', () => { kit.set({ stage: i }); sync(); }));
+  document.getElementById('btn-fuse-reset').addEventListener('click', () => { kit.set({ stage: 0 }); sync(); });
+  sync();
+})();
+</script>
+</section>

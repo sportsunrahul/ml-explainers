@@ -1,0 +1,65 @@
+{
+  "slug": "anomaly-survey",
+  "stage": "done",
+  "created": "2026-10-09",
+  "prompt": "Literature survey of visual anomaly detection for manufacturing defects. Explain from scratch; assume basic deep learning only. Knows DINO and CLIP. Core question: how do you find defects when you have almost no defect images? Benchmark first (MVTec AD, VisA), then families as deltas: feature embedding (SPADE, PaDiM, PatchCore), flows (FastFlow), synthetic anomalies (CutPaste, DRAEM), student-teacher (EfficientAD), unified (UniAD), zero/few-shot VLM (WinCLIP, AnomalyCLIP). Show scores, image vs pixel AUROC, speed vs accuracy on an edge GPU.",
+  "reader_background": "basic deep learning only; knows DINO and CLIP from earlier explainers",
+  "narration": "long page + atlas, no narration (steps 4-7 skipped; cue ids and player kept for a later resume <slug> scripts)",
+  "wording": "generic (stated as assumption at checkpoint 0, not objected to)",
+  "compute": {
+    "probed": null,
+    "note": "no narration chosen, so no GPU pod probe"
+  },
+  "arxiv_scan": {
+    "date": "2026-10-09",
+    "file": "notes/arxiv-scan-2026-10-09.json",
+    "queries": [
+      "abs:MVTec (406)",
+      "abs:\"industrial anomaly\" (189)",
+      "ti:\"anomaly detection\" AND (abs:defect OR abs:defects OR abs:manufacturing OR abs:industrial) (927, 2 pages)",
+      "abs:VisA AND abs:anomaly (153)"
+    ],
+    "unique": 1165,
+    "visual_subset": 813,
+    "hand_added_file": "notes/arxiv-named-and-hand-added-2026-10-09.json",
+    "industrial_visual_subset": 780,
+    "subset_rule": "VIS: 'cs.CV' in cats or re.search(r'\\bimage|\\bvisual|\\bvision|\\bpixel|mvtec|visa\\b', title+abstract lower); IND: re.search(r'mvtec|\\bvisa\\b|industr|defect|manufactur|surface|inspection'); minus VID: re.search(r'\\bvideo|surveillance') unless mvtec|visa. Script: build/mapclaims.py"
+  },
+  "scope_file": "notes/scope-proposal.md",
+  "approvals": {
+    "checkpoint0": {
+      "date": "2026-10-09",
+      "page_shape": "long page + atlas",
+      "additions": [
+        "DINOv2 delta: AnomalyDINO 2405.14529, Dinomaly 2405.14325 (own chapter after ch-uniad)",
+        "harder benchmarks: MVTec LOCO (IJCV 2022), MVTec AD 2 2503.21622 (in ch-benchmark)"
+      ],
+      "3d": [
+        "PatchCore embedding cloud + coreset slider",
+        "PaDiM Gaussian bell per patch",
+        "FastFlow density warp"
+      ],
+      "chapters": 14,
+      "scope": "notes/scope-proposal.md as presented, plus the additions"
+    },
+    "checkpoint2": {
+      "date": "2026-10-10",
+      "note": "skipped at the user's request (\"complete it\"); chapter 1 and outline reported at the end instead"
+    }
+  },
+  "edge_sources": "PaSTe failed the check (no Jetson, no EfficientAD); edge spine = 2605.24251v2 (Jetson Orin Nano), 2606.16119v1 (Orin Nano Super), 2505.24334v1 (Jetson NX/AGX)",
+  "build": {
+    "long_page": "bash build.sh -> explainer.html (check-page PASS, 29 figures, 238 KaTeX expressions)",
+    "f7_generator": "python3 -I build/f7/gen.py regenerates ch-speed/ch-closing from claims; re-run after any claim change",
+    "claims": "notes/claims/*.json merged to notes/claims.json; fact-check patches A (43) and B (211) applied via build/apply-patches.py; backup notes/claims.bak-before-fcb",
+    "atlas": "atlas/ -> anomaly-atlas.html (263 KB); atlas test.mjs PASS (0 problems, 3 viewports)"
+  },
+  "deliverables": {
+    "long_page": "explainer.html (1.52 MB, 15 chapters + interlude + closing, 29 figures, 783 distinct claims on page)",
+    "atlas": "anomaly-atlas.html (9 stages)"
+  },
+  "open": [
+    "MVTec LOCO IJCV PDF missing (Springer browser wall): save to sources/mvtec-loco/paper.pdf",
+    "not published (jot) unless asked"
+  ]
+}

@@ -1,0 +1,75 @@
+
+<p class="kicker"><span class="act-n">Act II</span>Principled memory</p>
+<section id="ch-continuous" class="chapter">
+<h2>Continuous time and discretization</h2>
+<p>A linear recurrence multiplies its state by a fixed matrix at every step and adds the new token. The papers in this act take one step back and describe the memory as a system that runs in continuous time, so that a sequence of tokens is that system read at regular steps.</p>
+
+<figure class="viz" id="viz-continuous" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="continuous-canvas" role="img" aria-label="A three-dimensional state space with a yellow curve: the state of a three-number memory spirals outward while an input is applied and spirals back to zero after the input stops. Yellow points on the curve mark the steps of the discrete recurrence. Below, a time strip shows the input as a blue staircase and the output as a green curve."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-continuous-signal" aria-pressed="true">Same signal, resampled</button>
+    <button type="button" id="btn-continuous-tokens" aria-pressed="false">Same tokens, new &Delta;</button>
+    <label for="continuous-dt">Step &Delta; <input type="range" id="continuous-dt" min="0" max="10" step="1" value="7"> <output id="continuous-dt-value">1/4</output></label>
+    <button type="button" id="btn-continuous-d1" aria-pressed="false">&Delta; = 1</button>
+    <button type="button" id="btn-continuous-d01" aria-pressed="false">&Delta; = 1/10</button>
+    <button type="button" id="btn-continuous-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="continuous-readout" aria-live="polite"></p>
+  <figcaption>A toy system, computed exactly. The state has three numbers. A is chosen by hand: one real eigenvalue, -0.5, pulls h1 toward zero, and a complex pair, -0.25 &plusmn; 1i, turns (h2, h3) while it shrinks; B = (1, 1, 0.4), C = (0.6, 0.5, 0.5). The input holds each of 8 values for one time unit, then stops. The yellow curve is the exact solution of the continuous system; the points are the zero-order-hold recurrence, computed with a matrix exponential and checked against a fine numerical integration (RK4). Drag the figure to turn it.</figcaption>
+</figure>
+
+<p>Read the yellow curve as the memory moving through time. The input pushes the state away from zero; the matrix <span class="tex">A</span> turns it and pulls it back, so after the input stops the state spirals home and the memory fades. Nothing in that picture has a step size. The points are the recurrence a computer actually runs, one per token, and with the default button they sit exactly on the curve whatever step you choose. Drag the slider: the curve stays the same and only the number of points changes. That is what it means for one model to describe the same signal at any resolution.</p>
+
+<p>The continuous system is the first equation in the Mamba paper, and in LSSL and S4 before it:</p>
+
+<div class="eq" id="eq-continuous-ode" data-build data-viz="viz-continuous"><div class="tex tex-display">
+\htmlData{step=1, link=state}{\htmlClass{t-yellow}{h'(t)}} = \htmlData{step=2, link=A}{A\,\htmlClass{t-yellow}{h(t)}} \htmlData{step=3, link=input}{{}+ B\,\htmlClass{t-blue}{x(t)}}
+\qquad
+\htmlData{step=4, link=output}{\htmlClass{t-green}{y(t)} = C\,\htmlClass{t-yellow}{h(t)}}
+</div></div>
+<p class="eqno">Eq. 1 in Mamba. An ordinary differential equation (ODE): it says how fast the state changes, not where it is.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{h(t)}</span> is the state, a vector of <span class="tex">N</span> numbers (here <span class="tex">N = 3</span>); <span class="tex">h'(t)</span> is its rate of change.</li>
+  <li><span class="tex">A</span> is an <span class="tex">N \times N</span> matrix. Its eigenvalues have negative real parts, so on its own the state shrinks toward zero; imaginary parts make it turn while it shrinks.</li>
+  <li><span class="tex">B</span> writes the scalar input <span class="tex">\htmlClass{t-blue}{x(t)}</span> into the state; <span class="tex">C</span> reads the scalar output <span class="tex">\htmlClass{t-green}{y(t)}</span> out of it. A real layer runs one such system per channel.</li>
+</ul>
+<p>A note on letters: this page writes the input <span class="tex">x</span>, the state <span class="tex">h</span> and the output <span class="tex">y</span>, as Mamba does. HiPPO, the next chapter, writes the input <span class="tex">f</span> and the state <span class="tex">c</span>; LSSL and S4 write the input <span class="tex">u</span> and the state <span class="tex">x</span>.</p>
+
+<p>A computer cannot run continuous time. It gets one token per step, so it must turn the ODE into a recurrence. Choose a step size <span class="tex">\Delta</span> and assume the input stays constant for the length of each step. Then the ODE can be solved exactly over one step, and the answer is two fixed matrices. This rule is called the zero-order hold (ZOH):</p>
+
+<div class="eq" id="eq-continuous-zoh" data-build data-viz="viz-continuous"><div class="tex tex-display">
+\htmlData{step=1, link=samples}{\overline{A} = \exp(\Delta A)}
+\qquad
+\htmlData{step=2, link=input}{\overline{B} = (\Delta A)^{-1}\big(\exp(\Delta A) - I\big)\cdot \Delta B}
+</div></div>
+<p class="eqno">Eq. 4 in Mamba (zero-order hold).</p>
+<ul class="gloss">
+  <li><span class="tex">\exp(\Delta A)</span> is the matrix exponential: what the system does to the state in <span class="tex">\Delta</span> time units with no input. Each eigenvalue <span class="tex">\lambda</span> of <span class="tex">A</span> becomes <span class="tex">e^{\Delta \lambda}</span>, a number of size below 1.</li>
+  <li><span class="tex">\overline{B}</span> is what a constant input of size 1 adds to the state over the same <span class="tex">\Delta</span>. For small <span class="tex">\Delta</span> it is close to <span class="tex">\Delta B</span>.</li>
+</ul>
+
+<p>With those two matrices the system becomes the recurrence the figure's points follow, the same shape as the linear recurrence of the last chapter:</p>
+
+<div class="eq" id="eq-continuous-rec" data-build data-viz="viz-continuous"><div class="tex tex-display">
+\htmlData{step=1, link=samples}{\htmlClass{t-yellow}{h_t} = \overline{A}\,\htmlClass{t-yellow}{h_{t-1}}} \htmlData{step=2, link=input}{{}+ \overline{B}\,\htmlClass{t-blue}{x_t}}
+\qquad
+\htmlData{step=3, link=output}{\htmlClass{t-green}{y_t} = C\,\htmlClass{t-yellow}{h_t}}
+</div></div>
+<p class="eqno">Eq. 2 in Mamba (the recurrent mode, used for generation one token at a time).</p>
+<ul class="gloss">
+  <li>One step: multiply the old state by <span class="tex">\overline{A}</span>, add <span class="tex">\overline{B}</span> times the new token, read the output with <span class="tex">C</span>.</li>
+  <li>This is the cost against attention: per token and per channel, one update of an <span class="tex">N</span>-number state, the same at token 10 as at token 1,000,000. Attention at token <span class="tex">L</span> reads <span class="tex">L</span> cached keys and values.</li>
+</ul>
+
+<p>So <span class="tex">\Delta</span> is the knob that connects the two pictures. Here is the question to settle with the figure. Press <b>Same tokens, new &Delta;</b>, which keeps the sixteen input values and gives each one a step of <span class="tex">\Delta</span>. Before you press <b>&Delta; = 1/10</b>: what does a 10 times smaller <span class="tex">\Delta</span> do to how long the state remembers?</p>
+
+<p>Counted in time, nothing changes: the slow part of the state still halves every <span data-claim="state3d-halflife-time">2.8</span> time units. Counted in tokens, the memory gets 10 times longer, from <span data-claim="state3d-halflife-d1">2.8</span> steps to <span data-claim="state3d-halflife-d01">28</span>, because each token now covers a tenth of the time. The price is that each token also moves the state about 10 times less, since <span class="tex">\overline{B} \approx \Delta B</span>: the whole curve shrinks toward zero. LSSL states the rule in these terms: the length of the dependencies such a layer captures is roughly proportional to <span class="tex">1/\Delta</span>.</p>
+
+<div class="aside">
+  <h4>Why the points land exactly on the curve</h4>
+  <p>The zero-order hold is exact when the input really is constant between samples, and the figure's input is a staircase for that reason. For a smooth input the ZOH points approach the curve as <span class="tex">\Delta</span> shrinks, but they are no longer exactly on it. Not every paper uses this rule. HiPPO, LSSL and S4 discretize with the <span data-claim="hippo-bilinear">bilinear</span> method, <span class="tex">\overline{A} = (I - \tfrac{\Delta}{2}A)^{-1}(I + \tfrac{\Delta}{2}A)</span> (S4 Eq. <span data-claim="s4-eq-bilinear">3</span>); Mamba uses ZOH. S4D tried both and found little difference in practice.</p>
+</div>
+
+<p>The same layer can be read a third way. LSSL (<span data-claim="lssl-venue">NeurIPS 2021</span>) showed that this one system is at once a continuous model, the recurrence above, and, because <span class="tex">\overline{A}</span>, <span class="tex">\overline{B}</span> and <span class="tex">C</span> are the same at every step, a single long convolution over the whole sequence. That third view is what makes training fast, and it is the subject of <a href="#ch-s4">chapter 5</a>. First, though, the choice this chapter left open: the toy's <span class="tex">A</span> was picked by hand. The next chapter derives an <span class="tex">A</span> whose state is the best possible summary of everything it has seen.</p>
+</section>

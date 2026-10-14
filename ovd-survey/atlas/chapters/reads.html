@@ -1,0 +1,27 @@
+  <article data-chapter="reads" data-chip="The class list">
+    <header class="ch-head"><span class="num">2 of 2</span><h2>The class list becomes a text encoder</h2><p class="subhead">A new class is a new sentence</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Classifier">
+        <button type="button" role="tab" data-step="0">Learned rows</button>
+        <button type="button" role="tab" data-step="1">Rows from text</button>
+        <button type="button" role="tab" data-step="2">Add a name</button>
+      </div>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>A list fixed at training time</h3>
+      <p>Each box becomes a feature vector (blue point). The classifier is one learned row per class (grey arrow). A box's score for a class is how well its point lines up with that row. The forklift box lines up with nothing, so "background" wins.</p>
+      <p class="note">Drag any point and watch its scores. To add a class to a closed-set detector you must label images of it and train again.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Rows that come from words</h3>
+      <p>A <button class="inline-term" data-open="embedding">shared embedding space</button>, as CLIP learns it, puts a name's text vector where pictures of that thing land. So the text encoder's output can stand in for the learned rows. Nothing on the image side changes.</p>
+      <p class="note">The language matters. In ViLD, CLIP's text vectors as the classifier gave 10.1 AP on held-out rare classes; GloVe word vectors, learned from text alone, gave 3.0 (ViLD Table 3).</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Type a name</h3>
+      <p>Type <span class="prompt">forklift</span> and the text encoder adds a row. The forklift box now matches it. No image was labelled and no weight changed.</p>
+      <p class="note">The field tests this on <button class="inline-term" data-open="lvis">LVIS</button>: train on 866 frequent and common classes, hide the labels of 337 rare ones, and score the rare ones only.</p>
+      <p class="inscription">The image side was never the problem. The list of names was.</p>
+    </div>
+    <button type="button" class="continue" data-go="overview">Back to the start</button>
+  </article>

@@ -1,0 +1,56 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="A drawn warehouse scene. A detector puts boxes on a person, a pallet, a traffic cone and a forklift. Its classifier has one fixed row per class, so three boxes get names and the forklift is called background. The rows become text embeddings, the word forklift is typed, and the forklift box gets its name. Then a diagram shows the image pipeline from image to score, with yellow taps where text enters each of five models."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge toy" style="top:.6rem;right:.75rem">Toy model</span>
+  </div>
+  <h1>Detectors that read</h1>
+  <p class="hook">A detector used to know a fixed list of names. Give it a text encoder and the list becomes whatever you type. This page follows that one change through five designs, then asks when typing a name can replace labelling data.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/2104.13921v3" title="arXiv 2104.13921v3">ViLD</a></li>
+    <li><a href="https://arxiv.org/abs/2205.06230v2" title="arXiv 2205.06230v2">OWL-ViT</a></li>
+    <li><a href="https://arxiv.org/abs/2306.09683v3" title="arXiv 2306.09683v3">OWLv2</a></li>
+    <li><a href="https://arxiv.org/abs/2112.03857v2" title="arXiv 2112.03857v2">GLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2303.05499v5" title="arXiv 2303.05499v5">Grounding DINO</a></li>
+    <li><a href="https://arxiv.org/abs/2401.17270v3" title="arXiv 2401.17270v3">YOLO-World</a></li>
+    <li><a href="https://arxiv.org/abs/2403.14610v1" title="arXiv 2403.14610v1">T-Rex2</a></li>
+    <li><a href="https://arxiv.org/abs/2505.20612v4" title="arXiv 2505.20612v4">Roboflow100-VL</a></li>
+    <li><a href="https://arxiv.org/abs/2312.14494v4" title="arXiv 2312.14494v4">Few-shot detection with VLMs</a></li>
+    <li><a href="https://arxiv.org/abs/2308.13177v2" title="arXiv 2308.13177v2">OVDEval</a></li>
+    <li><a href="https://arxiv.org/abs/2307.12813v2" title="arXiv 2307.12813v2">Described Object Detection</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: a detector that reads</li>
+    <li value="1"><a href="#ch-text-classifier" data-rail="Text classifier">The class list becomes a text encoder</a></li>
+    <li><a href="#ch-map" data-rail="The field">The field in one picture</a></li>
+    <li class="act">Act II: borrow CLIP's eyes</li>
+    <li value="3"><a href="#ch-two-stage" data-rail="Two-stage">How a two-stage detector finds boxes</a></li>
+    <li><a href="#ch-vild" data-rail="ViLD">ViLD: teach the region head to see like CLIP</a></li>
+    <li class="act">Act III: make CLIP the detector</li>
+    <li value="5"><a href="#ch-owl" data-rail="OWL-ViT">OWL-ViT: every patch is a candidate object</a></li>
+    <li><a href="#ch-owlv2" data-rail="OWLv2">OWLv2: label the web with yourself</a></li>
+    <li class="act">Act IV: detection as grounding</li>
+    <li value="7"><a href="#ch-glip" data-rail="GLIP">GLIP: a detector is a grounding model</a></li>
+    <li><a href="#ch-fusion" data-rail="Deep fusion">Deep fusion: words change what the image encoder sees</a></li>
+    <li><a href="#ch-gdino" data-rail="Grounding DINO">Grounding DINO: DINO-DETR that reads</a></li>
+    <li><a href="#ch-training" data-rail="Training step">One training step, end to end</a></li>
+    <li class="act">Act V: real time</li>
+    <li value="10"><a href="#ch-yoloworld" data-rail="YOLO-World">YOLO-World: fold the vocabulary into the weights</a></li>
+    <li class="act">Act VI: when words run out</li>
+    <li value="11"><a href="#ch-visual-prompts" data-rail="Visual prompts">Show, do not tell: visual prompts</a></li>
+    <li><a href="#ch-when" data-rail="Prompt or train?">When can a prompt replace a custom detector?</a></li>
+    <li><a href="#ch-failures" data-rail="Failure modes">How they fail on rare industrial objects</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-tree">Family tree</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p class="note">How to read the figures. The colors keep one meaning on the whole page:
+<span class="key" style="display:inline-flex"><span class="c-blue">image side: pixels, features, boxes</span><span class="c-yellow">text side: prompts, tokens</span><span class="c-green">a match</span><span class="c-red">loss and gradient</span><span class="c-brown">frozen, or background</span></span>
+A box drawn as four corners is a prediction. Prompts look like this: <span class="prompt">forklift</span>. Each figure carries a badge: a toy model, a computation that follows the paper, or the paper's own numbers. Point at a term in an equation and the matching part of the figure lights up.</p>

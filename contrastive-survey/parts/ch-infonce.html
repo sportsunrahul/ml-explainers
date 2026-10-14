@@ -1,0 +1,241 @@
+<section id="ch-infonce" class="chapter">
+<h2>InfoNCE: find your partner in a lineup</h2>
+<p>Chapter 1 ended with a police lineup: show the network one view of a photo and a row of candidates, and ask it to point at the true partner. This chapter turns that game into a loss called InfoNCE, shows what temperature does to it, and explains what the loss measures and what it cannot.</p>
+
+<figure class="viz" id="viz-lineup" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Negatives">
+    <span class="lbl">Negatives</span>
+    <button type="button" id="btn-lineup-easy" aria-pressed="true">Easy (far)</button>
+    <button type="button" id="btn-lineup-hard" aria-pressed="false">Hard (close)</button>
+    <button type="button" id="btn-lineup-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls" role="group" aria-label="Lineup size and temperature">
+    <label for="lineup-n">candidates N <input type="range" id="lineup-n" min="2" max="64" step="1" value="4"><output id="lineup-n-out" for="lineup-n">4</output></label>
+    <label for="lineup-tau">temperature <span class="tex">\tau</span> <input type="range" id="lineup-tau" min="0.05" max="1" step="0.01" value="1"><output id="lineup-tau-out" for="lineup-tau">1.00</output></label>
+  </div>
+  <canvas id="lineup-canvas" role="img" aria-label="A blue anchor card on the left and a row of N candidate cards: the yellow partner first, then red negatives. Below each candidate, a bar shows its similarity to the anchor, and a second bar shows its softmax probability. On the right, a red bar shows the loss in nats, a dashed line marks log N, and a green bracket marks the bound log N minus the loss."></canvas>
+  <p class="readout" id="lineup-readout" aria-live="polite"></p>
+  <figcaption>Computed toy. The similarities are made-up numbers: the partner always scores 0.8, easy negatives score between -0.4 and 0.3, and hard negatives between 0.45 and 0.78. The probabilities, the loss and log N are computed exactly from them. The starting state (four candidates, <span class="tex">\tau = 1</span>) is the worked example in the text.</figcaption>
+</figure>
+
+<h3>The game: one anchor, N candidates</h3>
+<p>Take one photo and make two views of it, as in <a href="#ch-compare">chapter 1</a>. Call one view the <b class="c-blue">anchor</b>. The other view is its <b class="c-yellow">partner</b>, also called the <em>positive</em>. Now add views of other photos. These are the <b class="c-red">negatives</b>. The partner and the negatives together are the <em>candidates</em>, and there are <span class="tex">N</span> of them: one partner and <span class="tex">N-1</span> negatives.</p>
+<p>The encoder turns every view into an embedding. To compare two embeddings we use the <em>cosine similarity</em>: the dot product of the two vectors after each is scaled to length 1. It is 1 when they point the same way, 0 when they are at right angles, and -1 when they point in opposite directions. In the figure, each candidate's similarity to the anchor is the first bar under its card.</p>
+
+<h3>First attempt: turn the scores into a choice</h3>
+<p>A good encoder gives the partner the highest score. But "highest" is not a loss yet. We want one number that is small when the partner clearly wins and large when it does not.</p>
+<p>You already know a tool for this: the softmax you use for classification. Exponentiate each score, then divide by the sum, and you get <span class="tex">N</span> probabilities that add up to 1. The second row of bars shows them. The loss is minus the log of the partner's probability. That is ordinary cross-entropy. The only new thing is what the classes are: not "cat" or "dog", but the <span class="tex">N</span> candidates in this lineup, with the partner as the correct answer. Every batch brings a new lineup, so there is no fixed list of classes.</p>
+<p>This also fixes collapse. If the encoder sent every photo to one point, every candidate would score the same, each would get probability <span class="tex">1/N</span>, and the loss would be <span class="tex">\log N</span>. That is the loss of a blind guess, the worst a sensible model can do. The only way down is to score the partner above the strangers.</p>
+
+<p><b>Make a guess before you press "Hard (close)".</b> The negatives become views of other mugs, so they score almost as high as the partner. Will the loss go up or down, and how close will it get to the dashed <span class="tex">\log N</span> line?</p>
+<p>Press it. From the starting state, the partner's probability falls from <span class="tex">0.40</span> to <span class="tex">0.29</span> and the loss rises from <span class="tex">0.90</span> to <span class="tex">1.24</span>, close to <span class="tex">\log 4 \approx 1.39</span>. The encoder has not changed; the lineup got harder. You might expect hard negatives to be bad news. In fact they are the useful ones: a negative that already scores far below the partner barely moves the probabilities, so it gives almost no gradient. <a href="#ch-negatives">Chapter 7</a> returns to this.</p>
+
+<h3>The same idea as an equation</h3>
+<p>Here is the loss for one anchor embedding <span class="tex">u</span>, with cosine similarity as the score and a temperature <span class="tex">\tau</span> (our notation). Read it as "minus the log of the partner's softmax probability".</p>
+<div class="eq" id="eq-infonce-ours" data-build data-viz="viz-lineup"><div class="tex tex-display">
+\htmlData{step=1, link=loss}{\htmlClass{t-red}{\mathcal{L}}} = -\log \frac{\exp\big(\htmlData{step=2, link=partner}{\htmlClass{t-yellow}{\mathrm{sim}(u, v^{+})}} / \htmlData{step=4, link=temp}{\tau}\big)}{\htmlData{step=3, link=lineup}{\sum_{j=1}^{N} \exp\big(\mathrm{sim}(u, v_j) / \tau\big)}}
+</div></div>
+<p class="eqno">Our notation for InfoNCE (CPC, arXiv <a href="https://arxiv.org/abs/1807.03748v2">1807.03748v2</a>, <span data-claim="cpc-infonce-eq">Eq. 4</span>), with the cosine score and temperature of Wu et al. 2018 and SimCLR (<a href="#ch-simclr">chapter 5</a>).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{u}</span>: the anchor's embedding. <span class="tex">v_1, \dots, v_N</span>: the candidates' embeddings; <span class="tex">\htmlClass{t-yellow}{v^{+}}</span> is the partner, one of them.</li>
+  <li><span class="tex">\mathrm{sim}(u, v) = u^T v / (\lVert u \rVert \lVert v \rVert)</span>: the cosine similarity, between -1 and 1.</li>
+  <li><span class="tex">\tau</span>: the temperature, a positive number that divides every score before the softmax. The next step explains it.</li>
+</ul>
+<p>Try it with the figure's starting numbers. Four candidates, <span class="tex">\tau = 1</span>, and similarities <span class="tex">0.8</span> for the partner and <span class="tex">0.3, 0.1, -0.2</span> for the negatives.</p>
+<ul>
+  <li>Exponentiate: <span class="tex">e^{0.8} = 2.23,\; e^{0.3} = 1.35,\; e^{0.1} = 1.11,\; e^{-0.2} = 0.82</span>. The sum is <span class="tex">5.50</span>.</li>
+  <li>The partner's probability: <span class="tex">2.23 / 5.50 = 0.40</span>. The negatives get <span class="tex">0.25, 0.20, 0.15</span>.</li>
+  <li>The loss: <span class="tex">-\log 0.40 = 0.90</span>. A blind guess would cost <span class="tex">\log 4 = 1.39</span>.</li>
+</ul>
+
+<div class="aside">
+  <h4>Notation on this page</h4>
+  <p><span class="tex">N</span> here is the number of candidates in one lineup: one partner and <span class="tex">N-1</span> negatives. Later chapters follow their papers and use <span class="tex">N</span> for the number of photos in a batch; <a href="#ch-simclr">chapter 5</a> says so where it switches. <span class="tex">\tau</span> always means the temperature.</p>
+</div>
+
+<h3>Temperature: how sharp is the pick?</h3>
+<p>Look at that example again. The partner wins clearly on similarity, yet it gets only <span class="tex">40\%</span> of the probability. The reason is that cosine similarity lives between -1 and 1, so the exponentials can differ by a factor of at most <span class="tex">e^2 \approx 7.4</span>. Even a perfect encoder, with the partner at 1 and three negatives at -1, would get only <span class="tex">1/(1 + 3e^{-2}) = 0.71</span>. With 63 negatives that drops to <span class="tex">0.10</span>.</p>
+<p>The temperature fixes this. Divide every similarity by <span class="tex">\tau</span> before the softmax. A small <span class="tex">\tau</span> stretches the gaps between scores, so the softmax becomes sharp. Try <span class="tex">\tau = 0.1</span> on the same four numbers: the scores become <span class="tex">8, 3, 1, -2</span>, the partner gets <span class="tex">0.99</span>, and the loss drops to <span class="tex">0.008</span>. Drag the <span class="tex">\tau</span> slider in the figure and watch the probability bars go from flat to peaked.</p>
+<p>You might think the smallest <span class="tex">\tau</span> is always best. It is not. When <span class="tex">\tau</span> is tiny, the softmax looks almost only at the highest-scoring negative, so nearly all the push lands on the negatives that score closest to the partner. Set the figure to hard negatives, <span class="tex">N = 64</span> and <span class="tex">\tau = 0.05</span>. Now the probability the partner loses goes almost all to the closest negatives. The rest get almost nothing. <a href="#ch-sphere">Chapter 6</a> shows what this does to the shape of the embedding.</p>
+<p>CPC itself has no temperature. Its score <span class="tex">z^T W_k c</span> is not normalized, so the network can make scores as large as it needs. The temperature comes with unit-length embeddings: Wu et al. (2018) used <span class="tex">\tau =</span> <span data-claim="wu2018-tau">0.07</span>, and SimCLR (<a href="#ch-simclr">chapter 5</a>) made it a standard knob.</p>
+
+<h3>What the loss measures: a bound on shared information</h3>
+<p>CPC gives the loss a second meaning. Its symbols <span class="tex">c_t</span> (the anchor) and <span class="tex">x_{t+k}</span> (the partner) are drawn in "Inside CPC" below. The <em>mutual information</em> <span class="tex">I</span> between two views is how much knowing one tells you about the other, here measured in nats (natural-log units). If the network can pick the partner out of a lineup, the views must share information. CPC turns this into an inequality:</p>
+<div class="eq" id="eq-mibound" data-build data-viz="viz-lineup"><div class="tex tex-display">
+\htmlData{step=1, link=bound}{\htmlClass{t-green}{I(x_{t+k}, c_t)}} \geq \htmlData{step=2, link=ceiling}{\log(N)} - \htmlData{step=3, link=loss}{\htmlClass{t-red}{\mathcal{L_{\text{N}}}}}
+</div></div>
+<p class="eqno">CPC (arXiv <a href="https://arxiv.org/abs/1807.03748v2">1807.03748v2</a>), Sec. 2.3: the unnumbered display just after Eq. 5. It is derived in App. A.1 through a step that is an approximation (<span data-claim="cpc-mi-bound-approx-step">Eq. 8</span>). Poole et al. prove the bound without that approximation (<span data-claim="poole-infonce-eq">Eq. 10</span>, arXiv <a href="https://arxiv.org/abs/1905.06922v1">1905.06922v1</a>, Sec. 2.3).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{I(x_{t+k}, c_t)}</span>: the mutual information between the context and the true future piece. Nobody can compute it directly, so we estimate it from below: the bound is a floor under it.</li>
+  <li><span class="tex">\log(N)</span>: the loss of a blind guess among <span class="tex">N</span> candidates, the dashed line in the figure.</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{\text{N}}}</span>: the InfoNCE loss. Every nat you take off it raises the floor by one nat.</li>
+</ul>
+<p>Read it as "how much better than a blind guess". In the worked example, <span class="tex">\log 4 - 0.90 = 0.48</span> nats: the two views share at least that much. The green bracket in the figure is this number.</p>
+<p>Now the catch. The loss can never go below 0, so the bound can never go above <span class="tex">\log N</span> (derived here; Poole et al. state the same cap). Pick the partner perfectly out of 4 candidates, and you have shown only <span class="tex">\log 4 = 1.39</span> nats, even if the two views share far more. In the lineup picture: one correct pick out of four people is evidence, but it cannot prove more than "one of four". CPC notes that the bound "becomes tighter as N becomes larger". Its ceiling is <span data-claim="cpc-mi-bound">log N</span>, which is one reason contrastive methods want many negatives. Press "Easy (far)", set <span class="tex">\tau</span> small, and watch the loss hit 0 while the bracket stops at the dashed line.</p>
+
+<details class="check">
+  <summary>Check yourself: you train with 256 candidates per lineup and the loss sits at <span class="tex">5.55</span> for hours. What is the model doing?</summary>
+  <p>Nothing useful. <span class="tex">\log 256 = 5.55</span>, so the loss equals that of a blind guess: every candidate gets about the same probability. The bound <span class="tex">\log N - \mathcal{L}</span> is 0. Suspect collapse, a bug that feeds the wrong partner, or a learning rate that is too high.</p>
+</details>
+
+<h3>A caveat: more information is not the point</h3>
+<p>The bound makes a tidy story: InfoNCE works because it maximizes mutual information. Tschannen et al. (<a href="https://arxiv.org/abs/1907.13625v2">1907.13625</a>) tested that story and found it incomplete. Mutual information does not change under any invertible transformation of the features. An encoder that scrambles its features in a reversible way keeps all the information, yet a linear classifier on top may find them useless. So information alone cannot explain why the features are good. In their words, maximizing tighter bounds on mutual information "can result in worse representations". Success depends strongly on the encoder architecture. It also depends on how the score function, called the <em>critic</em>, is built.</p>
+
+<p>How do you score an encoder that never saw a label? Freeze it, train one linear layer on top with the labels, and report how often its top guess is right (<em>top-1 accuracy</em>). This is a <em>linear probe</em>; every accuracy on this page uses it unless it says otherwise.</p>
+
+<div class="aside claim">
+  <h4>Claim card: Tschannen et al., "On mutual information maximization for representation learning" (<span data-claim="tschannen-venue">ICLR 2020</span>)</h4>
+  <dl>
+    <dt>Claim</dt>
+    <dd>The success of InfoNCE-style methods "cannot be attributed to the properties of MI alone"; it depends on the inductive bias of the encoder and of the critic. A tighter bound can give worse features.</dd>
+    <dt>Setup</dt>
+    <dd>MNIST digits cut in two: the top half is one view, the bottom half the other. Quality is the linear-probe test accuracy on the top-half features, with batch <span data-claim="tschannen-batch">128</span>, averaged over <span data-claim="tschannen-runs">20</span> runs. Reference points: a linear classifier on raw pixels reaches about <span data-claim="tschannen-pixel-baseline">85%</span>, a supervised network about <span data-claim="tschannen-supervised-baseline">94%</span>.</dd>
+    <dt>Test 1: invertible encoders</dt>
+    <dd>An invertible encoder (one whose input can always be rebuilt from its output) keeps all the information, so the true mutual information cannot change. Yet the estimated bound and the linear accuracy both rise during training. An invertible encoder trained adversarially (no MI estimator) ends up worse than raw pixels, although its true mutual information stays at the maximum.</dd>
+    <dt>Test 2: critics</dt>
+    <dd>Three score functions on the same encoders: a simple bilinear one (<span class="tex">x^T W y</span>) and two small networks. Measured with the NWJ bound (another estimate of mutual information), the MLP critic is tightest but barely beats raw pixels; the bilinear critic is loosest and gives the best features.</dd>
+    <dt>Test 3: same bound, different features</dt>
+    <dd>An MLP and a ConvNet encoder are trained to hold the bound at a target <span class="tex">t</span> of <span data-claim="tschannen-target-low">2</span> or <span data-claim="tschannen-target-high">4</span>. After <span data-claim="tschannen-fixed-iters">7k</span> iterations both hit the target, but the ConvNet gives clearly higher linear accuracy. Same bound, different features.</dd>
+    <dt>Result</dt>
+    <dd>Mostly shown in plots, not tables. With batch <span data-claim="tschannen-batch">128</span> the InfoNCE estimate is capped at <span class="tex">\log 128 \approx</span> <span data-claim="tschannen-logk-ceiling">4.85</span> nats, and it ends near that cap for every critic, so InfoNCE alone cannot rank them.</dd>
+    <dt>What would falsify it</dt>
+    <dd>Our reading: a tighter bound that always gave better accuracy across critics, or two encoders at the same bound with the same accuracy.</dd>
+    <dt>Scope</dt>
+    <dd>Small networks on MNIST halves (CIFAR-10 in the appendix), linear evaluation only. Not tested at ImageNet scale.</dd>
+  </dl>
+</div>
+<p>The same paper gives a more practical reading of InfoNCE (Sec. 4). Take one encoder for both inputs, and score a pair by the dot product of its two embeddings. Then InfoNCE is the N-pair metric-learning loss from <a href="#ch-compare">chapter 1</a>, up to constants. Think of InfoNCE as a ranking loss on embeddings, and of the bound as a side fact, not the reason it works.</p>
+
+<h3>Inside CPC: forward, then backward</h3>
+<p>Here is how CPC plays the lineup game on images. It cuts each image into a grid of overlapping patches, encodes every patch, and reads the grid from the top down. From the rows it has seen, it predicts the embeddings of patches up to <span data-claim="cpc-img-rows-ahead">five</span> rows below. Each prediction is an anchor; the true patch below is its partner.</p>
+<p><b>Make a guess before you press "7 Gradients".</b> Which boxes will the gradient reach, and is anything frozen?</p>
+
+<figure class="viz archflow" id="viz-cpcflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-cpcflow-crop" aria-pressed="false">1 Crop</button>
+    <button type="button" id="btn-cpcflow-patches" aria-pressed="false">2 Patches</button>
+    <button type="button" id="btn-cpcflow-encode" aria-pressed="false">3 Encode</button>
+    <button type="button" id="btn-cpcflow-context" aria-pressed="false">4 Context</button>
+    <button type="button" id="btn-cpcflow-predict" aria-pressed="false">5 Predict</button>
+    <button type="button" id="btn-cpcflow-loss" aria-pressed="false">6 InfoNCE</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-cpcflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-cpcflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <canvas id="cpcflow-canvas" role="img" aria-label="CPC on images as a diagram: an image is cropped and cut into a 7 by 7 grid of patches; a ResNet encodes each patch to a 1024-number vector; a context network reads the grid from the top; linear maps predict patches up to five rows below; the predictions and the true patch embeddings meet in the InfoNCE loss. In the backward stages red arrows run from the loss into the predictors, the context network and the encoder."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-cpcflow-prev">Previous</button>
+    <button type="button" id="btn-cpcflow-next">Next</button>
+    <button type="button" id="btn-cpcflow-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="cpcflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One image becomes a grid of patch embeddings. A context network reads the grid from the top, and its predictions face a lineup of patch embeddings. Press <b>1 Crop</b>, then <b>Next</b>.</p></div>
+    <div data-stage="crop" hidden><h4>1. Crop</h4><p>From a <span data-claim="cpc-img-resize">300x300</span> version of each ImageNet image, CPC takes a random <span data-claim="cpc-img-input">256x256</span> crop, flips it horizontally half the time, and turns it grey. Each GPU holds <span data-claim="cpc-img-batch-per-gpu">16</span> images, on <span data-claim="cpc-img-gpus">32 GPUs</span>: <span data-claim="cpc-img-batch-total">512</span> images per step (our arithmetic).</p></div>
+    <div data-stage="patches" hidden><h4>2. Patches</h4><p>The crop is cut into a <span data-claim="cpc-img-grid">7x7</span> grid of <span data-claim="cpc-img-patch">64x64</span> patches with <span data-claim="cpc-img-overlap">32</span> pixels of overlap, so neighbours start <span data-claim="cpc-img-stride">32</span> pixels apart (our reading). Each patch gets its own random <span data-claim="cpc-img-subcrop">60x60</span> subcrop, padded back to 64x64. Our reading: this stops the network from matching patches by their exact edges.</p></div>
+    <div data-stage="encode" hidden><h4>3. Encode</h4><p>A <span data-claim="cpc-img-encoder">ResNet-v2-101</span>, trained from scratch and without batch normalization, encodes each patch. The output of its third residual block is mean-pooled to one vector of <span data-claim="cpc-img-featdim">1024</span> numbers per patch: a <span data-claim="cpc-img-tensor">7x7x1024</span> tensor per image.</p></div>
+    <div data-stage="context" hidden><h4>4. Context</h4><p>A <span data-claim="cpc-img-context">PixelCNN-style</span> network (a network that only looks at rows above) reads the grid from the top. Its output <span class="tex">c</span> at each position sees only the rows above. This is the "past" from which CPC predicts the "future".</p></div>
+    <div data-stage="predict" hidden><h4>5. Predict</h4><p>For each step <span class="tex">k</span> from 1 to <span data-claim="cpc-img-rows-ahead">five</span> rows below, a learned matrix <span class="tex">W_k</span> turns the context into a prediction <span class="tex">W_k c</span>. If every position with <span class="tex">k</span> rows below it makes a prediction (our assumption), a 7-row grid gives <span data-claim="cpc-img-preds-per-image">140</span> predictions per image. Each prediction is an anchor; the encoded patch it points at is its partner.</p></div>
+    <div data-stage="loss" hidden><h4>6. The lineup and the loss</h4><p>Each anchor is scored against its partner and a set of negatives with <span class="tex">\exp(z^T W_k c)</span>, then InfoNCE (Eq. 4). The paper does not say where the image negatives come from. We draw them as other patches in the minibatch; that is our reading, based on the audio experiments, where the paper says negatives come from the minibatch. CPC v2 states its choice: "other locations in the image and other images in the mini-batch".</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>Everything is trained, and nothing is frozen. The gradient reaches the predictors <span class="tex">W_k</span>, then the context network, then the encoder. It reaches the encoder twice: once through the context, and once through the partner and negative embeddings, which are encoder outputs too.</p></div>
+    <div data-stage="update" hidden><h4>8. Update</h4><p>Adam with learning rate <span data-claim="cpc-img-lr">2e-4</span> updates all three parts. After pretraining, the encoder is frozen, the 7x7 grid is mean-pooled to one 1024-number vector, and a linear classifier on ImageNet labels reaches <span data-claim="cpc-linear-top1">48.7</span>% top-1 (linear probe, ResNet-v2-101).</p></div>
+  </div>
+  <figcaption>Computed: tensor shapes from the paper's image setup (Sec. 3.2 of CPC). The batch total, the stride and the prediction count are our arithmetic, and the source of the negatives is our reading. The context vector's width is not stated, so it is not shown.</figcaption>
+</figure>
+
+<p>Step 6 is the lineup loss of this chapter. This is the same loss, written in CPC's own notation: the anchor is the context <span class="tex">c_t</span>, and the partner is the patch <span class="tex">x_{t+k}</span> that lies <span class="tex">k</span> rows below.</p>
+<div class="eq" id="eq-infonce" data-build data-viz="viz-lineup"><div class="tex tex-display">
+\htmlData{step=1, link=loss}{\htmlClass{t-red}{\mathcal{L_{\text{N}}}}} = - \mathop{{}\mathbb{E}}_{X}\left[\log \frac{\htmlData{step=2, link=partner}{\htmlClass{t-yellow}{f_k(x_{t+k}, c_{t})}}}{\htmlData{step=3, link=lineup}{\sum_{x_j \in X} f_k(x_j, c_{t})}}\right]
+</div></div>
+<p class="eqno">Eq. 4 in van den Oord, Li and Vinyals, "Representation learning with contrastive predictive coding", arXiv <a href="https://arxiv.org/abs/1807.03748v2">1807.03748v2</a>, Sec. 2.3.</p>
+<ul class="gloss">
+  <li><span class="tex">X = \{x_1, \dots, x_N\}</span>: the lineup. One sample is the true future piece; the other <span class="tex">N-1</span> are negatives.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{f_k(x_{t+k}, c_t)}</span>: the score of the partner. CPC uses <span class="tex">f_k = \exp(z_{t+k}^T W_k c_t)</span> (its Eq. 3), where <span class="tex">z_{t+k}</span> is the encoded piece and <span class="tex">W_k</span> is a learned matrix, one per step <span class="tex">k</span>.</li>
+  <li><span class="tex">\sum_{x_j \in X} f_k(x_j, c_t)</span>: the scores of all <span class="tex">N</span> candidates, the partner included. Dividing by it is the softmax.</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{\text{N}}}</span>: minus the log of the partner's probability, averaged over lineups. The paper calls it "the categorical cross-entropy of classifying the positive sample correctly".</li>
+</ul>
+
+<h3>Where this came from</h3>
+<ul>
+  <li>Gutmann and Hyvarinen (NCE, <span data-claim="gutmann2010-venue">AISTATS 2010</span>) learned a model by telling real data from noise, a yes-or-no question that InfoNCE turns into a multiple choice.</li>
+  <li>Wu et al. (<a href="https://arxiv.org/abs/1805.01978v1">1805.01978</a>) treated every image as its own class, with a temperature and a memory bank of all <span data-claim="wu2018-bank-size">1.28M</span> ImageNet embeddings (<a href="#ch-moco">chapter 4</a>).</li>
+  <li>CPC (<a href="https://arxiv.org/abs/1807.03748v2">1807.03748</a>) named InfoNCE and its bound.</li>
+  <li>CPC v2 (<a href="https://arxiv.org/abs/1905.09272v3">1905.09272</a>) rebuilt CPC for images and reached <span data-claim="cpcv2-r161-top1">71.5</span>% top-1 (linear probe, ResNet-161, <span data-claim="cpcv2-epochs">200</span> epochs).</li>
+  <li>CMC (<a href="https://arxiv.org/abs/1906.05849v5">1906.05849</a>) made the views different channels of one image, such as lightness and color.</li>
+  <li>Poole et al. (<a href="https://arxiv.org/abs/1905.06922v1">1905.06922</a>) proved the InfoNCE bound exactly, beside other bounds on mutual information.</li>
+</ul>
+
+<h3>Where we go next: more candidates</h3>
+<p>The bound and the figure point the same way: a lineup with more strangers is a harder test, and its ceiling <span class="tex">\log N</span> is higher. But a batch only holds so many images. <a href="#ch-moco">Chapter 4</a> shows two ways to get tens of thousands of negatives without a huge batch: a memory bank, then a momentum queue.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why InfoNCE is softmax cross-entropy where the classes are the candidates in the lineup.</li>
+    <li>What the temperature does to the softmax, and why cosine similarity needs one.</li>
+    <li>Why the mutual-information bound <span class="tex">\log N - \mathcal{L}</span> can never exceed <span class="tex">\log N</span>.</li>
+    <li>Why a tighter bound is not the same as better features.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>Track <span class="tex">\log N</span> next to your InfoNCE loss. A loss stuck at <span class="tex">\log N</span> means the model is guessing. A loss near 0 means the lineups are too easy to teach anything, so add negatives or make the views harder. Treat the temperature as a hyperparameter to tune, not a constant to copy, and do not read the mutual-information bound as a measure of feature quality.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-lineup'), out = document.getElementById('lineup-readout');
+  const kit = KIT.lineup(document.getElementById('lineup-canvas'), { fig });
+  const nIn = document.getElementById('lineup-n'), tIn = document.getElementById('lineup-tau');
+  const nOut = document.getElementById('lineup-n-out'), tOut = document.getElementById('lineup-tau-out');
+  const btns = { easy: document.getElementById('btn-lineup-easy'), hard: document.getElementById('btn-lineup-hard') };
+  const say = () => { out.textContent = KIT.lineupText(kit.state); };
+  const mode = m => { kit.set({ mode: m }); Object.entries(btns).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === m))); say(); };
+  btns.easy.addEventListener('click', () => mode('easy'));
+  btns.hard.addEventListener('click', () => mode('hard'));
+  nIn.addEventListener('input', () => { nOut.textContent = nIn.value; kit.set({ N: +nIn.value }); });
+  tIn.addEventListener('input', () => { tOut.textContent = (+tIn.value).toFixed(2); kit.set({ tau: +tIn.value }); });
+  nIn.addEventListener('change', say); tIn.addEventListener('change', say);
+  document.getElementById('btn-lineup-reset').addEventListener('click', () => {
+    nIn.value = 4; tIn.value = 1; nOut.textContent = '4'; tOut.textContent = '1.00'; kit.set({ N: 4, tau: 1 }); mode('easy'); });
+  say();
+})();
+(() => {
+  const x = ' x ', crop = 256, P = 64, ov = 32, st = P - ov, G = (crop - P) / st + 1, K = 5, B = 16;
+  let preds = 0; for (let k = 1; k <= K; k++) preds += G * (G - k);
+  ArchFlow.mount({
+    prefix: 'cpcflow', grid: { cols: 6, rows: 2 },
+    boxes: {
+      img: { c: 0, r: .5, lane: 'blue', title: ['grey crop'], glyph: 'photo', data: true },
+      patches: { c: 1, r: .5, lane: 'blue', title: ['patch grid'], glyph: 'grid', data: true, cls: false },
+      enc: { c: 2, r: .5, lane: 'blue', title: ['encoder', 'g_enc'], glyph: 'layers' },
+      ctx: { c: 3, r: 0, lane: 'blue', title: ['context', 'g_ar'], glyph: 'seq', pattern: 'bbbbyyy' },
+      pred: { c: 4, r: 0, lane: 'blue', title: ['predict', 'W_k c'], glyph: 'vector' },
+      tgt: { c: 4, r: 1, lane: 'mixed', title: ['partners and', 'negatives z'], glyph: 'latents' },
+      loss: { c: 5, r: .5, lane: 'red', title: ['InfoNCE'], glyph: 'loss' },
+    },
+    edges: [['img', 'patches'], ['patches', 'enc'], ['enc', 'ctx'], ['ctx', 'pred'], ['enc', 'tgt'], ['pred', 'loss'], ['tgt', 'loss']],
+    stages: [{ key: 'crop', show: ['img'] }, { key: 'patches', show: ['patches'] }, { key: 'encode', show: ['enc'] }, { key: 'context', show: ['ctx'] },
+      { key: 'predict', show: ['pred', 'tgt'] }, { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: {},
+    shape: id => ({ img: `${B}${x}${crop}${x}${crop}`, patches: `${B}${x}${G}${x}${G} patches|${P}${x}${P} each`, enc: `${B}${x}${G}${x}${G}${x}1024`,
+      ctx: `${B}${x}${G}${x}${G} contexts`, pred: `${preds} per image|k = 1..${K}`, tgt: `encoder outputs|(negatives: our reading)`, loss: 'one number' })[id],
+    params: id => ({ enc: 'ResNet-v2-101', ctx: 'PixelCNN-style', pred: `W_1 ... W_${K}` })[id] || null,
+    frozen: () => false,
+    readout: s => ({ overview: `Per GPU: ${B} images of ${crop}${x}${crop}, a ${G}${x}${G} grid of patches, ${preds} predictions per image.`,
+      crop: `A batch of ${B} grey crops per GPU: ${B}${x}${crop}${x}${crop}.`,
+      patches: `(${crop} - ${P}) / ${st} + 1 = ${G} patches per side: ${B}${x}${G}${x}${G}${x}${P}${x}${P}.`,
+      encode: `Each patch -> 1024 numbers: ${B}${x}${G}${x}${G}${x}1024.`,
+      context: `One context vector per grid position: ${B}${x}${G}${x}${G}, each seeing only the rows above.`,
+      predict: `Predicting k = 1..${K} rows ahead: ${G} x (${Array.from({ length: K }, (_, i) => G - 1 - i).join(' + ')}) = ${preds} predictions per image.`,
+      loss: `${preds} lineups per image, each one partner against negatives; their losses are averaged into one number.`,
+      backward: 'The gradient reaches W_k, the context network and the encoder. Nothing is frozen.',
+      update: 'Adam updates every trainable box. Later, only the frozen encoder is used, with a linear classifier on top.' })[s],
+  });
+})();
+</script>
+</section>

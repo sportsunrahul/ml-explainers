@@ -1,0 +1,88 @@
+<section id="ch-dinov2" class="chapter">
+<h2>DINOv2 brings nearest neighbors back</h2>
+<p>You know DINO from an earlier explainer. DINOv2 is its scaled-up successor: self-supervised ViT features whose patch tokens already separate parts, textures and backgrounds. In 2024 two papers put those features into the oldest ideas on this page, and the simple ideas won again.</p>
+
+<figure class="viz" id="viz-dinov2" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <div id="svgwrap-dinov2"></div>
+  <div class="controls" role="group" aria-label="View">
+    <span>View</span>
+    <button type="button" id="btn-dinov2-fewshot" aria-pressed="true">Few good images (AnomalyDINO)</button>
+    <button type="button" id="btn-dinov2-multiclass" aria-pressed="false">One model for all (Dinomaly)</button>
+  </div>
+  <div class="controls" role="group" aria-label="Dataset and metric">
+    <span>Data</span>
+    <button type="button" id="btn-dinov2-mvtec" aria-pressed="true">MVTec AD</button>
+    <button type="button" id="btn-dinov2-visa" aria-pressed="false">VisA</button>
+    <button type="button" id="btn-dinov2-realiad" aria-pressed="false">Real-IAD</button>
+    <span>Metric</span>
+    <button type="button" id="btn-dinov2-img" aria-pressed="true">Image AUROC</button>
+    <button type="button" id="btn-dinov2-pix" aria-pressed="false">Pixel AUROC</button>
+    <button type="button" id="btn-dinov2-pro" aria-pressed="false">PRO</button>
+  </div>
+  <div class="controls">
+    <label>Good images per product <input type="range" id="rng-dinov2-k" min="0" max="4" step="1" value="0"> <output id="out-dinov2-k">1</output></label>
+    <button type="button" id="btn-dinov2-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Sourced. First view: AnomalyDINO v3 Tables 2 to 4, all numbers as printed there. By its own account AnomalyDINO re-ran no baseline: its WinCLIP+ rows at 1, 2 and 4 images and its PatchCore rows are copied from the WinCLIP paper; its WinCLIP+ rows at 8 and 16 images are a re-implementation reported by a later paper (ADP), drawn hollow; APRIL-GAN rows at 1, 2 and 4 images come from its own paper; AnomalyDINO says all other rows come from the original papers, but the APRIL-GAN paper stops at 4 images, so the source of its 8- and 16-image APRIL-GAN rows is unclear. Diamonds at zero images are zero-shot methods (image AUROC only). Second view: Dinomaly v5 Table 1 (one model for all categories), Dinomaly says its baseline rows come mostly from the ADer benchmark, but its UniAD, DiAD and MambaAD rows match MambaAD's Table 1 or each method's own paper, not ADer's cells; Dinomaly runs at <span data-claim="dinomaly-crop">392</span> pixels, the baselines at their own default sizes. The hollow diamond is Dinomaly trained one model per category (Table 2).</figcaption>
+</figure>
+
+<p>Predict first: <em>with one good image of a product and no text prompts at all, can plain patch nearest neighbors beat the CLIP methods that were built for few-shot?</em> On MVTec AD the answer is yes, at every number of images and on every metric: one image gives <span data-claim="anomalydino-mvtec-img-auroc-1shot-448">96.5</span> image AUROC against WinCLIP+'s <span data-claim="anomalydino-mvtec-winclip-img-auroc-1shot">93.1</span>. Switch to VisA and the answer changes: APRIL-GAN, which was trained on MVTec AD, wins image AUROC with one or two images. AnomalyDINO still wins every pixel metric there.</p>
+
+<h3>AnomalyDINO: PatchCore with better features and fewer tricks</h3>
+<div class="claim-card"><dl>
+  <dt>Claim</dt><dd>In few-shot anomaly detection, nearest neighbors on DINOv2 patch features beat vision-language methods, with no training and no prompts.</dd>
+  <dt>How measured</dt><dd>MVTec AD and VisA, one memory per category, with 1, 2, 4, 8 or 16 good images, each setting repeated <span data-claim="anomalydino-runs">three</span> times with different images. Baseline rows copied from their papers (see the caption).</dd>
+  <dt>Result</dt><dd>One good image: <span data-claim="anomalydino-abstract-1shot">96.6</span> MVTec AD image AUROC at <span data-claim="anomalydino-res-high">672</span> pixels, against a previous best of <span data-claim="anomalydino-prev-sota-1shot">93.1</span>. At the default <span data-claim="anomalydino-res-default">448</span> pixels it takes about <span data-claim="anomalydino-latency-default">60 ms</span> per image on one <span data-claim="anomalydino-gpu">A40</span> GPU.</dd>
+  <dt>What would falsify it</dt><dd>A CLIP method beating it at equal shots on both datasets. On VisA image AUROC that partly happens: APRIL-GAN scores <span data-claim="anomalydino-visa-aprilgan-img-auroc-1shot">91.2</span> with one image, against <span data-claim="anomalydino-visa-img-auroc-1shot-672">87.4</span> for AnomalyDINO at <span data-claim="anomalydino-res-high">672</span> pixels.</dd>
+</dl></div>
+<p>The method is <a href="#ch-patchcore">PatchCore</a> with each part re-chosen for a tiny memory. AnomalyDINO (<span data-claim="anomalydino-venue">WACV 2025</span>; arXiv v1 of <span data-claim="anomalydino-published">2024-05-23</span>, read at v3) runs DINOv2 <span data-claim="anomalydino-backbone">ViT-S</span>, with <span data-claim="anomalydino-backbone-params">21</span> million parameters and <span data-claim="anomalydino-patch-size">14</span>-pixel patches, on images whose shorter edge is <span data-claim="anomalydino-res-default">448</span> pixels. Every patch token of the good images goes into the memory. Each test patch scores by its cosine distance to the nearest memory patch, and the image scores by its worst patches:</p>
+<div class="eq" id="eq-anomalydino" data-build data-viz="viz-dinov2"><div class="tex tex-display">
+\htmlData{step=1, link=dino}{s(\htmlClass{t-yellow}{x}_{\mathrm{test}}) = \operatorname{mean}\Big(H_{0.01}\big(\{\, d_{\mathrm{NN}}(\htmlClass{t-yellow}{p}_j;\, \htmlData{step=2, link=shots}{\htmlClass{t-brown}{\mathcal{M}}}) \,\}_{j=1}^{n}\big)\Big)}, \qquad \htmlData{step=3, link=dino}{d(\mathbf{x}, \mathbf{y}) = 1 - \frac{\langle \mathbf{x}, \mathbf{y} \rangle}{\lVert \mathbf{x} \rVert\, \lVert \mathbf{y} \rVert}}
+</div></div>
+<p class="eqno">Eq. 4 with the inline definition of q, and Eq. 3, in AnomalyDINO v3.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-brown}{\mathcal{M}}</span> is the memory: all patch features of the k good images (Eq. 1). The slider in the figure sets k.</li>
+  <li><span class="tex">d_{\mathrm{NN}}(\htmlClass{t-yellow}{p}_j; \htmlClass{t-brown}{\mathcal{M}})</span> is the cosine distance from test patch <span class="tex">\htmlClass{t-yellow}{p}_j</span> to its nearest memory patch (Eq. 2).</li>
+  <li><span class="tex">H_{0.01}</span> keeps the top <span data-claim="anomalydino-top-percent">1%</span> of the patch distances, and the image score is their mean. With one good image, a single unlucky patch can have no good match; averaging the worst 1% is more robust than taking the single worst. The map is the patch distances, upsampled and smoothed with a Gaussian of sigma <span data-claim="anomalydino-sigma">4.0</span>, as in PatchCore.</li>
+</ul>
+<table class="data regimes">
+  <thead><tr><th>Choice</th><th>PatchCore</th><th>AnomalyDINO</th></tr></thead>
+  <tbody>
+    <tr><td>Features</td><td>Mid-level layers of a supervised ImageNet CNN, locally averaged</td><td>DINOv2 patch tokens, used as they are</td></tr>
+    <tr><td>Distance</td><td>Euclidean</td><td>Cosine</td></tr>
+    <tr><td>Memory</td><td>Thinned to a coreset, for speed</td><td>Kept whole, and enlarged with rotated copies of the good images</td></tr>
+    <tr><td>Background</td><td>Scored like the part</td><td>Masked on test images, using DINOv2's own first principal component, for objects that pass a one-time test</td></tr>
+    <tr><td>Image score</td><td>Worst patch</td><td>Mean of the worst 1% of patches</td></tr>
+    <tr><td>Training</td><td>None</td><td>None</td></tr>
+  </tbody>
+</table>
+<p>The background mask is applied to only <span data-claim="anomalydino-mvtec-masked-cats">5</span> of the MVTec AD categories and to all <span data-claim="anomalydino-visa-masked-cats">12</span> of VisA's; textures are never masked. Rotating the good images helps parts that appear at any angle: on MVTec AD's screw, one-image AUROC goes from <span data-claim="anomalydino-rotation-screw-before">65.6</span> to <span data-claim="anomalydino-rotation-screw-after">89.2</span>. The limit is the one every patch method shares. A cable whose wires are swapped has no patch that looks wrong, so detection of that defect type is <span data-claim="anomalydino-cable-swap">50.2</span> AUROC, which is chance. <a href="#ch-efficientad">Chapter 10</a> showed how EfficientAD adds an autoencoder for these logical anomalies.</p>
+
+<h3>Dinomaly: one model for all, with less</h3>
+<div class="claim-card"><dl>
+  <dt>Claim</dt><dd>A plain reconstruction model on frozen DINOv2 features, with a few deliberately simple parts, closes most of the gap between one model for all categories and one model per category.</dd>
+  <dt>How measured</dt><dd>One model trained on the good images of all categories at once: <span data-claim="dinomaly-data-mvtec-train">3,629</span> training images for MVTec AD's categories; also VisA and Real-IAD. Compared with Dinomaly trained one model per category, and with earlier multi-class methods (Dinomaly says most of these rows come from the ADer benchmark; see the caption).</dd>
+  <dt>Result</dt><dd>Image AUROC with one model for all: <span data-claim="dinomaly-mvtec-img-auroc">99.6</span> on MVTec AD, <span data-claim="dinomaly-visa-img-auroc">98.7</span> on VisA, <span data-claim="dinomaly-realiad-img-auroc">89.3</span> on Real-IAD. One model per category: <span data-claim="dinomaly-mvtec-dinomaly-cs-img-auroc">99.7</span>, <span data-claim="dinomaly-visa-dinomaly-cs-img-auroc">98.9</span>, <span data-claim="dinomaly-realiad-dinomaly-cs-img-auroc">92.0</span>.</dd>
+  <dt>What would falsify it</dt><dd>A clear drop from one-per-category to one-for-all. On MVTec AD and VisA there is almost none; on Real-IAD, with its many categories and camera views, a drop remains.</dd>
+</dl></div>
+<p>Recall the problem from <a href="#ch-uniad">the UniAD chapter</a>: a reconstruction model trained on many products learns to copy its input, so defects are reconstructed too. UniAD fought copying with a neighbor mask and feature noise. Dinomaly (<span data-claim="dinomaly-venue">CVPR 2025</span>; arXiv v1 of <span data-claim="dinomaly-published">2024-05-23</span>, read at v5) keeps the same goal and swaps each part for something simpler. Its encoder is a frozen <span data-claim="dinomaly-backbone">ViT-Base/14</span> trained by <span data-claim="dinomaly-backbone-pretrain">DINOv2-R</span> (DINOv2 with <span data-claim="dinomaly-registers">4</span> register tokens), at a <span data-claim="dinomaly-crop">392</span>-pixel crop; the decoder tries to rebuild the features of its middle <span data-claim="dinomaly-middle-layers">8</span> layers.</p>
+<table class="data regimes">
+  <thead><tr><th>Part</th><th>UniAD</th><th>Dinomaly</th></tr></thead>
+  <tbody>
+    <tr><td>Frozen encoder</td><td><span data-claim="uniad-backbone">EfficientNet-b4</span>, supervised on ImageNet</td><td>DINOv2-R ViT-B/14, self-supervised</td></tr>
+    <tr><td>Noise against copying</td><td>Feature jitter: noise added to the input features</td><td>Dropout of <span data-claim="dinomaly-dropout">0.2</span> inside an MLP bottleneck</td></tr>
+    <tr><td>Attention against copying</td><td>Neighbor-masked attention</td><td>Linear attention, which cannot focus on one token</td></tr>
+    <tr><td>What is reconstructed</td><td>Encoder features, point by point</td><td><span data-claim="dinomaly-groups">2</span> groups of summed layers ("loose constraint")</td></tr>
+    <tr><td>Loss</td><td>Per-point error</td><td>One cosine distance over the whole map; well-rebuilt points get <span data-claim="dinomaly-grad-shrink">one-tenth</span> of the gradient ("loose loss")</td></tr>
+  </tbody>
+</table>
+<p>The decoder has <span data-claim="dinomaly-decoder-layers">8</span> Transformer layers with linear attention. Softmax attention can put almost all of its weight on one token, including the token itself, which is exactly an identity copy. Linear attention has no softmax, so it cannot form such a sharp peak:</p>
+<div class="eq"><div class="tex tex-display">
+\mathrm{LA}(Q, K, V) = \big(\phi(Q)\,\phi(K)^{\top}\big)V = \phi(Q)\big(\phi(K)^{\top}V\big), \qquad \phi(x) = \mathrm{elu}(x) + 1
+</div></div>
+<p class="eqno">Eq. 3 in Dinomaly v5 (the paper writes <span class="tex">\phi(K^{T})</span>, and names <span class="tex">\mathrm{elu}(x) + 1</span> as the usual choice of <span class="tex">\phi</span>).</p>
+<p>Each output must draw on a summary of all tokens, <span class="tex">\phi(K)^{\top}V</span>, rather than on its own position, which is what a reconstruction decoder for anomaly detection wants. The ablation makes the title's point. The framework with none of the four parts, already on DINOv2, scores <span data-claim="dinomaly-abl-mvtec-baseline-img">98.41</span> image AUROC on MVTec AD, above UniAD's <span data-claim="dinomaly-mvtec-uniad-img-auroc">96.5</span>; all four parts give <span data-claim="dinomaly-abl-mvtec-full-img">99.60</span>. And UniAD's own tricks nearly match Dinomaly's at their best settings: feature jitter instead of dropout gives <span data-claim="dinomaly-jitter20-img">99.59</span>, and softmax attention with a neighbor mask gives <span data-claim="dinomaly-softmax-nm3-img">99.56</span>. Our reading: most of the gain over UniAD comes from the backbone. The encoder ablation agrees: the same model on MAE features scores <span data-claim="dinomaly-backbone-mae-img">96.27</span>, on DINOv2-R <span data-claim="dinomaly-backbone-dinov2r-img">99.60</span>.</p>
+<p>The cost is a ViT. The base model has <span data-claim="dinomaly-base-params">148.0M</span> parameters (including the frozen encoder, by our reading) and needs <span data-claim="dinomaly-base-macs">104.7G</span> multiply-accumulate operations per image, for <span data-claim="dinomaly-base-throughput">58.1</span> images per second on an <span data-claim="dinomaly-gpu">RTX3090</span> (Table 4). That is throughput with batches of images, not the latency of one image, so Dinomaly is not on the latency chart in <a href="#ch-speed">chapter 15</a>.</p>
+</section>

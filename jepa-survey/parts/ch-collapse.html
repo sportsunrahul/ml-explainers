@@ -1,0 +1,58 @@
+<section id="ch-collapse" class="chapter">
+<h2>Why doesn't it collapse?</h2>
+<p>Here is a solution to every prediction loss on this page: make the encoder output the same vector for every input. The target is then constant, the prediction is constant, the distance is zero, and nothing has been learned. The energy chapter called this collapse. I-JEPA's loss has no term against it. So why does I-JEPA learn anything at all?</p>
+
+<figure class="viz" id="viz-collapse" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="collapse-canvas" role="img" aria-label="A cloud of embedding points in three dimensions produced by a tiny linear JEPA trained live on synthetic data with one slow predictable feature and one noisy feature. Toggles for stop-gradient, predictor, EMA and depth change what the cloud does: it keeps its spread along the slow axis, flattens along the noisy one, or shrinks to a single point."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-collapse-run">Train 600 steps</button>
+    <button type="button" id="btn-collapse-sg-on" data-key="sg" data-val="1" aria-pressed="true">stop-gradient on</button>
+    <button type="button" id="btn-collapse-sg-off" data-key="sg" data-val="0" aria-pressed="false">off</button>
+    <button type="button" id="btn-collapse-pred-on" data-key="pred" data-val="1" aria-pressed="true">predictor on</button>
+    <button type="button" id="btn-collapse-pred-off" data-key="pred" data-val="0" aria-pressed="false">off</button>
+    <button type="button" id="btn-collapse-ema-on" data-key="ema" data-val="1" aria-pressed="false">EMA target on</button>
+    <button type="button" id="btn-collapse-ema-off" data-key="ema" data-val="0" aria-pressed="true">off</button>
+    <button type="button" id="btn-collapse-l1" data-key="L" data-val="1" aria-pressed="false">depth 1</button>
+    <button type="button" id="btn-collapse-l2" data-key="L" data-val="2" aria-pressed="true">depth 2</button>
+    <button type="button" id="btn-collapse-bg" data-key="bg" data-val="1" aria-pressed="false">fixed background</button>
+    <button type="button" id="btn-collapse-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="collapse-readout" aria-live="polite"></p>
+  <figcaption>Toy model, built on the deep linear self-distillation model of Littwin et al. (2024): a linear encoder of depth 1 or 2, a linear predictor, gradient descent on the squared error between the prediction and the target branch. Data has a slow axis (correlation 0.99 across the pair, little per-sample noise), a noisy axis (no correlation, unit noise) and a third axis that mixes both. The paper only analyses stop-gradient with a predictor; the other toggles are this page's additions. Before each toggle, guess what the cloud will do.</figcaption>
+</figure>
+
+<h3>The trivial solution, and three ways to dodge it</h3>
+<p>Press "Train" with the defaults and watch. The cloud keeps its width along the slow axis, flattens along the noisy one, and the three readouts settle near the values the theory predicts. Now switch the stop-gradient off: both branches are trained to agree, the cheapest agreement is a constant, and the cloud shrinks to a point. Switch the predictor off instead (the predictor becomes the identity): the point again. These are the two asymmetries that BYOL and SimSiam discovered empirically in 2020 and that I-JEPA inherits, with one addition: I-JEPA's target branch is not the current encoder but a slow average of it (EMA), which in the toy behaves like the stop-gradient.</p>
+<p>Why is the asymmetry enough? The paper behind the toy works it out for deep linear networks. Write the encoder as a product of <span class="tex">L</span> matrices, the predictor as one more matrix, and block the gradient on the target branch. Then each feature of the data evolves on its own, and the equation that governs it (their Theorem <span data-claim="noisy-features-main-theorem">Theorem 4.2</span>, Eq. <span data-claim="noisy-features-jepa-ode-eq">(7)</span>) differs from the pixel-reconstruction version (Eq. <span data-claim="noisy-features-mae-ode-eq">(8)</span>) by a single exponent. Two numbers describe a feature: its covariance with the target, <span class="tex">\lambda_i</span>, which sets how <em>fast</em> it is learned, and its regression coefficient <span class="tex">\rho_i = \lambda_i / \sigma_i^2</span>, how predictive it is per unit of variance, which sets where its weight <em>ends up</em>:</p>
+<div class="eq" id="eq-fixedpoint" data-build data-viz="viz-collapse"><div class="tex tex-display">
+\htmlData{step=1, link=slow}{\bar{w}_i^{\mathrm{JEPA}}(\infty) = \rho_i^{\,L}}, \qquad \htmlData{step=2, link=noisy}{\bar{w}_i^{\mathrm{MAE}}(\infty) = \rho_i^{\,L/(L+1)}}, \qquad \rho_i = \frac{\lambda_i}{\sigma_i^2}
+</div></div>
+<p class="eqno"><span data-claim="noisy-features-fixed-point-corollary">Corollary 4.3</span> in Littwin et al., "How JEPA Avoids Noisy Features" (<span data-claim="noisy-features-arxiv">2407.03475v1</span>): the weight the encoder gives feature <span class="tex">i</span> after training, for a product of <span class="tex">L</span> layers.</p>
+<ul class="gloss">
+  <li><span class="tex">\bar{w}_i</span>: how much the encoder keeps of feature <span class="tex">i</span> (the norm of its column in the product of the layers). The cloud's width along an axis.</li>
+  <li><span class="tex">\rho_i</span>: between 0 and 1. A clean, predictable feature has <span class="tex">\rho</span> near 1 and is kept at nearly full weight. A noisy feature (large variance, little covariance) has small <span class="tex">\rho</span> and, raised to the power <span class="tex">L</span>, nearly vanishes.</li>
+  <li>The MAE exponent <span class="tex">L/(L+1)</span> is always below 1: pixel reconstruction keeps noisy features too, however deep the encoder. A one-layer JEPA equals an infinitely deep MAE.</li>
+</ul>
+<p>So the asymmetry does two jobs at once. It removes the constant solution (the toy shows what happens without it), and it biases the encoder toward features that are predictive per unit of variance: "JEPA prioritizes influential features, whereas MAE only prioritizes highly covarying features, even if they are noisy". Switch the toy between depth 1 and depth 2 and watch the noisy axis shrink further. The paper's own experiments (deep linear networks of width <span data-claim="noisy-features-fig1-width">100</span> and depth <span data-claim="noisy-features-fig1-depth">5</span>, their Fig. 1) show the learning <em>order</em> inverting between the two objectives when covariance and predictiveness pull in opposite directions.</p>
+
+<h3>The trap in the gift: slow features</h3>
+<div class="aside">
+  <h4>Claim card: a JEPA keeps whatever is slowest (Sobal et al., 2022, <span data-claim="slow-features-arxiv">2211.10831v1</span>)</h4>
+  <p><b>Claim.</b> A JEPA trained to predict the next embedding is satisfied by features that do not change over time. That is a gift when the nuisance changes every frame (the JEPA ignores it without any tuning) and a trap when the nuisance is fixed: a static background becomes the perfect slow feature, the encoder keeps it, and drops the thing that moves.</p>
+  <p><b>How it was measured.</b> Sequences of <span data-claim="slow-features-episode-frames">17</span> frames of a dot moving under known actions on a <span data-claim="slow-features-resolution">28</span>-pixel image, with added noise that is either resampled every frame or fixed for the whole sequence; a conv encoder, a recurrent predictor, and VICReg or InfoNCE terms against collapse (no EMA, no stop-gradient: this paper uses the loss-term route). A frozen linear probe then has to recover the dot's position; the metric is its error.</p>
+  <p><b>Result.</b> With changing noise the JEPA tracks the dot as well as a pixel-reconstruction baseline; with fixed noise it fails while reconstruction still works (their Fig. 3). On a three-dot version, the VICReg JEPA locates the stationary dot with error <span data-claim="slow-features-3dots-vicreg-stationary">0.066</span> and the action-controlled dot with <span data-claim="slow-features-3dots-vicreg-action">0.277</span>, near the random baseline's <span data-claim="slow-features-3dots-random-action">0.235</span>; reconstruction gets both (<span data-claim="slow-features-3dots-recon-action">0.021</span> and <span data-claim="slow-features-3dots-recon-stationary">0.026</span>) (their Table 1).</p>
+  <p><b>What would falsify it.</b> The same JEPA, after the same hyper-parameter search, tracking the dot under fixed noise as well as reconstruction does.</p>
+</div>
+<p>The toy has a preset for this: "fixed background" adds an axis that is perfectly constant across the pair. Its <span class="tex">\rho</span> is 1, so the encoder weights it fully, while the moving feature, whose <span class="tex">\rho</span> is a little below 1, is weighted less, and more so with depth. The two papers describe the same bias from two sides. V-JEPA's answer in the next chapter is to make the masks span time, so that copying the static background does not solve the task.</p>
+
+<h3>The cost of the other route</h3>
+<div class="aside">
+  <h4>Claim card: the loss-term route carries a hidden prior (Assran et al., 2022, <span data-claim="uniform-prior-arxiv">2210.07277v1</span>)</h4>
+  <p><b>Claim.</b> Methods that prevent collapse with an explicit "spread out" term (SimCLR, VICReg, SwAV, MSN) are implicitly doing k-means with equal-sized clusters, and so they assume the data is balanced. Methods without such a term (data2vec's self-distillation, MAE) make no such assumption.</p>
+  <p><b>How it was measured.</b> Pretrain on ImageNet with mini-batches that are either class-balanced (<span data-claim="uniform-prior-balanced-classes">960</span> classes per batch) or deliberately imbalanced (<span data-claim="uniform-prior-imbalanced-classes-others">2</span> classes per batch for VICReg, MSN, MAE and data2vec), same batch size and the same overall sampling of every image; then compare linear probes.</p>
+  <p><b>Result.</b> ImageNet accuracy drops by <span data-claim="uniform-prior-t1-simclr-in1k">-11.2</span> for SimCLR, <span data-claim="uniform-prior-t1-msn-in1k">-17.7</span> for MSN and <span data-claim="uniform-prior-t1-vicreg-in1k">-17.7</span> for VICReg, but only <span data-claim="uniform-prior-t1-data2vec-in1k">-0.8</span> for data2vec and <span data-claim="uniform-prior-t1-mae-in1k">-0.1</span> for MAE (their Table 1). Replacing the uniform prior with the true class frequencies gains <span data-claim="uniform-prior-t2-delta-inat">+3.0</span> on long-tailed iNaturalist (Table 2).</p>
+  <p><b>What would falsify it.</b> VICReg or MSN unchanged under two-class batches, or data2vec and MAE dropping by the same amount.</p>
+</div>
+<p>This is the fork the rest of the page keeps returning to. The asymmetry route (EMA, stop-gradient, predictor) is cheap and prior-free but hard to reason about; the loss-term route is explicit but smuggles in assumptions. LeJEPA, in Act III, is an attempt to have a loss term whose assumption is the <em>right</em> one.</p>
+</section>

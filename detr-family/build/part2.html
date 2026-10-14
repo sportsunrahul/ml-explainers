@@ -1,0 +1,246 @@
+
+<section id="ch-detr-limits" class="chapter">
+<h2>What it cost: long training and small objects</h2>
+<p>The headline result was a clean tie. DETR with a ResNet-50 reached <span data-claim="pg-detr-ap">42.0 AP</span> on COCO, the same as a carefully tuned Faster R-CNN with FPN (<span data-claim="pg-frcnn-ap">42.0 AP</span>), with no anchors and no NMS. But the tie hides two very different profiles.</p>
+<p>On large objects DETR was much better: <span data-claim="pg-detr-apl">61.1</span> versus <span data-claim="pg-frcnn-apl">53.4</span> AP<sub>L</sub>. On small objects it was much worse: <span data-claim="pg-detr-aps">20.5</span> versus <span data-claim="pg-frcnn-aps">26.6</span> AP<sub>S</sub>. And it needed <span data-claim="pg-detr-500">500 epochs</span> of training for the headline number, against <span data-claim="pg-frcnn-109">109 epochs</span> for the baseline.</p>
+<p>The small-object problem traces back to the encoder. Every one of the HW feature-map cells attends to every other, so the cost grows with the square of the number of cells. DETR can only afford the coarse stride-32 map, where a small object may cover a single cell. The long training has more than one suspect, and the next chapters meet them: attention over image features that starts out nearly uniform over thousands of pixels (Deformable DETR's diagnosis), and object queries that carry no clear notion of position (DAB-DETR's). Doubling the resolution (the paper's DC5 variant) multiplies encoder self-attention cost by <span data-claim="pg-detr-dc5-16x">16x</span> and drops speed from <span data-claim="pg-detr-28fps">28</span> to <span data-claim="pg-detr-dc5-12fps">12</span> FPS. Slide the stride to feel the square.</p>
+
+<figure class="viz" id="viz-attn-cost">
+  <span class="badge computed">Computed + sourced</span>
+  <svg class="chart" id="cost-svg" viewBox="0 0 640 300" role="img" aria-label="Dense self-attention pair count by feature stride, and sourced AP and epoch bars"></svg>
+  <div class="controls">
+    <button type="button" id="btn-cost-s32">Stride 32 (DETR)</button>
+    <button type="button" id="btn-cost-s16">Stride 16 (DC5)</button>
+    <button type="button" id="btn-cost-s8">Stride 8</button>
+  </div>
+  <p class="readout" id="cost-readout" aria-live="polite"></p>
+  <figcaption>Left, computed: cells HW and query-key pairs (HW)<sup>2</sup> for an 800 x 1333 image (DETR's largest training size), on a log scale. Right, sourced from DETR Table 1: small- and large-object AP for DETR-R50 and Faster RCNN-FPN+.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('cost-svg'), out = document.getElementById('cost-readout');
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const cells = s => Math.ceil(800 / s) * Math.ceil(1333 / s);
+  const SRC = [ { l: 'small objects', d: 20.5, f: 26.6, cd: 'pg-detr-aps-v', cf: 'pg-frcnn-aps-v' }, { l: 'large objects', d: 61.1, f: 53.4, cd: 'pg-detr-apl-v', cf: 'pg-frcnn-apl-v' } ];
+  const STRIDES = [32, 16, 8];
+  let S = 32, stop = () => {};
+  const hl = { 32: 1, 16: 0, 8: 0 };
+  // Wide: the two panels side by side. Narrow (under 520 px): stacked, so the labels stay readable on a phone.
+  const LAY = {
+    wide: { vw: 640, vh: 300, bx: 30, gap: 90, bw: 60, base: 260, hmax: 200, div: [320, 30, 320, 285],
+      ax: 340, at: 22, ap: 350, agap: 130, abw: 42, astep: 50, abase: 230, leg: [350, 440, 262] },
+    narrow: { vw: 360, vh: 596, bx: 30, gap: 105, bw: 70, base: 250, hmax: 190, div: [10, 292, 350, 292],
+      ax: 10, at: 318, ap: 20, agap: 170, abw: 48, astep: 56, abase: 540, leg: [20, 150, 572] } };
+  const text = (x, y, fill, size, t, extra = {}) => mk('text', { x, y, fill, 'font-size': size, 'font-family': 'system-ui', ...extra }, t);
+  // On a phone the figure badge sits over the first line, so the narrow layout starts one line lower.
+  function clearBadge(narrow, vw, vh) { if (!narrow) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0,24)');
+    while (svg.firstChild) g.append(svg.firstChild); svg.append(g); svg.setAttribute('viewBox', `0 0 ${vw} ${vh + 24}`); }
+  function draw() {
+    const L = svg.clientWidth && svg.clientWidth < 520 ? LAY.narrow : LAY.wide;
+    svg.setAttribute('viewBox', `0 0 ${L.vw} ${L.vh}`);
+    svg.replaceChildren(); const fg = PE.css('--fg'), mu = PE.css('--muted'), red = PE.css('--red'), p2 = PE.css('--panel2');
+    svg.append(text(10, 22, mu, 13, 'query-key pairs per encoder layer (log scale)'));
+    STRIDES.forEach((s, i) => { const n = cells(s), p = n * n, h = L.hmax * Math.log10(p) / 9, x = L.bx + i * L.gap, k = hl[s];
+      svg.append(mk('rect', { x, y: L.base - h, width: L.bw, height: h, rx: 4, fill: PE.mix(p2, red, k) }));
+      svg.append(text(x + L.bw / 2, L.base - 8 - h, PE.mix(mu, fg, k), 12, p >= 1e6 ? (p / 1e6).toFixed(1) + 'M' : p.toLocaleString(), { 'text-anchor': 'middle', 'data-computed': '' }));
+      svg.append(text(x + L.bw / 2, L.base + 20, PE.mix(mu, fg, k), 12, 'stride ' + s, { 'text-anchor': 'middle' })); });
+    svg.append(mk('line', { x1: L.div[0], y1: L.div[1], x2: L.div[2], y2: L.div[3], stroke: PE.css('--rule') }));
+    svg.append(text(L.ax, L.at, mu, 13, 'COCO AP by object size'));
+    SRC.forEach((r, i) => { const x = L.ap + i * L.agap;
+      [[r.d, PE.css('--blue'), r.cd], [r.f, PE.css('--brown'), r.cf]].forEach(([v, c, cid], k) => {
+        const h = v * 3, bx = x + k * L.astep; svg.append(mk('rect', { x: bx, y: L.abase - h, width: L.abw, height: h, rx: 3, fill: c }));
+        svg.append(text(bx + L.abw / 2, L.abase - 6 - h, fg, 12, v.toFixed(1), { 'text-anchor': 'middle', 'data-claim': cid })); });
+      svg.append(text(x + (L.astep + L.abw) / 2, L.abase + 18, mu, 12, r.l, { 'text-anchor': 'middle' })); });
+    [[L.leg[0], '--blue', 'DETR-R50'], [L.leg[1], '--brown', 'Faster RCNN-FPN+']].forEach(([x, c, t]) => {
+      svg.append(mk('rect', { x, y: L.leg[2], width: 10, height: 10, fill: PE.css(c) })); svg.append(text(x + 14, L.leg[2] + 9, mu, 11, t)); });
+    clearBadge(L === LAY.narrow, L.vw, L.vh);
+  }
+  function readout() {
+    const n = cells(S), r = (n * n) / (cells(32) ** 2);
+    out.textContent = `Stride ${S}: ${n.toLocaleString()} cells, so ${(n * n / 1e6).toFixed(1)} million query-key pairs per attention head per layer${S === 32 ? '' : `, ${Math.round(r)}x the stride-32 cost`}.`;
+    document.querySelectorAll('#viz-attn-cost .controls button').forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-cost-s' + S)));
+  }
+  function pick(s) { stop(); S = s; readout(); const to = {}; STRIDES.forEach(t => { to[t] = t === s ? 1 : 0; }); stop = PE.tween(hl, to, 600, draw); }
+  STRIDES.forEach(s => document.getElementById('btn-cost-s' + s).onclick = () => pick(s));
+  new ResizeObserver(draw).observe(svg);
+  PE.onTheme(draw); draw(); readout();
+})();
+</script>
+
+<p>In the paper's own accounting (Appendix A.3), one encoder self-attention layer costs</p>
+<div class="eq"><div class="tex tex-display">\mathcal{O}\big(d^2\,\htmlClass{t-blue}{HW} + d\,(\htmlClass{t-red}{HW})^2\big)</div></div>
+<ul class="gloss">
+  <li><span class="tex">d</span>: the feature width (<span data-claim="pg-detr-d">d = 256</span>). The first term is the linear projections, one per cell.</li>
+  <li>The second term is every cell comparing itself with every other cell. Once HW is in the thousands it dominates, and it is the one that explodes when you ask for finer features.</li>
+</ul>
+<p>The paper names the long schedule and small objects as the "new challenges" of its design. Everything in Act II is an answer to them.</p>
+</section>
+
+<!-- ============================ ACT II ============================ -->
+<p class="kicker"><span class="act-n">Act II</span>Making DETR train fast</p>
+<section id="ch-deformable" class="chapter">
+<h2>Deformable DETR: look at a few points, not every pixel</h2>
+<p>Here is the idea that fixed attention over image features, in the encoder and in the decoder's cross-attention alike. A query does not need to compare itself against every pixel. Give it a <b>reference point</b>, and let it predict a handful of <b class="c-blue">sampling points</b> near it: where to look, and how much to trust each look. No query-key dot products at all; the offsets and the weights both come from the query through one linear layer.</p>
+<p>Deformable DETR uses <span data-claim="pg-ddetr-mk">M = 8, K = 4</span>: eight heads, each sampling four points, on each of <span data-claim="pg-ddetr-l">L = 4</span> feature levels. That is <span data-claim="pg-ddetr-128">128 per query</span> sampled points, no matter how large the feature maps are. Drag the reference point around.</p>
+
+<figure class="viz" id="viz-deform-points">
+  <span class="badge computed">Paper's initialization + toy</span>
+  <canvas id="deform-canvas" tabindex="0" aria-label="Reference point with deformable sampling points; drag or use arrow keys to move it" role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-deform-init">At initialization</button>
+    <button type="button" id="btn-deform-trained">After training (toy)</button>
+    <button type="button" id="btn-deform-single">One level</button>
+    <button type="button" id="btn-deform-multi">Four levels</button>
+    <button type="button" id="btn-deform-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="deform-readout" aria-live="polite"></p>
+  <figcaption>The "initialization" pattern is the paper's (Appendix A.4): head m points in one of 8 compass directions, and its k-th point sits k steps out, with equal weights. "After training" is a toy: the points move onto the object's edges, as the paper's visualizations describe, but these positions are illustrative. With four levels, the same offsets land on coarser maps (strides 8 to 64), so they cover more of the image.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('deform-canvas'), out = document.getElementById('deform-readout');
+  const DIRS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+  const CAR = { x1: .28, y1: .38, x2: .72, y2: .78 };
+  const S = { p: [.5, .58], mode: 'init', multi: false, t: 0, lv: 0 };
+  let stop = () => {}, stopL = () => {};
+  function target(h, k) { // toy "trained" location: spread the head's points along the car's outline
+    const u = (h * 4 + k) / 32, per = 2 * ((CAR.x2 - CAR.x1) + (CAR.y2 - CAR.y1)); let d = u * per;
+    const w = CAR.x2 - CAR.x1, hh = CAR.y2 - CAR.y1;
+    if (d < w) return [CAR.x1 + d, CAR.y1]; d -= w; if (d < hh) return [CAR.x2, CAR.y1 + d]; d -= hh;
+    if (d < w) return [CAR.x2 - d, CAR.y2]; d -= w; return [CAR.x1, CAR.y2 - d];
+  }
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); PE.thing(ctx, CAR, W, H, PE.css('--brown'));
+    const unit = .028, lv = S.lv;
+    [0, 1, 2, 3].forEach(l => { if (l > 0 && lv <= 0) return;
+      const sc = PE.lerp(1, Math.pow(2, l) * .5, lv), alpha = l === 0 ? .9 : lv * (.9 - l * .18), rad = PE.lerp(3.4, 3.2 - l * .4, lv);
+      DIRS.forEach(([dx, dy], h) => { for (let k = 1; k <= 4; k++) {
+        const ix = S.p[0] + dx * k * unit * sc * H / W, iy = S.p[1] + dy * k * unit * sc;
+        const [tx, ty] = target(h, k - 1), x = ix + (tx - ix) * S.t * (l === 0 ? 1 : .6), y = iy + (ty - iy) * S.t * (l === 0 ? 1 : .6);
+        ctx.fillStyle = PE.css('--blue'); ctx.globalAlpha = alpha;
+        ctx.beginPath(); ctx.arc(x * W, y * H, rad, 0, 7); ctx.fill(); ctx.globalAlpha = 1; } }); });
+    ctx.fillStyle = PE.css('--fg'); ctx.beginPath(); ctx.arc(S.p[0] * W, S.p[1] * H, 6, 0, 7); ctx.fill();
+    ctx.strokeStyle = PE.css('--bg'); ctx.lineWidth = 2; ctx.stroke();
+    const dense = Math.ceil(800 / 8) * Math.ceil(1333 / 8), n = S.multi ? 128 : 32;
+    const txt = `${n} sampled points for this query${S.multi ? ' (8 heads x 4 levels x 4 points)' : ' (8 heads x 4 points, one level)'}. Dense attention on one stride-8 map of an 800 x 1333 image would compare against ${dense.toLocaleString()} pixels.`;
+    if (out.textContent !== txt) out.textContent = txt;
+  });
+  function setMode(m) { stop(); S.mode = m; stop = PE.tween(S, { t: m === 'trained' ? 1 : 0 }, 900, cv.redraw);
+    document.getElementById('btn-deform-init').setAttribute('aria-pressed', String(m === 'init'));
+    document.getElementById('btn-deform-trained').setAttribute('aria-pressed', String(m === 'trained')); }
+  function setMulti(v) { stopL(); S.multi = v; stopL = PE.tween(S, { lv: v ? 1 : 0 }, 800, cv.redraw);
+    document.getElementById('btn-deform-single').setAttribute('aria-pressed', String(!v));
+    document.getElementById('btn-deform-multi').setAttribute('aria-pressed', String(v)); }
+  document.getElementById('btn-deform-init').onclick = () => setMode('init');
+  document.getElementById('btn-deform-trained').onclick = () => setMode('trained');
+  document.getElementById('btn-deform-single').onclick = () => setMulti(false);
+  document.getElementById('btn-deform-multi').onclick = () => setMulti(true);
+  document.getElementById('btn-deform-reset').onclick = () => { S.p = [.5, .58]; setMode('init'); setMulti(false); };
+  PE.draggable(el, () => S.p, (x, y) => { S.p = [PE.clamp(x, .03, .97), PE.clamp(y, .05, .95)]; cv.redraw(); });
+  setMode('init'); setMulti(false);
+})();
+</script>
+
+<p>Written out, deformable attention for one query (Deformable DETR Eq. 2) is</p>
+<div class="eq"><div class="tex tex-display">\mathrm{DeformAttn}(\mathbf{z}_q, \mathbf{p}_q, \mathbf{x}) = \sum_{m=1}^{M} \mathbf{W}_m \Big[\sum_{k=1}^{K} \htmlClass{t-green}{A_{mqk}} \cdot \mathbf{W}'_m\, \mathbf{x}\big(\mathbf{p}_q + \htmlClass{t-blue}{\Delta\mathbf{p}_{mqk}}\big)\Big]</div></div>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{z}_q</span>: the query's feature; <span class="tex">\mathbf{p}_q</span>: its reference point.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\Delta\mathbf{p}_{mqk}}</span>: where head m's k-th point looks, relative to the reference point, predicted from <span class="tex">\mathbf{z}_q</span>. Fractional, so the feature is read by bilinear interpolation.</li>
+  <li><span class="tex">\htmlClass{t-green}{A_{mqk}}</span>: how much that look counts; the K weights of a head sum to 1. Also predicted from <span class="tex">\mathbf{z}_q</span>, not from comparing with keys.</li>
+  <li><span class="tex">\mathbf{W}'_m, \mathbf{W}_m</span>: the usual value and output projections.</li>
+</ul>
+<p>The multi-scale version (Eq. 3) is the same sum with an extra loop over the L levels, and one softmax across all L x K points of a head, so a head can weigh fine and coarse evidence against each other. That is FPN-style fusion done by attention itself; adding an actual FPN on top gave no gain in the paper's ablation.</p>
+<p>The effect on training was dramatic. Deformable DETR reached <span data-claim="pg-ddetr-ap">43.8 AP</span> in <span data-claim="pg-ddetr-50">50 epochs</span>, against DETR's <span data-claim="pg-ddetr-detr-ap">42.0 AP</span> in <span data-claim="pg-ddetr-detr-500">500 epochs</span>, and small-object AP rose to <span data-claim="pg-ddetr-aps">26.4</span> AP<sub>S</sub>. Sparse attention also starts out focused, instead of spread uniformly over thousands of pixels, which the paper gives as a reason for the faster convergence. Two variants mattered for the future: <b>iterative box refinement</b>, where each decoder layer corrects the previous layer's box (<span data-claim="pg-ddetr-refine">45.4 AP</span>), and a <b>two-stage</b> version whose queries start from the encoder's best proposals (<span data-claim="pg-ddetr-2stage">46.2 AP</span>). The cost: it runs <span data-claim="pg-ddetr-slower">25% slower</span> than Faster R-CNN at similar FLOPs, because scattered sampling is unfriendly to memory.</p>
+</section>
+
+<section id="ch-anchor-queries" class="chapter">
+<h2>DAB-DETR: a query is a box</h2>
+<p>Back to that loose end: what <em>is</em> an object query? DAB-DETR's answer starts by splitting it in two. A decoder query has a <b>content part</b> (what it has seen so far) and a <b>positional part</b> (where it is looking). In DETR the positional part is an opaque learned vector, and the paper's visualizations show it spreads attention over several unrelated regions at once, which it conjectures is a root cause of the slow training.</p>
+<p>So make the positional part literally a box. Each of the <span data-claim="pg-dab-300">300</span> queries owns an anchor <span class="tex">(\htmlClass{t-blue}{x}, \htmlClass{t-blue}{y}, \htmlClass{t-blue}{w}, \htmlClass{t-blue}{h})</span>. Its center steers where attention looks, its width and height stretch attention into an oval of the right size, and after every decoder layer the box is nudged toward the object. Drag the box, change its size, and watch the positional attention follow.</p>
+
+<figure class="viz" id="viz-anchor-attn">
+  <span class="badge computed">Computed</span>
+  <canvas id="anchor-canvas" tabindex="0" aria-label="Positional attention heatmap for an anchor box; drag or use arrow keys to move it" role="img"></canvas>
+  <div class="controls">
+    <label>width <input type="range" id="anchor-w" min="0.06" max="0.6" step="0.01" value="0.3"></label>
+    <label>height <input type="range" id="anchor-h" min="0.06" max="0.8" step="0.01" value="0.3"></label>
+    <button type="button" id="btn-anchor-mod-on">Size-modulated</button>
+    <button type="button" id="btn-anchor-mod-off">Unmodulated</button>
+    <button type="button" id="btn-anchor-t20">T = 20</button>
+    <button type="button" id="btn-anchor-t10000">T = 10000</button>
+    <button type="button" id="btn-anchor-refine">Refine over 6 layers</button>
+    <button type="button" id="btn-anchor-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="anchor-readout" aria-live="polite"></p>
+  <figcaption>Computed: the heatmap is the softmax over image positions of DAB-DETR's positional attention (Eq. 5, and Eq. 6 when size-modulated), using sine encodings with temperature T (Eq. 8, 128 dimensions per coordinate, coordinates scaled by 2&pi; as in the official code). The reference size w<sub>ref</sub>, h<sub>ref</sub> is fixed at 0.3 here; the paper predicts it from the content query. The paper states T = 20 for all models; the official code uses 20 for image positions and 10000 for queries, so treat the exact sharpness as illustrative. The 6-step refinement uses the logit-space update rule with toy corrections.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('anchor-canvas'), out = document.getElementById('anchor-readout');
+  const wIn = document.getElementById('anchor-w'), hIn = document.getElementById('anchor-h');
+  const GTB = PE.fromC(.66, .56, .22, .5);
+  const HOME = { cx: .35, cy: .45, w: .3, h: .3, m: 1, lt: Math.log(20) };
+  const S = { ...HOME, mod: true, T: 20, trail: [], busy: false };
+  const GX = 96, GY = 48, D = 256;
+  const kernel = (d, T) => { let s = 0; for (let i = 0; i < 64; i++) s += Math.cos(2 * Math.PI * d / Math.pow(T, 2 * i / 128)); return s; };
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); PE.thing(ctx, GTB, W, H, PE.css('--yellow')); PE.strokeBox(ctx, GTB, W, H, PE.css('--yellow'), 1.4, [3, 3]);
+    // m blends unmodulated (0) into size-modulated (1); lt is log T, so the temperature morphs smoothly too.
+    const w = S.w, h = S.h, sx = 1 + S.m * (.3 / w - 1), sy = 1 + S.m * (.3 / h - 1), T = Math.exp(S.lt);
+    wIn.value = w; hIn.value = h;
+    const kx = [], ky = []; for (let i = 0; i < GX; i++) kx.push(kernel((i + .5) / GX - S.cx, T) * sx);
+    for (let j = 0; j < GY; j++) ky.push(kernel((j + .5) / GY - S.cy, T) * sy);
+    let mx = -1e9; const L = []; for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) { const v = (kx[i] + ky[j]) / Math.sqrt(D); L.push(v); if (v > mx) mx = v; }
+    let Z = 0; const P = L.map(v => { const e = Math.exp(v - mx); Z += e; return e; }); let pm = 0; P.forEach((p, i) => { P[i] = p / Z; if (P[i] > pm) pm = P[i]; });
+    // Paint the GX x GY heatmap into a tiny offscreen canvas, then scale it up smoothly.
+    const off = document.createElement('canvas'); off.width = GX; off.height = GY; const oc = off.getContext('2d'), img = oc.createImageData(GX, GY);
+    const rgb = PE.css('--blue').match(/[0-9a-f]{2}/gi).map(h => parseInt(h, 16));
+    P.forEach((p, k) => { img.data.set([rgb[0], rgb[1], rgb[2], Math.round(175 * p / pm)], k * 4); });
+    oc.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, W, H);
+    S.trail.forEach((b, k) => PE.strokeBox(ctx, b, W, H, PE.css('--blue'), 1, [2, 3], .35 + .1 * k));
+    const ab = PE.fromC(S.cx, S.cy, w, h); PE.strokeBox(ctx, ab, W, H, PE.css('--bg'), 5.5, null, .75); PE.strokeBox(ctx, ab, W, H, PE.css('--blue'), 2.4);
+    let near = 0; for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) { const x = (i + .5) / GX, y = (j + .5) / GY;
+      if (Math.abs(x - S.cx) < w / 2 && Math.abs(y - S.cy) < h / 2) near += P[j * GX + i]; }
+    if (!S.busy) out.textContent = `${Math.round(near * 100)}% of the positional attention falls inside the anchor box (${S.mod ? 'size-modulated' : 'unmodulated'}, T = ${S.T}).`;
+    [['btn-anchor-mod-on', S.mod], ['btn-anchor-mod-off', !S.mod], ['btn-anchor-t20', S.T === 20], ['btn-anchor-t10000', S.T === 10000]]
+      .forEach(([id, v]) => document.getElementById(id).setAttribute('aria-pressed', String(v)));
+  });
+  let stop = () => {};
+  // The readout waits for the end of a tween, so a screen reader hears one value, not every frame.
+  const go = (to, ms, done) => { stop(); S.busy = true; stop = PE.tween(S, to, ms, cv.redraw, () => { S.busy = false; cv.redraw(); if (done) done(); }); };
+  const halt = () => { stop(); S.busy = false; };
+  const sig = x => 1 / (1 + Math.exp(-x)), isig = p => Math.log(p / (1 - p));
+  // "Refine" restarts from where the box stood before the first refinement, so pressing it twice equals pressing it once.
+  function refine() {
+    halt(); if (S.trail.length) { const [x, y, w, h] = PE.cxcywh(S.trail[0]); Object.assign(S, { cx: x, cy: y, w, h }); }
+    S.trail = []; const [gx, gy, gw, gh] = PE.cxcywh(GTB); let step = 0;
+    const run = () => { if (step >= 6) return; const cur = [S.cx, S.cy, S.w, S.h], tgt = [gx, gy, gw, gh];
+      S.trail.push(PE.fromC(...cur)); const nxt = cur.map((v, i) => sig(isig(v) + .45 * (isig(tgt[i]) - isig(v))));
+      step++; go({ cx: nxt[0], cy: nxt[1], w: nxt[2], h: nxt[3] }, 420, run); };
+    run();
+  }
+  wIn.oninput = hIn.oninput = () => { halt(); S.w = +wIn.value; S.h = +hIn.value; S.trail = []; cv.redraw(); };
+  const setMod = v => { S.mod = v; go({ m: v ? 1 : 0 }, 700); };
+  const setT = T => { S.T = T; go({ lt: Math.log(T) }, 700); };
+  document.getElementById('btn-anchor-mod-on').onclick = () => setMod(true);
+  document.getElementById('btn-anchor-mod-off').onclick = () => setMod(false);
+  document.getElementById('btn-anchor-t20').onclick = () => setT(20);
+  document.getElementById('btn-anchor-t10000').onclick = () => setT(10000);
+  document.getElementById('btn-anchor-refine').onclick = refine;
+  document.getElementById('btn-anchor-reset').onclick = () => { S.mod = true; S.T = 20; S.trail = []; go({ ...HOME }, 600); };
+  PE.draggable(el, () => [S.cx, S.cy], (x, y) => { halt(); S.cx = PE.clamp(x, .05, .95); S.cy = PE.clamp(y, .05, .95); S.trail = []; cv.redraw(); });
+})();
+</script>
+
+<p>The anchor becomes the positional query in two steps (DAB-DETR Eq. 1-2): encode each of the four numbers with sines and cosines, then map the concatenation through a small MLP shared by all layers.</p>
+<div class="eq"><div class="tex tex-display">P_q = \mathrm{MLP}\big(\mathrm{PE}(\htmlClass{t-blue}{A_q})\big),\qquad \mathrm{PE}(\htmlClass{t-blue}{A_q}) = \mathrm{Cat}\big(\mathrm{PE}(\htmlClass{t-blue}{x_q}), \mathrm{PE}(\htmlClass{t-blue}{y_q}), \mathrm{PE}(\htmlClass{t-blue}{w_q}), \mathrm{PE}(\htmlClass{t-blue}{h_q})\big)</div></div>
+<p>The oval comes from Eq. 6: the similarity between an image position <span class="tex">(x, y)</span> and the anchor center is computed separately along x and along y, and each part is divided by the anchor's size relative to a reference size.</p>
+<div class="eq"><div class="tex tex-display">\mathrm{ModulateAttn} = \Big(\mathrm{PE}(x)\cdot \mathrm{PE}(\htmlClass{t-blue}{x_{\rm ref}})\,\frac{w_{q,\rm ref}}{\htmlClass{t-blue}{w_q}} + \mathrm{PE}(y)\cdot \mathrm{PE}(\htmlClass{t-blue}{y_{\rm ref}})\,\frac{h_{q,\rm ref}}{\htmlClass{t-blue}{h_q}}\Big) \big/ \sqrt{D}</div></div>
+<ul class="gloss">
+  <li>A wide anchor (large <span class="tex">\htmlClass{t-blue}{w_q}</span>) shrinks the x term, so attention flattens and spreads horizontally. A narrow one sharpens it.</li>
+  <li>This happens before the softmax, so it reshapes where the query looks, not what it does with what it finds.</li>
+</ul>
+<p>DAB-DETR also found that the standard temperature <span class="tex">T = 10000</span> in the sine encoding, designed for integer word positions, is a poor fit for box coordinates between 0 and 1; it uses <span data-claim="pg-dab-t20">T=20</span>. Flip between the two temperatures above to see why: at 10000 the attention is nearly flat.</p>
+<p>After each of the six decoder layers a shared head predicts a correction, and the anchor is updated in logit space, <span class="tex">\sigma(\sigma^{-1}(\text{old}) + \Delta)</span>: the rule Deformable DETR prints in its Appendix A.4, which DAB-DETR says it follows. In the paper's ablation, removing this layer-by-layer update costs <span data-claim="pg-dab-update">1.7 AP</span>. The full model reaches <span data-claim="pg-dab-ap">45.7</span> AP in <span data-claim="pg-dab-50">50 epochs</span> (ResNet-50 with dilated last stage and 3 pattern embeddings).</p>
+</section>

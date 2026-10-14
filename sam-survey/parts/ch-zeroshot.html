@@ -1,0 +1,54 @@
+<section id="ch-zeroshot" class="chapter">
+<h2>What prompting buys</h2>
+<p>SAM was never trained on the datasets in this chapter. The authors gave it one click per object on datasets it had not seen and compared it with RITM, the strongest interactive model at one click.</p>
+
+<figure class="viz" id="viz-zeroshot" data-scene="zeroshot">
+  <div class="stage tall"></div>
+  <div class="controls">
+    <button type="button" data-zs="single" id="btn-zeroshot-single">Most confident mask</button>
+    <button type="button" data-zs="oracle" id="btn-zeroshot-oracle">Best of three masks</button>
+    <button type="button" data-cue-reset id="btn-zeroshot-reset">Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Sourced: the bars are the 23 differences printed on SAM v1, Fig. 9a (SAM minus RITM, IoU at one "center" point). The rings for the best of three masks are not printed in the paper; their positions were read from the vector file of the same figure and are approximate. On wider screens, the image type from Table 7 follows each name in brackets.</figcaption>
+</figure>
+
+<p>Before you press <b>Best of three masks</b>, guess: on the datasets where SAM loses, is the right answer missing, or is SAM picking the wrong one of its three answers? The rings answer it. On every dataset, one of the three masks beats RITM. So most of SAM's losses are ranking errors on ambiguous clicks, not missing answers. For example (our reading, not the paper's), a click on a hand in an egocentric video (GTEA) could mean the hand, the arm, or the person.</p>
+
+<div class="claim-card">
+<h4>Claim card: one point, 23 unseen datasets</h4>
+<dl>
+  <dt>Claim</dt><dd>From a single click, SAM returns a valid mask on image distributions it never trained on, better than a dedicated interactive model.</dd>
+  <dt>How measured</dt><dd><span data-claim="sam-zs-n-datasets">23</span> datasets, from microscopy and X-ray to paintings and fisheye driving. The first point sits at the center of the object (the maximum of its distance transform). The metric is mIoU against the dataset's own masks. RITM, FocalClick and SimpleClick are the baselines, at their largest public sizes. Datasets with more than <span data-claim="sam-zs-subsample-cap">15k</span> masks are subsampled to about <span data-claim="sam-zs-subsample-target">10k</span>.</dd>
+  <dt>Result</dt><dd>SAM beats RITM on <span data-claim="sam-zs-wins">16</span> of the 23, by as much as about <span data-claim="sam-zs-max-gain">47</span> IoU. Because IoU cannot tell a wrong-but-valid mask from a bad one, the authors also asked people. Annotators rated <span data-claim="sam-zs-human-masks">1000</span> masks per model on <span data-claim="sam-zs-human-n-datasets">7</span> of the datasets, from 1 (no object) to 10 (no visible errors). SAM's masks scored higher than RITM's on all seven (table below).</dd>
+  <dt>What would falsify it</dt><dd>RITM ahead on most datasets, or human raters preferring RITM's masks where IoU says SAM wins. Neither happened. At more clicks the picture changes: by 5 and 9 points the paper calls SAM "on par" with the dedicated methods, and its curves sit slightly below RITM and SimpleClick there.</dd>
+</dl>
+</div>
+
+<table class="data">
+  <thead><tr><th>Dataset (human study)</th><th>RITM</th><th>SAM, one output</th><th>SAM</th><th>Ground truth</th></tr></thead>
+  <tbody>
+    <tr><td>LVIS v0.5</td><td><span data-claim="sam-zs-rating-ritm-lvis">6.5</span></td><td><span data-claim="sam-zs-rating-single-lvis">7.7</span></td><td><span data-claim="sam-zs-rating-sam-lvis">8.1</span></td><td><span data-claim="sam-zs-rating-gt-lvis">8.5</span></td></tr>
+    <tr><td>VISOR</td><td><span data-claim="sam-zs-rating-ritm-visor">6.3</span></td><td><span data-claim="sam-zs-rating-single-visor">7.5</span></td><td><span data-claim="sam-zs-rating-sam-visor">8.3</span></td><td><span data-claim="sam-zs-rating-gt-visor">8.5</span></td></tr>
+    <tr><td>DRAM</td><td><span data-claim="sam-zs-rating-ritm-dram">5.9</span></td><td><span data-claim="sam-zs-rating-single-dram">6.8</span></td><td><span data-claim="sam-zs-rating-sam-dram">7.7</span></td><td><span data-claim="sam-zs-rating-gt-dram">8.0</span></td></tr>
+    <tr><td>IBD</td><td><span data-claim="sam-zs-rating-ritm-ibd">7.1</span></td><td><span data-claim="sam-zs-rating-single-ibd">7.9</span></td><td><span data-claim="sam-zs-rating-sam-ibd">8.3</span></td><td><span data-claim="sam-zs-rating-gt-ibd">8.4</span></td></tr>
+    <tr><td>NDD20</td><td><span data-claim="sam-zs-rating-ritm-ndd20">6.4</span></td><td><span data-claim="sam-zs-rating-single-ndd20">8.2</span></td><td><span data-claim="sam-zs-rating-sam-ndd20">8.6</span></td><td><span data-claim="sam-zs-rating-gt-ndd20">8.9</span></td></tr>
+    <tr><td>OVIS</td><td><span data-claim="sam-zs-rating-ritm-ovis">6.1</span></td><td colspan="2">see note</td><td><span data-claim="sam-zs-rating-gt-ovis">8.8</span></td></tr>
+    <tr><td>iShape</td><td><span data-claim="sam-zs-rating-ritm-ishape">4.9</span></td><td><span data-claim="sam-zs-rating-single-ishape">6.2</span></td><td><span data-claim="sam-zs-rating-sam-ishape">7.1</span></td><td><span data-claim="sam-zs-rating-gt-ishape">9.3</span></td></tr>
+  </tbody>
+</table>
+<p class="note">Mean ratings from 1 to 10 (SAM v1, Fig. 18 legends). For OVIS the figure legend swaps the two SAM labels, while the text, Fig. 9b and Table 8 say SAM is rated above its one-output version; we leave both numbers out. DRAM and IBD are datasets where SAM loses on IoU but wins with the raters: the masks are valid, just not the ones the dataset drew.</p>
+
+<h3>Composing SAM with other parts</h3>
+<p>A promptable model is a part, not a finished system. The authors wired SAM into four other tasks with no further training, by choosing the prompts:</p>
+<ul>
+  <li><b>Edges.</b> Prompt a <span data-claim="sam-zs-edge-grid">16x16</span> grid of points, take the boundaries of all masks, and thin them. On BSDS500, SAM reaches ODS <span data-claim="sam-zs-edge-sam-ods">.768</span>. That beats the classic zero-shot method Canny (<span data-claim="sam-zs-edge-canny-ods">.600</span>) and comes close to HED (<span data-claim="sam-zs-edge-hed-ods">.788</span>), which was trained on BSDS500. It is below the newest trained model, EDETR (<span data-claim="sam-zs-edge-edetr-ods">.840</span>).</li>
+  <li><b>Object proposals.</b> Prompt a <span data-claim="sam-zs-prop-grid">64x64</span> grid and keep up to 1000 masks. On LVIS v1, mask recall AR@1000 is <span data-claim="sam-zs-prop-sam-all">59.3</span> against <span data-claim="sam-zs-prop-vitdet-all">63.0</span> for ViTDet-H, a detector trained on LVIS. SAM is ahead on rare categories (<span data-claim="sam-zs-prop-sam-rare">65.8</span> vs <span data-claim="sam-zs-prop-vitdet-rare">58.3</span>).</li>
+  <li><b>Instance segmentation.</b> Prompt SAM with ViTDet-H's boxes. Mask AP is lower than ViTDet-H's own masks: <span data-claim="sam-zs-inst-sam-coco-ap">46.5</span> vs <span data-claim="sam-zs-inst-vitdet-coco-ap">51.0</span> on COCO, <span data-claim="sam-zs-inst-sam-lvis-ap">44.7</span> vs <span data-claim="sam-zs-inst-vitdet-lvis-ap">46.6</span> on LVIS v1. Yet when both models were given ground-truth LVIS boxes, people rated SAM's masks higher (<span data-claim="sam-zs-inst-rating-sam">8.1</span> vs <span data-claim="sam-zs-inst-rating-vitdet">7.9</span>). The authors' reading: ViTDet learned the drawing habits of COCO's annotators, and AP rewards that.</li>
+  <li><b>Text to mask.</b> Train SAM to take a CLIP image embedding of the masked object as its prompt; at test time, give it the CLIP <em>text</em> embedding instead, because CLIP puts both in one space. The paper calls this "<span data-claim="sam-lim-text">exploratory and not entirely robust</span>". SAM 3 makes text a first-class prompt (chapter 9).</li>
+</ul>
+<p class="note">Two LVIS versions appear in this chapter. The 23-dataset suite uses LVIS v0.5; proposals and instance segmentation use LVIS v1. Their numbers are not comparable.</p>
+
+<h3>What the authors say it cannot do</h3>
+<p>The limitations section (SAM v1, Sec. 8) is short and specific. SAM can "<span data-claim="sam-lim-fine">miss fine structures</span>", it "<span data-claim="sam-lim-components">hallucinates small disconnected components</span>" at times, and it "<span data-claim="sam-lim-boundaries">does not produce boundaries as crisply</span>" as slower methods that zoom in. Prompts run in real time, but the whole model is "<span data-claim="sam-lim-realtime">not real-time when using a heavy image encoder</span>". And it is "<span data-claim="sam-lim-semantic">unclear how to design simple prompts that implement semantic and panoptic segmentation</span>": SAM finds things, but it does not name them. Each of these became a later paper: HQ-SAM for boundaries, the efficient encoders for speed (chapter 11), SAM 3 for names (chapter 9). The next gap the authors left was time.</p>
+</section>

@@ -1,0 +1,783 @@
+[
+ {
+  "id": "ae-ssim-published",
+  "claim": "AE-SSIM arXiv v1 submission date",
+  "value": "2018-07-05",
+  "loc": "abs.html submission history [v1]",
+  "paper": "AE-SSIM",
+  "arxiv": "1807.02011v3"
+ },
+ {
+  "id": "ae-ssim-version",
+  "claim": "AE-SSIM arXiv version read",
+  "value": "1807.02011v3",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "AE-SSIM",
+  "arxiv": "1807.02011v3"
+ },
+ {
+  "id": "ae-ssim-nanotwice-pix-auroc",
+  "claim": "SSIM autoencoder, pixel-level ROC AUC on NanoTWICE (nanofibrous materials); this paper has no MVTec AD result",
+  "value": "0.966",
+  "loc": "Sec. 4.3 Results text (p6): 'improves from 0.688 to 0.966'; Table 2 bold cells (d=500, K=11, patch 128x128)",
+  "paper": "AE-SSIM",
+  "arxiv": "1807.02011v3",
+  "protocol": "unsupervised, defect-free training patches only; pixel-level ROC over the whole NanoTWICE test set; not MVTec AD"
+ },
+ {
+  "id": "ae-ssim-nanotwice-l2-pix-auroc",
+  "claim": "L2-autoencoder baseline, pixel-level ROC AUC on NanoTWICE (same experiment)",
+  "value": "0.688",
+  "loc": "Sec. 4.3 Results text (p6): 'improves from 0.688 to 0.966'",
+  "paper": "AE-SSIM",
+  "arxiv": "1807.02011v3",
+  "protocol": "unsupervised, defect-free training patches only; pixel-level ROC over the whole NanoTWICE test set; not MVTec AD"
+ },
+ {
+  "id": "uninformed-students-published",
+  "claim": "Uninformed Students arXiv v1 submission date",
+  "value": "2019-11-06",
+  "loc": "abs.html submission history [v1]",
+  "paper": "Uninformed Students",
+  "arxiv": "1911.02357v2"
+ },
+ {
+  "id": "uninformed-students-version",
+  "claim": "Uninformed Students arXiv version read",
+  "value": "1911.02357v2",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "Uninformed Students",
+  "arxiv": "1911.02357v2"
+ },
+ {
+  "id": "uninformed-students-mvtec-aupro-multiscale",
+  "claim": "Uninformed Students, multiscale (p=17, 33, 65 combined), MVTec AD mean normalized area under the PRO curve up to 30% FPR; no image AUROC reported",
+  "value": "0.914",
+  "loc": "Table 3 (p7), row Mean, col Multiscale",
+  "paper": "Uninformed Students",
+  "arxiv": "1911.02357v2",
+  "protocol": "one-class (one model per category), full-shot; metric is AU-PRO to FPR 0.3, not AUROC"
+ },
+ {
+  "id": "uninformed-students-mvtec-aupro-p65",
+  "claim": "Uninformed Students, single scale p=65, MVTec AD mean normalized area under the PRO curve up to 30% FPR",
+  "value": "0.857",
+  "loc": "Table 1, row Mean, col 'Ours p=65'",
+  "paper": "Uninformed Students",
+  "arxiv": "1911.02357v2",
+  "protocol": "one-class (one model per category), full-shot; metric is AU-PRO to FPR 0.3, not AUROC"
+ },
+ {
+  "id": "dn2-published",
+  "claim": "DN2 arXiv v1 submission date",
+  "value": "2020-02-24",
+  "loc": "abs.html submission history [v1]",
+  "paper": "DN2",
+  "arxiv": "2002.10445v1"
+ },
+ {
+  "id": "dn2-version",
+  "claim": "DN2 arXiv version read",
+  "value": "2002.10445v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "DN2",
+  "arxiv": "2002.10445v1"
+ },
+ {
+  "id": "dn2-cifar10-auroc",
+  "claim": "DN2, CIFAR-10 one-class mean ROCAUC (%); this paper has no MVTec AD result",
+  "value": "92.5",
+  "loc": "Table 1 (Anomaly Detection Accuracy on Cifar10), row Avg, col DN2",
+  "paper": "DN2",
+  "arxiv": "2002.10445v1",
+  "protocol": "one-class image-level (one CIFAR-10 class is normal, the rest anomalous), ImageNet-pretrained ResNet features, kNN distance; not MVTec AD"
+ },
+ {
+  "id": "gaussian-ad-published",
+  "claim": "Gaussian AD arXiv v1 submission date",
+  "value": "2020-05-28",
+  "loc": "abs.html submission history [v1]",
+  "paper": "Gaussian AD",
+  "arxiv": "2005.14140v2"
+ },
+ {
+  "id": "gaussian-ad-version",
+  "claim": "Gaussian AD arXiv version read",
+  "value": "2005.14140v2",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "Gaussian AD",
+  "arxiv": "2005.14140v2"
+ },
+ {
+  "id": "gaussian-ad-mvtec-img-auroc",
+  "claim": "Mahalanobis (ours), NPCA 1%, EfficientNet-B4, MVTec AD mean image AUROC (%), SEM 1.2",
+  "value": "95.8",
+  "loc": "Table V, row 'Mahalanobis (ours) / NPCA 1% / EfficientNet-B4', col Mean; also abstract",
+  "paper": "Gaussian AD",
+  "arxiv": "2005.14140v2",
+  "protocol": "one-class, full-shot, image-level only; 5-fold evaluation over each category's training set, mean over categories and folds"
+ },
+ {
+  "id": "gaussian-ad-mvtec-img-auroc-allfeat",
+  "claim": "Mahalanobis (ours), all features (no PCA), EfficientNet-B4, MVTec AD mean image AUROC (%)",
+  "value": "95.2",
+  "loc": "Table V, row 'Mahalanobis (ours) / All Features / EfficientNet-B4', col Mean",
+  "paper": "Gaussian AD",
+  "arxiv": "2005.14140v2",
+  "protocol": "one-class, full-shot, image-level only; 5-fold evaluation over each category's training set"
+ },
+ {
+  "id": "patch-svdd-published",
+  "claim": "Patch SVDD arXiv v1 submission date",
+  "value": "2020-06-29",
+  "loc": "abs.html submission history [v1]",
+  "paper": "Patch SVDD",
+  "arxiv": "2006.16067v2"
+ },
+ {
+  "id": "patch-svdd-version",
+  "claim": "Patch SVDD arXiv version read",
+  "value": "2006.16067v2",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "Patch SVDD",
+  "arxiv": "2006.16067v2"
+ },
+ {
+  "id": "patch-svdd-mvtec-img-auroc",
+  "claim": "Patch SVDD, MVTec AD mean image AUROC (anomaly detection)",
+  "value": "0.921",
+  "loc": "Table 1 left (Task: Anomaly Detection), row 'Patch SVDD (Ours)'",
+  "paper": "Patch SVDD",
+  "arxiv": "2006.16067v2",
+  "protocol": "one-class, full-shot, images downsampled to 256x256 (Appendix)"
+ },
+ {
+  "id": "patch-svdd-mvtec-pix-auroc",
+  "claim": "Patch SVDD, MVTec AD mean pixel AUROC (anomaly segmentation)",
+  "value": "0.957",
+  "loc": "Table 1 right (Task: Anomaly Segmentation), row 'Patch SVDD (Ours)'",
+  "paper": "Patch SVDD",
+  "arxiv": "2006.16067v2",
+  "protocol": "one-class, full-shot, images downsampled to 256x256 (Appendix)"
+ },
+ {
+  "id": "cfa-published",
+  "claim": "CFA arXiv v1 submission date",
+  "value": "2022-06-09",
+  "loc": "abs.html submission history [v1]",
+  "paper": "CFA",
+  "arxiv": "2206.04325v1"
+ },
+ {
+  "id": "cfa-version",
+  "claim": "CFA arXiv version read",
+  "value": "2206.04325v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "CFA",
+  "arxiv": "2206.04325v1"
+ },
+ {
+  "id": "cfa-mvtec-img-auroc",
+  "claim": "CFA++ (WRN50-2), MVTec AD mean image AUROC (%)",
+  "value": "99.5",
+  "loc": "Table 2, row I-AUROC / All, col CFA++; also abstract",
+  "paper": "CFA",
+  "arxiv": "2206.04325v1",
+  "protocol": "one-class, full-shot, WRN50-2, resize 256 then center crop 224; CFA++ ensembles results on cropped and on resized-only inputs (text under Table 2)"
+ },
+ {
+  "id": "cfa-mvtec-pix-auroc",
+  "claim": "CFA++ (WRN50-2), MVTec AD mean pixel AUROC (%)",
+  "value": "98.5",
+  "loc": "Table 2, row P-AUROC / All, col CFA++; also abstract",
+  "paper": "CFA",
+  "arxiv": "2206.04325v1",
+  "protocol": "one-class, full-shot, WRN50-2, resize 256 then center crop 224; CFA++ ensembles results on cropped and on resized-only inputs (text under Table 2)"
+ },
+ {
+  "id": "cfa-mvtec-img-auroc-single",
+  "claim": "CFA (no ensemble, WRN50-2), MVTec AD mean image AUROC (%)",
+  "value": "99.3",
+  "loc": "Table 2, row I-AUROC / All, col CFA",
+  "paper": "CFA",
+  "arxiv": "2206.04325v1",
+  "protocol": "one-class, full-shot, WRN50-2, resize 256 then center crop 224"
+ },
+ {
+  "id": "cfa-mvtec-pix-auroc-single",
+  "claim": "CFA (no ensemble, WRN50-2), MVTec AD mean pixel AUROC (%)",
+  "value": "98.2",
+  "loc": "Table 2, row P-AUROC / All, col CFA",
+  "paper": "CFA",
+  "arxiv": "2206.04325v1",
+  "protocol": "one-class, full-shot, WRN50-2, resize 256 then center crop 224"
+ },
+ {
+  "id": "pni-published",
+  "claim": "PNI arXiv v1 submission date",
+  "value": "2022-11-22",
+  "loc": "abs.html submission history [v1]",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3"
+ },
+ {
+  "id": "pni-version",
+  "claim": "PNI arXiv version read",
+  "value": "2211.12634v3",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3"
+ },
+ {
+  "id": "pni-mvtec-img-auroc",
+  "claim": "PNI (single model, WideResNet-101), MVTec AD mean image AUROC (%)",
+  "value": "99.56",
+  "loc": "Table 2 (v3 PDF p6), row PNI, col AUROC Image; also abstract",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3",
+  "protocol": "one-class, full-shot, WideResNet-101, resize 512 then center crop 480"
+ },
+ {
+  "id": "pni-mvtec-pix-auroc",
+  "claim": "PNI (single model, WideResNet-101), MVTec AD mean pixel AUROC (%)",
+  "value": "98.98",
+  "loc": "Table 2 (v3 PDF p6), row PNI, col AUROC Pixel; also abstract",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3",
+  "protocol": "one-class, full-shot, WideResNet-101, resize 512 then center crop 480"
+ },
+ {
+  "id": "pni-mvtec-aupro",
+  "claim": "PNI (single model), MVTec AD mean AUPRO (%)",
+  "value": "96.05",
+  "loc": "Table 2 (v3 PDF p6), row PNI, col AUPRO Average",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3",
+  "protocol": "one-class, full-shot, WideResNet-101, resize 512 then center crop 480"
+ },
+ {
+  "id": "pni-mvtec-img-auroc-ensemble",
+  "claim": "PNI (Ensemble), MVTec AD mean image AUROC (%)",
+  "value": "99.63",
+  "loc": "Table 2 (v3 PDF p6), row 'PNI (Ensemble)', col AUROC Image",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3",
+  "protocol": "one-class, full-shot, ensemble of backbones, resize 512 then center crop 480"
+ },
+ {
+  "id": "pni-mvtec-pix-auroc-ensemble",
+  "claim": "PNI (Ensemble), MVTec AD mean pixel AUROC (%)",
+  "value": "99.06",
+  "loc": "Table 2 (v3 PDF p6), row 'PNI (Ensemble)', col AUROC Pixel",
+  "paper": "PNI",
+  "arxiv": "2211.12634v3",
+  "protocol": "one-class, full-shot, ensemble of backbones, resize 512 then center crop 480"
+ },
+ {
+  "id": "reconpatch-published",
+  "claim": "ReConPatch arXiv v1 submission date",
+  "value": "2023-05-26",
+  "loc": "abs.html submission history [v1]",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3"
+ },
+ {
+  "id": "reconpatch-version",
+  "claim": "ReConPatch arXiv version read",
+  "value": "2305.16713v3",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3"
+ },
+ {
+  "id": "reconpatch-mvtec-img-auroc",
+  "claim": "ReConPatch ensemble (WRN-101 + RNext-101 + DenseN-201), MVTec AD mean image AUROC (%)",
+  "value": "99.72",
+  "loc": "Table 6, row Detection, col Ours (480x480); also abstract",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "protocol": "one-class, full-shot, 3-backbone ensemble, 480x480"
+ },
+ {
+  "id": "reconpatch-mvtec-pix-auroc",
+  "claim": "ReConPatch ensemble (WRN-101 + RNext-101 + DenseN-201), MVTec AD mean pixel AUROC (%)",
+  "value": "98.67",
+  "loc": "Table 6, row Segmentation, col Ours (480x480)",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "protocol": "one-class, full-shot, 3-backbone ensemble, 480x480"
+ },
+ {
+  "id": "reconpatch-mvtec-img-auroc-wrn50",
+  "claim": "ReConPatch single model (WRN-50), MVTec AD mean image AUROC (%)",
+  "value": "99.56",
+  "loc": "Table 5, row Average, col Ours (WRN-50, 224x224), first value of '(99.56, 98.18)'",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "protocol": "one-class, full-shot, WRN-50, 224x224"
+ },
+ {
+  "id": "reconpatch-mvtec-pix-auroc-wrn50",
+  "claim": "ReConPatch single model (WRN-50), MVTec AD mean pixel AUROC (%)",
+  "value": "98.18",
+  "loc": "Table 5, row Average, col Ours (WRN-50, 224x224), second value of '(99.56, 98.18)'",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "protocol": "one-class, full-shot, WRN-50, 224x224"
+ },
+ {
+  "id": "reconpatch-mvtec-img-auroc-wrn101",
+  "claim": "ReConPatch single model (WRN-101), MVTec AD mean image AUROC (%)",
+  "value": "99.62",
+  "loc": "Table 5, row Average, col Ours (WRN-101, 480x480), first value of '(99.62, 98.53)'",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "protocol": "one-class, full-shot, WRN-101, 480x480"
+ },
+ {
+  "id": "reconpatch-mvtec-pix-auroc-wrn101",
+  "claim": "ReConPatch single model (WRN-101), MVTec AD mean pixel AUROC (%)",
+  "value": "98.53",
+  "loc": "Table 5, row Average, col Ours (WRN-101, 480x480), second value of '(99.62, 98.53)'",
+  "paper": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "protocol": "one-class, full-shot, WRN-101, 480x480"
+ },
+ {
+  "id": "differnet-published",
+  "claim": "DifferNet arXiv v1 submission date",
+  "value": "2020-08-28",
+  "loc": "abs.html submission history [v1]",
+  "paper": "DifferNet",
+  "arxiv": "2008.12577v1"
+ },
+ {
+  "id": "differnet-version",
+  "claim": "DifferNet arXiv version read",
+  "value": "2008.12577v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "DifferNet",
+  "arxiv": "2008.12577v1"
+ },
+ {
+  "id": "differnet-mvtec-img-auroc",
+  "claim": "DifferNet, MVTec AD mean image AUROC (%); no pixel metric",
+  "value": "94.9",
+  "loc": "Table 1, row Average, col 'DifferNet (ours)'",
+  "paper": "DifferNet",
+  "arxiv": "2008.12577v1",
+  "protocol": "one-class, full-shot, image-level only; AlexNet features at 3 scales (448x448, 224x224, 112x112 inputs)"
+ },
+ {
+  "id": "differnet-mvtec-img-auroc-16shot",
+  "claim": "DifferNet trained on 16 images per category, MVTec AD mean image AUROC (%)",
+  "value": "87.3",
+  "loc": "Table 1, row Average, col 'DifferNet (16 shots)'",
+  "paper": "DifferNet",
+  "arxiv": "2008.12577v1",
+  "protocol": "one-class, 16-shot, image-level only"
+ },
+ {
+  "id": "cflow-ad-published",
+  "claim": "CFLOW-AD arXiv v1 submission date",
+  "value": "2021-07-27",
+  "loc": "abs.html submission history [v1]",
+  "paper": "CFLOW-AD",
+  "arxiv": "2107.12571v1"
+ },
+ {
+  "id": "cflow-ad-version",
+  "claim": "CFLOW-AD arXiv version read",
+  "value": "2107.12571v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "CFLOW-AD",
+  "arxiv": "2107.12571v1"
+ },
+ {
+  "id": "cflow-ad-mvtec-img-auroc",
+  "claim": "CFLOW-AD (WideResNet-50), MVTec AD mean image AUROC (%)",
+  "value": "98.26",
+  "loc": "Table 4, row 'CFLOW-AD (ours)', col AUROC Detection",
+  "paper": "CFLOW-AD",
+  "arxiv": "2107.12571v1",
+  "protocol": "one-class, full-shot, WideResNet-50, per-class best hyperparameters from the ablation (input 256x256 or 512x512 per class, Table 3), mean of 4 runs"
+ },
+ {
+  "id": "cflow-ad-mvtec-pix-auroc",
+  "claim": "CFLOW-AD (WideResNet-50), MVTec AD mean pixel AUROC (%)",
+  "value": "98.62",
+  "loc": "Table 4, row 'CFLOW-AD (ours)', col AUROC Localization",
+  "paper": "CFLOW-AD",
+  "arxiv": "2107.12571v1",
+  "protocol": "one-class, full-shot, WideResNet-50, per-class best hyperparameters from the ablation (input 256x256 or 512x512 per class, Table 3), mean of 4 runs"
+ },
+ {
+  "id": "cflow-ad-mvtec-aupro",
+  "claim": "CFLOW-AD (WideResNet-50), MVTec AD mean AUPRO (%)",
+  "value": "94.60",
+  "loc": "Table 4, row 'CFLOW-AD (ours)', col AUPRO Localization",
+  "paper": "CFLOW-AD",
+  "arxiv": "2107.12571v1",
+  "protocol": "one-class, full-shot, WideResNet-50, per-class best hyperparameters from the ablation (input 256x256 or 512x512 per class, Table 3), mean of 4 runs"
+ },
+ {
+  "id": "cs-flow-published",
+  "claim": "CS-Flow arXiv v1 submission date",
+  "value": "2021-10-06",
+  "loc": "abs.html submission history [v1]",
+  "paper": "CS-Flow",
+  "arxiv": "2110.02855v1"
+ },
+ {
+  "id": "cs-flow-version",
+  "claim": "CS-Flow arXiv version read",
+  "value": "2110.02855v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "CS-Flow",
+  "arxiv": "2110.02855v1"
+ },
+ {
+  "id": "cs-flow-mvtec-img-auroc",
+  "claim": "CS-Flow (full training set), MVTec AD mean image AUROC (%); no pixel metric",
+  "value": "98.7",
+  "loc": "Table 1, row Average, col 'CS-Flow (ours) (16 shots/full set)', second value of '93.5 98.7'",
+  "paper": "CS-Flow",
+  "arxiv": "2110.02855v1",
+  "protocol": "one-class, full-shot, image-level only; EfficientNet-B5 features at 3 scales (768x768, 384x384, 192x192 inputs)"
+ },
+ {
+  "id": "cs-flow-mvtec-img-auroc-16shot",
+  "claim": "CS-Flow trained on 16 images per category, MVTec AD mean image AUROC (%)",
+  "value": "93.5",
+  "loc": "Table 1, row Average, col 'CS-Flow (ours) (16 shots/full set)', first value",
+  "paper": "CS-Flow",
+  "arxiv": "2110.02855v1",
+  "protocol": "one-class, 16-shot, image-level only"
+ },
+ {
+  "id": "msflow-published",
+  "claim": "MSFlow arXiv v1 submission date",
+  "value": "2023-08-29",
+  "loc": "abs.html submission history [v1]",
+  "paper": "MSFlow",
+  "arxiv": "2308.15300v1"
+ },
+ {
+  "id": "msflow-version",
+  "claim": "MSFlow arXiv version read",
+  "value": "2308.15300v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "MSFlow",
+  "arxiv": "2308.15300v1"
+ },
+ {
+  "id": "msflow-mvtec-img-auroc",
+  "claim": "MSFlow (WRN-50), MVTec AD mean image AUROC (%)",
+  "value": "99.7",
+  "loc": "Table I, row 'Total Average', col MSFlow; also abstract",
+  "paper": "MSFlow",
+  "arxiv": "2308.15300v1",
+  "protocol": "one-class, full-shot, WRN-50, 512x512 (256x256 for transistor)"
+ },
+ {
+  "id": "msflow-mvtec-pix-auroc",
+  "claim": "MSFlow (WRN-50), MVTec AD mean pixel AUROC (%)",
+  "value": "98.8",
+  "loc": "Table II, row 'Total Average', col MSFlow, first value of '98.8 / 97.1'",
+  "paper": "MSFlow",
+  "arxiv": "2308.15300v1",
+  "protocol": "one-class, full-shot, WRN-50, 512x512 (256x256 for transistor)"
+ },
+ {
+  "id": "msflow-mvtec-pro",
+  "claim": "MSFlow (WRN-50), MVTec AD mean PRO (%)",
+  "value": "97.1",
+  "loc": "Table II, row 'Total Average', col MSFlow, second value of '98.8 / 97.1'",
+  "paper": "MSFlow",
+  "arxiv": "2308.15300v1",
+  "protocol": "one-class, full-shot, WRN-50, 512x512 (256x256 for transistor)"
+ },
+ {
+  "id": "nsa-published",
+  "claim": "NSA arXiv v1 submission date",
+  "value": "2021-09-30",
+  "loc": "abs.html submission history [v1]",
+  "paper": "NSA",
+  "arxiv": "2109.15222v3"
+ },
+ {
+  "id": "nsa-version",
+  "claim": "NSA arXiv version read",
+  "value": "2109.15222v3",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "NSA",
+  "arxiv": "2109.15222v3"
+ },
+ {
+  "id": "nsa-mvtec-img-auroc",
+  "claim": "NSA (logistic), MVTec AD mean image AUROC (%), standard error 0.3 over 5 seeds",
+  "value": "97.2",
+  "loc": "Table 1, row 'overall average', col 'NSA (logistic)'; also abstract",
+  "paper": "NSA",
+  "arxiv": "2109.15222v3",
+  "protocol": "one-class, full-shot, no external data; objects resized to 256x256 with 224x224 center crop at test, textures 256x256; mean over 5 seeds"
+ },
+ {
+  "id": "nsa-mvtec-pix-auroc",
+  "claim": "NSA (logistic), MVTec AD mean pixel AUROC (%)",
+  "value": "96.3",
+  "loc": "Table 2, row 'overall average', col 'NSA (logistic)'",
+  "paper": "NSA",
+  "arxiv": "2109.15222v3",
+  "protocol": "one-class, full-shot, no external data; objects resized to 256x256 with 224x224 center crop at test, textures 256x256; mean over 5 seeds"
+ },
+ {
+  "id": "memseg-published",
+  "claim": "MemSeg arXiv v1 submission date",
+  "value": "2022-05-02",
+  "loc": "abs.html submission history [v1]",
+  "paper": "MemSeg",
+  "arxiv": "2205.00908v1"
+ },
+ {
+  "id": "memseg-version",
+  "claim": "MemSeg arXiv version read",
+  "value": "2205.00908v1",
+  "loc": "abs.html (the PDF has no arXiv stamp)",
+  "paper": "MemSeg",
+  "arxiv": "2205.00908v1"
+ },
+ {
+  "id": "memseg-mvtec-img-auroc",
+  "claim": "MemSeg, MVTec AD mean image AUROC (%)",
+  "value": "99.56",
+  "loc": "Table 1 (PDF p9; no LaTeX source downloaded), row Average, col Ours, first value of '(99.56,98.84)'; also abstract",
+  "paper": "MemSeg",
+  "arxiv": "2205.00908v1",
+  "protocol": "one-class, full-shot, ResNet18 encoder, input 256x256"
+ },
+ {
+  "id": "memseg-mvtec-pix-auroc",
+  "claim": "MemSeg, MVTec AD mean pixel AUROC (%)",
+  "value": "98.84",
+  "loc": "Table 1 (PDF p9; no LaTeX source downloaded), row Average, col Ours, second value of '(99.56,98.84)'; also abstract",
+  "paper": "MemSeg",
+  "arxiv": "2205.00908v1",
+  "protocol": "one-class, full-shot, ResNet18 encoder, input 256x256"
+ },
+ {
+  "id": "dsr-published",
+  "claim": "DSR arXiv v1 submission date",
+  "value": "2022-08-02",
+  "loc": "abs.html submission history [v1]",
+  "paper": "DSR",
+  "arxiv": "2208.01521v2"
+ },
+ {
+  "id": "dsr-version",
+  "claim": "DSR arXiv version read",
+  "value": "2208.01521v2",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "DSR",
+  "arxiv": "2208.01521v2"
+ },
+ {
+  "id": "dsr-mvtec-img-auroc",
+  "claim": "DSR, MVTec AD mean image AUROC (%)",
+  "value": "98.2",
+  "loc": "Table 3, row DSR, col average",
+  "paper": "DSR",
+  "arxiv": "2208.01521v2",
+  "protocol": "one-class, full-shot"
+ },
+ {
+  "id": "dsr-mvtec-pix-ap",
+  "claim": "DSR, MVTec AD mean pixel-level AP (%); the paper reports AP, not pixel AUROC",
+  "value": "70.2",
+  "loc": "Table 4, row DSR, col average",
+  "paper": "DSR",
+  "arxiv": "2208.01521v2",
+  "protocol": "one-class, full-shot; metric is average precision"
+ },
+ {
+  "id": "simplenet-published",
+  "claim": "SimpleNet arXiv v1 submission date",
+  "value": "2023-03-27",
+  "loc": "abs.html submission history [v1]",
+  "paper": "SimpleNet",
+  "arxiv": "2303.15140v2"
+ },
+ {
+  "id": "simplenet-version",
+  "claim": "SimpleNet arXiv version read",
+  "value": "2303.15140v2",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "SimpleNet",
+  "arxiv": "2303.15140v2"
+ },
+ {
+  "id": "simplenet-mvtec-img-auroc",
+  "claim": "SimpleNet (WideResNet50), MVTec AD mean image AUROC (%)",
+  "value": "99.6",
+  "loc": "Table 1, row Average, col SimpleNet, first value of '99.6/98.1'; also abstract",
+  "paper": "SimpleNet",
+  "arxiv": "2303.15140v2",
+  "protocol": "one-class, full-shot, WideResNet50, resize 256 then center crop 224"
+ },
+ {
+  "id": "simplenet-mvtec-pix-auroc",
+  "claim": "SimpleNet (WideResNet50), MVTec AD mean pixel AUROC (%)",
+  "value": "98.1",
+  "loc": "Table 1, row Average, col SimpleNet, second value of '99.6/98.1'",
+  "paper": "SimpleNet",
+  "arxiv": "2303.15140v2",
+  "protocol": "one-class, full-shot, WideResNet50, resize 256 then center crop 224"
+ },
+ {
+  "id": "simplenet-fps",
+  "claim": "SimpleNet inference frame rate",
+  "value": "77 FPS",
+  "loc": "Abstract: '77 FPS on a 3080ti GPU'",
+  "paper": "SimpleNet",
+  "arxiv": "2303.15140v2",
+  "protocol": "GPU: 3080ti (abstract); batch size not stated in the abstract"
+ },
+ {
+  "id": "glass-published",
+  "claim": "GLASS arXiv v1 submission date",
+  "value": "2024-07-12",
+  "loc": "abs.html submission history [v1]",
+  "paper": "GLASS",
+  "arxiv": "2407.09359v1"
+ },
+ {
+  "id": "glass-version",
+  "claim": "GLASS arXiv version read",
+  "value": "2407.09359v1",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "GLASS",
+  "arxiv": "2407.09359v1"
+ },
+ {
+  "id": "glass-mvtec-img-auroc",
+  "claim": "GLASS-j, MVTec AD mean image AUROC (%)",
+  "value": "99.9",
+  "loc": "Table 1, row Average, col GLASS-j, first value of '99.9/99.3'; also abstract",
+  "paper": "GLASS",
+  "arxiv": "2407.09359v1",
+  "protocol": "one-class, full-shot, WideResNet50 (level2 + level3), resize and center crop to 288x288; GLASS-j picks GLASS-m or GLASS-h per category by image-level spectrogram analysis"
+ },
+ {
+  "id": "glass-mvtec-pix-auroc",
+  "claim": "GLASS-j, MVTec AD mean pixel AUROC (%)",
+  "value": "99.3",
+  "loc": "Table 1, row Average, col GLASS-j, second value of '99.9/99.3'",
+  "paper": "GLASS",
+  "arxiv": "2407.09359v1",
+  "protocol": "one-class, full-shot, WideResNet50 (level2 + level3), resize and center crop to 288x288; GLASS-j picks GLASS-m or GLASS-h per category by image-level spectrogram analysis"
+ },
+ {
+  "id": "glass-mvtec-img-auroc-m",
+  "claim": "GLASS-m (default variant, manifold hypothesis), MVTec AD mean image AUROC (%)",
+  "value": "99.7",
+  "loc": "Table 1, row Average, col GLASS-m, first value of '99.7/99.1'",
+  "paper": "GLASS",
+  "arxiv": "2407.09359v1",
+  "protocol": "one-class, full-shot, WideResNet50 (level2 + level3), 288x288"
+ },
+ {
+  "id": "glass-mvtec-pix-auroc-m",
+  "claim": "GLASS-m (default variant, manifold hypothesis), MVTec AD mean pixel AUROC (%)",
+  "value": "99.1",
+  "loc": "Table 1, row Average, col GLASS-m, second value of '99.7/99.1'",
+  "paper": "GLASS",
+  "arxiv": "2407.09359v1",
+  "protocol": "one-class, full-shot, WideResNet50 (level2 + level3), 288x288"
+ },
+ {
+  "id": "stpm-published",
+  "claim": "STPM arXiv v1 submission date",
+  "value": "2021-03-07",
+  "loc": "abs.html submission history [v1]",
+  "paper": "STPM",
+  "arxiv": "2103.04257v3"
+ },
+ {
+  "id": "stpm-version",
+  "claim": "STPM arXiv version read",
+  "value": "2103.04257v3",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "STPM",
+  "arxiv": "2103.04257v3"
+ },
+ {
+  "id": "stpm-mvtec-img-auroc",
+  "claim": "STPM, MVTec AD mean image AUC-ROC",
+  "value": "0.955",
+  "loc": "Table 2 (image-level anomaly detection), col Ours",
+  "paper": "STPM",
+  "arxiv": "2103.04257v3",
+  "protocol": "one-class, full-shot, ResNet-18 teacher and student (conv2_x, conv3_x, conv4_x)"
+ },
+ {
+  "id": "stpm-mvtec-pix-auroc",
+  "claim": "STPM, MVTec AD mean pixel AUC-ROC",
+  "value": "0.970",
+  "loc": "Table 1 (pixel-level), row Mean, bottom line (AUC-ROC), col Ours",
+  "paper": "STPM",
+  "arxiv": "2103.04257v3",
+  "protocol": "one-class, full-shot, ResNet-18 teacher and student"
+ },
+ {
+  "id": "stpm-mvtec-pro",
+  "claim": "STPM, MVTec AD mean PRO",
+  "value": "0.921",
+  "loc": "Table 1 (pixel-level), row Mean, top line (PRO), col Ours",
+  "paper": "STPM",
+  "arxiv": "2103.04257v3",
+  "protocol": "one-class, full-shot, ResNet-18 teacher and student"
+ },
+ {
+  "id": "rd4ad-published",
+  "claim": "Reverse Distillation arXiv v1 submission date",
+  "value": "2022-01-26",
+  "loc": "abs.html submission history [v1]",
+  "paper": "Reverse Distillation",
+  "arxiv": "2201.10703v2"
+ },
+ {
+  "id": "rd4ad-version",
+  "claim": "Reverse Distillation arXiv version read",
+  "value": "2201.10703v2",
+  "loc": "abs.html; PDF stamp p1",
+  "paper": "Reverse Distillation",
+  "arxiv": "2201.10703v2"
+ },
+ {
+  "id": "rd4ad-mvtec-img-auroc",
+  "claim": "Reverse Distillation (WideResNet50, 256x256), MVTec AD mean image AUROC (%)",
+  "value": "98.5",
+  "loc": "Table 1, row 'Total Average', last col Ours (image size 256)",
+  "paper": "Reverse Distillation",
+  "arxiv": "2201.10703v2",
+  "protocol": "one-class, full-shot, WideResNet50 teacher, 256x256"
+ },
+ {
+  "id": "rd4ad-mvtec-pix-auroc",
+  "claim": "Reverse Distillation (WideResNet50, 256x256), MVTec AD mean pixel AUROC (%)",
+  "value": "97.8",
+  "loc": "Table 2, row 'Total Average', last col Ours, first value of '97.8/93.9'",
+  "paper": "Reverse Distillation",
+  "arxiv": "2201.10703v2",
+  "protocol": "one-class, full-shot, WideResNet50 teacher, 256x256"
+ },
+ {
+  "id": "rd4ad-mvtec-pro",
+  "claim": "Reverse Distillation (WideResNet50, 256x256), MVTec AD mean PRO (%)",
+  "value": "93.9",
+  "loc": "Table 2, row 'Total Average', last col Ours, second value of '97.8/93.9'",
+  "paper": "Reverse Distillation",
+  "arxiv": "2201.10703v2",
+  "protocol": "one-class, full-shot, WideResNet50 teacher, 256x256"
+ }
+]

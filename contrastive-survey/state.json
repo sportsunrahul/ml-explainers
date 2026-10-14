@@ -1,0 +1,124 @@
+{
+  "slug": "contrastive-survey",
+  "stage": "done",
+  "created": "2026-10-13",
+  "prompt": "Literature survey of contrastive learning: CPC/InfoNCE, instance discrimination, MoCo v1-v3, SimCLR, alignment/uniformity, temperature, hard and false negatives, SwAV, Barlow Twins, dimensional collapse, SupCon, CLIP vs SigLIP. Foundations for the existing VLM, OVD and JEPA surveys.",
+  "reader_background": "explain from scratch; assume basic deep learning only",
+  "mode": "survey",
+  "narration": "none: long page only, NO atlas (steps 4-7 skipped; cue ids and player hooks still built)",
+  "atlas": false,
+  "compute": {
+    "probed": null,
+    "note": "no narration chosen; pod not probed"
+  },
+  "scope_assumption": "vision-centric; text embeddings (SimCSE, DPR) offered as an optional branch",
+  "cross_links": {
+    "jepa-survey": "BYOL, SimSiam, VICReg, DINO: one paragraph + link, not re-explained",
+    "vlm-survey": "CLIP, InfoNCE toy figure, SigLIP: one delta chapter here",
+    "ovd-survey": "CLIP inside detectors: pointer only"
+  },
+  "papers_proposed": {
+    "spine": [
+      "1807.03748v2",
+      "1805.01978v1",
+      "1911.05722v3",
+      "2003.04297v1",
+      "2104.02057v4",
+      "2002.05709v3",
+      "2005.10242v10",
+      "2012.09740v2",
+      "2010.04592v2",
+      "2007.00224v3",
+      "2006.09882v5",
+      "2103.03230v3",
+      "2110.09348v3",
+      "2004.11362v5",
+      "2103.00020v1",
+      "2303.15343v4"
+    ],
+    "branches": [
+      "1906.05849v5",
+      "1905.09272v3",
+      "2006.10029v2",
+      "2005.10243v3",
+      "1905.06922v1",
+      "1907.13625v2",
+      "1902.09229v1",
+      "2106.04156v7",
+      "2110.06848v3",
+      "2006.07733v3",
+      "2011.10566v1",
+      "2105.04906v3",
+      "2104.14294v2",
+      "2304.07193v2",
+      "2508.10104v1",
+      "2111.07832v3",
+      "2011.09157v2",
+      "2103.10957v2",
+      "1503.03832v3",
+      "2102.05918v2",
+      "2212.07143v2",
+      "2309.16671v6",
+      "2502.14786v1",
+      "2504.01017v1",
+      "2504.13181v2"
+    ],
+    "optional_text_branch": [
+      "2104.08821v4",
+      "2004.04906v3"
+    ],
+    "non_arxiv_primary": [
+      "Chopra, Hadsell, LeCun 2005 (CVPR) siamese similarity metric",
+      "Hadsell, Chopra, LeCun 2006 (CVPR) DrLIM contrastive loss",
+      "Gutmann, Hyvarinen 2010 (AISTATS) noise-contrastive estimation",
+      "Sohn 2016 (NeurIPS) N-pair loss"
+    ],
+    "map": "arXiv title/abstract counts by year 2017-2026 with a title-keyword domain split; notes/scan/"
+  },
+  "arxiv_scan": {
+    "date": "2026-10-13",
+    "file": "notes/scan/arxiv-counts-2026-10-13.json",
+    "status": "done 2026-10-13: 100 count rows (2026 partial through 2026-10-13)"
+  },
+  "approvals": {
+    "checkpoint-0": {
+      "date": "2026-10-13",
+      "narration": "none (user)",
+      "atlas": "none (user)",
+      "scope": "approved 2026-10-13 as proposed: compact 10 chapters + interlude, vision only, generic wording, 16 spine, 25 branches, 2 x 3D (ch6 sphere, ch8 collapse)"
+    },
+    "checkpoint-2": {
+      "date": "2026-10-13",
+      "outline": "no objection; user asked: \"keep the chapter as if you are teaching me the concept\"",
+      "chapter1": "rewritten as a lesson (question, h3 steps, worked example, details.check, recap); teaching rules in notes/build-brief.md"
+    }
+  },
+  "build": {
+    "parts": "parts/ (head.html, body-top.html, lib-*.html from skill assets, kit/*.js, ch-*.html, ORDER)",
+    "script": "bash build.sh [ORDER] [OUTDIR] [--no-check]",
+    "checkpoint2": "hero (kit/10-hero.js, sim build/sim/hero2.js) + ch-compare (kit/20-pullpush.js, notes/sim-pullpush.txt) built; check-page PASS 2026-10-13",
+    "plan": {
+      "b-map": "ch-map (kits 25-29)",
+      "b-infonce": "ch-infonce (30-39)",
+      "b-moco": "ch-moco (40-49)",
+      "b-simclr": "ch-simclr + ch-step (50-59)",
+      "b-sphere": "ch-sphere + ch-negatives (60-74)",
+      "b-beyond": "ch-beyond (75-84)",
+      "b-labels": "ch-supcon + ch-clip (85-94)",
+      "me": "ch-guide, ch-summary, ch-deeper after the builders"
+    },
+    "final": {
+      "date": "2026-10-13",
+      "page": "explainer.html (1.77 MB, 10 chapters + interlude + guide, summary, deeper; 20 figures, 699 KaTeX expressions), check-page PASS, figure shots 1280 dark/light and 375 light with no console errors",
+      "reviews": "notes/factcheck-page-{1,2}.md (23 problems, all applied), notes/review-learner.md (teaching review, applied by builders)",
+      "incident": "sources/ deleted outside this project around 17:39 on 2026-10-13 (all sibling surveys lost sources/ too); re-fetched with build/tools/fetch.sh",
+      "siamese": "2026-10-14: viz-siamflow ArchFlow stepper added to ch-compare at user request; check-page PASS"
+    }
+  },
+  "understand": {
+    "notes": "notes/papers/*.md (46), notes/understanding.md, notes/outline-feedback.md (folded into outline.md)",
+    "claims": "notes/claims/{A..E}.json, 896 claims, 6 uncertain (2026-10-13)",
+    "factcheck": "done 2026-10-13: 896 claims (+1 split), 0 wrong values, 31 loc/wording fixes applied; logs notes/factcheck-claims-{AE,B,CD}.md; notes-level corrections in understanding.md"
+  },
+  "cleanup": "2026-10-14: sources/ and build/ images moved to ~/.Trash/contrastive-survey-cleanup-2026-10-14/ (user approved)"
+}

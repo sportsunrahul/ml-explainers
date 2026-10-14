@@ -1,0 +1,65 @@
+<p class="kicker"><span class="act-n">Act VI</span>Choosing a method</p>
+
+<section id="ch-speed" class="chapter">
+<h2>Speed versus accuracy, desktop and Jetson</h2>
+<p>Accuracy tables hide the other half of the choice: a line that inspects twenty parts per second gives each part only 50 milliseconds. Here are the published timings, device by device, with the accuracy each paper reports next to them.</p>
+
+<figure class="viz" id="viz-speed">
+  <span class="badge sourced">Sourced</span>
+  <div class="speed-chart" id="speed-chart" role="img" aria-label="Scatter chart: latency per image on a logarithmic horizontal axis, image AUROC on the vertical axis, one point per method and device. A vertical red line marks the time budget per part for the chosen line speed; methods to the right of it cannot keep up."></div>
+  <div class="controls" role="group" aria-label="Device">
+    <span>Device</span>
+    <button type="button" id="btn-speed-desktop" aria-pressed="true">Desktop GPU</button>
+    <button type="button" id="btn-speed-jetson" aria-pressed="false">Jetson</button>
+    <button type="button" id="btn-speed-cpu" aria-pressed="false">CPU and Raspberry Pi</button>
+  </div>
+  <div class="controls" role="group" aria-label="Desktop GPU" id="speed-gpus">
+    <span>GPU</span>
+    <button type="button" id="btn-speed-gpu-a6000" aria-pressed="true">RTX A6000</button>
+    <button type="button" id="btn-speed-gpu-a5000" aria-pressed="false">RTX A5000</button>
+    <button type="button" id="btn-speed-gpu-v100" aria-pressed="false">Tesla V100</button>
+    <button type="button" id="btn-speed-gpu-3080" aria-pressed="false">RTX 3080</button>
+    <button type="button" id="btn-speed-gpu-2080ti" aria-pressed="false">RTX 2080 Ti</button>
+  </div>
+  <div class="controls" role="group" aria-label="Accuracy measure" id="speed-acc">
+    <span>Accuracy</span>
+    <button type="button" id="btn-speed-acc-mvtec" aria-pressed="true">MVTec AD</button>
+    <button type="button" id="btn-speed-acc-mean" aria-pressed="false">Mean of MVTec AD, VisA and LOCO</button>
+  </div>
+  <div class="controls">
+    <label>Line speed <input type="range" id="rng-speed-pps" min="0" max="100" step="1" value="50" aria-describedby="out-speed-pps"> <output id="out-speed-pps">10 parts per second</output></label>
+    <button type="button" id="btn-speed-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Sourced. Each point is one method on one device, with the latency per image and the image AUROC that the same paper reports. Most papers time one image at a time; some do not state the batch size. The Jetson Xavier NX points plot a "mean AUROC" whose level, image or pixel, that paper does not state. Marker shape gives the accuracy protocol: circle one model per product, square one model for all products, diamond continual learning, triangle zero-shot. The red line is the time budget per part, 1000 ms divided by the line speed, for one camera, one device and no batching. Points from different papers are not a controlled comparison: the devices, input sizes, code and protocols differ. Focus or hover a point for its source.</figcaption>
+  <details class="speed-data">
+    <summary>The numbers behind each view</summary>
+    <table class="data speed-table">
+      <thead><tr><th>Method</th><th>Device</th><th>Latency (ms)</th><th>Image AUROC</th><th>Protocol</th><th>Source</th></tr></thead>
+{{SPEED_ROWS}}
+    </table>
+  </details>
+  <script type="application/json" id="speed-data">{{SPEED_JSON}}</script>
+</figure>
+
+<p>Start on the desktop view. Before you look, predict: <em>is the most accurate method on MVTec AD also the slowest?</em> In the EfficientAD paper's timings on an RTX A6000 (one image at a time, float16, every baseline re-run by the EfficientAD authors), PatchCore-Ens takes {{c:efficientad-t17-patchcore-ens-a6000}} ms per image, PatchCore takes {{c:efficientad-t17-patchcore-a6000}} ms, and EfficientAD-S takes {{c:efficientad-t17-s-a6000}} ms. Switch the GPU: every point moves right on older cards, but the order barely changes. The EfficientAD paper states that the ranking is the same on each GPU, except for two cases where DSR is slightly faster than FastFlow. Now drag the line speed up. Each step to the right of the red line is a method that cannot inspect every part.</p>
+
+<h3>Why the families differ so much</h3>
+<p>Latency follows from the model of normal. A memory bank pays for a nearest-neighbor search over its stored patches, so PatchCore's cost grows with the bank; that is why its coreset matters (<a href="#ch-patchcore">chapter 6</a>). PaDiM pays for one covariance matrix per patch position. On a desktop CPU, PaDiM with a heavy backbone takes {{c:pclite-padim-ms}} ms per image; with a {{c:pclite-backbone}} backbone (PaDiM-Edge) it takes {{c:pclite-padim-edge-ms}} ms, and with diagonal covariances on top (PaDiM-Lite) {{c:pclite-padim-lite-ms}} ms. MVTec AD image AUROC falls along the way, from {{c:pclite-padim-mvtec-img}} to {{c:pclite-padim-edge-mvtec-img}} to {{c:pclite-padim-lite-mvtec-img}}. A student-teacher method needs only two small networks; EfficientAD's patch description network is the smallest model on the desktop chart. Vision-language methods carry a large backbone: on a Jetson Orin Nano Super with TensorRT FP16, a CLIP ViT-L/14 image encoder alone takes {{c:edgezsad-clipl-jetson-ms}} ms, before any anomaly scoring.</p>
+<p>Latency and throughput are different numbers. Latency is the time for one image, which is what a part on a moving line waits for. Throughput is images per second with a batch, which suits offline checks. EfficientAD-S reaches {{c:efficientad-t1-s-throughput}} images per second with batching on the RTX A6000, against a latency of {{c:efficientad-t1-s-latency}} ms. The EfficientAD paper also warns that parameter counts mislead: a convolution's cost depends on how large its input feature map is, not only on how many weights it has.</p>
+
+<h3>On a Jetson</h3>
+<p>Only one source times PatchCore, EfficientAD and a DINO-based method on the same Jetson Orin Nano: a 2026 benchmark of continual learning. EfficientAD* takes {{c:rcad-orin-efficientad-ms}} ms, the DINOv3 coreset method DINOSaur {{c:rcad-orin-dinosaur-ms}} ms, and PatchCore* with a ResNet-18 {{c:rcad-orin-patchcore-ms}} ms. Their accuracy comes from a continual protocol, where products arrive one after another; there EfficientAD* keeps its speed but its MVTec AD image AUROC collapses to {{c:rcad-mvtec-img-efficientad}}. That is a statement about continual learning, not about EfficientAD on one product.</p>
+<p>Zero-shot detection on a Jetson needs a small backbone. EdgeZSAD runs at {{c:edgezsad-jetson-ms}} ms on a Jetson Orin Nano Super with TensorRT FP16 and reaches {{c:edgezsad-mvtec-img}} image AUROC on MVTec AD, scored on the device. Zero-shot here means that no MVTec AD image is used in training; its training set, Real-IAD-DR, still shares some category names with MVTec AD (our reading). Compression is not free: on a Jetson Xavier NX, quantizing the student to FP16 with TensorRT (the teacher stays FP32) cuts reverse distillation from {{c:unifiedq-xnx-rd-fp32-ms}} ms in PyTorch FP32 to {{c:unifiedq-xnx-rd-fp16-ms}} ms, but its mean AUROC falls from {{c:unifiedq-xnx-rd-fp32-auroc}} to {{c:unifiedq-xnx-rd-fp16-auroc}}, while STFPM keeps {{c:unifiedq-xnx-stfpm-fp16-auroc}} at {{c:unifiedq-xnx-stfpm-fp16-ms}} ms. Measure accuracy again after every export.</p>
+
+<div class="claim-card">
+  <dl>
+    <dt>Claim</dt><dd>EfficientAD detects anomalies at millisecond latency and is also the most accurate method in its comparison (EfficientAD v3).</dd>
+    <dt>How measured</dt><dd>The authors timed EfficientAD-S, EfficientAD-M and every baseline, which they re-ran themselves, with one image per batch on five desktop GPUs. Accuracy is the mean image AUROC over MVTec AD, VisA and MVTec LOCO (Table 1); latency is in Table 17.</dd>
+    <dt>Result</dt><dd>EfficientAD-S: {{c:efficientad-t1-s-latency}} ms and {{c:efficientad-t1-s-auroc}} mean image AUROC on an RTX A6000; {{c:efficientad-ast-latency-factor}} times lower latency than AST, the second-best method.</dd>
+    <dt>What would falsify it</dt><dd>An independent benchmark on one device, with the same images and protocol, where EfficientAD is slower than PatchCore or less accurate. No source here does that for one-class training. The Jetson numbers above use a different protocol, so they neither confirm nor refute it.</dd>
+  </dl>
+</div>
+
+<p class="note">Other timings in the sources: the PatchCore paper reports {{c:patchcore-t5-1pct-time}} s per image for PatchCore-1% on a GPU printed as "{{c:patchcore-hardware}}"; AnomalyDINO reports {{c:anomalydino-latency-default}} per image with one good image at {{c:anomalydino-res-default}} pixels on an {{c:anomalydino-gpu}} GPU; FastFlow reports frames per second including the backbone ({{c:fastflow-fps-cait}} for the CaiT version) and the time its flow adds on top of the backbone ({{c:fastflow-adtime-cait}}), on a {{c:fastflow-hw-gpu}} with no stated batch size. ADer reports total test times for a whole dataset, not per-image latency, so they are not plotted.</p>
+</section>

@@ -1,0 +1,127 @@
+<style>
+#ch-recurrence .controls output { font-variant-numeric:tabular-nums; color:var(--fg); min-width:2.6em; }
+#ch-recurrence .claim-card { background:var(--panel); border-radius:12px; padding:.9rem 1.1rem; margin:1.4rem 0; font-size:1rem; max-width:var(--stage, 60rem); }
+#ch-recurrence .claim-card h4 { font:600 1rem/1.4 system-ui, sans-serif; margin:0 0 .6rem; }
+#ch-recurrence .claim-card dl { display:grid; grid-template-columns:max-content 1fr; gap:.35rem 1rem; margin:0; }
+#ch-recurrence .claim-card dt { font:600 .88rem/1.6 system-ui, sans-serif; color:var(--muted); }
+#ch-recurrence .claim-card dd { margin:0; min-width:0; }
+#ch-recurrence .claim-card table.data td.fail { color:var(--muted); }
+#ch-recurrence .claim-card table.data td.first { font-weight:700; }
+#ch-recurrence .claim-card table.data tr.ref td { color:var(--muted); border-top:1px solid var(--muted); }
+#ch-recurrence .claim-card .tnote { font:.82rem/1.5 system-ui, sans-serif; color:var(--muted); margin:.2rem 0 0; }
+#ch-recurrence ol.ladder { font-size:1rem; padding-left:1.3rem; }
+#ch-recurrence ol.ladder li { margin:.35rem 0; }
+@media (max-width: 520px) { #ch-recurrence .claim-card dl { grid-template-columns:1fr; } #ch-recurrence .claim-card dt { margin-top:.4rem; } }
+</style>
+<section id="ch-recurrence" class="chapter">
+<h2>Linear recurrences, and why RNNs were dropped</h2>
+<p>A recurrent neural network (RNN) is the cheapest memory a sequence model can have: it keeps a <b class="c-yellow">state</b> of fixed size and updates it once per token, so every token costs the same. Strip it down to a single cell, <span class="tex">\htmlClass{t-yellow}{h_t} = \lambda\, \htmlClass{t-yellow}{h_{t-1}} + b\, \htmlClass{t-blue}{x_t}</span>, and drag the two numbers that define <span class="tex">\lambda</span>: its size <span class="tex">r</span> and its angle <span class="tex">\theta</span>.</p>
+
+<figure class="viz" id="viz-recurrence" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="recurrence-canvas" role="img" aria-label="Top: a row of blue tokens along a time axis, oldest on the left, with the yellow state grid at the right end. Under each token a blue bar shows the weight that token keeps in the state now; in tanh mode the bars give way to a chain of states, each waiting for the one before. Bottom: a chart of what is left of one token in the state over 60 steps, as yellow stems inside a dashed envelope, with a red bar for the noise gain."></canvas>
+  <div class="controls">
+    <label for="recurrence-r">size r <input type="range" id="recurrence-r" min="0" max="1.1" step="0.005" value="0.9"><output id="recurrence-r-val" for="recurrence-r">0.90</output></label>
+    <label for="recurrence-theta">angle θ <input type="range" id="recurrence-theta" min="0" max="3.14" step="0.01" value="0"><output id="recurrence-theta-val" for="recurrence-theta">0.00</output></label>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-recurrence-fast">Fast decay</button>
+    <button type="button" id="btn-recurrence-long">Long memory</button>
+    <button type="button" id="btn-recurrence-ring">Ringing</button>
+    <button type="button" id="btn-recurrence-explode">Exploding</button>
+    <button type="button" id="btn-recurrence-linear" aria-pressed="true">Linear</button>
+    <button type="button" id="btn-recurrence-tanh" aria-pressed="false">Nonlinear tanh RNN</button>
+    <button type="button" id="btn-recurrence-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="recurrence-readout" aria-live="polite"></p>
+  <figcaption>Toy model, exact arithmetic: one cell with <span class="tex">b = 1</span>, and a single token of size 1 at step 0. The strip shows the last 16 tokens (10 on a phone) and the weight each one keeps in the state now; the chart shows the same numbers from the token's side, step by step after it arrived. The yellow grid is the state: the figure follows one channel, whose complex value takes two cells (real and imaginary part); a real model has many channels, each with its own <span class="tex">\lambda</span>. In tanh mode the cell is the same <span class="tex">\lambda</span> written as a 2-by-2 rotation and scaling, passed through tanh. Its red line is the exact derivative of this toy, our own way of showing the gradient, not a number from a paper. The noise gain is LRU Eq. 6.</figcaption>
+</figure>
+
+<p>Each step multiplies what the cell holds by <span class="tex">\lambda</span>. A token that arrived <span class="tex">k</span> steps ago has been multiplied <span class="tex">k</span> times, so its share of the state is <span class="tex">\lambda^k</span>. Below <span class="tex">|\lambda| = 1</span> the token fades geometrically; above it, the token grows without limit. A real <span class="tex">\lambda</span> can only fade or flip sign. A complex <span class="tex">\lambda = r e^{i\theta}</span> also turns by <span class="tex">\theta</span> at each step, so the cell holds a damped oscillation: press <em>Ringing</em>.</p>
+
+<p>The same factor is what made RNNs hard to train. For this linear cell, the gradient that flows from the state at step <span class="tex">t</span> back to a token at step <span class="tex">k</span> is exactly <span class="tex">\lambda^{t-k} b</span> (a one-line derivation of ours; the papers make the point in words). Over hundreds of steps that number vanishes or explodes. This is the vanishing and exploding gradient problem, studied by Hochreiter (<span data-claim="rec-cite-hochreiter">1991</span>), Bengio, Simard and Frasconi (<span data-claim="rec-cite-bengio">1994</span>) and Pascanu, Mikolov and Bengio (<span data-claim="rec-cite-pascanu">2013</span>). LRU's introduction cites all three, and its Section 3.2.1 names the repeated powers of the recurrence matrix as the source.</p>
+
+<p>Real RNNs add a nonlinearity: <span class="tex">\htmlClass{t-yellow}{h_t} = \tanh(A\, \htmlClass{t-yellow}{h_{t-1}} + B\, \htmlClass{t-blue}{x_t})</span>. Press <em>Nonlinear tanh RNN</em>. The bars disappear, because no token has a fixed weight any more: its effect on the state depends on every token around it. And step <span class="tex">t</span> cannot start until step <span class="tex">t-1</span> is done, so a sequence of length <span class="tex">L</span> takes <span class="tex">L</span> steps one after another, in training as well as in generation. Now press <em>Exploding</em>. Tanh holds the state near <span data-claim="rec-tanh-hold">0.50</span>, so nothing blows up, yet the red gradient line falls below 1% within <span data-claim="rec-tanh-grad">17</span> steps. A bounded state is not a trainable one. Gated RNNs such as the LSTM (<span data-claim="rec-cite-lstm">1997</span>) and the GRU (<span data-claim="rec-cite-gru">2014</span>) were designed to ease the gradient problem, but in LRU's words they remained "slow to optimize due to the inherently sequential nature of their computation".</p>
+
+<p>LRU's introduction also says what Transformers offered instead: attention layers "are easier to scale and parallelize during training, and crucially they do not suffer from the vanishing gradient problem, since the interaction between any two tokens in the sequence is modeled by direct edges in the network." Every position of a training sequence is computed at once, and no gradient has to pass through hundreds of multiplications. The price is the bill of the previous chapter.</p>
+
+<p>Now press <em>Linear</em> again. Without tanh the recurrence unrolls into a plain weighted sum of the inputs, and the bars are its weights. They depend only on how long ago a token arrived, not on what the tokens were, so they are known before any data arrives. All <span class="tex">L</span> states can then be computed together, as a convolution (the S4 chapter) or with a parallel scan. Martin and Cundy (<span data-claim="parscan-venue">ICLR 2018</span>) built such a scan for the GPU: up to <span data-claim="parscan-kernel-speedup-max">40x</span> faster than a step-by-step loop on long sequences, and slower on short ones (<span data-claim="parscan-kernel-L16-m4">0.06</span> times the loop's speed at 16 steps). The chapter on <a href="#ch-scan">the parallel scan</a> takes it apart.</p>
+
+<p>In this page's notation: LRU writes the input as <span class="tex">u</span> and the state as <span class="tex">x</span>; here they are <span class="tex">\htmlClass{t-blue}{x}</span> and <span class="tex">\htmlClass{t-yellow}{h}</span>, and <span class="tex">\lambda</span> is one diagonal entry of the matrix <span class="tex">A</span> (LRU's <span class="tex">\Lambda</span>).</p>
+
+<div class="eq" id="eq-recurrence" data-build data-viz="viz-recurrence"><div class="tex tex-display">
+\htmlData{step=1, link=state}{\htmlClass{t-yellow}{h_t} = \lambda\, \htmlClass{t-yellow}{h_{t-1}}}
+\htmlData{step=2, link=token}{\;+\; b\, \htmlClass{t-blue}{x_t}}
+\quad\Longrightarrow\quad
+\htmlData{step=3, link=bars}{\htmlClass{t-yellow}{h_t} = \sum_{k \le t} \lambda^{\,t-k}\, b\, \htmlClass{t-blue}{x_k}},
+\qquad
+\htmlData{step=4, link=magnitude phase}{\lambda = r\, e^{i\theta}}
+</div></div>
+<p class="eqno">Left: LRU Eq. (1) with the nonlinearity set to the identity, for one cell of a diagonal state. Middle: the expansion in LRU Eq. (4). Its printed sum stops at <span class="tex">j = k-1</span>; the expansion it summarizes runs to <span class="tex">j = k</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{h_t}</span>: the cell's value after token <span class="tex">t</span>, one entry of the state.</li>
+  <li><span class="tex">\lambda</span>: what the cell multiplies itself by at each step. Its size <span class="tex">r</span> sets how fast a token fades; its angle <span class="tex">\theta</span> sets how fast the cell turns.</li>
+  <li><span class="tex">b\, \htmlClass{t-blue}{x_t}</span>: the new token, scaled by <span class="tex">b</span> and added once.</li>
+  <li><span class="tex">\lambda^{t-k}</span>: the weight of token <span class="tex">k</span> in today's state, drawn as the bars. It is the impulse response of the chart, read backward. For this linear cell it is also the factor that multiplies the gradient from <span class="tex">\htmlClass{t-yellow}{h_t}</span> back to <span class="tex">\htmlClass{t-blue}{x_k}</span>.</li>
+</ul>
+
+<p>Press <em>Reset</em> (<span class="tex">r = 0.9</span>). Each step keeps 90% of a token. Before you read the marker at <span class="tex">k = 50</span>: how much of the token is left 50 steps later? A third? A tenth? The chart says <span data-claim="rec-r09-k50">0.52%</span>. The token fell below 1% at step <span data-claim="rec-r09-below1">44</span>. A cell that keeps 90% per step forgets a paragraph before the paragraph ends. To keep 1% of a token across 16k steps, the length of PathX, LRU's longest task, <span class="tex">|\lambda|</span> must be at least <span data-claim="rec-r-16k">0.9997</span>.</p>
+
+<p>Long memory brings a second problem. Press <em>Long memory</em>: the cell now adds up many recent tokens at nearly full weight. Under random inputs of unit size, its variance settles at <span class="tex">1/(1-|\lambda|^2)</span> times the input's, the red bar: <span data-claim="rec-gain-r09">5.3</span> at <span class="tex">r = 0.9</span>, <span data-claim="rec-gain-r099">50</span> at <span class="tex">r = 0.99</span>, about <span data-claim="rec-gain-r0999">500</span> at <span class="tex">r = 0.999</span>, and no limit at all for <span class="tex">r \ge 1</span>. Push <em>Exploding</em> in linear mode and the token is 100 times its size by step <span data-claim="rec-r11-x100">49</span>.</p>
+
+<p>The cost against attention fits in one line. Per token, the cell does one multiply and one add for each entry of the state, at any position <span class="tex">t</span>, and the state is all it carries: the linear form needs no KV cache, while attention at step <span class="tex">t</span> reads all <span class="tex">t</span> cached keys and values.</p>
+
+<h3>What LRU changed</h3>
+<p>Deep state-space models such as S4 (the next three chapters) train in parallel and did very well on long-range benchmarks. LRU (Orvieto and colleagues, DeepMind, arXiv <span data-claim="lru-arxiv-version">2303.06349v1</span>) asked where that came from. It started from a plain deep RNN and changed one thing at a time, with the rest of the network held fixed:</p>
+<ol class="ladder">
+  <li><b>Linear.</b> Drop the nonlinearity from the recurrence and keep it in the small network that follows each recurrent layer. LRU reports that such linear layers "can be surprisingly expressive when coupled with nonlinear MLP or GLU blocks".</li>
+  <li><b>Diagonal and complex.</b> A dense matrix can be written <span class="tex">A = P \Lambda P^{-1}</span>, with its eigenvalues on the diagonal of <span class="tex">\Lambda</span>; LRU learns <span class="tex">\Lambda</span> directly, so each cell updates on its own. A randomly initialized dense matrix has eigenvalues spread over the unit disk of the complex plane (LRU Theorem 3.1), so the cells are complex. A diagonal linear RNN trained about <span data-claim="lru-speedup-scifar-text">8 times</span> faster than a dense ReLU RNN on sequential CIFAR (Sec 3.2.2).</li>
+  <li><b>A parameterization that cannot explode.</b> Write <span class="tex">\lambda</span> through two learned numbers, one for its size and one for its angle, so that <span class="tex">|\lambda| &lt; 1</span> whatever the training does (below).</li>
+  <li><b>Start near the circle.</b> Initialize <span class="tex">|\lambda|</span> on a ring close to 1, for long memory: from <span data-claim="lru-ring-pathx-rmin">0.999</span> to <span data-claim="lru-ring-pathx-rmax">0.9999</span> for PathX, whose sequences are <span data-claim="lru-pathx-length">16k</span> long.</li>
+  <li><b>Normalize.</b> Scale each cell's input by <span class="tex">\gamma</span>, set to cancel the noise gain of the red bar. On PathX alone, LRU also starts the angles small.</li>
+</ol>
+
+<div class="eq" id="eq-lru" data-build data-viz="viz-recurrence"><div class="tex tex-display">
+\htmlData{step=1, link=magnitude}{\lambda_j = \exp\!\big(-e^{\nu_j^{\log}} + i\,\theta_j\big)}
+\qquad
+\htmlData{step=2, link=gain}{\mathbb{E}\,|\htmlClass{t-yellow}{h_t}|^2 \;\to\; \frac{1}{1-|\lambda|^2}}
+\qquad
+\htmlData{step=3, link=token}{\htmlClass{t-yellow}{h_t} = \lambda\, \htmlClass{t-yellow}{h_{t-1}} + \gamma\, b\, \htmlClass{t-blue}{x_t}, \;\; \gamma = \sqrt{1-|\lambda|^2}}
+</div></div>
+<p class="eqno">Left: the stable exponential parameterization, LRU Sec 3.3 (the final model also writes <span class="tex">\theta_j = e^{\theta_j^{\log}}</span>, App A). Middle: LRU Eq. (6), one cell with uncorrelated inputs of unit size. Right: LRU Eq. (7), with <span class="tex">\gamma</span> initialized as shown, then trained.</p>
+<ul class="gloss">
+  <li><span class="tex">\nu_j^{\log}, \theta_j</span>: what training updates for cell <span class="tex">j</span>. Because <span class="tex">e^{\nu_j^{\log}}</span> is always positive, <span class="tex">|\lambda_j| = \exp(-e^{\nu_j^{\log}})</span> is always below 1, and it nears 1 only as <span class="tex">\nu_j^{\log}</span> goes to minus infinity. Size and angle are learned separately.</li>
+  <li><span class="tex">\mathbb{E}\,|\htmlClass{t-yellow}{h_t}|^2</span>: the average squared size of the cell when its inputs are random and uncorrelated. The factor <span class="tex">1/(1-|\lambda|^2)</span> is the noise gain, the red bar.</li>
+  <li><span class="tex">\gamma</span>: a scale on each cell's input. Starting at <span class="tex">\sqrt{1-|\lambda|^2}</span>, it cancels the gain, so a cell near the circle starts no larger than its input.</li>
+</ul>
+
+<div class="claim-card" id="recurrence-lru-card">
+  <h4>Claim: a plain RNN, made linear, diagonal and well parameterized, comes close to S4 on long-range tasks</h4>
+  <dl>
+    <dt>Source</dt><dd>LRU, Tables 1 to 3 (all six tasks per step in Tables 6 to 8).</dd>
+    <dt>How measured</dt><dd>One backbone for every row: <span data-claim="lru-depth">6</span> residual blocks of normalization, recurrent layer, gated MLP and skip connection. Only the recurrent layer changes. Test accuracy (%) on the six Long Range Arena (LRA) tasks, mean of <span data-claim="lru-seeds">3</span> seeds. LRU's sCIFAR uses <span data-claim="lru-scifar-colour">colored</span> images.</dd>
+    <dt>Result</dt><dd>
+      <table class="data">
+        <thead><tr><th>Recurrent layer</th><th>sCIFAR</th><th>ListOps</th><th>Text</th><th>Retrieval</th><th>Pathfinder</th><th>PathX</th></tr></thead>
+        <tbody>
+          <tr><td>tanh RNN (dense)</td><td><span data-claim="lru-rnn-tanh-scifar">69.9</span></td><td><span data-claim="lru-rnn-tanh-listops">43.9</span></td><td><span data-claim="lru-rnn-tanh-text">87.2</span></td><td><span data-claim="lru-rnn-tanh-retrieval">88.9</span></td><td class="fail">chance</td><td class="fail">chance</td></tr>
+          <tr><td>linear (dense)</td><td><span data-claim="lru-rnn-lin-scifar">72.2</span></td><td><span data-claim="lru-rnn-lin-listops">50.4</span></td><td><span data-claim="lru-rnn-lin-text">89.1</span></td><td><span data-claim="lru-rnn-lin-retrieval">89.1</span></td><td class="fail">chance</td><td class="fail">chance</td></tr>
+          <tr><td>diagonal, complex</td><td><span data-claim="lru-diag-reim-scifar">86.5</span></td><td><span data-claim="lru-diag-reim-listops">58.8</span></td><td><span data-claim="lru-diag-reim-text">87.4</span></td><td><span data-claim="lru-diag-reim-retrieval">87.8</span></td><td class="fail">chance</td><td class="fail">chance</td></tr>
+          <tr><td>exponential parameterization</td><td><span data-claim="lru-diag-exp-scifar">85.4</span></td><td><span data-claim="lru-diag-exp-listops">60.5</span></td><td><span data-claim="lru-diag-exp-text">86.5</span></td><td><span data-claim="lru-diag-exp-retrieval">89.4</span></td><td class="first"><span data-claim="lru-diag-exp-pathfinder">65.4</span></td><td class="fail">chance</td></tr>
+          <tr><td>stable exponential</td><td><span data-claim="lru-diag-stable-scifar">87.2</span></td><td><span data-claim="lru-diag-stable-listops">59.4</span></td><td><span data-claim="lru-diag-stable-text">87.6</span></td><td><span data-claim="lru-diag-stable-retrieval">89.1</span></td><td><span data-claim="lru-diag-stable-pathfinder">93.5</span></td><td class="fail">chance</td></tr>
+          <tr><td>+ ring initialization</td><td><span data-claim="lru-diag-ring-scifar">88.1</span></td><td><span data-claim="lru-diag-ring-listops">59.4</span></td><td><span data-claim="lru-diag-ring-text">89.4</span></td><td><span data-claim="lru-diag-ring-retrieval">90.1</span></td><td><span data-claim="lru-diag-ring-pathfinder">94.4</span></td><td class="fail">chance</td></tr>
+          <tr><td>+ normalization = LRU</td><td><span data-claim="lru-lru-scifar">89.0</span></td><td><span data-claim="lru-lru-listops">60.2</span></td><td><span data-claim="lru-lru-text">89.4</span></td><td><span data-claim="lru-lru-retrieval">89.9</span></td><td><span data-claim="lru-lru-pathfinder">95.1</span></td><td class="first"><span data-claim="lru-lru-pathx">94.2</span></td></tr>
+          <tr class="ref"><td>S4, its own results</td><td><span data-claim="lru-s4-paper-scifar">91.1</span></td><td><span data-claim="lru-s4-paper-listops">59.6</span></td><td><span data-claim="lru-s4-paper-text">86.8</span></td><td><span data-claim="lru-s4-paper-retrieval">90.9</span></td><td><span data-claim="lru-s4-paper-pathfinder">94.2</span></td><td><span data-claim="lru-s4-paper-pathx">96.4</span></td></tr>
+        </tbody>
+      </table>
+      <p class="tnote">"chance": not above chance, as marked by LRU. Bold: the first row above chance on that task. The S4 row is S4's published results as LRU Table 3 reports them, rounded. Its sCIFAR entry is S4's sequential CIFAR result (<span data-claim="s4-scifar">91.13</span>), not S4's grayscale LRA image score (<span data-claim="s4-lra-s4-image">88.65</span>). Our reading is that this column does compare: LRU App D.4 says it uses colored rather than grayscale images, and S4D App B calls the grayscale task a variant of "the normal sequential CIFAR-10 task", so S4's 91.13 is most likely the same colored task. LRU reports no average over the tasks, and none is shown here.</p>
+    </dd>
+    <dt>Reading</dt><dd>On all six tasks LRU lands within about two points of S4: ahead on ListOps, Text and Pathfinder, behind on sCIFAR (by 2.1 points, if the column compares as we read it), Retrieval and PathX. LRU states that its aim is "not to surpass the performance of S4-based models". Linearity alone mostly helps ListOps; the diagonal, complex form lifts sCIFAR and ListOps; the parameterization unlocks Pathfinder; PathX moves only once normalization (with small starting angles) is added.</dd>
+    <dt>Would have failed if</dt><dd>The late steps had added nothing over the linear dense row, or LRU had stayed at chance on PathX. Either would mean that something specific to S4, such as its continuous-time origin or its structured start, was still needed.</dd>
+  </dl>
+</div>
+
+<p>The speed came with it. On an A100 GPU, LRU trained <span data-claim="lru-steps-lru-scifar">15.9</span> steps per second on sCIFAR against <span data-claim="lru-steps-tanh-scifar">2.0</span> for the tanh RNN in the same backbone (LRU Table 4).</p>
+
+<p>LRU reached its recipe by ablation. S4 got there first from another direction: it treats the recurrence as a continuous-time system read at steps of size <span class="tex">\Delta</span>. LRU's own analysis (Sec 4) finds that this discretization "performs normalization", much as <span class="tex">\gamma</span> does. The next chapter builds that continuous view.</p>
+</section>

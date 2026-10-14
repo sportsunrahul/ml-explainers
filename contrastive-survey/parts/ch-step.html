@@ -1,0 +1,135 @@
+<style>
+.st-stages { display:flex; flex-wrap:wrap; gap:.3rem; margin:0 0 .6rem; padding-right:6rem; font:.85rem system-ui, sans-serif; counter-reset:sts; }
+.st-stages button { counter-increment:sts; font:inherit; color:var(--muted); background:var(--bg); border:1px solid var(--rule); border-radius:999px; padding:.22rem .6rem; cursor:pointer; }
+.st-stages button::before { content:counter(sts) "\00a0"; font-weight:700; }
+.st-stages button.done { color:var(--fg); border-color:var(--blue); }
+.st-stages button[aria-current="step"] { color:var(--bg); background:var(--blue); border-color:var(--blue); }
+.st-stages button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.st-text { font:.95rem/1.55 system-ui, sans-serif; margin:.7rem 0 0; min-height:9em; }
+.st-text h3 { font-size:1rem; margin:0 0 .3rem; }
+.st-text p { margin:0 0 .5rem; }
+@media (max-width: 520px) { .st-stages { padding-right:0; margin-top:1.8rem; } }
+</style>
+<p class="kicker">Interlude</p>
+<section id="ch-step" class="chapter">
+<h2>One SimCLR training step, end to end</h2>
+<p>When the loss goes down, what does each negative actually do to the anchor? Chapter 5 walked SimCLR's step box by box; this interlude runs the same step on drawn photos and stops where that question is answered, at the gradient.</p>
+<p>Click a stage or press <b>Next</b>. The stages before the gradient are a quick recap; the shapes and settings are explained in <a href="#ch-simclr">chapter 5</a>, and the equations in <a href="#ch-infonce">chapter 3</a> and <a href="#eq-ntxent">chapter 5</a>. <b>New batch</b> draws four other photos and new random views.</p>
+
+<figure class="viz" id="viz-step" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="st-stages" role="group" aria-label="Training step stages">
+    <button type="button" id="btn-step-s0">Sample</button>
+    <button type="button" id="btn-step-s1">Augment</button>
+    <button type="button" id="btn-step-s2">Encoder</button>
+    <button type="button" id="btn-step-s3">Head</button>
+    <button type="button" id="btn-step-s4">Normalize</button>
+    <button type="button" id="btn-step-s5">Similarity</button>
+    <button type="button" id="btn-step-s6">Masks</button>
+    <button type="button" id="btn-step-s7">Loss</button>
+    <button type="button" id="btn-step-s8">Gradient</button>
+    <button type="button" id="btn-step-s9">LARS step</button>
+  </div>
+  <canvas id="step-canvas" role="img" aria-label="Drawing of the current stage of one SimCLR training step: four photos of a mug on a table, their two random views (blue and yellow), the encoder and head, the views on a circle, an 8 by 8 cosine table with its diagonal crossed out and partners boxed, per-row losses, the backward path, and the learning-rate schedule."></canvas>
+  <p class="readout" id="step-readout" aria-live="polite"></p>
+  <div class="st-text">
+    <div data-stage="0">
+      <h3>Sample</h3>
+      <p>A batch of <span data-claim="simclr-batch">4096</span> unlabeled photos; four are drawn.</p>
+    </div>
+    <div data-stage="1" hidden>
+      <h3>Augment</h3>
+      <p>Two random views of each photo, <b class="c-blue">view a</b> and <b class="c-yellow">view b</b>, with SimCLR's crop, flip, color and blur (<a href="#ch-simclr">chapter 5</a>, Lesson 1). Press <b>New batch</b> to see how different they can be.</p>
+    </div>
+    <div data-stage="2" hidden>
+      <h3>Encoder</h3>
+      <p>One ResNet-50 turns every view into <span class="tex">\bm h</span>, <span data-claim="simclr-h-dim">2048</span> numbers.</p>
+    </div>
+    <div data-stage="3" hidden>
+      <h3>Head</h3>
+      <p>The head <span class="tex">g</span> turns <span class="tex">\bm h</span> into <span class="tex">\bm z</span>, <span data-claim="simclr-z-dim">128</span> numbers, used only by the loss.</p>
+    </div>
+    <div data-stage="4" hidden>
+      <h3>Normalize</h3>
+      <p>Every <span class="tex">\bm z</span> is scaled to length 1, so a dot product is a cosine.</p>
+    </div>
+    <div data-stage="5" hidden>
+      <h3>Similarity</h3>
+      <p>One matrix product compares all <span data-claim="simclr-views">8192</span> views with each other. The drawing shows the corner for the eight views on screen.</p>
+    </div>
+    <div data-stage="6" hidden>
+      <h3>Masks</h3>
+      <p>The diagonal is removed; each row keeps one partner and <span data-claim="simclr-neg-4096">8190</span> negatives (our arithmetic, <span class="tex">2(N-1)</span>).</p>
+    </div>
+    <div data-stage="7" hidden>
+      <h3>Loss</h3>
+      <p>Each row is one cross-entropy, <a href="#eq-ntxent">Eq. 1</a>; the loss is their mean (<a href="#eq-simclr-total">Algorithm 1</a>). <b>Make a guess before you press Next:</b> which cells of a row will the gradient push, and which will it pull?</p>
+    </div>
+    <div data-stage="8" hidden>
+      <h3>Gradient: who pushes, who pulls, and how hard</h3>
+      <p>Take one row: anchor <span class="tex">\bm z_i</span>, partner <span class="tex">\bm z_j</span>, and softmax probabilities <span class="tex">p_k</span> over the row. Differentiating Eq. 1 with respect to the anchor gives (derived here; it matches the NT-Xent gradient in SimCLR's Table 2):</p>
+      <p><span class="tex">\dfrac{\partial \ell_{i,j}}{\partial \bm z_i} = \dfrac{1}{\tau}\Big(\sum_{k \neq i,j} \htmlClass{t-red}{p_k\, \bm z_k} \;-\; \htmlClass{t-yellow}{(1 - p_j)\, \bm z_j}\Big)</span></p>
+      <p>Gradient descent moves the anchor against this. So every <b class="c-red">negative pushes</b> the anchor away, with a weight proportional to its softmax probability (the probability divided by <span class="tex">\tau</span>). A negative that already looks very different has <span class="tex">p_k</span> near 0 and barely counts; a close one counts most. The <b class="c-yellow">partner pulls</b>, with weight <span class="tex">(1 - p_j)/\tau</span>: the pull fades once the partner wins the row. The bars show these weights for row 1a of the toy batch.</p>
+      <p>The same gradient also reaches every other view in the row, and then flows back through the normalization into the head and the ResNet, along both views of every photo. No part is cut off from the gradient (a stop-gradient), and there is no momentum encoder: unlike MoCo (<a href="#ch-moco">chapter 4</a>), all keys are trained.</p>
+    </div>
+    <div data-stage="9" hidden>
+      <h3>LARS step: update every weight</h3>
+      <p>The optimizer is LARS, which the paper uses to keep large-batch training stable. The SimCLR paper cites it (You et al., 2017) but does not describe it. In our summary, LARS scales each layer's step by the ratio of that layer's weight norm to its gradient norm, so no layer moves too far in one step. The learning rate peaks at <span data-claim="simclr-lr">4.8</span> = <span data-claim="simclr-lr-formula-base">0.3</span> x 4096 / 256 after a linear warmup of <span data-claim="simclr-warmup">10</span> epochs, then follows a cosine decay; weight decay is <span data-claim="simclr-wd">1e-6</span>. The curve is that schedule for a <span data-claim="simclr-ablation-epochs">100</span>-epoch run.</p>
+    </div>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-step-prev">Previous</button>
+    <button type="button" id="btn-step-next">Next</button>
+    <button type="button" id="btn-step-run" aria-pressed="false">Run a step</button>
+    <button type="button" id="btn-step-batch">New batch</button>
+    <button type="button" id="btn-step-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <figcaption>Computed: the shapes in the readout follow from SimCLR's default batch of 4096, its 224 x 224 crops, h of 2048 and z of 128; the learning-rate curve follows the stated warmup and cosine schedule. Toy: the four photos and their views (drawn on this page with SimCLR's augmentation probabilities), the bar heights, the 2D embeddings, the cosines, the temperature of 0.5, the losses and the gradient weights for the eight drawn views. The gradient weights are computed exactly from the formula in stage 9 on those toy cosines.</figcaption>
+</figure>
+<script>
+(() => {
+  const fig = document.getElementById('viz-step'), out = document.getElementById('step-readout');
+  const kit = KIT.simclrStep(document.getElementById('step-canvas'), { fig });
+  const chips = [...fig.querySelectorAll('.st-stages button')], texts = [...fig.querySelectorAll('.st-text > div')], NS = chips.length;
+  const runB = document.getElementById('btn-step-run'), S = { stage: 0, seed: 1 };
+  let timer = 0;
+  const show = k => {
+    S.stage = (k + NS) % NS; kit.set(S.stage, S.seed);
+    chips.forEach((c, i) => { c.classList.toggle('done', i < S.stage); if (i === S.stage) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
+    texts.forEach((d, i) => { d.hidden = i !== S.stage; });
+    out.textContent = KIT.simclrStepText(S.stage, 4096);
+  };
+  const stopRun = () => { clearTimeout(timer); runB.setAttribute('aria-pressed', 'false'); };
+  const run = () => { stopRun(); runB.setAttribute('aria-pressed', 'true'); let k = 0;
+    const tick = () => { show(k); if (++k < NS) timer = setTimeout(tick, PE.instant() ? 0 : 2000); else stopRun(); }; tick(); };
+  chips.forEach((c, i) => c.addEventListener('click', () => { stopRun(); show(i); }));
+  document.getElementById('btn-step-prev').addEventListener('click', () => { stopRun(); show(S.stage - 1); });
+  document.getElementById('btn-step-next').addEventListener('click', () => { stopRun(); show(S.stage + 1); });
+  runB.addEventListener('click', run);
+  document.getElementById('btn-step-batch').addEventListener('click', () => { S.seed++; show(S.stage); });
+  document.getElementById('btn-step-reset').addEventListener('click', () => { stopRun(); S.seed = 1; show(0); });
+  show(0);
+})();
+</script>
+
+<p>Then the next batch arrives and the step repeats, for <span data-claim="simclr-ablation-epochs">100</span> epochs in the paper's ablations and <span data-claim="simclr-sota-epochs">1000</span> for its best models. When training ends, the head is deleted and the ResNet-50's <span class="tex">\bm h</span> is what you keep.</p>
+
+<details class="check">
+  <summary>Check yourself: in one row at N = 4096, how many cells get a push, and which one gets a pull?</summary>
+  <p>The row has 8192 cells. The diagonal (the anchor against itself) is masked and gets nothing. The partner view, the other view of the same photo, gets the pull. The remaining 8190 cells are negatives, and each gets a push weighted by its softmax probability divided by the temperature, so most of the push comes from the few negatives that look most like the anchor.</p>
+</details>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Which cells of a row push the anchor, which one pulls it, and why close negatives push hardest.</li>
+    <li>Where the negatives come from, how many each row has, and why the diagonal is removed.</li>
+    <li>Which weights the gradient reaches, and what is thrown away after training.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>The cosine table grows with the square of the batch, so in common multi-device implementations it is split. (This is our note; the paper does not describe it.) Each device computes the rows for its own views against all views gathered from every device. If you reimplement this, gather the embeddings across devices before the matrix product, or each row will see only its own device's negatives. Pool batch-norm statistics across devices too.</p>
+</div>
+</section>

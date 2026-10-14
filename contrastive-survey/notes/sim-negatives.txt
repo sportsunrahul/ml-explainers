@@ -1,0 +1,17 @@
+viz-negatives numbers (build/sim/negatives.js evals parts/kit/65-negatives.js), 2026-10-13
+Not trained: fixed angles on the unit circle, s = cos(angle to the anchor). Anchor at 0, positive at 0.3 rad, false negatives at 0.2, -0.3, 0.42, -0.48 rad, two hard true negatives at 0.6, -0.68 rad, 18 more true negatives evenly from 1 to 2 pi - 1 rad.
+Shares: Eq. 5 of Wang & Liu; hardness: terms times e^(beta s/tau) / mean (Robinson, our notation); debiased: Chuang Eq. 7-8 with M = 1, tau+ = 1/6, floor N e^(-1/tau).
+'loss true only' puts N x (mean true-negative term) in the denominator, the N -> infinity form of Chuang's unbiased loss; it needs the labels.
+
+settings {"TAU":0.5,"BETA":1,"TPLUS":0.16666666666666666,"POS":0.3,"FALSE":[0.2,-0.3,0.42,-0.48],"HARD":[0.6,-0.68],"REST":18}
+plain   share false 0.503 share 2 nearest true 0.193 share other 18 0.304 max share 0.138 min share 0.003
+        pos term 6.758 false mass 25.962 true mass 25.656 estimate N tau+ e^(s+/tau) 27.031 Ng 29.505 floored false loss all 2.156 loss true only 1.715 loss debiased 1.680
+        readout: Plain InfoNCE at tau = 0.5: the 4 false negatives take 50% of the push, the 2 nearest true negatives 19%, the other 18 together 30%.
+hard    share false 0.684 share 2 nearest true 0.200 share other 18 0.116 max share 0.204 min share 0.000
+        pos term 6.758 false mass 78.757 true mass 36.364 estimate N tau+ e^(s+/tau) 27.031 Ng 105.708 floored false loss all 2.892 loss true only 2.009 loss debiased 2.812
+        readout: Hardness weights, beta = 1: the 4 false negatives take 68% of the push, the 2 nearest true negatives 20%, the other 18 together 12%. The nearest negatives gain, and here the nearest are mostly false.
+debias  share false 0.503 share 2 nearest true 0.193 share other 18 0.304 max share 0.138 min share 0.003
+        pos term 6.758 false mass 25.962 true mass 25.656 estimate N tau+ e^(s+/tau) 27.031 Ng 29.505 floored false loss all 2.156 loss true only 1.715 loss debiased 1.680
+        readout: Debiased, pi+ = 1/6: the shares do not move (50% still on the false negatives). The loss does: 2.16 with all negatives, 1.71 with true negatives only, 1.68 for the debiased estimate.
+worked tau 0.5 terms 6.05 2.72 1.00 shares 0.6193 0.2783 0.1024
+worked tau 0.1 terms 8103.08 148.41 1.00 shares 0.9819 0.0180 0.0001

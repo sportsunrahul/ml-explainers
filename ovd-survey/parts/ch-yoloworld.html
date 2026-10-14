@@ -1,0 +1,191 @@
+<style>
+/* Workarounds for shared files: the head CSS sizes .tapstrip svg but not the canvas that DK.mountStrips inserts (it stays
+   300 px wide), and DK.strip throws on widths under about 90 px (a full-page screenshot briefly makes the viewport 1 px). */
+#ch-yoloworld .tapstrip canvas { display:block; width:100%; min-width:240px; }
+/* The chrome's measure rule (main > section > *) caps the strip at 40rem, where its tap labels overlap; give it the stage. */
+#ch-yoloworld > .tapstrip { max-width:var(--stage, 60rem); }
+</style>
+<p class="kicker"><span class="act-n">Act V</span>Real time (2024)</p>
+
+<section id="ch-yoloworld" class="chapter">
+<h2>YOLO-World: fold the vocabulary into the weights</h2>
+<div class="tapstrip" data-model="yolow" role="img" aria-label="Tap strip for YOLO-World: the text lane drops into the image pipeline at the neck and again at the score."></div>
+<p class="note">Where text enters YOLO-World: in the neck, where the prompts gate the features of every cell and a small attention lets the text look back at the image, and again at the score. For deployment the text encoder runs once, and its output becomes ordinary convolution weights.</p>
+
+<p>Every earlier detector in this chart runs at a few frames per second or less, as YOLO-World's authors measured them (chart below). YOLO-World starts from a real-time detector, YOLOv8, and asks how little it must change to read a prompt. The figure walks through the answer in three steps.</p>
+
+<figure class="viz" id="viz-repvl" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="repvl-canvas" tabindex="0" role="img" aria-label="Left: the warehouse drawing covered by a 16 by 10 grid of cells, one feature-map cell each, with a dot at every cell centre and boxes on the person, pallet, forklift and traffic cone. Right: what the selected cell computes. In the plain YOLO step it shows one score per fixed class row; in the text steps it shows the prompt vectors from the CLIP text encoder, the cell's similarity to each prompt, the maximum, and the sigmoid gate that scales its features. In the fold step the prompt vectors are framed as 1x1 convolution weights and the text encoder is greyed out. Below the grid: the PAN neck, or the 27 pooled tokens that I-Pooling reads."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-repvl-dense" aria-pressed="true">1 Plain YOLO</button>
+    <button type="button" id="btn-repvl-gate" aria-pressed="false">2 Text in the neck</button>
+    <button type="button" id="btn-repvl-reparam" aria-pressed="false">3 Fold into weights</button>
+    <button type="button" id="btn-repvl-vocab4" aria-pressed="true">Prompts: all four</button>
+    <button type="button" id="btn-repvl-vocab3" aria-pressed="false">Drop <span class="prompt">forklift</span></button>
+    <button type="button" id="btn-repvl-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="repvl-readout" aria-live="polite"></p>
+  <figcaption>One feature map, drawn as a coarse 16 by 10 grid over the image. Click a cell, or focus the figure and use the arrow keys, to see what that cell computes. In steps 2 and 3 the blue fill of each cell is its gate. The similarities, scores and the choice of positive cells are made up to show the mechanism; the real maps are much finer, and the real model has three of them.</figcaption>
+</figure>
+
+<h3>What YOLO is, from scratch</h3>
+<p>The two-stage detector of <a href="#ch-two-stage">chapter 3</a> first proposes boxes, then names each one. A one-stage detector skips the proposals. The network turns the image into grids of feature vectors, and every cell of every grid predicts a box and class scores at once. The name says it: YOLO is short for "You Only Look Once". YOLO-World builds on YOLOv8, and its paper names the parts that matter here:</p>
+<ul>
+  <li><b>Three feature maps.</b> The backbone, a convolutional network called Darknet, produces maps C3, C4 and C5, each a coarser grid than the one before. For an input of <span data-claim="yoloworld-input-res">640x640</span> pixels (the size of the released models, official code; the paper states no input size) they are <span data-claim="yoloworld-p3-size">80x80</span>, <span data-claim="yoloworld-p4-size">40x40</span> and <span data-claim="yoloworld-p5-size">20x20</span> cells <span class="reading">our reading</span>, from the YOLOv8 convention of strides 8, 16 and 32.</li>
+  <li><b>A neck that mixes the maps.</b> A path aggregation network (PAN) runs a top-down path, which passes coarse, high-level features down to the fine map, then a bottom-up path, which passes fine detail back up. Its outputs are P3, P4 and P5, on the same three grids.</li>
+  <li><b>Dense predictions.</b> Every cell of P3, P4 and P5 makes one prediction: <span data-claim="yolow-page-p3-cells">6400</span> + <span data-claim="yolow-page-p4-cells">1600</span> + <span data-claim="yolow-page-p5-cells">400</span> = <span data-claim="yoloworld-num-preds">8400</span> per image at that size <span class="reading">our reading</span>. Compare <span data-claim="gdino-nq">900</span> queries in Grounding DINO.</li>
+  <li><b>A decoupled head.</b> Each cell feeds two separate branches, each with <span data-claim="yoloworld-head-convs">two 3x3 convs</span> (the paper says "two 3x3 convs"; two per branch is the YOLOv8 convention and <span class="reading">our reading</span>). One branch regresses the box as four distances from the cell to the box edges; the other gives the class output.</li>
+  <li><b>Which cells should fire.</b> Thousands of cells and a handful of objects: training must decide which cells are positives. DETR answers with Hungarian matching, exactly one query per object (<a href="../detr-family/explainer.html#ch-matching">DETR family, matching</a>). YOLOv8 uses task-aligned label assignment: for each object it ranks the cells by how good both their class score and their box overlap are, and the top few become positives; every other cell learns "no object". Several cells can claim one object, so duplicates are removed after prediction.</li>
+  <li><b>Box losses.</b> An IoU loss penalizes low overlap with the true box. A distribution focal loss (DFL) lets the head predict each edge distance as a small probability distribution instead of one number, and pushes that distribution toward the true distance.</li>
+  <li><b>Mosaics.</b> Training images arrive as mosaics: <span data-claim="yoloworld-mosaic-imgs">4</span> images tiled into one, plus color changes, random affine warps and flips.</li>
+</ul>
+<p class="note">YOLO-World names task-aligned assignment, the IoU loss, DFL and the mosaic, but does not restate how they work. The one-line descriptions above, and the duplicate removal, come from the YOLOv8 line of work and are background, not claims of this paper.</p>
+<p>Press <b>1 Plain YOLO</b>. The green dots are the positives that assignment picks for each object; the selected cell on the forklift predicts a box (blue corners, with its four edge distances dashed). Its class branch has one score per class row, and no row is "forklift", so nothing fires. This is chapter 1's closed-set problem, now in a real-time detector.</p>
+
+<h3>Text in the neck</h3>
+<p>The first change is the one every chapter makes. The class branch becomes an embedding branch, and the class rows become text vectors. YOLO-World encodes the prompts with CLIP's text encoder, <span class="tex">\htmlClass{t-yellow}{W} = \texttt{TextEncoder}(T) \in \mathbb{R}^{C\times D}</span>: one <span class="tex">D</span>-dimensional row for each of the <span class="tex">C</span> nouns. The paper calls it <span data-claim="yoloworld-text-encoder">CLIP-base (ViT-base)</span> and keeps it <span data-claim="yoloworld-text-frozen">frozen</span> during pretraining. Its width <span class="tex">D</span> is not stated, so this page keeps it symbolic.</p>
+<p>During training, each mosaic gets its own vocabulary: all the nouns of its <span data-claim="yoloworld-mosaic-imgs">4</span> images, plus random negative nouns from the same dataset, at most <span data-claim="yoloworld-vocab-m">80</span> in all. Captions and referring expressions are cut into noun phrases first.</p>
+<p>The second change is new. Inside the neck, the text gets a say in which image features survive. After the last bottleneck of each C2f block, YOLO-World multiplies every cell's feature vector by one number between 0 and 1: the sigmoid of that cell's best similarity to any prompt. The block is renamed a text-guided CSPLayer (T-CSPLayer), and the operation is a max-sigmoid gate:</p>
+
+<div class="eq" id="eq-yolow-gate" data-build data-viz="viz-repvl"><div class="tex tex-display">
+\htmlData{step=4, link=features}{\htmlClass{t-blue}{X_l'} = \htmlClass{t-blue}{X_l}\cdot} \htmlData{step=3, link=gate}{\delta\Big(} \htmlData{step=2, link=max}{\max_{j\in\{1..C\}}} \htmlData{step=1, link=sims}{\big(\htmlClass{t-blue}{X_l}\htmlClass{t-yellow}{W_j}^{\top}\big)} \htmlData{step=3, link=gate}{\Big)^{\top}}
+</div></div>
+<p class="eqno">Eq. 2 in YOLO-World (2401.17270v3).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{X_l}</span>: the image features at level <span class="tex">l \in \{3,4,5\}</span>, an <span class="tex">H\times W\times D</span> map: one <span class="tex">D</span>-vector per cell.</li>
+  <li><span class="tex">\htmlClass{t-blue}{X_l}\htmlClass{t-yellow}{W_j}^{\top}</span>: every cell's dot product with prompt <span class="tex">j</span>, an <span class="tex">H\times W</span> map. The figure's bars show these numbers for the selected cell.</li>
+  <li><span class="tex">\max_j</span>: per cell, keep only the best-matching prompt.</li>
+  <li><span class="tex">\delta</span>: the sigmoid, which turns that score into a gate between 0 and 1.</li>
+  <li><span class="tex">\htmlClass{t-blue}{X_l'}</span>: the gated features. A cell that matches any prompt keeps its features; a cell that matches none is damped. The gated map is then concatenated with the block's cross-stage features, as in a plain C2f block.</li>
+</ul>
+<p>Press <b>2 Text in the neck</b>. The blue fill is the gate: it is bright on the four objects and dim on the shelf and the floor. Then press <b>Drop forklift</b>. The forklift's cells lose their best match, their gate falls, and the neck damps them before the head ever sees them. This is the difference from late fusion (<a href="#ch-fusion">chapter 8</a>): the image features now depend on the prompt.</p>
+<p>The text also looks back at the image. Image-Pooling Attention (I-Pooling) max-pools each of the three maps to a <span data-claim="yoloworld-ipool-grid">3x3</span> grid, which gives <span data-claim="yoloworld-ipool-tokens">27</span> image tokens, and lets the text vectors attend to them:</p>
+
+<div class="eq" id="eq-yolow-ipool" data-build data-viz="viz-repvl"><div class="tex tex-display">
+\htmlData{step=1, link=text}{\htmlClass{t-yellow}{W'} = \htmlClass{t-yellow}{W}} + \htmlData{step=2, link=pooled}{\texttt{MultiHead-Attention}(\htmlClass{t-yellow}{W}, \htmlClass{t-blue}{\tilde{X}}, \htmlClass{t-blue}{\tilde{X}})}
+</div></div>
+<p class="eqno">Eq. 3 in YOLO-World (2401.17270v3).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{W}</span>: the text vectors, used as the attention queries.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\tilde{X}}</span>: the <span data-claim="yoloworld-ipool-tokens">27</span> pooled image tokens, a <span class="tex">27\times D</span> matrix, used as keys and values. Pooling first keeps the attention tiny: <span data-claim="yoloworld-ipool-tokens">27</span> tokens instead of thousands of cells.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{W'}</span>: image-aware text vectors, added back as a residual. The head scores against these.</li>
+</ul>
+<p>Last, the head scores each prediction against each prompt, much as in chapter 1, but with both vectors normalized and a learned scale and shift:</p>
+
+<div class="eq" id="eq-yolow-head" data-build data-viz="viz-repvl"><div class="tex tex-display">
+\htmlData{step=3, link=score}{\htmlClass{t-green}{s_{k,j}} = \alpha\cdot} \htmlData{step=1, link=cells}{\texttt{L2-Norm}(\htmlClass{t-blue}{e_k})} \cdot \htmlData{step=2, link=text}{\texttt{L2-Norm}(\htmlClass{t-yellow}{w_j})^{\top}} \htmlData{step=3, link=score}{+ \beta}
+</div></div>
+<p class="eqno">Eq. 1 in YOLO-World (2401.17270v3).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{e_k}</span>: the object embedding of prediction <span class="tex">k</span>, from the embedding branch. There is one per cell.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{w_j}</span>: the vector of prompt <span class="tex">j</span>. With both vectors scaled to unit length, their product is a cosine.</li>
+  <li><span class="tex">\alpha, \beta</span>: a learned scale and shift. The paper says the normalization and this affine step "are important for stabilizing the region-text training".</li>
+  <li><span class="tex">\htmlClass{t-green}{s_{k,j}}</span>: the score of prediction <span class="tex">k</span> for prompt <span class="tex">j</span>, the tags on the figure's boxes.</li>
+</ul>
+<p>The training loss adds the box losses to a region-text contrastive loss: <span class="tex">\mathcal{L}(I) = \htmlClass{t-red}{\mathcal{L}_{\text{con}}} + \lambda_I\cdot(\htmlClass{t-red}{\mathcal{L}_{\text{iou}}} + \htmlClass{t-red}{\mathcal{L}_{\text{dfl}}})</span>. The contrastive term is a cross entropy between the scores and the assignment, which gives each positive cell the index of its noun. <span class="tex">\lambda_I</span> is 1 for detection and grounding images and 0 for image-text data, whose boxes are noisy. That image-text data is <span data-claim="yoloworld-data-cc3m-images">246k</span> CC3M images that <span data-claim="yoloworld-pl-teacher">GLIP-L</span> labelled automatically, a teacher-student loop like OWLv2's (<a href="#ch-owlv2">chapter 6</a>).</p>
+<p>Both neck paths pay off, a little. In the paper's ablation (YOLO-World-L pretrained on Objects365 alone, zero-shot LVIS minival AP), adding both paths raises AP from <span data-claim="yoloworld-t4-none-ap">22.4</span> to <span data-claim="yoloworld-t4-both-ap">23.5</span>; with GQA grounding data added, from <span data-claim="yoloworld-t4-gqa-none-ap">29.7</span> to <span data-claim="yoloworld-t4-gqa-both-ap">31.9</span> (Table 4). Freezing the text encoder matters more, on either metric: on AP the neck paths add 1.1 while fine-tuning the encoder costs 3.1, and on rare classes the neck adds 1.7 while fine-tuning costs 5.9. In the same setting without the neck paths, fine-tuning CLIP's text encoder drops rare-class AP from <span data-claim="yoloworld-t5-clip-frozen-apr">14.5</span> to <span data-claim="yoloworld-t5-clip-ft-apr">8.6</span> (Table 5): training on <span data-claim="yoloworld-data-o365-vocab">365</span> class names erodes what CLIP knows about the rest. Chapter 12 finds the same trade in OWLv2. <span class="reading">our reading</span>: these ablations use a shorter setting than the main results, so their numbers do not compare with the chart below.</p>
+
+<h3>Fold the vocabulary into the weights</h3>
+<p>At deployment the user's vocabulary is fixed for a while: the same twenty part names, all shift. YOLO-World calls this "prompt-then-detect". The text encoder runs once on the prompts, offline, and the resulting <span class="tex">\htmlClass{t-yellow}{W}</span> is stored. Stored text vectors are just numbers, and a dot product of every cell with each of <span class="tex">C</span> stored vectors is exactly what a 1x1 convolution with <span class="tex">C</span> filters computes.</p>
+
+<p class="predict"><strong>Guess first.</strong> Press <b>2 Text in the neck</b> and note the gate of the selected forklift cell. When the text encoder is folded into a 1x1 convolution, will that gate change? Decide, then press <b>3 Fold into weights</b>.</p>
+
+<p>It does not change. Folding moves where <span class="tex">\htmlClass{t-yellow}{W}</span> is computed, not its value, because the text encoder never sees the image <span class="reading">our reading</span>. The paper writes the folded gate this way, reshaping <span class="tex">\htmlClass{t-yellow}{W}</span> to <span class="tex">C\times D\times 1\times 1</span>, the weights of a 1x1 convolution:</p>
+
+<div class="eq" id="eq-yolow-reparam" data-build data-viz="viz-repvl"><div class="tex tex-display">
+\htmlData{step=4, link=features}{\htmlClass{t-blue}{X'} = \htmlClass{t-blue}{X} \odot} \htmlData{step=3, link=gate}{\texttt{Sigmoid}(} \htmlData{step=2, link=max}{\texttt{max}(} \htmlData{step=1, link=conv}{\texttt{Conv}(\htmlClass{t-blue}{X}, \htmlClass{t-yellow}{W})} \htmlData{step=2, link=max}{, \texttt{dim=1})} \htmlData{step=3, link=gate}{)}
+</div></div>
+<p class="eqno">Eq. 4 in YOLO-World (2401.17270v3), Appendix A.1.</p>
+<ul class="gloss">
+  <li><span class="tex">\texttt{Conv}(\htmlClass{t-blue}{X}, \htmlClass{t-yellow}{W})</span>: a 1x1 convolution whose <span class="tex">C</span> filters are the stored text vectors. It outputs <span class="tex">C</span> similarity maps, one per prompt, for a batch of <span class="tex">B</span> images: <span class="tex">B\times C\times H\times W</span>.</li>
+  <li><span class="tex">\texttt{max}(\cdot, \texttt{dim=1})</span>: the max over the prompts, per cell. <span class="tex">\texttt{Sigmoid}</span>: the gate.</li>
+  <li><span class="tex">\odot</span>: the paper calls it "matrix multiplication with reshape or transpose"; in effect it scales each cell's features by its gate. <span class="tex">\htmlClass{t-blue}{X}</span> and <span class="tex">\htmlClass{t-blue}{X'}</span> are <span class="tex">B\times D\times H\times W</span>.</li>
+</ul>
+<p>The classifier folds the same way: after fine-tuning, the paper stores the class text vectors "into the weights of the classification layers" (Appendix A.2). One part does not fold. I-Pooling reads the <span data-claim="yoloworld-ipool-tokens">27</span> pooled tokens of the current image, so the update to the text vectors still runs on every image after folding (Appendix A.1, Eq. 5 and 6). Eq. 6 is printed with an unbalanced parenthesis and does not match Eq. 3, so this page quotes neither and does not repair it. The deployed network is a YOLO with a few extra 1x1 convolutions and one tiny attention, and no text encoder.</p>
+
+<h3>What folding buys</h3>
+<p>The paper measures every model on one V100 GPU without TensorRT, and evaluates zero-shot on LVIS minival with Fixed AP, the LVIS protocol that MDETR, GLIP and DetCLIP report (the GLIP and Grounding DINO rows are copied from their own papers, which do not say they used Fixed AP: treat those two rows as approximate), keeping at most <span data-claim="yoloworld-maxdet">1000</span> predictions per image. Each YOLO-World size has two speeds: the re-parameterized version and the original version.</p>
+
+<figure class="viz" id="viz-speed">
+  <span class="badge sourced">Sourced</span>
+  <canvas id="speed-canvas" role="img" aria-label="Scatter chart, frames per second on a log axis against LVIS minival Fixed AP. GLIP-T sits near 0.12 frames per second, Grounding DINO-T at 1.5, DetCLIP-T at 2.3. Each YOLO-World size is drawn twice, joined by an arrow: the original version near 18 to 20 frames per second and the re-parameterized version at 52 to 74."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-speed-ap" aria-pressed="true">All classes (AP)</button>
+    <button type="button" id="btn-speed-apr" aria-pressed="false">Rare classes (APr)</button>
+    <button type="button" id="btn-speed-og" aria-pressed="true">Same data: O365 + GoldG</button>
+    <button type="button" id="btn-speed-all" aria-pressed="false">Add caption data</button>
+    <button type="button" id="btn-speed-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="speed-readout" aria-live="polite"></p>
+  <figcaption>All numbers from YOLO-World Table 2 (zero-shot, LVIS minival, Fixed AP for YOLO-World; the GLIP-T and Grounding DINO-T rows are copied from papers that do not state Fixed AP; FPS on one V100 without TensorRT, as YOLO-World's authors measured every model). GLIP's own paper reports other speeds for GLIP-T on other hardware (<a href="#ch-fusion">chapter 8</a>); do not mix the two. For YOLO-World, the ring is the original version and the dot the re-parameterized one; that the gap is the text encoder is <span class="reading">our reading</span> of the paper's "re-parameterized" and "original". APr on minival rests on only <span data-claim="trex2-lvis-minival-rare-count">70</span> rare classes, so it is noisier than AP.</figcaption>
+</figure>
+
+<table class="data" aria-label="YOLO-World Table 2 rows plotted above">
+  <thead><tr><th>Model</th><th>Pretraining data</th><th>FPS (original)</th><th>Fixed AP</th><th>APr</th></tr></thead>
+  <tbody>
+    <tr><td>GLIP-T</td><td>O365, GoldG</td><td><span data-claim="yoloworld-t2-glipt-og-fps">0.12</span></td><td><span data-claim="yoloworld-t2-glipt-og-ap">24.9</span></td><td><span data-claim="yoloworld-t2-glipt-og-apr">17.7</span></td></tr>
+    <tr><td>GLIP-T</td><td>O365, GoldG, Cap4M</td><td><span data-claim="yoloworld-t2-glipt-cap-fps">0.12</span></td><td><span data-claim="yoloworld-t2-glipt-cap-ap">26.0</span></td><td><span data-claim="yoloworld-t2-glipt-cap-apr">20.8</span></td></tr>
+    <tr><td>Grounding DINO-T</td><td>O365, GoldG</td><td><span data-claim="yoloworld-t2-gdinot-og-fps">1.5</span></td><td><span data-claim="yoloworld-t2-gdinot-og-ap">25.6</span></td><td><span data-claim="yoloworld-t2-gdinot-og-apr">14.4</span></td></tr>
+    <tr><td>Grounding DINO-T</td><td>O365, GoldG, Cap4M</td><td><span data-claim="yoloworld-t2-gdinot-cap-fps">1.5</span></td><td><span data-claim="yoloworld-t2-gdinot-cap-ap">27.4</span></td><td><span data-claim="yoloworld-t2-gdinot-cap-apr">18.1</span></td></tr>
+    <tr><td>DetCLIP-T</td><td>O365, GoldG</td><td><span data-claim="yoloworld-t2-detclipt-fps">2.3</span></td><td><span data-claim="yoloworld-t2-detclipt-ap">34.4</span></td><td><span data-claim="yoloworld-t2-detclipt-apr">26.9</span></td></tr>
+    <tr><td>YOLO-World-S</td><td>O365, GoldG</td><td><span data-claim="yoloworld-s-fps-rep">74.1</span> (<span data-claim="yoloworld-s-fps-orig">19.9</span>)</td><td><span data-claim="yoloworld-s-lvis-ap">26.2</span></td><td><span data-claim="yoloworld-s-lvis-apr">19.1</span></td></tr>
+    <tr><td>YOLO-World-M</td><td>O365, GoldG</td><td><span data-claim="yoloworld-m-fps-rep">58.1</span> (<span data-claim="yoloworld-m-fps-orig">18.5</span>)</td><td><span data-claim="yoloworld-m-lvis-ap">31.0</span></td><td><span data-claim="yoloworld-m-lvis-apr">23.8</span></td></tr>
+    <tr><td>YOLO-World-L</td><td>O365, GoldG</td><td><span data-claim="yoloworld-l-fps-rep">52.0</span> (<span data-claim="yoloworld-l-fps-orig">17.6</span>)</td><td><span data-claim="yoloworld-l-lvis-ap">35.0</span></td><td><span data-claim="yoloworld-l-lvis-apr">27.1</span></td></tr>
+    <tr><td>YOLO-World-L</td><td>O365, GoldG, CC3M</td><td><span data-claim="yoloworld-l-fps-rep">52.0</span> (<span data-claim="yoloworld-l-fps-orig">17.6</span>)</td><td><span data-claim="yoloworld-l-cc3m-lvis-ap">35.4</span></td><td><span data-claim="yoloworld-l-cc3m-lvis-apr">27.6</span></td></tr>
+  </tbody>
+</table>
+
+<p>Read the chart along both axes. Folding alone makes YOLO-World-L about <span data-claim="yolow-page-fold-speedup-l">3.0</span> times faster and YOLO-World-S about <span data-claim="yolow-page-fold-speedup-s">3.7</span> times faster <span class="reading">our arithmetic</span>. The parameter counts tell the same story: the original versions carry <span data-claim="yolow-page-param-gap">62M to 64M</span> more parameters at every size <span class="reading">our arithmetic</span>, a constant that fits one shared text encoder. Against the earlier models on the same data, YOLO-World-L matches DetCLIP-T's AP and runs about <span data-claim="yoloworld-detclip-speedup">20</span> times faster (the paper's figure for <span data-claim="yoloworld-l-fps-rep">52.0</span> against <span data-claim="yoloworld-t2-detclipt-fps">2.3</span> FPS). On rare classes the order is the same, with a smaller margin over GLIP-T.</p>
+
+<h3>Inside YOLO-World: forward, then backward</h3>
+<p>One pretraining step, stage by stage. The shapes assume a <span data-claim="yoloworld-input-res">640x640</span> input <span class="reading">our reading</span>; <span class="tex">B</span> is the batch, <span class="tex">C</span> the number of nouns in the mosaic's vocabulary and <span class="tex">D</span> the unstated embedding width.</p>
+
+<figure class="viz archflow" id="viz-yolowflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-yolowflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-yolowflow-text" aria-pressed="false">2 Text</button>
+    <button type="button" id="btn-yolowflow-backbone" aria-pressed="false">3 Backbone</button>
+    <button type="button" id="btn-yolowflow-neck" aria-pressed="false">4 Neck</button>
+    <button type="button" id="btn-yolowflow-ipool" aria-pressed="false">5 I-Pooling</button>
+    <button type="button" id="btn-yolowflow-head" aria-pressed="false">6 Head</button>
+    <button type="button" id="btn-yolowflow-score" aria-pressed="false">7 Scores</button>
+    <button type="button" id="btn-yolowflow-loss" aria-pressed="false">8 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-yolowflow-backward" aria-pressed="false">9 Gradients</button>
+    <button type="button" class="cf-back" id="btn-yolowflow-update" aria-pressed="false">10 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-yolowflow-s" aria-pressed="false">YOLO-World-S</button>
+    <button type="button" id="btn-yolowflow-m" aria-pressed="false">YOLO-World-M</button>
+    <button type="button" id="btn-yolowflow-l" aria-pressed="true">YOLO-World-L</button>
+  </div>
+  <canvas id="yolowflow-canvas" role="img" aria-label="YOLO-World's pretraining step as a diagram. Top lane: the vocabulary goes into the brown, frozen CLIP text encoder, whose vectors feed the neck and the green I-Pooling block. Middle lane: a mosaic goes through the Darknet backbone and the green RepVL-PAN neck into the embedding branch and the green text contrastive head, which ends in the red contrastive loss. Bottom lane: the box branch ends in the red IoU and DFL loss. In the backward stages red arrows reach every box except the text encoder."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-yolowflow-prev">Previous</button>
+    <button type="button" id="btn-yolowflow-next">Next</button>
+    <button type="button" id="btn-yolowflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="yolowflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>The <b class="c-blue">image lane</b> is a plain YOLOv8: backbone, neck, head. The <b class="c-yellow">text lane</b> is a frozen CLIP text encoder, drawn <b class="c-brown">brown</b>. The lanes meet in <b class="c-green">green</b>: the gates inside the neck, I-Pooling, and the text contrastive head. Two <b class="c-red">losses</b> close the step. Press <b>1 Inputs</b>, then <b>Next</b>.</p></div>
+    <div data-stage="inputs" hidden><h4>1. A mosaic and its own vocabulary</h4><p>Each training sample is a mosaic of <span data-claim="yoloworld-mosaic-imgs">4</span> images, after color augmentation, random affine and random flips. Its vocabulary holds the positive nouns of those images plus random negatives from the same dataset, at most <span data-claim="yoloworld-vocab-m">80</span>. The paper gives no input size; the shapes here use <span data-claim="yoloworld-input-res">640</span>, the size of the released models (official code), and are <span class="reading">our reading</span>.</p></div>
+    <div data-stage="text" hidden><h4>2. Text vectors, once per vocabulary</h4><p>The CLIP text encoder (<span data-claim="yoloworld-text-encoder">CLIP-base (ViT-base)</span>) turns the nouns into <span class="tex">W</span>, one row per noun. It is <span data-claim="yoloworld-text-frozen">frozen</span> in pretraining. The paper does not state the width <span class="tex">D</span>.</p></div>
+    <div data-stage="backbone" hidden><h4>3. Three maps</h4><p>The Darknet backbone gives C3, C4 and C5: <span data-claim="yoloworld-p3-size">80x80</span>, <span data-claim="yoloworld-p4-size">40x40</span> and <span data-claim="yoloworld-p5-size">20x20</span> cells at 640 <span class="reading">our reading</span>, from strides 8, 16 and 32.</p></div>
+    <div data-stage="neck" hidden><h4>4. RepVL-PAN: the text gates the neck</h4><p>The PAN runs top-down, then bottom-up, over the three maps and outputs P3, P4 and P5 on the same grids. Each C2f block after a fusion is a T-CSPLayer that applies Eq. 2's gate; Fig. 4 of the paper draws <span data-claim="yoloworld-tcsp-count">4</span> of them <span class="reading">our count</span>. Eq. 2 needs image features of width <span class="tex">D</span>, like the text; the paper does not say how the channels are matched (<span class="reading">our reading</span>: a projection).</p></div>
+    <div data-stage="ipool" hidden><h4>5. I-Pooling: the text looks at the image</h4><p>Each map is max-pooled to <span data-claim="yoloworld-ipool-grid">3x3</span>, giving <span data-claim="yoloworld-ipool-tokens">27</span> tokens; the text vectors attend to them (Eq. 3) and become image-aware. Fig. 4 draws <span data-claim="yoloworld-ipool-count">2</span> I-Pooling blocks <span class="reading">our count</span>; the second one gives the vectors the head scores against.</p></div>
+    <div data-stage="head" hidden><h4>6. The decoupled head</h4><p>On every cell of P3, P4 and P5, two branches with <span data-claim="yoloworld-head-convs">two 3x3 convs</span> each: one gives a box, one gives an object embedding. That is <span data-claim="yoloworld-num-preds">8400</span> boxes and embeddings per image at 640 <span class="reading">our reading</span>.</p></div>
+    <div data-stage="score" hidden><h4>7. Every cell against every noun</h4><p>The text contrastive head (Eq. 1) scores each embedding against each image-aware text vector: a cosine, times a learned <span class="tex">\alpha</span>, plus a learned <span class="tex">\beta</span>.</p></div>
+    <div data-stage="loss" hidden><h4>8. Two losses</h4><p>Task-aligned assignment picks the positive cells and gives each the index of its noun. The contrastive loss is a cross entropy between the scores and that assignment, on every image. The box losses (IoU and DFL) count only for detection and grounding images; the pseudo-labelled CC3M images get <span class="tex">\lambda_I = 0</span>.</p></div>
+    <div data-stage="backward" hidden><h4>9. Where the gradient goes</h4><p>From the contrastive loss into <span class="tex">\alpha</span> and <span class="tex">\beta</span>, the embedding branch, I-Pooling, the neck and the backbone; from the box loss into the box branch and on into the same neck and backbone. The text vectors enter the gates and I-Pooling as constants: the encoder is frozen and only the vocabulary, which is data, sits upstream of it, so the gradient stops there.</p></div>
+    <div data-stage="update" hidden><h4>10. The update</h4><p><span data-claim="yoloworld-pt-optim">AdamW</span>, initial learning rate <span data-claim="yoloworld-pt-lr">0.002</span>, weight decay <span data-claim="yoloworld-pt-wd">0.05</span>, <span data-claim="yoloworld-pt-epochs">100</span> epochs on <span data-claim="yoloworld-pt-gpus">32</span> V100 GPUs at a total batch of <span data-claim="yoloworld-pt-batch">512</span>. Fine-tuning later trains the text encoder too, at <span data-claim="yoloworld-ft-text-lr-factor">0.01</span> times the base learning rate; for COCO the paper removes RepVL-PAN altogether, since a small fixed class list needs little vision-language interaction.</p></div>
+  </div>
+  <figcaption>Computed: grid sizes and prediction counts from a 640 input and strides 8, 16 and 32 (<span class="reading">our reading</span>, the YOLOv8 convention); the vocabulary cap, pooled tokens, head convs, losses and optimizer from the paper. The model buttons change the parameter counts in the readout (Table 2); the paper gives no per-size channel widths, so the shapes do not change.</figcaption>
+</figure>
+
+<h3>Branch: YOLOE takes the text back out of the neck</h3>
+<p>YOLOE (2025) keeps a plain YOLO and puts text back at the classifier only. It caches the CLIP text vectors, refines them with a small network that folds into the last 1x1 convolution after training, and removes YOLO-World's fusion in the neck. Its roadmap table measures that removal on its own baseline, YOLO-Worldv2-L trained for <span data-claim="yoloe-text-epochs">30</span> epochs: standard AP (not Fixed AP) on LVIS minival falls from <span data-claim="yoloe-rm-globalneg-ap">31.9</span> to <span data-claim="yoloe-rm-nofusion-ap">30.0</span>, a loss of <span data-claim="yoloe-rm-fusion-drop">1.9</span> AP, while speed on a T4 GPU with TensorRT rises from <span data-claim="yoloe-rm-fusion-fps">80.0</span> to <span data-claim="yoloe-rm-nofusion-fps">102.5</span> FPS, <span data-claim="yoloe-rm-fusion-speedup">1.28</span> times faster (YOLOE Table 5; not comparable with the chart above). The same head also takes a box as the prompt, or no prompt at all, with names retrieved from a built-in list of <span data-claim="yoloe-vocab">4585</span>; <a href="#ch-visual-prompts">chapter 11</a> returns to those modes.</p>
+</section>

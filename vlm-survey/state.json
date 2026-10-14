@@ -1,0 +1,117 @@
+{
+  "slug": "vlm-survey",
+  "stage": "done (page only)",
+  "approvals": {
+    "checkpoint0": true,
+    "checkpoint2": "2026-09-29: user asked to add a training-pipeline / batch-formation chapter (ch-training-step, ch 8); read as approval of ch1 style + outline otherwise"
+  },
+  "compute": {
+    "target": "pod",
+    "gpu": "RTX 4090 24GB, 0% util, 1 MiB used",
+    "ram_free_gb": 33,
+    "disk_free": "438G",
+    "hf_reachable": true,
+    "venv_present": true
+  },
+  "tts_backend": "qwen3-tts-1.7b (proposed; audio optional per paper-explainer-priorities)",
+  "papers_candidate": {
+    "core": [
+      "2010.11929v2",
+      "2103.00020v1",
+      "2102.05918v2",
+      "2303.15343v4",
+      "2204.14198v2",
+      "2201.12086v2",
+      "2301.12597v3",
+      "2304.08485v2",
+      "2310.03744v2",
+      "2308.12966v3",
+      "2409.12191v2",
+      "2311.06242v1",
+      "2405.02246v1",
+      "2409.17146v2",
+      "2405.09818v2",
+      "2511.21631v2"
+    ],
+    "optional": [
+      "2305.06500v2",
+      "2407.07726v2",
+      "2312.14238v3",
+      "2504.10479v3",
+      "2502.13923v1",
+      "2502.14786v1",
+      "2408.03326v3"
+    ],
+    "reference_survey": "2405.17247v1"
+  },
+  "reader_background": "explain everything from scratch; knows transformers and CNNs (skip their basics); keep 16 core papers; page only",
+  "audio": "none (page only)",
+  "papers": [
+    "2010.11929v2",
+    "2103.00020v1",
+    "2102.05918v2",
+    "2303.15343v4",
+    "2204.14198v2",
+    "2201.12086v2",
+    "2301.12597v3",
+    "2304.08485v2",
+    "2310.03744v2",
+    "2308.12966v3",
+    "2409.12191v2",
+    "2311.06242v1",
+    "2405.02246v1",
+    "2409.17146v2",
+    "2405.09818v2",
+    "2511.21631v2"
+  ],
+  "build": {
+    "order": "parts/ORDER (13 chapters + closing)",
+    "html": "explainer.html 1.2 MB, 211 KaTeX expressions",
+    "qa": "check-page PASS; see qa_report.md",
+    "claims": "728 total, 445 on page, 0 uncertain on page"
+  },
+  "factcheck": "A+B done 2026-09-29: 0 wrong values; locs, llava fields, uncertain flags fixed; see notes/factcheck-*.md",
+  "chapters": [
+    "ch-shared-space",
+    "ch-sigmoid",
+    "ch-patches",
+    "ch-bootstrap",
+    "ch-flamingo",
+    "ch-qformer",
+    "ch-llava",
+    "ch-training-step",
+    "ch-resolution",
+    "ch-grounding",
+    "ch-recipes",
+    "ch-early-fusion",
+    "ch-qwen3"
+  ],
+  "factcheck_page": "3 fresh agents (ch8 alone, ch1-7, ch9-13+closing); all items applied; reports notes/factcheck-page-*.md",
+  "revision_2026_09_30": {
+    "request": "user: add architecture + training details; CLIP pipeline (how image and text flow, how gradients go back) was not understood",
+    "done": "ch-shared-space: new h3 'Inside CLIP' + viz-clipflow (9-stage forward/backward stepper, shapes computed from CLIP-ViT hyperparameter table, 4 model sizes) and h3 'Backward' + viz-clipgrad (exact per-caption gradient arrows, normalization projection) + eq-clip-grad; 29 claims added to clip.json, 1 to vit.json; pointer from ch-training-step Mode A",
+    "next": "done",
+    "rollout": {
+      "component": "parts/lib-archflow.js (copy of skill assets/archflow.js)",
+      "chapters": {
+        "ch-sigmoid": "viz-siglipflow + viz-siglipgrad",
+        "ch-patches": "viz-vitflow",
+        "ch-bootstrap": "viz-blipflow",
+        "ch-flamingo": "viz-flamingoflow + viz-flamingograd",
+        "ch-qformer": "viz-blip2flow (+ -s2)",
+        "ch-llava": "viz-llavaflow",
+        "ch-resolution": "viz-qwen2vlflow",
+        "ch-grounding": "viz-florence2flow",
+        "ch-recipes": "4 claim cards",
+        "ch-early-fusion": "viz-chameleonflow",
+        "ch-qwen3": "viz-qwen3vlflow"
+      },
+      "factcheck": "5 fresh agents (CLIP; SigLIP+ViT+recipes; BLIP+BLIP-2; Flamingo+LLaVA; Florence-2+Chameleon; Qwen2-VL+Qwen3-VL); all items applied"
+    }
+  },
+  "revision_2026_10_01": {
+    "request": "skill: HTML output must be a beautiful, interactive web page; apply to vlm-survey",
+    "done": "design plan notes/design.md; hero animation parts/viz-hero.js; page chrome parts/lib-page-chrome.js (skill assets/page-chrome.js): chapter rail with progress, sticky mobile bar, figures as 60rem stages, equation hover links; KaTeX_Main display type; act dividers; toc and paper chips restyled",
+    "qa": "check-page PASS; all 33 figures re-shot at 1280 (build/design/figs1280/sheet-*.png)"
+  }
+}

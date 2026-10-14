@@ -1,0 +1,139 @@
+<p class="kicker"><span class="act-n">Act V</span>No training images</p>
+
+<section id="ch-winclip" class="chapter">
+<h2>Ask CLIP whether the part is damaged</h2>
+<p>Every method so far needed good images of the product before it could judge one. CLIP already pairs images with words such as "flawless" and "damaged", so WinCLIP asks it directly, window by window, with no image of the product at all.</p>
+
+<figure class="viz" id="viz-winclip" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-winclip" tabindex="0" aria-label="Left: the camera view of the part, with a red heat map built from window scores. Middle: one cell per window, colored by that window's probability of 'damaged'. Right: two bars, 'flawless' and 'damaged', for the selected window and for the whole image. Click the camera view or the window grid, or use the arrow keys, to select a window."></canvas>
+  <div class="controls" role="group" aria-label="Part under inspection">
+    <span>Part</span>
+    <button type="button" id="btn-winclip-mesh" aria-pressed="true">Mesh with a scratch</button>
+    <button type="button" id="btn-winclip-cap" aria-pressed="false">Cap with a scratch</button>
+  </div>
+  <div class="controls" role="group" aria-label="Window size">
+    <span>Windows</span>
+    <button type="button" id="btn-winclip-small" aria-pressed="true">Small, 2 by 2 patches</button>
+    <button type="button" id="btn-winclip-mid" aria-pressed="false">Mid, 3 by 3 patches</button>
+    <button type="button" id="btn-winclip-img" aria-pressed="false">Whole image</button>
+    <button type="button" id="btn-winclip-all" aria-pressed="false">All three</button>
+  </div>
+  <div class="controls" role="group" aria-label="How window scores become pixel scores">
+    <span>Per pixel</span>
+    <button type="button" id="btn-winclip-harm" aria-pressed="true">Harmonic mean</button>
+    <button type="button" id="btn-winclip-arith" aria-pressed="false">Arithmetic mean</button>
+    <button type="button" id="btn-winclip-slide">Slide the windows</button>
+    <button type="button" id="btn-winclip-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. The scorer here is a stand-in for CLIP: a window's probability of "damaged" is a fixed logistic function of the window's mean diagonal-edge energy, computed from the toy image. No good image of the product is used. Real WinCLIP gets this probability from CLIP's image and text encoders (Eq. 1 below). The window layout follows the paper: 2 by 2 and 3 by 3 patches at a stride of one patch on a 15 by 15 patch grid, plus the whole image. The heat scale is the same for every setting.</figcaption>
+</figure>
+
+<p>Press <b>Slide the windows</b>. Each small window covers four patches and gets one score; the scratch lights up the windows that touch it. Now predict: <em>what does the whole-image window say about this part?</em> Press <b>Whole image</b>. It says "flawless". One scratch is a small part of the whole image, so the whole-image embedding barely moves. For the same reason, scoring whole images works for detection only when defects are large; small windows are what make a map possible.</p>
+<p>Then compare <b>Harmonic mean</b> with <b>Arithmetic mean</b>. Every pixel is covered by several windows. The arithmetic mean smears a defect window's score over all of its pixels, so the red area grows well past the scratch. The harmonic mean is pulled down hard by any confidently normal window, so a pixel stays normal unless every window that covers it looks damaged. Last, try the cap: the toy scorer also flags the designed rim, because a generic idea of "damaged" does not know which edges belong to this product. WinCLIP reports the same kind of failure on real data, for example designed holes on a circuit board flagged as defects.</p>
+
+<h3>Zero-shot means no images, not no knowledge</h3>
+<p>CLIP was trained to place an image and its caption close together in one embedding space. You know how CLIP classifies with no training: embed one text prompt per class, embed the image, and take a softmax over the cosine similarities. WinCLIP (<span data-claim="winclip-venue">CVPR 2023</span>, arXiv v1 of <span data-claim="winclip-published">2023-03-26</span>) uses exactly two classes, normal and anomalous.</p>
+
+<div class="eq" id="eq-winclip-softmax" data-build data-viz="viz-winclip"><div class="tex tex-display">
+\htmlData{step=1, link=prob}{p(\text{anomalous}\mid \htmlClass{t-yellow}{x})} = \frac{\exp\big(\langle \htmlData{step=2, link=win}{f(\htmlClass{t-yellow}{x})}, \htmlData{step=3, link=text}{\htmlClass{t-red}{g_a}} \rangle / \tau\big)}{\exp\big(\langle f(\htmlClass{t-yellow}{x}), \htmlClass{t-blue}{g_n} \rangle / \tau\big) + \exp\big(\langle f(\htmlClass{t-yellow}{x}), \htmlClass{t-red}{g_a} \rangle / \tau\big)}
+</div></div>
+<p class="eqno">Eq. 1 in WinCLIP v1 with k = 2 classes. The paper defines its zero-shot score in words; reading it as the anomalous-class probability of Eq. 1 is our reading of Sec. 4.1.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{x}</span> is the image, or one window of it; <span class="tex">f</span> is the frozen CLIP image encoder, and <span class="tex">\langle\cdot,\cdot\rangle</span> is cosine similarity.</li>
+  <li><span class="tex">\htmlClass{t-blue}{g_n}</span> and <span class="tex">\htmlClass{t-red}{g_a}</span> are text embeddings for "normal" and "anomalous", built from many prompts (below); <span class="tex">\tau</span> is CLIP's temperature.</li>
+  <li>The output is a number between 0 and 1: the bars in the figure. With only the two bare prompts "normal [object]" and "anomalous [object]", this scores <span data-claim="winclip-t1-clipac-mvtec">74.0</span> image AUROC on MVTec AD (Table 1).</li>
+</ul>
+
+<h3>Many prompts, averaged into two</h3>
+<p>One prompt is a noisy probe. WinCLIP writes a compositional prompt ensemble: <span data-claim="winclip-normal-states">7</span> normal states (such as "flawless [o]" and "[o] without defect"), <span data-claim="winclip-anomaly-states">4</span> anomalous states (such as "damaged [o]" and "[o] with flaw"), and <span data-claim="winclip-templates">22</span> sentence templates (such as "a photo of a [c] for visual inspection."). Every state goes into every template, which gives <span data-computed>154</span> normal and <span data-computed>88</span> anomalous prompts (our computation). The text encoder embeds each one, and the embeddings of each class are averaged into a single prototype.</p>
+<div class="eq" id="eq-winclip-cpe" data-build data-viz="viz-winclip"><div class="tex tex-display">
+\htmlData{step=1, link=text}{\htmlClass{t-red}{g_a} = \frac{1}{|S_a|\,|T|} \sum_{s \in S_a} \sum_{t \in T} g\big(t(s(o))\big)}, \qquad \htmlData{step=2, link=text}{\htmlClass{t-blue}{g_n} \text{ likewise over } S_n}
+</div></div>
+<p class="eqno">Our notation for "the average of text embeddings per label" (WinCLIP Sec. 4.1); the paper prints no formula.</p>
+<ul class="gloss">
+  <li><span class="tex">o</span> is the product name from the dataset, such as "bottle". So zero-shot here means no images of the product, but the name is still used. AnomalyCLIP, in the next chapter, removes it.</li>
+  <li><span class="tex">S_a</span>, <span class="tex">S_n</span> are the state phrases; <span class="tex">T</span> is the set of templates; <span class="tex">g</span> is the frozen CLIP text encoder.</li>
+</ul>
+<p>The ablation in Table 3 shows where the gain comes from. On MVTec AD, image AUROC goes from <span data-claim="winclip-abl-twoclass">74.0</span> with two bare prompts to <span data-claim="winclip-abl-stateens">89.8</span> with the state words, <span data-claim="winclip-abl-promptens">90.8</span> with the templates as well, and <span data-claim="winclip-abl-multicrop">91.8</span> with multi-crop prediction. Scoring against the normal prompt alone, with no anomalous class, gives only <span data-claim="winclip-abl-oneclass">34.2</span>: the contrast between the two classes is what carries the signal.</p>
+
+<h3>Windows instead of patch tokens</h3>
+<p>Why not score CLIP's patch tokens directly? CLIP aligns only its class token with text. Its last-layer patch tokens score <span data-claim="winclip-abl-patchtoken-pix">22.4</span> pixel AUROC on MVTec AD, worse than chance. So WinCLIP builds many small images. The backbone is OpenCLIP <span data-claim="winclip-backbone">ViT-B/16+</span>, trained on <span data-claim="winclip-pretrain-data">LAION-400M</span>, at an input of <span data-claim="winclip-input-res">240</span> pixels; that gives <span data-claim="winclip-tokens">225</span> patch tokens, a 15 by 15 grid. A window keeps a square of patches and drops all the others before the forward pass. Small windows are <span data-claim="winclip-small-window-px">32</span> pixels on a side (2 by 2 patches), mid windows <span data-claim="winclip-mid-window-px">48</span> pixels (3 by 3), and both move with a stride of <span data-claim="winclip-stride-px">16</span> pixels. That is <span data-computed>196</span> small and <span data-computed>169</span> mid windows, plus the whole image (our computation, assuming no padding). Each window's class token goes through Eq. 1, and its score is painted onto every pixel of the window.</p>
+<div class="eq" id="eq-winclip-harmonic" data-build data-viz="viz-winclip"><div class="tex tex-display">
+\htmlData{step=1, link=harm}{\bar{\mathbf{M}}^{\tt W}_{0,ij}} = \left(\htmlData{step=2, link=win}{\frac{1}{\sum_{u,v} (\mathbf{w}_{uv})_{ij}} \sum_{u,v} \frac{(\mathbf{w}_{uv})_{ij}}{\mathbf{M}^{\tt W}_{0,uv}}}\right)^{-1}
+</div></div>
+<p class="eqno">Eq. 3 in WinCLIP v1: the harmonic mean, at pixel (i, j), of the scores of all windows that cover it.</p>
+<ul class="gloss">
+  <li><span class="tex">(\mathbf{w}_{uv})_{ij}</span> is 1 when window (u, v) covers pixel (i, j), and 0 otherwise.</li>
+  <li><span class="tex">\mathbf{M}^{\tt W}_{0,uv}</span> is the zero-shot score of window (u, v). Dividing by it makes a near-zero (confidently normal) window dominate, which is the paper's stated intent: weight "more on scores towards normality".</li>
+  <li>The maps of the three scales are combined by a second harmonic mean. Without harmonic averaging, MVTec AD pixel AUROC drops from <span data-claim="winclip-mvtec-0shot-pix-auroc">85.1</span> to <span data-claim="winclip-abl-no-harmonic-pix">81.5</span> (Table 8). Removing the small, mid or image scale gives <span data-claim="winclip-abl-no-smallscale-pix">84.7</span>, <span data-claim="winclip-abl-no-midscale-pix">84.0</span> and <span data-claim="winclip-abl-no-imagescale-pix">82.0</span>.</li>
+</ul>
+<p>The price is many forward passes per image: zero-shot WinCLIP takes <span data-claim="winclip-latency-ms">389.4</span> ms per image on an Amazon EC2 <span data-claim="winclip-latency-instance">G4dn</span> instance (Table 8; the paper names neither the GPU model nor the batch size).</p>
+
+<h3>WinCLIP+: add a few good images</h3>
+<p>Some defects are defined only against a reference, such as a part that is flipped upside down. With K good images (1, 2 or 4), WinCLIP+ stores three memories: the small-window embeddings, the mid-window embeddings and the last-layer patch tokens of those images. A query feature then scores by its distance to the nearest stored feature, exactly as in <a href="#ch-spade">SPADE</a> and <a href="#ch-patchcore">PatchCore</a>, but with CLIP features.</p>
+<div class="eq" id="eq-winclip-plus" data-build data-viz="viz-winclip"><div class="tex tex-display">
+\htmlData{step=1, link=win}{\mathbf{M}_{ij} = \min_{r \in \htmlClass{t-brown}{\mathbf{R}}} \tfrac{1}{2}\big(1 - \langle \mathbf{F}_{ij}, r \rangle\big)}, \qquad \htmlData{step=2, link=prob}{\mathrm{ascore}_{\tt W}(\htmlClass{t-yellow}{x}) = \tfrac{1}{2}\Big(\mathrm{ascore}_0\big(f(\htmlClass{t-yellow}{x})\big) + \max_{ij} \mathbf{M}^{\tt W}_{ij}\Big)}
+</div></div>
+<p class="eqno">Eq. 4 and Eq. 6 in WinCLIP v1. The three memory maps are averaged (Eq. 5) and then fused with the language map; the paper does not give the fusion formula.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-brown}{\mathbf{R}}</span> is the stored memory from the K good images; <span class="tex">\mathbf{F}_{ij}</span> is the query feature at location (i, j). The score is half the cosine distance to the nearest stored feature.</li>
+  <li>The image score is half the language score of the whole image and half the worst vision-memory score anywhere.</li>
+</ul>
+<p>Nothing is trained in either version: "fitting" WinCLIP+ means storing the features of K images. Each few-shot result is the mean of <span data-claim="winclip-seeds">5</span> random choices of the K images.</p>
+
+<table class="data">
+  <thead><tr><th>MVTec AD (Tables 1 and 4)</th><th>Image AUROC</th><th>Pixel AUROC</th><th>PRO</th></tr></thead>
+  <tbody>
+    <tr><td>WinCLIP, zero-shot</td><td><span data-claim="winclip-mvtec-0shot-img-auroc">91.8</span></td><td><span data-claim="winclip-mvtec-0shot-pix-auroc">85.1</span></td><td><span data-claim="winclip-mvtec-0shot-pro">64.6</span></td></tr>
+    <tr><td>WinCLIP+, 1 good image</td><td><span data-claim="winclip-plus-mvtec-1shot-img-auroc">93.1</span></td><td><span data-claim="winclip-plus-mvtec-1shot-pix-auroc">95.2</span></td><td><span data-claim="winclip-plus-mvtec-1shot-pro">87.1</span></td></tr>
+    <tr><td>WinCLIP+, 4 good images</td><td><span data-claim="winclip-plus-mvtec-4shot-img-auroc">95.2</span></td><td><span data-claim="winclip-plus-mvtec-4shot-pix-auroc">96.2</span></td><td><span data-claim="winclip-plus-mvtec-4shot-pro">89.0</span></td></tr>
+    <tr><td>PatchCore, 1 good image (WinCLIP's run)</td><td><span data-claim="winclip-t1-patchcore-mvtec-1shot">83.4</span></td><td><span data-claim="winclip-t4-patchcore-mvtec-1shot-pix">92.0</span></td><td><span data-claim="winclip-t4-patchcore-mvtec-1shot-pro">79.7</span></td></tr>
+  </tbody>
+</table>
+<table class="data">
+  <thead><tr><th>VisA (Tables 1 and 4)</th><th>Image AUROC</th><th>Pixel AUROC</th><th>PRO</th></tr></thead>
+  <tbody>
+    <tr><td>WinCLIP, zero-shot</td><td><span data-claim="winclip-visa-0shot-img-auroc">78.1</span></td><td><span data-claim="winclip-visa-0shot-pix-auroc">79.6</span></td><td><span data-claim="winclip-visa-0shot-pro">56.8</span></td></tr>
+    <tr><td>WinCLIP+, 1 good image</td><td><span data-claim="winclip-plus-visa-1shot-img-auroc">83.8</span></td><td><span data-claim="winclip-plus-visa-1shot-pix-auroc">96.4</span></td><td><span data-claim="winclip-plus-visa-1shot-pro">85.1</span></td></tr>
+  </tbody>
+</table>
+<p>Two readings of these tables matter. First, zero-shot detection on MVTec AD is already close to the one-good-image results, but zero-shot localization is far behind: a window scored against words cannot match a map scored against real normal patches. Second, VisA is much harder for words than MVTec AD, with its multiple instances and complex circuit boards. The paper also notes that low-shot segmentation is not solved: the best pixel F1-max stays below <span data-claim="winclip-f1max-ceiling">60%</span> on both datasets, although pixel AUROC in the same setting looks excellent (the 1-shot rows above). That gap is chapter 2's warning about pixel AUROC, seen in practice.</p>
+
+<h3>Inside WinCLIP: forward, then backward</h3>
+<figure class="viz archflow" id="viz-winclipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-winclipflow-prompts" aria-pressed="false">1 Prompts</button>
+    <button type="button" id="btn-winclipflow-image" aria-pressed="false">2 Image</button>
+    <button type="button" id="btn-winclipflow-windows" aria-pressed="false">3 Windows</button>
+    <button type="button" id="btn-winclipflow-encoders" aria-pressed="false">4 Encoders</button>
+    <button type="button" id="btn-winclipflow-embed" aria-pressed="false">5 Embeddings</button>
+    <button type="button" id="btn-winclipflow-score" aria-pressed="false">6 Softmax</button>
+    <button type="button" id="btn-winclipflow-map" aria-pressed="false">7 Map</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-winclipflow-backward" aria-pressed="false">8 Gradients</button>
+  </div>
+  <canvas id="winclipflow-canvas" role="img" aria-label="WinCLIP as a diagram. Text lane: prompts go through the brown, frozen CLIP text encoder and are averaged into two prototypes. Image lane: the image is cut into windows that go through the brown, frozen CLIP image encoder. Window embeddings and prototypes meet in a two-class softmax, and harmonic aggregation turns window scores into a map. In the backward stage no arrow lights up: nothing is trained."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-winclipflow-prev">Previous</button>
+    <button type="button" id="btn-winclipflow-next">Next</button>
+    <button type="button" id="btn-winclipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="winclipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Two frozen encoders from CLIP and no trainable weights. The text lane runs once per product; the image lane runs once per window. Press <b>1 Prompts</b>, then <b>Next</b>.</p></div>
+    <div data-stage="prompts" hidden><h4>1. Prompts</h4><p><span data-claim="winclip-normal-states">7</span> normal and <span data-claim="winclip-anomaly-states">4</span> anomalous state phrases, each placed in <span data-claim="winclip-templates">22</span> templates, with the product name filled in.</p></div>
+    <div data-stage="image" hidden><h4>2. The image</h4><p>Resized so the shorter edge is <span data-claim="winclip-input-res">240</span> pixels. Non-square images are cut into overlapping square tiles whose predictions are averaged.</p></div>
+    <div data-stage="windows" hidden><h4>3. Windows</h4><p>Square masks of 2 by 2 and 3 by 3 patches, at a stride of one patch, plus the whole image. Each window is a separate forward pass that keeps only its own patches, the way a masked autoencoder drops masked patches.</p></div>
+    <div data-stage="encoders" hidden><h4>4. Two frozen encoders</h4><p>The image encoder is <span data-claim="winclip-backbone">ViT-B/16+</span> with an image width of <span data-claim="winclip-img-width">896</span>; the text encoder has a width of <span data-claim="winclip-txt-width">640</span>. Both stay exactly as CLIP trained them.</p></div>
+    <div data-stage="embed" hidden><h4>5. Embeddings</h4><p>Each window gives one class-token embedding. The text side gives two prototypes, the averages of the normal and the anomalous prompt embeddings. The joint embedding size is not stated in the paper.</p></div>
+    <div data-stage="score" hidden><h4>6. Two-class softmax</h4><p>Cosine similarity to each prototype, divided by the temperature, then a softmax over the two classes (Eq. 1). The anomalous probability is the window's score.</p></div>
+    <div data-stage="map" hidden><h4>7. Map and image score</h4><p>Each window's score is painted onto its pixels; each pixel takes the harmonic mean over its windows (Eq. 3), and the three scales are combined by another harmonic mean. The image score is the whole-image probability, with multi-crop prediction.</p></div>
+    <div data-stage="backward" hidden><h4>8. Where the gradient goes</h4><p>Nowhere. There is no loss and no trainable weight, so nothing receives a gradient. Every brown box is used exactly as released. WinCLIP+ adds a memory of features from K good images, which is also stored, not trained.</p></div>
+  </div>
+  <figcaption>Computed from the paper's configuration: input size, token count, window sizes and stride, encoder widths and prompt counts. Window and prompt totals in the diagram are our computation; the joint embedding size d is not stated.</figcaption>
+</figure>
+</section>

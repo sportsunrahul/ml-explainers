@@ -1,0 +1,172 @@
+<p class="kicker"><span class="act-n">Act III</span>Why it works</p>
+<section id="ch-sphere" class="chapter">
+<h2>Alignment and uniformity on the sphere</h2>
+<p>You now know how to train with InfoNCE, but what does it actually do to the embeddings? This chapter shows that it does two jobs at once, pulling partners together and spreading everything out, and that the temperature decides how the two trade off.</p>
+
+<h3>The picture: points on a ball</h3>
+<p>Almost every method on this page divides each embedding by its length before it compares two of them. Every embedding then has length 1, so it is a point on the surface of a ball: a <em>sphere</em>. In three dimensions you can see it; real models use many more dimensions, but the picture is the same. On the sphere the dot product of two embeddings is their cosine similarity, a number between -1 and 1, and only directions matter.</p>
+<p>Why normalize at all? Without it, the encoder could make the softmax confident by just making vectors longer, without learning anything new. With unit length, the only way to raise a score is to point in a better direction. The temperature <span class="tex">\tau</span> then sets the scale that the softmax sees.</p>
+<p>The figure trains a small encoder that maps 90 made-up images onto the sphere. Each image has two views: a <b class="c-blue">blue</b> dot (view A) and a <b class="c-yellow">yellow</b> dot (view B), joined by a <b class="c-green">green</b> line. The images come from six hidden classes that the loss never sees; the 15 images of one class are drawn as big dots, so you can follow them.</p>
+
+<figure class="viz" id="viz-sphere" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Training objective">
+    <span class="lbl">Train with</span>
+    <button type="button" id="btn-sphere-align" aria-pressed="false">Alignment only</button>
+    <button type="button" id="btn-sphere-both" aria-pressed="false">InfoNCE (align + spread)</button>
+    <button type="button" id="btn-sphere-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls" role="group" aria-label="Temperature">
+    <span class="lbl">Temperature</span>
+    <button type="button" id="btn-sphere-tau-low" data-tau="0" aria-pressed="false">&tau; = 0.1</button>
+    <button type="button" id="btn-sphere-tau-mid" data-tau="1" aria-pressed="true">&tau; = 0.5</button>
+    <button type="button" id="btn-sphere-tau-high" data-tau="2" aria-pressed="false">&tau; = 1.0</button>
+  </div>
+  <canvas id="sphere-canvas" role="img" aria-label="A wireframe sphere with 90 blue dots and 90 yellow dots, two views of each of 90 made-up images, joined by short green lines. The 15 images of one hidden class are drawn larger. With alignment only, every dot moves to one spot. With InfoNCE at a low temperature the dots cover the sphere evenly and the big dots spread apart; at a high temperature each class forms a tight group. Drag to rotate."></canvas>
+  <p class="readout" id="sphere-readout" aria-live="polite"></p>
+  <figcaption>A computed toy. Each made-up image is a point in six dimensions: three carry its class, three carry details of that one image. Each view adds noise, more on the detail dimensions, so class information is the more stable part. A linear encoder followed by normalization maps every view onto the sphere, and 300 real gradient steps (Adam) train it on alignment alone, or on InfoNCE with all 180 views as the batch. The readout measures <span class="tex">\mathcal L_\mathsf{align}</span> (<span class="tex">\alpha = 2</span>) and <span class="tex">\mathcal L_\mathsf{uniform}</span> (<span class="tex">t = 2</span>), both defined below, and the mean similarity of same-class images, which the loss never sees. Settings and numbers: <code>notes/sim-sphere.txt</code>. Drag the sphere, or focus it and use the arrow keys, to rotate it.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "Alignment only".</b> This loss only asks the two views of each image to land close together. Where will the 90 images end up?</p>
+<p>Press it. Everything slides to a single spot on the sphere. You have seen this in <a href="#ch-compare">chapter 1</a>: if every image gets the same embedding, every pair agrees perfectly and the loss is zero. It is collapse again, now on a sphere.</p>
+<p>Now press "InfoNCE". The same pull is still there, but the negatives in the denominator push every image away from every other one. The dots spread over the whole sphere, and each green line stays short.</p>
+
+<h3>Two forces: alignment and uniformity</h3>
+<p>Wang and Isola gave these two effects names. <em>Alignment</em> means the two views of an image land close together. <em>Uniformity</em> means all embeddings together cover the sphere evenly, with no crowded spots and no empty ones.</p>
+<p>Think of people arriving in an empty waiting room. Strangers sit as far from each other as they can, so the room fills evenly: that is uniformity. Couples still sit side by side: that is alignment. Nobody wants a crowd, and no couple wants to be split up.</p>
+<p>Why is an even spread good? Points that are spread out can be told apart. If many different images crowd into one region, their embeddings are nearly the same, and whatever made them different is lost. An even spread uses all the room the sphere has, so it keeps the most information about the images.</p>
+
+<h3>The two forces as equations</h3>
+<p>Both forces can be measured with a short formula. Alignment is the average distance between the two views of an image:</p>
+<div class="eq" id="eq-align" data-build data-viz="viz-sphere"><div class="tex tex-display">
+\mathcal{L}_\mathsf{align}(f; \alpha) \triangleq \htmlData{step=2, link=align}{\mathbb{E}_{(x, y) \sim p_\mathsf{pos}}} \left[ \htmlData{step=1, link=align}{\htmlClass{t-green}{\|f(x) - f(y)\|_2^\alpha}} \right], \quad \alpha > 0.
+</div></div>
+<p class="eqno">Unnumbered, Sec. 4.1.1 in Wang and Isola, "Understanding contrastive representation learning through alignment and uniformity on the hypersphere", <span data-claim="wangisola-venue">ICML 2020</span>, arXiv 2005.10242v10.</p>
+<p>Uniformity looks at two images picked independently, not a pair. It scores how close they are with a bump that is 1 when they touch and falls toward 0 as they move apart, then averages over all such pairs:</p>
+<div class="eq" id="eq-uniform" data-build data-viz="viz-sphere"><div class="tex tex-display">
+\mathcal{L}_\mathsf{uniform}(f; t) \triangleq \htmlData{step=2}{\log \mathbb{E}_{x, y \overset{\text{i.i.d.}}{\sim} p_\mathsf{data}}} \left[ \htmlData{step=1, link=uniform}{\htmlClass{t-red}{e^{-t \|f(x) - f(y)\|_2^2}}} \right], \quad t > 0.
+</div></div>
+<p class="eqno">Unnumbered, Sec. 4.1.2 in Wang and Isola, arXiv 2005.10242v10 (written there with a Gaussian potential <span class="tex">G_t(u, v) = e^{-t\|u - v\|_2^2}</span>).</p>
+<ul class="gloss">
+  <li><span class="tex">\triangleq</span> means "is defined as"; i.i.d. means drawn independently from the same distribution.</li>
+  <li><span class="tex">f</span>: the encoder; <span class="tex">f(x)</span> is a unit-length embedding.</li>
+  <li><span class="tex">(x, y) \sim p_\mathsf{pos}</span>: a positive pair, the two views of one image.</li>
+  <li><span class="tex">x, y \overset{\text{i.i.d.}}{\sim} p_\mathsf{data}</span>: two images drawn independently from the data, usually two different images.</li>
+  <li><span class="tex">\htmlClass{t-green}{\|f(x) - f(y)\|_2^\alpha}</span>: the distance between partners, raised to the power <span class="tex">\alpha</span>. The paper's code uses <span class="tex">\alpha = 2</span>.</li>
+  <li><span class="tex">\htmlClass{t-red}{e^{-t\|f(x) - f(y)\|_2^2}}</span>: the bump, the push between two images. The larger <span class="tex">t</span>, the faster it falls, so the more it only cares about near neighbours. The code uses <span class="tex">t = 2</span>.</li>
+  <li><span class="tex">\log \mathbb{E}</span>: the log of the average bump. Both losses are lower when better.</li>
+</ul>
+<p>Try <span class="tex">\mathcal L_\mathsf{uniform}</span> with <span class="tex">t = 2</span> on three points on a circle of radius 1. On the unit sphere, <span class="tex">\|u - v\|^2 = 2 - 2\,u^\mathsf{T} v</span>, so you only need the angles. Average over the three distinct pairs, as the paper's code does.</p>
+<ul>
+  <li>All three on one spot: every distance is 0, every bump is 1, and <span class="tex">\mathcal L = \log 1 = 0</span>. This is the worst value, the collapsed sphere you just saw.</li>
+  <li>Two on one spot, the third opposite (squared distance 4): the bumps are 1, <span class="tex">e^{-8}</span> and <span class="tex">e^{-8}</span>, so <span class="tex">\mathcal L = \log\big((1 + 2e^{-8})/3\big) \approx -1.10</span>.</li>
+  <li>Evenly spaced, 120 degrees apart: each squared distance is <span class="tex">2 - 2\cos 120^\circ = 3</span>, each bump is <span class="tex">e^{-6}</span>, and <span class="tex">\mathcal L = -6</span>. The even spread wins by far.</li>
+</ul>
+<p>Alignment is simpler: two pairs whose views are 0.2 and 0.4 apart give <span class="tex">\mathcal L_\mathsf{align} = (0.2^2 + 0.4^2)/2 = 0.10</span> with <span class="tex">\alpha = 2</span>.</p>
+
+<h3>The theorem: InfoNCE is these two forces</h3>
+<p>So far these are two nice measurements. The surprise is that InfoNCE optimizes exactly these two things. Wang and Isola take the loss with <span class="tex">M</span> negatives and let <span class="tex">M</span> grow without limit. The loss grows like <span class="tex">\log M</span>, so they subtract that, and what remains splits into two terms:</p>
+<div class="eq" id="eq-limit" data-build data-viz="viz-sphere"><div class="tex tex-display">
+\htmlData{step=1, link=tau}{\lim_{M \rightarrow \infty} \mathcal{L}_\mathsf{contrastive}(f; \tau, M) - \log M} = \htmlData{step=2, link=align}{\htmlClass{t-green}{-\frac{1}{\tau} \mathbb{E}_{(x, y) \sim p_\mathsf{pos}}\left[f(x)^{\mathsf{T}} f(y)\right]}} + \htmlData{step=3, link=uniform}{\htmlClass{t-red}{\mathbb{E}_{x \sim p_\mathsf{data}}\left[\log \mathbb{E}_{x^- \sim p_\mathsf{data}}\left[e^{f(x^-)^{\mathsf{T}} f(x) / \tau}\right]\right]}}
+</div></div>
+<p class="eqno">Eq. 2 (Theorem 1), Sec. 4.2 in Wang and Isola, arXiv 2005.10242v10; the proof is in App. A.2.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathcal L_\mathsf{contrastive}(f; \tau, M)</span>: InfoNCE with one positive and <span class="tex">M</span> negatives (their Eq. 1, the loss of <a href="#ch-infonce">chapter 3</a>).</li>
+  <li><span class="tex">\htmlClass{t-green}{-\tfrac{1}{\tau}\mathbb{E}[f(x)^\mathsf{T} f(y)]}</span>: the alignment term. It is smallest when every pair of views lands on the same point.</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathbb{E}_x[\log \mathbb{E}_{x^-}[\cdots]]}</span>: the uniformity term. For each image it measures how crowded its neighbourhood is. The paper proves that a perfectly uniform encoder, if one exists, minimizes it.</li>
+  <li>Careful: <span class="tex">M</span> here is the number of negatives, the <span class="tex">N - 1</span> of <a href="#ch-infonce">chapter 3</a>.</li>
+  <li>The paper also shows that, with <span class="tex">M</span> negatives, the gap to this limit shrinks like <span class="tex">M^{-1/2}</span>. More negatives bring InfoNCE closer to this clean split.</li>
+</ul>
+<p>Try the right side with numbers. Take <span class="tex">\tau = 0.5</span> and partners at cosine 0.9: the alignment term is <span class="tex">-0.9/0.5 = -1.8</span>. If every negative sits at cosine 0, the uniformity term is <span class="tex">\log e^{0} = 0</span>. Move half of the negatives to cosine 0.5 and it becomes <span class="tex">\log\big((1 + e^{1})/2\big) \approx 0.62</span>: crowding raises the loss.</p>
+<p>Why are these the same two forces? Use the identity from the worked example, <span class="tex">u^\mathsf{T} v = 1 - \tfrac12\|u - v\|^2</span> for unit vectors (derived here):</p>
+<div class="eq" id="eq-bridge" data-build data-viz="viz-sphere"><div class="tex tex-display">
+\htmlData{step=1, link=align}{\htmlClass{t-green}{-\tfrac{1}{\tau}\, u^\mathsf{T} v = \tfrac{1}{2\tau}\|u - v\|^2 - \tfrac{1}{\tau}}} \qquad \htmlData{step=2, link=uniform}{\htmlClass{t-red}{e^{u^\mathsf{T} v / \tau} = e^{1/\tau}\, e^{-\frac{1}{2\tau} \|u - v\|^2}}}
+</div></div>
+<p class="eqno">Derived here from Eq. 2 of Wang and Isola, using unit-length embeddings.</p>
+<p>The first term is <span class="tex">\mathcal L_\mathsf{align}</span> with <span class="tex">\alpha = 2</span>, scaled and shifted. The second is the same bump as in <span class="tex">\mathcal L_\mathsf{uniform}</span>, with <span class="tex">t = 1/(2\tau)</span>; the only difference is where the log sits, which the paper says does not change the best encoder. Take <span class="tex">\tau = 0.5</span>: then <span class="tex">t = 1</span>. Take <span class="tex">\tau = 0.1</span>: then <span class="tex">t = 5</span>, a much narrower bump. That one line already tells you what temperature does.</p>
+
+<details class="check">
+  <summary>Check yourself: what would you get if you trained with <span class="tex">\mathcal L_\mathsf{uniform}</span> alone?</summary>
+  <p>An even spread with no meaning. Nothing would ask the two views of an image to agree, so the encoder could scatter them anywhere, and the crop or the colors could decide where an image lands. When Wang and Isola fine-tune a trained encoder with only one of the two losses, its accuracy drops; with both, it rises (their Fig. 8). You need both forces.</p>
+</details>
+
+<h3>Temperature: how local the push is</h3>
+<p>The bridge above says that a small <span class="tex">\tau</span> gives a narrow bump: an image only feels the neighbours right next to it, and it feels them strongly. A large <span class="tex">\tau</span> gives a wide bump: every image feels a gentle push from almost everyone. <a href="#ch-negatives">Chapter 7</a> shows the same thing from the gradient: each negative's share of the push grows like <span class="tex">e^{s/\tau}</span>, where <span class="tex">s</span> is its similarity to the anchor.</p>
+<p>Now press the temperature buttons, then "InfoNCE", and watch the big dots. At <span class="tex">\tau = 0.1</span> the sphere is covered most evenly, but the big dots, one hidden class, are spread far apart. At <span class="tex">\tau = 1.0</span> they stay in a tight group, and the sphere is covered less evenly. The readout gives the numbers.</p>
+<p>You might expect the most uniform sphere to be the best one. It is not, because of what sits next to an image. Its nearest neighbours are often images of the same kind: another mug, another dog. A small <span class="tex">\tau</span> pushes exactly those neighbours hardest, so it tears apart groups that you wanted to keep. Wang and Liu call this the <em>uniformity-tolerance dilemma</em>. <em>Tolerance</em> is the average similarity of two images from the same class. It needs labels, so it is only a check, never part of training.</p>
+<p>In short, a lower <span class="tex">\tau</span> buys uniformity, and a higher one buys tolerance (Wang and Liu, Sec. 4.2). In the toy, most of the change happens between <span class="tex">\tau = 0.5</span> and <span class="tex">1.0</span>; below that the toy hardly changes. The toy has no accuracy to peak, so it cannot tell you the best <span class="tex">\tau</span>. For real networks the claim card below gives it.</p>
+
+<h3>Where this came from</h3>
+<p>Two papers built this view: Wang and Isola (<span data-claim="wangisola-venue">ICML 2020</span>) for the two forces, and Wang and Liu (<span data-claim="wangliu-venue">CVPR 2021</span>) for the temperature. Here is what each one claims, and how strong the evidence is.</p>
+
+<div class="aside claim">
+  <h4>Claim card: alignment and uniformity predict feature quality (Wang and Isola)</h4>
+  <dl>
+    <dt>Claim</dt><dd>Encoders with lower <span class="tex">\mathcal L_\mathsf{align}</span> and <span class="tex">\mathcal L_\mathsf{uniform}</span> transfer better, and training on these two losses alone gives features as good as InfoNCE or better.</dd>
+    <dt>How</dt><dd>They trained many encoders per dataset (<span data-claim="wangisola-n-stl10">304</span> on STL-10, <span data-claim="wangisola-n-in100">45</span> on ImageNet-100), sweeping loss weights, <span class="tex">\tau</span>, <span class="tex">\alpha</span> and <span class="tex">t</span>, and report the best of each family with a linear probe (picked by 5-fold cross-validation; for STL-10 among the <span data-claim="wangisola-stl10-pool">150</span> encoders with 128-d output and batch 768).</dd>
+    <dt>Result</dt><dd>STL-10, small AlexNet-style encoder, linear probe on the output: InfoNCE <span data-claim="wangisola-stl10-contr-linear">80.46%</span>, align + uniform <span data-claim="wangisola-stl10-au-linear">81.15%</span> (Table 1). ImageNet-100, ResNet-50 trained with MoCo for <span data-claim="sphere-wi-in100-epochs">240</span> epochs (an unofficial MoCo implementation), linear top-1: <span data-claim="wangisola-in100-contr-top1">72.80%</span> vs <span data-claim="wangisola-in100-au-top1">74.60%</span> (Table 3). ImageNet-1K, ResNet-50 with MoCo v2 for <span data-claim="sphere-wi-in1k-epochs">200</span> epochs, linear top-1: <span data-claim="wangisola-in1k-mocov2">67.5%</span> from the official MoCo v2 code vs <span data-claim="wangisola-in1k-au">67.69%</span> (Table 5).</dd>
+    <dt>Caveat</dt><dd>On text (BookCorpus sentence embeddings, Table 4) the two losses alone are <span data-claim="sphere-wi-text-gap">3 to 4</span> points worse than InfoNCE, for example InfoNCE <span data-claim="wangisola-bookcorpus-mr-contr">77.51%</span> vs align + uniform <span data-claim="wangisola-bookcorpus-mr-au">73.76%</span> on movie-review sentiment. The claim holds for the vision tables only.</dd>
+    <dt>Would fail if</dt><dd>Under a matched sweep, the align + uniform encoders lost consistently, as they do on text.</dd>
+  </dl>
+</div>
+
+<div class="aside claim">
+  <h4>Claim card: temperature trades uniformity for tolerance (Wang and Liu)</h4>
+  <dl>
+    <dt>Claim</dt><dd>A smaller <span class="tex">\tau</span> gives a more uniform but less tolerant embedding, and linear accuracy peaks in between.</dd>
+    <dt>How</dt><dd>ResNet-18 on CIFAR10, CIFAR100 and SVHN, ResNet-50 on ImageNet100; negatives from a memory bank (a stored feature for every training image, see <a href="#ch-moco">chapter 4</a>), not from the batch; <span data-claim="wangliu-epochs">200</span> epochs, batch <span data-claim="wangliu-batch">128</span>; linear probe. They sweep <span class="tex">\tau</span> from <span data-claim="wangliu-tau-min">0.05</span> to <span data-claim="wangliu-tau-max">1.0</span>. Their uniformity column prints <span class="tex">-\mathcal L_\mathsf{uniform}</span>, so larger means more uniform there.</dd>
+    <dt>Result</dt><dd>CIFAR10 (Table 1) below: uniformity falls and tolerance rises as <span class="tex">\tau</span> grows. The best accuracy comes at <span class="tex">\tau</span> = <span data-claim="sphere-wl-best-tau">0.2 or 0.3</span> (Sec. 5.3).</dd>
+    <dt>Would fail if</dt><dd>Accuracy rose steadily with uniformity at every <span class="tex">\tau</span>, so that the most uniform model were also the best.</dd>
+  </dl>
+</div>
+
+<table class="data">
+  <thead><tr><th>CIFAR10, ResNet-18</th><th>&tau; = <span data-claim="sphere-wl-tau-007">0.07</span></th><th>&tau; = <span data-claim="sphere-wl-tau-03">0.3</span></th><th>&tau; = <span data-claim="sphere-wl-tau-07">0.7</span></th><th>&tau; = <span data-claim="wangliu-tau-max">1.0</span></th></tr></thead>
+  <tbody>
+    <tr><td>Linear top-1 (%)</td><td><span data-claim="wangliu-c10-acc-007">79.75</span></td><td><span data-claim="wangliu-c10-acc-03">83.27</span></td><td><span data-claim="wangliu-c10-acc-07">82.69</span></td><td><span data-claim="wangliu-c10-acc-10">82.21</span></td></tr>
+    <tr><td>Uniformity, <span class="tex">-\mathcal L_\mathsf{uniform}</span></td><td><span data-claim="wangliu-c10-unif-007">3.86</span></td><td><span data-claim="wangliu-c10-unif-03">3.60</span></td><td><span data-claim="wangliu-c10-unif-07">3.17</span></td><td><span data-claim="wangliu-c10-unif-10">2.96</span></td></tr>
+    <tr><td>Tolerance</td><td><span data-claim="wangliu-c10-tol-007">0.04</span></td><td><span data-claim="wangliu-c10-tol-03">0.178</span></td><td><span data-claim="wangliu-c10-tol-07">0.333</span></td><td><span data-claim="wangliu-c10-tol-10">0.372</span></td></tr>
+  </tbody>
+  <caption>Wang and Liu, Table 1, ordinary contrastive loss, memory-bank negatives. The ImageNet100 rows in their supplementary sweep (ResNet-50, linear top-1) show the same rise and fall: <span data-claim="wangliu-supp-in100-005">63.91</span> at &tau; = <span data-claim="sphere-wl-tau-005">0.05</span>, <span data-claim="wangliu-supp-in100-020">75.41</span> at &tau; = <span data-claim="sphere-wl-tau-02">0.2</span>. At &tau; = <span data-claim="wangliu-tau-max">1.0</span> the paper prints <span data-claim="wangliu-in100-acc-10-main">63.57</span> in the main table and <span data-claim="wangliu-supp-in100-10">65.49</span> in the supplementary table; the two disagree and we do not know which is right.</caption>
+</table>
+
+<p>A different route to the same question: HaoChen et al. (<span data-claim="haochen-venue">NeurIPS 2021</span>, <a href="https://arxiv.org/abs/2106.04156v7">2106.04156</a>) replace the softmax with a <em>spectral contrastive loss</em>, a linear pull on partners plus a squared push on random pairs, and prove that a linear probe on its features works well when augmentations link images within a class well and rarely link images of different classes.</p>
+
+<h3>Where we go next: which negatives push?</h3>
+<p>Temperature decides how the push is shared among the negatives. The next chapter looks at that share one negative at a time, and at a problem hiding in it: some of the nearest "negatives" are not negatives at all.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why normalized embeddings live on a sphere, and what alignment and uniformity measure there.</li>
+    <li>Why InfoNCE with many negatives is alignment plus uniformity (Theorem 1), and why alignment alone collapses.</li>
+    <li>How temperature sets the width of the push, and why the most uniform embedding is not the best one.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>Both measurements cost two lines of code, so log them on held-out data while you train. A <span class="tex">\mathcal L_\mathsf{uniform}</span> that drifts toward 0 is a cheap early sign of collapse (our reading). Treat <span class="tex">\tau</span> as a real hyperparameter and sweep it: a small value suits tasks that must tell near-duplicates apart, a larger one suits tasks that group similar images together (our reading of the dilemma).</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-sphere'), out = document.getElementById('sphere-readout');
+  const kit = KIT.sphere(document.getElementById('sphere-canvas'), { fig });
+  const modeB = { align: document.getElementById('btn-sphere-align'), both: document.getElementById('btn-sphere-both') };
+  const tauB = [...fig.querySelectorAll('[data-tau]')];
+  let mode = null, tau = KIT.SPH_TAUS[1];
+  const go = (m, t) => {
+    mode = m; tau = t;
+    Object.entries(modeB).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === m)));
+    tauB.forEach(b => b.setAttribute('aria-pressed', String(KIT.SPH_TAUS[+b.dataset.tau] === t)));
+    kit.set(m, t, () => { out.textContent = KIT.sphereText(m, t, m ? KIT.sphMetrics(kit.state.st) : null); });
+  };
+  modeB.align.addEventListener('click', () => go('align', tau));
+  modeB.both.addEventListener('click', () => go('both', tau));
+  tauB.forEach(b => b.addEventListener('click', () => go(mode, KIT.SPH_TAUS[+b.dataset.tau])));
+  document.getElementById('btn-sphere-reset').addEventListener('click', () => go(null, KIT.SPH_TAUS[1]));
+  go(null, KIT.SPH_TAUS[1]);
+})();
+</script>
+</section>

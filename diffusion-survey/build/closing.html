@@ -1,0 +1,49 @@
+
+<!-- ============================ CLOSING ============================ -->
+<section id="ch-timeline">
+<h2>Family tree</h2>
+<p>Each entry says what the paper changed and what it inherited. Dates are first arXiv submissions.</p>
+<ul class="timeline">
+  <li><span class="when" data-claim="page-date-sohl-dickstein">12 Mar 2015</span> <b>Sohl-Dickstein et al.</b>, diffusion probabilistic models. Destroy structure with a slow forward diffusion, learn the reverse. <span class="inh">Inherits: non-equilibrium physics, variational bounds. <a href="#ch-generate">Chapter 1</a></span></li>
+  <li><span class="when" data-claim="page-date-ncsn">12 Jul 2019</span> <b>NCSN</b>. Learn the score at many noise levels; sample with annealed Langevin dynamics. <span class="inh">Inherits: denoising score matching, Langevin. <a href="#ch-score">Chapter 5</a></span></li>
+  <li><span class="when" data-claim="page-date-ddpm">19 Jun 2020</span> <b>DDPM</b>. Predict the noise; the unweighted loss <span class="tex">L_{\text{simple}}</span>; a thousand-step sampler; quality on par with GANs. <span class="inh">Inherits: Sohl-Dickstein's chain, NCSN's multi-scale denoising. <a href="#ch-forward">Chapters 2-4</a></span></li>
+  <li><span class="when" data-claim="page-date-ddim">6 Oct 2020</span> <b>DDIM</b>. Same trained model, deterministic non-Markovian sampler, skip steps. <span class="inh">Inherits: DDPM's model and loss. <a href="#ch-fast">Chapter 6</a></span></li>
+  <li><span class="when" data-claim="page-date-score-sde">26 Nov 2020</span> <b>Score SDE</b>. NCSN and DDPM as two SDEs; reverse SDE; probability flow ODE; exact likelihood. <span class="inh">Inherits: NCSN, DDPM. <a href="#ch-score">Chapter 5</a></span></li>
+  <li><span class="when" data-claim="page-date-improved-ddpm">18 Feb 2021</span> <b>Improved DDPM</b>. Cosine schedule, learned variances, better likelihood, fewer steps. <span class="inh">Inherits: DDPM. <a href="#ch-forward">Chapters 2-4</a></span></li>
+  <li><span class="when" data-claim="page-date-beat-gans">11 May 2021</span> <b>ADM</b> ("Diffusion Models Beat GANs"). A tuned U-Net and classifier guidance; beats BigGAN on ImageNet. <span class="inh">Inherits: Improved DDPM, DDIM. <a href="#ch-guidance">Chapter 7</a></span></li>
+  <li><span class="when" data-claim="page-date-ldm">20 Dec 2021</span> <b>Latent Diffusion</b>. Diffuse in an autoencoder's latent space; cross-attention conditioning; the basis of Stable Diffusion. <span class="inh">Inherits: DDPM-style training, ADM's U-Net, CFG-style guidance. <a href="#ch-latent">Chapter 8</a></span></li>
+  <li><span class="when" data-claim="page-date-edm">1 Jun 2022</span> <b>EDM</b>. One ODE, independent design choices; step spacing, Heun, preconditioning, noise-level weighting. <span class="inh">Inherits: Score SDE, DDIM, ADM. <a href="#ch-fast">Chapter 6</a></span></li>
+  <li><span class="when" data-claim="page-date-cfg">26 Jul 2022</span> <b>Classifier-Free Guidance</b>. One network trained with and without the label; extrapolate between them. <span class="inh">Inherits: ADM's classifier guidance. <a href="#ch-guidance">Chapter 7</a></span></li>
+  <li><span class="when" data-claim="page-date-rectified-flow">7 Sep 2022</span> <b>Rectified Flow</b>. Straight-line interpolation, velocity regression, reflow to straighten, one-step generation. <span class="inh">Inherits: the probability flow ODE view. <a href="#ch-flow">Chapter 10</a></span></li>
+  <li><span class="when" data-claim="page-date-flow-matching">6 Oct 2022</span> <b>Flow Matching</b>. Conditional flow matching as a general recipe; diffusion and optimal-transport paths as special cases. <span class="inh">Inherits: continuous normalizing flows, denoising score matching's trick. <a href="#ch-flow">Chapter 10</a></span></li>
+  <li><span class="when" data-claim="page-date-dit">19 Dec 2022</span> <b>DiT</b>. A transformer on latent patches with adaLN-Zero; quality tracks Gflops. <span class="inh">Inherits: LDM's latent space, ViT, CFG. <a href="#ch-dit">Chapter 9</a></span></li>
+  <li><span class="when" data-claim="page-date-consistency">2 Mar 2023</span> <b>Consistency Models</b>. Map any point on an ODE path to its end; one-step or few-step sampling. <span class="inh">Inherits: EDM's ODE and parametrization. <a href="#ch-consistency">Chapter 11</a></span></li>
+  <li><span class="when" data-claim="page-date-sd3">5 Mar 2024</span> <b>SD3</b>. Rectified flow with logit-normal timesteps, MM-DiT, three text encoders, predictable scaling. <span class="inh">Inherits: LDM, DiT, Rectified Flow and Flow Matching, CFG, EDM-style weighting. <a href="#ch-sd3">Chapter 12</a></span></li>
+</ul>
+</section>
+
+<section id="ch-summary">
+<h2>Summary</h2>
+<p>A diffusion model learns to generate by learning to denoise. Noising data is free and exactly controllable, and at every noise level the best possible denoiser is an average over the clean data that could have produced the noisy input. A network trained with plain squared error on "which noise was added" (DDPM) therefore learns the score of every noised distribution (NCSN, Score SDE). Generation is integrating the resulting flow from noise to data, either stochastically (the reverse SDE, DDPM's sampler) or deterministically (the probability flow ODE, DDIM). Everything after that is engineering on four axes. <b>Speed</b>: better step placement and solvers (EDM), straighter paths (rectified flow, flow matching) and learned jumps (consistency models). <b>Control</b>: guidance that trades diversity for fidelity (ADM, CFG). <b>Cost</b>: a compressed latent space (LDM). <b>Scale</b>: transformer backbones whose quality tracks compute (DiT, SD3).</p>
+</section>
+
+<section id="ch-deeper">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>Sohl-Dickstein et al. (1503.03585v8)</b>: Sec. 2 for the forward and reverse trajectories and the bound; Fig. 1 for the swiss roll.</li>
+  <li><b>DDPM (2006.11239v2)</b>: Sec. 3.2 end to end, Eqs. 4, 6-7, 11, 12 and 14, Algorithms 1-2; Sec. 4.3 for the progressive-decoding and rate-distortion view.</li>
+  <li><b>Improved DDPM (2102.09672v1)</b>: Sec. 3.1 (learned variance, Eqs. 15-16), Sec. 3.2 (cosine schedule, Eq. 17), Sec. 4 (fewer steps, Eq. 19).</li>
+  <li><b>NCSN (1907.05600v3)</b>: Sec. 3 on why score matching fails in low-density regions; Sec. 4 and Algorithm 1 for noise-conditional scores and annealed Langevin.</li>
+  <li><b>Score SDE (2011.13456v2)</b>: Sec. 3 (Eqs. 5-7 and 9-11), Sec. 4.3 (probability flow ODE, Eq. 13), App. D for exact likelihood.</li>
+  <li><b>DDIM (2010.02502v4)</b>: Sec. 3 (Eqs. 7, 9 and 12), Sec. 4.3 and Proposition 1 for the ODE connection, Table 1.</li>
+  <li><b>EDM (2206.00364v2)</b>: Table 1 first, then Sec. 3 (Eq. 5, Algorithm 1) for sampling and Sec. 5 (Eqs. 7-8) for preconditioning and training.</li>
+  <li><b>ADM (2105.05233v4)</b>: Sec. 3 for architecture ablations; Sec. 4.1-4.3, Algorithm 1 and Eq. 14 for classifier guidance.</li>
+  <li><b>CFG (2207.12598v1)</b>: Sec. 3.2 (Algorithm 1, Eq. 6 and the implicit classifier), Tables 1-2.</li>
+  <li><b>LDM (2112.10752v2)</b>: Sec. 3 (Eq. 2 and the cross-attention equation), Sec. 4.1 on the choice of <span class="tex">f</span>, Table 8.</li>
+  <li><b>DiT (2212.09748v2)</b>: Sec. 3.2 (patchify and block designs), Sec. 5 on scaling, and the appendix table of all models.</li>
+  <li><b>Rectified Flow (2209.03003v1)</b>: Sec. 2 (Eqs. 1-3 and the non-crossing argument), Sec. 3 (Theorems 3.3, 3.5 and 3.7), Table 1.</li>
+  <li><b>Flow Matching (2210.02747v2)</b>: Sec. 3 (Eqs. 5 and 9, Theorem 2), Sec. 4 (Eqs. 10, 15 and 20-23), Table 1.</li>
+  <li><b>Consistency Models (2303.01469v2)</b>: Sec. 3 (definition, Eq. 5, Algorithm 1), Sec. 4 (Eq. 7), Sec. 5 (Eq. 10), Tables 1-2.</li>
+  <li><b>SD3 (2403.03206v1)</b>: Sec. 3 (Eqs. 13 and 18-19), Sec. 5.1 (the formulation comparison), Sec. 4 and 5.2.3 (MM-DiT), Sec. 5.3.2 (Eq. 23, timestep shift).</li>
+</ul>
+</section>

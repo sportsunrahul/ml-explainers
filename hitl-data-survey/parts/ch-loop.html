@@ -1,0 +1,80 @@
+<p class="kicker"><span class="act-n">The loop</span>Labels are the scarce input</p>
+
+<section id="ch-loop" class="chapter">
+<h2>Two decisions in every feedback loop</h2>
+<p>Picture the platform from the model's side. Images arrive all day from cameras, the model scores each one, and a person can label only a few of them. Every label costs a person's time, and not every label comes back right.</p>
+
+<figure class="viz" id="viz-loop" data-toy>
+  <span class="badge toy">Toy model</span>
+  <svg class="chart" id="loop-svg" role="img" aria-label="The feedback loop as a cycle: a stream of images, the model scores them, a selection step picks some for a person, labelers return labels, the labels enter the dataset through a trust step, and the model retrains. The selection step and the trust step are the two decisions."></svg>
+  <div class="controls">
+    <button type="button" id="btn-loop-select" aria-pressed="false">Decision 1: which images get a label?</button>
+    <button type="button" id="btn-loop-trust" aria-pressed="false">Decision 2: which labels do we believe?</button>
+    <button type="button" id="btn-loop-both" aria-pressed="true">Both</button>
+    <button type="button" id="btn-loop-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="loop-readout" aria-live="polite"></p>
+  <figcaption>A diagram, not data. The two diamonds are the decisions this page is about; the chapter list under each button says where each one is answered.</figcaption>
+</figure>
+
+<p>So every round of the loop makes two decisions. The first is <b class="c-yellow">which images go to a person</b>. The second is <b class="c-green">which of the returned labels the model should believe</b>. Part one of this page is about the first decision, and part two is about the second.</p>
+
+<p>Each decision has a naive default: send a random sample, and believe every label. The rest of the page is the case for and against doing better than those two defaults. The case is not one-sided. Random sampling turns out to be a much stronger default than its reputation (chapter 5). Believing every label turns out to be a much weaker one: a large network will learn any label you give it, wrong ones included (chapter 7), and even famous test sets carry label errors (chapter 8).</p>
+
+<p>Before reading on, make a guess. If you could label only one image in a hundred, which one would you pick? Most people answer "the one the model is least sure about". The next chapter builds exactly that, and the three after it show where it breaks.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Write down your two current defaults: how images are picked for review today, and whether any returned label is ever doubted. Every chapter ends with one decision like this one, stated for a platform with a human in the loop.</p>
+</div>
+
+<script>
+(() => {
+  const svg = document.getElementById('loop-svg'), out = document.getElementById('loop-readout');
+  const btns = ['select', 'trust', 'both'].map(k => document.getElementById('btn-loop-' + k));
+  const TEXT = {
+    select: 'Decision 1, which images get a label: chapter 2 (uncertainty), 3 (BALD), 4 (core-sets), 5 (when random wins), and the interlude.',
+    trust: 'Decision 2, which labels to believe: chapter 7 (memorization), 8 (noisy benchmarks), 9 (confident learning), 10 (Co-teaching), 11 (DivideMix).',
+    both: 'Chapter 12 joins them: re-checking labels is active learning on images that already have a label.' };
+  let mode = 'both';
+  const NODES = [   // [label, color var, kind]
+    ['stream of images', '--brown', 'box'], ['model scores them', '--blue', 'box'], ['select', '--yellow', 'dia'],
+    ['labelers', '--yellow', 'box'], ['believe?', '--green', 'dia'], ['retrain', '--blue', 'box']];
+  function draw() {
+    const narrow = svg.clientWidth < 520, W = narrow ? 360 : 640, H = narrow ? 430 : 290;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const cx = W / 2, cy = H / 2 + (narrow ? 4 : 6), rx = narrow ? 120 : 230, ry = narrow ? 165 : 98;
+    const ang = [180, 240, 300, 0, 60, 120].map(a => a * Math.PI / 180);
+    const pos = ang.map(a => [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]);
+    let s = `<defs><marker id="loop-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>`;
+    for (let k = 0; k < 6; k++) {   // arcs between nodes
+      const a0 = ang[k] + .2, a1 = ang[(k + 1) % 6] - .2 + (k === 5 ? 2 * Math.PI : 0);
+      const p0 = [cx + rx * Math.cos(a0), cy + ry * Math.sin(a0)], p1 = [cx + rx * Math.cos(a1), cy + ry * Math.sin(a1)];
+      s += `<path d="M${p0[0].toFixed(1)},${p0[1].toFixed(1)} A${rx},${ry} 0 0 1 ${p1[0].toFixed(1)},${p1[1].toFixed(1)}" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#loop-ah)"/>`;
+    }
+    NODES.forEach(([t, col, kind], k) => {
+      const [x, y] = pos[k], on = kind === 'dia' && (mode === 'both' || (mode === 'select' && k === 2) || (mode === 'trust' && k === 4));
+      const dim = kind === 'dia' && !on ? .35 : 1;
+      if (kind === 'dia') {
+        const r = narrow ? 34 : 38;
+        s += `<path d="M${x},${y - r} L${x + r * 1.3},${y} L${x},${y + r} L${x - r * 1.3},${y} Z" fill="var(--panel)" stroke="var(${col})" stroke-width="${on ? 2.6 : 1.4}" opacity="${dim}"/>`;
+        s += `<text x="${x}" y="${y + 5}" text-anchor="middle" font-size="${narrow ? 13 : 14}" font-weight="700" fill="var(${col})" opacity="${dim}">${t}</text>`;
+      } else {
+        const w = narrow ? 112 : 132, h = 34;
+        s += `<rect x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="8" fill="var(--panel)" stroke="var(${col})" stroke-width="1.5"/>`;
+        s += `<text x="${x}" y="${y + 5}" text-anchor="middle" font-size="13" fill="var(--fg)">${t}</text>`;
+      }
+    });
+    s += `<text x="${cx}" y="${cy + 5}" text-anchor="middle" font-size="13" fill="var(--muted)">one round</text>`;
+    svg.innerHTML = s;
+    btns.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-loop-' + mode)));
+    out.textContent = TEXT[mode];
+  }
+  const set = m => { mode = m; draw(); };
+  btns.forEach(b => b.addEventListener('click', () => set(b.id.replace('btn-loop-', ''))));
+  document.getElementById('btn-loop-reset').addEventListener('click', () => set('both'));
+  new ResizeObserver(draw).observe(svg);
+  draw();
+})();
+</script>
+</section>

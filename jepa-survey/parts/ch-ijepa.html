@@ -1,0 +1,88 @@
+<p class="kicker"><span class="act-n">Act II</span>JEPA made real</p>
+
+<section id="ch-ijepa" class="chapter">
+<h2>I-JEPA: predicting the missing block</h2>
+<p>In January 2023 the diagram became a model. I-JEPA (Assran et al., <span data-claim="ijepa-arxiv">2301.08243v3</span>, <span data-claim="ijepa-venue">CVPR 2023</span>) takes one image, hides a few <em>large</em> blocks, encodes the rest, and predicts the hidden blocks' embeddings as produced by a second, slowly-updated copy of the encoder. No pixels are painted. No second augmented view is made. The two choices that make it work are both about the mask: the targets must be big enough to mean something, and the context must be spread out enough to say something.</p>
+
+<figure class="viz" id="viz-ijmask" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="ijmask-canvas" role="img" aria-label="A grid of image patches. Yellow blocks are the hidden targets, blue patches are the visible context, grey patches are removed from the context because a target covers them. Buttons resample the masks with the paper's ranges or show the ablated alternatives."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ijmask-sample">Sample masks</button>
+    <button type="button" id="btn-ijmask-multi" data-strat="multi" aria-pressed="true">Multi-block (I-JEPA)</button>
+    <button type="button" id="btn-ijmask-raster" data-strat="raster" aria-pressed="false">Rasterised</button>
+    <button type="button" id="btn-ijmask-block" data-strat="block" aria-pressed="false">Single block</button>
+    <button type="button" id="btn-ijmask-random" data-strat="random" aria-pressed="false">Random patches</button>
+    <button type="button" id="btn-ijmask-tiny" data-strat="tiny" aria-pressed="false">Tiny targets</button>
+    <button type="button" id="btn-ijmask-b16" data-grid="14" aria-pressed="true">ViT-B/16 (14 x 14)</button>
+    <button type="button" id="btn-ijmask-h14" data-grid="16" aria-pressed="false">ViT-H/14 (16 x 16)</button>
+    <button type="button" id="btn-ijmask-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ijmask-readout" aria-live="polite"></p>
+  <figcaption>Computed from the paper's masking ranges: <span data-claim="ijepa-num-targets">4</span> target blocks with scale <span data-claim="ijepa-target-scale">(0.15, 0.2)</span> of the patches and aspect ratio <span data-claim="ijepa-target-aspect">(0.75, 1.5)</span>; one square context block with scale <span data-claim="ijepa-context-scale">(0.85, 1.0)</span>, minus every patch inside a target (Sec. 3 and Fig. 4). The block-size rounding follows the official sampler. The three alternatives are the paper's Table 6 ablations; "Tiny targets" is this page's own extreme setting (the paper's smallest, scale (0.075, 0.2), is in its Table 8). Before pressing "Tiny targets", guess: why would single-patch targets fail?</figcaption>
+</figure>
+
+<h3>Four parts and one loss</h3>
+<p>Walk the picture. The image is cut into patches (<span data-claim="ijepa-tokens-b16-224">196</span> for a 224-pixel image with 16-pixel patches). The <b class="c-brown">target encoder</b> sees <em>all</em> of them and produces one vector per patch; the yellow blocks select which of those vectors are the targets. This order matters: masking the target encoder's output rather than its input is worth <span data-claim="ijepa-abl-output-masking">67.3</span> vs <span data-claim="ijepa-abl-input-masking">56.1</span> in the paper's Table 11 (a ViT-H/16, low-shot probe), because the targets are then <em>contextual</em>: the vector for a leaf patch already knows it sits in a tree. The <b class="c-blue">context encoder</b> sees only the blue patches, on average a quarter of the image (<span data-claim="ijepa-context-avg-ratio">0.25</span>, Table 6). The <b class="c-green">predictor</b>, a narrow transformer of width <span data-claim="ijepa-predictor-width">384</span>, takes the context vectors plus one <em>mask token</em> per target patch: a shared learned vector with that patch's position added, which is how the predictor knows <em>where</em> it is being asked to guess. It is run once per target block and outputs one vector per target patch. The loss is the squared distance between guess and target, summed over the patches of a block and averaged over the four blocks:</p>
+<div class="eq" id="eq-ijepa" data-build data-viz="viz-ijmask"><div class="tex tex-display">
+\htmlData{step=1, link=loss}{\mathcal{L} = \frac{1}{M}\sum_{i=1}^{M}} \htmlData{step=2, link=target}{\sum_{j \in B_i}} \big\lVert \htmlData{step=3, link=context}{\htmlClass{t-green}{\hat{s}_{y_j}}} - \htmlData{step=2, link=target}{\htmlClass{t-yellow}{s_{y_j}}} \big\rVert_2^2, \qquad \htmlClass{t-green}{\hat{s}_y(i)} = g_\phi\big(\htmlClass{t-blue}{s_x}, \{m_j\}_{j \in B_i}\big)
+</div></div>
+<p class="eqno">Sec. 3 of I-JEPA, paragraph "Loss" (the display equation there is unnumbered; the paper calls it "the average L2 distance" although the inner sum is not averaged).</p>
+<ul class="gloss">
+  <li><span class="tex">M</span>: the number of target blocks, <span data-claim="ijepa-num-targets">4</span>; <span class="tex">B_i</span>: the patch indices inside block <span class="tex">i</span>.</li>
+  <li><span class="tex t-yellow">s_{y_j}</span>: the target encoder's vector for patch <span class="tex">j</span>; nothing is normalised, and no gradient flows into it.</li>
+  <li><span class="tex t-green">\hat{s}_{y_j}</span>: the predictor's guess for that patch, from the context vectors <span class="tex t-blue">s_x</span> and the mask tokens <span class="tex">m_j</span>.</li>
+  <li><span class="tex">g_\phi</span>: the predictor, with parameters <span class="tex">\phi</span>; the context encoder has <span class="tex">\theta</span>; the target encoder's weights are an average of past <span class="tex">\theta</span> and have no parameters of their own.</li>
+</ul>
+<p>What stops collapse here? Nothing in the loss. The target encoder's weights are an exponential moving average of the context encoder's, with momentum <span data-claim="ijepa-ema-start">0.996</span> rising to <span data-claim="ijepa-ema-end">1.0</span> over training (BYOL's rule, <span data-claim="byol-eq-ema">Eq. (1)</span> in chapter 1), and the predictor sits between the two. Why those two asymmetries are enough is the subject of chapter 5.</p>
+
+<h3>Why the mask is the design</h3>
+<p>Every ablation in the paper points at the same lesson: the task has to be hard in the right way. With four targets, <span data-claim="ijepa-abl-mask-multiblock">54.2</span>% low-shot accuracy (ViT-B/16, 1% of ImageNet labels, linear probe); with one target block, <span data-claim="ijepa-abl-ntargets-1">9.0</span>%; two, <span data-claim="ijepa-abl-ntargets-2">22.0</span>%; three, <span data-claim="ijepa-abl-ntargets-3">48.5</span>% (Table 10). Shrink the targets to scale (0.075, 0.2) and the score falls to <span data-claim="ijepa-abl-tscale-0075">19.2</span>% (Table 8): a tiny target can be filled by copying its neighbours, so nothing semantic needs to be learned. Make them too large, (0.2, 0.3), and it falls to <span data-claim="ijepa-abl-tscale-02-03">33.6</span>%: there is not enough left to predict from. The alternatives in the figure fare worse still: predicting three quadrants from one (rasterised) gives <span data-claim="ijepa-abl-mask-rasterized">15.5</span>%, a single big block <span data-claim="ijepa-abl-mask-block">20.2</span>%, random patches <span data-claim="ijepa-abl-mask-random">17.6</span>% (Table 6). And the question this whole page asks, pixels or embeddings, has its cleanest answer in Table 7: the same ViT-L/16 trained to predict the target encoder's output reaches <span data-claim="ijepa-abl-target-rep">66.9</span>%, trained to predict pixels <span data-claim="ijepa-abl-target-pixels">40.7</span>%, even though the pixel run trained longer (<span data-claim="ijepa-abl-target-pixels-epochs">800</span> vs <span data-claim="ijepa-abl-target-rep-epochs">500</span> epochs).</p>
+
+<h3>What it bought</h3>
+<p>With a frozen encoder and a linear classifier on ImageNet-1k: <span data-claim="ijepa-in1k-linear-b16">72.9</span>% for ViT-B/16, <span data-claim="ijepa-in1k-linear-l16">77.5</span>% for ViT-L/16, <span data-claim="ijepa-in1k-linear-h14">79.3</span>% for ViT-H/14 and <span data-claim="ijepa-in1k-linear-h16-448">81.1</span>% for ViT-H/16 at 448 pixels (Table 1). MAE, the pixel route with the same backbones, gets <span data-claim="ijepa-in1k-linear-mae-b16">68.0</span>, <span data-claim="ijepa-in1k-linear-mae-l16">76.0</span> and <span data-claim="ijepa-in1k-linear-mae-h14">77.2</span> after <span data-claim="ijepa-mae-epochs">1600</span> epochs. The view-invariance methods that hand-design augmentations are still ahead on this one number (iBOT ViT-L/16: <span data-claim="ijepa-in1k-linear-ibot-l16">81.0</span>; DINO ViT-B/8: <span data-claim="ijepa-in1k-linear-dino-b8">80.1</span>), but they lose on the low-level tasks those augmentations throw away: counting objects in Clevr, I-JEPA's ViT-H/14 <span data-claim="ijepa-clevr-count">86.7</span> vs DINO <span data-claim="ijepa-clevr-count-dino">86.6</span> and iBOT <span data-claim="ijepa-clevr-count-ibot">85.7</span>; judging depth, <span data-claim="ijepa-clevr-dist">72.4</span> vs <span data-claim="ijepa-clevr-dist-dino">53.4</span> and <span data-claim="ijepa-clevr-dist-ibot">62.8</span> (Table 4). The compute story is the one the authors lead with: ViT-H/14 trains on <span data-claim="ijepa-gpus">16 A100 GPUs</span> in under <span data-claim="ijepa-hours">72 hours</span>, under <span data-claim="ijepa-gpu-hours">1200</span> GPU hours, which the paper puts at <span data-claim="ijepa-speedup-ibot">2.5x</span> less than a small iBOT ViT-S/16 and <span data-claim="ijepa-speedup-mae">10x</span> less than MAE's ViT-H/14. Each step is about <span data-claim="ijepa-iter-overhead-vs-mae">7%</span> slower than MAE's; it needs roughly <span data-claim="ijepa-fewer-iterations">5x</span> fewer of them.</p>
+
+<h3>Inside I-JEPA: forward, then backward</h3>
+<p>Press through the stages. The shapes are computed from the official configuration for each model size. Before you reach stage 8, guess: which of the three networks will the gradient reach?</p>
+<figure class="viz archflow" id="viz-ijflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-ijflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-ijflow-patches" aria-pressed="false">2 Patches</button>
+    <button type="button" id="btn-ijflow-masks" aria-pressed="false">3 Masks</button>
+    <button type="button" id="btn-ijflow-encoders" aria-pressed="false">4 Encoders</button>
+    <button type="button" id="btn-ijflow-predictor" aria-pressed="false">5 Predictor</button>
+    <button type="button" id="btn-ijflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-ijflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-ijflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-ijflow-b16" aria-pressed="false">ViT-B/16</button>
+    <button type="button" id="btn-ijflow-l16" aria-pressed="false">ViT-L/16</button>
+    <button type="button" id="btn-ijflow-h14" aria-pressed="true">ViT-H/14</button>
+    <button type="button" id="btn-ijflow-h16" aria-pressed="false">ViT-H/16 at 448</button>
+  </div>
+  <canvas id="ijflow-canvas" role="img" aria-label="I-JEPA's training step as a diagram: the image becomes patches; the full set goes to the brown target encoder, the context subset to the blue context encoder; the green predictor takes context vectors and mask tokens and meets the target vectors in a red loss. In the backward stages red arrows run from the loss into the predictor and the context encoder only."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ijflow-prev">Previous</button>
+    <button type="button" id="btn-ijflow-next">Next</button>
+    <button type="button" id="btn-ijflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ijflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One image, two copies of one encoder, one small predictor. The <b class="c-brown">target encoder</b> sees everything and is never trained directly; the <b class="c-blue">context encoder</b> sees the visible patches and is; the <b class="c-green">predictor</b> bridges them and the <b class="c-red">loss</b> compares. Press <b>1 Image</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. One image, one view</h4><p>A batch of images, each resized and randomly cropped to <span data-claim="ijepa-resolution">224</span> pixels (crop scale <span data-claim="ijepa-code-crop-scale">0.3 to 1.0</span> in the released config, code-only). No color jitter, no flips, no second view: I-JEPA is trained "without using any view data augmentations". Per GPU the batch is <span data-claim="ijepa-code-batch-per-gpu">128</span> images (code-only), <span data-claim="ijepa-batch">2048</span> in all.</p></div>
+    <div data-stage="patches" hidden><h4>2. Patches become tokens</h4><p>The image is cut into a grid of patches (14-pixel patches give <span data-claim="ijepa-tokens-h14-224">256</span> for ViT-H/14), each flattened and multiplied by a learned matrix, plus a fixed two-dimensional sine-cosine position code (<span data-claim="ijepa-code-pos-embed">2D sin-cos</span>, code-only). There is no class token.</p></div>
+    <div data-stage="masks" hidden><h4>3. The masks</h4><p>The sampler in the data loader draws <span data-claim="ijepa-num-targets">4</span> target blocks and <span data-claim="ijepa-context-count">1</span> context block per image (ranges in the figure above), removes target patches from the context, and keeps at least <span data-claim="ijepa-code-min-keep">10</span> patches (code-only). Every image on a GPU shares the same mask sizes so the tensors stay rectangular.</p></div>
+    <div data-stage="encoders" hidden><h4>4. Two encoders, one weight history</h4><p><b class="c-brown">Target encoder:</b> all patches in, one vector per patch out; its weights are the moving average of the context encoder's, momentum <span data-claim="ijepa-ema-start">0.996</span> to <span data-claim="ijepa-ema-end">1.0</span>. <b class="c-blue">Context encoder:</b> only the context patches in. Both are standard ViTs; the widths and depths shown are from the released code (code-only), the paper states only that ViT-L is <span data-claim="ijepa-encoder-width-l16">1024</span> wide.</p></div>
+    <div data-stage="predictor" hidden><h4>5. The predictor fills the holes</h4><p>Context vectors are projected to the predictor's width of <span data-claim="ijepa-predictor-width">384</span>; one mask token per target patch is appended (shared learned vector plus that patch's position code); a transformer of depth <span data-claim="ijepa-predictor-depth-l-h">12</span> (<span data-claim="ijepa-predictor-depth-b16">6</span> for ViT-B/16) with as many heads as the backbone runs over the sequence; the outputs at the mask positions are projected back to the encoder width. This is done once per target block.</p></div>
+    <div data-stage="loss" hidden><h4>6. One number</h4><p>For each target block, the squared distance between every predicted vector and its target vector, summed; then averaged over the four blocks: <a href="#eq-ijepa">the equation above</a>.</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>From the loss into the predictor's outputs, back through its layers to its mask tokens and input projection, then into the context encoder's vectors and down all its layers to the patch embedding. The target vectors are treated as constants: the <b class="c-brown">target encoder</b> gets no gradient, and since nothing trainable sits upstream of it, the gradient simply stops there.</p></div>
+    <div data-stage="update" hidden><h4>8. Three updates</h4><p><span data-claim="ijepa-optimizer">AdamW</span> moves the context encoder and the predictor. The learning rate warms up to <span data-claim="ijepa-lr-peak">1e-3</span> then decays by cosine to <span data-claim="ijepa-lr-final">1e-6</span>; weight decay rises from <span data-claim="ijepa-wd-start">0.04</span> to <span data-claim="ijepa-wd-end">0.4</span>. Then the target encoder takes its moving-average step toward the new context encoder. The schedules are drawn in the interlude below.</p></div>
+  </div>
+  <figcaption>Computed: patch counts from the resolution and patch size; encoder widths, depths and heads from the released <code>vision_transformer.py</code> (code-only); predictor width and depths from Appendix A; the average context size is the paper's measured <span data-claim="ijepa-context-avg-ratio">0.25</span> for ViT-B/16, extrapolated to the other grids.</figcaption>
+</figure>
+</section>

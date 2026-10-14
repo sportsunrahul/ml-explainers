@@ -1,0 +1,113 @@
+<p class="kicker"><span class="act-n">Act III</span>Model the density, or fake the defect</p>
+
+<section id="ch-fastflow" class="chapter">
+<h2>Turn normal into a perfect Gaussian</h2>
+<p>PaDiM forces normal features into one Gaussian per position, and PatchCore keeps raw examples. A normalizing flow learns an invertible warp that bends the real, oddly shaped cloud of normal features into a perfect Gaussian, so the likelihood of any feature becomes an exact number.</p>
+
+<figure class="viz" id="viz-fastflow" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-fastflow" class="pe3" tabindex="0" aria-label="A three-dimensional density surface over a two-dimensional feature plane. At the start the surface is a twisted crescent and blue dots of normal features sit under it. Each flow layer warps the plane until the surface is a round Gaussian bell. A yellow test feature from a scratch rides along and ends far out in the bell's tail, with a dashed stem showing its height, which is its likelihood. A small yellow ring around it stretches as the plane warps. Drag to orbit."></canvas>
+  <div class="controls" role="group" aria-label="Flow layers applied">
+    <span>Layers applied</span>
+    <button type="button" id="btn-fastflow-s0" aria-pressed="true">0: the data</button>
+    <button type="button" id="btn-fastflow-s1" aria-pressed="false">1</button>
+    <button type="button" id="btn-fastflow-s2" aria-pressed="false">2</button>
+    <button type="button" id="btn-fastflow-s3" aria-pressed="false">3</button>
+    <button type="button" id="btn-fastflow-s4" aria-pressed="false">4: Gaussian</button>
+    <button type="button" id="btn-fastflow-play">Run all four</button>
+  </div>
+  <div class="controls" role="group" aria-label="Test feature">
+    <span>Test feature</span>
+    <button type="button" id="btn-fastflow-anomaly" aria-pressed="true">From a scratch</button>
+    <button type="button" id="btn-fastflow-normal" aria-pressed="false">From a good part</button>
+    <button type="button" id="btn-fastflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model, computed exactly. The normal features follow a distribution that is defined as four affine coupling layers applied to a standard Gaussian, so the flow that undoes them is known exactly, and every surface drawn, including the in-between frames, is an exact density. The surface height is the density (the volume under it is always one), and the small dots on it are normal training features. The yellow ring is a small patch of the plane around the test feature; its stretching is the log-determinant.</figcaption>
+</figure>
+
+<p>Start at layer 0. The small dots are normal patch features, and the blue surface under them is their density: a twisted crescent that no single Gaussian fits. Predict before you press <em>4</em>: once normal is a round bell, where will the feature from the scratch land? Each layer warps the plane a little. The crescent tilts back, untwists, straightens into a thin band, and swells into a standard Gaussian. The scratch's feature rides along and ends far out in the tail, where the bell is almost flat. There, a likelihood is easy to read: a standard Gaussian's density depends only on the distance from its center.</p>
+<p>Watch the readout while you step. The log-likelihood of the test feature never changes. What changes is its split: the height of the surface under the point, plus a correction for how much the warp has stretched the plane so far. That correction is the yellow ring.</p>
+
+<h3>Why a flow gives an exact likelihood</h3>
+<p>A normalizing flow <span class="tex">\htmlClass{t-green}{f_\theta}</span> is an invertible network: every feature <span class="tex">\htmlClass{t-yellow}{x}</span> maps to exactly one latent <span class="tex">z = \htmlClass{t-green}{f_\theta}(\htmlClass{t-yellow}{x})</span> of the same size, and back. Train it so that normal features land on a standard normal distribution. Then the probability of any feature follows from the change-of-variables rule: the density of <span class="tex">z</span> under the bell, corrected for how much the flow squeezes or stretches space at <span class="tex">\htmlClass{t-yellow}{x}</span>.</p>
+<div class="eq" id="eq-ff-loglik" data-build data-viz="viz-fastflow"><div class="tex tex-display">
+\htmlData{step=1, link=test}{\log p_X(\htmlClass{t-yellow}{x})} = \htmlData{step=2, link=base}{\log p_Z\big(\htmlClass{t-green}{f_\theta}(\htmlClass{t-yellow}{x})\big)} + \htmlData{step=3, link=logdet}{\log \left\lvert \det \frac{\partial \htmlClass{t-green}{f_\theta}(\htmlClass{t-yellow}{x})}{\partial \htmlClass{t-yellow}{x}} \right\rvert}, \qquad z \sim \mathcal{N}(0, I)
+</div></div>
+<p class="eqno">Eq. 2 in FastFlow v2 (the paper prints the mean of the normal as <span class="tex">o</span>).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{x}</span> is a feature vector at one position of the backbone's feature map.</li>
+  <li><span class="tex">\htmlClass{t-green}{f_\theta}</span> is the flow with trainable parameters <span class="tex">\theta</span>; <span class="tex">p_Z</span> is the standard normal density, the round bell at layer 4.</li>
+  <li>The determinant term is the log of the local volume change. A flow that stretches the plane around <span class="tex">\htmlClass{t-yellow}{x}</span> spreads the probability thinner there, and this term pays it back. In the figure it is the ring's change in area.</li>
+  <li>Normal features get a high <span class="tex">\log p_X</span>. A defect's feature lands in the tail of the bell and gets a low one: that is the anomaly score.</li>
+</ul>
+
+<h3>One coupling layer</h3>
+<p>The determinant of a large network's Jacobian is expensive. Flows avoid it with <em>affine coupling layers</em>: split the channels into two halves, pass one half through unchanged, and use it to scale and shift the other half. The first half is untouched, so the layer is trivially invertible, and the Jacobian is triangular: its log-determinant is just the sum of the log-scales.</p>
+<div class="eq" id="eq-ff-coupling" data-build data-viz="viz-fastflow"><div class="tex tex-display">
+\htmlData{step=1}{y_a, y_b = \operatorname{split}(y)}, \qquad \htmlData{step=2}{y'_a = y_a}, \qquad \htmlData{step=3, link=logdet}{y'_b = s(y_a) \odot y_b + b(y_a)}, \qquad \htmlData{step=4}{y' = \operatorname{concat}(y'_a, y'_b)}
+</div></div>
+<p class="eqno">Eq. 3 in FastFlow v2. The paper's Fig. 2(b) applies <span class="tex">\exp(s)</span> before the multiplication and runs two such couplings per step, with an activation normalization and a channel permutation; the toy above uses that exponential form, so each layer's log-determinant is the sum of <span class="tex">s(y_a)</span>.</p>
+<p>Here <span class="tex">s</span> and <span class="tex">b</span> are small neural networks. They can be as complex as you like, because they are never inverted: to undo the layer, compute <span class="tex">s(y_a)</span> and <span class="tex">b(y_a)</span> again from the unchanged half and solve for <span class="tex">y_b</span>. Stack many such layers, alternating which half is held fixed, and the flow can bend any reasonable distribution into a Gaussian. The toy's four layers do exactly that, one bend each.</p>
+
+<h3>What makes FastFlow two-dimensional</h3>
+<p>Earlier flows for anomaly detection, such as DifferNet and CFLOW-AD, worked on one-dimensional vectors. Flattening a feature map into a vector "destroys the inherent spatial positional relationship", in FastFlow's words, and CFLOW-AD's sliding windows cost many forward passes. FastFlow's subnets <span class="tex">s</span> and <span class="tex">b</span> are convolutional instead. Each flow step maps a whole <span class="tex">C \times H \times W</span> feature map to a latent of the same shape, so one pass gives a likelihood for every position at once. The steps alternate <span class="tex">3 \times 3</span> convolutions, which see a neighborhood, with cheap <span class="tex">1 \times 1</span> convolutions, which see one position.</p>
+<p>Training maximizes the log-likelihood of normal features. The paper does not print its loss; our reading is the negative of Eq. 2, averaged over every position of every training image. At test time, FastFlow turns the latent into a map: "we sum the two-dimensional probabilities of each channel to get the final probability map and upsample it to the input image resolution using bilinear interpolation." With a ResNet backbone, three flows run on three feature scales and their maps are averaged. The paper does not say how it turns the map into one image score.</p>
+
+<h3>Inside FastFlow: forward, then backward</h3>
+<p>Before you press the backward steps, predict: which boxes will the gradient reach?</p>
+<figure class="viz archflow" id="viz-ffflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-ffflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-ffflow-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-ffflow-flow" aria-pressed="false">3 Flow</button>
+    <button type="button" id="btn-ffflow-latent" aria-pressed="false">4 Latent</button>
+    <button type="button" id="btn-ffflow-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-ffflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-ffflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Backbone">
+    <span>backbone</span>
+    <button type="button" id="btn-ffflow-cait" aria-pressed="true">CaiT-M48</button>
+    <button type="button" id="btn-ffflow-deit" aria-pressed="false">DeiT-base</button>
+    <button type="button" id="btn-ffflow-r18" aria-pressed="false">ResNet18</button>
+    <button type="button" id="btn-ffflow-wrn50" aria-pressed="false">WRN50-2</button>
+  </div>
+  <canvas id="ffflow-canvas" role="img" aria-label="FastFlow as a diagram: a good image enters a brown, frozen backbone; its feature map goes through a green two-dimensional flow to a latent of the same shape, which meets the standard normal in a red loss at every position. In the backward stages red arrows run from the loss into the flow only."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ffflow-prev">Previous</button>
+    <button type="button" id="btn-ffflow-next">Next</button>
+    <button type="button" id="btn-ffflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ffflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>A frozen <b class="c-brown">backbone</b> turns the image into a feature map; a trainable <b class="c-green">flow</b> turns the feature map into a latent of the same shape; the <b class="c-red">loss</b> asks every position of the latent to look like a standard normal sample. Press <b>1 Image</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. A good image</h4><p>Training uses good images only, one model per product. The input is <span data-claim="fastflow-cait-input">448</span> pixels for CaiT, <span data-claim="fastflow-deit-input">384</span> for DeiT and <span data-claim="fastflow-resnet-input">256</span> for the two ResNets. Training adds random flips and rotations, except for products where they change what normal means (a transistor cannot be upside down).</p></div>
+    <div data-stage="backbone" hidden><h4>2. A frozen backbone</h4><p>The backbone is pretrained on ImageNet and frozen. The vision transformers give one feature map from one block: block <span data-claim="fastflow-cait-block">40</span> of CaiT (a <span data-claim="fastflow-cait-featsize">28</span> by 28 grid) and block <span data-claim="fastflow-deit-block">7</span> of DeiT (<span data-claim="fastflow-deit-featsize">24</span> by 24). The ResNets give the last layer of each of their first three blocks, with feature-map sizes <span data-claim="fastflow-resnet-featsizes">[64, 32, 16]</span>. The paper does not state the channel counts; the figure prints the standard widths, labelled as our reading.</p></div>
+    <div data-stage="flow" hidden><h4>3. The flow</h4><p><span data-claim="fastflow-steps-vit">20</span> flow steps for the transformers and <span data-claim="fastflow-steps-resnet">8</span> for the ResNets, where each of the three scales gets its own flow. Each step is an activation normalization, a channel permutation and coupling layers whose subnets are two convolutions with a ReLU between them. The subnets alternate 3 by 3 and 1 by 1 kernels, except on ResNet18, which works better with 3 by 3 only. The hidden width of a subnet is <span data-claim="fastflow-hidden-ratio-cait">0.16</span> times its input width for CaiT and <span data-claim="fastflow-hidden-ratio-wrn50">1.0</span> times for WRN50.</p></div>
+    <div data-stage="latent" hidden><h4>4. The latent</h4><p>The output has exactly the shape of the input feature map, because the flow is a bijection. Training wants every position of it to look like a sample of a standard normal, independently of the others.</p></div>
+    <div data-stage="loss" hidden><h4>5. One number</h4><p>At each position, the negative of Eq. 2: how far the latent is from the center of the bell, minus the log volume change. Averaged over positions and images. This is our reading; the paper says the flow maximizes the log-likelihood but does not print the loss.</p></div>
+    <div data-stage="backward" hidden><h4>6. Where the gradient goes</h4><p>The loss depends on the flow twice: through the latent <span class="tex">z</span> and through the log-determinant. Both paths lead into the flow's subnets and normalization parameters. The backbone is frozen, and nothing trainable sits behind it, so the gradient stops at the feature map.</p></div>
+    <div data-stage="update" hidden><h4>7. The update</h4><p><span data-claim="fastflow-optimizer">Adam</span> with learning rate <span data-claim="fastflow-lr">1e-3</span> and weight decay <span data-claim="fastflow-wd">1e-5</span>, for <span data-claim="fastflow-epochs">500</span> epochs at batch size <span data-claim="fastflow-batch">32</span>. Only the flow changes. At test time the same forward pass gives the likelihood of every position; no gradient is needed.</p></div>
+  </div>
+  <figcaption>Computed: spatial sizes from the input resolution and block choice in Table 6 of FastFlow v2; step counts and kernels from Sec. 4.7 and 4.4. The channel counts C are the standard backbone widths, not stated in the paper (our reading).</figcaption>
+</figure>
+
+<h3>Results</h3>
+<p>On MVTec AD, one model per product, FastFlow's best numbers use the CaiT backbone at <span data-claim="fastflow-cait-input">448</span> pixels: <span data-claim="fastflow-mvtec-img-auroc-cait">99.4</span> image AUROC and <span data-claim="fastflow-mvtec-pix-auroc-cait">98.5</span> pixel AUROC. With WRN50-2 at <span data-claim="fastflow-resnet-input">256</span> pixels it gets <span data-claim="fastflow-mvtec-img-auroc-wrn50">99.3</span> and <span data-claim="fastflow-mvtec-pix-auroc-wrn50">98.1</span>. The same table credits CFLOW-AD with <span data-claim="fastflow-t2-cflow-pix">98.6</span> pixel AUROC, so FastFlow leads on detection, not on localization.</p>
+<table class="data">
+  <thead><tr><th>Backbone (input)</th><th>Image AUROC</th><th>Pixel AUROC</th><th>Frames per second</th><th>Added time</th><th>Added parameters (M)</th></tr></thead>
+  <tbody>
+    <tr><td>CaiT-M48 (448)</td><td><span data-claim="fastflow-mvtec-img-auroc-cait">99.4</span></td><td><span data-claim="fastflow-mvtec-pix-auroc-cait">98.5</span></td><td><span data-claim="fastflow-fps-cait">3.08</span></td><td><span data-claim="fastflow-adtime-cait">9 ms</span></td><td><span data-claim="fastflow-adparams-cait">14.8</span></td></tr>
+    <tr><td>DeiT-base (384)</td><td><span data-claim="fastflow-mvtec-img-auroc-deit">98.7</span></td><td><span data-claim="fastflow-mvtec-pix-auroc-deit">98.1</span></td><td><span data-claim="fastflow-fps-deit">30.14</span></td><td><span data-claim="fastflow-adtime-deit">8 ms</span></td><td><span data-claim="fastflow-adparams-deit">14.8</span></td></tr>
+    <tr><td>ResNet18 (256)</td><td><span data-claim="fastflow-mvtec-img-auroc-r18">97.9</span></td><td><span data-claim="fastflow-mvtec-pix-auroc-r18">97.2</span></td><td><span data-claim="fastflow-fps-r18">30.8</span></td><td><span data-claim="fastflow-adtime-r18">27 ms</span></td><td><span data-claim="fastflow-adparams-r18">4.9</span></td></tr>
+    <tr><td>WRN50-2 (256)</td><td><span data-claim="fastflow-mvtec-img-auroc-wrn50">99.3</span></td><td><span data-claim="fastflow-mvtec-pix-auroc-wrn50">98.1</span></td><td><span data-claim="fastflow-fps-wrn50">21.8</span></td><td><span data-claim="fastflow-adtime-wrn50">34 ms</span></td><td><span data-claim="fastflow-adparams-wrn50">41.3</span></td></tr>
+  </tbody>
+</table>
+<p class="note">FastFlow v2, Table 1: MVTec AD means, one model per product; timed on a <span data-claim="fastflow-hw-gpu">GTX 1080Ti</span> with a Xeon <span data-claim="fastflow-hw-cpu">E5-2680 V4</span>, batch size not stated. "Added" excludes the backbone; frames per second include it. That is why CaiT adds only <span data-claim="fastflow-adtime-cait">9 ms</span> yet runs at <span data-claim="fastflow-fps-cait">3.08</span> frames per second: its backbone is the slow part.</p>
+<p>Three more results matter. First, the cheap <span class="tex">1 \times 1</span> steps pay off on large backbones: on WRN50-2, all-<span class="tex">3 \times 3</span> subnets need <span data-claim="fastflow-abl-wrn50-33-params">74.4</span> M added parameters and score <span data-claim="fastflow-abl-wrn50-33-img">98.2</span>, worse than the alternating design. Second, FastFlow with CaiT keeps <span data-claim="fastflow-nonaligned-img">99.2</span> image AUROC when the test images are randomly zoomed, rotated and shifted, so it does not depend on aligned parts the way a per-position Gaussian does. Third, it is not a general novelty detector: on CIFAR-10 classes it scores <span data-claim="fastflow-cifar10">66.7</span>. Pretrained features plus a density are good at "this patch looks wrong", not at "this is a different object".</p>
+<p class="note">Related flows on the family tree: DifferNet (2008.12577), CFLOW-AD (2107.12571), CS-Flow (2110.02855) and MSFlow (2308.15300).</p>
+</section>

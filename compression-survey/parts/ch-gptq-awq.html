@@ -1,0 +1,161 @@
+<section id="ch-gptq-awq" class="chapter">
+<h2>Four-bit weights: GPTQ and AWQ</h2>
+<p>When a language model writes text one token at a time, each layer reads all of its weights to do a little arithmetic on one token, so it waits on memory (the "LLM layer, 1 token" dot in <a href="#ch-cost">chapter 1</a>). Storing the weights in 4 bits cuts those bytes by four, and the two methods in this chapter make 4-bit weights accurate without any retraining.</p>
+
+<figure class="viz" id="viz-gptq" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Method and bit width">
+    <span class="lbl">Method</span>
+    <button type="button" id="btn-gptq-m-gptq" aria-pressed="true">GPTQ</button>
+    <button type="button" id="btn-gptq-m-rtn" aria-pressed="false">Round to nearest</button>
+    <span class="lbl">Grid</span>
+    <button type="button" id="btn-gptq-b4" aria-pressed="true">4-bit</button>
+    <button type="button" id="btn-gptq-b3" aria-pressed="false">3-bit</button>
+  </div>
+  <canvas id="gptq-canvas" role="img" aria-label="An 8 by 16 grid of weights, each drawn as a small signed bar, with an outline marking its original value. Columns turn yellow as they are quantized from left to right. Above the grid, a row of red bars shows how much of the current column's error each later column absorbs. Beside the grid, a chart of output error against the number of quantized columns for GPTQ and for round to nearest."></canvas>
+  <div class="controls" role="group" aria-label="Columns quantized">
+    <span class="lbl">Columns done</span>
+    <button type="button" id="btn-gptq-c0" aria-pressed="true">0</button>
+    <button type="button" id="btn-gptq-c1" aria-pressed="false">1</button>
+    <button type="button" id="btn-gptq-c2" aria-pressed="false">2</button>
+    <button type="button" id="btn-gptq-c4" aria-pressed="false">4</button>
+    <button type="button" id="btn-gptq-c8" aria-pressed="false">8</button>
+    <button type="button" id="btn-gptq-c16" aria-pressed="false">all 16</button>
+    <button type="button" id="btn-gptq-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="gptq-readout" aria-live="polite"></p>
+  <figcaption>Computed with GPTQ's Algorithm 1 on toy data: an 8 by 16 weight block and 64 toy calibration inputs whose 16 channels are correlated. H = 2XX<sup>T</sup> + &lambda;I with &lambda; = 1% of the mean diagonal, the upper Cholesky factor of H<sup>-1</sup>, and column-by-column quantization with error feedback, as in the paper. The grid is per-row, asymmetric and min-max, fixed before the loop (our reading of the paper's setup), and round to nearest uses the same grid. Blocks are 4 columns instead of 128; the paper explains why blocking does not change the rounding decisions, and the toy gives identical codes for blocks of 1, 4 and 16. Output error is the squared Frobenius norm of WX minus the current weights times X.</figcaption>
+</figure>
+
+<h3>GPTQ: round one column, repair the rest</h3>
+<p>Round to nearest treats every weight alone. GPTQ (Frantar et al.) asks what the layer's <em>output</em> needs, using real inputs from a small calibration set:</p>
+<div class="eq" id="eq-gptq-obj" data-build data-viz="viz-gptq"><div class="tex tex-display">
+\htmlData{step=3, link=loss}{\text{argmin}_{\htmlClass{t-yellow}{\mathbf{\widehat{W}}}} \, ||}\htmlData{step=1, link=w}{\htmlClass{t-blue}{\mathbf{W} \mathbf{X}}} - \htmlData{step=2, link=q}{\htmlClass{t-yellow}{\mathbf{\widehat{W}} \mathbf{X}}}\htmlData{step=3, link=loss}{||_2^2.}
+</div></div>
+<p class="eqno">Eq. 1 in Frantar et al. (GPTQ), arXiv 2210.17323v2.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{W}</span>: the layer's weights, one row per output; blue bars in the figure.</li>
+  <li><span class="tex">\mathbf{X}</span>: the layer's inputs for the calibration samples, one column per sample.</li>
+  <li><span class="tex">\mathbf{\widehat{W}}</span>: the quantized weights, restricted to the grid; yellow bars.</li>
+  <li>The squared norm is the total output error, the red line in the chart.</li>
+</ul>
+<p>The algorithm walks the columns from left to right. It rounds one column onto the grid, measures the rounding error, and shifts every column not yet rounded so that the layer's output moves back toward where it was. Press the column buttons and watch the blue bars to the right of the frame move away from their outlines: that is the repair. The red bars above the grid say how much of the error each later column takes. They come from H, which records how the input channels move together; when two channels are correlated, one can stand in for the other. This is the same input Hessian that AdaRound uses to choose up or down in <a href="#ch-ptq">chapter 6</a>.</p>
+<p>The shift is the update of Optimal Brain Surgeon, applied to quantization by the earlier OBQ method (Frantar et al., arXiv 2208.11580v2), which GPTQ builds on:</p>
+<div class="eq" id="eq-gptq-obs" data-build data-viz="viz-gptq"><div class="tex tex-display">
+\htmlData{step=3, link=err}{\htmlClass{t-red}{\boldsymbol{\delta}_F}} = - \frac{\htmlData{step=1, link=q}{\htmlClass{t-red}{w_q - \text{quant}(w_q)}}}{[\mathbf{H}_F^{-1}]_{qq}} \cdot \htmlData{step=2, link=u}{(\mathbf{H}_F^{-1})_{:, q}}
+</div></div>
+<p class="eqno">Eq. 2 in Frantar et al., arXiv 2210.17323v2 (the update half; the paper's Eq. 2 also picks which weight goes next, and GPTQ replaces that choice with a fixed left-to-right order).</p>
+<ul class="gloss">
+  <li><span class="tex">w_q - \text{quant}(w_q)</span>: the rounding error of the weight just quantized.</li>
+  <li><span class="tex">\mathbf{H}_F = 2\mathbf{X}_F\mathbf{X}_F^\top</span>: the Hessian of the output error over the weights F that are still in full precision. GPTQ adds a small damping term, <span data-claim="gptq-dampening">1%</span> of its mean diagonal.</li>
+  <li><span class="tex">(\mathbf{H}_F^{-1})_{:, q}</span>: how strongly each remaining weight should move to cancel that error.</li>
+  <li><span class="tex">\boldsymbol{\delta}_F</span>: the change applied to all the remaining weights in that row.</li>
+</ul>
+<p>Two observations make this cheap. Every row uses the same column order, so all rows share one sequence of inverse Hessians. And that whole sequence is one Cholesky factorization of H<sup>-1</sup> (Sec. 4, Step 3). After line 3 of Algorithm 1, the symbol H<sup>-1</sup> means that upper Cholesky factor U, not the inverse itself:</p>
+<div class="eq" id="eq-gptq-alg" data-build data-viz="viz-gptq"><div class="tex tex-display">
+\begin{aligned} &\htmlData{step=1, link=q}{\htmlClass{t-yellow}{\mathbf{Q}_{:, j} \gets \text{quant}(\mathbf{W}_{:, j})}} \\ &\htmlData{step=2, link=err}{\htmlClass{t-red}{\mathbf{E}_{:, j - i}} \gets (\mathbf{W}_{:, j} - \mathbf{Q}_{:, j}) \, / \, [\mathbf{H}^{-1}]_{jj}} \\ &\htmlData{step=3, link=u}{\mathbf{W}_{:, j:(i + B)} \gets \mathbf{W}_{:, j:(i + B)} - \mathbf{E}_{:, j - i} \cdot \mathbf{H}^{-1}_{j, j:(i + B)}} \end{aligned}
+</div></div>
+<p class="eqno">Algorithm 1, lines 6 to 8, in Frantar et al., arXiv 2210.17323v2. The paper uses blocks of B = <span data-claim="gptq-blocksize">128</span> columns and applies the update to later blocks in one batch.</p>
+<p>Everything here is forward passes and linear algebra: no gradient, no training. GPTQ feeds <span data-claim="gptq-calib-count">128</span> random segments of <span data-claim="gptq-calib-len">2048</span> tokens from <span data-claim="gptq-calib-source">C4</span> (generic web text) through the model one block at a time, and quantizes each layer from its own inputs. In the toy, GPTQ ends <span data-toy>about 5 times</span> below round to nearest on the same 4-bit grid. Reading H<sup>-1</sup> in Algorithm 1 as the plain inverse instead of the Cholesky factor gives a different, wrong update.</p>
+<p>At full scale, GPTQ quantizes OPT-175B in <span data-claim="gptq-runtime-opt-175b">4.2h</span> and BLOOM-176B in <span data-claim="gptq-runtime-bloom-176b">3.8h</span> on a single A100 with <span data-claim="gptq-quant-gpu-mem">80GB</span>. On OPT-175B, WikiText2 perplexity goes from <span data-claim="gptq-t5-baseline-16-opt-175b-wiki2">8.34</span> in FP16 to <span data-claim="gptq-t5-gptq-4-opt-175b-wiki2">8.37</span> with 4-bit GPTQ, where 4-bit round to nearest gives <span data-claim="gptq-t5-rtn-4-opt-175b-wiki2">10.54</span>. At 3 bits, round to nearest collapses to <span data-claim="gptq-t5-rtn-3-opt-175b-wiki2">7.3e3</span> and GPTQ holds <span data-claim="gptq-t5-gptq-3-opt-175b-wiki2">8.68</span>. The algorithm also works on vision models: ResNet-50 with 4-bit weights keeps <span data-claim="gptq-t1-gptq-rn50-4bit">75.71</span>% ImageNet top-1 against <span data-claim="gptq-t1-rn50-fp">76.13</span>% in full precision (Table 1).</p>
+<p>The speed numbers need their conditions. The 3-bit OPT-175B model takes <span data-claim="gptq-3bit-175b-mem">63GB</span> and fits on one 80GB A100; the paper says a 4-bit version would not fully fit. Generating one token at a time (batch size 1), it takes <span data-claim="gptq-a100-3bit-ms">71</span> ms per token on that one GPU, against <span data-claim="gptq-a100-fp16-ms">230</span> ms for FP16 spread over <span data-claim="gptq-fp16-gpus">5x80GB</span> GPUs: <span data-claim="gptq-a100-speedup">3.24</span>x. The custom kernel multiplies a quantized matrix by one FP16 vector, so the gain comes from moving fewer bytes, and the paper lists speedups in batched execution as outside its study.</p>
+
+<h3>AWQ: protect the weights that see large inputs</h3>
+<p>AWQ (Lin et al.) starts from an experiment. Keep a small share of a layer's input channels in FP16 and round the rest to 3 bits. Which channels should you keep? Choosing them by the size of their <em>activations</em> recovers almost everything; choosing them by the size of their weights does about as well as choosing at random:</p>
+<table class="data">
+  <caption>AWQ Table 1 (arXiv 2306.00978v6): OPT models, INT3 weights with group size 128, WikiText perplexity (lower is better), with <span data-claim="awq-salient-1pct">1%</span> of input channels kept in FP16 and chosen three ways.</caption>
+  <thead><tr><th>Model</th><th>FP16</th><th>Round to nearest</th><th>Keep 1%, by activation</th><th>by weight</th><th>at random</th></tr></thead>
+  <tbody>
+    <tr><td>OPT-1.3B</td><td><span data-claim="awq-t1-opt-1-3b-fp16">14.62</span></td><td><span data-claim="awq-t1-opt-1-3b-rtn-w3-g128">119.00</span></td><td><span data-claim="awq-t1-opt-1-3b-act-1">16.91</span></td><td><span data-claim="awq-t1-opt-1-3b-w-1">98.55</span></td><td><span data-claim="awq-t1-opt-1-3b-random-1">109.38</span></td></tr>
+    <tr><td>OPT-6.7B</td><td><span data-claim="awq-t1-opt-6-7b-fp16">10.86</span></td><td><span data-claim="awq-t1-opt-6-7b-rtn-w3-g128">23.54</span></td><td><span data-claim="awq-t1-opt-6-7b-act-1">11.39</span></td><td><span data-claim="awq-t1-opt-6-7b-w-1">22.37</span></td><td><span data-claim="awq-t1-opt-6-7b-random-1">24.23</span></td></tr>
+    <tr><td>OPT-13B</td><td><span data-claim="awq-t1-opt-13b-fp16">10.13</span></td><td><span data-claim="awq-t1-opt-13b-rtn-w3-g128">46.04</span></td><td><span data-claim="awq-t1-opt-13b-act-1">10.43</span></td><td><span data-claim="awq-t1-opt-13b-w-1">48.96</span></td><td><span data-claim="awq-t1-opt-13b-random-1">42.00</span></td></tr>
+  </tbody>
+</table>
+<p>Mixed precision is awkward for hardware, so AWQ protects those channels another way. Multiply input channel j of W by a factor s greater than 1 before rounding, and divide the matching input by s (that division folds into the previous layer). The rounding error of a weight is at most half a step either way, so after dividing by s it shrinks by about s, as long as the scaled weight does not raise the group's maximum (AWQ Eq. 3 gives the error ratio as <span class="tex">(\Delta'/\Delta)(1/s)</span>). AWQ picks one scale per input channel from the activation sizes, with a single exponent found by search:</p>
+
+<figure class="viz" id="viz-awq" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Scale search">
+    <span class="lbl">Search</span>
+    <button type="button" id="btn-awq-search" aria-pressed="false">Grid search over alpha</button>
+  </div>
+  <canvas id="awq-canvas" role="img" aria-label="Three panels. Bars of the mean activation size for 32 input channels, two of them much taller and green, labelled with their current scale. Below, red bars of each channel's own output-error term. To the side, output error against alpha, with a marker at the current alpha and, after the search, 20 grid points with the best one circled."></canvas>
+  <div class="controls" role="group" aria-label="Exponent alpha">
+    <label for="awq-alpha">alpha <input type="range" id="awq-alpha" min="0" max="1" step="0.05" value="0"></label>
+    <output id="awq-alpha-out" for="awq-alpha">0.00</output>
+    <button type="button" id="btn-awq-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="awq-readout" aria-live="polite"></p>
+  <figcaption>Computed with AWQ's search (Eq. 4-5) on toy data: a layer with 16 outputs and 32 input channels, 64 calibration tokens, and two channels with about ten times larger activations. Weights are quantized to INT3, symmetric, one scale per group of 16 input channels (groups of 128 in the paper). Step size = max|w| / (2<sup>N-1</sup> - 1), our convention; the paper prints 2<sup>N-1</sup>, which puts the largest weight one level outside the signed range. The 20 grid points are spaced evenly from 0 to 1, including both ends (our reading of "grid size of 20"). The paper's extra weight clipping is not specified and is left out.</figcaption>
+</figure>
+
+<div class="eq" id="eq-awq-loss" data-build data-viz="viz-awq"><div class="tex tex-display">
+\begin{aligned} &\htmlData{step=3, link=loss}{\mathbf{s}^* = \mathop{\arg\min}_{\mathbf{s}} \mathcal{L}(\mathbf{s}),} \\ &\htmlData{step=3, link=loss}{\mathcal{L}(\mathbf{s})} = \lVert \htmlData{step=1, link=ch}{\htmlClass{t-yellow}{Q(\mathbf{W}\cdot \text{diag}(\mathbf{s}))}}  \htmlData{step=2, link=sx}{(\mathbf{\text{diag}(s)^{-1}} \cdot \mathbf{X})} - \htmlClass{t-blue}{\mathbf{W}\mathbf{X}}  \rVert \end{aligned}
+</div></div>
+<p class="eqno">Eq. 4 in Lin et al. (AWQ), arXiv 2306.00978v6 (the source splits "diag" across an alignment mark; joined here).</p>
+<div class="eq" id="eq-awq-s" data-build data-viz="viz-awq"><div class="tex tex-display">
+\mathbf{s}=\htmlData{step=1, link=sx}{\htmlClass{t-green}{\mathbf{s_X}}}^{\htmlData{step=2, link=alpha}{\alpha}}, \quad \htmlData{step=3, link=loss}{\alpha^*=\mathop{\arg\min}_{\alpha}\mathcal{L}(\mathbf{s_X}^{\alpha})}
+</div></div>
+<p class="eqno">Eq. 5 in Lin et al., arXiv 2306.00978v6.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{s_X}</span>: the average magnitude of each input channel's activation over calibration data, the top bars. SmoothQuant used the maximum; AWQ uses the mean.</li>
+  <li><span class="tex">Q</span>: the weight quantizer, INT3 or INT4 with a group size of <span data-claim="awq-group-size">128</span> in the paper.</li>
+  <li><span class="tex">\alpha</span>: one exponent for the whole layer. At 0 nothing is scaled (round to nearest); at 1 the scale equals the activation size.</li>
+  <li><span class="tex">\mathcal{L}</span>: the output error; the paper prints no norm subscript, and the toy uses the Frobenius norm. The paper searches <span data-claim="awq-grid-size">20</span> values of alpha on <span data-claim="awq-alpha-interval">[0, 1]</span>.</li>
+</ul>
+<p>Drag alpha up slowly. The two tall red bars, the error terms of the large-activation channels, shrink fast. Past a point, the scaled weights start to set the maximum of their group, the step grows for every other weight in it, and the small red bars rise. <b>Make a guess before you press "Grid search over alpha":</b> will the best alpha be 0, 1, or in between? In the toy the curve is a U, with its bottom near <span data-toy>0.42</span> and the error about halved. AWQ's Table 2 shows the same U on OPT-6.7B when it scales the salient 1% by a fixed s: perplexity <span data-claim="awq-t2-wiki-2-ppl-s1">23.54</span> at s = 1, <span data-claim="awq-t2-wiki-2-ppl-s2">11.92</span> at s = 2, and back up to <span data-claim="awq-t2-wiki-2-ppl-s4">12.36</span> at s = 4.</p>
+<p>Unlike GPTQ, AWQ does not fit the weights to the calibration data; it only measures activation sizes. The paper argues this makes it less sensitive to the calibration text. On OPT-6.7B at INT3, calibrating on PubMed and testing on Enron emails costs GPTQ <span data-claim="awq-f8b-gptq-shift-enron">+4.89</span> perplexity and AWQ <span data-claim="awq-f8b-awq-shift-enron">+0.50</span> (Fig. 8). With 4-bit weights in groups of 128, Llama-2-7B goes from <span data-claim="awq-t4-fp16-llama-2-7b">5.47</span> perplexity in FP16 to <span data-claim="awq-t4-int4-g128-awq-llama-2-7b">5.60</span> with AWQ, <span data-claim="awq-t4-int4-g128-gptq-llama-2-7b">5.69</span> with GPTQ and <span data-claim="awq-t4-int4-g128-rtn-llama-2-7b">5.73</span> with round to nearest (Table 4). With its own inference engine, TinyChat, at batch size 1, Llama-2-7B generates <span data-claim="awq-f9-4090-llama-2-7b-tinychat-awq-w4a16">194</span> tokens per second on an RTX 4090 with 4-bit weights, against <span data-claim="awq-f9-4090-llama-2-7b-hf-fp16">52</span> for Hugging Face in FP16 (Fig. 9).</p>
+
+<h3>The vision tie-in: vision-language models</h3>
+<p>AWQ also quantizes vision-language models, where an image encoder feeds a language model; only the language part is quantized. On COCO captioning with OpenFlamingo-9B, the score drops much less with AWQ than with the other two methods:</p>
+<table class="data">
+  <caption>AWQ Table 6 (arXiv 2306.00978v6): OpenFlamingo-9B, COCO captioning, CIDEr with 32 in-context examples (higher is better), language model weights quantized to INT4 with group size 128. Change is in absolute CIDEr points from FP16.</caption>
+  <thead><tr><th>Model, method</th><th>CIDEr, 32-shot</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr><td>OpenFlamingo-9B, FP16</td><td><span data-claim="awq-t6-fp16-32-shot">81.70</span></td><td></td></tr>
+    <tr><td>OpenFlamingo-9B, round to nearest</td><td><span data-claim="awq-t6-int4-g128-rtn-32-shot">77.13</span></td><td><span data-claim="awq-t6-int4-g128-rtn-delta-32-shot">-4.57</span></td></tr>
+    <tr><td>OpenFlamingo-9B, GPTQ</td><td><span data-claim="awq-t6-int4-g128-gptq-32-shot">74.98</span></td><td><span data-claim="awq-t6-int4-g128-gptq-delta-32-shot">-6.72</span></td></tr>
+    <tr><td>OpenFlamingo-9B, AWQ</td><td><span data-claim="awq-t6-int4-g128-awq-32-shot">80.53</span></td><td><span data-claim="awq-t6-int4-g128-awq-delta-32-shot">-1.17</span></td></tr>
+  </tbody>
+</table>
+<p>The VILA models tell the same story on 11 benchmarks; VILA-7B scores <span data-claim="awq-t7-vila-7b-vqav2">80.3</span> on VQAv2 in FP16 and <span data-claim="awq-t7-vila-7b-awq-vqav2">80.1</span> with 4-bit AWQ (Table 7). On a Jetson Orin edge module, VILA-7B's throughput rises from <span data-claim="awq-t10-vila-7b-fp16-orin">11.5</span> to <span data-claim="awq-t10-vila-7b-awq-w4a16-orin">35.6</span> with 4-bit weights in TinyChat (Table 10; the table prints no unit, tokens per second is our reading).</p>
+
+<h3>The same tools, used to prune</h3>
+<p>SparseGPT (Frantar and Alistarh, arXiv 2301.00774v3) runs GPTQ's column-by-column update with zero as the target instead of a grid point, and prunes OPT-175B to half its weights with WikiText2 perplexity <span data-claim="sparsegpt-t1-sparsegpt-50-opt-175b">8.21</span> against <span data-claim="sparsegpt-t1-dense-opt-175b">8.35</span> dense, or <span data-claim="sparsegpt-t1-sparsegpt-2-4-opt-175b">8.74</span> in the GPU-friendly 2:4 pattern of <a href="#ch-lottery">chapter 9</a>. Wanda (Sun et al., arXiv 2306.11695v3) brings the same signal to pruning (our framing; the paper builds on LLM.int8()'s outlier features, not on AWQ): score each weight by its magnitude times the size of its input channel, with no weight update at all; LLaMA-7B at half sparsity reaches <span data-claim="wanda-t3-wanda-llama-7b">7.26</span> perplexity, against <span data-claim="wanda-t3-magnitude-llama-7b">17.29</span> for plain magnitude pruning (dense <span data-claim="wanda-t3-dense-llama-7b">5.68</span>).</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>Every speedup in this chapter is for generating one token at a time, which is memory-bound. A detector backbone at normal resolution spends its time on arithmetic (<a href="#ch-cost">chapter 1</a>), so 4-bit weights with FP16 arithmetic save memory there, not much time (our reading). The algorithms themselves transfer: GPTQ's Table 1 and OBC's ImageNet rows are vision models, and OBC prunes YOLOv5l on COCO from <span data-claim="obc-t1-yolov5l-dense">66.97</span> mAP@0.5 dense to <span data-claim="obc-t1-exactobs-yolov5l-4x">64.05</span> at a 4x cut in operations, with the same layer-wise Hessian (Table 1); its YOLO quantization results exist only as figure curves. Where 4-bit weights do pay off directly is a vision-language model on an edge GPU, like VILA on Orin. <a href="#ch-guide">The decision guide</a> keeps detectors on INT8 or FP8 for both weights and activations.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-gptq'), out = document.getElementById('gptq-readout');
+  const kit = KIT.gptq(document.getElementById('gptq-canvas'), { fig });
+  const mb = ['gptq', 'rtn'].map(k => document.getElementById('btn-gptq-m-' + k)), bb = [4, 3].map(k => document.getElementById('btn-gptq-b' + k));
+  const cb = KIT.GPTQ.steps.map(k => document.getElementById('btn-gptq-c' + k));
+  const sync = () => {
+    mb.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-gptq-m-' + kit.state.method)));
+    bb.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-gptq-b' + kit.state.bits)));
+    cb.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-gptq-c' + kit.state.cols)));
+    out.innerHTML = KIT.gptqText(kit.info());
+  };
+  mb.forEach(b => b.addEventListener('click', () => { kit.set({ method: b.id.slice(11) }); sync(); }));
+  bb.forEach(b => b.addEventListener('click', () => { kit.set({ bits: +b.id.slice(10) }); sync(); }));
+  cb.forEach(b => b.addEventListener('click', () => { kit.set({ cols: +b.id.slice(10) }); sync(); }));
+  document.getElementById('btn-gptq-reset').addEventListener('click', () => { kit.set({ method: 'gptq', bits: 4, cols: 0 }); sync(); });
+  sync();
+})();
+(() => {
+  const fig = document.getElementById('viz-awq'), out = document.getElementById('awq-readout');
+  const kit = KIT.awq(document.getElementById('awq-canvas'), { fig });
+  const slider = document.getElementById('awq-alpha'), val = document.getElementById('awq-alpha-out'), sb = document.getElementById('btn-awq-search');
+  const sync = () => { sb.setAttribute('aria-pressed', String(kit.state.searched)); out.innerHTML = KIT.awqText(kit.info()); };
+  slider.addEventListener('input', () => { val.textContent = (+slider.value).toFixed(2); kit.set({ alpha: +slider.value, instant: true }); });
+  slider.addEventListener('change', sync);
+  sb.addEventListener('click', () => { const a = KIT.awqBest().alpha; slider.value = String(a); val.textContent = a.toFixed(2); kit.set({ search: true }); sync(); });
+  document.getElementById('btn-awq-reset').addEventListener('click', () => { slider.value = '0'; val.textContent = '0.00'; kit.set({ reset: true, alpha: 0 }); sync(); });
+  sync();
+})();
+</script>
+</section>

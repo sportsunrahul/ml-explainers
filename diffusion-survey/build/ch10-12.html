@@ -1,0 +1,280 @@
+
+<!-- ============================ ACT V ============================ -->
+<p class="kicker">Act V: straight paths and one step</p>
+<section id="ch-flow" class="chapter">
+<h2>Rectified flow and flow matching: learn straight paths</h2>
+<p>The probability flow ODE's paths curve, and curved paths need many small steps. Two 2022 papers asked: why not <em>train</em> on straight paths? Pair noise with data, draw straight lines, and learn to move along them. Watch what happens where the lines cross.</p>
+
+<figure class="viz" id="viz-reflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="reflow-canvas" aria-label="Noise points on the left side of each path and swiss-roll data at the ends: random straight pairings that cross, the curved paths of the learned rectified flow, and the straighter paths after reflow, integrated with the chosen number of Euler steps." role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-flow-pairs" aria-pressed="true">Random pairs, straight lines</button>
+    <button type="button" id="btn-flow-rf1" aria-pressed="false">Learned flow (1-rectified)</button>
+    <button type="button" id="btn-flow-reflow" aria-pressed="false">After reflow (2-rectified)</button>
+  </div>
+  <div class="controls">
+    <span>Euler steps:</span>
+    <button type="button" id="btn-flow-n1" aria-pressed="false">1</button>
+    <button type="button" id="btn-flow-n2" aria-pressed="false">2</button>
+    <button type="button" id="btn-flow-n4" aria-pressed="false">4</button>
+    <button type="button" id="btn-flow-n50" aria-pressed="true">50</button>
+    <button type="button" id="btn-flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="reflow-readout" aria-live="polite"></p>
+  <figcaption>Time runs from noise (<span class="tex">t = 0</span>, brown) to data (<span class="tex">t = 1</span>). The 1-rectified flow uses the exact optimal velocity for this toy (Eq. 2 of Rectified Flow, computable in closed form here). The 2-rectified flow is approximated: a smooth kernel regression on 300 noise-to-data pairs produced by the first flow, standing in for retraining a network on them. "Crossings" counts intersections among the 30 drawn pairs' straight segments.</figcaption>
+</figure>
+
+<h3>Rectified flow: regress onto the straight direction</h3>
+<p>Liu, Gong and Liu (<span data-claim="page-date-rectified-flow">7 Sep 2022</span>) start from the simplest possible path between a noise sample <span class="tex">X_0</span> and a data sample <span class="tex">X_1</span>, the straight line, and train a velocity field <span class="tex">v</span> to point along it:</p>
+<div class="eq" id="eq-rf" data-build data-viz="viz-reflow"><div class="tex tex-display">
+\min_v \int_0^1 \mathbb{E}\Big[\big\lVert \htmlData{step=2, link=lines}{(\htmlClass{t-yellow}{X_1} - \htmlClass{t-brown}{X_0})} - \htmlData{step=3, link=flow}{\htmlClass{t-blue}{v(X_t, t)}} \big\rVert^2\Big]\,\mathrm{d}t, \qquad \htmlData{step=1, link=lines}{X_t = t\,\htmlClass{t-yellow}{X_1} + (1-t)\,\htmlClass{t-brown}{X_0}}
+</div></div>
+<p class="eqno">Eq. 1 in Rectified Flow v1</p>
+<ul class="gloss">
+  <li><span class="tex">X_t</span>: the point a fraction <span class="tex">t</span> of the way along the segment. Note the direction of time: here <span class="tex">t = 0</span> is noise and <span class="tex">t = 1</span> is data, the opposite of DDPM.</li>
+  <li><span class="tex">X_1 - X_0</span>: the segment's direction, which is also its velocity because the segment is crossed in unit time.</li>
+  <li>Generation: start at noise and follow <span class="tex">\mathrm{d}Z_t = v(Z_t, t)\,\mathrm{d}t</span> to <span class="tex">t = 1</span>.</li>
+</ul>
+<p>Here is the subtlety. The noise and data are paired at random, so the segments cross each other (press <b>Random pairs</b>). At a crossing point, the "right" direction is ambiguous, and the least-squares answer is the <em>average</em> direction of all segments through that point at that time: <span class="tex">v^{\star}(x, t) = \mathbb{E}[X_1 - X_0 \mid X_t = x]</span> (Eq. 2). An ODE's solutions can never cross, so the learned flow <em>rewires</em> instead: paths bend away from each other at would-be crossings, while every time-slice keeps exactly the same distribution as the straight-line mixture. Press <b>Learned flow</b> to see the bends.</p>
+<p>The flow's own endpoints give a new pairing of noise with data, the <b>rectified coupling</b>, and the paper proves it never increases any convex transport cost compared with the random pairing (Theorem 3.5): it moves mass no farther. Now the key move, <b>reflow</b>. Train a second flow on these new pairs. They came from a non-crossing flow, so their straight segments rarely cross, and the second flow's paths come out much straighter (the paper bounds how fast straightness improves, Theorem 3.7). Before pressing <b>After reflow</b>, predict: with one Euler step, which flow lands closer to the data? Then try 1, 2 and 4 steps on each.</p>
+<p>A perfectly straight path is solved exactly by a single Euler step, <span class="tex">Z_1 = Z_0 + v(Z_0, 0)</span>. On CIFAR-10, one Euler step of the plain flow gives FID <span data-claim="page-rf-1rf-onestep">378</span> (the VP ODE: <span data-claim="page-rf-vpode-onestep">451</span>), one reflow brings it to <span data-claim="page-rf-2rf-onestep">12.21</span>, and a final distillation step to <span data-claim="page-rf-2rf-distill">4.85</span>. With an adaptive solver the plain flow reached FID <span data-claim="page-rf-rk45">2.58</span> at <span data-claim="page-rf-rk45-nfe">127</span> evaluations.</p>
+
+<h3>Flow matching: the general recipe</h3>
+<p>Lipman and colleagues (<span data-claim="page-date-flow-matching">6 Oct 2022</span>) arrived at the same place from continuous normalizing flows, and made it general. The ideal objective is to match the network's velocity <span class="tex">v_t(x)</span> to the true velocity <span class="tex">u_t(x)</span> of some chosen path of distributions from noise to data, which nobody can compute. But if you build that path as a mixture of simple per-example paths, each ending at one training image <span class="tex">x_1</span>, you can regress onto the per-example velocity instead:</p>
+<div class="eq" id="eq-cfm" data-build data-viz="viz-reflow"><div class="tex tex-display">
+\mathcal{L}_{\text{CFM}}(\theta) = \htmlData{step=1, link=lines}{\mathbb{E}_{t,\; q(x_1),\; p_t(x \mid x_1)}}\,\big\lVert \htmlData{step=2, link=flow}{\htmlClass{t-blue}{v_t(x)}} - \htmlData{step=3, link=lines}{u_t(x \mid x_1)} \big\rVert^2
+</div></div>
+<p class="eqno">Eq. 9 in Flow Matching v2; Theorem 2 shows its gradient equals that of the intractable full objective</p>
+<p>This is the same trick as denoising score matching, and the same trick as this page's ideal denoiser: the average of per-example targets is the right target. The recipe then leaves one choice open, the per-example path. Choose Gaussian paths that follow diffusion's schedule and you recover diffusion models (the paper shows this explicitly). Choose the <b>optimal transport</b> path, whose mean moves in a straight line <span class="tex">\mu_t = t\,x_1</span> while its width shrinks linearly, <span class="tex">\sigma_t = 1-(1-\sigma_{\min})t</span> (Eq. 20), and each noise sample travels straight to its image at constant speed: rectified flow, derived independently. On ImageNet <span data-computed>64x64</span> the OT path reached FID <span data-claim="page-fm-in64-ot">14.45</span>, against <span data-claim="page-fm-in64-diff">16.88</span> for the same method with a diffusion path and <span data-claim="page-fm-in64-ddpm">17.36</span> for DDPM, using <span data-claim="page-fm-nfe">138, 187 and 264</span> network evaluations respectively.</p>
+<p>The payoff is conceptual as much as numerical. "Diffusion model", "score model" and "flow model" became three descriptions of one object: a learned vector field that transports noise to data, trained by regressing onto per-sample targets. Which path to pick, and which noise levels to emphasize in training, are design choices. SD3 (Chapter 12) is built on exactly this view.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('reflow-canvas'), out = document.getElementById('reflow-readout');
+  const data = PE.swissRoll(240, 11), g = PE.gauss(PE.rng(61)), r = PE.rng(62), M = 300, SHOW = 30;
+  const pairs = Array.from({ length: M }, () => [[g() * 1.1, g() * 1.1], data[Math.floor(r() * data.length)]]);
+  // Exact optimal velocity of the straight-line mixture: v = (E[X1 | X_t = x] - x) / (1 - t).
+  const v1 = (x, y, t) => { t = Math.min(t, .995); const m = PE.idealX0(x, y, t, (1 - t) ** 2 * 1.21, data); return [(m[0] - x) / (1 - t), (m[1] - y) / (1 - t)]; };
+  const flow = (vf, x, y, N) => { const path = [[x, y]]; for (let k = 0; k < N; k++) { const t = k / N, v = vf(x, y, t); x += v[0] / N; y += v[1] / N; path.push([x, y]); } return path; };
+  let rect = null, v2 = null;
+  function makeReflow() { if (rect) return;
+    rect = pairs.map(([a]) => { const p = flow(v1, a[0], a[1], 80); return [a, p[p.length - 1]]; });
+    v2 = (x, y, t) => { const h2 = 2 * .18 * .18; let W = 0, vx = 0, vy = 0;
+      for (const [a, b] of rect) { const px = t * b[0] + (1 - t) * a[0], py = t * b[1] + (1 - t) * a[1], w = Math.exp(-((x - px) ** 2 + (y - py) ** 2) / h2); W += w; vx += w * (b[0] - a[0]); vy += w * (b[1] - a[1]); }
+      return W > 1e-12 ? [vx / W, vy / W] : v1(x, y, t); }; }
+  const S = { mode: 'pairs', N: 50, u: 1, paths: null, ends: null };
+  let stop = () => {};
+  const ref = PE.swissRoll(2000, 77), nn = p => Math.sqrt(Math.min(...ref.map(q => (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)));
+  const crossings = segs => { let n = 0; const cr = (a, b, c, d) => { const o = (p, q, r2) => (q[0] - p[0]) * (r2[1] - p[1]) - (q[1] - p[1]) * (r2[0] - p[0]);
+      return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0; };
+    for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) if (cr(segs[i][0], segs[i][1], segs[j][0], segs[j][1])) n++; return n; };
+  function compute() {
+    if (S.mode === 'pairs') { S.paths = pairs.slice(0, SHOW).map(([a, b]) => [a, b]); S.ends = null; return; }
+    if (S.mode === 'reflow') makeReflow();
+    const vf = S.mode === 'rf1' ? v1 : v2;
+    S.paths = pairs.slice(0, SHOW).map(([a]) => flow(vf, a[0], a[1], S.N));
+    S.ends = pairs.slice(0, 120).map(([a]) => { const p = flow(vf, a[0], a[1], S.N); return p[p.length - 1]; });
+  }
+  const cv = PE.canvas(el, w => w < 560 ? 1 : .6, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), B = PE.css('--brown'), G = PE.css('--green'), F = PE.css('--fg');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 5.6), rs = W < 500 ? 1.4 : 1.9;
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .4));
+    const gl = 1;
+    S.paths.forEach(pth => { const n = Math.max(1, Math.round(S.u * (pth.length - 1))), pts = pth.slice(0, n + 1).map(p => [V.X(p[0]), V.Y(p[1])]);
+      PE.polyline(ctx, pts, S.mode === 'pairs' ? F : G, S.mode === 'pairs' ? 1 : 1.6, null, S.mode === 'pairs' ? .45 : .85);
+      if (S.mode !== 'pairs' && S.N <= 4) pts.forEach(([x, y]) => PE.dot(ctx, x, y, 2.4, G));
+      PE.dot(ctx, V.X(pth[0][0]), V.Y(pth[0][1]), 3.2, B); });
+    if (S.ends && S.u >= 1) S.ends.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs + .5, G, .75));
+  });
+  function readout() {
+    if (S.mode === 'pairs') { out.textContent = `Random pairs: the ${SHOW} straight segments cross each other ${crossings(S.paths)} times. A flow cannot follow these lines, because two paths can never pass through one point in different directions.`; return; }
+    const segs = S.mode === 'rf1' ? pairs.slice(0, SHOW).map(([a]) => { const p = flow(v1, a[0], a[1], 60); return [a, p[p.length - 1]]; }) : rect.slice(0, SHOW);
+    const dist = S.ends.reduce((s, p) => s + nn(p), 0) / S.ends.length;
+    out.textContent = `${S.mode === 'rf1' ? '1-rectified flow' : '2-rectified flow (after reflow)'}, ${S.N} Euler step${S.N > 1 ? 's' : ''}: mean distance of samples to the data ${dist.toFixed(3)}. `
+      + `Straight segments between this flow's own start and end points cross ${crossings(segs)} times.`;
+  }
+  const modes = { pairs: 'btn-flow-pairs', rf1: 'btn-flow-rf1', reflow: 'btn-flow-reflow' }, Ns = [1, 2, 4, 50];
+  function set(o) { stop(); Object.assign(S, o); compute(); readout();
+    Object.entries(modes).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', k === S.mode));
+    Ns.forEach(n => document.getElementById('btn-flow-n' + n).setAttribute('aria-pressed', n === S.N));
+    stop = PE.animate(1300, u => { S.u = u; cv.redraw(); }); }
+  Object.entries(modes).forEach(([k, id]) => document.getElementById(id).addEventListener('click', () => set({ mode: k })));
+  Ns.forEach(n => document.getElementById('btn-flow-n' + n).addEventListener('click', () => set({ N: n, mode: S.mode === 'pairs' ? 'rf1' : S.mode })));
+  document.getElementById('btn-flow-reset').addEventListener('click', () => set({ mode: 'pairs', N: 50 }));
+  compute(); readout();
+})();
+</script>
+
+<section id="ch-consistency" class="chapter">
+<h2>Consistency models: jump to the end</h2>
+<p>Every deterministic sampler so far walks along the ODE path. But every point on one path ends at the same place. What if a network learned to jump straight from any point to its path's end? Pick a noise level and compare that jump with a plain one-step denoise.</p>
+
+<figure class="viz" id="viz-consistency" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="consistency-canvas" aria-label="Probability-flow ODE paths from noise to data; at the chosen noise level, arrows show either the one-step denoiser's guess or the consistency function's jump to each path's endpoint." role="img"></canvas>
+  <div class="controls">
+    <label for="rng-cm-level">start from noise level <input type="range" id="rng-cm-level" min="0" max="59" step="1" value="12"></label>
+    <button type="button" id="btn-cm-denoise">One denoising step</button>
+    <button type="button" id="btn-cm-jump">Consistency jump</button>
+    <button type="button" id="btn-cm-twostep">Two-step: jump, re-noise, jump</button>
+    <button type="button" id="btn-cm-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="consistency-readout" aria-live="polite"></p>
+  <figcaption>The exact probability flow ODE of the toy in EDM's coordinates (<span class="tex">T</span> = 8 here; the paper uses <span class="tex">T = 80</span> and <span class="tex">\epsilon = 0.002</span> for images), solved finely with Heun steps. The ideal consistency function is "the endpoint of the path through this point", which is what consistency distillation teaches a network; the denoising step is the ideal <span class="tex">\hat x_0</span> guess. Positions are drawn rescaled by the noise level, as in Chapter 6.</figcaption>
+</figure>
+
+<h3>A function that is constant along each path</h3>
+<p>Song, Dhariwal, Chen and Sutskever (<span data-claim="page-date-consistency">2 Mar 2023</span>) define the <b>consistency function</b> of a probability flow ODE: it maps any point <span class="tex">x_t</span> on a path to that path's starting point near the data, <span class="tex">x_\epsilon</span>. Its defining property is self-consistency:</p>
+<div class="eq" id="eq-consistency" data-build data-viz="viz-consistency"><div class="tex tex-display">
+\htmlData{step=1, link=jump}{\htmlClass{t-green}{f(x_t, t)}} = \htmlData{step=2, link=paths}{\htmlClass{t-green}{f(x_{t'}, t')}} \quad \text{for all } t, t' \in [\epsilon, T] \text{ on one path}, \qquad \htmlData{step=3, link=boundary}{f(x_\epsilon, \epsilon) = x_\epsilon}
+</div></div>
+<p class="eqno">Definition in Sec. 3 of CM v2</p>
+<p>Press <b>One denoising step</b> first. From a high noise level the denoiser's guess <span class="tex">\hat x_0</span> is the blurry average from Chapter 3: the arrows land in the middle of the data, on no arm. Now press <b>Consistency jump</b>: the arrows land on the spiral, each at the exact point its path would have reached after dozens of solver steps. That is the difference between "the average of where I could be going" and "where this deterministic path actually goes".</p>
+<p>The boundary condition is built into the network so it cannot be forgotten: <span class="tex">f_\theta(x, t) = c_{\text{skip}}(t)\,x + c_{\text{out}}(t)\,F_\theta(x, t)</span> with <span class="tex">c_{\text{skip}}(\epsilon) = 1</span> and <span class="tex">c_{\text{out}}(\epsilon) = 0</span> (Eq. 5), the same skip-connection idea as EDM's preconditioning.</p>
+
+<h3>Two ways to train it</h3>
+<p><b>Consistency distillation</b> starts from a trained diffusion model (the "teacher"). Take a noisy training point at level <span class="tex">t_{n+1}</span>, use the teacher to take one ODE solver step to the neighboring level <span class="tex">t_n</span>, and require the network to give the same answer at both points:</p>
+<div class="eq" id="eq-cd" data-build data-viz="viz-consistency"><div class="tex tex-display">
+\mathcal{L}_{\text{CD}} = \mathbb{E}\Big[\lambda(t_n)\; d\big(\htmlData{step=1, link=jump}{f_\theta(x_{t_{n+1}}, t_{n+1})},\; \htmlData{step=2, link=paths}{f_{\theta^-}(\hat x_{t_n}^{\phi}, t_n)}\big)\Big]
+</div></div>
+<p class="eqno">Eq. 7 in CM v2</p>
+<ul class="gloss">
+  <li><span class="tex">\hat x_{t_n}^{\phi}</span>: the point one teacher solver step (Heun) further along the path.</li>
+  <li><span class="tex">\theta^-</span>: a slowly updated copy of the network used as the target, with no gradient through it, a stabilizing trick borrowed from reinforcement and self-supervised learning.</li>
+  <li><span class="tex">d</span>: a distance between images; a perceptual one (LPIPS) worked best.</li>
+</ul>
+<p>Agreement between neighbors, chained back to the boundary condition, forces agreement along the whole path. <b>Consistency training</b> drops the teacher entirely, replacing its solver step with the known noise that produced the training point, so consistency models are also a standalone family of generative models.</p>
+<p>Sampling is one network call: <span class="tex">x = f_\theta(x_T, T)</span>. For more quality, re-noise the result to an intermediate level and jump again (<b>Two-step</b>). On CIFAR-10, consistency distillation scored FID <span data-claim="page-cm-cd1">3.55</span> in one step and <span data-claim="page-cm-cd2">2.93</span> in two, against <span data-claim="page-cm-pd1">8.34</span> for the earlier progressive distillation at one step and <span data-claim="consistency-cifar-edm-teacher">2.04 at 35 NFE</span> for the EDM teacher itself. On ImageNet <span data-computed>64x64</span> the one-step gap was <span data-claim="page-cm-in64-cd1">6.20</span> vs <span data-claim="page-cm-in64-pd1">15.39</span>. Consistency training from scratch reached <span data-claim="page-cm-ct1">8.70</span> in one step. Because the jump can start from any partially noised image, the same model also does inpainting, colorization and super-resolution without retraining.</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('consistency-canvas'), out = document.getElementById('consistency-readout'), slider = document.getElementById('rng-cm-level');
+  const data = PE.swissRoll(240, 11), SMAX = 8, SMIN = .002, K = 60;
+  const grid = (() => { const a = []; for (let i = 0; i < K; i++) a.push((SMAX ** (1 / 7) + i / (K - 1) * (SMIN ** (1 / 7) - SMAX ** (1 / 7))) ** 7); a.push(0); return a; })();
+  const D = (x, y, s) => PE.idealX0(x, y, 1, s * s, data);
+  function solve(x, y, from, gridArr) { const path = [[x, y]]; for (let i = from; i < gridArr.length - 1; i++) { const s = gridArr[i], sn = gridArr[i + 1], d = D(x, y, s), dx = (x - d[0]) / s, dy = (y - d[1]) / s;
+      let xn = x + (sn - s) * dx, yn = y + (sn - s) * dy; if (sn > 0) { const d2 = D(xn, yn, sn); xn = x + (sn - s) * (dx + (xn - d2[0]) / sn) / 2; yn = y + (sn - s) * (dy + (yn - d2[1]) / sn) / 2; }
+      x = xn; y = yn; path.push([x, y]); } return path; }
+  const g = PE.gauss(PE.rng(71)), P0 = Array.from({ length: 90 }, () => [SMAX * g(), SMAX * g()]);
+  const traj = P0.map(([x, y]) => solve(x, y, 0, grid));
+  const S = { k: 12, mode: null, u: 1, two: null };
+  let stop = () => {};
+  const glow = PE.linkPulses(document.getElementById('viz-consistency'), () => cv.redraw());
+  const ref = PE.swissRoll(2000, 77), nn = p => Math.sqrt(Math.min(...ref.map(q => (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)));
+  const sc = (p, s) => [p[0] / Math.sqrt(1 + s * s), p[1] / Math.sqrt(1 + s * s)];
+  const cv = PE.canvas(el, w => w < 560 ? 1 : .6, (ctx, W, H) => {
+    const Y = PE.css('--yellow'), G = PE.css('--green'), F = PE.css('--fg'), Bl = PE.css('--blue'), Br = PE.css('--brown');
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const V = PE.view(W, H, 4.4), rs = W < 500 ? 1.4 : 1.9, s = grid[S.k], gp = glow('paths');
+    data.forEach(p => PE.dot(ctx, V.X(p[0]), V.Y(p[1]), rs, Y, .35));
+    traj.forEach((pth, i) => { if (i % 3) return; PE.polyline(ctx, pth.map((p, k) => { const q = sc(p, grid[k]); return [V.X(q[0]), V.Y(q[1])]; }), F, 1 + gp, null, .22 + .3 * gp); });
+    traj.forEach(pth => { const q = sc(pth[S.k], s); PE.dot(ctx, V.X(q[0]), V.Y(q[1]), 3, Br, .9); });
+    if (S.mode === 'denoise' || S.mode === 'jump') traj.forEach(pth => { const q = sc(pth[S.k], s), e = S.mode === 'jump' ? pth[pth.length - 1] : D(pth[S.k][0], pth[S.k][1], s);
+      const ex = PE.lerp(q[0], e[0], S.u), ey = PE.lerp(q[1], e[1], S.u), col = S.mode === 'jump' ? G : Bl;
+      PE.arrow(ctx, V.X(q[0]), V.Y(q[1]), V.X(ex), V.Y(ey), col, 1.3 + glow('jump'), 6, .7); PE.dot(ctx, V.X(ex), V.Y(ey), rs + .6, col, .9); });
+    if (S.mode === 'two' && S.two) S.two.forEach(({ a, b, c }) => { const q = S.u < .5 ? a : b, u2 = S.u < .5 ? S.u * 2 : (S.u - .5) * 2;
+      const e = S.u < .5 ? b : c; PE.dot(ctx, V.X(PE.lerp(q[0], e[0], u2)), V.Y(PE.lerp(q[1], e[1], u2)), rs + .6, G, .9); });
+    PE.label(ctx, `noise level sigma = ${s.toFixed(3)}`, 10, 18, PE.css('--muted'), 12);
+  });
+  function readout() { const s = grid[S.k];
+    const dd = traj.reduce((a, pth) => a + nn(D(pth[S.k][0], pth[S.k][1], s)), 0) / traj.length, dj = traj.reduce((a, pth) => a + nn(pth[pth.length - 1]), 0) / traj.length;
+    out.textContent = S.mode === 'two' && S.two ? `Two steps: first jump, re-noise to sigma = 0.5, jump again. Final mean distance to data ${(S.two.reduce((a, t) => a + nn(t.c), 0) / S.two.length).toFixed(3)} (the exact ideal consistency function is already perfect in one step on this toy; with a real network the second step fixes some of its errors).`
+      : `From sigma = ${s.toFixed(2)}: one denoising step lands ${dd.toFixed(3)} from the data on average; the consistency jump lands ${dj.toFixed(3)} from it.`
+      + (s > 1 ? ' At high noise the denoiser can only return a blurry average; the consistency function knows where the path goes.' : ' At low noise the two nearly agree.'); }
+  function set(o) { stop(); Object.assign(S, o); readout(); stop = PE.animate(1100, u => { S.u = u; cv.redraw(); }); }
+  slider.addEventListener('input', () => { stop(); S.k = +slider.value; S.u = 1; cv.redraw(); readout(); });
+  document.getElementById('btn-cm-denoise').addEventListener('click', () => set({ mode: 'denoise' }));
+  document.getElementById('btn-cm-jump').addEventListener('click', () => set({ mode: 'jump' }));
+  document.getElementById('btn-cm-twostep').addEventListener('click', () => {
+    const gz = PE.gauss(PE.rng(72)), tau = .5, g2 = (() => { const a = []; const N = 30; for (let i = 0; i < N; i++) a.push((tau ** (1 / 7) + i / (N - 1) * (SMIN ** (1 / 7) - tau ** (1 / 7))) ** 7); a.push(0); return a; })();
+    S.two = traj.map(pth => { const e = pth[pth.length - 1], n = [e[0] + tau * gz(), e[1] + tau * gz()], p2 = solve(n[0], n[1], 0, g2);
+      return { a: sc(pth[0], SMAX), b: e, c: p2[p2.length - 1] }; });
+    set({ mode: 'two' }); });
+  document.getElementById('btn-cm-reset').addEventListener('click', () => { S.two = null; slider.value = 12; set({ k: 12, mode: null }); });
+  readout();
+})();
+</script>
+
+<section id="ch-sd3" class="chapter">
+<h2>Where it landed: SD3</h2>
+<p>By 2024 the pieces were on the table: latent spaces, transformers, straight-path flows and classifier-free guidance. Stable Diffusion 3's paper put them together and ran the comparisons at scale. One of its central choices is which noise levels to train on; slide the distribution and see.</p>
+
+<figure class="viz" id="viz-timesteps" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="timesteps-canvas" aria-label="Density of training timesteps between data at t 0 and noise at t 1: uniform versus logit-normal with the chosen location and scale, optionally shifted toward noise for high resolution." role="img"></canvas>
+  <div class="controls">
+    <label for="rng-sd3-m">location m <input type="range" id="rng-sd3-m" min="-20" max="20" step="1" value="0"></label>
+    <label for="rng-sd3-s">scale s <input type="range" id="rng-sd3-s" min="3" max="20" step="1" value="10"></label>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-sd3-uniform">Uniform (plain rectified flow)</button>
+    <button type="button" id="btn-sd3-lognorm">Logit-normal m = 0, s = 1</button>
+    <button type="button" id="btn-sd3-shift1" aria-pressed="true">No shift</button>
+    <button type="button" id="btn-sd3-shift3" aria-pressed="false">High-resolution shift</button>
+    <button type="button" id="btn-sd3-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="timesteps-readout" aria-live="polite"></p>
+  <figcaption>Densities computed from SD3 v1 Eq. 19 (logit-normal) and Eq. 23 (timestep shift, here with the shift factor <span class="tex">\sqrt{m/n}</span> = <span data-claim="page-sd3-shift3">3.0</span> used at <span data-computed>1024x1024</span>). SD3 runs time the other way from Rectified Flow: <span class="tex">t = 0</span> is data, <span class="tex">t = 1</span> is noise.</figcaption>
+</figure>
+
+<h3>Which noise levels to train on</h3>
+<p>SD3 (Esser and colleagues, <span data-claim="page-date-sd3">5 Mar 2024</span>) writes the rectified-flow path as <span class="tex">z_t = (1-t)\,x_0 + t\,\epsilon</span> and trains the network to predict the velocity <span class="tex">\epsilon - x_0</span>. Plain rectified flow draws <span class="tex">t</span> uniformly. But drawing some <span class="tex">t</span> more often is the same as weighting their loss more, so the timestep distribution is really a loss weighting, the same knob EDM tuned with its log-normal noise levels. The paper compared <span data-claim="page-sd3-61">61</span> formulations (different paths, prediction targets and timestep distributions), and the winner was rectified flow with the <b>logit-normal</b> distribution:</p>
+<div class="eq" id="eq-logitnormal" data-build data-viz="viz-timesteps"><div class="tex tex-display">
+\pi_{\text{ln}}(t; m, s) = \frac{1}{s\sqrt{2\pi}}\,\frac{1}{t(1-t)}\,\exp\!\Big(-\frac{(\operatorname{logit}(t) - \htmlData{step=1, link=location}{m})^2}{2\htmlData{step=2, link=scale}{s}^2}\Big)
+</div></div>
+<p class="eqno">Eq. 19 in SD3 v1, with <span class="tex">\operatorname{logit}(t) = \log\frac{t}{1-t}</span></p>
+<p>In practice: draw an ordinary bell-curve sample <span class="tex">u</span> with mean <span class="tex">m</span> and spread <span class="tex">s</span>, and squash it with <span class="tex">t = 1/(1+e^{-u})</span>. The result concentrates training on intermediate noise and rarely visits the extremes. The paper's reasoning: near pure data or pure noise the best velocity prediction is simple (close to an average), while in the middle the network must really decide what the image is. The <span class="tex">m</span> slider moves the emphasis toward data or toward noise.</p>
+<p>Resolution changes the picture. More pixels means more redundant evidence about the image at the same noise level: averaging many noisy pixels reveals the signal. So at <span data-computed>1024x1024</span> a given <span class="tex">t</span> is effectively less noisy than at <span data-computed>256x256</span>, and SD3 shifts timesteps toward noise, <span class="tex">t_m = \frac{\alpha t_n}{1 + (\alpha - 1)t_n}</span> with <span class="tex">\alpha = \sqrt{m/n}</span>, the square root of the ratio of pixel counts (Eq. 23). Press <b>High-resolution shift</b>.</p>
+
+<h3>MM-DiT: two streams, one attention</h3>
+<p>The network is a DiT (Chapter 9) adapted for text. The caption is encoded by three frozen text encoders, two CLIP models and the large T5 language model, and becomes a sequence of text tokens. Image latent patches form a second sequence. Each stream keeps its <em>own</em> weights for its layers, because text and images are different kinds of data, but in every block the two sequences are concatenated for one joint attention, so image tokens read text and text tokens read the image. This "multimodal DiT" beat cross-attention designs like LDM's. The autoencoder was widened to 16 latent channels, whose reconstructions are markedly better (rFID <span data-claim="page-sd3-ae">2.41, 1.56 and 1.06</span> for 4, 8 and 16 channels), which bigger diffusion models can exploit. Classifier-free guidance works as in Chapter 7, with each text encoder independently dropped during training.</p>
+<p>The headline is scaling. Across model sizes up to <span data-claim="page-sd3-8b">8B</span> parameters, validation loss falls smoothly with size and training compute, and it tracks human judgments closely: the correlation between validation loss and human-preference ELO across scales is <span data-claim="page-sd3-elo-r">-0.982</span> (lower loss, higher preference). On the GenEval benchmark of prompt following, the largest model scored <span data-claim="page-sd3-geneval">0.74</span>, above DALL-E 3's <span data-claim="page-sd3-dalle3">0.67</span>. The paper also reports human-preference comparisons against commercial systems, read here only as "competitive", since the exact rates exist only in bar charts.</p>
+<p>So the lineage of a modern image generator reads like this page's table of contents. Latent space from LDM, transformer backbone from DiT, straight-path flow training from rectified flow and flow matching, noise-level weighting in the spirit of EDM, classifier-free guidance, and an ODE sampler descended from DDIM, all resting on DDPM's "add noise, predict it" and Sohl-Dickstein's "destroy structure, learn to restore it".</p>
+</section>
+
+<script>
+(() => {
+  const el = document.getElementById('timesteps-canvas'), out = document.getElementById('timesteps-readout');
+  const rm = document.getElementById('rng-sd3-m'), rsl = document.getElementById('rng-sd3-s');
+  const S = { m: 0, s: 1, uni: 0, shift: 1, shown: { m: 0, s: 1, uni: 0, shift: 1 } };
+  let stop = () => {};
+  const glow = PE.linkPulses(document.getElementById('viz-timesteps'), () => cv.redraw());
+  const logit = t => Math.log(t / (1 - t));
+  const pln = (t, m, s) => Math.exp(-((logit(t) - m) ** 2) / (2 * s * s)) / (s * Math.sqrt(2 * Math.PI) * t * (1 - t));
+  // Density of t' = a t / (1 + (a - 1) t) when t has density p.
+  const shifted = (tp, p, a) => { const t = tp / (a - (a - 1) * tp), dt = a / (a - (a - 1) * tp) ** 2; return p(t) * dt; };
+  const dens = (t, o) => { const base = x => PE.lerp(pln(x, o.m, o.s), 1, o.uni); return o.shift === 1 ? base(t) : shifted(t, base, o.shift); };
+  const cv = PE.canvas(el, w => w < 560 ? .8 : .42, (ctx, W, H) => {
+    ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H);
+    const Bl = PE.css('--blue'), M = PE.css('--muted'), Y = PE.css('--yellow'), Br = PE.css('--brown');
+    const b = { x: 46, y: 16, w: W - 66, h: H - 58 }, ymax = 3;
+    const ax = PE.axes(ctx, b, [0, 1], [0, ymax], { xt: [0, .25, .5, .75, 1], yt: [0, 1, 2, 3], xl: 'timestep t   (0 = data, 1 = noise)', yl: 'training density' });
+    const pts = [], o = S.shown; for (let i = 1; i < 400; i++) { const t = i / 400; pts.push([ax.X(t), ax.Y(Math.min(ymax, dens(t, o)))]); }
+    ctx.save(); ctx.fillStyle = Bl; ctx.globalAlpha = .18; ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(0)); pts.forEach(([x, y]) => ctx.lineTo(x, y)); ctx.lineTo(ax.X(1), ax.Y(0)); ctx.fill(); ctx.restore();
+    PE.polyline(ctx, pts, Bl, 2.4 + 2 * (glow('location') + glow('scale')));
+    PE.polyline(ctx, [[ax.X(0), ax.Y(1)], [ax.X(1), ax.Y(1)]], M, 1, [4, 4], .8);
+    PE.label(ctx, 'uniform', ax.X(.02), ax.Y(1) - 5, M, 10.5);
+    PE.label(ctx, 'data', ax.X(0) + 2, b.y + 12, Y, 11); PE.label(ctx, 'noise', ax.X(1) - 2, b.y + 12, Br, 11, 'right');
+  });
+  function readout() { const o = S;
+    let mean = 0, W = 0; for (let i = 1; i < 400; i++) { const t = i / 400, d = dens(t, o); mean += t * d; W += d; }
+    out.textContent = (o.uni >= 1 ? 'Uniform: every noise level is trained equally often. ' : `Logit-normal with m = ${o.m.toFixed(1)}, s = ${o.s.toFixed(1)}: training concentrates on intermediate noise. `)
+      + (o.shift > 1 ? `Shifted by ${o.shift.toFixed(1)} for high resolution: the mass moves toward noise. ` : '') + `Average training timestep ${(mean / W).toFixed(2)}.`; }
+  function go(o) { stop(); Object.assign(S, o); const a = { ...S.shown }, b = { m: S.m, s: S.s, uni: S.uni, shift: S.shift };
+    rm.value = Math.round(S.m * 10); rsl.value = Math.round(S.s * 10);
+    document.getElementById('btn-sd3-shift1').setAttribute('aria-pressed', S.shift === 1); document.getElementById('btn-sd3-shift3').setAttribute('aria-pressed', S.shift !== 1);
+    readout(); stop = PE.animate(800, u => { S.shown = { m: PE.lerp(a.m, b.m, u), s: PE.lerp(a.s, b.s, u), uni: PE.lerp(a.uni, b.uni, u), shift: PE.lerp(a.shift, b.shift, u) }; cv.redraw(); }); }
+  rm.addEventListener('input', () => { stop(); S.m = +rm.value / 10; S.uni = 0; S.shown = { m: S.m, s: S.s, uni: 0, shift: S.shift }; cv.redraw(); readout(); });
+  rsl.addEventListener('input', () => { stop(); S.s = +rsl.value / 10; S.uni = 0; S.shown = { m: S.m, s: S.s, uni: 0, shift: S.shift }; cv.redraw(); readout(); });
+  document.getElementById('btn-sd3-uniform').addEventListener('click', () => go({ uni: 1 }));
+  document.getElementById('btn-sd3-lognorm').addEventListener('click', () => go({ uni: 0, m: 0, s: 1 }));
+  document.getElementById('btn-sd3-shift1').addEventListener('click', () => go({ shift: 1 }));
+  document.getElementById('btn-sd3-shift3').addEventListener('click', () => go({ shift: 3 }));
+  document.getElementById('btn-sd3-reset').addEventListener('click', () => go({ m: 0, s: 1, uni: 0, shift: 1 }));
+  readout();
+})();
+</script>

@@ -1,0 +1,201 @@
+
+<section id="ch-qwen3" class="chapter">
+<h2>Putting it together</h2>
+<p>Qwen3-VL is the late-fusion shape from the start of the page: a <b class="c-blue">vision encoder</b>, a <b class="c-green">merger</b>, a <b class="c-yellow">language model</b>. Almost every part of it is a fix you have already met in an earlier chapter; click a part to see which one, then look at the two ideas that are new.</p>
+
+<style>
+#viz-anatomy .anatomy-info { font:.92rem/1.5 system-ui, sans-serif; background:var(--bg); border-radius:8px; padding:.6rem .8rem; margin:.5rem 0 0; min-height:6.5em; }
+#viz-anatomy .anatomy-info h4 { font:600 .95rem system-ui, sans-serif; margin:0 0 .25rem; }
+#viz-anatomy .anatomy-info p { margin:0 0 .35rem; }
+#viz-anatomy .anatomy-info p:last-child { margin:0; }
+#viz-anatomy .anatomy-info .from { color:var(--muted); }
+</style>
+<figure class="viz" id="viz-anatomy" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <canvas id="anatomy-canvas" tabindex="0" role="img" aria-label="Diagram of Qwen3-VL: an image at its own size and video frames enter a SigLIP-2 encoder; a 2x2 MLP merger turns its output into visual tokens, which sit in one sequence with text and timestamp tokens and enter the language model. With DeepStack, features from three encoder levels are added to the first three language-model layers. Click a part, or use the buttons."></canvas>
+  <div class="controls" role="group" aria-label="Parts">
+    <button type="button" id="btn-anatomy-resolution">Native resolution</button>
+    <button type="button" id="btn-anatomy-encoder">Encoder</button>
+    <button type="button" id="btn-anatomy-merger">Merger</button>
+    <button type="button" id="btn-anatomy-mrope">Positions</button>
+    <button type="button" id="btn-anatomy-video">Video time</button>
+    <button type="button" id="btn-anatomy-deepstack">DeepStack</button>
+    <button type="button" id="btn-anatomy-llm">Language model</button>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-anatomy-before">Without DeepStack</button>
+    <button type="button" id="btn-anatomy-after">With DeepStack</button>
+    <button type="button" id="btn-anatomy-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="anatomy-info" id="anatomy-info">
+    <div data-part="none">
+      <h4>Pick a part</h4>
+      <p>Each part names the chapter where its idea first appeared on this page, and the wall it knocked down. The DeepStack buttons show the one wiring change that is new here.</p>
+    </div>
+    <div data-part="resolution" hidden>
+      <h4>Images at their own size</h4>
+      <p>The encoder is trained further <span data-claim="page-anatomy-dyn-res">with dynamic input resolutions</span>: a tall page, a wide screenshot and a thumbnail each keep their shape, and each gets as many patches as its pixels need.</p>
+      <p class="from">Introduced in <a href="#ch-resolution">A fixed small square cannot read a page</a> (Qwen2-VL). Fixed: small fixed squares blur text.</p>
+    </div>
+    <div data-part="encoder" hidden>
+      <h4>A SigLIP-2 encoder</h4>
+      <p>The architecture is SigLIP-2, started from its public checkpoints: <span data-claim="page-anatomy-so400m">SigLIP2-SO-400M</span> by default, and <span data-claim="page-anatomy-large">SigLIP2-Large (300M) for small-scale LLMs (2B and 4B)</span>. It still cuts the image into patches and runs a vision transformer over them.</p>
+      <p class="from">Introduced in <a href="#ch-patches">How an encoder sees</a> (patches as tokens) and <a href="#ch-sigmoid">The softmax needs the whole batch</a> (SigLIP's sigmoid loss; SigLIP-2 is its successor, not covered on this page). Fixed: image features that did not line up with words.</p>
+    </div>
+    <div data-part="merger" hidden>
+      <h4>A 2x2 MLP merger</h4>
+      <p>A <span data-claim="qwen3vl-merger">two-layer MLP, 2x2 visual features -> 1 token</span>: four neighbouring patch vectors are concatenated and squeezed into one token of the language model's width.</p>
+      <p class="from">Introduced in <a href="#ch-resolution">A fixed small square cannot read a page</a> (Qwen2-VL's 2x2 merge) and <a href="#ch-llava">Chat needs conversations</a> (LLaVA's projector, an MLP from LLaVA-1.5 on). Fixed: native resolution would otherwise flood the context with tokens.</p>
+    </div>
+    <div data-part="mrope" hidden>
+      <h4>Interleaved M-RoPE</h4>
+      <p>Each token's position is still three numbers (time, height, width), as in Qwen2-VL. What changes is which rotary frequencies each number gets. Qwen2-VL split the dimensions into three contiguous blocks, so each axis saw only a slice of the frequency range; Qwen3-VL interleaves them so that <span data-claim="page-anatomy-mrope-quote">each spatial-temporal axis is uniformly represented across both low- and high-frequency bands</span>. The paper gives no equation and no ablation for this; the order drawn is illustrative.</p>
+      <p class="from">Introduced in <a href="#ch-resolution">A fixed small square cannot read a page</a> (M-RoPE). Fixed: an imbalanced frequency spectrum that hurt long videos.</p>
+    </div>
+    <div data-part="video" hidden>
+      <h4>Time written as text</h4>
+      <p>Each group of video frames is prefixed with its time as ordinary text, for example <span data-claim="qwen3vl-timestamp-format"><code>&lt;3.0 seconds&gt;</code></span>, and training uses both <span data-claim="qwen3vl-timestamp-formats">seconds and HMS (hours:minutes:seconds)</span>.</p>
+      <p class="from">The same move as <a href="#ch-grounding">Say where, not just what</a>: when a number is hard to encode, write it as text. Fixed: position ids tied to absolute time grew huge and sparse on long videos.</p>
+    </div>
+    <div data-part="deepstack" hidden>
+      <h4>DeepStack</h4>
+      <p>Features from <span data-claim="qwen3vl-deepstack-levels">three levels -> first three LLM layers</span>: each level passes through its own small merger and is <em>added</em> to the hidden states of the visual tokens, <span data-claim="page-anatomy-no-extra-ctx">without introducing extra context length</span>. Which encoder layers are tapped is not stated in the paper.</p>
+      <p>In the paper's ablation the average moved <span data-claim="qwen3vl-deepstack-avg">74.7 vs 76.0</span>, InfoVQA <span data-claim="qwen3vl-deepstack-infovqa">71.9 vs 74.2</span>, DocVQA <span data-claim="qwen3vl-deepstack-docvqa">89.5 vs 91.1</span>, TextVQA <span data-claim="qwen3vl-deepstack-textvqa">80.6 vs 80.5</span> (without vs with).</p>
+      <p class="from">New in this chapter (the idea adapts an earlier DeepStack paper not covered here). Fixed: vision entering the language model only at its input layer.</p>
+    </div>
+    <div data-part="llm" hidden>
+      <h4>The language model</h4>
+      <p>A Qwen3 language model in <span data-claim="qwen3vl-dense-sizes">2B / 4B / 8B / 32B</span> dense sizes and <span data-claim="qwen3vl-moe-sizes">30B-A3B and 235B-A22B (235B total, 22B activated per token)</span> mixture-of-experts sizes, with a native window of <span data-claim="qwen3vl-context">256K tokens (S3 sequence length 262,144)</span>.</p>
+      <p class="from">Training starts the LLaVA way (<a href="#ch-llava">Chat needs conversations</a>, <a href="#ch-training-step">One training step</a>): in stage 0 <span data-claim="page-anatomy-s0-frozen">only the parameters of the MLP merger are trained during this phase, while both the vision encoder and the LLM backbone remain frozen</span>, on <span data-claim="page-anatomy-s0">approximately 67B tokens</span>; later stages unfreeze everything and stretch the sequence length.</p>
+    </div>
+  </div>
+  <p class="readout" id="anatomy-readout" aria-live="polite"></p>
+  <figcaption>The structure is redrawn from Sec. 2 and the architecture figure of Qwen3-VL v2; no numbers are plotted. Before you press With DeepStack, guess: which benchmarks will gain most from giving the language model the encoder's middle layers, reading documents and charts, or general question answering? The table below the figure answers it. And a quicker guess the drawing answers by itself: do the extra wires land at the top or the bottom of the language model? Not to scale: the encoder and language-model depths are drawn short, the three tapped encoder levels are placed evenly because the paper does not say which layers they are, and pairing them with the first three language-model layers in depth order is this page's assumption too.</figcaption>
+</figure>
+
+<h3>A chain of fixes, assembled</h3>
+<p>Read the diagram left to right and it is a tour of this page. An image enters at its own size, the fix from <a href="#ch-resolution">the resolution chapter</a>, instead of being squashed to a small square. A <b class="c-blue">SigLIP-2 encoder</b> cuts it into patches (<a href="#ch-patches">the patches chapter</a>) and runs a vision transformer whose training descends from the sigmoid loss of <a href="#ch-sigmoid">the SigLIP chapter</a>; Qwen3-VL starts from the public SigLIP-2 checkpoints and keeps training it on images of varying size. A <b class="c-green">merger</b> folds every 2x2 block of patch vectors into one token, which keeps a large page from flooding the context. The tokens join the text in one sequence, each tagged with a (time, height, width) position. And the training starts the way LLaVA's did (<a href="#ch-llava">the LLaVA chapter</a>; the mechanics are in <a href="#ch-training-step">one training step</a>): first only the bridge learns, with encoder and language model frozen, then everything is unfrozen.</p>
+<p>Two things in the diagram are not in any earlier chapter: the extra wires from the middle of the encoder into the bottom of the language model, and the text labels in front of the video frames.</p>
+
+<h3>DeepStack: more than the last layer</h3>
+<p>Almost every connector on this page hands the language model the features of one encoder layer, the last or the next-to-last (Molmo, which concatenates two, is the exception). And apart from the cross-attention designs, Flamingo and BLIP, they all put the resulting tokens into the language model's input sequence, so vision enters at its first layer and nowhere else. But a vision transformer's layers hold different things: the paper's words are that intermediate features range from low- to high-level representations (think strokes and edges at one end, objects at the other). Handing over only the top risks losing exactly the fine detail that small print needs. Press <b>With DeepStack</b>. Features from three levels of the encoder each pass through their own small <b class="c-green">merger</b>, and the result is <em>added</em> to the hidden states of the visual tokens in the first three layers of the language model. Nothing is appended to the sequence, so the context length does not change.</p>
+
+<div class="eq" id="eq-anatomy" data-build data-viz="viz-anatomy"><div class="tex tex-display">
+\htmlData{step=3, link=hidden}{\htmlClass{t-yellow}{h^{(\ell)}_{\text{vis}}}} \;\leftarrow\; h^{(\ell)}_{\text{vis}} \;+\; \htmlData{step=2, link=merge}{\htmlClass{t-green}{\mathrm{Merger}_{\ell}}}\big(\htmlData{step=1, link=level}{\htmlClass{t-blue}{v^{(\ell)}}}\big), \qquad \ell = 1, 2, 3
+</div></div>
+<p class="eqno">Written from the words of Sec. 2.2 of Qwen3-VL v2, which has no equation for it.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{v^{(\ell)}}</span>: the patch features at encoder level <span class="tex">\ell</span>, one of the three blue taps. The paper does not say which encoder layers these are. Which level feeds which of the three language-model layers is not stated either; pairing level <span class="tex">\ell</span> with layer <span class="tex">\ell</span>, shallowest first, is this page's assumption.</li>
+  <li><span class="tex">\htmlClass{t-green}{\mathrm{Merger}_{\ell}}</span>: a dedicated merger for that level, like the main one, mapping patch features to the language model's width.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{h^{(\ell)}_{\text{vis}}}</span>: the hidden states of the visual tokens in language-model layer <span class="tex">\ell</span>. Text tokens are untouched.</li>
+  <li>The arrow means "add into the residual stream": a residual shortcut, which is why it costs no extra tokens.</li>
+</ul>
+<p>Did it help? The paper's ablation trains an <span data-claim="page-anatomy-abl-setup">internal 15B-A2B LLM, with all experiments pretrained on 200 billion tokens</span>, and scores the models on validation sets without any post-training. So these are small, early-training numbers, not the release models. The table is the paper's whole result, all <span data-computed>11</span> benchmarks and their average; the labels in parentheses are this page's, following the paper's own benchmark lists.</p>
+<table class="data">
+  <thead><tr><th>benchmark</th><th>without vs with DeepStack</th><th>change</th></tr></thead>
+  <tbody>
+    <tr><td>average of <span data-computed>11</span></td><td><span data-claim="qwen3vl-deepstack-avg">74.7 vs 76.0</span></td><td><span data-computed>+1.3</span></td></tr>
+    <tr><td>InfoVQA (infographics)</td><td><span data-claim="qwen3vl-deepstack-infovqa">71.9 vs 74.2</span></td><td><span data-computed>+2.3</span></td></tr>
+    <tr><td>OCRBench</td><td><span data-claim="qwen3vl-deepstack-ocrbench">81.0 vs 83.6</span></td><td><span data-computed>+2.6</span></td></tr>
+    <tr><td>DocVQA (documents)</td><td><span data-claim="qwen3vl-deepstack-docvqa">89.5 vs 91.1</span></td><td><span data-computed>+1.6</span></td></tr>
+    <tr><td>ChartQA (charts)</td><td><span data-claim="page-anatomy-deepstack-chartqa">81.5 vs 83.3</span></td><td><span data-computed>+1.8</span></td></tr>
+    <tr><td>AI2D (diagrams)</td><td><span data-claim="page-anatomy-deepstack-ai2d">81.8 vs 83.2</span></td><td><span data-computed>+1.4</span></td></tr>
+    <tr><td>TextVQA</td><td><span data-claim="qwen3vl-deepstack-textvqa">80.6 vs 80.5</span></td><td><span data-computed>-0.1</span></td></tr>
+    <tr><td>MMStar (general)</td><td><span data-claim="page-anatomy-deepstack-mmstar">55.5 vs 57.7</span></td><td><span data-computed>+2.2</span></td></tr>
+    <tr><td>RealWorldQA (general)</td><td><span data-claim="page-anatomy-deepstack-rwqa">67.7 vs 68.1</span></td><td><span data-computed>+0.4</span></td></tr>
+    <tr><td>MMBench-EN (general)</td><td><span data-claim="page-anatomy-deepstack-mmb-en">81.0 vs 81.2</span></td><td><span data-computed>+0.2</span></td></tr>
+    <tr><td>MMBench-CN (general)</td><td><span data-claim="page-anatomy-deepstack-mmb-cn">78.1 vs 78.5</span></td><td><span data-computed>+0.4</span></td></tr>
+    <tr><td>MMMU (reasoning)</td><td><span data-claim="page-anatomy-deepstack-mmmu">52.9 vs 54.1</span></td><td><span data-computed>+1.2</span></td></tr>
+  </tbody>
+</table>
+<p>The answer to the prediction: mostly the reading tests, though not cleanly. The five largest gains are OCRBench (<span data-computed>+2.6</span>), InfoVQA (<span data-computed>+2.3</span>), MMStar (<span data-computed>+2.2</span>), ChartQA (<span data-computed>+1.8</span>) and DocVQA (<span data-computed>+1.6</span>): four reading tests and one general benchmark. The paper says DeepStack boosts <span data-claim="page-anatomy-deepstack-quote">fine-grained visual understanding, such as on the InfoVQA and DocVQA benchmarks</span>, which is what you would expect if the middle layers carry detail the last layer has thrown away. AI2D and MMMU land in the middle, and the other general benchmarks barely move (<span data-computed>+0.2</span> to <span data-computed>+0.4</span>). The split is not clean: MMStar, a general benchmark, beats DocVQA and ChartQA, and TextVQA, a reading test, is flat (down <span data-computed>0.1</span>).</p>
+
+<h3>Positions and time</h3>
+<p>Press <b>Positions</b>. Qwen2-VL's M-RoPE gave each token three position numbers, time, height and width, and gave each number its own block of rotary dimensions. Rotary dimensions run from fast-turning (high frequency, good for fine, nearby distinctions) to slow-turning (low frequency, good for long distances). With contiguous blocks, each axis sees only its own slice of that range, which the Qwen3-VL paper calls an imbalanced frequency spectrum and says hurts long-video understanding. The fix is to interleave the three axes across the dimensions so that <span data-claim="page-anatomy-mrope-quote">each spatial-temporal axis is uniformly represented across both low- and high-frequency bands</span>. That is the whole of what the paper says: there is no equation for the new layout and no ablation isolating it.</p>
+<p>Press <b>Video time</b>. The previous model in this line, Qwen2.5-VL (not covered on this page), tied the time position of each video frame to the clock, which produced <span data-claim="page-anatomy-ts-limit">excessively large and sparse temporal position ids for long videos</span>. Qwen3-VL instead writes the time into the sequence as ordinary text, <span data-claim="qwen3vl-timestamp-format"><code>&lt;3.0 seconds&gt;</code></span>, in front of each group of frames. It is the same trick as the boxes and points of <a href="#ch-grounding">the grounding chapter</a> (and Qwen3-VL still answers with <span data-claim="page-anatomy-grounding">two grounding modalities: bounding boxes and points</span>): when a number is awkward to build into the architecture, let the language model read and write it as text.</p>
+
+<h3>The family</h3>
+<p>The language models come in four dense sizes, <span data-claim="qwen3vl-dense-sizes">2B / 4B / 8B / 32B</span> (Sec. 2 says <span data-claim="page-anatomy-three-dense">three dense variants (Qwen3-VL-2B/4B/8B/32B)</span> but lists four; the introduction says four), and two mixture-of-experts sizes, <span data-claim="qwen3vl-moe-sizes">30B-A3B and 235B-A22B (235B total, 22B activated per token)</span>. The native context is <span data-claim="qwen3vl-context">256K tokens (S3 sequence length 262,144)</span>, enough for long documents and long videos in one sequence; the final pretraining stage is trained at that full length.</p>
+
+<h3>Inside Qwen3-VL: forward, then backward</h3>
+<p>The diagram above names the parts; this one follows a training example through them, with the three DeepStack wires drawn as real edges. Step through it; the line under the drawing gives each tensor's shape for the paper's own example picture, and the stage buttons switch between the four pretraining stages.</p>
+
+<figure class="viz archflow" id="viz-qwen3vlflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-qwen3vlflow-input" aria-pressed="false">1 Input</button>
+    <button type="button" id="btn-qwen3vlflow-vit" aria-pressed="false">2 ViT</button>
+    <button type="button" id="btn-qwen3vlflow-merge" aria-pressed="false">3 Merger</button>
+    <button type="button" id="btn-qwen3vlflow-splice" aria-pressed="false">4 Splice</button>
+    <button type="button" id="btn-qwen3vlflow-deepstack" aria-pressed="false">5 DeepStack</button>
+    <button type="button" id="btn-qwen3vlflow-llm" aria-pressed="false">6 LLM</button>
+    <button type="button" id="btn-qwen3vlflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-qwen3vlflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-qwen3vlflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Pretraining stage">
+    <span>stage</span>
+    <button type="button" id="btn-qwen3vlflow-s0" aria-pressed="true">S0 align</button>
+    <button type="button" id="btn-qwen3vlflow-s1" aria-pressed="false">S1 pretrain</button>
+    <button type="button" id="btn-qwen3vlflow-s2" aria-pressed="false">S2 32K</button>
+    <button type="button" id="btn-qwen3vlflow-s3" aria-pressed="false">S3 256K</button>
+  </div>
+  <canvas id="qwen3vlflow-canvas" role="img" aria-label="Qwen3-VL's training step as a diagram: an image lane (blue) of patches and a SigLIP-2 vision transformer, which feeds a main merger and three DeepStack mergers (green); the main merger's tokens and the text enter LLM layer 1, and each DeepStack merger adds into LLM layer 1, 2 or 3; then the remaining layers and a red loss. In the backward stages red arrows run from the loss back; frozen boxes are brown and dashed."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-qwen3vlflow-prev">Previous</button>
+    <button type="button" id="btn-qwen3vlflow-next">Next</button>
+    <button type="button" id="btn-qwen3vlflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="qwen3vlflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>The Qwen2-VL shape from <a href="#viz-qwen2vlflow">the resolution chapter</a>, with one change you can see: the <b class="c-blue">ViT</b> has four outgoing wires instead of one. The top one is the usual <b class="c-green">merger</b> into the input sequence at LLM layer 1; the other three go through their own mergers into LLM layers 1, 2 and 3 (<b class="c-yellow">yellow</b>), which the drawing staggers so the wires stay apart. Press <b>1 Input</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="input" hidden>
+      <h4>1. The input, at its own size, and its patches</h4>
+      <p>We use Picture 3 of the paper's architecture figure, <span data-claim="qwen3vl-arch-fig-image">1440 x 800</span> pixels (width first), kept at native size. A video enters as groups of frames; the figure's example is <span data-claim="qwen3vl-arch-fig-video">736 x 448, 8s</span>. How many frames make one group is not stated in this paper (Qwen2-VL used two), and the sampling rate is set per stage: frames per second and the maximum frame count are adjusted to each stage's sequence length.</p>
+      <p>The paper never states the patch size. Its figure does it for us: that picture costs <span data-claim="qwen3vl-arch-fig-image-tok">1125 tokens</span>, the <span data-claim="qwen3vl-arch-fig-page">1248 x 9376</span> page <span data-claim="qwen3vl-arch-fig-page-tok">11427 tokens</span> and the <span data-claim="qwen3vl-arch-fig-strip">256 x 32</span> strip <span data-claim="qwen3vl-arch-fig-strip-tok">8 tokens</span>, and all three equal (width / 32) &times; (height / 32). With the stated 2 &times; 2 merge, that means <span data-computed>16</span>-pixel patches (derived here, not stated). The picture is then <span data-computed>50 &times; 90 = 4,500</span> patches, each embedded to <span class="tex">d_{\text{ViT}}</span>. Positions come from <span data-claim="qwen3vl-arch-vit-pos">2D-RoPE and interpolate absolute position embeddings based on input size</span>.</p>
+    </div>
+    <div data-stage="vit" hidden>
+      <h4>2. The encoder</h4>
+      <p>A SigLIP-2 ViT (<span data-claim="page-anatomy-so400m">SigLIP2-SO-400M</span> by default, <span data-claim="page-anatomy-large">SigLIP2-Large (300M) for small-scale LLMs (2B and 4B)</span>), first improved on its own by <span data-claim="qwen3vl-arch-vit-cont">conducting continuous training with dynamic resolutions based on the pre-trained SigLIP-2 model</span>. Shapes do not change inside it. On the way up, three of its levels are tapped for DeepStack; which layers, the paper does not say.</p>
+    </div>
+    <div data-stage="merge" hidden>
+      <h4>3. The main merger</h4>
+      <p>A two-layer MLP folds each 2 &times; 2 block of the final features into one token, <span data-claim="qwen3vl-arch-merger-dim">aligned with the LLM's hidden dimension</span>: <span data-computed>4,500 / 4 = 1,125</span> tokens of width <span class="tex">d_{\text{LLM}}</span>, matching the figure's <span data-claim="qwen3vl-arch-fig-image-tok">1125 tokens</span>.</p>
+    </div>
+    <div data-stage="splice" hidden>
+      <h4>4. One sequence, with text timestamps</h4>
+      <p>The visual tokens join the text in one sequence. For video, <span data-claim="qwen3vl-arch-ts">each video temporal patch is prefixed with a timestamp expressed as a formatted text string</span>, such as <span data-claim="qwen3vl-timestamp-format"><code>&lt;3.0 seconds&gt;</code></span>: ordinary text tokens, at the cost of <span data-claim="qwen3vl-arch-ts-cost">a modest increase in context length</span>. For the figure's video each temporal patch is <span data-computed>23 &times; 14 = 322</span> tokens (by the same 32-pixel rule) plus its timestamp. Every token gets its (t, h, w) position; what changes from Qwen2-VL is the rotary layout, which was <span data-claim="qwen3vl-arch-mrope-part">partitioned into temporal (t), horizontal (h), and vertical (w) subspaces</span> and now works by <span data-claim="qwen3vl-arch-interleave">interleaving the t, h, and w components across the embedding dimensions</span>. That the ids themselves follow Qwen2-VL's rule is our reading; the paper describes only the frequency layout. Whether vision start and end markers wrap the block, this paper does not say.</p>
+    </div>
+    <div data-stage="deepstack" hidden>
+      <h4>5. DeepStack: three extra wires</h4>
+      <p>The paper's move is to <span data-claim="qwen3vl-arch-ds-inter">extract visual tokens from intermediate layers of the Vision Transformer (ViT)</span>. Three levels each pass through <span data-claim="qwen3vl-arch-ds-merger">dedicated vision-language merger modules</span> and are <span data-claim="qwen3vl-arch-ds-add">added directly to the corresponding hidden states of the first three LLM layers</span>. Each wire carries <span data-computed>1,125</span> vectors of width <span class="tex">d_{\text{LLM}}</span>, one per visual token, added at the visual positions only. Nothing joins the sequence, so its length is unchanged. As in the diagram above, pairing the shallowest level with layer 1 is this page's assumption.</p>
+    </div>
+    <div data-stage="llm" hidden>
+      <h4>6. The language model</h4>
+      <p>A Qwen3 decoder, dense (<span data-claim="qwen3vl-dense-sizes">2B / 4B / 8B / 32B</span>) or mixture-of-experts (<span data-claim="qwen3vl-moe-sizes">30B-A3B and 235B-A22B (235B total, 22B activated per token)</span>). The paper gives no widths or layer counts, so <span class="tex">d_{\text{LLM}}</span> and <span class="tex">N</span> stay symbolic; for the stepper dense and MoE look the same, because experts change what happens inside a layer, not the shapes going in and out of it.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. The loss</h4>
+      <p>Next-token cross-entropy, with one change of weighting: the authors <span data-claim="qwen3vl-arch-lossmove">move from a per-sample loss to a square-root-normalized per-token loss</span>, to balance text-only and multimodal data. The paper does not spell out which positions are graded; our reading is text positions, as in Qwen2-VL (visual tokens and timestamps are inputs).</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. Where the gradient goes</h4>
+      <p><b>S0:</b> <span data-claim="page-anatomy-s0-frozen">only the parameters of the MLP merger are trained during this phase, while both the vision encoder and the LLM backbone remain frozen</span>. The introduction's wording is plural: it <span data-claim="qwen3vl-arch-s0-plural">updates only the merger (vision-language projection) layers while keeping the rest of the model frozen</span>. We count the three DeepStack mergers among them; that is our reading. So the gradient runs down through the frozen LLM (brown, "passes") into all four mergers and stops at the frozen ViT. The DeepStack wires matter here: layers 2 and 3 send gradient straight to their own mergers without going through layer 1. <b>S1 to S3:</b> <span data-claim="qwen3vl-arch-s1-unfreeze">we unfreeze all model components</span>, and the ViT receives gradient by four routes at once.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. The update</h4>
+      <p>Token budgets of <span data-claim="qwen3vl-arch-budget">67B / ~1T / ~1T / 100B</span> at sequence lengths of <span data-claim="qwen3vl-arch-seqlen">8,192 / 8,192 / 32,768 / 262,144</span> for S0 to S3, trained with <span data-claim="qwen3vl-arch-megatron">Megatron-LM</span> on an infrastructure the paper says scales <span data-claim="qwen3vl-arch-gpus">up to 10,000 GPUs</span>. No optimizer, learning rate or batch size is given. Post-training follows (<span data-claim="qwen3vl-arch-post">supervised fine-tuning on long chain-of-thought data</span>, distillation, reinforcement learning); only for distillation does the paper say what trains, <span data-claim="qwen3vl-arch-distill">using text-only data to fine-tune the LLM backbone</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: shapes are for Picture 3 of the paper's architecture figure; the 16-pixel patch is derived from that figure's token counts, not stated; widths the paper does not give are <span class="tex">d_{\text{ViT}}</span>, <span class="tex">d_{\text{LLM}}</span>, and <span class="tex">L</span> is the text length. The DeepStack level-to-layer pairing and the DeepStack mergers' S0 status are our reading. Before you open stage 8 on <b>S0 align</b>, guess: with the LLM frozen, which boxes does the gradient reach, and does the ViT move?</figcaption>
+</figure>
+
+<p>The answer: all four mergers get a gradient, the ViT does not move. In S0 the language model is a fixed reader, and the only thing being learned is how to write visual tokens it can read, at four depths at once.</p>
+
+<p>That is where the chain of fixes has arrived for now: a contrastively trained encoder, native resolution, a small merger, positions that know about space and time, and a language model that reads it all as one sequence. The family tree that follows lays the whole page out by date, with an arc from each paper to the one that fixed its wall, and the summary after it says the story in one paragraph.</p>
+</section>

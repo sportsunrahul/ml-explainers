@@ -1,0 +1,24 @@
+<section id="ch-training" class="chapter">
+<h2>One training step, end to end</h2>
+<p>Not narrated. The stepper above shows the forward and backward pass of one step; this section is the bookkeeping around it, from the paper's Appendix A and the released ViT-H/14 configuration. Things the sources do not state are marked.</p>
+<ol>
+  <li><b>Batch.</b> <span data-claim="ijepa-batch">2048</span> images per step across <span data-claim="ijepa-readme-gpus">16 A100 80G GPUs</span> (README), so <span data-claim="ijepa-code-batch-per-gpu">128</span> per GPU (code-only), in <span data-claim="ijepa-code-bf16">bfloat16</span> (code-only). Each image: random resized crop to <span data-claim="ijepa-resolution">224</span>; no other augmentation.</li>
+  <li><b>Masks, in the data loader.</b> Per image, four target blocks and one context block from the ranges in the chapter; at least <span data-claim="ijepa-code-min-keep">10</span> patches kept (code-only). Within a GPU every image gets the same block sizes, so the context and target tensors are rectangular.</li>
+  <li><b>Forward.</b> Target encoder (no gradient, EMA weights) on all patches; context encoder on the context patches; predictor once per target block with mask tokens.</li>
+  <li><b>Loss.</b> Summed squared L2 per block, averaged over the four blocks (the chapter's equation).</li>
+  <li><b>Backward and update.</b> <span data-claim="ijepa-optimizer">AdamW</span> on context encoder and predictor. Learning rate: linear warm-up from <span data-claim="ijepa-lr-start">1e-4</span> to <span data-claim="ijepa-lr-peak">1e-3</span> over <span data-claim="ijepa-warmup-epochs">15</span> epochs, then cosine to <span data-claim="ijepa-lr-final">1e-6</span> (the released config instead starts at <span data-claim="ijepa-code-start-lr">2e-4</span> and warms up for <span data-claim="ijepa-code-warmup">40</span> epochs; code-only, and the paper and config disagree). Weight decay: linear from <span data-claim="ijepa-wd-start">0.04</span> to <span data-claim="ijepa-wd-end">0.4</span>. EMA momentum: linear from <span data-claim="ijepa-ema-start">0.996</span> to <span data-claim="ijepa-ema-end">1.0</span>.</li>
+  <li><b>Length.</b> <span data-claim="ijepa-epochs-h14">300</span> epochs for ViT-H/14 (<span data-claim="ijepa-epochs-b16">600</span> for ViT-B/16); about <span data-approx>626</span> steps per epoch at batch 2048 (our reading; the ImageNet size is not in the sources). Total: <span data-claim="ijepa-gpus">16 A100 GPUs</span> for under <span data-claim="ijepa-hours">72 hours</span>.</li>
+  <li><b>Evaluation.</b> The <em>target</em> encoder is the model that ships: its last layer, average-pooled over patches (or the last <span data-claim="ijepa-eval-last-layers">4</span> layers concatenated, whichever is better), under a linear probe.</li>
+</ol>
+<figure class="viz" id="viz-ijsched" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="ijsched-canvas" role="img" aria-label="Three schedules over 300 epochs: the learning rate warms up then decays by cosine, the weight decay rises linearly, and the EMA momentum rises linearly from 0.996 to 1."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ijsched-paper" data-src="paper" aria-pressed="true">Paper (Appendix A)</button>
+    <button type="button" id="btn-ijsched-config" data-src="config" aria-pressed="false">Released config</button>
+    <button type="button" id="btn-ijsched-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ijsched-readout" aria-live="polite"></p>
+  <figcaption>Computed from the stated schedules for the ViT-H/14 run (300 epochs). The two buttons show the paper's warm-up and the released config's; both share the peak, the final learning rate and the weight-decay and momentum ramps.</figcaption>
+</figure>
+</section>

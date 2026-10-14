@@ -1,0 +1,56 @@
+<p class="kicker"><span class="act-n">Act I</span>A detector that reads</p>
+
+<section id="ch-text-classifier" class="chapter">
+<h2>The class list becomes a text encoder</h2>
+<p>A detector does two jobs: it puts a box around each object, and it gives each box a score for every class it knows. The second job ends in a short list of names that is fixed when you train the model, and everything on this page starts by replacing that list with a text encoder.</p>
+
+<figure class="viz" id="viz-classifier" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="classifier-canvas" tabindex="0" role="img" aria-label="A circle shows a two-dimensional slice of the embedding space. Blue points are the features of four boxes: person, pallet, traffic cone and forklift. Arrows from the centre are the class rows. Bars on the right show the scores of the selected box for every row and for background."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-classifier-closed" aria-pressed="true">Learned rows (closed set)</button>
+    <button type="button" id="btn-classifier-text" aria-pressed="false">Rows from text</button>
+    <button type="button" id="btn-classifier-add" aria-pressed="false">Add <span class="prompt">forklift</span></button>
+    <button type="button" id="btn-classifier-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="classifier-readout" aria-live="polite"></p>
+  <figcaption>Each box becomes a feature vector (blue point). Its score for a class is the cosine between the point and that class's row, divided by a temperature of 0.1, then a softmax that includes a fixed "background" score. Drag a point, or focus the figure and use the arrow keys (space picks the next box). The geometry is a two-dimensional toy; real embeddings have hundreds of dimensions.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> The forklift box gets "background" because no row points its way. Before you press <em>Add forklift</em>, decide what must change on the image side of the network to fix this. Then press it.</p>
+
+<p>Nothing on the image side changes. The box was always found; its feature was always there. Only a new row appeared, and the row came from a sentence instead of from training. That is the whole idea of open-vocabulary detection, and the rest of the page is about making it work.</p>
+
+<h3>The last layer is a list of names</h3>
+<p>Take any detector you have seen. A backbone turns the image into features, some machinery proposes boxes, and each box ends up as one feature vector. The classifier is then one matrix with one row per class. GLIP writes it this way (Sec. 3.1, Eq. 2 of v2):</p>
+
+<div class="eq" id="eq-closed" data-build data-viz="viz-classifier"><div class="tex tex-display">
+\htmlData{step=1, link=regions}{\htmlClass{t-blue}{O} = \mathrm{Enc}_I(\text{image})}, \qquad \htmlData{step=2, link=rows}{\htmlClass{t-green}{S_{\rm cls}} = \htmlClass{t-blue}{O}\,W^{\top}}, \qquad \htmlData{step=3, link=scores}{\htmlClass{t-red}{\mathcal{L}_{\rm cls}} = \mathrm{loss}(\htmlClass{t-green}{S_{\rm cls}};\, T)}
+</div></div>
+<p class="eqno">Eq. 2 in GLIP (2112.03857v2). Bias terms are left out, as in the paper.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{O}</span>: the box features, one row per box. With <span class="tex">N</span> boxes and feature width <span class="tex">d</span>, it is <span class="tex">N \times d</span>.</li>
+  <li><span class="tex">W</span>: the classifier, one learned row per class, <span class="tex">c \times d</span> for <span class="tex">c</span> classes.</li>
+  <li><span class="tex">\htmlClass{t-green}{S_{\rm cls}}</span>: every box scored against every class, <span class="tex">N \times c</span>. The best entry in a row names that box.</li>
+  <li><span class="tex">T</span>: the targets, a 0/1 matrix that says which class each box should have; <span class="tex">\htmlClass{t-red}{\mathcal{L}_{\rm cls}}</span> pushes the scores toward it.</li>
+</ul>
+<p>Read the shapes and the problem is plain. <span class="tex">W</span> has exactly <span class="tex">c</span> rows. A class that was not in the training labels has no row, and the only way to get one is to label images of it and train again.</p>
+
+<h3>Swap the rows for sentences</h3>
+<p>Your CLIP explainer (<a href="../vlm-survey/explainer.html#ch-shared-space">VLM survey, chapter 1</a>) showed the other half of the trick. CLIP trains an image encoder and a text encoder together until a photo and its caption land close in one shared space. In that space, the text vector for a name points the same way as the images of that thing. So a text vector can do a classifier row's job.</p>
+<p>Write the class names into a prompt, run the text encoder, and use its output where <span class="tex">W</span> was (GLIP Eq. 3):</p>
+
+<div class="eq" id="eq-ground" data-build data-viz="viz-classifier"><div class="tex tex-display">
+\htmlData{step=1, link=text}{\htmlClass{t-yellow}{P} = \mathrm{Enc}_L(\text{prompt})}, \qquad \htmlData{step=2, link=text scores}{\htmlClass{t-green}{S_{\rm ground}} = \htmlClass{t-blue}{O}\,\htmlClass{t-yellow}{P}^{\top}}
+</div></div>
+<p class="eqno">Eq. 3 in GLIP (2112.03857v2).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{P}</span>: the text features, <span class="tex">M \times d</span>, one row per token of the prompt. It plays the role of <span class="tex">W</span>.</li>
+  <li><span class="tex">\htmlClass{t-green}{S_{\rm ground}}</span>: every box scored against every token, <span class="tex">N \times M</span>. A new class is a new phrase in the prompt; no weight changes.</li>
+</ul>
+<p>The text encoder must share a space with images; a language-only one is not enough. ViLD tested this directly. With CLIP's text encoder as the classifier, a detector trained only on the <span data-claim="ch1-lvis-base">866</span> base classes (frequent and common) reached <span data-claim="ch1-vild-text-apr">10.1</span> AP on the held-out rare classes; with GloVe word vectors, trained on text alone, it reached <span data-claim="ch1-vild-glove-apr">3.0</span> (ViLD Table 3, ResNet-50, mask AP).</p>
+
+<h3>How the field measures "open"</h3>
+<p>The papers on this page share one test bed, LVIS, a dataset with <span data-claim="ch1-lvis-categories">1,203</span> categories that is split by how often each class appears in training. The open-vocabulary protocol from ViLD trains on the <span data-claim="ch1-lvis-base">866</span> frequent and common classes, hides the labels of the <span data-claim="ch1-lvis-rare">337</span> rare ones, and reports <strong>APr</strong>: average precision on the rare classes only. A high APr means the model names things that it never saw a box for.</p>
+<p>You will meet two other tests. <strong>Zero-shot transfer</strong> evaluates on a dataset whose images the model never trained on, such as COCO. <strong>Object Detection in the Wild</strong> (ODinW) collects many small datasets from other domains, such as drone footage, aquariums and potholes. These three tests measure different things, and chapter 12 shows that only the last one looks like a factory.</p>
+</section>

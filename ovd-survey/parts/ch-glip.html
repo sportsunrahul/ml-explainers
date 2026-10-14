@@ -1,0 +1,108 @@
+<p class="kicker"><span class="act-n">Act IV</span>Detection as grounding (2021-2023)</p>
+
+<section id="ch-glip" class="chapter">
+<h2>GLIP: a detector is a grounding model</h2>
+<div class="tapstrip" data-model="glip" role="img" aria-label="The image pipeline from image to score, with the text lane above it. For GLIP, text enters at two places: inside the encoder, where the image and text features exchange information, and at the score."></div>
+<p class="note">Where text enters GLIP: at the score, where every box meets every token of the prompt, and in the last encoder layers (chapter 8).</p>
+
+<p>Chapter 1 replaced the class rows with text vectors, one vector per class name. GLIP (Li et al., <span data-claim="glip-venue">CVPR 2022</span>) writes all the class names into one sentence, <span class="prompt">person. bicycle. car.</span>, and scores every box against every token of that sentence. Detection then becomes phrase grounding: find the box that each phrase of a caption refers to.</p>
+
+<figure class="viz" id="viz-ground" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="ground-canvas" role="img" aria-label="Left: a drawn warehouse with four boxes, a person, a pallet, a forklift and a traffic cone. Right: a score matrix with one row per box and one column per phrase or token of the prompt person, traffic cone, toothbrush. Darker cells are higher scores. Green outlines mark the positive targets of the selected phrase."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-ground-phrases" aria-pressed="true">Phrases as classes</button>
+    <button type="button" id="btn-ground-tokens" aria-pressed="false">Split into tokens</button>
+    <button type="button" id="btn-ground-person" aria-pressed="false">Target: <span class="prompt">person</span></button>
+    <button type="button" id="btn-ground-cone" aria-pressed="false">Target: <span class="prompt">traffic cone</span></button>
+    <button type="button" id="btn-ground-tooth" aria-pressed="false">Target: <span class="prompt">toothbrush</span></button>
+    <button type="button" id="btn-ground-all" aria-pressed="false">All targets</button>
+    <button type="button" id="btn-ground-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ground-readout" aria-live="polite"></p>
+  <figcaption>The prompt is <span class="prompt">person. traffic cone. toothbrush</span>. Each cell is a box-token score passed through a sigmoid; a phrase score is the mean of its token scores. The scores are made up for the toy. The subword split of "toothbrush" is the paper's own example (Sec. 3.1); a real tokenizer splits words by its own vocabulary. You can also click a phrase above the matrix.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> <span class="prompt">toothbrush</span> is in the prompt, but no box shows one. Which cells in its two columns become positive targets? Decide, then press <em>Target: toothbrush</em>.</p>
+
+<p>None of them. Both subword tokens are negative targets for every box. This detail makes a prompt work as a classifier: a class name with no object in the image teaches the model to say no. The forklift row is the mirror case. The box is there, but no phrase names it, so for this prompt it is background.</p>
+
+<h3>From phrases to tokens</h3>
+<p>A classifier has one column per class. A text encoder does not see classes; it sees tokens, and a prompt has more tokens than phrases. GLIP gives four reasons (Sec. 3.1):</p>
+<ul>
+  <li>a phrase can have several words, such as "traffic light" (the toy uses "traffic cone");</li>
+  <li>the tokenizer splits some words into subwords: "toothbrush" becomes "tooth#" and "#brush";</li>
+  <li>the language model adds tokens of its own, such as separators and special tokens;</li>
+  <li>GLIP appends one [NoObj] token at the end of the sequence.</li>
+</ul>
+<p>So the score matrix has <span class="tex">M</span> token columns, with <span class="tex">M</span> larger than the number of classes <span class="tex">c</span>, but the detection labels give a target with <span class="tex">c</span> columns. GLIP widens the target to the token level:</p>
+
+<div class="eq" id="eq-glip-target" data-build data-viz="viz-ground"><div class="tex tex-display">
+\begin{gathered}
+\htmlData{step=1, link=scores}{\htmlClass{t-green}{S_{\rm ground}} = \htmlClass{t-blue}{O}\,\htmlClass{t-yellow}{P}^{\top} \in \mathbb{R}^{N\times M}} \\[4pt]
+\htmlData{step=2, link=targets}{T \in \{0,1\}^{N\times c} \;\longrightarrow\; \htmlClass{t-green}{T'} \in \{0,1\}^{N\times M}, \qquad \htmlClass{t-green}{T'_{ij}} = \begin{cases} T_{ik} & \text{token } j \text{ belongs to phrase } k \\ 0 & \text{token } j \text{ is an added token} \end{cases}} \\[4pt]
+\htmlData{step=3, link=loss}{\htmlClass{t-red}{\mathcal{L}_{\rm cls}} = \mathrm{loss}(\htmlClass{t-green}{S_{\rm ground}};\, \htmlClass{t-green}{T'})}
+\end{gathered}
+</div></div>
+<p class="eqno">Eq. 3 in GLIP (2112.03857v2), then the target expansion of Sec. 3.1, which the paper states in words; the case notation is ours.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{O}</span>: one feature row per <span class="tex">N</span> boxes (regions). <span class="tex">\htmlClass{t-yellow}{P}</span>: one feature row per token of the prompt, <span class="tex">M</span> rows.</li>
+  <li><span class="tex">\htmlClass{t-green}{S_{\rm ground}}</span>: every box against every token, the matrix in the figure.</li>
+  <li><span class="tex">T</span>: the detection label, which class each box is. <span class="tex">\htmlClass{t-green}{T'}</span>: the same label copied to every token of that class's phrase; added tokens are 0 for every box.</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{\rm cls}}</span>: a focal sigmoid loss over every cell, the loss of a one-stage detector. Only the target got wider.</li>
+</ul>
+<p>At test time, each phrase needs one score. GLIP averages the token probabilities of the phrase (Sec. 3.1):</p>
+
+<div class="eq" id="eq-glip-phrase" data-build data-viz="viz-ground"><div class="tex tex-display">
+\htmlData{step=1, link=phrase}{p(\text{box } i,\ \text{phrase } k) = \frac{1}{|k|}\sum_{j \in k} \sigma\!\left(\htmlClass{t-green}{S_{{\rm ground},\,ij}}\right)}
+</div></div>
+<p class="eqno">The inference rule of GLIP Sec. 3.1, written as a formula (our notation).</p>
+<ul class="gloss">
+  <li><span class="tex">|k|</span>: the number of tokens in phrase <span class="tex">k</span>; <span class="tex">\sigma</span>: the sigmoid. The cone box in the figure shows the arithmetic.</li>
+</ul>
+
+<p>Does the rewrite cost accuracy? GLIP tested it on COCO with all <span data-claim="glip-coco-prompt-phrases">80</span> class names in one prompt. The same DyHead detector with a Swin-T backbone scores <span data-claim="glip-equiv-ap">49.4</span> AP on COCO val2017 both as a detector and as a grounding model (App. B).</p>
+<p>The prompt has a budget. BERT can read <span data-claim="glip-bert-limit">512</span> tokens, and GLIP limits the prompt to <span data-claim="glip-max-tokens">256</span>. Objects365 has <span data-claim="glip-o365-classes">365</span> classes, too many for one prompt, so in pre-training each prompt holds at most <span data-claim="glip-o365-prompt-cap">85</span> category names: every class present in the image, plus random absent classes as negatives (App. C.1). On LVIS, GLIP splits the <span data-claim="ch1-lvis-categories">1,203</span> categories into prompts of <span data-claim="glip-lvis-chunk">40</span> and runs the model once per prompt (App. C.2). The format matters too: with BERT as the text encoder, <span class="prompt">person. bicycle. car.</span> works better than the friendlier <span class="prompt">Detect: person, bicycle, car</span>. The paper gives no number for this.</p>
+
+<h3>Any captioned box is now training data</h3>
+<p>Once detection is grounding, three kinds of data train one model with one loss. Detection labels become prompts of class names. Human grounding data gives a caption with a box for each phrase. Web image-caption pairs get boxes from a teacher model. The vocabulary grows by orders of magnitude. The largest detection datasets have no more than <span data-claim="glip-det-vocab-cap">2,000</span> categories. The gold grounding data has <span data-claim="glip-flickr-phrases">44,518</span> unique phrases in Flickr30K and <span data-claim="glip-vg-phrases">110,689</span> in VG Caption (Sec. 3.3).</p>
+<p>The web data comes from self-training. A GLIP trained on gold data is the teacher. A language parser finds the noun phrases in each caption, and the teacher boxes them. The student trains on the gold data plus these pseudo labels. On the <span data-claim="glip-web-data">24M</span> web pairs of GLIP-L, the teacher kept <span data-claim="glip-pseudo-boxes">78.1M</span> phrase-box pairs with confidence above <span data-claim="glip-pseudo-threshold">0.5</span>, which cover <span data-claim="glip-pseudo-unique-np">58.4M</span> unique noun phrases (Sec. 1).</p>
+
+<table class="data">
+  <caption class="note" style="caption-side:bottom;text-align:left">GLIP Table 1. Objects365: <span data-claim="glip-o365-images">0.66M</span> images. GoldG: <span data-claim="glip-goldg-size">0.8M</span> human grounding examples (Flickr30K, VG Caption, GQA; COCO images removed). Cap4M: <span data-claim="glip-cap4m">4M</span> web pairs boxed by GLIP-T (C). FourODs: <span data-claim="glip-fourods-size">2.66M</span> detection images. Cap24M: web pairs boxed by the teacher. Chapter 8 compares A with B.</caption>
+  <thead><tr><th>Model</th><th>Backbone</th><th>Deep fusion</th><th>Pre-training data</th></tr></thead>
+  <tbody>
+    <tr><td>GLIP-T (A)</td><td>Swin-T</td><td>no</td><td>Objects365</td></tr>
+    <tr><td>GLIP-T (B)</td><td>Swin-T</td><td>yes</td><td>Objects365</td></tr>
+    <tr><td>GLIP-T (C)</td><td>Swin-T</td><td>yes</td><td>Objects365, GoldG</td></tr>
+    <tr><td>GLIP-T</td><td>Swin-T</td><td>yes</td><td>Objects365, GoldG, Cap4M</td></tr>
+    <tr><td>GLIP-L</td><td>Swin-L</td><td>yes</td><td>FourODs, GoldG, Cap24M</td></tr>
+  </tbody>
+</table>
+
+<p>Does grounding data help more than detection data? The paper says that <span data-claim="glip-goldg-size">0.8M</span> gold grounding examples help rare categories more than <span data-claim="glip-extra-det-2m">2M</span> extra detection images. The test is Table 5: GLIP-T pre-trained on Objects365 plus GoldG (row 6) against GLIP-T pre-trained on FourODs (row 8), both zero-shot. Read the pair exactly:</p>
+<table class="data">
+  <thead><tr><th>GLIP-T pre-training</th><th>COCO AP</th><th>LVIS APr</th><th>APc</th><th>APf</th><th>AP</th></tr></thead>
+  <tbody>
+    <tr><td>Objects365 + GoldG (row 6)</td><td><span data-claim="glip-t5-row6-coco">46.7</span></td><td><span data-claim="glip-t5-row6-apr">17.7</span></td><td><span data-claim="glip-t5-row6-apc">19.5</span></td><td><span data-claim="glip-t5-row6-apf">31.0</span></td><td><span data-claim="glip-t5-row6-ap">24.9</span></td></tr>
+    <tr><td>FourODs (row 8)</td><td><span data-claim="glip-t5-row8-coco">46.3</span></td><td><span data-claim="glip-t5-row8-apr">15.0</span></td><td><span data-claim="glip-t5-row8-apc">22.5</span></td><td><span data-claim="glip-t5-row8-apf">32.8</span></td><td><span data-claim="glip-t5-row8-ap">26.8</span></td></tr>
+  </tbody>
+</table>
+<p class="note">GLIP Table 5, rows 6 and 8. COCO: zero-shot box AP on 2017val. LVIS: zero-shot on minival, AP on rare, common and frequent classes and overall (box AP, <span class="reading">our reading</span>: DyHead has no mask head).</p>
+<p>Within LVIS, the grounding row wins only on rare classes: APr <span data-claim="glip-t5-row6-apr">17.7</span> against <span data-claim="glip-t5-row8-apr">15.0</span>. The detection row is better on common classes, frequent classes and overall AP. On COCO the two rows are close. So the claim holds for the long tail, which is the part an open-vocabulary detector is for, and not across the board.</p>
+
+<h3>What the zero-shot numbers mean</h3>
+<p>Two of GLIP's headline tests are not open-vocabulary in ViLD's sense, so read them with care.</p>
+<p><strong>COCO is domain transfer.</strong> GLIP-L reaches <span data-claim="glip-coco-zs-l">49.8</span> AP on COCO 2017val without COCO training (Table 2). But Objects365 contains all <span data-claim="glip-coco-prompt-phrases">80</span> COCO classes (Sec. 4.1), so the test changes the images, not the classes; the paper calls it zero-shot domain transfer. A plain DyHead-T trained on Objects365, with its outputs restricted to COCO's classes, already scores <span data-claim="glip-coco-zs-dyhead-o365">43.6</span>.</p>
+<p><strong>LVIS holds nothing out.</strong> GLIP-L scores <span data-claim="glip-lvis-minival-l-apr">28.2</span> APr and <span data-claim="glip-lvis-minival-l-ap">37.3</span> AP on LVIS minival, and <span data-claim="glip-lvis-val-l-apr">17.1</span> APr and <span data-claim="glip-lvis-val-l-ap">26.9</span> AP on LVIS val v1.0 (Table 3, box AP, <span class="reading">our reading</span>). <span class="reading">our reading</span>: no LVIS category was removed from pre-training (the paper describes no filtering), and the checkpoint was chosen by its minival score (App. C.2). ViLD's numbers in chapter 4 are mask AP with the rare classes held out. Do not set the two side by side as equals.</p>
+
+<h3>Branches</h3>
+<div class="aside">
+  <h4>MDETR: the grounding ancestor</h4>
+  <p>MDETR (Kamath et al., 2104.12763v2) came first. It is DETR whose encoder reads the image features and the RoBERTa token features as one joined sequence. Each matched query predicts which tokens its box refers to, and a contrastive loss pulls query and token embeddings together. GLIP says its token-level target follows MDETR (Sec. 3.1). MDETR trained on <span data-claim="mdetr-pretrain-pairs">1.3M</span> aligned image-text pairs. It cannot be tested zero-shot: every training text has a box, which biases the model "to always predict boxes for a given text" (Sec. 3.2.1). On LVIS it asks for one class name per forward pass, about <span data-claim="mdetr-lvis-inference-time">10s</span> per image on a GPU. GLIP's detection prompts list absent classes, so its model learns to answer "no box" (<span class="reading">our reading</span>).</p>
+</div>
+<div class="aside">
+  <h4>GLIPv2: more negatives, same tap</h4>
+  <p>GLIPv2 (2206.05836v2) keeps GLIP's architecture, so text still enters at the fusion layers. It changes the loss: it adds negatives from the other images in the batch, scored on the features before fusion, and a masked-language loss on the text. At the Tiny size, zero-shot ODinW-13 (the average AP over GLIP's <span data-claim="glip-odinw-count">13</span> ODinW datasets) goes from <span data-claim="glip-odinw-t-0shot">46.5</span> to <span data-claim="glipv2-t-odinw-zs">48.5</span>, and LVIS minival AP from <span data-claim="glipv2-gliptT-lvis">26.0</span> to <span data-claim="glipv2-t-lvis-zs">29.0</span> (GLIPv2 Table 2).</p>
+</div>
+</section>

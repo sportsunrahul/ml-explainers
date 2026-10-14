@@ -1,0 +1,272 @@
+[
+ {
+  "id": "siglip-arch-b16",
+  "claim": "SigLIP base encoders",
+  "value": "B/16 ViT for image embeddings and B-sized transformer for text embeddings",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-res",
+  "claim": "SigLIP base input resolution",
+  "value": "224",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.2 para 1 (\"resized to 224x224 resolution\")",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-vocab",
+  "claim": "SigLIP tokenizer",
+  "value": "32 k vocabulary sentencepiece tokenizer",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-text16",
+  "claim": "SigLIP text length",
+  "value": "a maximum of 16 text tokens are kept",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.2 para 1; App. A",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-textw",
+  "claim": "Base text model embedding width",
+  "value": "W = 768",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.3 para 3 (bottleneck paragraph)",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-d",
+  "claim": "Output width per model size",
+  "value": "768, 1024 and 1152",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, App. F model card (Outputs)",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-samesize",
+  "claim": "Tower sizes",
+  "value": "The vision and language encoders always have the same size",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, App. F model card (Model Architecture)",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-adafactor",
+  "claim": "Default optimizer",
+  "value": "ScalingViT-Adafactor optimizer",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-lrwd",
+  "claim": "Default lr and weight decay",
+  "value": "0.001 learning rate and 0.0001 weight decay",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, App. C (Hyperparameters for different batch sizes)",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-cosine",
+  "claim": "Default schedule",
+  "value": "default cosine learning rate scheduler",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, App. C (Alternative optimizers)",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-beta2",
+  "claim": "beta2 used",
+  "value": "0.95",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.7",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-scaled",
+  "claim": "Scaled-up recipe tokens",
+  "value": "256 image patches and 64 text tokens",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.6 para 1 (\"(256/16)^2 = 256 image patches and 64 text tokens (instead of 16)\")",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-scaled-examples",
+  "claim": "Scaled-up recipe length",
+  "value": "40 billion examples seen at batch size 32 k",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.6 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-scaled-sizes",
+  "claim": "Scaled-up encoders",
+  "value": "ViT-B, ViT-L or So-400m",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.6 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-resft",
+  "claim": "Resolution variants",
+  "value": "5 billion more examples at the target resolution, with a 100x smaller learning rate and no weight decay",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.6 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-so-patches",
+  "claim": "SO400M patch count",
+  "value": "729",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-b16-chips",
+  "claim": "From-scratch B/16 run",
+  "value": "5 days with 32 TPUv4 chips",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 1; Table 1 row 5",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-siglit-tower",
+  "claim": "SigLiT image tower",
+  "value": "ViT-AugReg-B/8",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-siglit-precompute",
+  "claim": "SigLiT embeddings",
+  "value": "precompute embeddings to accelerate the training",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-siglit-text",
+  "claim": "SigLiT text tower",
+  "value": "a Large Transformer, but with a depth of only 12 layers (instead of 24)",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-lion",
+  "claim": "SigLiT optimizer",
+  "value": "LION",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2; App. A",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-lion-lr",
+  "claim": "SigLiT peak lr",
+  "value": "1 x 10^-4",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2; App. A",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-lion-wd",
+  "claim": "SigLiT weight decay",
+  "value": "1 x 10^-7",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2; App. A",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-lion-warm",
+  "claim": "SigLiT warm-up",
+  "value": "6.5k steps",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-siglit-steps",
+  "claim": "SigLiT steps",
+  "value": "65,000",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 para 2 (\"65 000 steps\")",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-siglit-chips",
+  "claim": "SigLiT hardware",
+  "value": "four TPU-v4 chips",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.4 title and para 1",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-unlocked-mult",
+  "claim": "Unlocked init lr multiplier",
+  "value": "0.1 learning rate multiplier to the pre-trained image tower",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.5 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-unlocked-wd",
+  "claim": "Unlocked init weight decay",
+  "value": "Weight decay is therefore only applied to the randomly initialized weights in the text model",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 4.5 para 4",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-symmetric",
+  "claim": "Sigmoid loss properties",
+  "value": "the sigmoid loss is symmetric, requires just a single pass",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 1 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "siglip-arch-final-sum",
+  "claim": "Chunked loss final step",
+  "value": "Losses can then simply be summed across all devices",
+  "paper": "SigLIP",
+  "version": "v4",
+  "loc": "PDF, Sec. 3.3",
+  "uncertain": false
+ }
+]

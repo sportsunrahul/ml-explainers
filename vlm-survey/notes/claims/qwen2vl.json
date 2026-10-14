@@ -1,0 +1,200 @@
+[
+ {
+  "id": "qwen2vl-patch",
+  "claim": "ViT patch size",
+  "value": "patch_size=14",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Naive Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-merge",
+  "claim": "MLP compresses adjacent tokens into one token",
+  "value": "2x2 tokens -> 1 token",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Naive Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-224-tokens",
+  "claim": "224x224 image with patch 14 is compressed to this many tokens before the LLM",
+  "value": "66 tokens",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Naive Dynamic Resolution",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-px-per-token",
+  "claim": "Pixels covered per LLM visual token (14 x 2 = 28 per side); derived from patch and merge, matches min/max_pixels formula",
+  "value": "28 x 28 = 784 px",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 + Sec. 3.3.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-minmax-pixels",
+  "claim": "min_pixels and max_pixels used in dynamic-resolution ablation",
+  "value": "min_pixels=100x28x28, max_pixels=16384x28x28",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-vit-size",
+  "claim": "ViT parameter count, constant across LLM sizes",
+  "value": "675M",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Table model_description",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-sizes",
+  "claim": "LLM sizes for 2B / 7B / 72B models",
+  "value": "1.5B / 7.6B / 72B",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Table model_description",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-vit-init",
+  "claim": "ViT init and position encoding change",
+  "value": "DFN ViT; fixed position embedding replaced by 2D-RoPE",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 Training",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-video-fps",
+  "claim": "Video sampling rate",
+  "value": "two frames per second",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Unified Image and Video Understanding",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-3dconv",
+  "claim": "3D convolution depth for video; images treated as two identical frames",
+  "value": "depth two",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1 Unified Image and Video Understanding",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-video-cap",
+  "claim": "Max tokens per video during training",
+  "value": "16384",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-mrope-extrap",
+  "claim": "Model trained with max 16K tokens per video still performs well at inference length",
+  "value": "up to 80K tokens",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.2",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-mrope-fig-text-start",
+  "claim": "In the M-RoPE figure, text following a 3-frame, 3-row, 4-column video block starts at position ids",
+  "value": "(4,4,4), then (5,5,5), (6,6,6)",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Fig. mrope (images/mrope.png)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-mrope-ablation-video",
+  "claim": "1D-RoPE vs M-RoPE on NextQA and STAR (Qwen2-1.5B, pretrained)",
+  "value": "NextQA 43.9 vs 46.0; STAR 55.5 vs 57.9",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.2 (Table 8)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-mrope-ablation-mathvista",
+  "claim": "1D-RoPE vs M-RoPE on MathVista and MMBench",
+  "value": "MathVista 39.2 vs 43.4; MMB 58.6 vs 60.6",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.2 (Table 8)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-fixed-vs-dyn-infovqa",
+  "claim": "InfoVQA val, Qwen2-VL-7B: fixed 64 / 576 / 1600 / 3136 tokens vs dynamic (avg 1924 tokens)",
+  "value": "28.85 / 65.72 / 74.99 / 77.27 vs 75.89",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.1 (Table 7)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-fixed-vs-dyn-ocrbench",
+  "claim": "OCRBench, Qwen2-VL-7B: fixed 64 / 576 / 1600 / 3136 vs dynamic",
+  "value": "572 / 828 / 824 / 786 vs 866",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 3.3.1 (Table 7)",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-docvqa",
+  "claim": "DocVQA test: 72B / 7B / 2B (GPT-4o 92.8, Claude-3.5-Sonnet 95.2, previous SoTA 94.1)",
+  "value": "96.5 / 94.5 / 90.1",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Table 2, in Sec. 3.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-infovqa",
+  "claim": "InfoVQA test: 72B / 7B / 2B",
+  "value": "84.5 / 76.5 / 65.5",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Table comparison, InfoVQA_test row",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-ocrbench",
+  "claim": "OCRBench: 72B / 7B / 2B",
+  "value": "877 / 866 / 809",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Table comparison",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-pretrain-tokens",
+  "claim": "Pretraining tokens: stage 1 / stage 2 additional / cumulative",
+  "value": "~600 billion / 800 billion / 1.4 trillion",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 Training",
+  "uncertain": false
+ },
+ {
+  "id": "qwen2vl-stages",
+  "claim": "Three stages: stage 1 trains ViT only; stage 2 unfreezes all; stage 3 locks ViT and tunes LLM",
+  "value": "ViT-only / all / LLM-only",
+  "paper": "Qwen2-VL",
+  "version": "v2",
+  "loc": "Sec. 2.2 Training para 1",
+  "uncertain": false
+ }
+]

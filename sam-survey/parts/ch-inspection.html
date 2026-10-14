@@ -1,0 +1,51 @@
+<p class="kicker"><span class="act-n">Act V</span>Inspection</p>
+<section id="ch-inspection" class="chapter">
+<h2>Where SAM helps inspection, and where it fails</h2>
+<p>A defect is often not an object. A scratch has no closed outline, and a stain has almost no edge, while SAM was trained on a billion masks of things. Step through three ways to use it on a toy machined part.</p>
+
+<figure class="viz" id="viz-inspect" data-scene="inspect" data-toy>
+  <div class="controls"><div class="seg" role="tablist" aria-label="Method">
+    <button type="button" role="tab" data-step="0" id="btn-insp-click">One click</button>
+    <button type="button" role="tab" data-step="1" id="btn-insp-box">A box from a detector</button>
+    <button type="button" role="tab" data-step="2" id="btn-insp-student">Train a student on SAM masks</button>
+  </div></div>
+  <div class="stage" style="height:clamp(330px, 40vw, 420px)"></div>
+  <div class="controls"><button type="button" data-cue-reset id="btn-insp-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. The plate, the defects and the outcomes are our illustration, not a model's output. The box and student tabs follow failure modes the papers below report; the one-click tab is our illustration of SAM's object bias, which no paper here measures on defects.</figcaption>
+</figure>
+
+<p>Before you click the second tab, guess: will a box around the scratch fix it? The papers that tested SAM on defects agree on a pattern, and the toy follows it.</p>
+
+<div class="claim-card">
+  <h4>Where it fails</h4>
+  <dl>
+    <dt>Claim</dt><dd>Zero-shot SAM is weakest on concealed, low-contrast and thin targets, and industrial defects are the hardest case.</dd>
+    <dt>How measured</dt><dd>"Segment Anything Is Not Always Perfect" ran SAM on CDS2K, an industrial defect set of <span data-claim="notperfect-cds2k-size">2,492</span> images, and kept SAM's best mask by comparing each candidate with the ground truth: an upper bound on SAM. Metric: mean absolute error (MAE), lower is better.</dd>
+    <dt>Result</dt><dd>MAE <span data-claim="notperfect-cds2k-vith">0.265</span> for SAM ViT-H against <span data-claim="notperfect-cds2k-dgnet">0.089</span> for the best dedicated model (DGNet). Larger encoders help less and less: ViT-B <span data-claim="notperfect-cds2k-vitb">0.372</span>, ViT-L <span data-claim="notperfect-cds2k-vitl">0.281</span>.</dd>
+    <dt>Would falsify it</dt><dd>SAM matching the dedicated model on CDS2K even with oracle mask selection.</dd>
+  </dl>
+</div>
+<p>Finding a defect and outlining it are different. On infrared thermography of carbon-fibre parts, zero-shot SAM found the defects on flat parts (a recall-weighted F-score of <span data-claim="samdefect-sam-f-flat">98.24</span>) but its masks overlapped the true extent poorly: IoU <span data-claim="samdefect-sam-iou-flat">49.32</span>. Fine-tuned on the task (DefectSAM), IoU rose to <span data-claim="samdefect-iou-flat">78.58</span>. On irregular parts zero-shot SAM also missed defects (F-score <span data-claim="samdefect-sam-f-r">68.02</span>).</p>
+<p>Zero-shot anomaly segmentation without any training images is possible but weak. Segment Any Anomaly chains Grounding DINO boxes from text such as "scratch" with SAM masks, then filters them with hand-written rules about location and size. Its best version scores a pixel max-F1 of <span data-claim="saa-fp-total-plus">34.85</span> overall and <span data-claim="saa-fp-object-plus">28.82</span> on objects. Much of the gain comes from the rule filters: without the property prompts, texture categories drop from <span data-claim="saa-fp-texture-plus">53.79</span> to <span data-claim="saa-abl-no-pp-texture">21.83</span>.</p>
+
+<div class="claim-card">
+  <h4>Where it helps</h4>
+  <dl>
+    <dt>Claim</dt><dd>SAM's masks, made from boxes you already have, are good enough to train a fast defect segmenter that beats standard segmenters trained the same way.</dd>
+    <dt>How measured</dt><dd>Boxes2Pixels turns detection boxes into SAM masks, trains a small student on them with a separate defect-vs-background head and a one-sided self-correction step, and tests on a manually masked set. Baselines train on the same SAM masks.</dd>
+    <dt>Result</dt><dd>Defect mIoU <span data-claim="boxes2pixels-t1-miou-anom-ours">0.6523</span> against <span data-claim="boxes2pixels-t1-miou-anom-segformer">0.5881</span> for SegFormer-B2. Self-correction raises binary recall from <span data-claim="boxes2pixels-sc-recall-bin-without">0.6195</span> to <span data-claim="boxes2pixels-sc-recall-bin-with">0.8051</span>. The student has <span data-claim="boxes2pixels-params-trainable">5.6</span>M trainable parameters and runs in <span data-claim="boxes2pixels-latency">6.20</span> ms on an H100; SAM is not needed at run time.</dd>
+    <dt>Would falsify it</dt><dd>The baselines matching the student when trained on the same pseudo-masks, or the gain vanishing on the manual test set.</dd>
+  </dl>
+</div>
+<p>As a labelling tool, SAM saves clicks. In a case study on aircraft borescope images, the example image for each of five defect classes needed <span data-claim="industrialsam-borescope-clicks">1-3</span> clicks for a pixel-accurate mask. That paper says SAM drastically reduces labelling time but does not measure it, and no paper here does, so treat speed-up claims with care. On edge hardware, a distilled SAM encoder can carry an OK/NG classifier: KairosAD, built on MobileSAM's encoder, reaches an image AUROC of <span data-claim="kairosad-mvtec-auroc">99.10</span> on MVTec AD at <span data-claim="kairosad-jetson-nx">211</span> ms per image on a Jetson NX, but only <span data-claim="kairosad-visa-auroc">92.3</span> on VisA, and it needs labelled defect images and gives no masks.</p>
+
+<h3>A recipe for an inspection platform (our reading)</h3>
+<ul>
+  <li><b>Label with it, do not detect with it.</b> Use SAM, or HQ-SAM for thin defects, inside the labelling tool with positive and negative clicks. Check diffuse defects such as dirt and stains by eye.</li>
+  <li><b>Prompt with boxes.</b> If a detector or past labels already give boxes, prompt SAM with them; a box removes most of the "which object" ambiguity.</li>
+  <li><b>Distil for production.</b> Train a small segmenter on SAM's masks with a noise-tolerant loss, keep a small hand-masked test set, and deploy the student, not SAM.</li>
+  <li><b>Fine-tune when you have labels.</b> For a new imaging modality, fine-tune the decoder or add adapters; zero-shot SAM's extents are not ground truth.</li>
+  <li><b>Use SAM 3 for "every scratch".</b> Concept prompts with exemplar boxes ask for all instances of a defect type; the chapter on SAM 3 shows how its presence score decides whether the concept is there at all.</li>
+</ul>
+</section>

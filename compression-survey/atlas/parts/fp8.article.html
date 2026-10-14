@@ -1,0 +1,12 @@
+  <article data-chapter="fp8">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>FP8</h2><p class="subhead">Eight bits as a float: dense near zero, sparse far away</p></header>
+    <div class="controls">
+      <div class="row"><span>Tensor</span><button type="button" class="tool" data-dist="uniform">Uniform</button><button type="button" class="tool" data-dist="normal">Normal</button><button type="button" class="tool" data-dist="student">Student-t</button></div>
+    </div>
+    <p>An 8-bit integer spaces its levels evenly. An 8-bit <button type="button" class="inline-term" data-open="fp8-float">floating-point</button> number spends some bits on an <button type="button" class="inline-term" data-open="fp8-exponent">exponent</button>, which picks a power of two, and the rest on a <button type="button" class="inline-term" data-open="fp8-mantissa">mantissa</button>, which picks a mark between that power and the next. So its marks are dense near zero and sparse far away.</p>
+    <p>The stage shows a tensor's values (blue) on a logarithmic axis, with every positive value of three formats (yellow) below it: INT8, <button type="button" class="inline-term" data-open="fp8-e4m3">E4M3</button> and <button type="button" class="inline-term" data-open="fp8-e5m2">E5M2</button>. Each format first gets a <button type="button" class="inline-term" data-open="fp8-scale">scaling factor</button>, so that its largest value meets the tensor's largest value. The red bars (or red values on a phone) are the error after rounding.</p>
+    <p>On the uniform and normal tensors, INT8 has the lowest error. Now guess which format wins on the Student-t tensor, where a few values are about twenty times the typical size. It is E4M3: one huge value stretches INT8's even steps, while E4M3 keeps the same relative precision at every size.</p>
+    <p class="note">Computed: all 256 codes of E4M3 and E5M2 are decoded with the rules of the FP8 paper by Micikevicius et al. The tensors are toys in the three shapes van Baalen et al. compare; the scaling and the errors are our computation.</p>
+    <p class="inscription">FP8 wins only when a tensor has large outliers. Convolutional detectors rarely do, so 8-bit integers stay the default there.</p>
+    {{CONTINUE}}
+  </article>

@@ -1,0 +1,80 @@
+<h3>Inside LLaVA: forward, then backward</h3>
+<p>The connector figure showed how many tokens a picture costs; here is the whole training step around it, with the tensor shapes at every stage. The variant buttons switch between the two papers and between their two training stages, which differ in exactly one thing: which boxes are allowed to learn.</p>
+
+<figure class="viz archflow" id="viz-llavaflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-llavaflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-llavaflow-encode" aria-pressed="false">2 CLIP</button>
+    <button type="button" id="btn-llavaflow-project" aria-pressed="false">3 Project</button>
+    <button type="button" id="btn-llavaflow-tokens" aria-pressed="false">4 Text</button>
+    <button type="button" id="btn-llavaflow-splice" aria-pressed="false">5 Splice</button>
+    <button type="button" id="btn-llavaflow-llm" aria-pressed="false">6 LLM</button>
+    <button type="button" id="btn-llavaflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-llavaflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-llavaflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model and training stage">
+    <span>variant</span>
+    <button type="button" id="btn-llavaflow-v1s1" aria-pressed="true">LLaVA stage 1</button>
+    <button type="button" id="btn-llavaflow-v1s2" aria-pressed="false">LLaVA stage 2</button>
+    <button type="button" id="btn-llavaflow-v15s1" aria-pressed="false">LLaVA-1.5 stage 1</button>
+    <button type="button" id="btn-llavaflow-v15s2" aria-pressed="false">LLaVA-1.5 stage 2</button>
+  </div>
+  <canvas id="llavaflow-canvas" role="img" aria-label="LLaVA's training step as a diagram: an image lane (blue) through the frozen CLIP encoder (brown) to its patch grid and a projector (green), and a text lane (yellow) through the language model's token embeddings, meeting in one spliced sequence that the language model reads before the loss (red). In the backward stages red arrows run from the loss back through the language model to the projector and stop at CLIP; in stage 1 the language model is brown (frozen), in stage 2 it is outlined red (trained)."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-llavaflow-prev">Previous</button>
+    <button type="button" id="btn-llavaflow-next">Next</button>
+    <button type="button" id="btn-llavaflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="llavaflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>The image lane (<b class="c-blue">blue</b>) ends in a <b class="c-green">green</b> projector, the text lane (<b class="c-yellow">yellow</b>) in the language model's embedding table, and the two merge into one sequence before the language model ever runs. Unlike Flamingo, nothing is inserted inside the language model: after the splice it is an ordinary text model reading an unusually long prompt. <b class="c-brown">Brown</b> boxes are frozen; which ones are brown depends on the variant. Press <b>1 Inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>1. An image and a conversation</h4>
+      <p>One example is a square image, <span data-claim="page-connectors-224">224</span> pixels for LLaVA and <span data-claim="page-connectors-336">336</span> for LLaVA-1.5, plus text. What the text is depends on the stage. Stage 1 uses caption pairs, <span data-claim="llava-cc3m-filtered">595K image-text pairs</span> filtered from CC3M for LLaVA (<span data-claim="llava15-pretrain-size">558K</span> for LLaVA-1.5), each turned into a one-turn chat: a randomly chosen "describe the image briefly" request, answered by the caption. Stage 2 uses the real conversations: the <span data-claim="llava-instruct-total">158K</span> GPT-4-written samples for LLaVA, the <span data-claim="llava15-mixture-total">665K</span> mix for LLaVA-1.5.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>2. The frozen CLIP encoder, read one layer early</h4>
+      <p>The encoder is the first chapter's <span data-claim="llava-clip-encoder">CLIP ViT-L/14</span> (for LLaVA-1.5, its <span data-claim="llava15-arch-encoder">CLIP-ViT-L-336px</span> version), with <span data-claim="clip-arch-l14-dims">24 / 1024</span> layers / width in CLIP's own table. <span data-claim="llava-arch-grid-quote">The grid features before and after the last Transformer layer are considered in our experiments</span>, and for its ScienceQA model the paper says <span data-claim="llava-arch-before-last">we use the visual features before the last layer</span>; it does not restate the choice for the chat model or for LLaVA-1.5 (our reading: the same layer). "Grid features" also means the <code>[class]</code> token is dropped: our reading, since the paper never mentions it. What remains is <span data-computed>16 &times; 16 = 256</span> vectors at 224 pixels, <span data-computed>24 &times; 24 = 576</span> at 336, each of width 1024.</p>
+    </div>
+    <div data-stage="project" hidden>
+      <h4>3. One matrix (or two layers) to word width</h4>
+      <p>LLaVA's connector is a <span data-claim="page-connectors-linear">simple linear layer</span>, Eq. 1's <span class="tex">H_v = W \cdot Z_v</span>, with output of <span data-claim="llava-arch-same-dim">the same dimensionality as the word embedding space in the language model</span>. We write that width <span class="tex">d_{\text{LLM}}</span>: neither paper states it, so <span class="tex">W</span> is <span class="tex">1024 \times d_{\text{LLM}}</span>. LLaVA-1.5 replaces it with a <span data-claim="page-connectors-mlp">two-layer MLP</span>, whose hidden width and activation the paper does not give. Either way the same weights are applied to every patch, so the token count does not change.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>4. The conversation becomes tokens</h4>
+      <p>The text is laid out in LLaVA's template (a system message, then <code>Human:</code> and <code>Assistant:</code> turns, each ending in <code>&lt;STOP&gt;</code>, which is <span data-claim="page-pipeline-stop"><code>###</code></span> in LLaVA), tokenized to <span class="tex">T</span> ids, and embedded by the language model's own table. The <a href="#viz-pipeline">training-step chapter</a> builds this template stage by stage.</p>
+    </div>
+    <div data-stage="splice" hidden>
+      <h4>5. Splice</h4>
+      <p>The <code>&lt;image&gt;</code> placeholder in the first human turn is replaced by the visual tokens, which LLaVA's Eq. 2 puts before or after the first question at random. From here on the language model sees one sequence of <span class="tex">256 + T</span> (LLaVA-1.5: <span class="tex">576 + T</span>) vectors, all of the same width, and cannot tell from the shape which came from pixels.</p>
+    </div>
+    <div data-stage="llm" hidden>
+      <h4>6. An ordinary language model</h4>
+      <p>The language model is <span data-claim="llava-arch-vicuna">Vicuna</span>: the paper's main model is its <span data-claim="llava-arch-13b">best 13B model</span>, with a 7B trained only as an ablation. LLaVA-1.5 uses <span data-claim="llava15-arch-vicuna">Vicuna v1.5</span> at <span data-claim="llava15-arch-sizes">7B and 13B</span>. It reads the spliced sequence with its usual causal self-attention, so every text token after the image can attend to every visual token. Its depth and width are not in these papers, which is why the shapes stay symbolic.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. Grade only the assistant</h4>
+      <p>The loss is next-token cross-entropy, but only where the model plays the assistant: it is <span data-claim="page-pipeline-predict">trained to predict the assistant answers and where to stop</span>. The visual tokens and the human's words are context, never targets. <a href="#eq-pipeline">The training-step chapter's Eq. 3</a> writes this out and draws the label row cell by cell; nothing about it changes between the stages.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. Same road back, different stops</h4>
+      <p>Switch between <b>LLaVA stage 1</b> and <b>LLaVA stage 2</b> here. In stage 1 the paper says <span data-claim="llava-arch-frozen-s1">we keep both the visual encoder and LLM weights frozen</span>, and the only trainable weights are <span data-claim="llava-arch-theta-s1">the projection matrix</span>. Yet the loss sits at the top of the language model and <span class="tex">W</span> sits below it, so the gradient has to run down through every frozen layer (brown, "gradient passes, no update") to reach it. The language model's embedding table, by contrast, is marked "gradient stops here": in stage 1 nothing upstream of it trains, so no gradient needs to be sent there. The paper's phrase for this stage is <span data-claim="page-pipeline-tokenizer">training a compatible visual tokenizer for the frozen LLM</span>.</p>
+      <p>In stage 2, <span data-claim="llava-arch-frozen-s2">We always keep the visual encoder weights frozen</span>, and the trainable set grows to <span class="tex">\theta = \{W, \phi\}</span>, the projector plus the language model's weights <span class="tex">\phi</span> (we count the embedding table as part of <span class="tex">\phi</span>). CLIP is brown in all four variants and the gradient stops at its output. For LLaVA-1.5 the paper does not restate the frozen sets; it keeps LLaVA's two stages and <span data-claim="llava15-arch-same-hp">the same set of hyperparameters as the original LLaVA, except that we halve the learning rate in pretraining</span>, so the 1.5 variants follow LLaVA's pattern (our reading).</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p>LLaVA stage 1 trains for <span data-claim="page-pipeline-stage1-hp">1 epoch with a learning rate of 2e-3 and a batch size of 128</span>, stage 2 for <span data-claim="page-pipeline-stage2-hp">3 epochs, with a learning rate of 2e-5 and a batch size of 32</span>, both with the <span data-claim="llava-arch-optim">Adam optimizer with no weight decay and a cosine learning rate with a warmup ratio of 3%</span>, on <span data-claim="llava-hardware">8x A100</span>: stage 1 finishes <span data-claim="llava-time-stage1">within 4 hours</span>, stage 2 <span data-claim="llava-time-stage2">within 10 hours</span>. LLaVA-1.5 uses batch <span data-claim="page-pipeline-l15-pre-bs">256</span> and learning rate <span data-claim="page-pipeline-l15-pre-lr">1e-3</span> for stage 1, batch <span data-claim="page-pipeline-l15-ft-bs">128</span> and <span data-claim="page-pipeline-l15-ft-lr">2e-5</span> for stage 2, <span data-claim="page-pipeline-l15-epoch">1</span> epoch each, with <span data-claim="llava15-arch-adamw">AdamW</span> (<span data-claim="llava15-arch-sched">cosine decay, warmup ratio 0.03, weight decay 0</span>) and DeepSpeed stages <span data-claim="llava15-arch-deepspeed">2 / 3</span>, taking <span data-claim="page-connectors-hours">~6 hours of pretraining and ~20 hours of visual instruction tuning</span>. The step counts under the drawing are examples divided by batch size, times epochs: computed, not stated.</p>
+    </div>
+  </div>
+  <figcaption>Computed: token counts from the input resolution and the 14-pixel patch; the encoder width from CLIP's appendix table; step counts from dataset size, batch size and epochs. The language model's width <span class="tex">d_{\text{LLM}}</span>, its depth, the MLP's hidden width and the text length <span class="tex">T</span> stay symbolic because neither paper gives them. Before you open stage 8 in stage 1, guess: the language model is frozen and sits between the loss and the projector. Does the gradient reach the projector, and does it reach CLIP?</figcaption>
+</figure>
+
+<p>The step counts show how small this recipe is. LLaVA's stage 1 is <span data-computed>about 4,650</span> updates and its stage 2 <span data-computed>about 14,800</span>; LLaVA-1.5's are <span data-computed>about 2,180</span> and <span data-computed>about 5,200</span>, larger batches over more data in a single epoch. Stage 1 is cheap for another reason too: it updates only the projector, a single <span class="tex">1024 \times d_{\text{LLM}}</span> matrix in LLaVA, though every one of its steps still pays for a full forward and backward pass through the frozen language model.</p>
+

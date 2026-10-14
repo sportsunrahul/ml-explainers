@@ -1,0 +1,1873 @@
+[
+ {
+  "id": "sam2-published-v1",
+  "claim": "SAM 2 v1 submission date",
+  "value": "2024-08-01",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "abs.html submission history [v1]"
+ },
+ {
+  "id": "sam2-published-v2",
+  "claim": "SAM 2 v2 submission date (SAM 2.1 results)",
+  "value": "2024-10-28",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "abs.html submission history [v2]"
+ },
+ {
+  "id": "sam2-ver-2-1",
+  "claim": "All v2 paper results are from the improved SAM 2.1 checkpoints",
+  "value": "SAM 2.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 1 footnote"
+ },
+ {
+  "id": "sam2-ckpt-2-1-date",
+  "claim": "SAM 2.1 checkpoints release date",
+  "value": "September 29, 2024",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README, SAM 2.1 checkpoints",
+  "code_only": true
+ },
+ {
+  "id": "sam2-ckpt-2-0-date",
+  "claim": "Original SAM 2 checkpoints release date",
+  "value": "July 29, 2024",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README, SAM 2 checkpoints",
+  "code_only": true
+ },
+ {
+  "id": "sam2-res",
+  "claim": "Input resolution of the final model",
+  "value": "1024",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12a/b resolution; App. A.2.1 input size"
+ },
+ {
+  "id": "sam2-abl-res",
+  "claim": "Resolution used for ablations",
+  "value": "512",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. A intro; A.2"
+ },
+ {
+  "id": "sam2-fpn-strides",
+  "claim": "Strides fused by the FPN into the frame embedding (stages 3 and 4)",
+  "value": "stride 16 and 32",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.1 Image encoder"
+ },
+ {
+  "id": "sam2-skip-strides",
+  "claim": "Strides added to the decoder upsampling (stages 1 and 2), bypassing memory attention",
+  "value": "stride 4 and 8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.1; Fig. 8"
+ },
+ {
+  "id": "sam2-img-emb-shape",
+  "claim": "Image embedding shape fed to the mask decoder",
+  "value": "256x64x64",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 8 label"
+ },
+ {
+  "id": "sam2-tokens-dim",
+  "claim": "Prompt/output token width in the decoder",
+  "value": "256",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 8 label (Ntokensx256)"
+ },
+ {
+  "id": "sam2-memattn-layers",
+  "claim": "Number of memory attention layers",
+  "value": "L = 4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.1 Memory attention"
+ },
+ {
+  "id": "sam2-memattn-sa-ca",
+  "claim": "Default (#self-attn, #cross-attn) in the ablation grid",
+  "value": "(4, 4)",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9e default row"
+ },
+ {
+  "id": "sam2-mem-dim",
+  "claim": "Memory feature channel dimension",
+  "value": "64",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.1 Memory encoder and memory bank"
+ },
+ {
+  "id": "sam2-objptr-dim",
+  "claim": "Object pointer dimension",
+  "value": "256",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.1"
+ },
+ {
+  "id": "sam2-objptr-split",
+  "claim": "Object pointer split into tokens for cross-attention",
+  "value": "4 tokens",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.1"
+ },
+ {
+  "id": "sam2-n-recent",
+  "claim": "Default number of recent (unprompted) frame memories N",
+  "value": "6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. A.2.1 Memory size; Table 9c default"
+ },
+ {
+  "id": "sam2-decoder-blocks",
+  "claim": "Two-way transformer blocks in the mask decoder",
+  "value": "x2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 8 diagram label"
+ },
+ {
+  "id": "sam2-glob-attn-bplus",
+  "claim": "Global attention block indices in Hiera-B+",
+  "value": "12-16-20",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12 global attn. blocks"
+ },
+ {
+  "id": "sam2-glob-attn-l",
+  "claim": "Global attention block indices in Hiera-L",
+  "value": "23-33-43",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12 global attn. blocks"
+ },
+ {
+  "id": "sam2-glob-attn-t",
+  "claim": "Global attention block indices in Hiera-T",
+  "value": "5-7-9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12 global attn. blocks"
+ },
+ {
+  "id": "sam2-glob-attn-s",
+  "claim": "Global attention block indices in Hiera-S",
+  "value": "7-10-13",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12 global attn. blocks"
+ },
+ {
+  "id": "sam2-hiera-t-channels",
+  "claim": "Hiera-T stage channel widths",
+  "value": "[96-192-384-768]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants' (hiera_arxiv.tex tab:hiera_configs)"
+ },
+ {
+  "id": "sam2-hiera-t-blocks",
+  "claim": "Hiera-T blocks per stage",
+  "value": "[1-2-7-2]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants'"
+ },
+ {
+  "id": "sam2-hiera-s-channels",
+  "claim": "Hiera-S stage channel widths",
+  "value": "[96-192-384-768]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants' (hiera_arxiv.tex tab:hiera_configs)"
+ },
+ {
+  "id": "sam2-hiera-s-blocks",
+  "claim": "Hiera-S blocks per stage",
+  "value": "[1-2-11-2]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants'"
+ },
+ {
+  "id": "sam2-hiera-bplus-channels",
+  "claim": "Hiera-B+ stage channel widths",
+  "value": "[112-224-448-896]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants' (hiera_arxiv.tex tab:hiera_configs)"
+ },
+ {
+  "id": "sam2-hiera-bplus-blocks",
+  "claim": "Hiera-B+ blocks per stage",
+  "value": "[2-3-16-3]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants'"
+ },
+ {
+  "id": "sam2-hiera-l-channels",
+  "claim": "Hiera-L stage channel widths",
+  "value": "[144-288-576-1152]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants' (hiera_arxiv.tex tab:hiera_configs)"
+ },
+ {
+  "id": "sam2-hiera-l-blocks",
+  "claim": "Hiera-L blocks per stage",
+  "value": "[2-6-36-4]",
+  "paper": "Hiera",
+  "arxiv": "2306.00989v1",
+  "loc": "Hiera Table 'Configuration for Hiera variants'"
+ },
+ {
+  "id": "sam2-params-t",
+  "claim": "SAM 2.1 Hiera-T model size (M params)",
+  "value": "38.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Size (M)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps-t",
+  "claim": "SAM 2.1 Hiera-T speed (FPS, A100, torch 2.5.1, full compile)",
+  "value": "91.2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps20-t",
+  "claim": "SAM 2.0 Hiera-T speed (FPS)",
+  "value": "91.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-params-s",
+  "claim": "SAM 2.1 Hiera-S model size (M params)",
+  "value": "46",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Size (M)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps-s",
+  "claim": "SAM 2.1 Hiera-S speed (FPS, A100, torch 2.5.1, full compile)",
+  "value": "84.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps20-s",
+  "claim": "SAM 2.0 Hiera-S speed (FPS)",
+  "value": "85.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-params-bplus",
+  "claim": "SAM 2.1 Hiera-B+ model size (M params)",
+  "value": "80.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Size (M)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps-bplus",
+  "claim": "SAM 2.1 Hiera-B+ speed (FPS, A100, torch 2.5.1, full compile)",
+  "value": "64.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps20-bplus",
+  "claim": "SAM 2.0 Hiera-B+ speed (FPS)",
+  "value": "64.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-params-l",
+  "claim": "SAM 2.1 Hiera-L model size (M params)",
+  "value": "224.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Size (M)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps-l",
+  "claim": "SAM 2.1 Hiera-L speed (FPS, A100, torch 2.5.1, full compile)",
+  "value": "39.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps20-l",
+  "claim": "SAM 2.0 Hiera-L speed (FPS)",
+  "value": "39.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2 checkpoints table, Speed (FPS)",
+  "code_only": true
+ },
+ {
+  "id": "sam2-fps-video-bplus",
+  "claim": "Paper video FPS of SAM 2 Hiera-B+ (A100, batch 1)",
+  "value": "43.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 7 paragraph 1"
+ },
+ {
+  "id": "sam2-fps-video-l",
+  "claim": "Paper video FPS of SAM 2 Hiera-L (A100, batch 1)",
+  "value": "30.2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 7 paragraph 1"
+ },
+ {
+  "id": "sam2-seq-len",
+  "claim": "Frames per training sequence",
+  "value": "8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 4 Training; App. D.2.2"
+ },
+ {
+  "id": "sam2-prompted-frames",
+  "claim": "Max frames prompted per training sequence",
+  "value": "up to 2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 4 Training"
+ },
+ {
+  "id": "sam2-p-mask",
+  "claim": "Probability initial prompt is the GT mask",
+  "value": "0.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 4 Training"
+ },
+ {
+  "id": "sam2-p-click",
+  "claim": "Probability initial prompt is a positive click",
+  "value": "0.25",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 4 Training"
+ },
+ {
+  "id": "sam2-p-box",
+  "claim": "Probability initial prompt is a box",
+  "value": "0.25",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 4 Training"
+ },
+ {
+  "id": "sam2-max-masklets",
+  "claim": "Max masklets per 8-frame sequence",
+  "value": "3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2; Table 12b max. masks per frame (video: 3)"
+ },
+ {
+  "id": "sam2-p-reverse",
+  "claim": "Probability of reversing temporal order",
+  "value": "50%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-p-random-click",
+  "claim": "Probability a corrective click is sampled from GT ignoring prediction",
+  "value": "10%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-p-mosaic",
+  "claim": "Probability of the 2x2 mosaic augmentation",
+  "value": "10%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-corr-clicks",
+  "claim": "Correction clicks during training (SAM used 8)",
+  "value": "7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.1; Table 12"
+ },
+ {
+  "id": "sam2-loss-ratio",
+  "claim": "Focal : dice : IoU (MAE) : occlusion CE loss ratio",
+  "value": "20:1:1:1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2 Losses and optimization; Table 12b"
+ },
+ {
+  "id": "sam2-pt-steps",
+  "claim": "Pre-training steps on SA-1B",
+  "value": "~90k",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12a steps"
+ },
+ {
+  "id": "sam2-pt-lr",
+  "claim": "Pre-training learning rate",
+  "value": "4e-4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12a"
+ },
+ {
+  "id": "sam2-ft-steps",
+  "claim": "Full training steps",
+  "value": "~150k",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12b steps"
+ },
+ {
+  "id": "sam2-batch",
+  "claim": "Batch size (pre-training and full training)",
+  "value": "256",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12a/b batch size"
+ },
+ {
+  "id": "sam2-lr-enc",
+  "claim": "Full-training lr for the image encoder",
+  "value": "6e-5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12b learning rate"
+ },
+ {
+  "id": "sam2-lr-other",
+  "claim": "Full-training lr for other components",
+  "value": "3.0e-4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 12b learning rate"
+ },
+ {
+  "id": "sam2-mix-sav",
+  "claim": "Share of SA-V in the training mix",
+  "value": "~70%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-mix-sa1b",
+  "claim": "Share of SA-1B in the training mix",
+  "value": "~15.2%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-mix-internal",
+  "claim": "Share of Internal in the training mix",
+  "value": "~14.8%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-ft16-frames",
+  "claim": "Sequence length in the extra fine-tuning stage",
+  "value": "16-frame",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2 Fine-tuning using 16-frame sequences"
+ },
+ {
+  "id": "sam2-ft16-iters",
+  "claim": "Iterations of the 16-frame fine-tuning",
+  "value": "50k",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-ft16-frozen",
+  "claim": "Image encoder frozen in 16-frame fine-tuning to fit A100 memory",
+  "value": "80 GB",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. D.2.2"
+ },
+ {
+  "id": "sam2-compute",
+  "claim": "Released SAM 2 training compute",
+  "value": "256 A100 GPUs for 108 hours",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 18 model card, Cost and impact of compute"
+ },
+ {
+  "id": "sam2-p1-time",
+  "claim": "Phase 1 (SAM only) annotation time per frame",
+  "value": "37.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1 row Phase 1"
+ },
+ {
+  "id": "sam2-p2-time",
+  "claim": "Phase 2 (SAM + SAM 2 Mask) annotation time per frame",
+  "value": "7.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1 row Phase 2"
+ },
+ {
+  "id": "sam2-p3-time",
+  "claim": "Phase 3 (SAM 2) annotation time per frame",
+  "value": "4.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1 row Phase 3"
+ },
+ {
+  "id": "sam2-p2-speedup",
+  "claim": "Phase 2 speed-up over Phase 1",
+  "value": "5.1x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 2"
+ },
+ {
+  "id": "sam2-p3-speedup",
+  "claim": "Phase 3 speed-up over Phase 1",
+  "value": "8.4x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 3; Table 1 analysis"
+ },
+ {
+  "id": "sam2-p1-edited",
+  "claim": "Phase 1 edited frames per masklet",
+  "value": "100.00",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam2-p2-edited",
+  "claim": "Phase 2 edited frames per masklet",
+  "value": "23.25",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam2-p3-edited",
+  "claim": "Phase 3 edited frames per masklet",
+  "value": "19.04",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam2-p1-clicks",
+  "claim": "Phase 1 clicks per clicked frame",
+  "value": "4.80",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam2-p2-clicks",
+  "claim": "Phase 2 clicks per clicked frame",
+  "value": "3.61",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam2-p3-clicks",
+  "claim": "Phase 3 clicks per clicked frame",
+  "value": "2.68",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1"
+ },
+ {
+  "id": "sam2-p2-align",
+  "claim": "Phase 2 mask alignment to Phase 1 (IoU>0.75), all sizes",
+  "value": "86.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1, All column"
+ },
+ {
+  "id": "sam2-p3-align",
+  "claim": "Phase 3 mask alignment to Phase 1 (IoU>0.75), all sizes",
+  "value": "89.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 1, All column"
+ },
+ {
+  "id": "sam2-ctrl-exp",
+  "claim": "Controlled phase comparison size",
+  "value": "169 videos and 452 masklets",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.2.2"
+ },
+ {
+  "id": "sam2-p1-masklets",
+  "claim": "Masklets collected in Phase 1",
+  "value": "16K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 1"
+ },
+ {
+  "id": "sam2-p1-videos",
+  "claim": "Videos in Phase 1",
+  "value": "1.4K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 1"
+ },
+ {
+  "id": "sam2-p2-masklets",
+  "claim": "Masklets collected in Phase 2",
+  "value": "63.5K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 2"
+ },
+ {
+  "id": "sam2-p3-masklets",
+  "claim": "Masklets collected in Phase 3",
+  "value": "197.0K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 3"
+ },
+ {
+  "id": "sam2-p3-retrains",
+  "claim": "Times SAM 2 was retrained during Phase 3",
+  "value": "five",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 3"
+ },
+ {
+  "id": "sam2-p1-fps",
+  "claim": "Annotation frame rate",
+  "value": "6 FPS",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.1 Phase 1; App. H.2 data card"
+ },
+ {
+  "id": "sam2-auto-grid",
+  "claim": "Grid on the first frame for auto masklets",
+  "value": "32x32",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.1 Automatic masklets"
+ },
+ {
+  "id": "sam2-tab2-p3-sav",
+  "claim": "SA-V val J&F after adding Phase 3 data (fixed iterations)",
+  "value": "62.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 2"
+ },
+ {
+  "id": "sam2-tab2-auto-sav",
+  "claim": "SA-V val J&F after adding Auto masklets",
+  "value": "63.2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 2"
+ },
+ {
+  "id": "sam2-tab2-base-sav",
+  "claim": "SA-V val J&F with VOS + SA-1B only",
+  "value": "50.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 2"
+ },
+ {
+  "id": "sam2-sav-videos",
+  "claim": "SA-V videos",
+  "value": "50.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2; Table 3"
+ },
+ {
+  "id": "sam2-sav-masklets-total",
+  "claim": "SA-V masklets (manual + auto)",
+  "value": "642.6K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2; Table 3"
+ },
+ {
+  "id": "sam2-sav-masklets-manual",
+  "claim": "SA-V manual masklets",
+  "value": "190.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 Masklets; Table 3"
+ },
+ {
+  "id": "sam2-sav-masklets-auto",
+  "claim": "SA-V automatic masklets",
+  "value": "451.7K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 Masklets"
+ },
+ {
+  "id": "sam2-sav-masks-total",
+  "claim": "SA-V masks (manual + auto)",
+  "value": "35.5M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 1; Table 3"
+ },
+ {
+  "id": "sam2-sav-masks-manual",
+  "claim": "SA-V manual masks",
+  "value": "10.0M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 SA-V Manual"
+ },
+ {
+  "id": "sam2-sav-frames",
+  "claim": "SA-V frames",
+  "value": "4.2M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3; App. E.1"
+ },
+ {
+  "id": "sam2-sav-hours",
+  "claim": "SA-V total duration",
+  "value": "196",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.1 (196 hours); Table 3 (196.0 hr)"
+ },
+ {
+  "id": "sam2-sav-indoor",
+  "claim": "SA-V indoor share",
+  "value": "54%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 Videos"
+ },
+ {
+  "id": "sam2-sav-outdoor",
+  "claim": "SA-V outdoor share",
+  "value": "46%",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 Videos"
+ },
+ {
+  "id": "sam2-sav-dur-main",
+  "claim": "SA-V average video duration (main text)",
+  "value": "14 seconds",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 Videos"
+ },
+ {
+  "id": "sam2-sav-dur-app",
+  "claim": "SA-V average video duration (appendix; differs from main text)",
+  "value": "13.8 seconds",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.1 Videos"
+ },
+ {
+  "id": "sam2-sav-res",
+  "claim": "SA-V average resolution",
+  "value": "1,401 x 1,037",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.1 Videos"
+ },
+ {
+  "id": "sam2-sav-res-range",
+  "claim": "SA-V resolution range",
+  "value": "240p to 4K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.1 Videos"
+ },
+ {
+  "id": "sam2-sav-countries",
+  "claim": "Countries where SA-V videos were recorded",
+  "value": "47",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. E.1 Dataset diversity"
+ },
+ {
+  "id": "sam2-sav-disapp",
+  "claim": "SA-V Manual disappearance rate",
+  "value": "42.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2; Table 3"
+ },
+ {
+  "id": "sam2-sav-53x",
+  "claim": "SA-V masks vs largest VOS dataset (with auto)",
+  "value": "53x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 1; Sec. 5.2"
+ },
+ {
+  "id": "sam2-sav-15x",
+  "claim": "SA-V masks vs largest VOS dataset (manual only)",
+  "value": "15x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2"
+ },
+ {
+  "id": "sam2-sav-val",
+  "claim": "SA-V val split",
+  "value": "155 videos",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 splits"
+ },
+ {
+  "id": "sam2-sav-test",
+  "claim": "SA-V test split",
+  "value": "150 videos",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 splits"
+ },
+ {
+  "id": "sam2-mose-masks",
+  "claim": "MOSE masks",
+  "value": "431.7K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 MOSE row"
+ },
+ {
+  "id": "sam2-uvo-masks",
+  "claim": "UVO-dense masks (largest prior VOS mask count in Table 3)",
+  "value": "667.1K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 UVO-dense row"
+ },
+ {
+  "id": "sam2-ytvos-videos",
+  "claim": "YouTube-VOS videos",
+  "value": "4.5K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3"
+ },
+ {
+  "id": "sam2-davis-videos",
+  "claim": "DAVIS 2017 videos",
+  "value": "0.2K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3"
+ },
+ {
+  "id": "sam2-internal-videos",
+  "claim": "Internal dataset videos",
+  "value": "62.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 Internal dataset; Table 3"
+ },
+ {
+  "id": "sam2-pvs-offline",
+  "claim": "SAM 2 average J&F, interactive offline, 9 datasets, 3-click, 1-8 frames",
+  "value": "80.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 12b average column"
+ },
+ {
+  "id": "sam2-pvs-offline-cutie",
+  "claim": "SAM+Cutie average J&F, interactive offline",
+  "value": "74.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 12b average column"
+ },
+ {
+  "id": "sam2-pvs-online",
+  "claim": "SAM 2 average J&F, interactive online",
+  "value": "79.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 13b average column"
+ },
+ {
+  "id": "sam2-pvs-online-cutie",
+  "claim": "SAM+Cutie average J&F, interactive online",
+  "value": "74.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Fig. 13b average column"
+ },
+ {
+  "id": "sam2-pvs-3x",
+  "claim": "Fewer interactions than prior approaches for better accuracy",
+  "value": ">3x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 6.1 last sentence (abstract says 3x); read off Fig. 5 curves, values not extractable"
+ },
+ {
+  "id": "sam2-vos17-1click",
+  "claim": "SAM 2 avg accuracy over 17 video datasets, 1 click on frame 1",
+  "value": "64.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-vos17-3click",
+  "claim": "SAM 2, 3 clicks",
+  "value": "75.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-vos17-5click",
+  "claim": "SAM 2, 5 clicks",
+  "value": "77.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-vos17-box",
+  "claim": "SAM 2, box",
+  "value": "74.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-vos17-mask",
+  "claim": "SAM 2, GT mask",
+  "value": "79.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-vos17-cutie-mask",
+  "claim": "Cutie (no SAM), GT mask",
+  "value": "74.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-vos17-cutie-1click",
+  "claim": "SAM+Cutie, 1 click",
+  "value": "56.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 4"
+ },
+ {
+  "id": "sam2-img-sam-miou",
+  "claim": "SAM (ViT-H) SA-23 1-click mIoU",
+  "value": "58.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5 SAM row, SA-23 All"
+ },
+ {
+  "id": "sam2-img-sam2-miou",
+  "claim": "SAM 2 (B+, SA-1B only) SA-23 1-click mIoU",
+  "value": "58.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5 SAM 2 SA-1B row"
+ },
+ {
+  "id": "sam2-img-sam2-mix-miou",
+  "claim": "SAM 2 (B+, our mix) SA-23 1-click mIoU (table value)",
+  "value": "61.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5 / Table 15 our mix row"
+ },
+ {
+  "id": "sam2-img-sam-fps",
+  "claim": "SAM (ViT-H) FPS on SA task (A100, batch 10)",
+  "value": "21.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5 FPS"
+ },
+ {
+  "id": "sam2-img-sam2-fps",
+  "claim": "SAM 2 (B+) FPS on SA task",
+  "value": "130.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5 FPS"
+ },
+ {
+  "id": "sam2-img-6x",
+  "claim": "SAM 2 speed-up over SAM on images",
+  "value": "6x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Abstract; Sec. 6.3 (130.1 vs 21.7 FPS)"
+ },
+ {
+  "id": "sam2-img-14video-sam",
+  "claim": "SAM 1-click mIoU on 14 new video datasets",
+  "value": "59.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5"
+ },
+ {
+  "id": "sam2-img-14video-sam2",
+  "claim": "SAM 2 (mix) 1-click mIoU on 14 new video datasets",
+  "value": "69.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 5"
+ },
+ {
+  "id": "sam2-img-l-fps",
+  "claim": "SAM 2 (Hiera-L) FPS on SA task",
+  "value": "61.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 15 Hiera-L rows FPS"
+ },
+ {
+  "id": "sam2-img-29",
+  "claim": "Datasets where SAM 2 B+ beats SAM (of 37)",
+  "value": "29",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. F.3.2 Fig. 15 text"
+ },
+ {
+  "id": "sam2-img-53-9",
+  "claim": "Max 1-click mIoU gain over SAM on one dataset",
+  "value": "53.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. F.3.2"
+ },
+ {
+  "id": "sam2-sota-mose-bplus",
+  "claim": "Table 6 MOSE val, SAM 2 B+",
+  "value": "76.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-mose-l",
+  "claim": "Table 6 MOSE val, SAM 2 L",
+  "value": "77.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-davis-bplus",
+  "claim": "Table 6 DAVIS 2017 val, SAM 2 B+",
+  "value": "90.2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-davis-l",
+  "claim": "Table 6 DAVIS 2017 val, SAM 2 L",
+  "value": "90.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-lvos-bplus",
+  "claim": "Table 6 LVOS val, SAM 2 B+ (identical to L row in source)",
+  "value": "78.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-savval-bplus",
+  "claim": "Table 6 SA-V val, SAM 2 B+",
+  "value": "76.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-savval-l",
+  "claim": "Table 6 SA-V val, SAM 2 L",
+  "value": "77.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-savtest-bplus",
+  "claim": "Table 6 SA-V test, SAM 2 B+",
+  "value": "77.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-savtest-l",
+  "claim": "Table 6 SA-V test, SAM 2 L",
+  "value": "78.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-ytvos-bplus",
+  "claim": "Table 6 YTVOS 2019 val G, SAM 2 B+",
+  "value": "88.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-ytvos-l",
+  "claim": "Table 6 YTVOS 2019 val G, SAM 2 L",
+  "value": "89.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-mose-cutie",
+  "claim": "Table 6 MOSE val, Cutie-base+",
+  "value": "71.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-savval-cutie",
+  "claim": "Table 6 SA-V val, Cutie-base+",
+  "value": "61.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-savtest-cutie",
+  "claim": "Table 6 SA-V test, Cutie-base+",
+  "value": "62.8",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-davis-jointformer",
+  "claim": "Table 6 DAVIS 2017 val, JointFormer",
+  "value": "90.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-sota-lvos-cutie",
+  "claim": "Table 6 LVOS val, Cutie-base",
+  "value": "66.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6, column per claim"
+ },
+ {
+  "id": "sam2-readme-savtest-l",
+  "claim": "SAM 2.1 Hiera-L SA-V test J&F (released mix)",
+  "value": "79.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 table; Table 17a double-dagger row; also in the paper: Table 17a, SAM 2 (Hiera-L) double-dagger row (tab/appendix_sa-v.tex:52)"
+ },
+ {
+  "id": "sam2-readme-savtest-l-20",
+  "claim": "SAM 2.0 Hiera-L SA-V test J&F",
+  "value": "76.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2 table",
+  "code_only": true
+ },
+ {
+  "id": "sam2-readme-lvosv2-l",
+  "claim": "SAM 2.1 Hiera-L LVOSv2 J&F",
+  "value": "80.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "README SAM 2.1 table; Table 17c double-dagger row; also in the paper: Table 17c, Hiera-L double-dagger row (tab/appendix_LVOSv2.tex:42)"
+ },
+ {
+  "id": "sam2-davis-interactive",
+  "claim": "SAM 2 DAVIS interactive J&F@60s (clicks)",
+  "value": "0.90",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 14"
+ },
+ {
+  "id": "sam2-abl-mem4",
+  "claim": "SA-V val J&F with 4 memories",
+  "value": "68.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9c"
+ },
+ {
+  "id": "sam2-abl-mem6",
+  "claim": "SA-V val J&F with 6 memories (default)",
+  "value": "68.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9c"
+ },
+ {
+  "id": "sam2-abl-mem8",
+  "claim": "SA-V val J&F with 8 memories",
+  "value": "69.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9c"
+ },
+ {
+  "id": "sam2-abl-mem8-speed",
+  "claim": "Relative speed with 8 memories",
+  "value": "0.93",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9c speed column"
+ },
+ {
+  "id": "sam2-abl-ch256",
+  "claim": "SA-V val J&F with 256 memory channels",
+  "value": "66.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9d"
+ },
+ {
+  "id": "sam2-abl-ch-4x",
+  "claim": "Storage saving of 64 vs 256 memory channels",
+  "value": "4x",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. A.2.1 Memory size (4x smaller)"
+ },
+ {
+  "id": "sam2-abl-noptr-sav",
+  "claim": "SA-V val J&F without object pointers or GRU",
+  "value": "64.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 11 row 1"
+ },
+ {
+  "id": "sam2-abl-gru-sav",
+  "claim": "SA-V val J&F with GRU, no object pointers",
+  "value": "65.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 11 row 2"
+ },
+ {
+  "id": "sam2-abl-ptr-sav",
+  "claim": "SA-V val J&F with object pointers (default)",
+  "value": "68.3",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 11 row 3"
+ },
+ {
+  "id": "sam2-abl-noptr-lvos",
+  "claim": "LVOSv2 val J&F without object pointers",
+  "value": "67.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 11 row 1"
+ },
+ {
+  "id": "sam2-abl-gru-lvos",
+  "claim": "LVOSv2 val J&F with GRU",
+  "value": "68.9",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 11 row 2"
+ },
+ {
+  "id": "sam2-abl-ptr-lvos",
+  "claim": "LVOSv2 val J&F with object pointers",
+  "value": "71.6",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 11 row 3"
+ },
+ {
+  "id": "sam2-abl-frames4",
+  "claim": "SA-V val J&F training with 4-frame sequences",
+  "value": "60.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 9b"
+ },
+ {
+  "id": "sam2-abl-mix-vosonly",
+  "claim": "9 zero-shot J&F trained on VOS datasets only",
+  "value": "59.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 7 row 1"
+ },
+ {
+  "id": "sam2-abl-mix-gain",
+  "claim": "Gain on 9 zero-shot from adding data-engine data (row 11 vs 1)",
+  "value": "+12.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "App. A.1 Data mix ablation"
+ },
+ {
+  "id": "sam2-sav-val-masklets",
+  "claim": "SA-V val masklets",
+  "value": "293",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 splits"
+ },
+ {
+  "id": "sam2-sav-test-masklets",
+  "claim": "SA-V test masklets",
+  "value": "278",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Sec. 5.2 splits"
+ },
+ {
+  "id": "sam2-sota-lvos-l",
+  "claim": "Table 6 LVOS val, SAM 2 L (identical to B+ row in source)",
+  "value": "78.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 6 LVOS val column"
+ },
+ {
+  "id": "sam2-t3-davis2017-videos",
+  "claim": "Table 3 DAVIS 2017 videos",
+  "value": "0.2K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row DAVIS 2017, column videos"
+ },
+ {
+  "id": "sam2-t3-davis2017-duration",
+  "claim": "Table 3 DAVIS 2017 duration",
+  "value": "0.1 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row DAVIS 2017, column duration"
+ },
+ {
+  "id": "sam2-t3-davis2017-masklets",
+  "claim": "Table 3 DAVIS 2017 masklets",
+  "value": "0.4K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row DAVIS 2017, column masklets"
+ },
+ {
+  "id": "sam2-t3-davis2017-masks",
+  "claim": "Table 3 DAVIS 2017 masks",
+  "value": "27.1K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row DAVIS 2017, column masks"
+ },
+ {
+  "id": "sam2-t3-davis2017-frames",
+  "claim": "Table 3 DAVIS 2017 frames",
+  "value": "10.7K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row DAVIS 2017, column frames"
+ },
+ {
+  "id": "sam2-t3-davis2017-disapp",
+  "claim": "Table 3 DAVIS 2017 disapp",
+  "value": "16.1",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row DAVIS 2017, column disapp"
+ },
+ {
+  "id": "sam2-t3-ytvos-videos",
+  "claim": "Table 3 YouTube-VOS videos",
+  "value": "4.5K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row YouTube-VOS, column videos"
+ },
+ {
+  "id": "sam2-t3-ytvos-duration",
+  "claim": "Table 3 YouTube-VOS duration",
+  "value": "5.6 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row YouTube-VOS, column duration"
+ },
+ {
+  "id": "sam2-t3-ytvos-masklets",
+  "claim": "Table 3 YouTube-VOS masklets",
+  "value": "8.6K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row YouTube-VOS, column masklets"
+ },
+ {
+  "id": "sam2-t3-ytvos-masks",
+  "claim": "Table 3 YouTube-VOS masks",
+  "value": "197.3K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row YouTube-VOS, column masks"
+ },
+ {
+  "id": "sam2-t3-ytvos-frames",
+  "claim": "Table 3 YouTube-VOS frames",
+  "value": "123.3K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row YouTube-VOS, column frames"
+ },
+ {
+  "id": "sam2-t3-ytvos-disapp",
+  "claim": "Table 3 YouTube-VOS disapp",
+  "value": "13.0",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row YouTube-VOS, column disapp"
+ },
+ {
+  "id": "sam2-t3-uvo-videos",
+  "claim": "Table 3 UVO-dense videos",
+  "value": "1.0K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row UVO-dense, column videos"
+ },
+ {
+  "id": "sam2-t3-uvo-duration",
+  "claim": "Table 3 UVO-dense duration",
+  "value": "0.9 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row UVO-dense, column duration"
+ },
+ {
+  "id": "sam2-t3-uvo-masklets",
+  "claim": "Table 3 UVO-dense masklets",
+  "value": "10.2K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row UVO-dense, column masklets"
+ },
+ {
+  "id": "sam2-t3-uvo-masks",
+  "claim": "Table 3 UVO-dense masks",
+  "value": "667.1K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row UVO-dense, column masks"
+ },
+ {
+  "id": "sam2-t3-uvo-frames",
+  "claim": "Table 3 UVO-dense frames",
+  "value": "68.3K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row UVO-dense, column frames"
+ },
+ {
+  "id": "sam2-t3-uvo-disapp",
+  "claim": "Table 3 UVO-dense disapp",
+  "value": "9.2",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row UVO-dense, column disapp"
+ },
+ {
+  "id": "sam2-t3-vost-videos",
+  "claim": "Table 3 VOST videos",
+  "value": "0.7K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row VOST, column videos"
+ },
+ {
+  "id": "sam2-t3-vost-duration",
+  "claim": "Table 3 VOST duration",
+  "value": "4.2 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row VOST, column duration"
+ },
+ {
+  "id": "sam2-t3-vost-masklets",
+  "claim": "Table 3 VOST masklets",
+  "value": "1.5K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row VOST, column masklets"
+ },
+ {
+  "id": "sam2-t3-vost-masks",
+  "claim": "Table 3 VOST masks",
+  "value": "175.0K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row VOST, column masks"
+ },
+ {
+  "id": "sam2-t3-vost-frames",
+  "claim": "Table 3 VOST frames",
+  "value": "75.5K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row VOST, column frames"
+ },
+ {
+  "id": "sam2-t3-vost-disapp",
+  "claim": "Table 3 VOST disapp",
+  "value": "41.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row VOST, column disapp"
+ },
+ {
+  "id": "sam2-t3-burst-videos",
+  "claim": "Table 3 BURST videos",
+  "value": "2.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row BURST, column videos"
+ },
+ {
+  "id": "sam2-t3-burst-duration",
+  "claim": "Table 3 BURST duration",
+  "value": "28.9 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row BURST, column duration"
+ },
+ {
+  "id": "sam2-t3-burst-masklets",
+  "claim": "Table 3 BURST masklets",
+  "value": "16.1K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row BURST, column masklets"
+ },
+ {
+  "id": "sam2-t3-burst-masks",
+  "claim": "Table 3 BURST masks",
+  "value": "600.2K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row BURST, column masks"
+ },
+ {
+  "id": "sam2-t3-burst-frames",
+  "claim": "Table 3 BURST frames",
+  "value": "195.7K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row BURST, column frames"
+ },
+ {
+  "id": "sam2-t3-burst-disapp",
+  "claim": "Table 3 BURST disapp",
+  "value": "37.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row BURST, column disapp"
+ },
+ {
+  "id": "sam2-t3-mose-videos",
+  "claim": "Table 3 MOSE videos",
+  "value": "2.1K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row MOSE, column videos"
+ },
+ {
+  "id": "sam2-t3-mose-duration",
+  "claim": "Table 3 MOSE duration",
+  "value": "7.4 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row MOSE, column duration"
+ },
+ {
+  "id": "sam2-t3-mose-masklets",
+  "claim": "Table 3 MOSE masklets",
+  "value": "5.2K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row MOSE, column masklets"
+ },
+ {
+  "id": "sam2-t3-mose-masks",
+  "claim": "Table 3 MOSE masks",
+  "value": "431.7K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row MOSE, column masks"
+ },
+ {
+  "id": "sam2-t3-mose-frames",
+  "claim": "Table 3 MOSE frames",
+  "value": "638.8K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row MOSE, column frames"
+ },
+ {
+  "id": "sam2-t3-mose-disapp",
+  "claim": "Table 3 MOSE disapp",
+  "value": "41.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row MOSE, column disapp"
+ },
+ {
+  "id": "sam2-t3-internal-videos",
+  "claim": "Table 3 Internal videos",
+  "value": "62.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row Internal, column videos"
+ },
+ {
+  "id": "sam2-t3-internal-duration",
+  "claim": "Table 3 Internal duration",
+  "value": "281.8 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row Internal, column duration"
+ },
+ {
+  "id": "sam2-t3-internal-masklets",
+  "claim": "Table 3 Internal masklets",
+  "value": "69.6K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row Internal, column masklets"
+ },
+ {
+  "id": "sam2-t3-internal-masks",
+  "claim": "Table 3 Internal masks",
+  "value": "5.4M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row Internal, column masks"
+ },
+ {
+  "id": "sam2-t3-internal-frames",
+  "claim": "Table 3 Internal frames",
+  "value": "6.0M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row Internal, column frames"
+ },
+ {
+  "id": "sam2-t3-internal-disapp",
+  "claim": "Table 3 Internal disapp",
+  "value": "36.4",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row Internal, column disapp"
+ },
+ {
+  "id": "sam2-t3-savman-videos",
+  "claim": "Table 3 SA-V Manual videos",
+  "value": "50.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual, column videos"
+ },
+ {
+  "id": "sam2-t3-savman-duration",
+  "claim": "Table 3 SA-V Manual duration",
+  "value": "196.0 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual, column duration"
+ },
+ {
+  "id": "sam2-t3-savman-masklets",
+  "claim": "Table 3 SA-V Manual masklets",
+  "value": "190.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual, column masklets"
+ },
+ {
+  "id": "sam2-t3-savman-masks",
+  "claim": "Table 3 SA-V Manual masks",
+  "value": "10.0M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual, column masks"
+ },
+ {
+  "id": "sam2-t3-savman-frames",
+  "claim": "Table 3 SA-V Manual frames",
+  "value": "4.2M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual, column frames"
+ },
+ {
+  "id": "sam2-t3-savman-disapp",
+  "claim": "Table 3 SA-V Manual disapp",
+  "value": "42.5",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual, column disapp"
+ },
+ {
+  "id": "sam2-t3-savall-videos",
+  "claim": "Table 3 SA-V Manual+Auto videos",
+  "value": "50.9K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual+Auto, column videos"
+ },
+ {
+  "id": "sam2-t3-savall-duration",
+  "claim": "Table 3 SA-V Manual+Auto duration",
+  "value": "196.0 hr",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual+Auto, column duration"
+ },
+ {
+  "id": "sam2-t3-savall-masklets",
+  "claim": "Table 3 SA-V Manual+Auto masklets",
+  "value": "642.6K",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual+Auto, column masklets"
+ },
+ {
+  "id": "sam2-t3-savall-masks",
+  "claim": "Table 3 SA-V Manual+Auto masks",
+  "value": "35.5M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual+Auto, column masks"
+ },
+ {
+  "id": "sam2-t3-savall-frames",
+  "claim": "Table 3 SA-V Manual+Auto frames",
+  "value": "4.2M",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual+Auto, column frames"
+ },
+ {
+  "id": "sam2-t3-savall-disapp",
+  "claim": "Table 3 SA-V Manual+Auto disapp",
+  "value": "27.7",
+  "paper": "SAM 2",
+  "arxiv": "2408.00714v2",
+  "loc": "Table 3 row SA-V Manual+Auto, column disapp"
+ }
+]

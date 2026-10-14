@@ -1,0 +1,200 @@
+[
+ {
+  "id": "blip-med-shared-layers",
+  "claim": "Text encoder and decoder share all parameters except which layers",
+  "value": "share all parameters except for the SA layers",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 last paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip-med-param-counts",
+  "claim": "Params by sharing strategy: All / All except CA / All except SA / None",
+  "value": "224M / 252M / 252M / 361M",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (med), col #parameters",
+  "uncertain": false
+ },
+ {
+  "id": "blip-med-sa-shared-cost",
+  "claim": "Sharing all layers vs all except SA: COCO TR@1 / IR@1",
+  "value": "77.3 / 59.5 vs 78.4 / 60.7",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (med), rows All and All except SA",
+  "uncertain": false
+ },
+ {
+  "id": "blip-objectives-passes",
+  "claim": "Forward passes per image-text pair",
+  "value": "1 through ViT, 3 through text transformer",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-lm-label-smoothing",
+  "claim": "Label smoothing in the LM loss",
+  "value": "0.1",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2, LM paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip-capfilt-finetune-data",
+  "claim": "Captioner and filter are each finetuned on",
+  "value": "COCO (human-annotated), individually, from the same pre-trained MED",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.3 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip-capfilt-nucleus-p",
+  "claim": "Nucleus sampling threshold p",
+  "value": "0.9",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.3",
+  "uncertain": false
+ },
+ {
+  "id": "blip-noise-ratio",
+  "claim": "Filter-measured noise ratio, beam vs nucleus",
+  "value": "19% vs 25%",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (generate), col Noise ratio",
+  "uncertain": false
+ },
+ {
+  "id": "blip-nucleus-vs-beam-coco-ir",
+  "claim": "COCO retrieval FT IR@1: no synthetic / beam / nucleus",
+  "value": "60.7 / 61.9 / 63.1",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (generate)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-nucleus-vs-beam-coco-tr",
+  "claim": "COCO retrieval FT TR@1: no synthetic / beam / nucleus",
+  "value": "78.4 / 79.6 / 80.6",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (generate)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-nucleus-vs-beam-nocaps",
+  "claim": "NoCaps zero-shot CIDEr: no synthetic / beam / nucleus",
+  "value": "102.2 / 103.5 / 105.1",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (generate)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-capfilt-14m-ablation-ir",
+  "claim": "14M ViT-B COCO IR@1: none / F only / C only / C+F",
+  "value": "60.7 / 61.5 / 62.0 / 63.1",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (capfilt), first block",
+  "uncertain": false
+ },
+ {
+  "id": "blip-capfilt-129m-ablation-ir",
+  "claim": "129M ViT-B COCO IR@1: no CapFilt vs C+F (ViT-B captioner/filter)",
+  "value": "62.0 vs 64.3",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (capfilt), 129M block",
+  "uncertain": false
+ },
+ {
+  "id": "blip-capfilt-129m-large-cider",
+  "claim": "129M ViT-B NoCaps CIDEr with ViT-L captioner+filter vs no CapFilt",
+  "value": "109.6 vs 105.4",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (capfilt), 129M block",
+  "uncertain": false
+ },
+ {
+  "id": "blip-share-cf-noise",
+  "claim": "Captioner and filter sharing params: noise ratio vs decoupled",
+  "value": "8% vs 25%",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (independent)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-share-cf-nocaps",
+  "claim": "Captioner/filter shared vs decoupled NoCaps CIDEr",
+  "value": "103.5 vs 105.1",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (independent)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-data-14m",
+  "claim": "Pre-training set size (COCO, VG, CC3M, CC12M, SBU)",
+  "value": "14M images",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-data-laion",
+  "claim": "LAION images added for the larger set",
+  "value": "115M (only shorter edge > 256 px; 1/5 used each epoch)",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 + footnote; appendix Table pretrain_data",
+  "uncertain": false
+ },
+ {
+  "id": "blip-data-129m",
+  "claim": "Total images with LAION",
+  "value": "129M",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Table (capfilt); Sec. 5 text 'BLIP with 129M images'",
+  "uncertain": false
+ },
+ {
+  "id": "blip-data-sizes-per-set",
+  "claim": "Images per dataset: COCO / VG / SBU / CC3M / CC12M",
+  "value": "113K / 100K / 860K / 3M / 10M",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Appendix Table pretrain_data",
+  "uncertain": false
+ },
+ {
+  "id": "blip-headline-abstract",
+  "claim": "Headline gains: retrieval avg recall@1, captioning CIDEr, VQA score",
+  "value": "+2.7% / +2.8% / +1.6%",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "blip-pretrain-batch",
+  "claim": "Pre-training batch size ViT-B / ViT-L",
+  "value": "2880 / 2400",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ }
+]

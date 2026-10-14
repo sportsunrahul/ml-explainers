@@ -1,0 +1,763 @@
+[
+ {
+  "id": "ddetr-detr-500ep",
+  "claim": "DETR needs 500 epochs to converge on COCO",
+  "value": "500 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 1 Introduction, para 2; Table 1 row 'DETR', Epochs column",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-detr-10-20x-slower",
+  "claim": "DETR convergence is around 10 to 20 times slower than Faster R-CNN",
+  "value": "10 to 20 times slower",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 1 Introduction, para 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-uniform-init-attn",
+  "claim": "With proper init, attention weights A_mqk are approximately 1/N_k when N_k is large, giving ambiguous gradients",
+  "value": "A_mqk approx 1/N_k",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 3, 'Multi-Head Attention in Transformers', para 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-mha-complexity",
+  "claim": "Complexity of multi-head attention (Eq. 1); dominated by O(N_q N_k C) for images",
+  "value": "O(N_qC^2 + N_kC^2 + N_qN_kC)",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 3, 'Multi-Head Attention in Transformers', para 3",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-detr-enc-complexity",
+  "claim": "DETR encoder self-attention complexity, quadratic in spatial size",
+  "value": "O(H^2W^2C)",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 3, 'DETR', para 3",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-deform-complexity",
+  "claim": "Deformable attention complexity when MK is small (M=8, K<=4, C=256 so 5K+3MK<C)",
+  "value": "O(2N_qC^2 + min(HWC^2, N_qKC^2))",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 4.1 'Deformable Attention Module' last para; derivation Appendix A.1",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-3mk-proj",
+  "claim": "z_q fed to a linear projection of 3MK channels: first 2MK = offsets, remaining MK -> softmax = attention weights",
+  "value": "3MK channels",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 4.1, 'Deformable Attention Module', para 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-10x-fewer-epochs",
+  "claim": "Deformable DETR achieves better performance than DETR (especially on small objects) with 10x less training epochs",
+  "value": "10x less training epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Abstract; Sec 1 last para; Sec 5.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-L4",
+  "claim": "Number of feature levels in the encoder: C3-C5 via 1x1 conv plus C6 via 3x3 stride-2 conv on C5",
+  "value": "L = 4",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 4.1 'Deformable Transformer Encoder'; Appendix A.2",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-C256",
+  "claim": "All multi-scale feature maps have C channels",
+  "value": "C = 256",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 4.1 'Deformable Transformer Encoder'; Appendix A.1",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-M8-K4",
+  "claim": "Default heads and sampling points per head per level",
+  "value": "M = 8, K = 4",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5 'Implementation Details'; Appendix A.4 (M = 8)",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-queries-300",
+  "claim": "Number of object queries increased from 100 to 300",
+  "value": "300 object queries",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5 'Implementation Details'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-focal",
+  "claim": "Focal Loss with loss weight 2 for box classification",
+  "value": "loss weight of 2",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5 'Implementation Details'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-sched",
+  "claim": "Default schedule: 50 epochs, LR decayed at epoch 40 by 0.1",
+  "value": "50 epochs, decay at 40th epoch by 0.1",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5 'Implementation Details'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-lr",
+  "claim": "Adam, base LR 2e-4, beta1 0.9, beta2 0.999, weight decay 1e-4; LR of reference-point and sampling-offset projections multiplied by 0.1",
+  "value": "2 x 10^-4; 0.9; 0.999; 10^-4; x0.1",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5 'Implementation Details'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-D6",
+  "claim": "Example number of decoder layers",
+  "value": "D = 6",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Appendix A.4 'Iterative Bounding Box Refinement'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-init-wh",
+  "claim": "Initial box width and height for iterative refinement",
+  "value": "0.1",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Appendix A.4 'Iterative Bounding Box Refinement'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-init-wh-robust",
+  "claim": "Initial w/h values tried with similar performance",
+  "value": "0.05, 0.1, 0.2, 0.5",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Appendix A.4 'Iterative Bounding Box Refinement'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-two-stage-s",
+  "claim": "Base object scale s in two-stage proposal box prior 2^(l_i-1) s",
+  "value": "s = 0.05",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Appendix A.4 'Two-Stage Deformable DETR'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-init-offsets",
+  "claim": "Init: projection weights zero; biases give A_mlqk = 1/(LK) and 8 head offsets (-k,-k),(-k,0),(-k,k),(0,-k),(0,k),(k,-k),(k,0),(k,k), k in 1..K; decoder offsets x 1/(2K) with refinement",
+  "value": "A = 1/(LK); 8 directions; x 1/(2K)",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Appendix A.4 'Initialization for Multi-scale Deformable Attention'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-speed-vs-dc5",
+  "claim": "Deformable DETR runtime is faster than DETR-DC5",
+  "value": "1.6x faster",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-speed-vs-frcnn",
+  "claim": "Deformable DETR runtime is slower than Faster R-CNN + FPN",
+  "value": "25% slower",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-epochs",
+  "claim": "Faster R-CNN + FPN: Epochs on COCO 2017 val",
+  "value": "109 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column Epochs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-ap",
+  "claim": "Faster R-CNN + FPN: AP on COCO 2017 val",
+  "value": "42.0 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-aps",
+  "claim": "Faster R-CNN + FPN: AP_S on COCO 2017 val",
+  "value": "26.6 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-apl",
+  "claim": "Faster R-CNN + FPN: AP_L on COCO 2017 val",
+  "value": "53.4 AP_L",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-flops",
+  "claim": "Faster R-CNN + FPN: FLOPs on COCO 2017 val",
+  "value": "180G FLOPs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column FLOPs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-gpuh",
+  "claim": "Faster R-CNN + FPN: Training GPU hours on COCO 2017 val",
+  "value": "380 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-frcnn-fps",
+  "claim": "Faster R-CNN + FPN: Inference FPS on COCO 2017 val",
+  "value": "26 FPS",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Faster R-CNN + FPN', column Inference FPS",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-epochs",
+  "claim": "DETR: Epochs on COCO 2017 val",
+  "value": "500 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column Epochs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-ap",
+  "claim": "DETR: AP on COCO 2017 val",
+  "value": "42.0 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-aps",
+  "claim": "DETR: AP_S on COCO 2017 val",
+  "value": "20.5 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-apl",
+  "claim": "DETR: AP_L on COCO 2017 val",
+  "value": "61.1 AP_L",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-flops",
+  "claim": "DETR: FLOPs on COCO 2017 val",
+  "value": "86G FLOPs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column FLOPs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-gpuh",
+  "claim": "DETR: Training GPU hours on COCO 2017 val",
+  "value": "2000 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-detr-fps",
+  "claim": "DETR: Inference FPS on COCO 2017 val",
+  "value": "28 FPS",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR', column Inference FPS",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-epochs",
+  "claim": "DETR-DC5 (500 epochs): Epochs on COCO 2017 val",
+  "value": "500 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column Epochs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-ap",
+  "claim": "DETR-DC5 (500 epochs): AP on COCO 2017 val",
+  "value": "43.3 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-aps",
+  "claim": "DETR-DC5 (500 epochs): AP_S on COCO 2017 val",
+  "value": "22.5 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-apl",
+  "claim": "DETR-DC5 (500 epochs): AP_L on COCO 2017 val",
+  "value": "61.1 AP_L",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-flops",
+  "claim": "DETR-DC5 (500 epochs): FLOPs on COCO 2017 val",
+  "value": "187G FLOPs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column FLOPs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-gpuh",
+  "claim": "DETR-DC5 (500 epochs): Training GPU hours on COCO 2017 val",
+  "value": "7000 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-500-fps",
+  "claim": "DETR-DC5 (500 epochs): Inference FPS on COCO 2017 val",
+  "value": "12 FPS",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (500 epochs)', column Inference FPS",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-50-ap",
+  "claim": "DETR-DC5 (50 epochs): AP on COCO 2017 val",
+  "value": "35.3 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (50 epochs)', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-50-aps",
+  "claim": "DETR-DC5 (50 epochs): AP_S on COCO 2017 val",
+  "value": "15.2 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (50 epochs)', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-50-gpuh",
+  "claim": "DETR-DC5 (50 epochs): Training GPU hours on COCO 2017 val",
+  "value": "700 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5 (50 epochs)', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5plus-ap",
+  "claim": "DETR-DC5+ (50 epochs): AP on COCO 2017 val",
+  "value": "36.2 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5+ (50 epochs)', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5plus-aps",
+  "claim": "DETR-DC5+ (50 epochs): AP_S on COCO 2017 val",
+  "value": "16.3 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5+ (50 epochs)', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5plus-gpuh",
+  "claim": "DETR-DC5+ (50 epochs): Training GPU hours on COCO 2017 val",
+  "value": "700 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5+ (50 epochs)', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-epochs",
+  "claim": "Deformable DETR: Epochs on COCO 2017 val",
+  "value": "50 epochs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column Epochs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-ap",
+  "claim": "Deformable DETR: AP on COCO 2017 val",
+  "value": "43.8 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-aps",
+  "claim": "Deformable DETR: AP_S on COCO 2017 val",
+  "value": "26.4 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-apl",
+  "claim": "Deformable DETR: AP_L on COCO 2017 val",
+  "value": "58.0 AP_L",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-flops",
+  "claim": "Deformable DETR: FLOPs on COCO 2017 val",
+  "value": "173G FLOPs",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column FLOPs",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-gpuh",
+  "claim": "Deformable DETR: Training GPU hours on COCO 2017 val",
+  "value": "325 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-ddetr-fps",
+  "claim": "Deformable DETR: Inference FPS on COCO 2017 val",
+  "value": "19 FPS",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'Deformable DETR', column Inference FPS",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-refine-ap",
+  "claim": "+ iterative bounding box refinement: AP on COCO 2017 val",
+  "value": "45.4 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '+ iterative bounding box refinement', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-refine-aps",
+  "claim": "+ iterative bounding box refinement: AP_S on COCO 2017 val",
+  "value": "26.8 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '+ iterative bounding box refinement', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-refine-apl",
+  "claim": "+ iterative bounding box refinement: AP_L on COCO 2017 val",
+  "value": "61.7 AP_L",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '+ iterative bounding box refinement', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-refine-gpuh",
+  "claim": "+ iterative bounding box refinement: Training GPU hours on COCO 2017 val",
+  "value": "325 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '+ iterative bounding box refinement', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-twostage-ap",
+  "claim": "++ two-stage Deformable DETR: AP on COCO 2017 val",
+  "value": "46.2 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '++ two-stage Deformable DETR', column AP",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-twostage-aps",
+  "claim": "++ two-stage Deformable DETR: AP_S on COCO 2017 val",
+  "value": "28.8 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '++ two-stage Deformable DETR', column AP_S",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-twostage-apl",
+  "claim": "++ two-stage Deformable DETR: AP_L on COCO 2017 val",
+  "value": "61.7 AP_L",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '++ two-stage Deformable DETR', column AP_L",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-twostage-gpuh",
+  "claim": "++ two-stage Deformable DETR: Training GPU hours on COCO 2017 val",
+  "value": "340 GPU hours",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row '++ two-stage Deformable DETR', column Training GPU hours",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t1-dc5-fps",
+  "claim": "DETR-DC5 inference FPS",
+  "value": "12 FPS",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 1 (COCO 2017 val; backbone not named, R50 inferred), row 'DETR-DC5' (both 500 and 50 epoch rows), column Inference FPS",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t2-ss-k1",
+  "claim": "Single-scale inputs, no MS attention, K=1, w/o FPN",
+  "value": "39.7 AP, 21.2 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 2 (ablation, COCO 2017 val), row MS inputs no, MS attention no, K=1, w/o",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t2-ms-k1",
+  "claim": "MS inputs, no MS attention, K=1, w/o FPN",
+  "value": "41.4 AP, 24.1 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 2 (ablation, COCO 2017 val), row MS inputs yes, MS attention no, K=1, w/o",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t2-ms-k4",
+  "claim": "MS inputs, no MS attention, K=4, w/o FPN",
+  "value": "42.3 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 2 (ablation, COCO 2017 val), row MS inputs yes, MS attention no, K=4, w/o",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t2-full",
+  "claim": "MS inputs + MS attention, K=4, w/o FPN",
+  "value": "43.8 AP, 26.4 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 2 (ablation, COCO 2017 val), row MS inputs yes, MS attention yes, K=4, w/o",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t2-fpn",
+  "claim": "Full model plus FPN",
+  "value": "43.8 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 2 (ablation, COCO 2017 val), row MS inputs yes, MS attention yes, K=4, FPN",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t2-bifpn",
+  "claim": "Full model plus BiFPN",
+  "value": "43.9 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 2 (ablation, COCO 2017 val), row MS inputs yes, MS attention yes, K=4, BiFPN",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-ablate-ms-inputs-gain",
+  "claim": "Multi-scale inputs instead of single-scale improve AP and AP_S",
+  "value": "1.7% AP, 2.9% AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-ablate-k-gain",
+  "claim": "Increasing number of sampling points K improves AP",
+  "value": "0.9% AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-ablate-msattn-gain",
+  "claim": "Multi-scale deformable attention (cross-level exchange) adds AP",
+  "value": "1.5% AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Sec 5.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t3-r50",
+  "claim": "Deformable DETR ResNet-50",
+  "value": "46.9 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 3 (COCO 2017 test-dev, with refinement + two-stage), row 'Deformable DETR, ResNet-50'",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t3-r101",
+  "claim": "Deformable DETR ResNet-101",
+  "value": "48.7 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 3 (COCO 2017 test-dev, with refinement + two-stage), row 'Deformable DETR, ResNet-101'; Sec 5.3",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t3-x101",
+  "claim": "Deformable DETR ResNeXt-101",
+  "value": "49.0 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 3 (COCO 2017 test-dev, with refinement + two-stage), row 'Deformable DETR, ResNeXt-101'; Sec 5.3",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t3-x101dcn",
+  "claim": "Deformable DETR ResNeXt-101 + DCN",
+  "value": "50.1 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 3 (COCO 2017 test-dev, with refinement + two-stage), row 'Deformable DETR, ResNeXt-101 + DCN' (no TTA); Sec 5.3",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-t3-tta",
+  "claim": "Deformable DETR ResNeXt-101 + DCN with test-time augmentation",
+  "value": "52.3 AP",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Table 3 (COCO 2017 test-dev, with refinement + two-stage), row 'Deformable DETR, ResNeXt-101 + DCN, TTA'; Sec 5.3",
+  "uncertain": false
+ },
+ {
+  "id": "ddetr-derived-gain-vs-detr",
+  "claim": "Deformable DETR (50 ep) minus DETR (500 ep): AP and AP_S differences",
+  "value": "+1.8 AP, +5.9 AP_S",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Derived: Table 1 rows 'Deformable DETR' (43.8, 26.4) minus 'DETR' (42.0, 20.5)",
+  "uncertain": false,
+  "derived": true
+ },
+ {
+  "id": "ddetr-derived-points",
+  "claim": "Sampling points per query: L*K per head, M*L*K total at defaults",
+  "value": "16 per head, 128 per query",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Derived: M=8, K=4 (Sec 5), L=4 (Sec 4.1)",
+  "uncertain": false,
+  "derived": true
+ },
+ {
+  "id": "ddetr-derived-cv",
+  "claim": "Per-head value dimension C_v = C/M at defaults",
+  "value": "C_v = 32",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Derived: C_v = C/M (Sec 3), C=256, M=8",
+  "uncertain": false,
+  "derived": true
+ },
+ {
+  "id": "ddetr-derived-prior-sizes",
+  "claim": "Two-stage prior box size 2^(l-1)*s for l=1..4 with s=0.05",
+  "value": "0.05, 0.1, 0.2, 0.4",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Derived: Appendix A.4 two-stage equation, s=0.05, L=4",
+  "uncertain": false,
+  "derived": true
+ },
+ {
+  "id": "ddetr-derived-strides",
+  "claim": "Feature strides of C3..C6 given 'C_l is of resolution 2^l lower than the input image'",
+  "value": "8, 16, 32, 64",
+  "paper": "Deformable DETR",
+  "version": "v4",
+  "loc": "Derived: Sec 4.1 'Deformable Transformer Encoder'",
+  "uncertain": false,
+  "derived": true
+ }
+]

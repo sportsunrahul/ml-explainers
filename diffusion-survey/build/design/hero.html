@@ -1,0 +1,108 @@
+<script>
+(() => {
+  const el = document.getElementById('hero-canvas'), btn = document.getElementById('btn-hero-replay');
+  // A 1D dataset of three clusters [mean, sd, weight]. Under the VP forward process each cluster stays Gaussian,
+  // so the noised density and the best denoiser E[x0 | xt] are exact, not learned.
+  const MIX = [[-1.35, .16, .3], [.15, .1, .42], [1.3, .22, .28]];
+  // The axis stops at 0.97 T: the cosine schedule's last few steps re-noise almost fully and only add zigzag.
+  const A = PE.cosineAbar, K = 140, TM = .97, tk = k => Math.round(TM * PE.T * k / K), XR = 2.8;
+  const comps = (x, a) => { const sa = Math.sqrt(a);
+    return MIX.map(([m, sd, w]) => { const v = a * sd * sd + 1 - a, d = x - sa * m;
+      return { lw: Math.log(w) - d * d / (2 * v) - .5 * Math.log(2 * Math.PI * v), mean: m + sa * sd * sd / v * d }; }); };
+  const dens = (x, a) => comps(x, a).reduce((s, c) => s + Math.exp(c.lw), 0);
+  function x0hat(x, a) {
+    const c = comps(x, a), mx = Math.max(...c.map(q => q.lw)); let W = 0, M = 0;
+    c.forEach(q => { const w = Math.exp(q.lw - mx); W += w; M += w * q.mean; }); return M / W;
+  }
+  const r = PE.rng(7), g = PE.gauss(PE.rng(8));
+  const sampleData = () => { let u = r(), i = 0; while (i < MIX.length - 1 && u > MIX[i][2]) u -= MIX[i++][2]; return MIX[i][0] + MIX[i][1] * g(); };
+  // Forward: the real noising chain, one jittery path per data point.
+  const fwd = Array.from({ length: 16 }, () => { const p = [sampleData()];
+    for (let k = 1; k <= K; k++) { const q = A[tk(k)] / A[tk(k - 1)]; p.push(Math.sqrt(q) * p[k - 1] + Math.sqrt(1 - q) * g()); } return p; });
+  // Reverse: DDIM (eta = 0) with the exact denoiser, started from evenly spread quantiles of N(0, 1).
+  const cdf = []; for (let x = -4, s = 0; x <= 4; x += .001) { s += Math.exp(-x * x / 2) * .001 / Math.sqrt(2 * Math.PI); cdf.push([x, s]); }
+  const quant = u => { let lo = 0, hi = cdf.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; cdf[m][1] < u ? lo = m : hi = m; } return cdf[hi][0]; };
+  const NR = 24;
+  const rev = Array.from({ length: NR }, (_, i) => { const p = new Array(K + 1); p[K] = quant((i + .5) / NR);
+    for (let k = K; k > 0; k--) { const a = A[tk(k)], ap = A[tk(k - 1)], h = x0hat(p[k], a);
+      p[k - 1] = Math.sqrt(ap) * h + Math.sqrt(1 - ap) * (p[k] - Math.sqrt(a) * h) / Math.sqrt(1 - a); } return p; });
+
+  const T_END = 5.8;
+  let t = 0, raf = 0, heat = null, heatKey = '';
+  const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const ease = x => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const seg = (a, b) => ease((t - a) / (b - a));
+  const rgb = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  // The noised density p_t(x) as an image: one column per time step, each column scaled to its own peak.
+  function heatmap(BG, Y, Br) {
+    const key = BG + Y + Br; if (heat && key === heatKey) return heat;
+    const NC = 280, NY = 160, cv = document.createElement('canvas'); cv.width = NC; cv.height = NY;
+    const c2 = cv.getContext('2d'), img = c2.createImageData(NC, NY), bg = rgb(BG), cy = rgb(Y), cb = rgb(Br);
+    for (let i = 0; i < NC; i++) {
+      const a = A[Math.round(TM * PE.T * i / (NC - 1))], col = [], f = 1 - Math.sqrt(a);
+      for (let j = 0; j < NY; j++) col.push(dens(XR - 2 * XR * (j + .5) / NY, a));
+      const mx = Math.max(...col), hue = cy.map((v, q) => v + (cb[q] - v) * f);
+      col.forEach((p, j) => { const u = .62 * Math.pow(p / mx, .6), o = 4 * (j * NC + i);
+        for (let q = 0; q < 3; q++) img.data[o + q] = Math.round(bg[q] + (hue[q] - bg[q]) * u); img.data[o + 3] = 255; });
+    }
+    c2.putImageData(img, 0, 0); heat = cv; heatKey = key; return cv;
+  }
+  // Two virtual stages, wide (960 x 360) and narrow (360 x 410); everything below is in virtual units.
+  const L = wide => wide ? { vw: 960, vh: 360, x0: 120, x1: 840, y0: 62, y1: 298, pw: 72, top: [[480, 30]], ta: 44, ba: 318, bot: [[480, 344]], fs: 14, end: 322 }
+    : { vw: 360, vh: 410, x0: 52, x1: 308, y0: 78, y1: 314, pw: 40, top: [[180, 22], [180, 39]], ta: 54, ba: 334, bot: [[180, 358], [180, 375]], fs: 12.5, end: 338 };
+  const TOP = [['add a little noise at every step'], ['add a little noise', 'at every step']];
+  const BOT = [['learn to remove it, one step at a time'], ['learn to remove it,', 'one step at a time']];
+
+  const cv = PE.canvas(el, w => w >= 620 ? 360 / 960 : 410 / 360, (ctx, W, H) => {
+    const C = { Y: PE.css('--yellow'), Br: PE.css('--brown'), G: PE.css('--green'), M: PE.css('--muted'), BG: PE.css('--bg') };
+    ctx.clearRect(0, 0, W, H);
+    const wide = W >= 620, S = L(wide), k = W / S.vw;
+    ctx.save(); ctx.scale(k, k);
+    const Yx = x => S.y0 + (XR - x) / (2 * XR) * (S.y1 - S.y0), Xk = j => S.x0 + j / K * (S.x1 - S.x0);
+    const dataIn = seg(0, .7), pf = seg(.5, 3.1), noiseIn = seg(2.9, 3.5), pr = seg(3.4, 5.5);
+    // The density band, revealed left to right as the forward process runs.
+    if (pf > 0) { ctx.save(); ctx.beginPath(); ctx.rect(S.x0, S.y0, (S.x1 - S.x0) * pf, S.y1 - S.y0); ctx.clip();
+      ctx.imageSmoothingEnabled = true; ctx.drawImage(heatmap(C.BG, C.Y, C.Br), S.x0, S.y0, S.x1 - S.x0, S.y1 - S.y0); ctx.restore(); }
+    // Side profiles: the data density at t = 0 and the noise density at t = T.
+    function profile(a, x, dir, col, u) {
+      if (u <= 0) return; const n = 120, xs = Array.from({ length: n + 1 }, (_, i) => XR - 2 * XR * i / n), ps = xs.map(v => dens(v, a)), mx = Math.max(...ps);
+      ctx.save(); ctx.beginPath(); ctx.moveTo(x, Yx(xs[0])); xs.forEach((v, i) => ctx.lineTo(x + dir * S.pw * u * ps[i] / mx, Yx(v))); ctx.lineTo(x, Yx(xs[n])); ctx.closePath();
+      ctx.globalAlpha = .3; ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore();
+    }
+    profile(1, S.x0 - 6, -1, C.Y, dataIn); profile(A[tk(K)], S.x1 + 6, 1, C.Br, noiseIn);
+    ctx.save(); ctx.globalAlpha = dataIn; PE.label(ctx, 'data', S.x0 - 6 - S.pw / 2, S.end, C.Y, S.fs, 'center'); ctx.restore();
+    ctx.save(); ctx.globalAlpha = noiseIn; PE.label(ctx, 'noise', S.x1 + 6 + S.pw / 2, S.end, C.Br, S.fs, 'center'); ctx.restore();
+    // Forward paths: jittery, data colored at the start and noise colored at the end.
+    if (pf > 0) {
+      const grad = ctx.createLinearGradient(S.x0, 0, S.x1, 0); grad.addColorStop(0, C.Y); grad.addColorStop(1, C.Br);
+      const n = pf * K, j = Math.floor(n), w = n - j;
+      ctx.save(); ctx.beginPath(); ctx.rect(S.x0, S.y0, S.x1 - S.x0, S.y1 - S.y0); ctx.clip();
+      fwd.forEach(p => { const pts = []; for (let q = 0; q <= j; q++) pts.push([Xk(q), Yx(p[q])]);
+        if (j < K) pts.push([Xk(j + w), Yx(PE.lerp(p[j], p[j + 1], w))]); PE.polyline(ctx, pts, grad, 1.1, null, .5); });
+      ctx.restore();
+    }
+    // Reverse paths: from evenly spread noise back into the three clusters.
+    if (pr > 0) {
+      const n = K - pr * K, j = Math.ceil(n), w = j - n;
+      rev.forEach(p => { const pts = []; for (let q = K; q >= j; q--) pts.push([Xk(q), Yx(p[q])]);
+        let hx = Xk(j), hy = Yx(p[j]); if (j > 0) { hx = Xk(j - w); hy = Yx(PE.lerp(p[j], p[j - 1], w)); pts.push([hx, hy]); }
+        PE.polyline(ctx, pts, C.G, 1.7, null, .9); PE.dot(ctx, hx, hy, 2.6, C.G); });
+    }
+    // Direction labels: forward on top, reverse underneath.
+    const arrowRow = (y, from, to, col, lines, at, u) => { if (u <= 0) return; ctx.save(); ctx.globalAlpha = u;
+      PE.arrow(ctx, from, y, PE.lerp(from, to, u), y, col, 1.5, 8); lines.forEach((s, i) => PE.label(ctx, s, at[i][0], at[i][1], col, S.fs, 'center')); ctx.restore(); };
+    arrowRow(S.ta, S.x0, S.x1, C.Br, TOP[wide ? 0 : 1], S.top, seg(.7, 1.4));
+    arrowRow(S.ba, S.x1, S.x0, C.G, BOT[wide ? 0 : 1], S.bot, seg(3.5, 4.2));
+    ctx.restore();
+  });
+  function play() {
+    cancelAnimationFrame(raf);
+    if (PE.instant()) { t = T_END; cv.redraw(); return; }
+    const t0 = performance.now();
+    const f = now => { t = (now - t0) / 1000; cv.redraw(); if (t < T_END) raf = requestAnimationFrame(f); };
+    raf = requestAnimationFrame(f);
+  }
+  btn.addEventListener('click', play);
+  play();
+})();
+</script>

@@ -1,0 +1,89 @@
+<style>
+#ch-hippo #hippo-recon-canvas { margin-top:.6rem; }
+#ch-hippo .claim-card table.data { margin:.4rem 0 .6rem; }
+</style>
+<section id="ch-hippo" class="chapter">
+<h2>HiPPO: memory as compression of the past</h2>
+<p>The last chapter gave the state a continuous clock but left the matrix <span class="tex">A</span> open, and almost any choice of <span class="tex">A</span> forgets quickly. HiPPO (<a href="https://arxiv.org/abs/2008.07669v2">Gu, Dao and colleagues</a>, <span data-claim="page-hippo-year">2020</span>) asked what the state should hold, and answered: the best polynomial fit of everything seen so far.</p>
+
+<figure class="viz" id="viz-hippo">
+  <span class="badge computed">Computed</span>
+  <canvas id="hippo-canvas" role="img" aria-label="A three-dimensional surface over time and polynomial degree. Its height is the HiPPO coefficient c_n(t) for each degree n at each time t. A blue input signal runs along the front edge; a yellow line across the surface marks the state at the current time."></canvas>
+  <canvas id="hippo-recon-canvas" role="img" aria-label="A chart of the whole input history in blue and its reconstruction in yellow, rebuilt from the N numbers of the current state, with the error between them shaded red. Beside it, the state as a grid of yellow cells, the lower-triangular matrix A and the vector B."></canvas>
+  <div class="controls">
+    <label for="hippo-N">State size N <input type="range" id="hippo-N" min="4" max="64" step="1" value="16"></label>
+    <button type="button" id="btn-hippo-n4">N = 4</button>
+    <button type="button" id="btn-hippo-n16">16</button>
+    <button type="button" id="btn-hippo-n64">64</button>
+    <label for="hippo-t">Time t <input type="range" id="hippo-t" min="20" max="1000" step="10" value="1000"></label>
+    <button type="button" id="btn-hippo-play">Play from t = 2</button>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-hippo-paper" data-sig="paper" aria-pressed="true">Test function</button>
+    <button type="button" id="btn-hippo-steps" data-sig="steps" aria-pressed="false">Steps</button>
+    <button type="button" id="btn-hippo-chirp" data-sig="chirp" aria-pressed="false">Chirp</button>
+    <button type="button" id="btn-hippo-noise" data-sig="noise" aria-pressed="false">Noise</button>
+    <button type="button" id="btn-hippo-bilinear" data-method="bilinear" aria-pressed="true">Bilinear update</button>
+    <button type="button" id="btn-hippo-euler" data-method="euler" aria-pressed="false">Forward Euler</button>
+    <button type="button" id="btn-hippo-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="hippo-readout" aria-live="polite"></p>
+  <figcaption>Computed by running HiPPO-LegS itself: the matrices <span class="tex">A</span> and <span class="tex">B</span> of <span data-claim="hippo-thm-legs">Theorem 2</span>, the bilinear update of Appendix B.3, and the reconstruction from normalized Legendre polynomials of Appendix D.3. The sign and the starting step are our reading (see the box below). The signal has 1,000 samples on the time interval [0, 100]; the test function is the paper's own (Appendix F.8), the other three signals are ours. Error is the root-mean-square difference (RMSE) over every sample seen so far. Drag the surface to turn it.</figcaption>
+</figure>
+
+<p>Here is the idea. At time <span class="tex">t</span> the model has seen an input signal on the whole interval <span class="tex">[0, t]</span>. Fit it with a polynomial of degree less than <span class="tex">N</span>, the closest one in the least-squares sense, and keep only that polynomial's <span class="tex">N</span> coefficients. Those numbers are the state. A moment later the history is a little longer, the best fit changes a little, and so do the coefficients. HiPPO calls this online function approximation: compress the past into <span class="tex">N</span> numbers, and keep the compression optimal as the past grows.</p>
+
+<p>Written in the right basis, the coefficients move in a simple way. HiPPO expands the fit in Legendre polynomials <span class="tex">P_0, P_1, \dots</span> (the standard orthogonal polynomials on an interval), stretched to cover <span class="tex">[0, t]</span>. Differentiate the optimal coefficients with respect to <span class="tex">t</span> and the result is a linear differential equation, the same shape as the last chapter's. The measure that weighs the past matters: HiPPO-LegS ("scaled Legendre") weighs every past moment equally, however long ago. A word on notation first: HiPPO writes the input as <span class="tex">f</span> and the state as <span class="tex">c</span>, and it uses <span class="tex">x</span> for a moment in the past, not for the input. So in this chapter <span class="tex">\htmlClass{t-blue}{f}</span> is our input <span class="tex">\htmlClass{t-blue}{x}</span> and <span class="tex">\htmlClass{t-yellow}{c}</span> is our state <span class="tex">\htmlClass{t-yellow}{h}</span>.</p>
+
+<div class="eq" id="eq-hippo-ode" data-build data-viz="viz-hippo"><div class="tex tex-display">
+\htmlData{step=1, link=state}{\frac{d}{dt}\,\htmlClass{t-yellow}{c(t)}} = \htmlData{step=2, link=time}{-\frac{1}{t}}\; \htmlData{step=3, link=A}{A\,\htmlClass{t-yellow}{c(t)}} \;+\; \htmlData{step=4, link=B input}{\frac{1}{t}\,B\,\htmlClass{t-blue}{f(t)}}
+</div></div>
+<p class="eqno">HiPPO-LegS dynamics: Eq. <span data-claim="hippo-eq-legs-ode">(3)</span>, <span data-claim="hippo-thm-legs">Theorem 2</span> in HiPPO v2.</p>
+<div class="eq" id="eq-hippo-ab" data-build data-viz="viz-hippo"><div class="tex tex-display">
+\htmlData{step=1, link=A}{A_{nk} = \begin{cases} \sqrt{2n+1}\,\sqrt{2k+1} & n > k \\ n+1 & n = k \\ 0 & n < k \end{cases}} \qquad \htmlData{step=2, link=B}{B_n = \sqrt{2n+1}}
+</div></div>
+<p class="eqno">The LegS matrices, <span data-claim="hippo-thm-legs">Theorem 2</span> in HiPPO v2; degrees <span class="tex">n, k = 0, \dots, N-1</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{c(t)}</span>: the state, <span class="tex">N</span> Legendre coefficients of the best fit to the history. The yellow line across the surface, and the yellow grid of cells.</li>
+  <li><span class="tex">-\frac{1}{t}</span>: the update slows down as the history grows. A new sample is one part in <span class="tex">t</span> of everything seen, so it moves the fit by about <span class="tex">1/t</span>.</li>
+  <li><span class="tex">A</span>: how the coefficients pull on each other. It is lower triangular: degree <span class="tex">n</span> only listens to degrees <span class="tex">0</span> to <span class="tex">n</span>. Raising <span class="tex">N</span> therefore never changes the rows you already had; it adds new ones behind them (watch the surface grow backwards).</li>
+  <li><span class="tex">B\,\htmlClass{t-blue}{f(t)}</span>: the new input, written into every degree with weight <span class="tex">\sqrt{2n+1}</span>.</li>
+</ul>
+
+<p>The state is only useful if the past can be read back out of it. The fit itself is the readout: sum the stretched Legendre polynomials, each weighted by its coefficient. That is the yellow line in the lower panel, drawn over the true history in blue.</p>
+<div class="eq" id="eq-hippo-recon" data-build data-viz="viz-hippo"><div class="tex tex-display">
+\htmlData{step=1, link=recon}{f(x) \;\approx\; \sum_{n=0}^{N-1}} \htmlData{step=2, link=state}{\htmlClass{t-yellow}{c_n(t)}}\; \htmlData{step=3, link=time}{\sqrt{2n+1}\; P_n\!\left(\frac{2x}{t} - 1\right)}, \qquad 0 \le x \le t
+</div></div>
+<p class="eqno">Reconstruction for LegS, HiPPO v2 Appendix D.3 (general form Eq. <span data-claim="hippo-eq-reconstruction">(19)</span>). The map <span class="tex">x \mapsto 2x/t - 1</span> stretches the window <span class="tex">[0, t]</span> onto <span class="tex">[-1, 1]</span>; the factor <span class="tex">\sqrt{2n+1}</span> makes each polynomial have unit norm.</p>
+
+<p>Before you move the <span class="tex">N</span> slider: the test function has a fast wiggle, about sixteen cycles across the window. How many numbers must the state hold before the yellow line follows it? With <span class="tex">N = 4</span> the fit catches only the slow trend (RMSE <span data-claim="page-hippo-rmse-4">0.750</span>). At <span class="tex">N = 16</span> it follows the two slow waves but flattens the fast one (<span data-claim="page-hippo-rmse-16">0.234</span>). At <span class="tex">N = 64</span> it follows everything (<span data-claim="page-hippo-rmse-64">0.0133</span>). Now press Play with <span class="tex">N = 16</span>. Early on, the same sixteen numbers rebuild the short history almost perfectly (RMSE <span data-claim="page-hippo-rmse-16-t20">0.0118</span> at <span class="tex">t = 20</span>); as the window stretches they must cover more and more of it with the same budget. LegS forgets nothing, so it blurs everything evenly instead.</p>
+
+<p>That is the trade against attention, in its plainest form. After 1,000 samples a KV cache holds all 1,000; the HiPPO state holds <span class="tex">N</span> numbers and pays for it with a blurrier past. Thanks to the structure of <span class="tex">A</span>, one update costs <span class="tex">O(N)</span> operations (<span data-claim="hippo-prop-efficiency">Proposition 4</span>); this figure uses a plain triangular solve, which is fast enough for 64 numbers.</p>
+
+<div class="aside">
+  <h4>Two traps in turning the equation into steps (our reading)</h4>
+  <p>The paper runs LegS with the bilinear rule, which averages the old and new slopes. Its appendix writes the bilinear step for an equation without the minus sign of <span data-claim="hippo-thm-legs">Theorem 2</span>, so with Theorem 2's positive <span class="tex">A</span> the step reads</p>
+  <div class="eq"><div class="tex tex-display">\htmlClass{t-yellow}{c_{k+1}} = \Big(I + \frac{A}{2(k+1)}\Big)^{-1} \Big[\Big(I - \frac{A}{2k}\Big)\htmlClass{t-yellow}{c_k} + \frac{1}{k} B\, \htmlClass{t-blue}{f_k}\Big]</div></div>
+  <p>The paper also divides by <span class="tex">k</span> without saying how to start; we start at <span class="tex">k = 1</span> with <span class="tex">c_1 = f_0\, e_0</span>, the exact fit of a single constant. With these choices the coefficients at <span class="tex">t = 100</span> stay within <span data-claim="page-hippo-exact-gap">0.0047</span> of the exact fit computed by numerical integration (<span class="tex">N = 64</span>). And the rule matters. Press <b>Forward Euler</b> at <span class="tex">N = 64</span>: early steps multiply by <span class="tex">I - A/k</span>, whose entries reach 64 when <span class="tex">k</span> is small, so a coefficient climbs to about <span data-claim="page-hippo-euler-peak">1.0e44</span> before the <span class="tex">1/k</span> damping wins. The final RMSE is <span data-claim="page-hippo-euler-64">0.296</span>, against <span data-claim="page-hippo-rmse-64">0.0133</span> for the bilinear rule. The paper reports the same ordering (its Fig. 4; Euler is the form of Eq. <span data-claim="hippo-eq-legs-euler">(4)</span>, written "for illustration"). One more note: S4 later folds the minus sign into <span class="tex">A</span> itself (S4 Eq. (2)), which is the convention of every other chapter on this page.</p>
+</div>
+
+<p>Weighing all of history equally has a second payoff. LegS has no window length and no step size to tune: play a signal twice as fast and its coefficients are the same, reached in half the time (<span data-claim="hippo-prop-timescale">Proposition 3</span>). Its gradients also fade slowly. The influence of an old input on the state shrinks like <span class="tex">1/t</span> (<span data-claim="hippo-prop-gradient">Proposition 5</span>), a polynomial decay, not the exponential <span class="tex">a^T</span> that sank plain RNNs two chapters ago.</p>
+
+<div class="aside claim-card">
+  <h4>Claim card: a memory with no clock</h4>
+  <p><b>Claim.</b> Because LegS has no timescale, a model built on it keeps working when the sampling rate at test time differs from training (HiPPO Sec. 4.2).</p>
+  <p><b>How it was measured.</b> Character Trajectories: pen strokes of <span data-claim="hippo-ct-classes">20</span> letters, recorded at <span data-claim="hippo-ct-rate">200Hz</span>. Train at one rate, test at another, or drop half of the samples; the models are not told. Without a shift, every method scores at least <span data-claim="hippo-ct-noshift">95</span>%.</p>
+  <table class="data"><thead><tr><th>Shift (train to test)</th><th>HiPPO-LegS</th><th>Best baseline</th></tr></thead><tbody>
+    <tr><td>100 Hz to 200 Hz</td><td><span data-claim="hippo-ct-up-legs">88.8</span></td><td><span data-claim="hippo-ct-up-ncde">44.7</span> (neural CDE)</td></tr>
+    <tr><td>200 Hz to 100 Hz</td><td><span data-claim="hippo-ct-down-legs">90.1</span></td><td><span data-claim="hippo-ct-down-gru">64.6</span> (GRU)</td></tr>
+    <tr><td>Missing values, upsampled</td><td><span data-claim="hippo-ct-missup-legs">94.5</span></td><td><span data-claim="hippo-ct-missup-ncde">63.9</span> (neural CDE)</td></tr>
+    <tr><td>Missing values, downsampled</td><td><span data-claim="hippo-ct-missdown-legs">94.9</span></td><td><span data-claim="hippo-ct-missdown-ncde">69.7</span> (neural CDE)</td></tr>
+  </tbody></table>
+  <p><b>Result.</b> Test accuracy in percent, HiPPO Table 2. LegS stays near its unshifted level; the baselines, including models built for irregular time, fall by 25 points or more.</p>
+  <p><b>What would have falsified it.</b> LegS dropping under a shift as far as the baselines do.</p>
+</div>
+
+<p>One number needs care. HiPPO's best-known result, <span data-claim="hippo-pmnist-test-legs">98.3</span>% test accuracy on permuted MNIST (each digit's <span data-claim="hippo-pmnist-length">784</span> pixels read one at a time in a fixed shuffled order), is not a linear state-space model. It is a HiPPO-RNN: a gated nonlinear RNN that writes one feature per step into a fixed LegS memory and reads the memory back at the next step. The memory is the new part, and the paper's own ablation shows it carries the result: the same model scores <span data-claim="hippo-pmnist-val-legs">98.34</span>% validation accuracy with LegS's <span class="tex">A</span> and <span data-claim="hippo-pmnist-val-rand">69.93</span>% with a random one (Table 1). The first numbers for a stack of purely linear state-space layers came a year later from <a href="https://arxiv.org/abs/2110.13985v1">LSSL</a>: <span data-claim="lssl-pmnist-lssl">98.76</span>% on the same task, and <span data-claim="lssl-pmnist-lsslf">98.60</span>% with <span class="tex">A</span> frozen at HiPPO's value (LSSL Table 1, where the HiPPO-RNN row reads <span data-claim="lssl-pmnist-hippornn">98.3</span>).</p>
+
+<p>There is a catch in the equation itself. LegS is time-varying: the <span class="tex">1/t</span> in front of <span class="tex">A</span> makes every step different, and there is no step size <span class="tex">\Delta</span> anywhere. LSSL and S4 keep LegS's <span class="tex">A</span> and <span class="tex">B</span>, drop the <span class="tex">1/t</span>, and bring <span class="tex">\Delta</span> back, giving <span class="tex">h'(t) = A\,h(t) + B\,x(t)</span> with S4's sign (LSSL's appendix prints the positive <span class="tex">A</span> without a minus; that system would blow up, so we read it as a typo). The memory is no longer exactly LegS, but it keeps its habit of remembering, and it becomes time-invariant: the same <span class="tex">A</span>, <span class="tex">B</span> and <span class="tex">C</span> at every step. The next chapter shows what that buys.</p>
+</section>

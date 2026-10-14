@@ -1,0 +1,1752 @@
+[
+ {
+  "id": "winclip-published",
+  "claim": "WinCLIP v1 submission date",
+  "value": "2023-03-26",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "abs.html submission history [v1]"
+ },
+ {
+  "id": "winclip-venue",
+  "claim": "WinCLIP venue",
+  "value": "CVPR 2023",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "abs.html comments; main.tex \\confName/\\confYear"
+ },
+ {
+  "id": "winclip-backbone",
+  "claim": "default CLIP backbone (OpenCLIP)",
+  "value": "ViT-B/16+",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Sec. 5 Implementation details, p.6"
+ },
+ {
+  "id": "winclip-pretrain-data",
+  "claim": "pretraining data of the CLIP weights used",
+  "value": "LAION-400M",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Sec. 5 Implementation details, p.6"
+ },
+ {
+  "id": "winclip-input-res",
+  "claim": "input resolution (shorter edge after bicubic resize)",
+  "value": "240",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Sec. A Data pre-processing, p.12; supp. Sec. A (i)"
+ },
+ {
+  "id": "winclip-tokens",
+  "claim": "patch tokens of ViT-B/16+ at 240^2",
+  "value": "225",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Sec. A Other implementation details (i), p.12"
+ },
+ {
+  "id": "winclip-img-width",
+  "claim": "ViT-B/16+ image embedding dimension (vs 768 for ViT-B/16)",
+  "value": "896",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Sec. A (i), p.12"
+ },
+ {
+  "id": "winclip-txt-width",
+  "claim": "ViT-B/16+ text embedding dimension (vs 512 for ViT-B/16)",
+  "value": "640",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Sec. A (i), p.12"
+ },
+ {
+  "id": "winclip-small-window-px",
+  "claim": "small-scale window side in pixels (2 x 2 ViT patches)",
+  "value": "32",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Sec. 4.2 Multi-scale aggregation, p.5"
+ },
+ {
+  "id": "winclip-mid-window-px",
+  "claim": "mid-scale window side in pixels (3 x 3 ViT patches)",
+  "value": "48",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Sec. 4.2 Multi-scale aggregation, p.5"
+ },
+ {
+  "id": "winclip-stride-px",
+  "claim": "window stride in pixels (stride 1 on ViT patch embeddings)",
+  "value": "16",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Sec. 5 Implementation details, p.6"
+ },
+ {
+  "id": "winclip-normal-states",
+  "claim": "number of normal state words (incl. bare [o])",
+  "value": "7",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Fig. 6 (a), p.12"
+ },
+ {
+  "id": "winclip-anomaly-states",
+  "claim": "number of anomaly state words",
+  "value": "4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Fig. 6 (b), p.12"
+ },
+ {
+  "id": "winclip-templates",
+  "claim": "number of prompt templates",
+  "value": "22",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Fig. 6 (c), p.12 (10 + 12 cont'd)"
+ },
+ {
+  "id": "winclip-normal-prompts",
+  "claim": "normal prompts = 7 states x 22 templates (computed, our reading)",
+  "value": "154",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "computed from supp. Fig. 6, p.12",
+  "uncertain": true
+ },
+ {
+  "id": "winclip-anomalous-prompts",
+  "claim": "anomalous prompts = 4 states x 22 templates (computed, our reading)",
+  "value": "88",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "computed from supp. Fig. 6, p.12",
+  "uncertain": true
+ },
+ {
+  "id": "winclip-windows-small",
+  "claim": "small windows per 15 x 15 grid at stride 1, no padding (computed, our reading)",
+  "value": "196",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "computed from Sec. 4.2 and Sec. 5",
+  "uncertain": true
+ },
+ {
+  "id": "winclip-windows-mid",
+  "claim": "mid windows per 15 x 15 grid at stride 1, no padding (computed, our reading)",
+  "value": "169",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "computed from Sec. 4.2 and Sec. 5",
+  "uncertain": true
+ },
+ {
+  "id": "winclip-seeds",
+  "claim": "random seeds averaged for few-shot results",
+  "value": "5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1 and Table 4 captions, p.7-8"
+ },
+ {
+  "id": "winclip-latency-ms",
+  "claim": "zero-shot WinCLIP per-image inference time (ms), MVTec AD",
+  "value": "389.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row WinCLIP, Time (ms)",
+  "protocol": "zero-shot; Amazon EC2 G4dn instance; batch size and GPU model not stated"
+ },
+ {
+  "id": "winclip-latency-patchtoken-ms",
+  "claim": "Patch-token baseline per-image time (ms)",
+  "value": "95.5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row Patch-token",
+  "protocol": "Amazon EC2 G4dn; batch not stated"
+ },
+ {
+  "id": "winclip-latency-tiling-ms",
+  "claim": "Image tiling baseline per-image time (ms)",
+  "value": "1442.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row Image tiling",
+  "protocol": "Amazon EC2 G4dn; batch not stated"
+ },
+ {
+  "id": "winclip-latency-instance",
+  "claim": "instance type used for timing",
+  "value": "G4dn",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8 caption, p.8"
+ },
+ {
+  "id": "winclip-mvtec-0shot-img-auroc",
+  "claim": "WinCLIP zero-shot MVTec AD image AUROC",
+  "value": "91.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot WinCLIP, MVTec-AD AUROC",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-mvtec-0shot-img-aupr",
+  "claim": "WinCLIP zero-shot MVTec AD image AUPR",
+  "value": "96.5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot WinCLIP, MVTec-AD AUPR",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-mvtec-0shot-img-f1",
+  "claim": "WinCLIP zero-shot MVTec AD image F1-max",
+  "value": "92.9",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot WinCLIP, MVTec-AD F1-max",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-visa-0shot-img-auroc",
+  "claim": "WinCLIP zero-shot VisA image AUROC",
+  "value": "78.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot WinCLIP, VisA AUROC",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-visa-0shot-img-aupr",
+  "claim": "WinCLIP zero-shot VisA image AUPR",
+  "value": "81.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot WinCLIP, VisA AUPR",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-mvtec-0shot-pix-auroc",
+  "claim": "WinCLIP zero-shot MVTec AD pixel AUROC",
+  "value": "85.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot WinCLIP, MVTec-AD pAUROC",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-mvtec-0shot-pro",
+  "claim": "WinCLIP zero-shot MVTec AD PRO",
+  "value": "64.6",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot WinCLIP, MVTec-AD PRO",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-mvtec-0shot-pix-f1",
+  "claim": "WinCLIP zero-shot MVTec AD pixel F1-max",
+  "value": "31.7",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot WinCLIP, MVTec-AD F1-max",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-visa-0shot-pix-auroc",
+  "claim": "WinCLIP zero-shot VisA pixel AUROC",
+  "value": "79.6",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot WinCLIP, VisA pAUROC",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-visa-0shot-pro",
+  "claim": "WinCLIP zero-shot VisA PRO",
+  "value": "56.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot WinCLIP, VisA PRO",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-visa-0shot-pix-f1",
+  "claim": "WinCLIP zero-shot VisA pixel F1-max",
+  "value": "14.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot WinCLIP, VisA F1-max",
+  "protocol": "zero-shot, no training, per-category prompts with object name, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-1shot-img-auroc",
+  "claim": "WinCLIP+ 1-shot MVTec AD image AUROC",
+  "value": "93.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot WinCLIP+, MVTec-AD AUROC",
+  "protocol": "1-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-1shot-img-auroc",
+  "claim": "WinCLIP+ 1-shot VisA image AUROC",
+  "value": "83.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot WinCLIP+, VisA AUROC",
+  "protocol": "1-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-1shot-pix-auroc",
+  "claim": "WinCLIP+ 1-shot MVTec AD pixel AUROC",
+  "value": "95.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot WinCLIP+, MVTec-AD pAUROC",
+  "protocol": "1-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-1shot-pix-auroc",
+  "claim": "WinCLIP+ 1-shot VisA pixel AUROC",
+  "value": "96.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot WinCLIP+, VisA pAUROC",
+  "protocol": "1-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-1shot-pro",
+  "claim": "WinCLIP+ 1-shot MVTec AD PRO",
+  "value": "87.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot WinCLIP+, MVTec-AD PRO",
+  "protocol": "1-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-1shot-pro",
+  "claim": "WinCLIP+ 1-shot VisA PRO",
+  "value": "85.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot WinCLIP+, VisA PRO",
+  "protocol": "1-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-2shot-img-auroc",
+  "claim": "WinCLIP+ 2-shot MVTec AD image AUROC",
+  "value": "94.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 2-shot WinCLIP+, MVTec-AD AUROC",
+  "protocol": "2-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-2shot-img-auroc",
+  "claim": "WinCLIP+ 2-shot VisA image AUROC",
+  "value": "84.6",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 2-shot WinCLIP+, VisA AUROC",
+  "protocol": "2-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-2shot-pix-auroc",
+  "claim": "WinCLIP+ 2-shot MVTec AD pixel AUROC",
+  "value": "96.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 2-shot WinCLIP+, MVTec-AD pAUROC",
+  "protocol": "2-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-2shot-pix-auroc",
+  "claim": "WinCLIP+ 2-shot VisA pixel AUROC",
+  "value": "96.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 2-shot WinCLIP+, VisA pAUROC",
+  "protocol": "2-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-2shot-pro",
+  "claim": "WinCLIP+ 2-shot MVTec AD PRO",
+  "value": "88.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 2-shot WinCLIP+, MVTec-AD PRO",
+  "protocol": "2-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-2shot-pro",
+  "claim": "WinCLIP+ 2-shot VisA PRO",
+  "value": "86.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 2-shot WinCLIP+, VisA PRO",
+  "protocol": "2-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-4shot-img-auroc",
+  "claim": "WinCLIP+ 4-shot MVTec AD image AUROC",
+  "value": "95.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 4-shot WinCLIP+, MVTec-AD AUROC",
+  "protocol": "4-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-4shot-img-auroc",
+  "claim": "WinCLIP+ 4-shot VisA image AUROC",
+  "value": "87.3",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 4-shot WinCLIP+, VisA AUROC",
+  "protocol": "4-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-4shot-pix-auroc",
+  "claim": "WinCLIP+ 4-shot MVTec AD pixel AUROC",
+  "value": "96.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 4-shot WinCLIP+, MVTec-AD pAUROC",
+  "protocol": "4-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-4shot-pix-auroc",
+  "claim": "WinCLIP+ 4-shot VisA pixel AUROC",
+  "value": "97.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 4-shot WinCLIP+, VisA pAUROC",
+  "protocol": "4-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-4shot-pro",
+  "claim": "WinCLIP+ 4-shot MVTec AD PRO",
+  "value": "89.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 4-shot WinCLIP+, MVTec-AD PRO",
+  "protocol": "4-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-visa-4shot-pro",
+  "claim": "WinCLIP+ 4-shot VisA PRO",
+  "value": "87.6",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 4-shot WinCLIP+, VisA PRO",
+  "protocol": "4-normal-shot, no training, one memory per category, mean of 5 seeds, ViT-B/16+, 240px"
+ },
+ {
+  "id": "winclip-plus-mvtec-1shot-img-auroc-std",
+  "claim": "WinCLIP+ 1-shot MVTec AD image AUROC std over 5 seeds",
+  "value": "2.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot WinCLIP+, MVTec-AD AUROC (\\dev)"
+ },
+ {
+  "id": "winclip-plus-visa-1shot-img-auroc-std",
+  "claim": "WinCLIP+ 1-shot VisA image AUROC std over 5 seeds",
+  "value": "4.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot WinCLIP+, VisA AUROC (\\dev)"
+ },
+ {
+  "id": "winclip-plus-mvtec-8shot-img-auroc",
+  "claim": "WinCLIP+ 8-shot MVTec AD image AUROC (both scores)",
+  "value": "96.3",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 5, p.8, row max M^W + ascore_0, column 8",
+  "protocol": "8-normal-shot, MVTec AD only (no VisA 8-shot)"
+ },
+ {
+  "id": "winclip-plus-mvtec-8shot-pix-auroc",
+  "claim": "WinCLIP+ 8-shot MVTec AD pixel AUROC (all three memories)",
+  "value": "96.5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 6, p.8, row M^P + M^W_m + M^W_s, column 8",
+  "protocol": "8-normal-shot, MVTec AD only"
+ },
+ {
+  "id": "winclip-plus-mvtec-1shot-maxonly",
+  "claim": "WinCLIP+ 1-shot MVTec AD image AUROC with max M^W only (no language score)",
+  "value": "87.9",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 5, p.8, row max M^W only, column 1",
+  "protocol": "1-normal-shot"
+ },
+ {
+  "id": "winclip-t1-clipac-mvtec",
+  "claim": "CLIP-AC (two-class naive prompts) zero-shot MVTec AD image AUROC",
+  "value": "74.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot CLIP-AC",
+  "protocol": "zero-shot, WinCLIP's run"
+ },
+ {
+  "id": "winclip-t1-clipac-visa",
+  "claim": "CLIP-AC zero-shot VisA image AUROC",
+  "value": "59.3",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 0-shot CLIP-AC",
+  "protocol": "zero-shot, WinCLIP's run"
+ },
+ {
+  "id": "winclip-t1-promptens-mvtec",
+  "claim": "CLIP-AC + CLIP ImageNet prompt ensemble, MVTec AD image AUROC",
+  "value": "74.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row + Prompt ens.",
+  "protocol": "zero-shot, WinCLIP's run"
+ },
+ {
+  "id": "winclip-t1-patchcore-mvtec-1shot",
+  "claim": "PatchCore 1-shot MVTec AD image AUROC",
+  "value": "83.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t1-patchcore-visa-1shot",
+  "claim": "PatchCore 1-shot VisA image AUROC",
+  "value": "79.9",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t1-patchcore-mvtec-4shot",
+  "claim": "PatchCore 4-shot MVTec AD image AUROC",
+  "value": "88.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 4-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t1-patchcore-visa-4shot",
+  "claim": "PatchCore 4-shot VisA image AUROC",
+  "value": "85.3",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 4-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t1-spade-mvtec-1shot",
+  "claim": "SPADE 1-shot MVTec AD image AUROC",
+  "value": "81.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot SPADE",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t1-padim-mvtec-1shot",
+  "claim": "PaDiM 1-shot MVTec AD image AUROC",
+  "value": "76.6",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 1, p.7, row 1-shot PaDiM",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t4-patchcore-mvtec-1shot-pix",
+  "claim": "PatchCore 1-shot MVTec AD pixel AUROC",
+  "value": "92.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t4-patchcore-mvtec-1shot-pro",
+  "claim": "PatchCore 1-shot MVTec AD PRO",
+  "value": "79.7",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t4-patchcore-visa-1shot-pix",
+  "claim": "PatchCore 1-shot VisA pixel AUROC",
+  "value": "95.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 1-shot PatchCore",
+  "protocol": "baseline re-run by WinCLIP (own SPADE/PaDiM reimplementation, official PatchCore code), 240px, mean of 5 seeds"
+ },
+ {
+  "id": "winclip-t4-maskclip-mvtec-pix",
+  "claim": "MaskCLIP zero-shot MVTec AD pixel AUROC",
+  "value": "63.7",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot MaskCLIP",
+  "protocol": "zero-shot, WinCLIP's run"
+ },
+ {
+  "id": "winclip-t4-transmm-mvtec-pix",
+  "claim": "Trans-MM zero-shot MVTec AD pixel AUROC",
+  "value": "57.5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 4, p.8, row 0-shot Trans-MM",
+  "protocol": "zero-shot, WinCLIP's run"
+ },
+ {
+  "id": "winclip-t2-patchcore-full-ac",
+  "claim": "PatchCore full-shot MVTec AD image AUROC as cited by WinCLIP",
+  "value": "99.6",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 2, p.7, row PatchCore full-shot, AC",
+  "protocol": "full-shot, copied from the cited paper (not re-run), MVTec AD"
+ },
+ {
+  "id": "winclip-t2-patchcore-full-as",
+  "claim": "PatchCore full-shot MVTec AD pixel AUROC as cited by WinCLIP",
+  "value": "98.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 2, p.7, row PatchCore full-shot, AS",
+  "protocol": "full-shot, copied from the cited paper (not re-run), MVTec AD"
+ },
+ {
+  "id": "winclip-t2-cutpaste-full-ac",
+  "claim": "CutPaste full-shot MVTec AD image AUROC as cited by WinCLIP",
+  "value": "95.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 2, p.7, row CutPaste full-shot, AC",
+  "protocol": "full-shot, copied from the cited paper (not re-run), MVTec AD"
+ },
+ {
+  "id": "winclip-t2-regad-4agg-ac",
+  "claim": "RegAD aggregated 4-shot MVTec AD image AUROC as cited",
+  "value": "88.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 2, p.7, row RegAD 4 + agg., AC",
+  "protocol": "aggregated few-shot, copied from the cited paper (not re-run), MVTec AD"
+ },
+ {
+  "id": "winclip-abl-oneclass",
+  "claim": "one-class zero-shot (normal prompt only) image AUROC",
+  "value": "34.2",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 3, p.7, row (a) One-class",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-twoclass",
+  "claim": "two-class zero-shot image AUROC",
+  "value": "74.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 3, p.7, row Two-class",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-stateens",
+  "claim": "+ state ensemble image AUROC",
+  "value": "89.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 3, p.7, row (b) + State ens.",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-promptens",
+  "claim": "+ prompt (template) ensemble image AUROC",
+  "value": "90.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 3, p.7, row (c) + Prompt ens.",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-multicrop",
+  "claim": "+ multi-crop image AUROC (= headline)",
+  "value": "91.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 3, p.7, row (d) + Multi-crop",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-patchtoken-pix",
+  "claim": "Patch-token (last-layer patch features) zero-shot pixel AUROC",
+  "value": "22.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row Patch-token",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-patchtoken-pro",
+  "claim": "Patch-token zero-shot PRO",
+  "value": "2.3",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row Patch-token",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-tiling-pix",
+  "claim": "Image tiling zero-shot pixel AUROC",
+  "value": "77.9",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row Image tiling",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-no-harmonic-pix",
+  "claim": "WinCLIP w/o harmonic averaging pixel AUROC",
+  "value": "81.5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row w/o Harmonic avg.",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-no-imagescale-pix",
+  "claim": "WinCLIP w/o image-scale pixel AUROC",
+  "value": "82.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row w/o image-scale",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-no-midscale-pix",
+  "claim": "WinCLIP w/o mid-scale pixel AUROC",
+  "value": "84.0",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row w/o mid-scale",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-no-smallscale-pix",
+  "claim": "WinCLIP w/o small-scale pixel AUROC",
+  "value": "84.7",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "main Table 8, p.8, row w/o small-scale",
+  "protocol": "zero-shot, MVTec AD, ablation"
+ },
+ {
+  "id": "winclip-abl-specific-states-visa",
+  "claim": "VisA zero-shot mean image AUROC with task-specific state words",
+  "value": "78.9",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 7, p.8, row + specific states, Mean",
+  "protocol": "zero-shot, VisA"
+ },
+ {
+  "id": "winclip-abl-specific-states-pcb2",
+  "claim": "VisA PCB2 zero-shot image AUROC with task-specific states (from 51.2)",
+  "value": "56.5",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "Table 7, p.8, row + specific states, PCB2",
+  "protocol": "zero-shot, VisA"
+ },
+ {
+  "id": "winclip-abl-vitb16",
+  "claim": "zero-shot WinCLIP with ViT-B/16 (224^2), MVTec AD image AUROC",
+  "value": "86.1",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Table 9, p.13, row ViT-B/16, AC",
+  "protocol": "zero-shot, MVTec AD, backbone ablation"
+ },
+ {
+  "id": "winclip-abl-vitl14-as",
+  "claim": "zero-shot WinCLIP with ViT-L/14 (224^2), MVTec AD pixel AUROC",
+  "value": "64.4",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Table 9, p.13, row ViT-L/14, AS",
+  "protocol": "zero-shot, MVTec AD, backbone ablation"
+ },
+ {
+  "id": "winclip-abl-vitb16plus-ac-noMC",
+  "claim": "zero-shot WinCLIP ViT-B/16+ MVTec AD image AUROC in the backbone table (differs from 91.8)",
+  "value": "90.8",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Table 9, p.13, row ViT-B/16+, AC",
+  "protocol": "zero-shot, MVTec AD, backbone ablation"
+ },
+ {
+  "id": "winclip-f1max-ceiling",
+  "claim": "best low-shot segmentation F1-max is below this percentage",
+  "value": "60%",
+  "paper": "WinCLIP",
+  "arxiv": "2303.14814v1",
+  "loc": "supp. Sec. A Evaluation metrics, p.12 ('<60% F1-max')"
+ },
+ {
+  "id": "anomalyclip-v1-published",
+  "claim": "AnomalyCLIP v1 submission date",
+  "value": "2023-10-29",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "abs.html submission history [v1]"
+ },
+ {
+  "id": "anomalyclip-v12-published",
+  "claim": "AnomalyCLIP v12 (version read) date",
+  "value": "2026-01-01",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "abs.html submission history [v12]"
+ },
+ {
+  "id": "anomalyclip-venue",
+  "claim": "AnomalyCLIP venue",
+  "value": "ICLR 2024",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "abs.html comments"
+ },
+ {
+  "id": "anomalyclip-datasets",
+  "claim": "number of datasets evaluated",
+  "value": "17",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Abstract; Sec. 4.1; Table 6, p.16"
+ },
+ {
+  "id": "anomalyclip-backbone",
+  "claim": "CLIP backbone",
+  "value": "ViT-L/14@336px",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Sec. 4.1 Implementation details; App. A"
+ },
+ {
+  "id": "anomalyclip-input-res",
+  "claim": "input image size (pixels per side)",
+  "value": "518",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A; App. B 'More dataset details'"
+ },
+ {
+  "id": "anomalyclip-patch-grid",
+  "claim": "patch grid side at 518 px with 14 px patches (computed, our reading)",
+  "value": "37",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "computed from App. A (518) and ViT-L/14",
+  "uncertain": true
+ },
+ {
+  "id": "anomalyclip-E",
+  "claim": "learnable word embeddings per prompt (E)",
+  "value": "12",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Sec. 4.1 Implementation details (App. A calls it M); Fig. 7(a)"
+ },
+ {
+  "id": "anomalyclip-deep-layers",
+  "claim": "text-encoder layers that receive learnable token embeddings",
+  "value": "9",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Sec. 4.1 ('first 9 layers'); App. A; Fig. 7(b)"
+ },
+ {
+  "id": "anomalyclip-deep-tokens",
+  "claim": "learnable token embeddings per text layer (Q; L in Fig. 7c)",
+  "value": "4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A ('each text token has a length of 4'); Fig. 7(c)"
+ },
+ {
+  "id": "anomalyclip-dpam-start",
+  "claim": "visual layer from which DPAM is applied",
+  "value": "6th",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A"
+ },
+ {
+  "id": "anomalyclip-lambda",
+  "claim": "local-loss weight lambda",
+  "value": "4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Sec. 4.1; App. A"
+ },
+ {
+  "id": "anomalyclip-lr",
+  "claim": "Adam learning rate",
+  "value": "0.001",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A"
+ },
+ {
+  "id": "anomalyclip-batch",
+  "claim": "batch size",
+  "value": "8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A"
+ },
+ {
+  "id": "anomalyclip-epochs",
+  "claim": "training epochs",
+  "value": "15",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A"
+ },
+ {
+  "id": "anomalyclip-gpu",
+  "claim": "training GPU",
+  "value": "RTX 3090",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Sec. 4.1; App. A ('a single NVIDIA RTX 3090 24GB GPU')"
+ },
+ {
+  "id": "anomalyclip-sigma",
+  "claim": "Gaussian smoothing sigma on the anomaly map at test",
+  "value": "4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. A"
+ },
+ {
+  "id": "anomalyclip-aux-mvtec-normal",
+  "claim": "MVTec AD test split normal images (auxiliary training set for non-MVTec targets)",
+  "value": "467",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 6, p.16, row MVTec AD"
+ },
+ {
+  "id": "anomalyclip-aux-mvtec-anom",
+  "claim": "MVTec AD test split anomalous images",
+  "value": "1258",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 6, p.16, row MVTec AD"
+ },
+ {
+  "id": "anomalyclip-aux-visa-normal",
+  "claim": "VisA test split normal images (auxiliary training set for MVTec AD target)",
+  "value": "962",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 6, p.16, row VisA"
+ },
+ {
+  "id": "anomalyclip-aux-visa-anom",
+  "claim": "VisA test split anomalous images",
+  "value": "1200",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 6, p.16, row VisA"
+ },
+ {
+  "id": "anomalyclip-aux-medical-normal",
+  "claim": "built medical auxiliary set (ColonDB + Endo) normal samples",
+  "value": "163",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. B 'Fine-tuning medical dataset'"
+ },
+ {
+  "id": "anomalyclip-aux-medical-anom",
+  "claim": "built medical auxiliary set anomaly samples",
+  "value": "380",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "App. B 'Fine-tuning medical dataset'"
+ },
+ {
+  "id": "anomalyclip-mvtec-img-auroc",
+  "claim": "AnomalyCLIP MVTec AD image AUROC",
+  "value": "91.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, AnomalyCLIP (first value)",
+  "protocol": "zero-shot on MVTec AD; prompts trained on VisA test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-mvtec-img-ap",
+  "claim": "AnomalyCLIP MVTec AD image AP",
+  "value": "96.2",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, AnomalyCLIP (second value)",
+  "protocol": "zero-shot on MVTec AD; prompts trained on VisA test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-mvtec-pix-auroc",
+  "claim": "AnomalyCLIP MVTec AD pixel AUROC",
+  "value": "91.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, AnomalyCLIP (first value)",
+  "protocol": "zero-shot on MVTec AD; prompts trained on VisA test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-mvtec-pro",
+  "claim": "AnomalyCLIP MVTec AD PRO (AUPRO)",
+  "value": "81.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, AnomalyCLIP (second value)",
+  "protocol": "zero-shot on MVTec AD; prompts trained on VisA test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-visa-img-auroc",
+  "claim": "AnomalyCLIP VisA image AUROC",
+  "value": "82.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level VisA, AnomalyCLIP",
+  "protocol": "zero-shot on VisA; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-visa-img-ap",
+  "claim": "AnomalyCLIP VisA image AP",
+  "value": "85.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level VisA, AnomalyCLIP",
+  "protocol": "zero-shot on VisA; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-visa-pix-auroc",
+  "claim": "AnomalyCLIP VisA pixel AUROC",
+  "value": "95.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level VisA, AnomalyCLIP",
+  "protocol": "zero-shot on VisA; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-visa-pro",
+  "claim": "AnomalyCLIP VisA PRO (AUPRO)",
+  "value": "87.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level VisA, AnomalyCLIP",
+  "protocol": "zero-shot on VisA; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-mpdd-img-auroc",
+  "claim": "AnomalyCLIP MPDD image AUROC",
+  "value": "77.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MPDD, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-mpdd-pix-auroc",
+  "claim": "AnomalyCLIP MPDD pixel AUROC",
+  "value": "96.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MPDD, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-btad-img-auroc",
+  "claim": "AnomalyCLIP BTAD image AUROC",
+  "value": "88.3",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level BTAD, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-btad-pix-auroc",
+  "claim": "AnomalyCLIP BTAD pixel AUROC",
+  "value": "94.2",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level BTAD, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-sdd-img-auroc",
+  "claim": "AnomalyCLIP SDD image AUROC",
+  "value": "84.7",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level SDD, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-sdd-pix-auroc",
+  "claim": "AnomalyCLIP SDD pixel AUROC",
+  "value": "90.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level SDD, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-dagm-img-auroc",
+  "claim": "AnomalyCLIP DAGM image AUROC",
+  "value": "97.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level DAGM, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-dagm-pix-auroc",
+  "claim": "AnomalyCLIP DAGM pixel AUROC",
+  "value": "95.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level DAGM, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-dtd-img-auroc",
+  "claim": "AnomalyCLIP DTD-Synthetic image AUROC",
+  "value": "93.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level DTD-Synthetic, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-dtd-pix-auroc",
+  "claim": "AnomalyCLIP DTD-Synthetic pixel AUROC",
+  "value": "97.9",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level DTD-Synthetic, AnomalyCLIP",
+  "protocol": "zero-shot; prompts trained on MVTec AD test split; 518px; ViT-L/14@336px"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-mvtec-img-auroc",
+  "claim": "WinCLIP MVTec AD image AUROC as printed in AnomalyCLIP Table 1",
+  "value": "91.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-mvtec-img-ap",
+  "claim": "WinCLIP MVTec AD image AP as printed in AnomalyCLIP Table 1",
+  "value": "96.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-mvtec-pix-auroc",
+  "claim": "WinCLIP MVTec AD pixel AUROC in AnomalyCLIP Table 1",
+  "value": "85.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-mvtec-pro",
+  "claim": "WinCLIP MVTec AD PRO in AnomalyCLIP Table 1",
+  "value": "64.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-visa-img-auroc",
+  "claim": "WinCLIP VisA image AUROC in AnomalyCLIP Table 1",
+  "value": "78.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level VisA, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-visa-pix-auroc",
+  "claim": "WinCLIP VisA pixel AUROC in AnomalyCLIP Table 1",
+  "value": "79.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level VisA, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-visa-pro",
+  "claim": "WinCLIP VisA PRO in AnomalyCLIP Table 1",
+  "value": "56.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level VisA, WinCLIP (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from WinCLIP 2303.14814 (dagger 'results taken from original papers'); 240px, ViT-B/16+"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-mpdd-img-auroc",
+  "claim": "WinCLIP MPDD image AUROC, re-run by AnomalyCLIP",
+  "value": "63.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MPDD, WinCLIP (no dagger)",
+  "protocol": "zero-shot; re-run by AnomalyCLIP with WinCLIP's parameters (App. A)"
+ },
+ {
+  "id": "anomalyclip-t1-winclip-btad-pix-auroc",
+  "claim": "WinCLIP BTAD pixel AUROC, re-run by AnomalyCLIP",
+  "value": "72.7",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level BTAD, WinCLIP (no dagger)",
+  "protocol": "zero-shot; re-run by AnomalyCLIP"
+ },
+ {
+  "id": "anomalyclip-t1-vand-mvtec-img-auroc",
+  "claim": "VAND MVTec AD image AUROC in AnomalyCLIP Table 1",
+  "value": "86.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, VAND (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-vand-mvtec-pix-auroc",
+  "claim": "VAND MVTec AD pixel AUROC in AnomalyCLIP Table 1",
+  "value": "87.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, VAND (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-vand-mvtec-pro",
+  "claim": "VAND MVTec AD PRO in AnomalyCLIP Table 1",
+  "value": "44.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, VAND (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-vand-visa-img-auroc",
+  "claim": "VAND VisA image AUROC in AnomalyCLIP Table 1",
+  "value": "78.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level VisA, VAND (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-vand-visa-pix-auroc",
+  "claim": "VAND VisA pixel AUROC in AnomalyCLIP Table 1",
+  "value": "94.2",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level VisA, VAND (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-vand-visa-pro",
+  "claim": "VAND VisA PRO in AnomalyCLIP Table 1",
+  "value": "86.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level VisA, VAND (dagger)",
+  "protocol": "zero-shot; copied by AnomalyCLIP from the VAND paper (dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-coop-mvtec-img-auroc",
+  "claim": "CoOp (prompts trained like AnomalyCLIP) MVTec AD image AUROC",
+  "value": "88.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, CoOp",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-coop-mvtec-pix-auroc",
+  "claim": "CoOp MVTec AD pixel AUROC",
+  "value": "33.3",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, CoOp",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-coop-visa-img-auroc",
+  "claim": "CoOp VisA image AUROC",
+  "value": "62.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level VisA, CoOp",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-clip-mvtec-img-auroc",
+  "claim": "CLIP (bare 'A photo of a normal/anomalous [cls]') MVTec AD image AUROC",
+  "value": "74.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, CLIP",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-clip-mvtec-pix-auroc",
+  "claim": "CLIP (bare prompts) MVTec AD pixel AUROC",
+  "value": "38.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Pixel-level MVTec AD, CLIP",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-clipac-mvtec-img-auroc",
+  "claim": "CLIP-AC (ImageNet prompt ensemble, AnomalyCLIP naming) MVTec AD image AUROC",
+  "value": "71.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level MVTec AD, CLIP-AC",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-t1-clip-visa-img-auroc",
+  "claim": "CLIP (bare prompts) VisA image AUROC",
+  "value": "66.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 1, p.7, Image-level VisA, CLIP",
+  "protocol": "zero-shot; run by AnomalyCLIP authors (no dagger)"
+ },
+ {
+  "id": "anomalyclip-abl-base-mvtec-img",
+  "claim": "module ablation Base, MVTec AD image AUROC",
+  "value": "66.3",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 4, p.9, row Base, MVTec AD Image-level (first value)",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-base-mvtec-pix",
+  "claim": "module ablation Base, MVTec AD pixel AUROC",
+  "value": "46.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 4, p.9, row Base, MVTec AD Pixel-level (first value)",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-dpam-mvtec-pix",
+  "claim": "+T1 (DPAM), MVTec AD pixel AUROC",
+  "value": "68.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 4, p.9, row +T1, MVTec AD Pixel-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-dpam-mvtec-pro",
+  "claim": "+T1 (DPAM), MVTec AD PRO",
+  "value": "47.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 4, p.9, row +T1, MVTec AD Pixel-level (second value)",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-t2-mvtec-img",
+  "claim": "+T2 (object-agnostic prompts), MVTec AD image AUROC",
+  "value": "90.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 4, p.9, row +T2, MVTec AD Image-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-t2-mvtec-pix",
+  "claim": "+T2, MVTec AD pixel AUROC",
+  "value": "89.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 4, p.9, row +T2, MVTec AD Pixel-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-global-only-mvtec-pix",
+  "claim": "global loss only, MVTec AD pixel AUROC",
+  "value": "80.3",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 5, p.9, row Local no / Global yes, MVTec AD Pixel-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-global-only-mvtec-pro",
+  "claim": "global loss only, MVTec AD PRO",
+  "value": "77.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 5, p.9, row Local no / Global yes, MVTec AD Pixel-level (second value)",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-local-only-mvtec-pix",
+  "claim": "local loss only, MVTec AD pixel AUROC",
+  "value": "91.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 5, p.9, row Local yes / Global no, MVTec AD Pixel-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-local-only-visa-img",
+  "claim": "local loss only, VisA image AUROC",
+  "value": "79.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 5, p.9, row Local yes / Global no, VisA Image-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-global-only-visa-img",
+  "claim": "global loss only, VisA image AUROC",
+  "value": "82.2",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 5, p.9, row Local no / Global yes, VisA Image-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-abl-neither-mvtec-img",
+  "claim": "neither loss term, MVTec AD image AUROC",
+  "value": "68.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 5, p.9, row Local no / Global no, MVTec AD Image-level",
+  "protocol": "ablation; zero-shot protocol as Table 1"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mvtec-img-auroc",
+  "claim": "gain of object-agnostic over object-aware prompts, MVTec AD, img-auroc",
+  "value": "0.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MVTec AD group, img-auroc bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mvtec-img-ap",
+  "claim": "gain of object-agnostic over object-aware prompts, MVTec AD, img-ap",
+  "value": "0.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MVTec AD group, img-ap bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mvtec-pix-auroc",
+  "claim": "gain of object-agnostic over object-aware prompts, MVTec AD, pix-auroc",
+  "value": "0.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MVTec AD group, pix-auroc bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mvtec-aupro",
+  "claim": "gain of object-agnostic over object-aware prompts, MVTec AD, aupro",
+  "value": "1.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MVTec AD group, aupro bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-visa-img-auroc",
+  "claim": "gain of object-agnostic over object-aware prompts, VisA, img-auroc",
+  "value": "0.3",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, VisA group, img-auroc bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-visa-img-ap",
+  "claim": "gain of object-agnostic over object-aware prompts, VisA, img-ap",
+  "value": "0.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, VisA group, img-ap bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-visa-pix-auroc",
+  "claim": "gain of object-agnostic over object-aware prompts, VisA, pix-auroc",
+  "value": "0.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, VisA group, pix-auroc bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-visa-aupro",
+  "claim": "gain of object-agnostic over object-aware prompts, VisA, aupro",
+  "value": "0.2",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, VisA group, aupro bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mpdd-img-auroc",
+  "claim": "gain of object-agnostic over object-aware prompts, MPDD, img-auroc",
+  "value": "4.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MPDD group, img-auroc bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mpdd-img-ap",
+  "claim": "gain of object-agnostic over object-aware prompts, MPDD, img-ap",
+  "value": "3.3",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MPDD group, img-ap bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mpdd-pix-auroc",
+  "claim": "gain of object-agnostic over object-aware prompts, MPDD, pix-auroc",
+  "value": "0.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MPDD group, pix-auroc bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-mpdd-aupro",
+  "claim": "gain of object-agnostic over object-aware prompts, MPDD, aupro",
+  "value": "0.9",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, MPDD group, aupro bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-gain-agnostic-btad-aupro",
+  "claim": "gain of object-agnostic over object-aware prompts, BTAD, AUPRO",
+  "value": "1.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 5, p.9, BTAD group, AUPRO bar",
+  "protocol": "object-agnostic minus object-aware prompt learning; bar label as printed"
+ },
+ {
+  "id": "anomalyclip-re-mvtec-img-auroc",
+  "claim": "AnomalyCLIP_re MVTec AD image AUROC (vs 91.5)",
+  "value": "89.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 8, p.19, Image-level AUROC panel, MVTec AD",
+  "protocol": "trained object-agnostic, tested with 'object' replaced by [cls] (AnomalyCLIP_re); bar label as printed"
+ },
+ {
+  "id": "anomalyclip-re-mvtec-img-ap",
+  "claim": "AnomalyCLIP_re MVTec AD image AP (vs 96.2)",
+  "value": "94.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 8, p.19, AP panel, MVTec AD",
+  "protocol": "trained object-agnostic, tested with 'object' replaced by [cls] (AnomalyCLIP_re); bar label as printed"
+ },
+ {
+  "id": "anomalyclip-re-mvtec-pix-auroc",
+  "claim": "AnomalyCLIP_re MVTec AD pixel AUROC (vs 91.1)",
+  "value": "90.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 8, p.19, Pixel-level AUROC panel, MVTec AD",
+  "protocol": "trained object-agnostic, tested with 'object' replaced by [cls] (AnomalyCLIP_re); bar label as printed"
+ },
+ {
+  "id": "anomalyclip-re-mvtec-aupro",
+  "claim": "AnomalyCLIP_re MVTec AD AUPRO (vs 81.4)",
+  "value": "80.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 8, p.19, AUPRO panel, MVTec AD",
+  "protocol": "trained object-agnostic, tested with 'object' replaced by [cls] (AnomalyCLIP_re); bar label as printed"
+ },
+ {
+  "id": "anomalyclip-re-visa-img-auroc",
+  "claim": "AnomalyCLIP_re VisA image AUROC (vs 82.1)",
+  "value": "82.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 8, p.19, Image-level AUROC panel, VisA",
+  "protocol": "trained object-agnostic, tested with 'object' replaced by [cls] (AnomalyCLIP_re); bar label as printed"
+ },
+ {
+  "id": "anomalyclip-re-visa-pix-auroc",
+  "claim": "AnomalyCLIP_re VisA pixel AUROC (vs 95.5)",
+  "value": "95.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Fig. 8, p.19, Pixel-level AUROC panel, VisA",
+  "protocol": "trained object-agnostic, tested with 'object' replaced by [cls] (AnomalyCLIP_re); bar label as printed"
+ },
+ {
+  "id": "anomalyclip-t7-patchcore-mvtec-img",
+  "claim": "PatchCore MVTec AD image AUROC in AnomalyCLIP Table 7",
+  "value": "99.0",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 7, p.18, Image-level MVTec AD, PatchCore",
+  "protocol": "full-shot; printed in AnomalyCLIP Table 7; provenance (re-run or copied) not stated"
+ },
+ {
+  "id": "anomalyclip-t7-patchcore-mvtec-pix",
+  "claim": "PatchCore MVTec AD pixel AUROC in AnomalyCLIP Table 7",
+  "value": "98.1",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 7, p.18, Pixel-level MVTec AD, PatchCore",
+  "protocol": "full-shot; printed in AnomalyCLIP Table 7; provenance (re-run or copied) not stated"
+ },
+ {
+  "id": "anomalyclip-t7-patchcore-mvtec-pro",
+  "claim": "PatchCore MVTec AD PRO in AnomalyCLIP Table 7",
+  "value": "92.8",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 7, p.18, Pixel-level MVTec AD, PatchCore (second value)",
+  "protocol": "full-shot; printed in AnomalyCLIP Table 7; provenance (re-run or copied) not stated"
+ },
+ {
+  "id": "anomalyclip-t7-patchcore-visa-img",
+  "claim": "PatchCore VisA image AUROC in AnomalyCLIP Table 7",
+  "value": "94.6",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 7, p.18, Image-level VisA, PatchCore",
+  "protocol": "full-shot; printed in AnomalyCLIP Table 7; provenance (re-run or copied) not stated"
+ },
+ {
+  "id": "anomalyclip-t7-rd4ad-mvtec-img",
+  "claim": "RD4AD MVTec AD image AUROC in AnomalyCLIP Table 7",
+  "value": "98.7",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 7, p.18, Image-level MVTec AD, RD4AD",
+  "protocol": "full-shot; printed in AnomalyCLIP Table 7; provenance (re-run or copied) not stated"
+ },
+ {
+  "id": "anomalyclip-t8-anomalous-mvtec",
+  "claim": "MVTec AD image AUROC with 'anomalous' instead of 'damaged'",
+  "value": "91.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 8, p.19, Image-level MVTec AD, column anomalous",
+  "protocol": "prompt-word ablation"
+ },
+ {
+  "id": "anomalyclip-t8-anomalous-visa",
+  "claim": "VisA image AUROC with 'anomalous' instead of 'damaged'",
+  "value": "80.7",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 8, p.19, Image-level VisA, column anomalous",
+  "protocol": "prompt-word ablation"
+ },
+ {
+  "id": "anomalyclip-headct-img-auroc",
+  "claim": "AnomalyCLIP HeadCT image AUROC",
+  "value": "93.4",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 2, p.8, HeadCT, AnomalyCLIP",
+  "protocol": "zero-shot medical; prompts trained on MVTec AD test split"
+ },
+ {
+  "id": "anomalyclip-isic-pix-auroc",
+  "claim": "AnomalyCLIP ISIC pixel AUROC",
+  "value": "89.7",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 2, p.8, ISIC, AnomalyCLIP",
+  "protocol": "zero-shot medical; prompts trained on MVTec AD test split"
+ },
+ {
+  "id": "anomalyclip-kvasir-pix-auroc",
+  "claim": "AnomalyCLIP Kvasir pixel AUROC (MVTec AD-trained)",
+  "value": "78.9",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 2, p.8, Kvasir, AnomalyCLIP",
+  "protocol": "zero-shot medical; prompts trained on MVTec AD test split"
+ },
+ {
+  "id": "anomalyclip-kvasir-pix-auroc-medtrained",
+  "claim": "AnomalyCLIP Kvasir pixel AUROC when trained on the ColonDB-based medical set",
+  "value": "92.5",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 3, p.9, Kvasir, AnomalyCLIP",
+  "protocol": "zero-shot medical; prompts trained on ColonDB + Endo set"
+ },
+ {
+  "id": "anomalyclip-covid-img-auroc-medtrained",
+  "claim": "AnomalyCLIP COVID-19 image AUROC when trained on the medical set (vs 80.1)",
+  "value": "70.9",
+  "paper": "AnomalyCLIP",
+  "arxiv": "2310.18961v12",
+  "loc": "Table 3, p.9, COVID-19, AnomalyCLIP",
+  "protocol": "zero-shot medical; prompts trained on ColonDB + Endo set"
+ }
+]

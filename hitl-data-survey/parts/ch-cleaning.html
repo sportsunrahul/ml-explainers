@@ -1,0 +1,60 @@
+<p class="kicker"><span class="act-n">Closing the loop</span>Back to the person</p>
+
+<section id="ch-cleaning" class="chapter">
+<h2>Which labels to re-check first</h2>
+<p>Re-checking labels is active learning again, applied to images that already have a label. The reviewer's time is the budget, and the order of the queue decides how much of it is wasted.</p>
+
+<figure class="viz" id="viz-relabel" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="relabel-canvas" role="img" aria-label="Three rising curves of the share of flipped labels fixed against the number of reviews: random order rises in a straight line; confident-learning margin order and the Phi order rise much faster. A dashed yellow line marks the chosen review budget."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-relabel-b2500" aria-pressed="false">2,500 reviews</button>
+    <button type="button" id="btn-relabel-b5000" aria-pressed="true">5,000 reviews</button>
+    <button type="button" id="btn-relabel-b10000" aria-pressed="false">10,000 reviews</button>
+    <button type="button" id="btn-relabel-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="relabel-readout" aria-live="polite"></p>
+  <figcaption>Computed on our run C (out-of-sample probabilities, 20.13% of labels flipped). A simplification: one reviewer who is always right fixes any wrong label in one look, so ambiguous images cost no extra votes here. In Bernhardt et al.'s simulation they do, which is where the entropy term pays off.</figcaption>
+</figure>
+
+<p>The naive order is random, and it fixes errors at the rate they occur: <span data-claim="run-c-review-5000-random">9.9%</span> of the flipped labels after 5,000 reviews. Sorting by confident learning's normalized margin fixes <span data-claim="run-c-review-5000-margin">25.3%</span> with the same effort.</p>
+
+<p>Bernhardt et al. (2022) add a second idea. Some images are not mislabeled but genuinely ambiguous; a reviewer looks, hesitates, and the image needs several more votes before a majority forms. Their score puts clear errors first and ambiguous images last:</p>
+
+<div class="eq" id="eq-phi" data-build data-viz="viz-relabel"><div class="tex tex-display">
+\htmlData{step=1, link=phi}{\Phi(\mathbf{x}, \hat{\mathbf{l}}; \theta)} = \htmlData{step=2, link=phi}{\mathrm{CE}(\hat{\mathbf{l}}, p_\theta)} - \htmlData{step=3, link=phi}{\mathrm{H}(p_\theta)}
+</div></div>
+<p class="eqno">Bernhardt et al. (2022), Eq. 2. <span class="tex">\mathrm{CE}</span>: cross-entropy of the current label counts <span class="tex">\hat{\mathbf{l}}</span> against the model's prediction (high when the label looks wrong). <span class="tex">\mathrm{H}</span>: entropy of the prediction (high when the image is ambiguous). This is the ambiguity term that BALD also subtracts (chapter 3); both scores push ambiguous images down the queue.</p>
+
+<p>In their simulation, with several noisy annotators per image, even the plainly trained (vanilla) selector reached 90% correct labels with <span data-claim="labelclean-body-25x-cifar10h">2.5x</span> fewer re-annotations than random on CIFAR-10H and <span data-claim="labelclean-body-3x-cxr">3x</span> fewer on a chest X-ray benchmark. In our one-look simulation the entropy term cannot help, and <span class="tex">\Phi</span> fixes <span data-claim="run-c-review-5000-phi">23.3%</span> after 5,000 reviews, close to the margin order. Their recommendation on where to spend the budget matches chapter 8: "<span data-claim="labelclean-eval-first">we generally recommend prioritising the cleaning of evaluation data up to an acceptable level before applying any remaining budget to clean the training set</span>".</p>
+
+<h3>The decisions, side by side</h3>
+<table class="decide">
+<thead><tr><th>Decision</th><th>Method</th><th>Signal</th><th>Cost</th><th>Chapter</th></tr></thead>
+<tbody>
+<tr><td>A new camera or product has almost no labels</td><td>Typical image per cluster (TypiClust)</td><td>Density in a self-supervised embedding</td><td>One embedding pass, clustering</td><td>5</td></tr>
+<tr><td>Which images get a label this round</td><td>Margin or entropy sampling</td><td>Softmax probabilities</td><td>One forward pass per pool image</td><td>2</td></tr>
+<tr><td>Skip images that are ambiguous to everyone</td><td>BALD with MC dropout or an ensemble</td><td>Disagreement between passes</td><td>T passes per image</td><td>3</td></tr>
+<tr><td>Fill a large batch from video</td><td>Deduplicate, then k-Center, BADGE or stochastic sampling</td><td>Feature-space distance</td><td>Pairwise distances</td><td>4</td></tr>
+<tr><td>Measure accuracy honestly</td><td>A random slice, more votes, re-checked</td><td>None: chosen at random</td><td>Labels that do not train</td><td>5, 8</td></tr>
+<tr><td>Which existing labels are wrong</td><td>Confident learning (cleanlab)</td><td>k-fold out-of-sample probabilities</td><td>k extra trainings</td><td>9</td></tr>
+<tr><td>Train before the review is done</td><td>Co-teaching or DivideMix</td><td>Per-image loss early in training</td><td>Two networks</td><td>10, 11</td></tr>
+<tr><td>Order the review queue</td><td>Margin, or Phi = CE - H with several annotators</td><td>Out-of-sample probabilities</td><td>Reviewer time</td><td>12</td></tr>
+</tbody></table>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Spend review time on the evaluation set first. Then order the training-set queue by how wrong the label looks (lowest margin, or highest Phi when ambiguous images need several votes), and stop when the queue's hit rate drops toward the base error rate.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('relabel-readout');
+  const f = FIG.relabel(document.getElementById('relabel-canvas'), { say: t => out.textContent = t });
+  const bs = [2500, 5000, 10000].map(v => document.getElementById('btn-relabel-b' + v));
+  bs.forEach((b, k) => b.addEventListener('click', () => { KIT.press(bs, b); f.budget([2500, 5000, 10000][k]); }));
+  document.getElementById('btn-relabel-reset').addEventListener('click', () => { KIT.press(bs, bs[1]); f.reset(); });
+  f.reset();
+})();
+</script>
+</section>

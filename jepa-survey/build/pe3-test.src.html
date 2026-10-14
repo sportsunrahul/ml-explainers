@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE3 test page</title>
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:1.125rem/1.7 Charter, "Bitstream Charter", Georgia, serif; }
+main { max-width:60rem; margin:0 auto; padding:1rem 16px 4rem; }
+h2 { font-size:1.6rem; margin:2rem 0 .6rem; }
+figure.viz { margin:1.8rem 0; padding:1rem; background:var(--panel); border-radius:14px; position:relative; }
+figure.viz canvas { display:block; width:100%; border-radius:9px; background:var(--bg); touch-action:none; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.8rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.34rem .85rem; cursor:pointer; }
+.controls button:hover { border-color:var(--muted); }
+.controls button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; color:var(--muted); }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+.readout { font:.92rem/1.5 system-ui, sans-serif; color:var(--fg); margin:.6rem 0 0; min-height:1.5em; }
+figcaption { font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.6rem; }
+@media (max-width:520px) { figure.viz { margin:1.4rem -16px; padding:.7rem; border-radius:0; } }
+</style>
+<!--PE3-->
+</head>
+<body>
+<main>
+<h2>1. Embedding cloud</h2>
+<figure class="viz" id="viz-emb">
+  <canvas id="emb-canvas" aria-label="400 embedding points in 3D"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-collapse">collapse</button>
+    <button type="button" id="btn-isotropic">isotropic</button>
+    <button type="button" id="btn-reset" data-cue-reset>reset</button>
+    <button type="button" id="btn-pulse-emb">pulse emb</button>
+  </div>
+  <p class="readout" id="emb-readout" aria-live="polite"></p>
+  <figcaption>Drag to rotate; arrow keys when focused.</figcaption>
+</figure>
+
+<h2>2. Energy surface</h2>
+<figure class="viz" id="viz-energy">
+  <canvas id="energy-canvas" aria-label="Energy surface with two valleys"></canvas>
+  <div class="controls">
+    <label>position <input type="range" id="energy-t" min="0" max="1" step=".01" value=".15"></label>
+  </div>
+  <p class="readout" id="energy-readout" aria-live="polite"></p>
+</figure>
+
+<h2>3. Plan in latent space</h2>
+<figure class="viz" id="viz-plan">
+  <canvas id="plan-canvas" aria-label="Start, goal, one plan and candidate trajectories"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-replan">replan</button>
+  </div>
+  <p class="readout" id="plan-readout" aria-live="polite"></p>
+</figure>
+</main>
+<script>
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const lerp = (a, b, u) => a + (b - a) * u;
+window.pe3scenes = {};
+
+// 1. Embedding cloud: u = 0 isotropic, u = 1 collapsed; positions derive from the fixed base each frame.
+{
+  const base = PE3.gaussian(400, { scale: [1, 1, 1], seed: 7 });
+  const st = { u: 0 };
+  let cancel = () => {};
+  const pts = { type: 'points', pts: base, color: '--blue', size: 3, link: 'emb' };
+  const s = PE3.scene(document.getElementById('emb-canvas'), { aspect: w => w < 520 ? .8 : .58, dist: 6, yaw: .6, pitch: .35,
+    items: [{ type: 'grid', y: -1.6, size: 2, step: .5 }, { type: 'axes', len: 1.8 }, pts, { type: 'label', at: [1.2, 1.7, 1.2], text: 'embeddings', color: '--blue', link: 'emb' }] });
+  window.pe3scenes.emb = s;
+  const out = document.getElementById('emb-readout');
+  const apply = () => { pts.pts = base.map(p => [p[0] * (1 - st.u), p[1] * (1 - st.u), p[2] * (1 - st.u)]); };
+  const go = (target, ms) => { cancel(); const from = st.u; cancel = s.tween(ms, u => { st.u = lerp(from, target, u); apply(); s.redraw(); }); };
+  document.getElementById('btn-collapse').addEventListener('click', () => { go(1, 800); out.textContent = 'Collapsed: every embedding at the origin.'; });
+  document.getElementById('btn-isotropic').addEventListener('click', () => { go(0, 800); out.textContent = 'Isotropic: an isotropic Gaussian cloud.'; });
+  document.getElementById('btn-reset').addEventListener('click', () => { cancel(); st.u = 0; apply(); s.redraw(); s.setView({ yaw: .6, pitch: .35, dist: 6 }, 500); out.textContent = 'Reset.'; });
+  document.getElementById('btn-pulse-emb').addEventListener('click', () => document.getElementById('viz-emb').dispatchEvent(new CustomEvent('pe-link', { detail: 'emb' })));
+  out.textContent = 'Isotropic: an isotropic Gaussian cloud.';
+}
+
+// 2. Energy surface: two valleys, a marker that slides along a path between them.
+{
+  const f = (x, z) => .16 * (x * x + z * z) - .75 * Math.exp(-((x - .9) ** 2 + (z - .6) ** 2) / .5) - .6 * Math.exp(-((x + .9) ** 2 + (z + .5) ** 2) / .6) - .1;
+  let ymin = 1e9, ymax = -1e9;
+  for (let x = -1.8; x <= 1.8; x += .05) for (let z = -1.8; z <= 1.8; z += .05) { const y = f(x, z); ymin = Math.min(ymin, y); ymax = Math.max(ymax, y); }
+  const dark = matchMedia('(prefers-color-scheme: dark)'); let tk = null, B, Y;
+  const ramp = y => { if (dark.matches !== tk) { tk = dark.matches; B = css('--blue'); Y = css('--yellow'); } return PE3.mix(B, Y, (y - ymin) / (ymax - ymin)); };
+  const surf = PE3.surface(f, { x0: -1.8, x1: 1.8, z0: -1.8, z1: 1.8, nx: 28, nz: 28, fill: ramp, alpha: .92, link: 'energy' });
+  const marker = { type: 'points', pts: [[0, 0, 0]], color: '--red', size: 7, link: 'x' };
+  const mlabel = { type: 'label', at: [0, 0, 0], text: 'x', color: '--red', dy: -16, link: 'x' };
+  const path = t => [lerp(-.9, .9, t), 0, lerp(-.5, .6, t)];
+  const pathPts = []; for (let i = 0; i <= 40; i++) { const p = path(i / 40); p[1] = f(p[0], p[2]) + .02; pathPts.push(p); }
+  const narrow = document.getElementById('energy-canvas').clientWidth < 520;
+  const s = PE3.scene(document.getElementById('energy-canvas'), { aspect: w => w < 520 ? .8 : .58, dist: narrow ? 8 : 6.7, yaw: -.5, pitch: .7, fov: 36,
+    items: [...surf, { type: 'line', pts: pathPts, color: '--fg', width: 1, dash: [3, 4], alpha: .6 }, marker, mlabel,
+      narrow ? { type: 'label', at: [1.8, f(1.8, -1.8) + .2, -1.8], text: 'E(x)', color: '--muted', dy: -8 } : { type: 'label', at: [1.8, f(1.8, 1.8), 1.8], text: 'E(x)', color: '--muted', dx: 12, align: 'left' }] });
+  window.pe3scenes.energy = s;
+  const inp = document.getElementById('energy-t'), out = document.getElementById('energy-readout');
+  const set = () => { const t = +inp.value, p = path(t); p[1] = f(p[0], p[2]) + .04; marker.pts = [p]; mlabel.at = p; s.redraw(); out.textContent = `E = ${f(p[0], p[2]).toFixed(2)} at t = ${t.toFixed(2)}`; };
+  inp.addEventListener('input', set); set();
+}
+
+// 3. Plan: one solid plan and 12 faint candidates; replan draws a new seed and eases the plan to the new best.
+{
+  const start = [-1.6, 0, -1], goal = [1.6, 0, 1.1];
+  const st = { seed: 11, plan: null, from: null, to: null, u: 1 };
+  const cands = { type: 'line', pts: [], color: '--muted', width: 1, dash: [3, 5], alpha: .5 };
+  const items = [{ type: 'grid', y: 0, size: 2, step: .5 }];
+  const candItems = Array.from({ length: 12 }, () => ({ ...cands, pts: [] }));
+  const plan = { type: 'line', pts: [], color: '--green', width: 2.5, arrow: true, link: 'plan' };
+  const gen = seed => {
+    const r = PE3.rng(seed), out = [];
+    for (let c = 0; c < 12; c++) {
+      const pts = [start], n = 4;
+      for (let i = 1; i < n; i++) { const t = i / n; pts.push([lerp(start[0], goal[0], t) + (r() - .5) * 1.4, .2 + r() * 1.2, lerp(start[2], goal[2], t) + (r() - .5) * 1.4]); }
+      pts.push(goal); out.push(pts);
+    }
+    return out;
+  };
+  const cost = pts => pts.reduce((s, p, i) => i ? s + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1], p[2] - pts[i - 1][2]) : 0, 0);
+  const curve = pts => { const o = []; for (let k = 0; k <= 32; k++) { const t = k / 32 * (pts.length - 1), i = Math.min(pts.length - 2, Math.floor(t)), u = t - i;
+    const a = pts[Math.max(0, i - 1)], b = pts[i], c = pts[i + 1], d = pts[Math.min(pts.length - 1, i + 2)];
+    o.push([0, 1, 2].map(j => .5 * (2 * b[j] + (-a[j] + c[j]) * u + (2 * a[j] - 5 * b[j] + 4 * c[j] - d[j]) * u * u + (-a[j] + 3 * b[j] - 3 * c[j] + d[j]) * u * u * u))); } return o; };
+  const s = PE3.scene(document.getElementById('plan-canvas'), { aspect: w => w < 520 ? .8 : .55, dist: 6.5, yaw: .35, pitch: .45,
+    items: [...items, ...candItems, plan,
+      { type: 'points', pts: [start], color: '--yellow', size: 6, link: 'start' }, { type: 'points', pts: [goal], color: '--red', size: 6, link: 'goal' },
+      { type: 'label', at: start, text: 'start', color: '--yellow', dy: -14, link: 'start' }, { type: 'label', at: goal, text: 'goal', color: '--red', dy: -14, link: 'goal' }] });
+  window.pe3scenes.plan = s;
+  const out = document.getElementById('plan-readout');
+  const build = seed => { const c = gen(seed); c.forEach((pts, i) => { candItems[i].pts = curve(pts); }); const best = c.map(cost).reduce((b, v, i, a) => v < a[b] ? i : b, 0); return candItems[best].pts; };
+  st.plan = build(st.seed); plan.pts = st.plan;
+  let busy = -1e9;
+  // A second press within the ease is ignored, so a replayed cue never advances the seed twice.
+  document.getElementById('btn-replan').addEventListener('click', () => {
+    if (performance.now() - busy < 800) return; busy = performance.now();
+    st.seed += 1; const from = st.plan, to = build(st.seed); st.plan = to;
+    s.tween(700, u => { plan.pts = from.map((p, i) => [0, 1, 2].map(j => lerp(p[j], to[i][j], u))); s.redraw(); });
+    out.textContent = `Plan from seed ${st.seed}: ${cost(to).toFixed(2)} latent units.`;
+  });
+  out.textContent = `Plan from seed ${st.seed}.`;
+}
+</script>
+</body>
+</html>

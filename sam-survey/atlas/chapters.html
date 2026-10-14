@@ -1,0 +1,109 @@
+  <article data-chapter="overview">
+    <header class="ch-head"><span class="num">1 of 8</span><h2>What SAM does</h2><p class="subhead">One click, three valid answers</p></header>
+    <div class="tools"><button type="button" class="tool play" data-replay>Replay</button></div>
+    <p>A <button class="inline-term" data-open="mask">mask</button> is the set of pixels that belong to one thing. The Segment Anything Model (SAM) returns a mask for any <button class="inline-term" data-open="prompt">prompt</button>: a click, a box, or a rough mask. It knows no class names. It only answers "which pixels go with this point?"</p>
+    <p>A click is often ambiguous. A click on the logo of a mug could mean the logo, the mug, or the mug with its saucer. SAM does not guess one. It returns three masks, each with a predicted quality score, and you pick.</p>
+    <p class="note">The stage is a drawn desk scene, not a photo. The click lands on the logo; the image is encoded once (blue); three cutouts lift off with toy scores.</p>
+    <p class="inscription">SAM turns "what is this?" into "show me the pixels that go with this point".</p>
+    <button type="button" class="continue" data-go="before">Continue with before SAM</button>
+  </article>
+
+  <article data-chapter="before">
+    <header class="ch-head"><span class="num">2 of 8</span><h2>Before SAM</h2><p class="subhead">Four ways to draw a mask, one fixed list of classes</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Model">
+        <button type="button" role="tab" data-step="0">FCN</button>
+        <button type="button" role="tab" data-step="1">U-Net</button>
+        <button type="button" role="tab" data-step="2">Mask R-CNN</button>
+        <button type="button" role="tab" data-step="3">Mask2Former</button>
+      </div>
+    </div>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-stride="32" aria-pressed="true">Stride 32</button><button type="button" class="tool" data-stride="16">Stride 16</button><button type="button" class="tool" data-stride="8">Stride 8</button></div></div>
+    <div class="step-text" data-step="0"><h3>FCN (2014): a class for every pixel</h3><p>A fully convolutional network gives a score for every class at every location, on a coarse grid of one cell per 32 pixels. Adding finer scores from earlier layers sharpens the edges: on PASCAL VOC, mean overlap rose from 59.4 at stride 32 to 62.7 at stride 8. This is <button class="inline-term" data-open="semantic">semantic segmentation</button>.</p></div>
+    <div class="step-text" data-step="1"><h3>U-Net (2015): carry the detail across</h3><p>A contracting path shrinks the image, an expanding path grows it back, and skip connections copy detail between matching levels. Built for cell images with 30 training images and 2 classes, it is still the shape of most dense-prediction networks.</p></div>
+    <div class="step-text" data-step="2"><h3>Mask R-CNN (2017): find each object, then mask it</h3><p>A detector puts a box on each object; a small head predicts a 28x28 mask inside each box, for 80 COCO classes. Two cups become two masks. This is <button class="inline-term" data-open="instance">instance segmentation</button>.</p></div>
+    <div class="step-text" data-step="3"><h3>MaskFormer and Mask2Former (2021): a set of masks</h3><p>A fixed set of <button class="inline-term" data-open="queries">queries</button> (100 by default) each predict a class or "no object" plus a mask, from a dot product with every pixel's embedding. One design covers semantic, instance and <button class="inline-term" data-open="panoptic">panoptic</button> segmentation. The best Mask2Former model (a Swin-L backbone with 200 queries) reaches 57.8 PQ on COCO panoptic.</p></div>
+    <p class="note">Toy scene, our class list (cup, plant, lamp, book). The window and the pencil are not in the list, so none of these models can mask them, however clear their edges are.</p>
+    <table class="data"><thead><tr><th>Model</th><th>Dataset</th><th>Classes</th></tr></thead><tbody><tr><td>FCN</td><td>PASCAL VOC</td><td>21</td></tr><tr><td>Mask R-CNN</td><td>COCO</td><td>80</td></tr><tr><td>Mask2Former</td><td>COCO panoptic</td><td>133</td></tr><tr><td>Mask2Former</td><td>ADE20K</td><td>150</td></tr></tbody></table>
+    <p class="inscription">Every model in this panel learned a fixed list of classes from one labelled dataset, and was retrained for each new task.</p>
+    <button type="button" class="continue" data-go="clicks">Continue with a human in the loop</button>
+  </article>
+
+  <article data-chapter="clicks">
+    <header class="ch-head"><span class="num">3 of 8</span><h2>A human in the loop</h2><p class="subhead">Click where the mask is wrong, again and again</p></header>
+    <div class="controls"><div class="row">
+      <button type="button" class="tool" data-target="mug" aria-pressed="true">Mug</button><button type="button" class="tool" data-target="plant">Plant</button><button type="button" class="tool" data-target="lamp">Lamp</button><button type="button" class="tool" data-target="window">Window</button>
+    </div></div>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-next>Simulated user: next click</button><button type="button" class="tool play" data-auto>Run 12 clicks</button></div></div>
+    <p>In <button class="inline-term" data-open="interactive">interactive segmentation</button>, a person clicks on the thing, the model draws a mask, and the person clicks again where it is wrong. No class list is needed, so the window is as easy as the mug.</p>
+    <p>RITM (2021) revived and refined two ideas from ITIS (2018) that SAM reuses: it feeds the previous mask back in, and it trains by simulating a user who clicks on the errors. Benchmarks score a model by the number of clicks it needs to reach 90% <button class="inline-term" data-open="iou">IoU</button>: on DAVIS, RITM (an HRNet-32 model) needs 5.34 and SimpleClick (a much larger ViT-H) 4.78, both trained on COCO and LVIS.</p>
+    <p class="note">Toy model. Green is the mask, red is where it is wrong, the dashed line is the true object. The simulated user clicks the centre of the largest red region, the rule the benchmarks use. You can click the image yourself.</p>
+    <p class="inscription">Interactive segmentation had prompts and feedback, but one kind of prompt, a few datasets, and one right answer per click.</p>
+    <button type="button" class="continue" data-go="promptable">Continue with any prompt, a valid mask</button>
+  </article>
+
+  <article data-chapter="promptable">
+    <header class="ch-head"><span class="num">4 of 8</span><h2>Any prompt, a valid mask</h2><p class="subhead">SAM returns three answers when one click is ambiguous</p></header>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-pmode="click" aria-pressed="true">One click</button><button type="button" class="tool" data-pmode="two">Two clicks</button><button type="button" class="tool" data-pmode="box">Box</button></div></div>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-pout="three" aria-pressed="true">Three outputs</button><button type="button" class="tool" data-pout="one">One output</button></div></div>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-pview="use" aria-pressed="true">Use</button><button type="button" class="tool" data-pview="train">Train</button><button type="button" class="tool" data-ptarget="0">smallest</button><button type="button" class="tool" data-ptarget="1" aria-pressed="true">middle</button><button type="button" class="tool" data-ptarget="2">largest</button></div></div>
+    <p>SAM's task is to return a valid mask for any <button class="inline-term" data-open="prompt">prompt</button>. A click on the logo could mean the logo, the mug, or the mug and saucer. A model with one output learns the blurry average of the three; SAM has three outputs and a predicted quality score for each.</p>
+    <p>In training, SAM computes the loss for all three masks but learns only from the best one, so, in our reading, each output slot specialises. With two or more prompts, for example two clicks, ambiguity is much rarer, and a fourth output returns one mask.</p>
+    <p>The cost is split: a heavy <button class="inline-term" data-open="encoder">image encoder</button> (a ViT-H) runs once per image, and a light decoder runs per prompt in about 50 ms in a web browser on a CPU.</p>
+    <p class="note">Toy model on the desk scene. Click anywhere. "One output" shows the average a single-output model would learn. "Train" shows which of the three masks gets the gradient for the mask you meant.</p>
+    <p class="inscription">One click can mean several things, so SAM answers with several masks and lets you choose.</p>
+    <button type="button" class="continue" data-go="engine">Continue with the data engine</button>
+  </article>
+
+  <article data-chapter="engine">
+    <header class="ch-head"><span class="num">5 of 8</span><h2>The data engine</h2><p class="subhead">The model labels its own training set</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Filter step">
+        <button type="button" role="tab" data-step="0">All</button><button type="button" role="tab" data-step="1">IoU</button><button type="button" role="tab" data-step="2">Stability</button><button type="button" role="tab" data-step="3">Not whole</button><button type="button" role="tab" data-step="4">NMS</button><button type="button" role="tab" data-step="5">Clean-up</button>
+      </div>
+    </div>
+    <div class="controls"><label class="slider"><span>Toy grid <b data-grid-value>8 x 8</b></span><input type="range" min="4" max="16" step="1" value="8" data-grid aria-label="Point grid size"></label></div>
+    <p>SAM's training set, SA-1B, has 1.1B masks on 11M images, and 99.1% of the masks were made by the model itself. It got there in three stages: annotators fixed SAM's masks (assisted-manual), then labelled only what SAM missed (semi-automatic), then SAM ran alone (fully automatic). Masks per image went from 20 to 44 to 72.</p>
+    <p>In the fully automatic stage, SAM is prompted with a 32 x 32 grid of points. Every point gives up to three masks, and filters keep the good ones: a high predicted <button class="inline-term" data-open="iou">IoU</button>, a stable outline (<button class="inline-term" data-open="stability">stability</button>), not the whole image, no duplicates (<button class="inline-term" data-open="nms">NMS</button>), and small holes and specks cleaned up.</p>
+    <p class="note">Toy model: a small grid on the desk scene. Step through the filters in the paper's order and watch the count fall. The predicted IoU and stability here are stand-ins computed from the drawing.</p>
+    <p class="inscription">SAM's real advantage was data: a loop where each better model made more and better masks.</p>
+    <button type="button" class="continue" data-go="sam2">Continue with SAM 2</button>
+  </article>
+
+  <article data-chapter="sam2">
+    <header class="ch-head"><span class="num">6 of 8</span><h2>SAM 2: video</h2><p class="subhead">Images with memory</p></header>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-sam2="click">Click the mug on frame 1</button><button type="button" class="tool play" data-sam2="play">Play</button><button type="button" class="tool" data-sam2="correct">Correct with one click</button></div></div>
+    <div class="controls"><label class="slider"><span>Frame</span><input type="range" min="0" max="23" step="1" value="0" data-sam2-frame aria-label="Frame"></label></div>
+    <p>SAM 2 (2024) treats an image as a one-frame video. Frames arrive as a stream; each frame's features look at a <button class="inline-term" data-open="memory">memory bank</button> of the 6 most recent frames and of the frames you prompted (up to a limit the paper does not give). One click on frame 1 segments the object in every frame, and one more click fixes the track wherever it drifts.</p>
+    <p>An <button class="inline-term" data-open="occlusion">occlusion</button> head says when the object is hidden. On images, where the memory is empty, SAM 2 (its Hiera-B+ size) is about 6 times faster than SAM with ViT-H.</p>
+    <p class="note">Toy video: the mug slides behind a box and comes out again. Click, play, then correct. The panel on the right shows which memories the current frame reads.</p>
+    <p class="inscription">Memory turns a per-frame segmenter into a tracker you can correct with a click.</p>
+    <button type="button" class="continue" data-go="sam3">Continue with SAM 3</button>
+  </article>
+
+  <article data-chapter="sam3">
+    <header class="ch-head"><span class="num">7 of 8</span><h2>SAM 3: concepts</h2><p class="subhead">Every object of this kind</p></header>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-concept="leaf">leaf</button><button type="button" class="tool" data-concept="pane">window pane</button><button type="button" class="tool" data-concept="mug">mug</button><button type="button" class="tool" data-concept="shade">lamp shade</button><button type="button" class="tool" data-concept="ymug">yellow mug</button><button type="button" class="tool" data-concept="cat">cat</button></div></div>
+    <div class="controls"><div class="row"><input type="text" data-concept-input maxlength="40" placeholder="type a phrase" aria-label="Phrase" style="font:inherit;flex:1;min-width:8rem;padding:.35rem .6rem;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg)"><button type="button" class="tool" data-concept-go>Find</button></div></div>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-exemplar="leaf">+ box on a small leaf</button><button type="button" class="tool" data-exemplar="pane">- box on the window frame</button></div></div>
+    <div class="controls"><div class="row"><button type="button" class="tool" data-presence="1">Presence on</button><button type="button" class="tool" data-presence="0">Presence off</button><button type="button" class="tool" data-hn="0">No hard negatives</button><button type="button" class="tool" data-hn="1">Hard negatives</button></div></div>
+    <p>SAM 3 (2025) changes the prompt from "this object" to "this concept": a short phrase such as "leaf" or an <button class="inline-term" data-open="exemplar">example box</button>, and it returns every instance. Inside, a detector with object queries, as in DETR, proposes regions, and a separate <button class="inline-term" data-open="presence">presence</button> score decides whether the concept is in the image at all.</p>
+    <p>The final score of each region is the presence score times the region's own score. Splitting "is it here?" from "where is each one?", together with training on hard negative phrases, helps SAM 3 say "no yellow mug" instead of masking the nearest mug.</p>
+    <p class="note">Toy model on the desk scene; all scores are invented to show the mechanism. Try "yellow mug" with presence on and off.</p>
+    <p class="inscription">SAM 3 answers "find all of these", and knows when there are none.</p>
+    <button type="button" class="continue" data-go="inspection">Continue with inspection</button>
+  </article>
+
+  <article data-chapter="inspection">
+    <header class="ch-head"><span class="num">8 of 8</span><h2>SAM for inspection</h2><p class="subhead">A strong labeller, a weak defect detector</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Method">
+        <button type="button" role="tab" data-step="0">One click</button><button type="button" role="tab" data-step="1">A box</button><button type="button" role="tab" data-step="2">Train a student</button>
+      </div>
+    </div>
+    <p>A defect is often not an object: a scratch has no closed outline and a stain has almost no edge. On close-up product photos, SAM tends to segment the main object rather than the defect. On the concealed-defect set CDS2K, even when the best of its automatic masks is chosen by comparing each with the ground truth (an upper bound), SAM ViT-H has a mean absolute error of 0.265 against 0.089 for the best dedicated model in the table (DGNet).</p>
+    <p>SAM helps as a tool. Boxes you already have become SAM masks, and the masks become noisy training labels for a small, fast student: Boxes2Pixels reaches a defect mIoU of 0.6523 against 0.5881 for SegFormer-B2 trained the same way, and runs in 6.20 ms on an H100 without SAM. For thin defects, HQ-SAM's fine-detail token is worth trying (our reading: no paper here tests it on defects).</p>
+    <p class="note">Toy model: a machined plate with a dent, a thin scratch and a faint stain. The outcomes follow the failure modes the papers report; they are not a model's output.</p>
+    <p class="inscription">Label with SAM, prompt it with boxes, and deploy a student you trained on its masks.</p>
+    <button type="button" class="continue" data-go="overview">Back to the overview</button>
+  </article>

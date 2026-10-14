@@ -1,0 +1,15 @@
+sim-distill: viz-temp toy, computed by parts/kit/30-temp.js (KIT.tempCore) under node, 2026-10-10.
+Classes truck, bus, car, motorbike, person, cat; teacher logits v = [9,6,4.5,2,0.5,-2]; student logits z = [7,2.5,4.5,3,2,2.5]; label = truck.
+Not a training toy: closed-form Hinton Eq. 1, Eq. 2 and Eq. 4 (on zero-meaned logits). Gradient size = L2 norm over the six logits.
+T=1: p=[0.942,0.047,0.010,0.001,0.000,0.000] q=[0.885,0.010,0.073,0.016,0.006,0.010] KL=0.1075 |g|=0.0936 (x0.681 hard) T2|g|=0.0936 (x0.68 hard) Eq4=1.0458 Eq4*T2=1.0458
+T=2: p=[0.726,0.162,0.077,0.022,0.010,0.003] q=[0.583,0.061,0.167,0.079,0.048,0.061] KL=0.2036 |g|=0.1082 (x0.787 hard) T2|g|=0.4328 (x3.15 hard) Eq4=0.2615 Eq4*T2=1.0458
+T=3: p=[0.564,0.208,0.126,0.055,0.033,0.014] q=[0.429,0.096,0.186,0.113,0.081,0.096] KL=0.1702 |g|=0.0721 (x0.525 hard) T2|g|=0.6493 (x4.72 hard) Eq4=0.1162 Eq4*T2=1.0458
+T=4: p=[0.464,0.219,0.151,0.081,0.055,0.030] q=[0.352,0.114,0.189,0.130,0.101,0.114] KL=0.1257 |g|=0.0478 (x0.348 hard) T2|g|=0.7654 (x5.57 hard) Eq4=0.0654 Eq4*T2=1.0458
+T=6: p=[0.358,0.217,0.169,0.112,0.087,0.057] q=[0.282,0.133,0.186,0.145,0.122,0.133] KL=0.0700 |g|=0.0243 (x0.177 hard) T2|g|=0.8758 (x6.37 hard) Eq4=0.0291 Eq4*T2=1.0458
+T=8: p=[0.306,0.210,0.174,0.127,0.106,0.077] q=[0.249,0.142,0.182,0.151,0.133,0.142] KL=0.0431 |g|=0.0145 (x0.105 hard) T2|g|=0.9261 (x6.74 hard) Eq4=0.0163 Eq4*T2=1.0458
+T=12: p=[0.255,0.199,0.175,0.142,0.126,0.102] q=[0.219,0.151,0.178,0.157,0.144,0.151] KL=0.0207 |g|=0.0067 (x0.049 hard) T2|g|=0.9718 (x7.07 hard) Eq4=0.0073 Eq4*T2=1.0458
+T=16: p=[0.231,0.192,0.175,0.149,0.136,0.116] q=[0.205,0.155,0.175,0.160,0.150,0.155] KL=0.0120 |g|=0.0039 (x0.028 hard) T2|g|=0.9926 (x7.22 hard) Eq4=0.0041 Eq4*T2=1.0458
+T=20: p=[0.218,0.187,0.174,0.153,0.142,0.126] q=[0.197,0.157,0.174,0.161,0.153,0.157] KL=0.0078 |g|=0.0025 (x0.018 hard) T2|g|=1.0043 (x7.31 hard) Eq4=0.0026 Eq4*T2=1.0458
+hard-label gradient |q(z;1) - y| = 0.1375
+Visible effect: without T^2 the soft gradient falls 0.094 -> 0.0025 (1/T^2 slope on the log axis); with T^2 it levels off near the Eq. 4 value 1.046 from T ~ 6.
+Bus vs cat (the dark-knowledge pair): teacher at T=1 gives 0.047 vs 0.000; at T=3 0.208 vs 0.014; the student has them equal, so the red arrows push bus up and cat down.

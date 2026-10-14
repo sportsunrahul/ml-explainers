@@ -1,0 +1,371 @@
+[
+ {
+  "id": "flamingo-gate-alpha-init",
+  "claim": "Initial value of the learnable gate scalars alpha_xattn and alpha_dense (tanh(0)=0 so LM unchanged at init)",
+  "value": "0",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.2 para 2; Fig. 4 pseudocode",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-gate-two-alphas",
+  "claim": "Number of separate tanh gates per GATED XATTN-DENSE block",
+  "value": "2 (alpha_xattn on cross-attention, alpha_dense on dense FFW)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Fig. 4 pseudocode",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-gate-residual",
+  "claim": "Gated residual update in pseudocode",
+  "value": "y = y + tanh(alpha_xattn) * attention(q=y, kv=x); y = y + tanh(alpha_dense) * ffw(y)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Fig. 4 pseudocode",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ablate-no-tanh",
+  "claim": "Overall score of Flamingo-3B with tanh gating removed vs with",
+  "value": "66.5 vs 70.7",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 3 row (iii)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-latents",
+  "claim": "Number of Perceiver Resampler output tokens (learned latents)",
+  "value": "64",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-resampler-layers",
+  "claim": "Perceiver Resampler layers / hidden dim / heads",
+  "value": "6 / 1536 / 16",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 4 (App. A.1.4)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-resampler-params",
+  "claim": "Perceiver Resampler trainable parameters (all sizes)",
+  "value": "194M",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5 (App. B.1.1)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-resampler-kv",
+  "claim": "Resampler keys/values are concatenation of flattened visual features and the latents",
+  "value": "concat([x_f, x])",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Fig. 5 pseudocode; App. A.1.1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-frames-train",
+  "claim": "Video frames per training clip and sampling rate",
+  "value": "8 frames at 1 fps",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 Data augmentation para",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-frames-infer",
+  "claim": "Video frames at inference (temporal embeddings linearly interpolated)",
+  "value": "30 frames at 3 FPS",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 Data augmentation para",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-freq-3b",
+  "claim": "GATED XATTN-DENSE insertion frequency, Flamingo-3B",
+  "value": "before every LM block (24 layers)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5; Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-freq-9b",
+  "claim": "GATED XATTN-DENSE insertion frequency, Flamingo-9B",
+  "value": "every 4th block (10 layers over 40)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5; Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-freq-80b",
+  "claim": "GATED XATTN-DENSE insertion frequency, Flamingo-80B",
+  "value": "every 7th block (12 layers over 80)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5; Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-sizes-total",
+  "claim": "Total parameter count of Flamingo-3B / 9B / 80B",
+  "value": "3.2B / 9.3B / 80B",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-frozen-lm",
+  "claim": "Frozen Chinchilla LM size for 3B / 9B / 80B",
+  "value": "1.4B / 7.1B / 70B",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-frozen-vision",
+  "claim": "Frozen vision encoder (NFNet-F6) parameters",
+  "value": "435M",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5; Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-trainable-xattn",
+  "claim": "Trainable GATED XATTN-DENSE parameters for 3B / 9B / 80B",
+  "value": "1.2B / 1.6B / 10B",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-trainable-80b-sum",
+  "claim": "Trainable params of 80B model = xattn-dense 10B + resampler 194M (derived sum, not stated as one number)",
+  "value": "about 10.2B",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 5",
+  "uncertain": true
+ },
+ {
+  "id": "flamingo-mask-rule",
+  "claim": "Cross-attention masking rule",
+  "value": "each text token attends only to visual tokens of the last preceding image/video (phi(l)=index of last image before l; 0 if none)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.3; App. A.1.3",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-mask-train-images",
+  "claim": "Max images per training sequence vs shots at evaluation",
+  "value": "5 vs 32",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.3 has a single paragraph; the 5-vs-32 sentence is its last-but-one sentence",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-mask-ablation",
+  "claim": "Overall score, attend only to last image vs all previous images (Flamingo-3B)",
+  "value": "70.7 vs 63.5",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. Table 10 row (ii)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-pnext",
+  "claim": "p_next probability of mapping text to the NEXT image during M3W training; overall score at 0.0 / 0.5 / 1.0",
+  "value": "0.5; 69.6 / 70.7 / 70.4",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. A.3.2; App. Table 10 row (iii)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-m3w-size",
+  "claim": "M3W webpages",
+  "value": "approximately 43 million (43.3M documents, 185M images)",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4; Table 14 datasheet",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-m3w-seq",
+  "claim": "M3W subsequence length and images kept per sample",
+  "value": "L=256 tokens, up to first N=5 images",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-align-size",
+  "claim": "ALIGN image-text pairs",
+  "value": "1.8 billion",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ltip-size",
+  "claim": "LTIP image-text pairs",
+  "value": "312 million",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-vtp-size",
+  "claim": "VTP video-text pairs (avg length ~22 s)",
+  "value": "27 million",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Sec. 2.4",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-loss-weights",
+  "claim": "Dataset weights lambda_m for M3W / ALIGN / LTIP / VTP",
+  "value": "1.0 / 0.2 / 0.2 / 0.03",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 Loss and optimisation",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-objective",
+  "claim": "Training objective: weighted sum of per-dataset expected NLL",
+  "value": "sum_m lambda_m E_{(x,y)~D_m}[ -sum_l log p(y_l | y_<l, x_<=l) ]",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Eq. 2 (Sec. 2.4)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-compute-80b",
+  "claim": "Training compute for 80B",
+  "value": "1536 TPUv4 chips for 15 days",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "App. B.1.2 Infrastructure",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-headline-six",
+  "claim": "Tasks (of 16) where Flamingo-80B with 32 shots beats fine-tuned SotA (Table 1 caption says \"seven\"; table rows, Sec. 3.1 and Fig. 2 support six)",
+  "value": "6 (OKVQA, MSVDQA, Flickr30K, iVQA, STAR, NextQA); Table 1 caption says seven",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Fig. 2 caption; Sec. 3.1; Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-headline-okvqa",
+  "claim": "OKVQA 32-shot Flamingo-80B vs fine-tuned SotA",
+  "value": "57.8 vs 54.4",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-headline-vqav2",
+  "claim": "VQAv2 32-shot Flamingo-80B vs fine-tuned SotA",
+  "value": "67.6 vs 80.2",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-headline-coco",
+  "claim": "COCO CIDEr 32-shot Flamingo-80B vs fine-tuned SotA",
+  "value": "113.8 vs 143.3",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-scale-vqav2",
+  "claim": "VQAv2 32-shot for 3B / 9B / 80B",
+  "value": "57.1 / 60.4 / 67.6",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-fewshot-coco-shots",
+  "claim": "COCO CIDEr of Flamingo-80B at 0 / 4 / 32 shots",
+  "value": "84.3 / 103.2 / 113.8",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ft-sota-five",
+  "claim": "Fine-tuned Flamingo-80B sets new SotA on five more tasks",
+  "value": "VQAv2 82.0, VATEX 84.2, VizWiz 65.7 (test-dev), MSRVTTQA 47.4, HatefulMemes 86.6",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ablate-freeze-lm",
+  "claim": "Overall score when LM is unfrozen (pretrained init) vs frozen (Flamingo-3B)",
+  "value": "62.7 vs 70.7",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 3 row (viii)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ablate-resampler",
+  "claim": "Overall score: Perceiver Resampler vs MLP vs plain Transformer",
+  "value": "70.7 vs 66.6 vs 66.7",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 3 row (vi)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ablate-freq",
+  "claim": "Overall score by xattn frequency: every / every 2nd / every 4th / single in middle",
+  "value": "70.7 / 68.2 / 68.8 / 59.8",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 3 row (v)",
+  "uncertain": false
+ },
+ {
+  "id": "flamingo-ablate-no-m3w",
+  "claim": "Overall score without M3W interleaved data",
+  "value": "53.4 vs 70.7",
+  "paper": "Flamingo",
+  "version": "v2",
+  "loc": "Table 3 row (i)",
+  "uncertain": false
+ }
+]

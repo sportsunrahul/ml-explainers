@@ -1,0 +1,60 @@
+<section id="ch-map" class="chapter">
+<h2>The field at a glance</h2>
+<p>Model compression is older than the deep-learning boom, and the large language model (LLM) wave made it popular again. A count of arXiv titles shows where the activity went, and a family tree shows where each method on this page came from.</p>
+
+<figure class="viz" id="viz-map">
+  <span class="badge sourced">Sourced</span>
+  <div class="controls fig-top" role="group" aria-label="Title subset">
+    <span class="lbl">Highlight</span>
+    <button type="button" id="btn-map-llm" aria-pressed="true">titles naming an LLM</button>
+    <button type="button" id="btn-map-dv" aria-pressed="false">titles naming detection or segmentation</button>
+    <button type="button" id="btn-map-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="map-canvas" role="img" aria-label="Three bar charts, one each for distillation, quantization and pruning, with one bar per year from 2014 to 2026. Grey bars count every matching arXiv title; a solid overlay counts the highlighted subset."></canvas>
+  <p class="readout" id="map-readout" aria-live="polite"></p>
+  <figcaption>Each grey bar counts arXiv papers in machine-learning and vision categories whose title contains the topic word, by year of first submission. The solid overlay counts the subset whose title also names an LLM, or detection or segmentation. Queried on <span data-claim="scan-date">2026-10-09</span>; the 2026 bars are partial. Title words are a heuristic: "distillation" also catches dataset distillation, and "detection" also catches anomaly detection. Each count's exact query is in the page's claims file.</figcaption>
+</figure>
+
+<p><b>Make a guess first:</b> in 2022, how many quantization titles named a language model? The answer is <span data-claim="scan-quantization-llm-2022">5</span> of <span data-claim="scan-quantization-all-2022">217</span>. By 2025 it was <span data-claim="scan-quantization-llm-2025">160</span> of <span data-claim="scan-quantization-all-2025">600</span>. Titles naming detection or segmentation stayed small: <span data-claim="scan-quantization-densevision-2025">21</span> quantization titles and <span data-claim="scan-pruning-densevision-2025">26</span> pruning titles in 2025.</p>
+<p>For a detector, that is good news. The methods that matter most for a convolutional detector (per-channel INT8, calibration, short quantization-aware fine-tuning, 2:4 sparsity) were published between 2017 and 2021 and have been tested at length since. The newer LLM methods solve problems that detectors mostly do not have, such as single-token decoding that waits on weight memory. Chapters 10 and 11 explain when they still apply.</p>
+
+<div class="aside claim">
+  <h4>Claim card: the arXiv scan</h4>
+  <dl>
+    <dt>Claim</dt><dd>Since 2023, titles naming LLMs make up a much larger share of distillation, quantization and pruning papers on arXiv than before (in 2025, from about a seventh for distillation to about a third for pruning, computed from the counts above; the share does not rise every year); titles naming detection or segmentation stay a small minority.</dd>
+    <dt>Measured</dt><dd>The arXiv API's total-result count for each topic word in the title, restricted to machine-learning, vision and related categories, one query per year of first submission, with and without a second title keyword.</dd>
+    <dt>Cannot see</dt><dd>Papers that use a method without its name in the title, papers outside arXiv, and quality. A title count measures attention, not progress.</dd>
+    <dt>Falsifier</dt><dd>A hand-labelled sample in which most "LLM" titles turn out not to be about compressing language models, or a full-text search showing detection work hidden under generic titles.</dd>
+  </dl>
+</div>
+
+<h3>Family tree</h3>
+<p>Each pill is one paper, in the lane of the lever it pulls. Papers run down the page in order of first arXiv submission, one row each. Select one to see what it did and which earlier work it builds on. The "builds on" links are our reading of each paper's own related-work section, not a citation graph.</p>
+<figure class="viz" id="viz-tree">
+  <span class="badge sourced">Sourced</span>
+  <div class="tree" id="tree-host" style="margin-top:1.4rem"></div>
+  <div class="controls"><button type="button" id="btn-tree-reset" class="reset" data-cue-reset>Clear selection</button></div>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Rows follow each paper's first arXiv submission date (order, not a scale); TensorRT 11 is placed at the documentation version read for this page. Lines are our reading of lineage.</figcaption>
+</figure>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>The left half of the tree (distillation with feature imitation, per-channel INT8 with good calibration, QAT, structured and 2:4 sparsity) is the toolbox for convolutional detectors and segmenters. The LLM-era methods on the right matter when your model has transformer blocks with large activation outliers, or when weight memory, not arithmetic, limits its speed.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('map-readout'), kit = KIT.mapchart(document.getElementById('map-canvas'));
+  const bs = { llm: document.getElementById('btn-map-llm'), dense_vision: document.getElementById('btn-map-dv') };
+  const sync = () => { for (const k in bs) bs[k].setAttribute('aria-pressed', String(k === kit.state.split)); out.textContent = KIT.mapText(kit.state.split); };
+  for (const k in bs) bs[k].addEventListener('click', () => { kit.set({ split: k }); sync(); });
+  document.getElementById('btn-map-reset').addEventListener('click', () => { kit.set({ split: 'llm' }); sync(); });
+  sync();
+  const tout = document.getElementById('tree-readout'), tree = KIT.tree(document.getElementById('tree-host'));
+  tree.pills.forEach(b => b.addEventListener('click', () => { tree.set({ sel: b.id.slice(9) }); tout.innerHTML = KIT.treeText(tree.state.sel); }));
+  document.getElementById('btn-tree-reset').addEventListener('click', () => { tree.set({ sel: null }); tout.innerHTML = KIT.treeText(null); });
+  tout.innerHTML = KIT.treeText(null);
+})();
+</script>
+</section>

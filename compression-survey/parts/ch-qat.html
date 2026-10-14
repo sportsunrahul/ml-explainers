@@ -1,0 +1,166 @@
+<section id="ch-qat" class="chapter">
+<h2>Training through the rounding: QAT and the straight-through estimator</h2>
+<p>Quantization-aware training (QAT) simulates the rounding in the forward pass, so the network can learn weights that survive it. The obstacle is the backward pass: rounding is a staircase, and a staircase has zero slope almost everywhere.</p>
+
+<figure class="viz" id="viz-ste" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Gradient">
+    <span class="lbl">Gradient</span>
+    <button type="button" id="btn-ste-true" aria-pressed="false">true</button>
+    <button type="button" id="btn-ste-ste" aria-pressed="true">straight-through</button>
+    <button type="button" id="btn-ste-lsq" aria-pressed="false">straight-through + learned step</button>
+  </div>
+  <canvas id="ste-canvas" role="img" aria-label="Top: the fake quantizer as a yellow staircase from the shadow weight w to the rounded weight w_hat, with a dashed red target line and the clipped regions shaded. A blue dot is the shadow weight, a yellow dot its rounded value, and a small red curve the loss so far. Bottom: two derivatives of the staircase: the true one, zero with spikes at the jumps, and the straight-through one, a red box equal to 1 inside the range."></canvas>
+  <div class="controls" role="group" aria-label="Training">
+    <span class="lbl">Train</span>
+    <button type="button" id="btn-ste-step1">1 step</button>
+    <button type="button" id="btn-ste-step5">5 steps</button>
+    <button type="button" id="btn-ste-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="ste-readout" aria-live="polite"></p>
+  <figcaption>Computed toy, simulated once before shipping (notes/sim-ste.txt). One weight, a 3-bit signed quantizer in the form of LSQ Eq. 1-2 (4 levels below zero, 3 above, step 0.25 at the start), a model output equal to the rounded weight, and the loss (output minus 1.1) squared. Plain gradient descent with learning rate 0.1. The learned step uses LSQ's gradient (Eq. 3) scaled by one over the square root of 3, the value of Esser's scale for a layer with a single weight.</figcaption>
+</figure>
+
+<p>The top panel is the forward pass. The network keeps a full-precision copy of each weight, the <em>shadow weight</em> <span class="tex">w</span> (blue). Every forward pass rounds it onto the grid, <span class="tex">\hat w</span> (yellow), and uses only the rounded value. The bottom panel is what the backward pass needs: the slope of the staircase. Its true value is zero everywhere except at the jumps, where it is infinite. Press "true", then "1 step" a few times: the loss stays where it is, and the weight never moves.</p>
+<p>The straight-through estimator (STE) ignores the staircase in the backward pass and treats rounding as the identity. Inside the grid's range, the gradient passes through unchanged; outside it, where the quantizer clips, it is zero. Now the weight moves, and the rounded value climbs the staircase toward the target.</p>
+
+<div class="eq" id="eq-fq" data-build data-viz="viz-ste"><div class="tex tex-display">
+\htmlClass{t-yellow}{\hat{v}} = \htmlData{step=3, link=round}{\Big\lfloor} \htmlData{step=2, link=clip}{\mathrm{clip}\big(} \htmlData{step=1, link=shadow}{\htmlClass{t-blue}{v} / s}\htmlData{step=2, link=clip}{,\, -Q_N,\, Q_P\big)} \htmlData{step=3, link=round}{\Big\rceil} \htmlData{step=4, link=grid}{\times s}
+</div></div>
+<p class="eqno">Eq. 1-2 in Esser et al. (LSQ), arXiv 1902.08153v3, written as one line (our notation). Nagel et al. Eq. 7 (arXiv 2106.08295v1) writes the same operation with a zero-point; Wu et al. Eq. 12 (arXiv 2004.09602v1) writes it as dequantize(quantize(x)).</p>
+<ul class="gloss">
+  <li><span class="tex">v</span>: the full-precision value, here the shadow weight; <span class="tex">\hat v</span>: the value the forward pass uses.</li>
+  <li><span class="tex">s</span>: the step size, the distance between grid levels.</li>
+  <li><span class="tex">Q_N, Q_P</span>: the number of levels below and above zero. For <span class="tex">b</span>-bit signed weights, <span class="tex">Q_N = 2^{b-1}</span> and <span class="tex">Q_P = 2^{b-1} - 1</span>.</li>
+  <li><span class="tex">\lfloor \cdot \rceil</span>: round to the nearest integer. Multiplying back by <span class="tex">s</span> returns a float that lies on the grid: this is <em>fake quantization</em>, integer values carried in a float tensor.</li>
+</ul>
+<div class="eq" id="eq-ste" data-build data-viz="viz-ste"><div class="tex tex-display">
+\frac{\partial \hat{v}}{\partial v} = \htmlData{step=1, link=ste}{\begin{cases} \htmlClass{t-red}{1} & \text{if } -Q_N < v/s < Q_P \\ 0 & \text{otherwise} \end{cases}} \qquad \text{instead of} \qquad \htmlData{step=2, link=true}{\frac{\partial \lfloor y \rceil}{\partial y} = 0 \text{ almost everywhere}}
+</div></div>
+<p class="eqno">Eq. 5 in Esser et al., arXiv 1902.08153v3. The same clipped rule is Eq. 14-15 in Krishnamoorthi, arXiv 1806.08342v1, and Eq. 13 in Wu et al., arXiv 2004.09602v1. Bengio et al., arXiv 1308.3432v1 (Sec. 4, Eq. 13), named the straight-through estimator and define its plain form, identity with no clipping, crediting Hinton's lecture <span data-claim="bengio-ste-hinton-lecture">15b</span>.</p>
+<p><b>Make a guess before you press "5 steps" with the straight-through gradient.</b> The target lies above the top level of the grid. Where will the weight stop? It climbs to the top level and stops there, short of the target. Once the shadow weight passes the top of the range, the clipped STE passes no gradient, so nothing pulls the weight back and nothing moves the range.</p>
+<p>The fix is to learn the range too. Learned step size quantization (LSQ, Esser et al.) makes the step <span class="tex">s</span> a trainable parameter and differentiates the quantizer with respect to it, again with the STE for the rounding:</p>
+<div class="eq" id="eq-lsq" data-build data-viz="viz-ste"><div class="tex tex-display">
+\htmlData{step=1, link=step}{\frac{\partial \hat{v}}{\partial s}} = \htmlData{step=2, link=round}{\begin{cases} -v/s + \lfloor v/s \rceil & \text{if } -Q_N < v/s < Q_P \\ -Q_N & \text{if } v/s \le -Q_N \\ Q_P & \text{if } v/s \ge Q_P \end{cases}}
+</div></div>
+<p class="eqno">Eq. 3 in Esser et al., arXiv 1902.08153v3 (<code>\sfrac</code> written as a slash). Nagel et al. Eq. 38 is the same gradient in their notation.</p>
+<p>Inside the range, the step's gradient is the distance from <span class="tex">v/s</span> to its rounded value, so it is largest near a jump. Outside the range it is the full level count, so a clipped value pushes the range outward. LSQ multiplies this gradient by <span class="tex">g = 1/\sqrt{N Q_P}</span>, where <span class="tex">N</span> is the number of weights in the layer, so the step changes about as fast as the weights do. Press "straight-through + learned step": the step grows until the top level reaches the target, and the loss goes to nearly zero.</p>
+<p>Three papers set the range in three ways. Jacob et al. (arXiv 1712.05877v1) do not learn it: weight ranges are the minimum and maximum of the weights, activation ranges are a moving average of the values seen in training, and "backpropagation still happens as usual". The paper does not name the STE. It also turns activation quantization off at the start of training, for <span data-claim="jacob-act-delay-low">50 thousand</span> to <span data-claim="jacob-act-delay-high">2 million</span> steps (<span data-claim="jacob-act-delay-protocol">500</span> thousand in all its training protocols). PACT (Choi et al., arXiv 1805.06085v2) learns a clipping value for each layer's activations; its gradient comes only from the inputs that are clipped. LSQ learns the step for weights and activations. On the first and last layers they differ too: LSQ always keeps them at 8 bits, PACT leaves them unquantized in its accuracy runs (but assumes 8 bits in its hardware model), and Jacob et al. do not discuss them.</p>
+
+<h3>Inside one QAT step on a detector: forward, then backward</h3>
+<p>The same machinery runs at the scale of a detector. Every convolution gets a fake quantizer on its weights and on its output activations; the rest is ordinary fine-tuning.</p>
+<figure class="viz archflow" id="viz-qatflow" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-qatflow-images" aria-pressed="false">1 Images</button>
+    <button type="button" id="btn-qatflow-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-qatflow-fpn" aria-pressed="false">3 FPN</button>
+    <button type="button" id="btn-qatflow-head" aria-pressed="false">4 Head</button>
+    <button type="button" id="btn-qatflow-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-qatflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-qatflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Range setting">
+    <span>ranges</span>
+    <button type="button" id="btn-qatflow-jacob" aria-pressed="true">from statistics (Jacob)</button>
+    <button type="button" id="btn-qatflow-learned" aria-pressed="false">learned (PACT, LSQ)</button>
+  </div>
+  <canvas id="qatflow-canvas" role="img" aria-label="One QAT step for a detector as boxes: images and target boxes, a backbone of fake-quantized convolutions with batch norm folded, an FPN, a detection head, and the detection loss. In the backward stages red arrows run from the loss back through every quantized block to the shadow weights."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-qatflow-prev">Previous</button>
+    <button type="button" id="btn-qatflow-next">Next</button>
+    <button type="button" id="btn-qatflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="qatflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>A detector in fine-tuning: <b class="c-blue">images and target boxes</b> go into a <b class="c-yellow">backbone, FPN and head whose convolutions are fake-quantized</b>, and the <b class="c-red">detection loss</b> compares the predictions with the targets. Press <b>1 Images</b>, then <b>Next</b>. Shapes are symbolic: <span class="tex">B</span> images of <span class="tex">H \times W</span> pixels.</p></div>
+    <div data-stage="images" hidden><h4>1. A batch of images</h4><p>QAT starts from the trained FP32 detector, not from scratch. Wu et al. start from the best calibrated PTQ model and fine-tune detectors on COCO with batch size <span data-claim="wu20-t10-detection-batch">16</span>.</p></div>
+    <div data-stage="backbone" hidden><h4>2. Fake-quantized convolutions</h4><p>Before each convolution, batch norm is folded into the weights, <span class="tex">w_{\text{fold}} = \gamma w / \sqrt{EMA(\sigma_B^2) + \varepsilon}</span> (Jacob Eq. 14), and the folded weights pass through a fake quantizer. Activations are fake-quantized where inference will quantize them: after the activation function and after each residual add. Biases are not fake-quantized; at inference they become 32-bit integers.</p></div>
+    <div data-stage="fpn" hidden><h4>3. FPN</h4><p>The feature pyramid adds lateral and top-down paths. Each convolution is fake-quantized the same way. An add or a concatenation needs its inputs on compatible grids, so it is quantized where the inference engine will quantize it.</p></div>
+    <div data-stage="head" hidden><h4>4. Head</h4><p>The head predicts class scores and box offsets at every position of every level. It is quantized like the rest; whether the final layer stays at higher precision is a deployment choice (LSQ keeps first and last layers at 8 bits).</p></div>
+    <div data-stage="loss" hidden><h4>5. The detection loss</h4><p>The ordinary loss of the detector, classification plus box regression, computed in floating point. QAT does not add a loss term; it only changes the forward pass.</p></div>
+    <div data-stage="backward" hidden><h4>6. Where the gradient goes</h4><p>The gradient leaves the loss and retraces every arrow. At each fake quantizer the STE passes it through unchanged inside the range and stops it for clipped values. It reaches the shadow weight of every convolution and the batch-norm parameters. With learned ranges it also reaches each quantizer's step or clipping value; with Jacob's ranges it does not.</p></div>
+    <div data-stage="update" hidden><h4>7. The update</h4><p>The optimizer changes the FP32 shadow weights; the integer weights are recomputed from them in the next forward pass. Wu et al.'s recipe: fine-tune for about <span data-claim="wu20-qat-schedule-frac">10%</span> of the original schedule, starting at <span data-claim="wu20-qat-lr-frac">1%</span> of the original learning rate with cosine annealing; for detection, <span data-claim="wu20-t10-detection-optimizer">SGD</span> for <span data-claim="wu20-t10-detection-epochs">3</span> epochs at learning rate <span data-claim="wu20-t10-detection-lr">2.5e-5</span>. Wu et al. keep the ranges <span data-claim="wu20-qat-ranges-fixed">fixed</span> during fine-tuning. Nagel et al. fine-tune EfficientDet-D1 for <span data-claim="nagel21-qat-effdet-epochs">20</span> epochs with <span data-claim="nagel21-qat-optimizer">Adam</span>. After training, the folded integer graph is exported for the inference engine.</p></div>
+  </div>
+  <figcaption>The graph and what each box trains follow Jacob et al. Sec. 3 (fake quantization, batch-norm folding, range setting) and Nagel et al. Sec. 4 (STE, learned ranges). The detector is a generic FPN detector, our example; shapes are symbolic.</figcaption>
+</figure>
+<p><b>Make a guess before you press "6 Gradients":</b> does the gradient stop at the fake quantizers, or reach the weights in the first convolution? It reaches every shadow weight, because the STE lets it through each quantizer. Only values outside the clipping range block it.</p>
+
+<h3>What QAT buys on detectors</h3>
+<p>For 8-bit CNN detectors, very little: post-training quantization is already close. Nagel et al. ran both pipelines on the same models (absolute points, mean of 5 PTQ runs and 3 QAT runs):</p>
+<table class="data">
+  <caption>Nagel et al. 2021, Table 6 (PTQ) and Table 10 (QAT), per-channel weights, the authors' own simulation. Absolute points.</caption>
+  <thead><tr><th>Model (backbone), dataset, metric</th><th>FP32</th><th>W8A8 PTQ</th><th>W8A8 QAT</th><th>W4A8 PTQ</th><th>W4A8 QAT</th><th>W4A4 QAT</th></tr></thead>
+  <tbody>
+    <tr><td>EfficientDet-D1, COCO, mAP</td><td><span data-claim="nagel21-t10-efficientdet-d1-fp32">40.08</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w8a8">38.67</span></td><td><span data-claim="nagel21-t10-efficientdet-d1-pc-w8a8">38.97</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w4a8">35.08</span></td><td><span data-claim="nagel21-t10-efficientdet-d1-pc-w4a8">36.75</span></td><td><span data-claim="nagel21-t10-efficientdet-d1-pc-w4a4">28.68</span></td></tr>
+    <tr><td>DeeplabV3 (MobileNetV2), Pascal VOC, mIoU</td><td><span data-claim="nagel21-t10-deeplabv3-fp32">72.94</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w8a8">72.27</span></td><td><span data-claim="nagel21-t10-deeplabv3-pc-w8a8">72.87</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w4a8">71.67</span></td><td><span data-claim="nagel21-t10-deeplabv3-pc-w4a8">73.01</span></td><td><span data-claim="nagel21-t10-deeplabv3-pc-w4a4">68.90</span></td></tr>
+  </tbody>
+</table>
+<p>QAT matters at 4 bits. With 4-bit weights and activations, the EfficientDet-D1 detector still ends at <span data-claim="nagel21-t10-efficientdet-d1-pc-w4a4">28.68</span> mAP after QAT, against <span data-claim="nagel21-t10-efficientdet-d1-fp32">40.08</span> in FP32, so low-bit activations remain hard for this kind of network. Wu et al. compared PTQ and QAT at 8 bits on larger CNN detectors and segmenters. They report the change relative to FP32 in percent, which is a different unit from the points above:</p>
+<table class="data">
+  <caption>Wu et al. 2020, Table 7: INT8, per-channel max-calibrated weights, per-tensor activations; PTQ with the best calibrator, QAT fine-tuned from it. COCO 2017 val; PyTorch with simulated quantization. Relative change = (INT8 - FP32) / FP32.</caption>
+  <thead><tr><th>Model (backbone), metric</th><th>FP32</th><th>PTQ</th><th>PTQ relative</th><th>QAT</th><th>QAT relative</th></tr></thead>
+  <tbody>
+    <tr><td>Faster R-CNN (ResNet-50-FPN), mAP</td><td><span data-claim="wu20-t7-faster-r-cnn-fp32">36.95</span></td><td><span data-claim="wu20-t7-faster-r-cnn-ptq-acc">36.82</span></td><td><span data-claim="wu20-t7-faster-r-cnn-ptq-rel">-0.35%</span></td><td><span data-claim="wu20-t7-faster-r-cnn-qat-acc">36.76</span></td><td><span data-claim="wu20-t7-faster-r-cnn-qat-rel">-0.51%</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50-FPN), mAP</td><td><span data-claim="wu20-t7-mask-r-cnn-fp32">37.89</span></td><td><span data-claim="wu20-t7-mask-r-cnn-ptq-acc">37.80</span></td><td><span data-claim="wu20-t7-mask-r-cnn-ptq-rel">-0.24%</span></td><td><span data-claim="wu20-t7-mask-r-cnn-qat-acc">37.75</span></td><td><span data-claim="wu20-t7-mask-r-cnn-qat-rel">-0.37%</span></td></tr>
+    <tr><td>RetinaNet (ResNeXt-101-32x4d-FPN), mAP</td><td><span data-claim="wu20-t7-retinanet-fp32">39.30</span></td><td><span data-claim="wu20-t7-retinanet-ptq-acc">39.19</span></td><td><span data-claim="wu20-t7-retinanet-ptq-rel">-0.28%</span></td><td><span data-claim="wu20-t7-retinanet-qat-acc">39.25</span></td><td><span data-claim="wu20-t7-retinanet-qat-rel">-0.13%</span></td></tr>
+    <tr><td>DeepLabV3 (ResNet-101), mIoU</td><td><span data-claim="wu20-t7-deeplabv3-fp32">67.40</span></td><td><span data-claim="wu20-t7-deeplabv3-ptq-acc">67.50</span></td><td><span data-claim="wu20-t7-deeplabv3-ptq-rel">0.15%</span></td><td><span data-claim="wu20-t7-deeplabv3-qat-acc">67.50</span></td><td><span data-claim="wu20-t7-deeplabv3-qat-rel">0.15%</span></td></tr>
+  </tbody>
+</table>
+<p>For these networks QAT does not help: Faster R-CNN and Mask R-CNN end slightly below their PTQ scores, and Wu et al. put the Mask R-CNN gap at the noise level (their text does not discuss Faster R-CNN). The classification rows of the same table tell the other side. EfficientNet b0, full of depthwise convolutions, goes from <span data-claim="wu20-t7-efficientnet-b0-ptq-rel">-6.23%</span> after PTQ to <span data-claim="wu20-t7-efficientnet-b0-qat-rel">0.13%</span> after QAT.</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>For an 8-bit ResNet-FPN detector, try PTQ first: in Wu's measurements QAT added nothing. Reach for QAT when PTQ leaves a gap you cannot accept, typically with depthwise-separable backbones or 4-bit weights. Then start from the best calibrated model, fine-tune for about a tenth of the original schedule at a small learning rate, and export the folded graph that matches the inference engine. The <a href="#ch-guide">decision guide</a> places this step after partial quantization.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-ste'), out = document.getElementById('ste-readout');
+  const kit = KIT.ste(document.getElementById('ste-canvas'), { fig });
+  const modes = ['true', 'ste', 'lsq'], mb = modes.map(m => document.getElementById('btn-ste-' + m));
+  const sync = () => { mb.forEach((b, i) => b.setAttribute('aria-pressed', String(modes[i] === kit.state.mode))); out.innerHTML = KIT.steText(kit.info()); };
+  mb.forEach((b, i) => b.addEventListener('click', () => { kit.set({ mode: modes[i] }); sync(); }));
+  document.getElementById('btn-ste-step1').addEventListener('click', () => { kit.set({ step: 1 }); sync(); });
+  document.getElementById('btn-ste-step5').addEventListener('click', () => { kit.set({ step: 5 }); sync(); });
+  document.getElementById('btn-ste-reset').addEventListener('click', () => { kit.set({ mode: 'ste', reset: true }); sync(); });
+  sync();
+})();
+(() => {
+  const V = { jacob: { learned: false, name: 'ranges from statistics' }, learned: { learned: true, name: 'learned ranges' } };
+  const conv = v => 'shadow W, BN ' + (v.learned ? '| + step s (LSQ)' : '| ranges: min/max, EMA');
+  ArchFlow.mount({
+    prefix: 'qatflow', grid: { cols: 5, rows: 2 },
+    boxes: {
+      img: { c: 0, r: .5, lane: 'blue', title: ['images'], glyph: 'photos', data: true },
+      bb: { c: 1, r: .5, lane: 'yellow', title: ['backbone', 'fake-quant convs'], glyph: 'layers' },
+      fpn: { c: 2, r: .5, lane: 'yellow', title: ['FPN'], glyph: 'layers' },
+      head: { c: 3, r: 0, lane: 'yellow', title: ['head'], glyph: 'grid', cls: false },
+      gt: { c: 3, r: 1, lane: 'blue', title: ['target boxes'], glyph: 'matrix', data: true },
+      loss: { c: 4, r: .5, lane: 'red', title: ['detection loss'], glyph: 'loss' },
+    },
+    edges: [['img', 'bb'], ['bb', 'fpn'], ['fpn', 'head'], ['head', 'loss'], ['gt', 'loss']],
+    stages: [
+      { key: 'images', show: ['img', 'gt'] }, { key: 'backbone', show: ['bb'] }, { key: 'fpn', show: ['fpn'] }, { key: 'head', show: ['head'] },
+      { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: V, variant: 'jacob',
+    shape: id => ({ img: 'B x 3 x H x W', bb: 'maps at H/8, H/16, H/32', fpn: 'C channels per level', head: 'scores + boxes per level', gt: 'boxes, classes', loss: 'one number' })[id],
+    sub: id => id === 'fpn' ? 'one map per level' : null,
+    params: (id, v) => ({ bb: conv(v), fpn: conv(v), head: 'shadow W' + (v.learned ? ', step s' : '') })[id] || null,
+    frozen: () => false,
+    readout: (s, v) => ({
+      overview: `One fine-tuning step with ${v.name}. Yellow boxes are fake-quantized: integer values carried in float tensors.`,
+      images: 'Step 1: a batch of B images and their target boxes. QAT fine-tunes a trained model.',
+      backbone: 'Step 2: each conv folds BN into its weights, fake-quantizes them, and fake-quantizes its output activations.',
+      fpn: 'Step 3: the FPN convs are fake-quantized the same way; adds are quantized where the engine will quantize them.',
+      head: 'Step 4: the head predicts class scores and box offsets at every position of every level.',
+      loss: 'Step 5: the usual detection loss in floating point; QAT adds no loss term.',
+      backward: `Backward: the STE passes the gradient through every fake quantizer inside its range. It reaches every shadow weight${v.learned ? ' and every learned step or clip value' : '; ranges get no gradient, they follow min/max and a moving average'}.`,
+      update: `Update: the optimizer steps the FP32 shadow weights${v.learned ? ' and the learned ranges' : ''}; the next forward pass rounds them again.`,
+    })[s],
+  });
+})();
+</script>
+</section>

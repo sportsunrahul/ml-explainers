@@ -1,0 +1,138 @@
+<section id="ch-clip" class="chapter">
+<h2>Image and text: CLIP's softmax, SigLIP's sigmoid</h2>
+<p>A label says "these photos belong together". A caption says much more: "a brown dog catching a frisbee on a beach". What if the partner of a photo is not a second crop but the sentence written under it? This chapter answers three questions. How does the lineup loss turn into CLIP? Why can CLIP then classify images it was never trained to label? And how did SigLIP make the same idea cheaper?</p>
+
+<h3>The game: a table of photos and captions</h3>
+<p>Collect pairs from the web: a photo and the text next to it. Put <span class="tex">N</span> pairs in a batch. Send the photos through an image encoder and the captions through a text encoder; both end in unit vectors of the same length, so you can take the cosine of any photo with any caption. That gives an <span class="tex">N \times N</span> table. Row <span class="tex">i</span> is photo <span class="tex">i</span>, column <span class="tex">j</span> is caption <span class="tex">j</span>, and the true pairs sit on the <b class="c-green">diagonal</b>. Every other cell is a mismatched pair, a negative.</p>
+<p>The figure is such a table for eight made-up pairs. The photos are <b class="c-blue">blue</b> row labels, the captions <b class="c-yellow">yellow</b> column labels. We built the embeddings so that each photo has one look-alike caption: dog and "cat", car and "truck", and so on.</p>
+
+<figure class="viz" id="viz-clipsig" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="How each cell becomes a probability">
+    <span class="lbl">Score each cell with</span>
+    <button type="button" id="btn-clipsig-softmax" aria-pressed="false">Softmax over the row (CLIP)</button>
+    <button type="button" id="btn-clipsig-sigmoid" aria-pressed="false">Sigmoid per cell (SigLIP)</button>
+    <button type="button" id="btn-clipsig-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="clipsig-canvas" role="img" aria-label="An eight by eight table: rows are photos (dog, cat, car, truck, pizza, cake, tree, flower), columns are their captions. Cells show cosine similarity, then either row-softmax probabilities, which sum to one along each row, or independent sigmoid probabilities with a bias. A red outline marks what the top-left cell depends on: the whole row for the softmax, the cell alone for the sigmoid. A bar beside the table splits one row of a real-size batch across devices."></canvas>
+  <div class="controls" role="group" aria-label="Bias and batch size">
+    <label for="clipsig-b">bias b <input type="range" id="clipsig-b" min="-10" max="0" step="1" value="-10"> <output id="clipsig-b-val" for="clipsig-b">-10</output></label>
+    <label for="clipsig-n">batch N <input type="range" id="clipsig-n" min="3" max="20" step="1" value="15"> <output id="clipsig-n-val" for="clipsig-n">32,768</output></label>
+    <label for="clipsig-d">devices D <input type="range" id="clipsig-d" min="0" max="8" step="1" value="3"> <output id="clipsig-d-val" for="clipsig-d">8</output></label>
+  </div>
+  <p class="readout" id="clipsig-readout" aria-live="polite"></p>
+  <figcaption>The eight photo and eight caption embeddings are made-up 12-dimensional unit vectors (each look-alike pair shares one direction); the table shows their real cosines, and the buttons apply the real softmax or sigmoid with scale <span class="tex">t = 10</span>. Nothing is trained here. The bias slider changes <span class="tex">b</span> in the sigmoid view. The batch and device sliders do not change the small table: they size the bar, which counts how many similarity scores one cell's probability needs in a batch of <span class="tex">N</span> pairs spread evenly over <span class="tex">D</span> devices (our arithmetic). Numbers: <code>notes/sim-clipsig.txt</code>.</figcaption>
+</figure>
+
+<p>Before you press anything, read the raw cosines. Each photo is closest to its own caption, but the dog photo also scores well against "cat". <b>Make a guess before you press "Softmax over the row".</b> The dog row has cosine <span data-computed>0.91</span> for "dog" and <span data-computed>0.46</span> for "cat". What probability will the softmax give "cat"?</p>
+<p>Press it. "Cat" gets about <span data-computed>one percent</span>. The softmax turns the row into a lineup: the probabilities must sum to 1 (see the "sum" column), so the clear winner takes almost everything. The red outline shows the catch. The number in the top-left cell depends on <em>every</em> score in its row.</p>
+
+<h3>CLIP: the lineup in both directions</h3>
+<p>CLIP (Contrastive Language-Image Pre-training) trains both encoders so that each row of the table picks out its own caption, and each column picks out its own photo. It is the lineup loss of <a href="#ch-infonce">chapter 3</a> run twice: once with the photo as the anchor and the captions as candidates, and once the other way round. The paper writes the loss as a few lines of code (its Figure 3). The heart of it:</p>
+<pre style="overflow-x:auto;font-size:.85rem"><code>logits = np.dot(I_e, T_e.T) * np.exp(t)
+labels = np.arange(n)
+loss_i = cross_entropy_loss(logits, labels, axis=0)
+loss_t = cross_entropy_loss(logits, labels, axis=1)
+loss   = (loss_i + loss_t)/2</code></pre>
+<p>Here <code>I_e</code> and <code>T_e</code> are the unit-length photo and caption embeddings, <code>labels</code> says "the answer for row <span class="tex">i</span> is column <span class="tex">i</span>", and the two cross-entropies run down the columns and along the rows. The paper prints no numbered equation for this. The SigLIP paper writes the same loss out in full, and we quote that form:</p>
+<div class="eq" id="eq-clip" data-build data-viz="viz-clipsig"><div class="tex tex-display">
+\htmlClass{t-red}{\mathcal{L}_{\text{soft}}} = -\frac{1}{2|\mathcal{B}|}\sum_{i=1}^{|\mathcal{B}|}\left( \htmlData{step=2, link=row}{\log\frac{e^{\htmlData{step=1, link=diag}{t\,\htmlClass{t-blue}{\mathbf{x}_i}\cdot\htmlClass{t-yellow}{\mathbf{y}_i}}}}{\sum_{j=1}^{|\mathcal{B}|}e^{t\,\htmlClass{t-blue}{\mathbf{x}_i}\cdot\htmlClass{t-yellow}{\mathbf{y}_j}}}} + \htmlData{step=3, link=col}{\log\frac{e^{t\,\htmlClass{t-blue}{\mathbf{x}_i}\cdot\htmlClass{t-yellow}{\mathbf{y}_i}}}{\sum_{j=1}^{|\mathcal{B}|}e^{t\,\htmlClass{t-blue}{\mathbf{x}_j}\cdot\htmlClass{t-yellow}{\mathbf{y}_i}}}}\right)
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.1 of Zhai et al., "Sigmoid loss for language image pre-training", ICCV 2023, arXiv <a href="https://arxiv.org/abs/2303.15343v4">2303.15343v4</a> (its labels "image to text softmax" and "text to image softmax" over the two terms are dropped here). It is the loss of the Figure 3 pseudocode in Radford et al., arXiv <a href="https://arxiv.org/abs/2103.00020v1">2103.00020v1</a>, with <code>np.exp(t)</code> written as <span class="tex">t</span> (our transcription).</p>
+<ul class="gloss">
+  <li><span class="tex">\mathcal{B}</span>: the batch of photo-caption pairs; <span class="tex">|\mathcal{B}|</span> is its size, the <span class="tex">N</span> above.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mathbf{x}_i}</span>, <span class="tex">\htmlClass{t-yellow}{\mathbf{y}_j}</span>: the unit-length embeddings of photo <span class="tex">i</span> and caption <span class="tex">j</span>. Their dot product is the cosine in cell <span class="tex">(i, j)</span>.</li>
+  <li><span class="tex">t</span>: the scale, one over the temperature <span class="tex">\tau</span> of <a href="#ch-infonce">chapter 3</a>. It is learned, as <span class="tex">t = e^{t'}</span>.</li>
+  <li>First log: the softmax along row <span class="tex">i</span>, "which caption is photo <span class="tex">i</span>'s partner?". Its denominator sums over every caption.</li>
+  <li>Second log: the softmax down column <span class="tex">i</span>, "which photo is caption <span class="tex">i</span>'s partner?". Its denominator sums over every photo.</li>
+</ul>
+<p>CLIP learns the temperature instead of fixing it. It starts at the equivalent of <span data-claim="clip-temp-init">0.07</span>, and the scale <span class="tex">t</span> is clipped so it never exceeds <span data-claim="clip-temp-clip">100</span>, to keep training stable.</p>
+<p>Try one row with numbers. Take three pairs and <span class="tex">t = 10</span>, the figure's scale. Say the cosines are:</p>
+<div class="tex tex-display">\begin{array}{c|ccc} & \text{"dog"} & \text{"cat"} & \text{"car"} \\ \hline \text{dog} & 0.8 & 0.5 & 0.1 \\ \text{cat} & 0.5 & 0.7 & 0.2 \\ \text{car} & 0.1 & 0.2 & 0.9 \end{array}</div>
+<p>The dog row has scores <span class="tex">8,\ 5,\ 1</span>. The softmax gives <span class="tex">e^8 / (e^8 + e^5 + e^1) \approx 0.95</span> for "dog", <span class="tex">0.05</span> for "cat" and <span class="tex">0.001</span> for "car". The row's loss is <span class="tex">-\log 0.95 \approx 0.05</span>: this row is nearly solved.</p>
+
+<h3>Zero-shot: which caption is my partner?</h3>
+<p>Here is the payoff. After training, you can classify a photo into classes nobody trained on. Write one caption per class, such as "a photo of a dog." and "a photo of a cat.", and embed them with the text encoder. Then ask the question CLIP was trained on: which caption is this photo's partner? The class of the most similar caption is the answer. No labelled training images are needed, so this is called <em>zero-shot</em> classification.</p>
+<p>CLIP was trained on <span data-claim="clip-wit-size">400 million</span> photo-caption pairs from the web, with a batch of <span data-claim="clip-batch">32,768</span> pairs. Zero-shot on ImageNet, its best model (a ViT-L/14 at 336 pixels) reaches <span data-claim="clip-zs-best">76.2</span>% top-1, and its ResNet-50 reaches <span data-claim="clip-zs-rn50">59.6</span>%. The best model thus matches a ResNet-50 trained on all <span data-claim="clip-imagenet-labels">1.28 million</span> labelled ImageNet images, without using any of them. A different protocol, a linear classifier trained on the frozen image features with labels, gives <span data-claim="clip-lp-best">85.4</span>% for the same ViT-L/14 at 336 pixels.</p>
+
+<h3>The trouble with the softmax: it needs the whole row</h3>
+<p>Look at the red outline again. To turn one cell into a probability, the softmax needs the sum over its whole row, and the column loss needs the whole column. At toy size that is nothing. At CLIP's batch the photos and captions are spread over many accelerators, called <em>devices</em>, each holding a slice of the batch.</p>
+<p>Use the sliders under the figure. With the defaults, <span data-computed>a batch of 32,768 pairs over 8 devices</span>, one row's denominator needs <span data-computed>all 32,768 scores</span>, and <span data-computed>28,672</span> of the captions behind them live on other devices. So before any row can be scored, every device must collect every caption embedding from every other device (an <em>all-gather</em>), and the same again for photos for the columns. Make the batch bigger and the full table grows with its square.</p>
+
+<h3>SigLIP: one yes/no question per cell</h3>
+<p>SigLIP (Sigmoid loss for Language-Image Pre-training) drops the lineup. Each cell asks its own question: <em>do this photo and this caption belong together?</em> A diagonal cell should answer yes, every other cell no. Each answer is scored like any binary classifier, with a sigmoid and a log loss. No cell looks at any other cell.</p>
+<p>Press "Sigmoid per cell". With the starting bias <span class="tex">b = -10</span>, every cell, even the true pairs, says "probably not". That looks wrong, but it is deliberate. In a batch of <span class="tex">N</span> pairs there are only <span class="tex">N</span> yes-cells and <span class="tex">N^2 - N</span> no-cells, so "no" is almost always right. Starting every cell near "no" means training does not first spend large steps learning that. Now drag the bias slider to <span data-computed>-5</span>. A cell now says yes once <span class="tex">t \cos + b &gt; 0</span>, that is, once its cosine passes <span class="tex">-b/t = 0.5</span>. The diagonal turns green, and the dog photo still gives "cat" a fair <span data-computed>0.40</span>, an honest "maybe" that the softmax would never allow.</p>
+<div class="eq" id="eq-siglip" data-build data-viz="viz-clipsig"><div class="tex tex-display">
+\htmlClass{t-red}{\mathcal{L}_{\text{sig}}} = -\frac{1}{|\mathcal{B}|}\htmlData{step=4, link=cell}{\sum_{i=1}^{|\mathcal{B}|}\sum_{j=1}^{|\mathcal{B}|}} \log\frac{1}{1+e^{\htmlData{step=1, link=diag}{\htmlClass{t-green}{z_{ij}}}\left(\htmlData{step=2, link=scale}{-t\,\htmlClass{t-blue}{\mathbf{x}_i}\cdot\htmlClass{t-yellow}{\mathbf{y}_j}} \htmlData{step=3, link=bias}{- b}\right)}}
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.2 of SigLIP, arXiv 2303.15343v4, with the sign of <span class="tex">b</span> taken from the paper's Algorithm 1, which computes <code><span data-claim="siglip-bias-sign">logits = dot(zimg, ztxt.T) * t + b</span></code>. The equation printed in Sec. 3.2 has <span class="tex">+b</span> inside the exponent, which would make the logit <span class="tex">t\,\mathbf{x}\cdot\mathbf{y} - b</span>. With <span class="tex">b</span> starting at -10, only the Algorithm 1 form starts every cell near "no", which is what the paper says the bias is for, so we follow Algorithm 1.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{z_{ij}}</span>: the label of cell <span class="tex">(i, j)</span>: +1 on the diagonal (a true pair), -1 everywhere else.</li>
+  <li><span class="tex">t\,\mathbf{x}_i\cdot\mathbf{y}_j + b</span>: the cell's logit. Each term of the loss is <span class="tex">\log\sigma(z_{ij}(t\,\mathbf{x}_i\cdot\mathbf{y}_j + b))</span>, with <span class="tex">\sigma(u) = 1/(1+e^{-u})</span> the sigmoid.</li>
+  <li><span class="tex">t = e^{t'}</span>: the learned scale. <span class="tex">t'</span> starts at <span data-claim="siglip-tprime-init">log 10</span>, so <span data-claim="siglip-t-init">t = 10</span>.</li>
+  <li><span class="tex">b</span>: a learned bias shared by every cell, starting at <span data-claim="siglip-b-init">-10</span>. It sets the cosine where "no" turns into "yes".</li>
+  <li>The double sum runs over all <span class="tex">|\mathcal{B}|^2</span> cells, each scored on its own, and is divided by <span class="tex">|\mathcal{B}|</span>.</li>
+</ul>
+<p>Back to the three-pair example, dog row, <span class="tex">t = 10</span>. At the starting bias <span class="tex">b = -10</span> the logits are <span class="tex">-2,\ -5,\ -9</span> and the probabilities <span class="tex">0.12,\ 0.007,\ 0.0001</span>: the "dog" cell pays <span class="tex">-\log 0.12 \approx 2.1</span>, the two no-cells almost nothing. With <span class="tex">b = -5</span> the logits are <span class="tex">3,\ 0,\ -4</span> and the probabilities <span class="tex">0.95,\ 0.50,\ 0.02</span>. Now "dog" pays <span class="tex">0.05</span>, "cat" pays <span class="tex">-\log(1 - 0.5) \approx 0.69</span>, and "car" pays <span class="tex">0.02</span>. The softmax was happy with this row; the sigmoid still pushes "cat" down, because it judges each cell against a fixed line rather than against its neighbours.</p>
+
+<details class="check">
+  <summary>Check yourself: add a fourth caption, "puppy", with cosine 0.7 to the dog photo. Which of the dog row's probabilities change, under each loss?</summary>
+  <p>Under the softmax, all of them. The new score <span class="tex">e^7</span> joins the denominator, and "dog" drops from <span class="tex">0.95</span> to about <span class="tex">0.70</span>, though nothing about the dog photo or its caption changed. Under the sigmoid, none of them. "Puppy" simply gets its own cell, and with <span class="tex">b = -5</span> it reads <span class="tex">\sigma(2) \approx 0.88</span>. That independence is the whole point: a cell's loss never needs the rest of the batch.</p>
+</details>
+
+<h3>What independence buys</h3>
+<p>Press "Sigmoid per cell" and look at the bar again. One cell's probability needs one score, its own. The total work is the same, all <span class="tex">N^2</span> cells still get scored, but no device ever needs the whole row at once. SigLIP's implementation exploits this. Each device scores the block of cells for its own photos and the captions it currently holds, then passes those captions to its neighbour and repeats. There are <span data-claim="siglip-chunk-comm">no all-gathers</span>, and the memory at any moment drops from <span class="tex">|\mathcal{B}|^2</span> to <span class="tex">B_d^2</span>, where <span class="tex">B_d</span> is the per-device batch (our notation; the paper writes it <span class="tex">b</span>, the same letter as the bias). The <a href="../vlm-survey/explainer.html#ch-sigmoid">VLM survey's sigmoid chapter</a> animates this device-by-device schedule and trains the bias from both starting points.</p>
+<p>The second gain is at small batches. Each row of the softmax is a lineup, and a lineup with few candidates is an easy test. Each sigmoid cell is a fixed question, so it does not depend on how many others are in the batch. The paper finds the sigmoid "significantly better" than the softmax below a batch of <span data-claim="siglip-small-batch-threshold">16 k</span>, and the two meet at large batches:</p>
+<table class="data">
+  <thead><tr><th>Batch size</th><th>Sigmoid (SigLIP)</th><th>Softmax (CLIP loss)</th></tr></thead>
+  <tbody>
+    <tr><td>512</td><td><span data-claim="siglip-small-512-sig">51.5</span></td><td><span data-claim="siglip-small-512-soft">47.7</span></td></tr>
+    <tr><td>4k</td><td><span data-claim="siglip-small-4k-sig">65.3</span></td><td><span data-claim="siglip-small-4k-soft">63.8</span></td></tr>
+    <tr><td>32 k</td><td colspan="2" style="text-align:center"><span data-claim="siglip-32k-3b">69.9</span> (both)</td></tr>
+  </tbody>
+  <caption>Zero-shot ImageNet top-1 (%), SigLIP Base (both encoders trained), <span data-claim="page-clip-tab5-examples">3 billion</span> training examples seen; SigLIP App. B, Table 5.</caption>
+</table>
+<p>Bigger batches stop paying off: in the paper's runs the sigmoid peaked at <span data-claim="siglip-saturate">32 k</span>, while the softmax still gained a little up to <span data-claim="siglip-softmax-best-bs">98 k</span>. And the cheapness pays off in another setting: with a frozen, already-trained ViT-g/14 image encoder and only the text encoder trained, SigLIP's sigmoid reaches <span data-claim="siglip-siglit-g14">84.5</span>% zero-shot on ImageNet, on <span data-claim="siglip-siglit-g14-chips">four TPUv4 chips</span> in <span data-claim="siglip-siglit-g14-days">two days</span>.</p>
+
+<h3>Where this came from</h3>
+<p>CLIP was posted in February 2021. Its authors name the lineup losses of this page, the N-pair loss and InfoNCE, as its ancestors, and its big change was the data: captions scraped at scale instead of labels. ALIGN appeared the same month with the same loss on even noisier data. SigLIP followed in 2023 and kept everything but the loss.</p>
+
+<h3>Where it stands in 2025-26</h3>
+<p>Image-text contrastive training is the branch of this page that is still growing, and its lesson is simple. Since 2021 the loss has hardly changed; the gains came from data and scale. ALIGN (<a href="https://arxiv.org/abs/2102.05918v2">2102.05918v2</a>) trained the CLIP loss on <span data-claim="align-data">1.8B</span> noisy alt-text pairs with almost no cleaning and reached <span data-claim="align-zs-imagenet">76.4</span>% zero-shot ImageNet. MetaCLIP (<a href="https://arxiv.org/abs/2309.16671v6">2309.16671v6</a>) kept CLIP's recipe and only balanced the data per concept, reaching <span data-claim="metaclip-b16-zs">70.8</span>% zero-shot with a ViT-B/16. The OpenCLIP scaling laws (<a href="https://arxiv.org/abs/2212.07143v2">2212.07143v2</a>) showed accuracy rising as a power law with model and data size, and Perception Encoder (<a href="https://arxiv.org/abs/2504.13181v2">2504.13181v2</a>) scaled the plain CLIP loss to <span data-claim="pe-coreg-zs">85.4</span>% zero-shot ImageNet. SigLIP 2 (<a href="https://arxiv.org/abs/2502.14786v1">2502.14786v1</a>) keeps this chapter's sigmoid and adds extra training signals on top. For dense, pixel-level features, self-distilled image-only encoders are now the usual choice; <a href="#ch-guide">the decision guide</a> covers when to pick which.</p>
+<p>For how CLIP-style encoders feed vision-language models, see the <a href="../vlm-survey/explainer.html">VLM survey</a>; for how they let detectors find objects named in free text, see the <a href="../ovd-survey/explainer.html">open-vocabulary detection survey</a>.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>How CLIP turns a batch of photo-caption pairs into a table and trains a lineup along every row and every column.</li>
+    <li>Why zero-shot classification is just "which caption is my partner?".</li>
+    <li>Why the softmax needs the whole row, and what that costs across devices.</li>
+    <li>How SigLIP's per-cell sigmoid and its bias of <span data-claim="siglip-b-init">-10</span> remove that need, and why it helps most at small batches.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>Reach for a pretrained CLIP- or SigLIP-family encoder when you want to search images with text, or to sort images into classes you can name but have few examples of. Write captions the way web text reads ("a photo of a ..."), and test a few phrasings, since the wording moves accuracy. If you fine-tune one yourself on a modest number of GPUs, the sigmoid loss is the safer choice: it does not need a huge batch, and it does not need every device to see every caption. For pixel-level tasks such as segmentation, compare against a self-distilled encoder such as DINOv2 or DINOv3 before you commit.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-clipsig'), out = document.getElementById('clipsig-readout');
+  const kit = KIT.clipsig(document.getElementById('clipsig-canvas'), { fig });
+  const btns = { softmax: document.getElementById('btn-clipsig-softmax'), sigmoid: document.getElementById('btn-clipsig-sigmoid') };
+  const bIn = document.getElementById('clipsig-b'), nIn = document.getElementById('clipsig-n'), dIn = document.getElementById('clipsig-d');
+  const S = { mode: null };
+  const vals = () => ({ b: +bIn.value, N: 2 ** +nIn.value, D: 2 ** +dIn.value });
+  const text = () => { const v = vals(); out.textContent = KIT.clipsigText(S.mode, v.b, v.N, v.D); };
+  const go = mode => { S.mode = mode; kit.set(mode, vals().b); Object.entries(btns).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === mode))); text(); };
+  btns.softmax.addEventListener('click', () => go('softmax'));
+  btns.sigmoid.addEventListener('click', () => go('sigmoid'));
+  bIn.addEventListener('input', () => { document.getElementById('clipsig-b-val').textContent = bIn.value; if (S.mode === 'sigmoid') kit.set('sigmoid', +bIn.value); else kit.state.b = +bIn.value; text(); });
+  const batch = () => { const v = vals(); document.getElementById('clipsig-n-val').textContent = KIT.csNum(v.N); document.getElementById('clipsig-d-val').textContent = String(v.D); kit.setBatch(v.N, v.D); text(); };
+  nIn.addEventListener('input', batch); dIn.addEventListener('input', batch);
+  document.getElementById('btn-clipsig-reset').addEventListener('click', () => { bIn.value = -10; nIn.value = 15; dIn.value = 3; document.getElementById('clipsig-b-val').textContent = '-10'; batch(); go(null); });
+  batch(); go(null);
+})();
+</script>
+</section>

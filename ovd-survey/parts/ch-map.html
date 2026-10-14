@@ -1,0 +1,34 @@
+<section id="ch-map" class="chapter">
+<h2>The field in one picture</h2>
+<p>Before the models, look at the size of the field. On <span data-claim="scan-date">2026-10-09</span> we asked arXiv for every paper whose title or abstract names open-vocabulary, open-set, open-world, zero-shot or grounded object detection, and got back <span data-claim="scan-total">522</span> unique papers.</p>
+
+<figure class="viz" id="viz-map" data-computed>
+  <span class="badge computed">Computed</span>
+  <svg class="chart" id="map-svg" tabindex="0" role="img" aria-label="Bar chart of open-vocabulary detection papers on arXiv per year, from 2 in 2017 to over one hundred a year from 2024; 2026 is a partial year. A month view shows the same papers per month with the six main papers of this page marked. A domain view shows title keywords: 3D and LiDAR is the largest group, and industrial or defect titles are 3 of 522."></svg>
+  <div class="controls">
+    <button type="button" id="btn-map-years" aria-pressed="true">Per year</button>
+    <button type="button" id="btn-map-months" aria-pressed="false">Per month</button>
+    <button type="button" id="btn-map-domains" aria-pressed="false">By domain (title keywords)</button>
+    <button type="button" id="btn-map-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="map-readout" aria-live="polite"></p>
+  <figcaption>Computed from the scan file: each paper is counted once, in the month of its first arXiv version. The last bar in each time view is partial, because the scan stopped on <span data-claim="scan-date">2026-10-09</span>. The domain view is a heuristic: it matches keywords in titles only, and one title can match several domains. Point at a bar, or focus the chart and use the arrow keys, to read one year or month.</figcaption>
+</figure>
+
+<p class="predict"><strong>Guess first.</strong> This page ends on one practical question: can a text prompt replace a custom detector in a factory? Of the <span data-claim="scan-total">522</span> titles, how many name industry, manufacturing, defects or inspection? Pick a number, then press <em>By domain</em>.</p>
+
+<p>The answer is <span data-claim="scan-dom-industrial-defect">3</span>. The field itself grew fast: <span data-claim="scan-year-2021">12</span> papers in 2021, <span data-claim="scan-year-2022">38</span> in 2022, <span data-claim="scan-year-2023">93</span> in 2023, <span data-claim="scan-year-2024">110</span> in 2024 and <span data-claim="scan-year-2025">116</span> in 2025. By the scan date, 2026 already had <span data-claim="scan-year-2026">138</span>. The month view marks the six main papers of this page on that curve. They sit at the start of the climb: the last of them, YOLO-World, appeared on <span data-claim="yoloworld-v1-date">2024-01-30</span>, and most of the papers in the scan came after it.</p>
+<p>Very little of that growth points at a factory. The largest title groups are 3D and LiDAR (<span data-claim="scan-dom-3d-lidar">63</span> titles), few-shot learning, adaptation and benchmarks (<span data-claim="scan-dom-few-shot-adaptation-benchmarks">57</span>), and open-world detection of unknown objects (<span data-claim="scan-dom-open-world-unknowns">53</span>). Remote sensing has <span data-claim="scan-dom-remote-sensing-aerial">27</span> titles and medical imaging <span data-claim="scan-dom-medical">8</span>. The <span data-claim="scan-dom-industrial-defect">3</span> industrial titles are a detector for industrial parts (BioDet), a mobile robot that grasps small objects during field inspection, and an agent for industrial anomaly detection (IndusAgent). Most titles, <span data-claim="scan-dom-none">269</span> of them, name no domain at all: they improve the general method and test it on web-like benchmarks.</p>
+<p>That gap is why chapters 11 to 13 lean on a few benchmark papers instead of a large literature. When this page asks how these models behave on rare industrial objects, the honest answer comes from a handful of tests, not from hundreds of studies.</p>
+
+<h3>How the count was made</h3>
+<div class="claimcard">
+  <h4>A lower bound on the size of the field</h4>
+  <dl>
+    <dt>Claim</dt><dd>At least <span data-claim="scan-total">522</span> arXiv papers study open-vocabulary, open-set or grounded object detection, and the yearly count passed one hundred in 2024.</dd>
+    <dt>Measured</dt><dd>Three arXiv API queries, run on <span data-claim="scan-date">2026-10-09</span>. The first asks for "open vocabulary" and a form of "detection" in the title (<span data-claim="scan-q-ti">221</span> results). The second asks for open set, open world, grounded, grounding or zero shot together with "object detection" in the title (<span data-claim="scan-q-ti2">135</span> results). The third asks for one of five phrases, such as "open-vocabulary object detection", in the abstract (<span data-claim="scan-q-abs">321</span> results). The union, without duplicates, is <span data-claim="scan-total">522</span> papers, each dated by its first version.</dd>
+    <dt>Result</dt><dd>A lower bound, because the queries look for the field's name. Of <span data-claim="scan-recall-of">18</span> key papers that we listed by hand before the scan, it finds <span data-claim="scan-recall-hit">14</span>. The four misses are GLIP, Detic, Roboflow100-VL and the few-shot detection benchmark of Madan et al. (arXiv 2312.14494): arXiv's search finds none of the queried phrases in their titles or abstracts. Detic, for example, writes "open-vocabulary LVIS benchmark". The scan also catches a few papers off the subject, such as keyword spotting in speech, and before 2021 its titles are mostly "zero-shot object detection" with word vectors, the ancestor of this page's subject.</dd>
+    <dt>Would falsify</dt><dd>A citation crawl or a classifier over the abstracts that finds a different growth curve, or many factory papers that do not say so in their titles. A first check: the same industrial keywords match the abstracts of <span data-claim="field-abs-industrial">13</span> papers, and several of those mention industry only in passing <span class="reading">our reading</span>. The "almost none" holds either way.</dd>
+  </dl>
+</div>
+</section>

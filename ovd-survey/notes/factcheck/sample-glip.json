@@ -1,0 +1,400 @@
+[
+ {
+  "id": "glip-code-sep",
+  "claim": "GLIP prompt separation token",
+  "value": ". ",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, DATASETS.SEPARATION_TOKENS",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-lang-lr",
+  "claim": "GLIP-T language backbone learning rate",
+  "value": "0.00001",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, SOLVER.LANG_LR",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-bert",
+  "claim": "GLIP-T language backbone",
+  "value": "bert-base-uncased",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, MODEL.LANGUAGE_BACKBONE.MODEL_TYPE (FREEZE: False)",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-dyhead-t",
+  "claim": "GLIP-T DyHead layers (NUM_CONVS) in the official Swin-T O365+GoldG pretraining config",
+  "value": "6",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "github.com/microsoft/GLIP configs/pretrain/glip_Swin_T_O365_GoldG.yaml, MODEL.DYHEAD.NUM_CONVS (fetched 2026-10-09)",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-min-size",
+  "claim": "GLIP-T training/test short side",
+  "value": "800",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, INPUT.MIN_SIZE_TRAIN / MIN_SIZE_TEST",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-channels",
+  "claim": "GLIP-T DyHead channels / FPN out channels",
+  "value": "256",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, MODEL.DYHEAD.CHANNELS and BACKBONE.OUT_CHANNELS",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-batch",
+  "claim": "GLIP-T pretraining images per batch",
+  "value": "64",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, SOLVER.IMS_PER_BATCH",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-max-size",
+  "claim": "GLIP-T training/test long side cap",
+  "value": "1333",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, INPUT.MAX_SIZE_TRAIN / MAX_SIZE_TEST",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-lr",
+  "claim": "GLIP-T base learning rate (AdamW)",
+  "value": "0.0001",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, SOLVER.BASE_LR",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-dyhead-l",
+  "claim": "GLIP-L DyHead layers (NUM_CONVS) in the official Swin-L config",
+  "value": "8",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "configs/pretrain/glip_Swin_L.yaml, MODEL.DYHEAD.NUM_CONVS",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-code-neg",
+  "claim": "GLIP-T random negative category names sampled into the prompt",
+  "value": "85",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, DATASETS.RANDOM_SAMPLE_NEG",
+  "code_only": true,
+  "file": "glip-code.json"
+ },
+ {
+  "id": "glip-t8-fuse-o365-odinw-10",
+  "claim": "GLIP-T deep fusion, O365: ODinW avg AP 10-shot full tuning",
+  "value": "54.9",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 8, row deep fusion, O365, col ODinW 10-Shot",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-linear-dyhead-o365-5",
+  "claim": "DyHead-T O365 ODinW-13 average AP, linear probing, 5-shot",
+  "value": "39.6",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 12, row DyHead-T O365, col 5",
+  "file": "glip.json"
+ },
+ {
+  "id": "mdetr-pretrain-pairs",
+  "claim": "aligned image-text pairs in MDETR pre-training",
+  "value": "1.3M",
+  "paper": "MDETR",
+  "arxiv": "2104.12763v2",
+  "loc": "Abstract; Sec. 3.1 'Data combination'",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-pseudo-boxes",
+  "claim": "high-confidence phrase-box pseudo annotations in the 24M image-text pairs",
+  "value": "78.1M",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Sec. 1 'Scaling up visual concepts'",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-venue",
+  "claim": "GLIP venue",
+  "value": "CVPR 2022",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "abs.html Comments; main.tex confName/confYear",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-prompt-mushrooms-orig",
+  "claim": "GLIP-T zero-shot AP on Mushrooms with original prompt (caption says 'CLIP-T', a typo)",
+  "value": "13.6",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 10, row Mushrooms, col Original Prompt AP",
+  "file": "glip.json"
+ },
+ {
+  "id": "mdetr-lvis-100-apr",
+  "claim": "MDETR fine-tuned on 100% LVIS APr fixed, minival (text Sec. 3.2.1 says 7.5)",
+  "value": "7.4",
+  "paper": "MDETR",
+  "arxiv": "2104.12763v2",
+  "loc": "Table 6, row MDETR 100%, col APr",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t8-nofuse-goldg-odinw-0",
+  "claim": "GLIP-T no fusion, O365+GoldG: ODinW avg AP 0-shot",
+  "value": "35.5",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 8, row no fusion, O365+GoldG, col ODinW 0-Shot",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-linear-dyhead-coco-3",
+  "claim": "DyHead-T COCO ODinW-13 average AP, linear probing, 3-shot",
+  "value": "32.7",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 12, row DyHead-T COCO, col 3",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-ptune-l-10",
+  "claim": "GLIP-L ODinW-13 average AP, prompt tuning, 10-shot (mean of 3 runs)",
+  "value": "64.1",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 13, row GLIP-L, col 10",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-coco-ft-t-cc3m",
+  "claim": "GLIP-T (CC3M,SBU) COCO 2017val fine-tuned box AP",
+  "value": "55.2",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 2, row GLIP-T (CC3M,SBU), col Fine-Tune 2017val / test-dev",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t5-row2-apr",
+  "claim": "GLIP-T pre-trained on VG w/o COCO + GoldG: LVIS MiniVal zero-shot APr",
+  "value": "7.8",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 5, row 2, col LVIS MiniVal APr",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t8-nofuse-o365-odinw-5",
+  "claim": "GLIP-T no fusion, O365: ODinW avg AP 5-shot full tuning",
+  "value": "50.4",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 8, row no fusion, O365, col ODinW 5-Shot",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-odinw-mushrooms-train",
+  "claim": "ODinW mushrooms training images",
+  "value": "41",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 9, row mushrooms, col Train/Val/Test (first number)",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-ptune-b-3-std",
+  "claim": "GLIP-T (B) ODinW-13 prompt tuning 3-shot std",
+  "value": "0.9",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 13, row GLIP-T (B), col 3 (+-)",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-odinw-l-10shot-std",
+  "claim": "GLIP-L ODinW-13 10-shot full tuning std over 3 runs",
+  "value": "0.9",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 11, row GLIP-L, col Full Tuning 10 (+-)",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-coco-zs-dyhead-o365",
+  "claim": "DyHead-T (O365) COCO 2017val zero-shot box AP (restricted to 80 classes)",
+  "value": "43.6",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 2, row DyHead-T (O365), col Zero-Shot 2017val",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-lvis-minival-a-apr",
+  "claim": "GLIP-T (A) LVIS MiniVal (MDETR 5k subset) zero-shot APr (box AP, our reading; no LVIS training data)",
+  "value": "14.2",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 3, row GLIP-T (A), col MiniVal APr",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-ptune-c-3",
+  "claim": "GLIP-T (C) ODinW-13 average AP, prompt tuning, 3-shot (mean of 3 runs)",
+  "value": "52.9",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 13, row GLIP-T (C), col 3",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-lvis-val-c-ap",
+  "claim": "GLIP-T (C) LVIS val v1.0 zero-shot AP (box AP, our reading; no LVIS training data)",
+  "value": "16.5",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 3, row GLIP-T (C), col Val v1.0 AP",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-linear-t-1",
+  "claim": "GLIP-T ODinW-13 average AP, linear probing, 1-shot",
+  "value": "48.9",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 12, row GLIP-T, col 1",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-odinw-dyhead-coco-3shot",
+  "claim": "DyHead-T COCO ODinW-13 average AP, full-model tuning, 3-shot (mean of 3 runs)",
+  "value": "44.2",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 11, row DyHead-T COCO, col Full Tuning 3",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t5-row8-apr",
+  "claim": "GLIP-T pre-trained on FourODs: LVIS MiniVal zero-shot APr",
+  "value": "15.0",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 5, row 8, col LVIS MiniVal APr",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-prompt-rabbits-designed",
+  "claim": "GLIP-T zero-shot AP on Rabbits with manually designed prompt",
+  "value": "70.2",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 10, row Rabbits, col Manually Designed Prompts AP",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-fourods-vocab",
+  "claim": "FourODs aligned vocabulary size (over)",
+  "value": "1,500",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Sec. 4.4 para 3",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-odinw-ft-batch",
+  "claim": "ODinW fine-tuning / probing batch size",
+  "value": "4",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "App. E.3; App. E.4",
+  "file": "glip.json"
+ },
+ {
+  "id": "mdetr-tau",
+  "claim": "contrastive temperature",
+  "value": "0.07",
+  "paper": "MDETR",
+  "arxiv": "2104.12763v2",
+  "loc": "Sec. 2.2.2, after Eq. 1",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-prompt-packages-orig",
+  "claim": "GLIP-T zero-shot AP on Packages with original prompt (caption says 'CLIP-T', a typo)",
+  "value": "50.0",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 10, row Packages, col Original Prompt AP",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-zs-t-thermal",
+  "claim": "GLIP-T zero-shot AP on ODinW Thermal",
+  "value": "44.1",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 14, row GLIP-T, col Thermal",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t8-fuse-o365-coco-zs",
+  "claim": "GLIP-T deep fusion, O365: COCO zero-shot AP",
+  "value": "44.9",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 8, row deep fusion, O365, col COCO Zero-Shot",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t8-nofuse-o365-odinw-full",
+  "claim": "GLIP-T no fusion, O365: ODinW avg AP full-shot tuning",
+  "value": "63.6",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 8, row no fusion, O365, col ODinW Full-Shot",
+  "file": "glip.json"
+ },
+ {
+  "id": "glip-t5-row8-coco",
+  "claim": "GLIP-T pre-trained on FourODs: COCO 2017val zero-shot AP",
+  "value": "46.3",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "Table 5, row 8, col COCO 2017val",
+  "file": "glip.json"
+ }
+]

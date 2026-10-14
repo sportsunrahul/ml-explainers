@@ -1,0 +1,254 @@
+[
+ {
+  "id": "blip-arch-vit-variants",
+  "claim": "ViT variants explored",
+  "value": "ViT-B/16 and ViT-L/16",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-vit-init",
+  "claim": "Image transformer initialisation",
+  "value": "initialized from ViT pre-trained on ImageNet",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-text-init",
+  "claim": "Text transformer initialisation",
+  "value": "BERT-base",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1 (BERT_base)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-img-cls",
+  "claim": "Global image feature",
+  "value": "an additional [CLS] token to represent the global image feature",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-ca-insert",
+  "claim": "Where cross-attention is inserted",
+  "value": "one additional cross-attention (CA) layer between the self-attention (SA) layer and the feed forward network (FFN) for each transformer block",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.1, item (2)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-encode-token",
+  "claim": "Multimodal representation for ITM",
+  "value": "the output embedding of [Encode] is used as the multimodal representation",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.1, item (2)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-causal",
+  "claim": "Decoder self-attention",
+  "value": "replaces the bi-directional self-attention layers in the image-grounded text encoder with causal self-attention layers",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.1, item (3)",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-soft-labels",
+  "claim": "ITC soft labels",
+  "value": "soft labels are created from the momentum encoder as training targets",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2, ITC paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-one-vit-pass",
+  "claim": "ViT passes per pair",
+  "value": "one forward pass through the computational-heavier visual transformer",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-three-text-passes",
+  "claim": "Text transformer passes per pair",
+  "value": "three forward passes through the text transformer",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-shared-similar",
+  "claim": "Which shared layers work alike for encoding and decoding",
+  "value": "the embedding layers, CA layers and FFN function similarly between encoding and decoding tasks",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 last paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-joint",
+  "claim": "How the objectives are combined",
+  "value": "We jointly optimize three objectives",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-epochs",
+  "claim": "Pre-training epochs",
+  "value": "20 epochs",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-batch-b",
+  "claim": "Pre-training batch size, ViT-B",
+  "value": "2880",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-batch-l",
+  "claim": "Pre-training batch size, ViT-L",
+  "value": "2400",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-optim",
+  "claim": "Optimizer",
+  "value": "AdamW",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-wd",
+  "claim": "Weight decay",
+  "value": "0.05",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-lr-b",
+  "claim": "Peak learning rate, ViT-B",
+  "value": "3e-4",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-lr-l",
+  "claim": "Peak learning rate, ViT-L",
+  "value": "2e-4",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-lr-decay",
+  "claim": "Learning-rate decay",
+  "value": "decayed linearly with a rate of 0.85",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-res",
+  "claim": "Pre-training crop resolution (square)",
+  "value": "224",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-res-ft",
+  "claim": "Finetuning resolution (square)",
+  "value": "384",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-gpus",
+  "claim": "Pre-training hardware",
+  "value": "two 16-GPU nodes",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 4.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-bootstrap-b-width",
+  "claim": "ViT-Base hidden size D",
+  "value": "768",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1, ViT-Base row",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-bootstrap-l-width",
+  "claim": "ViT-Large hidden size D",
+  "value": "1024",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1, ViT-Large row",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-bootstrap-b-layers",
+  "claim": "ViT-Base layers",
+  "value": "12",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1, ViT-Base row",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-bootstrap-l-layers",
+  "claim": "ViT-Large layers",
+  "value": "24",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1, ViT-Large row",
+  "uncertain": false
+ },
+ {
+  "id": "blip-arch-shared-except-sa",
+  "claim": "What the text encoder and decoder share",
+  "value": "share all parameters except for the SA layers",
+  "paper": "BLIP",
+  "version": "v2",
+  "loc": "Sec. 3.2 last paragraph",
+  "uncertain": false
+ }
+]

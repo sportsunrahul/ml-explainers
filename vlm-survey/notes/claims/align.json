@@ -1,0 +1,173 @@
+[
+ {
+  "id": "align-dataset-size",
+  "claim": "ALIGN training set size after minimal frequency-based filtering",
+  "value": "1.8B image-text pairs",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 3 first para",
+  "uncertain": false
+ },
+ {
+  "id": "align-abstract-size",
+  "claim": "Abstract phrasing of dataset size",
+  "value": "over one billion image alt-text pairs",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Abstract (\"a noisy dataset of over one billion image alt-text pairs\")",
+  "uncertain": false
+ },
+ {
+  "id": "align-vs-cc",
+  "claim": "Scale relative to Conceptual Captions",
+  "value": "two orders of magnitude larger",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 1",
+  "uncertain": false
+ },
+ {
+  "id": "align-eq1",
+  "claim": "Eq. (1) image-to-text loss",
+  "value": "L_{i2t} = -\\frac{1}{N}\\sum_i^N\\log{\\frac{\\exp(x_i^\\top y_i / \\sigma)}{\\sum_{j=1}^{N} \\exp(x_i^\\top y_j / \\sigma)}}",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Eq. 1",
+  "uncertain": false
+ },
+ {
+  "id": "align-eq2",
+  "claim": "Eq. (2) text-to-image loss",
+  "value": "L_{t2i} = -\\frac{1}{N}\\sum_i^N\\log{\\frac{\\exp(y_i^\\top x_i / \\sigma)}{\\sum_{j=1}^{N} \\exp(y_i^\\top x_j / \\sigma)}}",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Eq. 2",
+  "uncertain": false
+ },
+ {
+  "id": "align-loss-combo",
+  "claim": "How the two losses combine",
+  "value": "minimize the sum of two losses",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 4.1 \"Pre-training on Noisy Image-Text Pairs\" (Sec. 3 is the dataset)",
+  "uncertain": false
+ },
+ {
+  "id": "align-temp-learned",
+  "claim": "Temperature learned or fixed",
+  "value": "it can be effectively learned together with all the other parameters",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 4.1, paragraph after Eq. 2",
+  "uncertain": false
+ },
+ {
+  "id": "align-temp-init",
+  "claim": "Softmax temperature init",
+  "value": "1.0",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "align-temp-converged",
+  "claim": "Learned temperature converged value in ablation",
+  "value": "about 1/64",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 6.1 \"Model Architectures\", Table 8 rows 7-9 (\"converged to about 1/64\"); Sec. 8 is Multilingual ALIGN",
+  "uncertain": false
+ },
+ {
+  "id": "align-label-smooth",
+  "claim": "Label smoothing",
+  "value": "0.1",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "align-batch",
+  "claim": "Effective batch size",
+  "value": "16384 (1024 TPUv3 cores x 16 positive pairs)",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "align-zs-imagenet",
+  "claim": "Zero-shot ImageNet top-1, ALIGN vs CLIP",
+  "value": "76.4 vs 76.2",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Table 4 (zs_imagenet_result)",
+  "uncertain": false
+ },
+ {
+  "id": "align-filter-img",
+  "claim": "Image filter",
+  "value": "shorter dimension larger than 200 pixels, aspect ratio smaller than 3; discard images with more than 1000 alt-texts",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 3 Image-based filtering",
+  "uncertain": false
+ },
+ {
+  "id": "align-filter-txt-share",
+  "claim": "Text filter: shared alt-text",
+  "value": "exclude alt-texts shared by more than 10 images",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 3 Text-based filtering",
+  "uncertain": false
+ },
+ {
+  "id": "align-filter-txt-rare",
+  "claim": "Text filter: rare tokens",
+  "value": "discard alt-texts with any token outside the 100 million most frequent unigrams and bigrams",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 3 Text-based filtering",
+  "uncertain": false
+ },
+ {
+  "id": "align-filter-txt-len",
+  "claim": "Text filter: length",
+  "value": "discard texts shorter than 3 unigrams or longer than 20 unigrams",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 3 Text-based filtering",
+  "uncertain": false
+ },
+ {
+  "id": "align-scale-vs-noise",
+  "claim": "Noise vs scale ablation",
+  "value": "data outperforms Conceptual Captions with only 4x size",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 6.2 \"Pre-training Datasets\", Table 10 text (\"ALIGN data outperforms Conceptual Captions with only 4x size\")",
+  "uncertain": false
+ },
+ {
+  "id": "align-encoders",
+  "claim": "Headline encoders",
+  "value": "EfficientNet-L2 image encoder, BERT-Large text encoder",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Sec. 5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "align-frozen-imagenet",
+  "claim": "ImageNet top-1 with frozen ALIGN features",
+  "value": "85.5",
+  "paper": "ALIGN",
+  "version": "v2",
+  "loc": "Table 5 \"ImageNet classification results\" (Table 3 is CxC Spearman), Sec. 5.3; row ALIGN (EfficientNet-L2) 85.5 frozen",
+  "uncertain": false
+ }
+]

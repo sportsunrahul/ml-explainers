@@ -1,0 +1,173 @@
+[
+ {
+  "id": "cfg-guided-eps-formula",
+  "claim": "Classifier-free guided noise prediction: tilde eps(z, c) = (1+w) eps(z, c) - w eps(z)",
+  "value": "(1+w)eps(z,c) - w eps(z)",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Eq. 6, Sec 3.2; Algorithm 2",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-label-dropout",
+  "claim": "Conditional and unconditional models are one network trained jointly by replacing the label with a null token with probability p_uncond",
+  "value": "c <- null w.p. p_uncond",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Algorithm 1; Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-puncond-values",
+  "claim": "p_uncond values tried on ImageNet 64x64 (400K training steps each)",
+  "value": "0.1, 0.2, 0.5",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.2; Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-puncond-finding",
+  "claim": "p_uncond = 0.5 is consistently worse across the IS/FID frontier; 0.1 and 0.2 perform about equally",
+  "value": "0.1 ~ 0.2 > 0.5",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.2; Figure 4",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-implicit-classifier",
+  "claim": "Guidance is inspired by an implicit classifier p^i(c|z) proportional to p(z|c)/p(z), whose gradient for exact scores is -(1/sigma)[eps*(z,c) - eps*(z)]",
+  "value": "grad log p^i = -(1/sigma)(eps*(z,c) - eps*(z))",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 3.2, second paragraph after Eq. 6",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-best-fid",
+  "claim": "Best ImageNet 64x64 FID with classifier-free guidance (w=0.1, p_uncond=0.1), IS at that point",
+  "value": "FID 1.55, IS 66.11",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=0.1, p_uncond=0.1 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-unguided",
+  "claim": "ImageNet 64x64 unguided (w=0) FID / IS for p_uncond = 0.1 / 0.2 / 0.5",
+  "value": "FID 1.8 / 1.8 / 2.21; IS 53.71 / 52.9 / 47.61",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=0.0",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-w1",
+  "claim": "ImageNet 64x64 at w=1.0, p_uncond=0.1: FID / IS",
+  "value": "12.6 / 170.1",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=1.0, p_uncond=0.1 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-w4",
+  "claim": "ImageNet 64x64 at w=4.0, p_uncond=0.1: FID / IS (max IS in table)",
+  "value": "26.22 / 260.2",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=4.0, p_uncond=0.1 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-best-fid",
+  "claim": "Best ImageNet 128x128 FID (w=0.3, T=256 and T=1024) vs classifier-guided ADM-G",
+  "value": "2.43 vs 2.97",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, row w=0.3; row ADM-G",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-unguided",
+  "claim": "ImageNet 128x128 unguided (w=0) FID / IS at T=256",
+  "value": "7.27 / 82.45",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, row w=0.0, T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-w4-vs-biggan",
+  "claim": "ImageNet 128x128 at w=4.0, T=128 vs BigGAN-deep at max-IS truncation: FID / IS",
+  "value": "21.55 / 422.29 vs 25 / 253",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, row w=4.0 T=128 column; row BigGAN-deep, max IS",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-w-sweep",
+  "claim": "ImageNet 128x128, T=256: FID as w goes 0 / 0.3 / 1.0 / 2.0 / 4.0 (FID falls then rises)",
+  "value": "7.27 / 2.43 / 7.86 / 15.93 / 21.53",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-is-sweep",
+  "claim": "ImageNet 128x128, T=256: IS as w goes 0 / 0.3 / 1.0 / 2.0 / 4.0 (monotone increase)",
+  "value": "82.45 / 158.47 / 297.98 / 377.37 / 421.03",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-tradeoff",
+  "claim": "Best FID at small guidance (w=0.1 or 0.3 depending on dataset), best IS at strong guidance (w>=4), clear trade-off in between; more guidance means less variety and higher per-sample fidelity",
+  "value": "qualitative",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-two-passes",
+  "claim": "Each sampling step needs two network evaluations (conditional and unconditional); at matched cost (T=128) CFG FID underperforms ADM-G",
+  "value": "T=128 best FID 3.02 (w=0.4); 3.04 at w=0.3; vs ADM-G 2.97",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.3; Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-training-setup",
+  "claim": "Training steps and sampler variance coefficient v: 64x64 vs 128x128 models; log-SNR endpoints",
+  "value": "400K steps, v=0.3 (64); 2.7M steps, v=0.2 (128); lambda in [-20, 20]",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-w-range",
+  "claim": "Guidance strengths evaluated, FID/IS with 50000 samples each",
+  "value": "w in {0, 0.1, 0.2, ..., 4}",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-fig5-legend-typo",
+  "claim": "Figure 5 legend lists T=512 while Table 2 and Sec 4.3 use T=1024",
+  "value": "legend T=512 vs text T=1024",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Figure 5 vs Table 2, Sec 4.3",
+  "uncertain": true
+ }
+]

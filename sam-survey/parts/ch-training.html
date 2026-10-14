@@ -1,0 +1,30 @@
+<section id="ch-training" class="chapter">
+<h2>One training step: eleven rounds</h2>
+<p>Not narrated. SAM is not trained on single prompts. For every mask it plays a short game of interactive segmentation against itself, and the loss is counted in every round. Step through one game.</p>
+
+<figure class="viz" id="viz-rounds" data-scene="rounds" data-toy>
+  <div class="stage" style="height:clamp(340px, 44vw, 470px)"></div>
+  <div class="controls">
+    <label>Round <input type="range" min="0" max="11" step="1" value="1" data-round id="rng-rounds-round" aria-label="Training round"> <b data-round-value>1</b> of 11</label>
+    <button type="button" data-round-step="-1" id="btn-rounds-prev">Previous round</button>
+    <button type="button" data-round-step="1" id="btn-rounds-next">Next round</button>
+  </div>
+  <div class="controls">
+    <button type="button" data-newmask id="btn-rounds-new">New mask</button>
+    <button type="button" data-cue-reset id="btn-rounds-reset">Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model on the desk scene. The sampling rules are SAM's (App. A): the first prompt, the error region, include and exclude points, the fed-back mask, and the two rounds without a new point. The predictions are perturbed masks we draw, not SAM's output, and our toy repairs the error near each click. "New mask" picks another target and another random game.</figcaption>
+</figure>
+
+<ol>
+  <li><b>The first prompt.</b> For each target mask, SAM picks a foreground point or a box with <span data-claim="sam-first-prompt-equal">equal probability</span>. Points are <span data-claim="sam-first-point-uniform">sampled uniformly from the ground truth mask</span>. A box is the mask's bounding box with noise on each corner: a standard deviation of <span data-claim="sam-box-noise">10%</span> of the side, up to <span data-claim="sam-box-noise-max">20 pixels</span>.</li>
+  <li><b>Round 1 returns three masks.</b> One prompt may be ambiguous, so the decoder gives three. The mask loss is computed for each, and only the lowest-loss mask sends a gradient back (<a href="#ch-promptable">the loss is in chapter 3</a>). The IoU head learns to predict mask quality; whether its loss covers all three masks, SAM's paper does not say.</li>
+  <li><b>The next point comes from the mistakes.</b> Each later point is <span data-claim="sam-next-point-uniform">selected uniformly from the error region</span> between the last prediction and the ground truth. A point where the mask is missing becomes an include point; a point where it spills over becomes an exclude point.</li>
+  <li><b>The last answer is fed back.</b> The previous prediction enters as a mask prompt, as <span data-claim="sam-feedback-unthresholded">unthresholded mask logits</span> rather than a yes/no mask, so the model sees how sure it was. When round 1 gave three masks, the one passed on is the one with the <span data-claim="sam-feedback-highest-iou">highest predicted IoU</span>. With more than one prompt, the decoder returns a single mask from its fourth output token (our reading: from round 2 on).</li>
+  <li><b>Two rounds without a new point.</b> After <span data-claim="sam-sampled-points">8</span> sampled points the gains fade (the authors tested up to <span data-claim="sam-max-tested">16</span>). Two more rounds give no new point, so the model learns to clean up its own mask: one is placed at random among the sampled points and one is <span data-claim="sam-nopoint-placement">always at the end</span>. That makes <span data-claim="sam-rounds">11</span> rounds.</li>
+  <li><b>Why eleven rounds are cheap.</b> The image encoder runs once per image. The decoder that runs eleven times needs <span data-claim="sam-decoder-compute">less than 1%</span> of the encoder's compute. Earlier interactive methods ran only one or a few rounds per optimizer step.</li>
+  <li><b>The optimizer step.</b> <span data-claim="sam-optimizer">AdamW</span>, a learning rate of <span data-claim="sam-lr">8e-4</span> after a linear warmup of <span data-claim="sam-warmup">250</span> iterations, divided by <span data-claim="sam-lr-factor">10</span> at <span data-claim="sam-lr-drop1">60k</span> and at <span data-claim="sam-lr-drop2">86666</span> iterations, for <span data-claim="sam-iters">90k</span> iterations: about <span data-claim="sam-epochs">2</span> passes over SA-1B. A batch holds <span data-claim="sam-batch">256</span> images, with at most <span data-claim="sam-masks-per-gpu">64</span> masks sampled per GPU. The ViT-H model trained on <span data-claim="sam-compute-gpus">256 A100 GPUs</span> for <span data-claim="sam-compute-hours">68 hours</span>.</li>
+</ol>
+<p class="note">What SAM 2 changes in this game (App. D.2.1): <span data-claim="sam2-corr-clicks">7</span> correction clicks instead of <span data-claim="sam-sampled-points">8</span>; for the two rounds without a new point, "<span data-claim="sam2-no-empty-rounds">we do not add such iterations</span>"; and an <span data-claim="sam2-iou-l1">l1</span> loss on the IoU predictions of <span data-claim="sam2-iou-all-masks">all</span> three masks on the first click (in the SA-1B pre-training stage), while the mask loss still goes only to the lowest-loss mask.</p>
+</section>

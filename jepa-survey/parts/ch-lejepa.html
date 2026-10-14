@@ -1,0 +1,60 @@
+<p class="kicker"><span class="act-n">Act III</span>Cleaning up the recipe</p>
+
+<section id="ch-lejepa" class="chapter">
+<h2>LeJEPA: one regulariser instead of the heuristics</h2>
+<p>Everything so far avoided collapse with an asymmetry: a slow copy of the encoder, a stop-gradient, a predictor on one side only. It works, but nobody can say what embedding distribution it is aiming at, and every new setup needs its schedules re-tuned. LeJEPA (Balestriero and LeCun, <span data-claim="lejepa-published-v1">2025-11-11</span>) starts from the other end. First ask: what <em>should</em> the embeddings look like for any downstream task? Then write a single term that pushes them there, and drop the rest.</p>
+
+<figure class="viz" id="viz-sigreg" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="sigreg-canvas" role="img" aria-label="A cloud of embedding points in three dimensions with a draggable direction arrow through the origin. A side panel shows the histogram of the points projected onto that direction against the standard Gaussian, and the Epps-Pulley statistic computed for it. Buttons stretch, squash or clump the cloud, and one eases it to an isotropic Gaussian."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-sigreg-stretched" data-cloud="stretched" aria-pressed="true">Stretched cloud</button>
+    <button type="button" id="btn-sigreg-clumpy" data-cloud="clumpy" aria-pressed="false">Clumpy cloud</button>
+    <button type="button" id="btn-sigreg-iso" data-cloud="iso" aria-pressed="false">Apply SIGReg (isotropic Gaussian)</button>
+    <button type="button" id="btn-sigreg-dir-x" data-dir="x" aria-pressed="true">test along x</button>
+    <button type="button" id="btn-sigreg-dir-z" data-dir="z" aria-pressed="false">along z</button>
+    <button type="button" id="btn-sigreg-dir-rand" data-dir="rand" aria-pressed="false">random direction</button>
+    <button type="button" id="btn-sigreg-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="sigreg-readout" aria-live="polite"></p>
+  <figcaption>Computed: the statistic is Algorithm 1 of LeJEPA for one direction (project, compare the empirical characteristic function with the Gaussian's at <span data-claim="lejepa-ep-knots">17</span> points on <span data-claim="lejepa-ep-domain">[-5,5]</span>, weighted, integrated), divided by the sample count so the number is scale-free. The cloud is synthetic. LeJEPA averages over <span data-claim="lejepa-readme-num-slices">1024</span> random directions resampled every step; here you test one. Before pressing a direction button, guess which direction will fail the test on the stretched cloud.</figcaption>
+</figure>
+
+<h3>What the embeddings should look like</h3>
+<p>The argument runs through the probe. After pretraining, someone will fit a linear classifier, or a nearest-neighbour rule, or a kernel, on the frozen embeddings, for a task nobody knows yet. Section 3 of the paper asks which embedding distribution makes that probe's error smallest in the worst case over tasks, holding the total variance fixed. Two lemmas show anisotropy (some directions stretched, some squashed) can only increase a linear probe's bias and does increase its variance; Theorem 1 (with Theorems 7 and 8 in the appendix) shows that for nearest-neighbour and kernel probes, among all distributions with that variance, the <b>isotropic Gaussian</b> is the unique minimiser of the integrated squared bias. The reason, in one phrase from our reading: at fixed covariance, the Gaussian has the least Fisher information, the least "structure" for a probe to be misled by.</p>
+
+<h3>SIGReg: a statistical test as a loss</h3>
+<p>So the target is known: embeddings should be distributed as <span class="tex">\mathcal{N}(0, I)</span>. Testing that in a thousand dimensions is hopeless, but a classical trick makes it cheap. A distribution is Gaussian if and only if its projection onto <em>every</em> direction is Gaussian (Cramer-Wold), so sample a few random unit directions, project the batch onto each, and run a one-dimensional test. The test is Epps-Pulley: compare the empirical characteristic function of the projections with the Gaussian's, under a Gaussian weight:</p>
+<div class="eq" id="eq-sigreg" data-build data-viz="viz-sigreg"><div class="tex tex-display">
+\htmlData{step=1, link=dir}{\mathrm{SIGReg}_T(\mathcal{A}, \{f_\theta(x_n)\}) = \frac{1}{|\mathcal{A}|}\sum_{a\in\mathcal{A}} T\big(\{a^\top f_\theta(x_n)\}_{n=1}^N\big)}, \qquad \htmlData{step=2, link=hist}{T = \mathrm{EP} = N\int_{-\infty}^{\infty}\big|\hat\varphi_X(t) - e^{-t^2/2}\big|^2 w(t)\,dt}
+</div></div>
+<p class="eqno">Definition 2 (tagged SIGReg) and the Epps-Pulley equation in Sec. 4.2.3 of LeJEPA (tagged, not numbered). <span class="tex">\hat\varphi_X(t) = \frac{1}{N}\sum_n e^{itX_n}</span> is the empirical characteristic function of the projections; <span class="tex">w(t)</span> a Gaussian weight; the integral is a trapezoid sum over <span data-claim="lejepa-ep-knots">17</span> points.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathcal{A}</span>: the set of random unit directions, <span data-claim="lejepa-readme-num-slices">1024</span> by default, drawn fresh at every step; the paper argues as few as <span data-claim="lejepa-slices-min-effective">16</span> work because resampling covers the sphere over time.</li>
+  <li><span class="tex">T</span>: any one-dimensional goodness-of-fit statistic; Epps-Pulley is chosen because its gradient is bounded by <span data-claim="lejepa-ep-gradient-bound">4\sigma^2/N</span> per sample for any input (Theorem 4), so it cannot blow up training.</li>
+  <li>Cost: linear in the batch size; no pairwise distances, no prototypes, no queue.</li>
+</ul>
+<p>The whole method is then two terms. Views of an image (DINO-style: <span data-claim="lejepa-global-views">2</span> global crops and several local ones) go through <em>one</em> encoder; every view's embedding is pushed toward the mean of the global views' embeddings (the prediction term), and SIGReg is applied to each view's batch of embeddings:</p>
+<div class="eq" id="eq-lejepa" data-build data-viz="viz-sigreg"><div class="tex tex-display">
+\mathcal{L}_{\mathrm{LeJEPA}} = \htmlData{step=1, link=hist}{\frac{\lambda}{V}\sum_{v=1}^{V}\mathrm{SIGReg}\big(\{z_{n,v}\}_{n=1}^{B}\big)} + \htmlData{step=2, link=cloud}{\frac{1-\lambda}{B}\sum_{n=1}^{B}\frac{1}{V}\sum_{v'=1}^{V}\big\lVert \mu_n - z_{n,v'}\big\rVert_2^2}
+</div></div>
+<p class="eqno">Equation tagged (LeJEPA) in Sec. 5.1, with the prediction term in its Eq. (7) form; <span class="tex">\mu_n</span> is the mean of sample <span class="tex">n</span>'s global-view embeddings, <span class="tex">V</span> the number of views, <span class="tex">B</span> the batch. The single hyperparameter <span class="tex">\lambda</span> defaults to <span data-claim="lejepa-lambda-default">0.05</span>.</p>
+<p>Note what is not there. No target encoder, no EMA, no stop-gradient: the gradient flows into the encoder from both sides of the difference. No predictor network: the paper argues it is "only justified when there exists an asymmetry". No prototypes, no register tokens, no whitening, no negatives. What stays: a projector head on the encoder, multi-crop views, and an ordinary learning-rate warm-up. The reference implementation is about <span data-claim="lejepa-lines-of-code">50</span> lines.</p>
+
+<h3>What it bought</h3>
+<p>The headline is stability rather than a record. The abstract reports <span data-claim="lejepa-in1k-vith14-abstract">79</span>% ImageNet-1k linear accuracy for a ViT-H/14; the tables give <span data-claim="lejepa-in1k-vitl-online-linear">77.1</span>% for a ViT-L and <span data-claim="lejepa-in1k-convnextv2h-online-linear">78.5</span>% for a ConvNeXt-V2 Huge after <span data-claim="lejepa-table1-epochs">100</span> epochs (Sec. 6.4), and a ViT-L with <span data-claim="lejepa-transfer-epochs-lejepa">100</span> epochs transfers slightly better than I-JEPA's ViT-H with <span data-claim="lejepa-transfer-epochs-ijepa">300</span> (<span data-claim="lejepa-transfer-vitl-all-avg">79.48</span> vs <span data-claim="lejepa-transfer-ijepa-vith-all-avg">78.50</span> average over 8 datasets, Table 2). The same recipe trains over <span data-claim="lejepa-architectures-claimed">60+</span> architectures without per-model tuning, up to a <span data-claim="lejepa-vitg-params">1.8B</span> ViT-g with a smooth loss curve, and removing the predictor and teacher does not collapse it (Table 4). Two results matter more for practice. The training loss predicts downstream accuracy (Spearman about <span data-claim="lejepa-loss-spearman">85</span>%), so you can select models without labels. And pretraining in-domain on small datasets beats transferring a frontier model: on Galaxy10 (<span data-claim="lejepa-galaxy10-train-samples">11,000</span> images) a LeJEPA ResNet-34 reaches <span data-claim="lejepa-galaxy10-frozen-resnet34-all">78.17</span>% frozen against <span data-claim="lejepa-galaxy10-frozen-dinov3-all">71.38</span>% for DINOv3 (appendix Table 3); though on CIFAR-100 the transferred I-JEPA still wins, <span data-claim="lejepa-indomain-cifar100-ijepa">86.93</span> to <span data-claim="lejepa-indomain-cifar100-resnet34">70.44</span> (Table 5).</p>
+
+<h3>Two companions</h3>
+<div class="aside">
+  <h4>Claim card: the anti-collapse term estimates the data density (Balestriero et al., <span data-claim="ge-published">2025-10-07</span>)</h4>
+  <p><b>Claim.</b> If a JEPA's embeddings are isotropic Gaussian, then by the change-of-variables formula the input density is, up to a constant, the product of the encoder's Jacobian singular values: <span class="tex">\log p(x) \propto \sum_i \log \sigma_i(J_f(x))</span>, the "JEPA-SCORE" (their Eq. <span data-claim="ge-eq-jepa-score">(5)</span>). A trained JEPA can be read as a density estimator for free.</p>
+  <p><b>How it was measured.</b> On synthetic data with a known density, the Pearson correlation between the score and the true log density across dimensions <span data-claim="ge-pearson-dims">64, 128, 256, 512</span>; on real data, qualitatively, by ranking ImageNet images and classes by the score under four public encoders.</p>
+  <p><b>Result.</b> Correlations from <span data-claim="ge-pearson-min">0.64</span> to <span data-claim="ge-pearson-max">0.94</span> on the synthetic tests; low-score images are atypical. <b>Falsified by:</b> a correlation near zero on data with a known density, or by scores that do not change with the dataset.</p>
+</div>
+<div class="aside">
+  <h4>Claim card: when does LeJEPA learn a world model? (Klindt, LeCun, Balestriero, <span data-claim="wm-published">2026-05-25</span>)</h4>
+  <p><b>Claim.</b> If the world's latents evolve under a stationary additive-noise process and the observations are a nonlinear function of them, LeJEPA's two terms recover the latents up to a linear map (linear identifiability), and the Gaussian is the <em>unique</em> latent distribution for which this holds. The optimum of the prediction term is a linear map because every nonlinear component loses correlation across a time step.</p>
+  <p><b>How it was measured.</b> Synthetic worlds with known latents up to dimension <span data-claim="wm-scaling-max-dim">1024</span>, measuring the <span class="tex">R^2</span> of a linear regression from embeddings to true latents; a Reacher control environment; the main theorems checked in Lean with <span data-claim="wm-lean-sorry">zero</span> unproven steps.</p>
+  <p><b>Result.</b> <span class="tex">R^2</span> above <span data-claim="wm-scaling-r2-threshold">0.999</span> for SIGReg and VICReg-style regularisers in the synthetic worlds and <span data-claim="wm-scaling-infonce-n1024">0.720241</span> for a contrastive one at 1024 dimensions. <b>Falsified by:</b> low <span class="tex">R^2</span> under the stated assumptions, or linear recovery under a non-Gaussian latent prior.</p>
+</div>
+</section>

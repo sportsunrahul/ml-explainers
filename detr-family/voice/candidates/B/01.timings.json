@@ -1,0 +1,164 @@
+{
+ "id": "ch-set-problem",
+ "title": "Detection is a set problem",
+ "duration": 73.775,
+ "sentences": [
+  {
+   "text": "Look at a photo and tell me what's in it.",
+   "cues": [
+    "btn-nms-reset"
+   ],
+   "para": 0,
+   "t0": 0.3,
+   "t1": 1.843
+  },
+  {
+   "text": "You'd say something like: two people, a dog, a car.",
+   "cues": [],
+   "para": 0,
+   "t0": 2.093,
+   "t1": 6.273
+  },
+  {
+   "text": "No order, and no repeats.",
+   "cues": [],
+   "para": 0,
+   "t0": 6.523,
+   "t1": 8.551
+  },
+  {
+   "text": "That's a set, and it's exactly what an object detector is supposed to give us.",
+   "cues": [],
+   "para": 0,
+   "t0": 8.801,
+   "t1": 12.735
+  },
+  {
+   "text": "Here's the funny thing.",
+   "cues": [],
+   "para": 1,
+   "t0": 13.435,
+   "t1": 14.407
+  },
+  {
+   "text": "Classic detectors never produce that set directly.",
+   "cues": [],
+   "para": 1,
+   "t0": 14.657,
+   "t1": 17.303
+  },
+  {
+   "text": "They throw down thousands of candidate boxes, score every one, and end up with a little cloud of guesses around each object.",
+   "cues": [],
+   "para": 1,
+   "t0": 17.553,
+   "t1": 24.011
+  },
+  {
+   "text": "That's what you're looking at: two people, and a swarm of blue boxes.",
+   "cues": [],
+   "para": 1,
+   "t0": 24.261,
+   "t1": 28.441
+  },
+  {
+   "text": "So how do you get down to one box per person?",
+   "cues": [],
+   "para": 2,
+   "t0": 29.141,
+   "t1": 31.554
+  },
+  {
+   "text": "With a cleanup step called non-maximum suppression.",
+   "cues": [
+    "btn-nms-run"
+   ],
+   "para": 2,
+   "t0": 31.804,
+   "t1": 34.281
+  },
+  {
+   "text": "Keep the most confident box, and delete anything that overlaps it too much.",
+   "cues": [],
+   "para": 2,
+   "t0": 34.531,
+   "t1": 38.764
+  },
+  {
+   "text": "With the people standing apart, that works nicely.",
+   "cues": [],
+   "para": 2,
+   "t0": 39.014,
+   "t1": 42.063
+  },
+  {
+   "text": "Now push them together.",
+   "cues": [
+    "btn-nms-close"
+   ],
+   "para": 3,
+   "t0": 42.763,
+   "t1": 43.806
+  },
+  {
+   "text": "Make the rule strict, and the second person simply vanishes.",
+   "cues": [
+    "btn-nms-low"
+   ],
+   "para": 3,
+   "t0": 44.056,
+   "t1": 47.376
+  },
+  {
+   "text": "NMS can't tell another person from the same person again.",
+   "cues": [],
+   "para": 3,
+   "t0": 47.626,
+   "t1": 50.911
+  },
+  {
+   "text": "Loosen it, and now the duplicates pile up instead.",
+   "cues": [
+    "btn-nms-high"
+   ],
+   "para": 3,
+   "t0": 51.161,
+   "t1": 54.241
+  },
+  {
+   "text": "Try the slider yourself, and ask whether one setting could be right for every scene.",
+   "cues": [],
+   "para": 3,
+   "t0": 54.491,
+   "t1": 59.149
+  },
+  {
+   "text": "Here's the real point.",
+   "cues": [],
+   "para": 4,
+   "t0": 59.849,
+   "t1": 60.945
+  },
+  {
+   "text": "The network never learned to avoid duplicates.",
+   "cues": [],
+   "para": 4,
+   "t0": 61.195,
+   "t1": 63.564
+  },
+  {
+   "text": "A hand-tuned rule cleans up after it.",
+   "cues": [],
+   "para": 4,
+   "t0": 63.814,
+   "t1": 66.053
+  },
+  {
+   "text": "So DETR asks a simple question: can a network just output the final set, directly, with nothing to clean up?",
+   "cues": [],
+   "para": 4,
+   "t0": 66.303,
+   "t1": 73.475
+  }
+ ]
+}

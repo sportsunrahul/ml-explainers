@@ -1,0 +1,130 @@
+<section id="ch-dividemix" class="chapter">
+<h2>Drop the label, keep the image</h2>
+<p>Co-teaching throws away the images it doubts, and their pixels are still worth learning from. DivideMix drops only the doubtful label and keeps the image as unlabeled data for semi-supervised learning.</p>
+
+<figure class="viz" id="viz-gmm" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="gmm-canvas" role="img" aria-label="Left: a stacked histogram of per-image training losses, green for correct labels and red for flipped ones, with two fitted bell curves for a low-loss and a high-loss bump and a yellow threshold line. Right: four rows of bars for one image's given label, the model's prediction, their blend and the sharpened blend."></canvas>
+  <div class="controls">
+    <span style="color:var(--muted)">epoch</span>
+    <button type="button" id="btn-gmm-e5" aria-pressed="false">5</button>
+    <button type="button" id="btn-gmm-e10" aria-pressed="true">10</button>
+    <button type="button" id="btn-gmm-e20" aria-pressed="false">20</button>
+    <button type="button" id="btn-gmm-e30" aria-pressed="false">30</button>
+    <label>threshold tau <input type="range" id="gmm-tau" min="0.05" max="0.95" step="0.01" value="0.5"></label>
+    <button type="button" id="btn-gmm-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls">
+    <label>clean probability w <input type="range" id="gmm-w" min="0" max="1" step="0.01" value="0.3"></label>
+    <label>temperature T <input type="range" id="gmm-T" min="0.1" max="1" step="0.01" value="0.5"></label>
+  </div>
+  <p class="readout" id="gmm-readout" aria-live="polite"></p>
+  <figcaption>Left, computed: the losses of 1,500 training images from our run A (plain training, 40% of labels flipped); the mixture is fitted in your browser by EM on min-max normalized loss, as DivideMix does. Run A is not DivideMix, which would sharpen the split as it trains; this shows the first division. Right, a toy image with made-up numbers. Before you move to epoch 30, guess what happens to the two bumps.</figcaption>
+</figure>
+
+<p>The division step is simple. Take each training image's loss, fit a mixture of two Gaussians to all of them, and read off, for each image, the probability that it belongs to the low-loss bump:</p>
+
+<div class="eq" id="eq-dmx" data-build data-viz="viz-gmm"><div class="tex tex-display">
+\begin{aligned}
+\htmlData{step=1, link=split}{w_i} &\htmlData{step=1, link=split}{= p(g \mid \ell_i)} \\
+\htmlData{step=2, link=refine}{\bar y_b} &\htmlData{step=2, link=refine}{= w_b\, \htmlClass{t-yellow}{y_b} + (1 - w_b)\, \htmlClass{t-blue}{p_b}} \\
+\htmlData{step=3, link=loss}{\mathcal{L}} &\htmlData{step=3, link=loss}{= \mathcal{L}_{\mathcal{X}} + \lambda_u \mathcal{L}_{\mathcal{U}} + \lambda_r \mathcal{L}_{\mathrm{reg}}}
+\end{aligned}
+</div></div>
+<p class="eqno">Li, Socher and Hoi (2020): the clean probability (Sec. 3.1), label co-refinement (Eq. 3) and the total loss (Eq. 12).</p>
+<ul class="gloss">
+  <li><span class="tex">w_i</span>: the posterior of the low-mean Gaussian <span class="tex">g</span> given image <span class="tex">i</span>'s loss <span class="tex">\ell_i</span>. Images with <span class="tex">w_i \ge \tau</span> keep their label; the rest lose it. The paper uses <span class="tex">\tau = 0.5</span> in most settings.</li>
+  <li><span class="tex">\bar y_b</span>: a kept label is blended with the model's own prediction <span class="tex">p_b</span> (averaged over two augmentations), weighted by how clean the image looks; then sharpened (Eq. 4).</li>
+  <li><span class="tex">\mathcal{L}</span>: cross-entropy on the labeled part, a squared-error term on guessed labels for the unlabeled part, and a regularizer that keeps the average prediction spread over all classes.</li>
+</ul>
+
+<p>Move the epoch buttons. At epoch 10 the flipped labels form their own high-loss bump and the fit separates them well. By epoch 30 the network has memorized them (chapter 7) and both bumps collapse onto zero. DivideMix fights this from both sides: it trains for only a short warm-up (<span data-claim="dividemix-hp-warmup">10 epochs for CIFAR-10 and 30 epochs for CIFAR-100</span>) before it starts dividing, and it never trains on a label it has doubted.</p>
+
+<p>The unlabeled images are not wasted. For each one, both networks predict on two augmentations, the four predictions are averaged and sharpened into a guessed label ("co-guessing"), and all images, labeled and unlabeled, are mixed pairwise with MixMatch. As in Co-teaching, there are two networks, and each one divides the data for the other: "<span data-claim="dividemix-codivide">the GMM for one network is used to divide training data for the other network</span>".</p>
+
+<p>The results were a large step. On CIFAR-10 with 50% symmetric noise, plain cross-entropy reaches <span data-claim="dividemix-t1-c10-sym50-ce-best">79.4</span>% at its best epoch and <span data-claim="dividemix-t1-c10-sym50-ce-last">57.9</span>% at the end; DivideMix reaches <span data-claim="dividemix-t1-c10-sym50-dividemix-best">94.6</span>% and <span data-claim="dividemix-t1-c10-sym50-dividemix-last">94.4</span>%. With 40% asymmetric noise it reaches <span data-claim="dividemix-t2-asym40-dividemix-best">93.4</span>% best and <span data-claim="dividemix-t2-asym40-dividemix-last">92.1</span>% last. Read "best" with care: it is "<span data-claim="dividemix-best-def">the best test accuracy across all epochs</span>", which uses the test set to pick the epoch; "last" is "<span data-claim="dividemix-last-def">the averaged test accuracy over the last 10 epochs</span>". Later work such as ELR reports numbers selected on a held-out validation set instead. Also note that DivideMix's "symmetric" noise draws the new label from all classes, so some "flipped" labels stay correct, unlike the Co-teaching definition used in our runs.</p>
+
+<h3>Inside DivideMix: forward, then backward</h3>
+<figure class="viz archflow" id="viz-dmflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-dmflow-losses" aria-pressed="false">1 Losses</button>
+    <button type="button" id="btn-dmflow-divide" aria-pressed="false">2 Co-divide</button>
+    <button type="button" id="btn-dmflow-batch" aria-pressed="false">3 Two batches</button>
+    <button type="button" id="btn-dmflow-labels" aria-pressed="false">4 Refine and guess</button>
+    <button type="button" id="btn-dmflow-mix" aria-pressed="false">5 MixMatch</button>
+    <button type="button" id="btn-dmflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-dmflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-dmflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Batch size">
+    <span>batch</span>
+    <button type="button" id="btn-dmflow-paper" aria-pressed="true">128 (paper)</button>
+    <button type="button" id="btn-dmflow-code" aria-pressed="false">64 (official code)</button>
+  </div>
+  <canvas id="dmflow-canvas" role="img" aria-label="DivideMix's training step for network A as a diagram: network B's losses on the whole training set feed a two-component mixture that splits the data into a labeled and an unlabeled batch; network A refines the labeled targets, both networks guess the unlabeled targets, MixMatch mixes the batches, and a three-part loss closes the step. In the backward stages red arrows run into network A only."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-dmflow-prev">Previous</button>
+    <button type="button" id="btn-dmflow-next">Next</button>
+    <button type="button" id="btn-dmflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="dmflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One epoch trains network A while network B is fixed, then the roles swap. Press <b>1 Losses</b>, then <b>Next</b>.</p></div>
+    <div data-stage="losses" hidden><h4>1. Losses over the whole set</h4><p>At the start of the epoch, network B computes the cross-entropy loss of every training image against its given label (Eq. 1).</p></div>
+    <div data-stage="divide" hidden><h4>2. Co-divide</h4><p>A two-component mixture is fitted to B's losses; images with a clean probability of at least <span class="tex">\tau</span> form the labeled set for A, the rest its unlabeled set. B's view of the data decides what A trusts.</p></div>
+    <div data-stage="batch" hidden><h4>3. Two batches</h4><p>Each step draws one labeled and one unlabeled batch, each augmented twice (<span class="tex">M = 2</span>). The paper states a batch size of <span data-claim="dividemix-hp-batch-paper">128</span>; the official CIFAR script defaults to 64 (code-only).</p></div>
+    <div data-stage="labels" hidden><h4>4. Refine and guess</h4><p>Labeled targets: the given label blended with A's prediction by <span class="tex">w_b</span>, then sharpened. Unlabeled targets: both networks' predictions on both augmentations, averaged and sharpened. These are computed without gradient.</p></div>
+    <div data-stage="mix" hidden><h4>5. MixMatch</h4><p>All images and targets are shuffled together and mixed pairwise with a weight drawn from a Beta distribution, kept closer to the first image of each pair.</p></div>
+    <div data-stage="loss" hidden><h4>6. Three terms</h4><p>Cross-entropy on the mixed labeled part, squared error on the mixed unlabeled part weighted by <span class="tex">\lambda_u</span>, and the spread regularizer with <span class="tex">\lambda_r =</span> <span data-claim="dividemix-hp-lambda-r">1</span> (Eq. 12).</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>Only into network A. B's losses and the mixture only chose which labels to trust, and the refined and guessed targets are constants: no gradient flows through them.</p></div>
+    <div data-stage="update" hidden><h4>8. Update</h4><p>SGD steps network A. At the next epoch the roles swap: A's losses divide the data for B.</p></div>
+  </div>
+  <figcaption>Computed: shapes from the stated batch size and CIFAR-10's 10 classes. The labeled and unlabeled batches have the same size in the paper's training loop.</figcaption>
+</figure>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>When a batch of labels is unreliable (crowd work, auto-labels from an older model), keep the images even where you doubt the labels; semi-supervised training can still use them. The images whose clean probability sits near 0.5 are where a human label is worth the most: send those to review first.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('gmm-readout');
+  const f = FIG.gmm(document.getElementById('gmm-canvas'), { say: t => out.textContent = t });
+  const es = [5, 10, 20, 30].map(e => document.getElementById('btn-gmm-e' + e));
+  es.forEach((b, k) => b.addEventListener('click', () => { KIT.press(es, b); f.epoch([5, 10, 20, 30][k]); }));
+  const tau = document.getElementById('gmm-tau'), w = document.getElementById('gmm-w'), T = document.getElementById('gmm-T');
+  tau.addEventListener('input', () => f.tau(+tau.value)); w.addEventListener('input', () => f.w(+w.value)); T.addEventListener('input', () => f.T(+T.value));
+  document.getElementById('btn-gmm-reset').addEventListener('click', () => { KIT.press(es, es[1]); tau.value = .5; w.value = .3; T.value = .5; f.reset(); });
+})();
+(() => {
+  const x = ' x ';
+  ArchFlow.mount({
+    prefix: 'dmflow', grid: { cols: 6, rows: 2 },
+    boxes: {
+      data: { c: 0, r: .5, lane: 'yellow', title: ['training set', '+ given labels'], glyph: 'photos', data: true },
+      netB: { c: 1, r: 0, lane: 'blue', title: ['network B', '(fixed)'], glyph: 'layers' },
+      gmm: { c: 2, r: 0, lane: 'green', title: ['two-bump fit', 'w_i, split'], glyph: 'vector', nograd: true },
+      lab: { c: 3, r: 0, lane: 'yellow', title: ['labeled batch', '+ refined targets'], glyph: 'tokens', nograd: true },
+      unl: { c: 3, r: 1, lane: 'mixed', title: ['unlabeled batch', '+ guessed targets'], glyph: 'tokens', nograd: true },
+      netA: { c: 4, r: 1, lane: 'blue', title: ['network A', '(trained)'], glyph: 'layers' },
+      loss: { c: 5, r: .5, lane: 'red', title: ['L_X + lambda_u L_U', '+ lambda_r L_reg'], glyph: 'loss' },
+    },
+    edges: [['data', 'netB'], ['netB', 'gmm'], ['gmm', 'lab'], ['gmm', 'unl'], ['data', 'netA'], ['lab', 'loss'], ['unl', 'loss'], ['netA', 'loss']],
+    stages: [{ key: 'losses', show: ['data', 'netB'] }, { key: 'divide', show: ['gmm'] }, { key: 'batch', show: ['lab', 'unl'] }, { key: 'labels', show: ['netA'] },
+      { key: 'mix', show: [] }, { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: { paper: { B: 128 }, code: { B: 64 } }, variant: 'paper',
+    shape: (id, v) => ({ data: '50,000 images', netB: '50,000 losses', gmm: '50,000 w_i', lab: `${v.B}${x}2${x}3${x}32${x}32`, unl: `${v.B}${x}2${x}3${x}32${x}32`, netA: `${4 * v.B}${x}10 logits`, loss: 'one number' })[id],
+    params: id => id === 'netA' || id === 'netB' ? 'PreAct ResNet-18' : null,
+    frozen: id => id === 'netB',
+    readout: (s, v) => ({ overview: `Batch ${v.B}: ${v.B} labeled and ${v.B} unlabeled images, each augmented twice, so network A sees ${4 * v.B} images per step after MixMatch.`,
+      losses: 'Network B scores all 50,000 training images: one loss each.', divide: 'EM fits two Gaussians to the 50,000 losses; w_i >= tau keeps the label.',
+      batch: `${v.B} labeled + ${v.B} unlabeled images, 2 augmentations each.`, labels: 'Targets: refined labels (labeled) and co-guessed labels (unlabeled), no gradient.',
+      mix: `MixMatch mixes all ${4 * v.B} images pairwise.`, loss: 'Three terms, one number.', backward: 'Gradient into network A only.', update: 'SGD steps A; next epoch, the roles swap.' })[s],
+  });
+})();
+</script>
+</section>

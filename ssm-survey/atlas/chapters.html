@@ -1,0 +1,257 @@
+  <article data-chapter="bill">
+    <header class="ch-head"><span class="num">1 of 10</span><h2>The bill attention sends</h2><p class="subhead">A cache that grows, against a memory that does not</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">The cache grows</button><button type="button" role="tab" data-step="1">The bill at scale</button></div>
+      <button type="button" class="tool play" data-replay>Replay</button>
+    </div>
+    <div class="controls">
+      <label class="slider">Context length <input type="range" id="bill-atlas-L" min="0" max="1000" step="1" value="500"></label>
+      <button type="button" class="tool" data-l="8192">8K</button><button type="button" class="tool" data-l="131072">128K</button><button type="button" class="tool" data-l="1048576">1M</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>To write the next word, a Transformer compares it with every word before it. To make that fast it keeps a <button class="inline-term" data-open="kvcache">KV cache</button>: a key and a value for every past <button class="inline-term" data-open="token">token</button>, in every layer. Each new token adds a column, so the cache (brown) grows for as long as the text does.</p>
+      <p>A <button class="inline-term" data-open="ssm">state-space model</button> keeps a <button class="inline-term" data-open="state">state</button> instead (yellow): a fixed set of numbers that each new token updates. It never gets bigger. It only changes.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>The same picture with real sizes. The brown line is the KV cache of Llama 3 8B: 128 KiB for every token, at 16 bits per value. The yellow line is the whole memory of Mamba 2.8B: 11.9 MiB, at any length.</p>
+      <p>Drag the slider. Near 122,000 tokens the cache of one conversation is as large as the model's weights (the dashed line). The two models differ in size; what matters is that one line rises and the other stays flat.</p>
+    </div>
+    <p class="note">Step 1 is a toy (twenty tokens, four layers). Step 2 is computed from the published configurations: Llama 3 8B has 32 layers and 8 key-value heads of dimension 128; Mamba 2.8B has 64 layers of width 2560, expanded 2 times, with a state of 16 per channel (the README default) plus the last 3 inputs of a width-4 convolution.</p>
+    <table class="data"><thead><tr><th>Context</th><th>KV cache, Llama 3 8B</th><th>State, Mamba 2.8B</th></tr></thead>
+      <tbody><tr><td>8K tokens</td><td>1 GiB</td><td>11.9 MiB</td></tr><tr><td>128K tokens</td><td>16 GiB</td><td>11.9 MiB</td></tr><tr><td>1M tokens</td><td>128 GiB</td><td>11.9 MiB</td></tr></tbody></table>
+    <p class="inscription">Attention pays for every token it has seen, every time it writes a new one. A state-space model pays the same small amount each time.</p>
+    <button type="button" class="continue" data-go="recurrence">Continue with linear recurrences</button>
+  </article>
+
+  <article data-chapter="recurrence">
+    <header class="ch-head"><span class="num">2 of 10</span><h2>Linear recurrences</h2><p class="subhead">Why RNNs were dropped, and the change that brings them back</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">One number remembers</button><button type="button" role="tab" data-step="1">Unrolled into a sum</button><button type="button" role="tab" data-step="2">LRU's recipe</button></div>
+    </div>
+    <div class="controls">
+      <label class="slider"><span>Size r of λ <b id="recurrence-atlas-r-val">0.90</b></span><input type="range" id="recurrence-atlas-r" min="0" max="1.1" step="0.005" value="0.9"></label>
+      <label class="slider"><span>Angle θ of λ (radians per step) <b id="recurrence-atlas-theta-val">0.00</b></span><input type="range" id="recurrence-atlas-theta" min="0" max="3.14" step="0.01" value="0"></label>
+      <div class="row"><span>Presets</span><button type="button" class="tool" data-preset="fast">Fast decay</button><button type="button" class="tool" data-preset="long">Long memory</button><button type="button" class="tool" data-preset="ring">Ringing</button><button type="button" class="tool" data-preset="explode">Exploding</button><button type="button" class="tool" data-preset="reset">Reset</button></div>
+      <div class="row"><span>Cell</span><button type="button" class="tool" data-mode="linear" aria-pressed="true">Linear</button><button type="button" class="tool" data-mode="tanh" aria-pressed="false">Nonlinear tanh RNN</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>A <button class="inline-term" data-open="rnn">recurrent neural network</button> (RNN) keeps a <button class="inline-term" data-open="state">state</button> and updates it once per <button class="inline-term" data-open="token">token</button>. Every token costs the same, at any length, and nothing grows. It is the cheapest memory a sequence model can have.</p>
+      <p>Strip it to one cell: h<sub>t</sub> = λ h<sub>t-1</sub> + b x<sub>t</sub>. Each step multiplies what the cell holds by λ, then adds the new token. So a token that arrived k steps ago has been multiplied by λ k times. The chart is that <button class="inline-term" data-open="impulse-response">impulse response</button>: with |λ| below 1 the token fades, above 1 it grows without limit.</p>
+      <p>λ is an <button class="inline-term" data-open="eigenvalue">eigenvalue</button> of the recurrence, and it can be a <button class="inline-term" data-open="complex">complex number</button> r e<sup>iθ</sup>. Then the cell also turns by θ each step, and its real part rings (try Ringing). With r = 0.9, only 0.52% of a token is left after 50 steps.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>Press <b>Nonlinear tanh RNN</b>. Classic RNNs pass each update through a squashing function. Then no token has a fixed weight in the state, and step t cannot start before step t-1 is done: a sequence of length L takes L steps, one after another, even in training.</p>
+      <p>The repeated multiplication also hits training. The gradient back to an old token is multiplied at every step, so it shrinks or explodes: the <button class="inline-term" data-open="vanishing-gradient">vanishing gradient</button> problem. Press Exploding while in tanh mode: the state stays bounded, yet the red gradient line dies within 17 steps.</p>
+      <p>Press <b>Linear</b>. Without tanh, the recurrence unrolls into a weighted sum, h<sub>t</sub> = Σ λ<sup>t-k</sup> b x<sub>k</sub>, and the bars are its weights. They depend only on how long ago a token came, so they are known in advance, and every state can be computed at once with a <button class="inline-term" data-open="parallel-scan">parallel scan</button>. That is what Transformers offered: every position trains in parallel.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <p>LRU (2023) started from a plain deep RNN and changed one thing at a time: make it linear; make it diagonal and complex, so each cell updates on its own; write λ so that |λ| stays below 1 whatever training does; start the cells near |λ| = 1 for long memory; and normalize.</p>
+      <p>Why normalize? Near |λ| = 1 a cell adds up many tokens at almost full weight. Under random input its variance grows by 1/(1-|λ|²), the red bar: 5.3 at r = 0.9, about 500 at r = 0.999. LRU scales each cell's input by √(1-|λ|²) to cancel it.</p>
+      <p>Test accuracy (%) on three of the six <button class="inline-term" data-open="lra">Long Range Arena</button> tasks, as each step is added:</p>
+      <table class="data"><thead><tr><th>Recurrent layer</th><th class="n">sCIFAR</th><th class="n">Pathfinder</th><th class="n">PathX</th></tr></thead>
+        <tbody>
+          <tr><td>tanh RNN</td><td class="n">69.9</td><td class="n">chance</td><td class="n">chance</td></tr>
+          <tr><td>linear</td><td class="n">72.2</td><td class="n">chance</td><td class="n">chance</td></tr>
+          <tr><td>diagonal, complex</td><td class="n">86.5</td><td class="n">chance</td><td class="n">chance</td></tr>
+          <tr><td>exponential</td><td class="n">85.4</td><td class="n">65.4</td><td class="n">chance</td></tr>
+          <tr><td>stable exponential</td><td class="n">87.2</td><td class="n">93.5</td><td class="n">chance</td></tr>
+          <tr><td>+ ring start</td><td class="n">88.1</td><td class="n">94.4</td><td class="n">chance</td></tr>
+          <tr class="ours"><td>+ normalization = LRU</td><td class="n">89.0</td><td class="n">95.1</td><td class="n">94.2</td></tr>
+          <tr><td>S4, its own results</td><td class="n">91.1</td><td class="n">94.2</td><td class="n">96.4</td></tr>
+        </tbody></table>
+    </div>
+    <p class="note">The stage is a toy, computed exactly: one cell, b = 1, and a single token of size 1 at step 0. The tanh cell is the same λ as a 2-by-2 rotation and scaling, passed through tanh; its red gradient line is the exact derivative of this toy (our reading), not a paper's number. The noise gain is LRU Eq. 6. The table is sourced from LRU Tables 1 to 3 (mean of 3 seeds); LRU reports no average. LRU's sCIFAR images are in color; the S4 row's 91.1 is S4's sequential CIFAR result, not its grayscale LRA image score (88.65), and in our reading (LRU App D.4, S4D App B) it is the same colored task, so LRU trails S4 there by 2.1 points.</p>
+    <p class="inscription">A linear recurrence keeps the RNN's fixed memory and drops its two faults: its weights are known in advance, so training runs in parallel, and |λ| can be placed exactly where memory needs it.</p>
+    <button type="button" class="continue" data-go="continuous">Continue with continuous time</button>
+  </article>
+
+  <article data-chapter="continuous">
+    <header class="ch-head"><span class="num">3 of 10</span><h2>Continuous time and discretization</h2><p class="subhead">One memory, read at any step size</p></header>
+    <div class="controls">
+      <button type="button" class="tool" data-mode="signal" aria-pressed="true">Same signal, resampled</button><button type="button" class="tool" data-mode="tokens" aria-pressed="false">Same tokens, new &Delta;</button>
+      <label class="slider">Step size &Delta; <input type="range" id="continuous-atlas-dt" min="0" max="10" step="1" value="7"></label>
+      <button type="button" class="tool" data-dt="1">&Delta; = 1</button><button type="button" class="tool" data-dt="0.1">&Delta; = 1/10</button>
+    </div>
+    <p>Here the <button class="inline-term" data-open="state">state</button> has three numbers, and the yellow curve is how it moves through time. The blue staircase is the input; the green curve is the output. The memory is written as an <button class="inline-term" data-open="ode">ODE</button>, a rule for how fast the state changes: a matrix A turns the state and pulls it back to zero, and the input pushes it away. Nothing in that rule has a step size.</p>
+    <p>A computer sees one token per step, so it needs a recurrence instead. <button class="inline-term" data-open="discretization">Discretization</button> picks a <button class="inline-term" data-open="delta">step size &Delta;</button> and solves the ODE over one step. Mamba does it with the <button class="inline-term" data-open="zoh">zero-order hold</button>, and the yellow points are that recurrence. Drag the slider: the curve stays put, only the number of points changes.</p>
+    <p>Now press <b>Same tokens, new &Delta;</b> and then <b>&Delta; = 1/10</b>. The sixteen inputs are now crammed into a tenth of the time. Each token moves the state less, and the state forgets less per token: its memory reaches ten times more tokens back.</p>
+    <p class="note">A toy, computed exactly: A is chosen by hand (decay rate 0.5 for h1; a pair that turns at 1 radian per time unit and decays at 0.25). The points use the zero-order hold, Abar = exp(&Delta;A), checked against a fine numerical integration. HiPPO, LSSL and S4 use the bilinear rule instead; S4D found little difference between the two.</p>
+    <p class="inscription">The step size &Delta; is the knob between time and tokens: a smaller step means a longer memory, counted in tokens.</p>
+    <button type="button" class="continue" data-go="hippo">Continue with HiPPO</button>
+  </article>
+
+  <article data-chapter="hippo">
+    <header class="ch-head"><span class="num">4 of 10</span><h2>HiPPO: memory as compression</h2><p class="subhead">Keep the best polynomial fit of everything seen so far</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">The coefficients</button><button type="button" role="tab" data-step="1">Rebuild the past</button></div>
+    </div>
+    <div class="controls">
+      <label class="slider">State size N <input type="range" id="hippo-atlas-N" min="4" max="64" step="1" value="16"></label>
+      <button type="button" class="tool" data-sig="paper" aria-pressed="true">Test function</button><button type="button" class="tool" data-sig="steps" aria-pressed="false">Steps</button><button type="button" class="tool" data-sig="chirp" aria-pressed="false">Chirp</button><button type="button" class="tool" data-sig="noise" aria-pressed="false">Noise</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>What should a fixed-size <button class="inline-term" data-open="state">state</button> hold? HiPPO's answer is <button class="inline-term" data-open="online-approximation">online function approximation</button>: at every moment, fit the whole input history with a polynomial of degree below N, written in <button class="inline-term" data-open="legendre">Legendre polynomials</button>, and keep its N coefficients.</p>
+      <p>The surface shows those coefficients over time: one row per degree n, height = value. The yellow line is the state now. As the history grows, the fit changes smoothly, and the change turns out to be a fixed linear equation with a specific matrix A. Raise N: the old rows do not move, new ones appear behind them, because A is lower triangular.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>The state is only useful if the past can be read back. Sum the Legendre polynomials weighted by the N coefficients and you get the yellow line, drawn over the true history in blue; red is the error.</p>
+      <p>With N = 4 only the slow trend survives. With N = 16 the two slow waves come back. With N = 64 even the fast wiggle does. A KV cache would keep all 1,000 samples; this state keeps N numbers.</p>
+    </div>
+    <p class="note">Computed: HiPPO-LegS's matrices A and B (Theorem 2), the bilinear update the paper uses, and its reconstruction formula, on 1,000 samples. The test function is the paper's; the other signals are ours. HiPPO writes the input as f and the state as c; here they are x and h.</p>
+    <table class="data"><thead><tr><th>State size N</th><th>Error of the rebuilt history (RMSE, test function)</th></tr></thead>
+      <tbody><tr><td>4</td><td>0.750</td></tr><tr><td>16</td><td>0.234</td></tr><tr><td>64</td><td>0.0133</td></tr></tbody></table>
+    <p class="inscription">The state is a compressed copy of the whole past, kept optimal as the past grows. Bigger N, sharper memory; never a growing cache.</p>
+    <button type="button" class="continue" data-go="s4">Continue with S4</button>
+  </article>
+
+  <article data-chapter="s4">
+    <header class="ch-head"><span class="num">5 of 10</span><h2>S4: one system, three views</h2><p class="subhead">Fixed weights turn the recurrence into one long convolution</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">Three views</button><button type="button" role="tab" data-step="1">The kernel</button></div>
+      <button type="button" class="tool play" data-replay>Replay</button>
+    </div>
+    <div class="controls">
+      <button type="button" class="tool" data-view="all" aria-pressed="true">All three</button><button type="button" class="tool" data-view="cont" aria-pressed="false">Continuous</button><button type="button" class="tool" data-view="rec" aria-pressed="false">Recurrent</button><button type="button" class="tool" data-view="conv" aria-pressed="false">Convolutional</button>
+      <label class="slider">Step size &Delta; <input type="range" id="s4-atlas-dt" min="0" max="1000" step="1" value="500"></label>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>Drop HiPPO's time factor and keep its matrix A: the <button class="inline-term" data-open="ssm">state-space model</button> now uses the same A, B and C at every step. Then it can be computed three ways. Continuous: a differential equation. Recurrent: update the state once per token, like an RNN. Convolutional: slide one long <button class="inline-term" data-open="kernel">convolution kernel</button> over the input.</p>
+      <p>The dots (recurrent) and rings (convolution) land on exactly the same numbers. The green curve (continuous) agrees up to the small error of turning the equation into steps. Training uses the convolution, all positions at once with an <button class="inline-term" data-open="fft">FFT</button>; generation uses the recurrence, one cheap step per token.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>The yellow row is the kernel: entry j is how much the input j steps back adds to the output now. Drag the step size: a smaller &Delta; stretches the same memory over more tokens.</p>
+      <p>Building this kernel naively costs N&sup2;L operations, and HiPPO's A cannot be diagonalized safely. S4 writes A as normal plus <button class="inline-term" data-open="low-rank">low-rank</button>, works in frequency space where all the powers of A become one inverse, and gets the kernel in about N + L operations. It was the first model above chance on <button class="inline-term" data-open="lra">Path-X</button>.</p>
+    </div>
+    <p class="note">Computed on a toy: one SSM with N = 4, HiPPO-LegS's A with S4's sign, B from S4D, a random readout C, 64 tokens of our choosing, bilinear steps (S4 Eq. 3) and the kernel of S4 Eq. 5. The three views are LSSL's.</p>
+    <table class="data"><thead><tr><th>Long Range Arena</th><th>Path-X</th><th>Average</th></tr></thead>
+      <tbody><tr><td>Transformer</td><td>failed</td><td>53.66</td></tr><tr><td>S4 (updated row, v3 Table 4)</td><td>96.35</td><td>86.09</td></tr></tbody></table>
+    <p class="inscription">Same weights at every step means one kernel for the whole sequence: train it as a convolution, run it as a recurrence.</p>
+    <button type="button" class="continue" data-go="select">Continue with selection</button>
+  </article>
+
+  <article data-chapter="select">
+    <header class="ch-head"><span class="num">6 of 10</span><h2>Mamba: input-dependent selection</h2><p class="subhead">Each token sets its own step size</p></header>
+    <div class="controls">
+      <button type="button" class="tool" data-preset="keys" aria-pressed="true">Mark the 3 key tokens</button><button type="button" class="tool" data-preset="allfill" aria-pressed="false">All filler</button><button type="button" class="tool" data-preset="allimp" aria-pressed="false">All important</button>
+    </div>
+    <div class="controls" role="group" aria-label="Mark tokens as important" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:.35rem;align-items:center"><span style="width:100%;font-size:.9rem">Important tokens:</span>
+      <button type="button" class="tool" data-tok="0" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">1</button>
+      <button type="button" class="tool" data-tok="1" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">2</button>
+      <button type="button" class="tool" data-tok="2" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">3</button>
+      <button type="button" class="tool" data-tok="3" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">4</button>
+      <button type="button" class="tool" data-tok="4" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">5</button>
+      <button type="button" class="tool" data-tok="5" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">6</button>
+      <button type="button" class="tool" data-tok="6" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">7</button>
+      <button type="button" class="tool" data-tok="7" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">8</button>
+      <button type="button" class="tool" data-tok="8" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">9</button>
+      <button type="button" class="tool" data-tok="9" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">10</button>
+      <button type="button" class="tool" data-tok="10" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">11</button>
+      <button type="button" class="tool" data-tok="11" aria-pressed="false" style="width:auto;min-width:2.6rem;flex:0 0 auto">12</button>
+    </div>
+    <p>In S4 the step size &Delta; and the matrices B and C are the same for every token, so the model cannot tell a key word from filler. Mamba makes them depend on the token. This is <button class="inline-term" data-open="selection">selection</button>: each token computes its own <button class="inline-term" data-open="delta">step size &Delta;</button>.</p>
+    <p>Mark a token important and it gets a large &Delta;: the yellow state flows toward it, forgets most of what it held, and stores the new value. Filler gets a tiny &Delta;, and the state barely moves. The green output keeps the last important value across the filler. The dashed path uses one &Delta; for every token and wanders with each of them.</p>
+    <p>With one state number this is exactly a <button class="inline-term" data-open="gate">gate</button>: h_t = (1 - g_t) h_(t-1) + g_t x_t, with g_t computed from the token (Mamba's Theorem 1). Press <b>All important</b>: the state copies every token and remembers none. Selection only helps when it is selective.</p>
+    <p class="note">A toy, computed exactly: one channel, three state numbers, A = diag(-1, -2, -3) (Mamba's default real initialization), &Delta; = softplus of a linear function of the important flag (2.13 or 0.049), zero-order hold per token. B is selective too; C is fixed. In the paper's ablations at about 350M parameters, a bigger state helps only when B and C are selective: perplexity 9.73 to 8.71 as N goes from 1 to 16, against 9.88 to 9.81 with constant B and C (Table 10).</p>
+    <p class="inscription">A large step resets the memory and stores the token; a small step keeps the memory and skips it. Mamba lets each token choose.</p>
+    <button type="button" class="continue" data-go="scan">Continue with the parallel scan</button>
+  </article>
+
+  <article data-chapter="scan">
+    <header class="ch-head"><span class="num">7 of 10</span><h2>The parallel scan</h2><p class="subhead">All the states of a recurrence, in a few rounds instead of one per token</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">The scan tree</button><button type="button" role="tab" data-step="1">Where the state lives</button></div>
+      <button type="button" class="tool play" data-replay>Play</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <div class="controls"><div class="row"><span>Tokens</span><button type="button" class="tool" data-n="8" aria-pressed="true">8</button><button type="button" class="tool" data-n="16" aria-pressed="false">16</button></div>
+        <div class="row"><span>Step</span><button type="button" class="tool" data-dir="-1">Previous</button><button type="button" class="tool" data-dir="1">Next level</button><button type="button" class="tool" data-dir="0">Start</button></div></div>
+      <p>Selection makes the recurrence change at every token, so the convolution trick of S4 is gone. A plain loop computes the states one after another: L tokens, L steps in a row. But every step is still "keep a of the old state, add b", and two such steps merge into one: (a1, b1) then (a2, b2) is (a1 a2, a2 b1 + b2). That merge is an <button class="inline-term" data-open="associative">associative operator</button>, so the states can be computed as a <button class="inline-term" data-open="scan">scan</button>, on a tree.</p>
+      <p>Going up, neighbours merge in parallel until the root holds the whole sequence. Going down, each node receives the state just before its span (yellow). One last merge per token gives every state. For 16 tokens: 9 rounds instead of 16, for about three times the arithmetic. At 2,048 tokens: 23 rounds instead of 2,048.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <div class="controls"><div class="row"><span>Kernel</span><button type="button" class="tool" data-mode="fused" aria-pressed="true">Fused (Mamba)</button><button type="button" class="tool" data-mode="standard" aria-pressed="false">Standard</button></div>
+        <div class="row"><span>Stage</span><button type="button" class="tool" data-stage="1">Read</button><button type="button" class="tool" data-stage="2">Expand</button><button type="button" class="tool" data-stage="3">Scan</button><button type="button" class="tool" data-stage="4">Read out</button><button type="button" class="tool" data-stage="5">Backward</button></div></div>
+      <p>Each token's state has D x N numbers, N = 16 times more than the layer's input and output. Writing all of it to the GPU's main memory and reading it back would cost more than computing it, because moving bytes, not arithmetic, is the bottleneck (see <button class="inline-term" data-open="sram-hbm">SRAM vs HBM</button>).</p>
+      <p>Mamba uses <button class="inline-term" data-open="fusion">kernel fusion</button>: the expanded state lives only in fast on-chip memory, one chunk at a time, and only inputs and outputs travel. For the backward pass it uses <button class="inline-term" data-open="recomputation">recomputation</button> instead of storing the states. In our count for one layer of Mamba 2.8B at 2,048 tokens, that is about 33 times less memory traffic.</p>
+    </div>
+    <p class="note">The tree is a toy with exact arithmetic: one state cell, random decays, checked against the plain loop. The memory picture is computed: one layer, 2,048 tokens, inner width 5,120, state size 16, 16-bit values; the bytes per stage are our count of the reads and writes Mamba's appendix describes.</p>
+    <table class="data"><thead><tr><th>Measured (Mamba, A100)</th><th class="n">Result</th></tr></thead>
+      <tbody><tr><td>Fused scan vs standard PyTorch scan</td><td class="n">20-40x faster</td></tr><tr><td>vs FlashAttention-2</td><td class="n">faster beyond 2K</td></tr><tr><td>Training memory, batch 8 (Transformer / Mamba)</td><td class="n">11.5 / 12.3 GB</td></tr></tbody></table>
+    <p>The tree is not always worth it: on 16-step sequences Martin and Cundy's parallel kernel ran at 0.06 times the serial speed, and Griffin found the tree slower than a sequential scan on TPU-v3.</p>
+    <p class="inscription">A linear recurrence can be computed like a sum: in log-depth rounds on a tree, with the big state kept in fast memory and never written out.</p>
+    <button type="button" class="continue" data-go="ssd">Continue with Mamba-2 and state-space duality</button>
+  </article>
+
+  <article data-chapter="ssd">
+    <header class="ch-head"><span class="num">8 of 10</span><h2>Mamba-2 and state-space duality</h2><p class="subhead">Linear attention and a selective SSM compute the same matrix</p></header>
+    <div class="controls">
+      <div class="row"><span>Matrix</span><button type="button" class="tool" data-mode="softmax" aria-pressed="true">Softmax attention</button><button type="button" class="tool" data-mode="linattn" aria-pressed="false">Linear attention</button><button type="button" class="tool" data-mode="ssd" aria-pressed="false">SSD: decay mask</button></div>
+      <div class="row"><span>Compute</span><button type="button" class="tool" data-q="0" aria-pressed="true">Whole matrix</button><button type="button" class="tool" data-q="1" aria-pressed="false">Chunks of 1</button><button type="button" class="tool" data-q="4" aria-pressed="false">Chunks of 4</button><button type="button" class="tool" data-q="8" aria-pressed="false">Chunks of 8</button></div>
+    </div>
+    <p>Every causal layer here can be written y = M x, with M a lower-triangular matrix: entry (t, s) is how much input s adds to output t. The stage draws M as columns, for three layers on the same random inputs. Softmax attention builds every entry from its own query and key, so it must keep a key and a value for every past token: the brown <button class="inline-term" data-open="kvcache">KV cache</button> along the front edge.</p>
+    <p><button class="inline-term" data-open="linattn">Linear attention</button> replaces exp(q · k) with a dot product of <button class="inline-term" data-open="featuremap">features</button>, φ(q) · φ(k). By <button class="inline-term" data-open="associativity">associativity</button> the past then folds into a small matrix, a <button class="inline-term" data-open="state">state</button> that each token adds to. The yellow line on the front edge is how much of each token is still in that state at the end: flat at 1, nothing is forgotten.</p>
+    <p>Mamba-2 starts from Mamba's <button class="inline-term" data-open="ssm">selective SSM</button> and makes its state matrix one number a<sub>t</sub> times the identity. The result is the same matrix times a decay mask: M = L ∘ C Bᵀ, with C as the query, B as the key and L<sub>ts</sub> = a<sub>t</sub> ⋯ a<sub>s+1</sub>. Press SSD: columns fade with distance, and the token with a = 0.12 cuts a step into the surface. The paper calls this equivalence state-space duality (SSD).</p>
+    <p>Now press a chunk size. The <button class="inline-term" data-open="chunk">chunked</button> SSD algorithm computes the brown diagonal blocks like attention and the yellow blocks below them through the state: M is a <button class="inline-term" data-open="semiseparable">semiseparable matrix</button>, so those blocks have rank at most N. Nearly all the work becomes matrix products, which run on <button class="inline-term" data-open="tensorcore">tensor cores</button>. Chunks of 1 is the plain recurrence. Back on softmax, the same blocks turn red: they are full rank, and no small state can replace them.</p>
+    <p class="note">The stage is computed on random toy inputs (one head, state size N = 2, head dimension P = 2, 16 tokens); linear attention and SSD use the feature map φ = elu + 1, and linear attention is drawn without its normalizer. The chunked computation follows Mamba-2's reference code, and its output matches the quadratic and recurrent ones to about 1e-15. Measured on a GPU, Mamba-2's SSD layer is 2-8x faster than Mamba's scan and beats FlashAttention-2 from sequence length 2K (Mamba-2 Fig 10). Mamba-2 uses state sizes around 64 or 128, against Mamba's 16.</p>
+    <p class="inscription">One matrix, two readings: an SSM that forgets is masked linear attention, and the mask's low rank is what lets the chunked algorithm run on matrix-multiply hardware.</p>
+    <button type="button" class="continue" data-go="vision">Continue with Vision Mamba</button>
+  </article>
+
+  <article data-chapter="vision">
+    <header class="ch-head"><span class="num">9 of 10</span><h2>Vision Mamba, VMamba, and a counterpoint</h2><p class="subhead">An image has no single order</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">One scan</button><button type="button" role="tab" data-step="1">More routes</button><button type="button" role="tab" data-step="2">Is it long?</button></div>
+    </div>
+    <div class="controls">
+      <div class="row"><span>Scan</span><button type="button" class="tool" data-scan="raster" aria-pressed="true">Raster</button><button type="button" class="tool" data-scan="vim" aria-pressed="false">Vim</button><button type="button" class="tool" data-scan="vmamba" aria-pressed="false">VMamba</button></div>
+      <label class="slider">Decay per step <input type="range" id="vision-atlas-decay" min="50" max="99" step="1" value="85"></label>
+      <label class="slider">Image size, 224 to 1248 pixels <input type="range" id="vision-atlas-res" min="0" max="32" step="1" value="0"></label>
+      <div class="row"><span>Patch</span><button type="button" class="tool" data-patch="8" aria-pressed="false">8 px</button><button type="button" class="tool" data-patch="16" aria-pressed="true">16 px</button><button type="button" class="tool" data-patch="32" aria-pressed="false">32 px</button></div>
+      <div class="row"><span>Width D</span><button type="button" class="tool" data-d="192" aria-pressed="false">192</button><button type="button" class="tool" data-d="384" aria-pressed="true">384</button><button type="button" class="tool" data-d="768" aria-pressed="false">768</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <p>A <button class="inline-term" data-open="vit">vision Transformer</button> cuts an image into a grid of <button class="inline-term" data-open="patch">patches</button>: 14 x 14 = 196 of them for a 224-pixel image with 16-pixel patches. It treats them as a sequence of tokens, and attention lets every patch look at every other.</p>
+      <p>A <button class="inline-term" data-open="ssm">state-space model</button> can read the same sequence, but it reads in order. With a <button class="inline-term" data-open="raster">raster scan</button>, row by row like text, a patch's output can only use patches that came before it. Click a patch to make it the green one: everything after it stays empty. The patch directly above is a whole row (14 steps) back and arrives faint. The last patch of the row above, at the far edge of the image, is closer in the sequence and counts more.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p><b>Vim</b> scans the same sequence twice, forward and backward, with two separate SSMs, and adds the results. Now every patch can reach every other, but vertical neighbours are still 14 steps away. <b>VMamba</b> adds two column routes, each with its own SSM. The patch above becomes one step away, and the heat turns into a cross.</p>
+      <p>Vim puts its <button class="inline-term" data-open="cls-token">class token</button> in the middle of the sequence, which scored 76.1% top-1 on ImageNet against 75.2% at the start. On 1248-pixel images (6084 tokens), Vim-Ti is 2.8x faster than DeiT-Ti, a vision Transformer of the same size, and uses 86.8% less GPU memory. VMamba reports a <button class="inline-term" data-open="erf">receptive field</button> that is more even and more two-dimensional than Vim's.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <p>MambaOut asks whether images need the SSM at all. In a Transformer block, attention's cost overtakes everything else only when the sequence is longer than six times the width D. ImageNet's 196 tokens are far below that. The large images of <button class="inline-term" data-open="detseg">detection and segmentation</button> give about 4K tokens, which is above it. Move the image size and the width to watch the verdict.</p>
+      <p>A model with Mamba's block but no SSM matched VMamba on ImageNet and fell behind on COCO and ADE20K (table). A second paper, MLLA, reads Mamba as linear attention with a forget gate. In its tests the forget gate (77.6 to 78.4% top-1) and Mamba's block design (80.9%) carried the gain, and a position encoding could do the forget gate's job (81.7%).</p>
+    </div>
+    <p class="note">The heat is a toy: one scan layer, one fixed decay per step, and where several routes reach a patch it shows the strongest. Real models stack many layers and choose the decay from the input. Vim adds its two outputs; VMamba's paper does not say how it merges its four. The token count and the threshold 6D are exact; the table gives MambaOut's own numbers.</p>
+    <table class="data"><thead><tr><th>MambaOut Tables 1 to 3</th><th class="n">ImageNet top-1</th><th class="n">COCO box AP</th><th class="n">ADE20K mIoU</th></tr></thead>
+      <tbody><tr><td>VMamba-T (with SSM)</td><td class="n">82.5</td><td class="n">47.4</td><td class="n">48.3</td></tr><tr><td>MambaOut-Tiny (no SSM)</td><td class="n">82.7</td><td class="n">45.1</td><td class="n">47.4</td></tr></tbody></table>
+    <p class="inscription">Scan an image more than one way and every patch can reach every other. Whether the scan earns its place depends on length: at 196 tokens a convolution does as well, at 4K tokens the SSM still helps.</p>
+    <button type="button" class="continue" data-go="limits">Continue with where SSMs still lose</button>
+  </article>
+
+  <article data-chapter="limits">
+    <header class="ch-head"><span class="num">10 of 10</span><h2>Where SSMs lose, and hybrids</h2><p class="subhead">A fixed memory runs out of room; a little attention buys it back</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="Steps"><button type="button" role="tab" data-step="0">Recall</button><button type="button" role="tab" data-step="1">Hybrids</button></div>
+    </div>
+    <div class="step-text" data-step="0">
+      <div class="controls">
+        <label class="slider">State size N <input type="range" id="limits-atlas-N" min="2" max="5" step="1" value="4"></label>
+        <label class="slider">Pairs stored K <input type="range" id="limits-atlas-K" min="0" max="1000" step="1" value="625"></label>
+        <div class="row"><span>Keys</span><button type="button" class="tool" data-keys="random" aria-pressed="true">Random</button><button type="button" class="tool" data-keys="ortho" aria-pressed="false">Orthogonal</button></div>
+      </div>
+      <p>Store K key-value pairs in a <button class="inline-term" data-open="state">state</button> of N x N numbers by adding each pair on top of the others, the way linear attention does. Then ask for each key's value. This is <button class="inline-term" data-open="mqar">associative recall</button>, and the cache of attention (brown) gets every answer right.</p>
+      <p>The state (yellow) does well while K is small. Past K = N the keys can no longer stay out of each other's way, and the answers fill with crosstalk. Real models fail the same way on a <button class="inline-term" data-open="phonebook">phone book</button> or a <button class="inline-term" data-open="copying">copying task</button>: in NVIDIA's 8B study, pure Mamba models began to give wrong numbers past about 500 tokens of phone book. A big enough state wins, though: Mamba-2 with a state of 256 beat attention on recall at small model width. <button class="inline-term" data-open="statetracking">State tracking</button> is a separate limit.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <div class="controls">
+        <label class="slider">Attention layers of 32 <input type="range" id="limits-atlas-n" min="0" max="32" step="1" value="4"></label>
+        <div class="row"><span>Preset</span><button type="button" class="tool" data-n="0">Pure Mamba</button><button type="button" class="tool" data-n="4">1:7, Jamba</button><button type="button" class="tool" data-n="32">All attention</button></div>
+        <div class="row"><span>Context</span><button type="button" class="tool" data-ctx="8192" aria-pressed="false">8K</button><button type="button" class="tool" data-ctx="131072" aria-pressed="false">128K</button><button type="button" class="tool" data-ctx="262144" aria-pressed="true">256K</button></div>
+      </div>
+      <p>A <button class="inline-term" data-open="hybrid">hybrid</button> keeps most layers as Mamba and a few as attention. Only attention layers keep a cache, so the cache shrinks with every one removed, while the attention left over handles the exact lookups.</p>
+      <p>Jamba keeps 1 attention layer in 8, with a <button class="inline-term" data-open="moe">mixture of experts</button> on every other layer: its cache at 256K tokens is 4GB against 32GB for Mixtral. NVIDIA's 8B hybrid (4 attention layers of 56) beat a Transformer trained on the same data on all 12 standard tasks and solved the phone book past 150K tokens.</p>
+    </div>
+    <p class="note">Step 1 is our illustration with exact arithmetic on one random draw; no paper gives a formula for how many pairs a state can hold. Step 2 is computed: 4 KiB per token per attention layer, back-solved from Jamba's Table 1 (our reading). Filled markers are the papers' KV tables, hollow ones computed from their configurations.</p>
+    <p class="inscription">A fixed-size state is lossy compression: it loses exact facts once they outnumber its room. A few attention layers bring them back for a small part of attention's memory.</p>
+    <button type="button" class="continue" data-go="bill">Back to the start</button>
+  </article>

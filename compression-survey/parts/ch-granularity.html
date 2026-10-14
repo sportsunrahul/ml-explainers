@@ -1,0 +1,136 @@
+<section id="ch-granularity" class="chapter">
+<h2>One scale or many? Calibration</h2>
+<p>A tensor gets one ruler, but a convolution's weights are really many small filters, one per output channel, and their ranges can differ a lot. When one ruler must cover the widest filter, the narrow filters fall between a few marks; giving each output channel its own scale fixes that.</p>
+
+<figure class="viz" id="viz-chanland" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Weight grid">
+    <span class="lbl">Grid</span>
+    <button type="button" id="btn-chanland-tensor" aria-pressed="true">per-tensor</button>
+    <button type="button" id="btn-chanland-channel" aria-pressed="false">per-channel</button>
+  </div>
+  <canvas id="chanland-canvas" role="img" aria-label="A 3D landscape of 32 output channels, each a row of 9 weights shown as blue dots on stems. Six channels rise far above the rest. Yellow lines across each channel mark the grid levels inside its range; yellow dots are the quantized weights and red sticks join each weight to its quantized value. Drag or use the arrow keys to turn it."></canvas>
+  <div class="controls" role="group" aria-label="Vertical scale">
+    <span class="lbl">Height</span>
+    <button type="button" id="btn-chanland-true" aria-pressed="true">true scale</button>
+    <button type="button" id="btn-chanland-zoom" aria-pressed="false">zoom each channel</button>
+    <button type="button" id="btn-chanland-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="chanland-readout" aria-live="polite"></p>
+  <figcaption>A toy depthwise 3x3 layer after batch-norm folding: 32 output channels of 9 weights each. Its spread is shaped after Nagel 2021 Fig. 5 (the first depthwise layer of MobileNetV2), as read off that figure: six wide channels, the largest reaching <span data-approx>about 95, read off the figure</span>, two all-zero channels, and the rest within <span data-approx>about &plusmn;16, read off the figure</span>. Both grids are asymmetric 8-bit min-max grids with 0.0 exact; levels, errors and MSE are computed exactly on the toy weights. A channel's "levels" are the codes between the codes of its smallest and largest weight.</figcaption>
+</figure>
+
+<p>Each row of blue dots is one output channel's nine weights. On the true scale, six channels tower over the rest, and most channels look flat. A per-tensor grid must stretch from the lowest weight to the highest, so its marks are about <span data-toy>0.6</span> apart. That is fine for the tall channels and terrible for the flat ones.</p>
+<p><b>Make a guess before you press "zoom each channel".</b> The zoom stretches every channel to the same height so you can see its marks. How many of the 256 levels does a typical flat channel get? Press it: most get between three and a dozen, and their nine weights snap onto a few terraces. The red sticks are the rounding error, often a large part of the weight itself. Then press "per-channel": every channel gets its own scale, all 256 levels fit its own range, and the red sticks vanish.</p>
+<p>Why do channel ranges differ so much? Batch normalization is folded into the convolution before quantization, which multiplies each output channel's weights by its own factor <span class="tex">\gamma_k/\sqrt{\sigma_k^2+\epsilon}</span> (Nagel Eq. 11). Depthwise layers have only nine weights per channel, so nothing averages the spread out. Jacob named this failure mode: weight ranges of different output channels that differ by more than <span data-claim="jacob-channel-range-spread">100</span>x.</p>
+
+<h3>One scale per output channel</h3>
+<p>The scale may change from one output channel to the next because each output value comes from one channel's weights only. The integer dot product for that output still uses a single weight scale, so it can be applied after the sum. A scale per <em>input</em> channel would not factor out of the sum, which is why only output channels get their own (Wu Eq. 10). The TensorRT documentation writes the per-channel rule for convolution weights like this:</p>
+<div class="eq" id="eq-gran-perchan" data-build data-viz="viz-chanland"><div class="tex tex-display">
+\htmlData{step=1, link=grid}{\htmlClass{t-yellow}{\mathrm{output}[k,c,r,s]} := \mathrm{clamp}(\mathrm{round}(\htmlClass{t-blue}{\mathrm{input}[k,c,r,s]}} \,/\, \htmlData{step=2, link=weights}{\htmlClass{t-yellow}{\mathrm{scale}[k]}}))
+</div></div>
+<p class="eqno">Per-channel weight quantization in the TensorRT 11.4 documentation (Quantized Types, Quantization Granularities); <span class="tex">k</span> must be the output-channel axis for a convolution.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathrm{input}[k,c,r,s]</span>: the real weight for output channel <span class="tex">k</span>, input channel <span class="tex">c</span>, and kernel row and column <span class="tex">r, s</span>.</li>
+  <li><span class="tex">\mathrm{scale}[k]</span>: one scale for each output channel, fitted to that channel's own range.</li>
+  <li><span class="tex">\mathrm{output}[k,c,r,s]</span>: the signed INT8 code. TensorRT has no zero-point; the toy uses Krishnamoorthi's "asymmetric, per-channel" variant, which changes the counts by about one bit.</li>
+</ul>
+<p>The measured effect is large. In Krishnamoorthi's 8-bit tests, MobileNet-v1 on ImageNet scored <span data-claim="krishnamoorthi-mnv1-ptq-asym-layer">0.001</span> top-1 with one asymmetric scale per layer and <span data-claim="krishnamoorthi-mnv1-ptq-asym-chan">0.703</span> with one per channel. Wu found the same for EfficientNet b0 weights once batch norm is folded: <span data-claim="wu20-t3-efficientnet-b0-pt-foldbn">12.93</span>% per-tensor against <span data-claim="wu20-t3-efficientnet-b0-pc">76.72</span>% per-channel. Activations stay per-tensor in all three papers, because their scale would not factor out of the sum.</p>
+
+<h3>Calibration: choosing the range for activations</h3>
+<p>Weights are known before inference, so their range is just their min and max. Activations depend on the input image. <em>Calibration</em> runs a few hundred representative images through the float network, records each activation tensor as a histogram, and picks one clip value per tensor. Wu used <span data-claim="wu20-t9-faster-r-cnn-calib-samples">512</span> images from the <span data-claim="wu20-calib-source">training set</span> for each detector and segmenter; Nagel says between <span data-claim="nagel21-calib-images">500 and 1000</span> unlabeled images usually suffice.</p>
+
+<figure class="viz" id="viz-calib" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Calibrator">
+    <span class="lbl">Calibrator</span>
+    <button type="button" id="btn-calib-max" aria-pressed="true">max</button>
+    <button type="button" id="btn-calib-p9999" aria-pressed="false">percentile 99.99</button>
+    <button type="button" id="btn-calib-entropy" aria-pressed="false" data-link="kl">entropy (KL)</button>
+    <button type="button" id="btn-calib-mse" aria-pressed="false" data-link="mse">MSE</button>
+    <button type="button" id="btn-calib-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="calib-canvas" role="img" aria-label="A histogram of toy ReLU activations on a logarithmic count axis, with a long thin tail to the right. Dashed lines mark the clip value chosen by each of four calibrators; values beyond the chosen clip are red. Yellow ticks under the axis show the 128 grid levels up to the clip. Two red bars show rounding and clipping error."></canvas>
+  <p class="readout" id="calib-readout" aria-live="polite"></p>
+  <figcaption>A toy sample of 100,000 ReLU outputs with a long tail, in the spirit of Wu Fig. 2. Each calibrator runs its real algorithm on this sample: max takes the largest value; percentile takes the 99.99th percentile of all values; MSE searches for the clip with the smallest quantization error (Nagel Eq. 16); entropy is our reading of the KL method that Wu Sec. 3.4 describes in words (2048 histogram bins, 128 levels; the exact zeros from ReLU are left out). The grid is symmetric 8-bit, so a ReLU output uses codes 0 to 127.</figcaption>
+</figure>
+
+<p>Max keeps every value and pays in rounding error: the one largest value sets the spacing for all the others. The other three calibrators clip a handful of values in the tail, and the marks for everything else get closer together. The bars show the trade directly: clipping error appears, rounding error drops.</p>
+<p><b>Make a guess before you press "entropy (KL)".</b> Percentile 99.99 clips a fixed share of values no matter what the tail looks like. Will the KL method clip more or fewer? It clips fewer here, because it looks at the shape of the tail, not a fixed count. MSE clips fewer still: in squared error, one far outlier costs a lot, so MSE prefers to keep most of the tail.</p>
+
+<p>The MSE calibrator is Nagel's range-setting objective. It chooses the grid ends that minimize the squared difference between a tensor and its quantized copy:</p>
+<div class="eq" id="eq-gran-mse" data-build data-viz="viz-calib"><div class="tex tex-display">
+\htmlData{step=1, link=mse}{\operatorname*{arg\,min}_{q_{\text{min}}, q_{\text{max}}}} \quad \htmlData{step=2, link=hist}{\big\lVert \htmlClass{t-blue}{\mathbf{V}}} - \htmlData{step=3, link=grid}{\htmlClass{t-yellow}{\hat{\mathbf{V}}(q_{\text{min}}, q_{\text{max}})}\big\rVert^2_F}
+</div></div>
+<p class="eqno">Eq. 16 in Nagel et al., arXiv 2106.08295v1 (solved by grid search, golden-section search or a closed-form approximation).</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{V}</span>: the tensor being quantized, here the calibration activations (blue histogram).</li>
+  <li><span class="tex">\hat{\mathbf{V}}(q_{\text{min}}, q_{\text{max}})</span>: the same tensor after quantizing with a grid from <span class="tex">q_{\text{min}}</span> to <span class="tex">q_{\text{max}}</span>. For ReLU outputs <span class="tex">q_{\text{min}} = 0</span>, so only the clip value is searched.</li>
+  <li><span class="tex">\lVert\cdot\rVert_F^2</span>: the sum of squared differences, rounding and clipping error together.</li>
+</ul>
+<p>The entropy calibrator compares distributions instead of values. Wu describes it in one sentence: use the KL divergence to minimize information loss between the floating-point values and what the quantized format can represent. It gives no equation, so the one below is our reading, in our notation:</p>
+<div class="eq" id="eq-gran-kl" data-build data-viz="viz-calib"><div class="tex tex-display">
+T^\star = \htmlData{step=1, link=kl}{\operatorname*{arg\,min}_{T}\ \mathrm{KL}\big(}\htmlData{step=2, link=hist}{\htmlClass{t-blue}{P_T}} \,\big\|\, \htmlData{step=3, link=grid}{\htmlClass{t-yellow}{Q_T}}\big), \qquad \mathrm{KL}(P\,\|\,Q) = \sum_j P_j \log\frac{P_j}{Q_j}
+</div></div>
+<p class="eqno">Our reading of the entropy calibration described in words in Wu et al. Sec. 3.4, arXiv 2004.09602v1, which credits it to TensorRT.</p>
+<ul class="gloss">
+  <li><span class="tex">P_T</span>: the activation histogram cut at <span class="tex">T</span>, with every value beyond <span class="tex">T</span> added to the last bin, which is what clipping does to them.</li>
+  <li><span class="tex">Q_T</span>: the same bins merged into 128 groups, one per grid level, and spread back evenly. This is what the 8-bit grid can still tell apart.</li>
+  <li><span class="tex">T^\star</span>: the clip value whose two histograms differ least.</li>
+</ul>
+
+<h3>What the calibrators did on real detectors</h3>
+<p>Wu and colleagues ran each calibrator on INT8 detectors and segmenters, with per-channel max weights and per-tensor activations. The numbers below are the accuracies as printed in their Table 5. The last column is their Table 7: the best calibrator for each network and its change relative to FP32, in relative percent.</p>
+<table class="data">
+<thead><tr><th>Model</th><th>Backbone</th><th>Metric (COCO val)</th><th>FP32</th><th>max</th><th>entropy</th><th>99.9%</th><th>99.99%</th><th>99.999%</th><th>99.9999%</th><th>Table 7: best calibrator, relative change</th></tr></thead>
+<tbody>
+<tr><td>Faster R-CNN</td><td><span data-claim="wu20-t9-faster-r-cnn-config">resnet50-fpn</span> (torchvision)</td><td>mAP</td><td><span data-claim="wu20-t5-faster-r-cnn-fp32">36.95</span></td><td><span data-claim="wu20-t5-faster-r-cnn-max">36.38</span></td><td><span data-claim="wu20-t5-faster-r-cnn-entropy">36.82</span></td><td><span data-claim="wu20-t5-faster-r-cnn-p99p9">35.22</span></td><td><span data-claim="wu20-t5-faster-r-cnn-p99p99">36.69</span></td><td><span data-claim="wu20-t5-faster-r-cnn-p99p999">36.76</span></td><td><span data-claim="wu20-t5-faster-r-cnn-p99p9999">36.78</span></td><td><span data-claim="wu20-t7-faster-r-cnn-ptq-calib">Entropy</span>: <span data-claim="wu20-t7-faster-r-cnn-ptq-rel">-0.35%</span></td></tr>
+<tr><td>Mask R-CNN</td><td><span data-claim="wu20-t9-mask-r-cnn-config">resnet50-fpn</span> (torchvision)</td><td>mAP (box or mask not stated)</td><td><span data-claim="wu20-t5-mask-r-cnn-fp32">37.89</span></td><td><span data-claim="wu20-t5-mask-r-cnn-max">37.51</span></td><td><span data-claim="wu20-t5-mask-r-cnn-entropy">37.75</span></td><td><span data-claim="wu20-t5-mask-r-cnn-p99p9">36.17</span></td><td><span data-claim="wu20-t5-mask-r-cnn-p99p99">37.55</span></td><td><span data-claim="wu20-t5-mask-r-cnn-p99p999">37.72</span></td><td><span data-claim="wu20-t5-mask-r-cnn-p99p9999">37.80</span></td><td><span data-claim="wu20-t7-mask-r-cnn-ptq-calib">99.9999%</span>: <span data-claim="wu20-t7-mask-r-cnn-ptq-rel">-0.24%</span></td></tr>
+<tr><td>RetinaNet</td><td><span data-claim="wu20-t9-retinanet-config">resnext101-32x4d-fpn</span> (mmdetection)</td><td>mAP</td><td><span data-claim="wu20-t5-retinanet-fp32">39.30</span></td><td><span data-claim="wu20-t5-retinanet-max">38.90</span></td><td><span data-claim="wu20-t5-retinanet-entropy">38.97</span></td><td><span data-claim="wu20-t5-retinanet-p99p9">35.34</span></td><td><span data-claim="wu20-t5-retinanet-p99p99">38.55</span></td><td><span data-claim="wu20-t5-retinanet-p99p999">39.19</span></td><td><span data-claim="wu20-t5-retinanet-p99p9999">39.19</span></td><td><span data-claim="wu20-t7-retinanet-ptq-calib">99.999%</span>: <span data-claim="wu20-t7-retinanet-ptq-rel">-0.28%</span></td></tr>
+<tr><td>FCN</td><td><span data-claim="wu20-t9-fcn-config">resnet101</span> (torchvision)</td><td>mIoU</td><td><span data-claim="wu20-t5-fcn-fp32">63.70</span></td><td><span data-claim="wu20-t5-fcn-max">63.40</span></td><td><span data-claim="wu20-t5-fcn-entropy">64.00</span></td><td><span data-claim="wu20-t5-fcn-p99p9">62.20</span></td><td><span data-claim="wu20-t5-fcn-p99p99">64.00</span></td><td><span data-claim="wu20-t5-fcn-p99p999">63.90</span></td><td><span data-claim="wu20-t5-fcn-p99p9999">63.60</span></td><td><span data-claim="wu20-t7-fcn-ptq-calib">Entropy</span>: <span data-claim="wu20-t7-fcn-ptq-rel">0.47%</span></td></tr>
+<tr><td>DeepLabV3</td><td><span data-claim="wu20-t9-deeplabv3-config">resnet101</span> (torchvision)</td><td>mIoU</td><td><span data-claim="wu20-t5-deeplabv3-fp32">67.40</span></td><td><span data-claim="wu20-t5-deeplabv3-max">67.20</span></td><td><span data-claim="wu20-t5-deeplabv3-entropy">67.40</span></td><td><span data-claim="wu20-t5-deeplabv3-p99p9">66.40</span></td><td><span data-claim="wu20-t5-deeplabv3-p99p99">67.40</span></td><td><span data-claim="wu20-t5-deeplabv3-p99p999">67.50</span></td><td><span data-claim="wu20-t5-deeplabv3-p99p9999">67.40</span></td><td><span data-claim="wu20-t7-deeplabv3-ptq-calib">99.999%</span>: <span data-claim="wu20-t7-deeplabv3-ptq-rel">0.15%</span></td></tr>
+</tbody>
+<caption>Wu et al. 2020, arXiv 2004.09602v1, Tables 5 and 7: INT8 post-training quantization simulated in PyTorch; weights per-channel with max calibration, activations per-tensor with the calibrator named; COCO 2017 validation set. Accuracy columns are absolute metric values; the last column is relative percent, (INT8 &minus; FP32) / FP32. The paper bolds 99.999% for FCN, but its Table 7 names entropy as FCN's best.</caption>
+</table>
+<p>For these ResNet-based networks every calibrator except 99.9% stays close to FP32, and no single calibrator wins on all of them. Even max stays close. Depthwise networks are different. Nagel's standard post-training pipeline, in absolute points, shows EfficientDet-D1 losing more than a point at 8 bits even with per-channel weights:</p>
+<table class="data">
+<thead><tr><th>Model</th><th>Backbone</th><th>Dataset, metric</th><th>FP32</th><th>W8A8 per-tensor</th><th>W8A8 per-channel</th></tr></thead>
+<tbody>
+<tr><td>EfficientDet-D1</td><td>EfficientNet family (not named in Table 6)</td><td>COCO 2017 val, mAP</td><td><span data-claim="nagel21-t6-efficientdet-d1-fp32">40.08</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pt-w8a8">38.29</span></td><td><span data-claim="nagel21-t6-efficientdet-d1-pc-w8a8">38.67</span></td></tr>
+<tr><td>DeepLabV3</td><td>MobileNetV2</td><td>Pascal VOC val, mIoU</td><td><span data-claim="nagel21-t6-deeplabv3-fp32">72.94</span></td><td><span data-claim="nagel21-t6-deeplabv3-pt-w8a8">72.44</span></td><td><span data-claim="nagel21-t6-deeplabv3-pc-w8a8">72.27</span></td></tr>
+</tbody>
+<caption>Nagel et al. 2021, arXiv 2106.08295v1, Table 6: their standard post-training pipeline (cross-layer equalization, MSE range setting, AdaRound or bias correction), simulated, average of 5 runs; activations per-tensor in both columns. Absolute metric values. Not comparable row for row with the table above: different backbones, datasets and toolchains.</caption>
+</table>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>Use per-channel weights and per-tensor activations; the TensorRT documentation recommends exactly that for INT8. Calibrate on a few hundred images that look like deployment, and try more than one calibrator: entropy was <span data-claim="wu20-entropy-default-trt">TensorRT</span>'s default, and Wu's best results came from entropy and the 99.99% or <span data-claim="wu20-best-calibrators">99.999%</span> percentiles. TensorRT <span data-claim="trt-removal-version">11.0.0</span> removed its built-in calibrators, so today the clip values are computed by a tool such as Model Optimizer and written into the model as quantize nodes. For a depthwise-heavy detector like EfficientDet, expect a measurable drop and keep reading: <a href="#ch-ptq">chapter 6</a> fixes much of it without training.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-chanland'), out = document.getElementById('chanland-readout');
+  const kit = KIT.chanland(document.getElementById('chanland-canvas'), { fig });
+  const gB = ['tensor', 'channel'].map(k => document.getElementById('btn-chanland-' + k));
+  const vB = ['true', 'zoom'].map(k => document.getElementById('btn-chanland-' + k));
+  const sync = () => {
+    gB.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-chanland-' + kit.state.mode)));
+    vB.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-chanland-' + (kit.state.zoomTo ? 'zoom' : 'true'))));
+    out.innerHTML = KIT.chanlandText(kit.info());
+  };
+  gB.forEach(b => b.addEventListener('click', () => { kit.set({ mode: b.id.slice(13) }); sync(); }));
+  vB.forEach(b => b.addEventListener('click', () => { kit.state.zoomTo = b.id.endsWith('zoom') ? 1 : 0; kit.set({ zoom: kit.state.zoomTo }); sync(); }));
+  document.getElementById('btn-chanland-reset').addEventListener('click', () => { kit.state.zoomTo = 0; kit.set({ mode: 'tensor', zoom: 0 }); sync(); });
+  sync();
+})();
+(() => {
+  const fig = document.getElementById('viz-calib'), out = document.getElementById('calib-readout');
+  const kit = KIT.calib(document.getElementById('calib-canvas'), { fig });
+  const btns = ['max', 'p9999', 'entropy', 'mse'].map(k => document.getElementById('btn-calib-' + k));
+  const go = k => { kit.set({ method: k }); btns.forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-calib-' + k))); out.innerHTML = KIT.calibText(kit.info()); };
+  btns.forEach(b => b.addEventListener('click', () => go(b.id.slice(10))));
+  document.getElementById('btn-calib-reset').addEventListener('click', () => go('max'));
+  out.innerHTML = KIT.calibText(kit.info());
+})();
+</script>
+</section>

@@ -1,0 +1,122 @@
+# Evidence group results (RF100-VL 2505.20612v4, FSOD-VLM 2312.14494v4, OVDEval 2308.13177v2, D3 2307.12813v2, T-Rex2 2403.14610v1).
+# SUMMARY: Part 1 outline (43 items): 38 confirmed (4 medium flags, 15 minor; 3 of these are new text-vs-table findings the outline does not record), 1 wrong (medium, already superseded), 4 unverifiable (3 labelled 'our reading', 1 medium: 'about 7 defect sets') | Part 2 rf100vl.json (18 items): 17 confirmed (1 medium flag, 2 minor), 0 wrong, 1 unverifiable (medium) | Part 3 sample claims (50): 50 confirmed (6 minor wording), 0 wrong, 0 unverifiable.
+# Format: item | verdict | severity | what is wrong | what the source says | loc
+# Convention: "confirmed | minor/medium" = value right, but wording, model variant or an unlike comparison must be labelled.
+# All numbers were checked in the LaTeX (uncommented rows only) and cross-checked in paper.pdf text.
+
+## Part 1: outline.md chapters 11-13 and the "Evidence group" paragraph (40)
+o11-owlvit-oneshot | confirmed | minor | spec omits that the means are for held-out (unseen) COCO classes | OWL-ViT Table 2 "Unseen" block, mean over 4 splits: AIT 24.3, OWL-ViT 41.8 (R50+H/32, 3 runs averaged) | OWL-ViT Table 2 p10 (outline L160-161)
+o11-trex2-onespace | confirmed | | | text and visual (box or point) prompts are aligned by region-level contrastive alignment; conclusion: "complementary advantages between text prompts and visual prompts" | T-Rex2 Sec 3.2, Sec 5 (Conclusion); src/sec/3_method.tex:52 (L161-162)
+o11-trex2-16ex | confirmed | minor | "average about 16" is loose; this applies to Visual-G only; the paper itself calls these results zero-shot ("not zero-shot" is our reading) | Visual-G: sample N images per class from the benchmark TRAINING set, one GT box each, average the N embeddings; "By default, N is set to 16" (Table 5 varies 1-64). Visual-I uses a GT box from the test image itself | T-Rex2 Sec 4.3, 4_experiments.tex:71,73 (L163-164)
+o11-trex2-flip | confirmed | minor | spec omits backbone; minival and val rare groups differ in size | Swin-T (Table 1): LVIS-val APr visual-G 32.4 vs text 29.0; minival APr text 37.4 vs visual-G 29.9. Swin-L shows the same flip: val APr 43.8 vs 42.7, minival APr 49.2 (text) vs 45.4. Rare classes: val 337, minival 70 | T-Rex2 Table 1 (tab:main_result), Sec 4.3 (L164-165)
+o11-rf100vl-6.4-vs-12.2 | confirmed | minor | unlike settings not labelled in the spec | 6.4 = MQ-GLIP-Image (Images Only) in the Few-Shot (10 shots) block (in-context exemplars, frozen VLM); 12.2 = MQ-GLIP-Text (Class-Names Only) in the Zero-Shot block. MQ-GLIP (Class Names + Images) is also 12.2, so adding images adds nothing | RF100-VL Table 2 All col, neurips_2025.tex:526,536,537 (L167)
+o11-fsodvlm-3.34-vs-8.41 | confirmed | minor | unlike settings not labelled | nuImages Few cohort: MQ-GLIP-Image (Visual Prompting, 10-shot) 3.34 vs MQ-GLIP-Text (Zero-Shot Detection) 8.41; both Swin-L | FSOD-VLM Table 3 (tab:all_res_10_shots), neurips_2024.tex (L167)
+o11-independent-tests | confirmed | medium | "independent tests disagree" with T-Rex2, but neither paper tests T-Rex2; both test MQ-GLIP (MQ-Det on GLIP-L) with 10 exemplars per class, not T-Rex2 Visual-G's 16 averaged boxes | T-Rex2's own Roboflow100 (RF100, not RF100-VL) result favours visual: Swin-T 17.4 vs text 8.2, Swin-L 18.5 vs 10.5. Say "a different visual-prompt model (MQ-GLIP) on different benchmarks" | RF100-VL Table 2; FSOD-VLM Table 3; T-Rex2 Table 1 (L166)
+o11-yoloe-modes | confirmed | | | YOLOE abstract: text prompts (RepRTA), visual prompts (SAVPE), prompt-free (LRPC) | yoloe abs.html (L168)
+o12-ladder-tables | confirmed | | | Table 2 (tab:baseline, p8) has zero-shot and 10-shot only; Table 7 (tab:supervised_baseline, App. F, p22) has 10% labels and full | rf100vl neurips_2025.tex:509-555; suppl.tex:205-265 (L174)
+o12-ind-zs-10.3 | confirmed | | | Industrial zero-shot: GroundingDINO 10.3 is the best of all 8 zero-shot rows (next: Gemini class names 8.6, OWLv2 7.8, MQ-GLIP-Text 7.8). App. A: MM-GroundingDINO-L* weights, all class names in one prompt | Table 2 neurips_2025.tex:524; suppl.tex:9 (L175)
+o12-ind-10shot-37.8 | confirmed | minor | spec says "Grounding DINO"; it is the same MM-GroundingDINO-L* checkpoint, fully fine-tuned | 37.8 is the best 10-shot Industrial value (next YOLOv8n 28.1). Fine-tune: 1000 iters, batch 4, lr 3e-4, resize (640, 1333). 10-shot = 10 instances per class (TFA protocol) | Table 2 neurips_2025.tex:538; suppl.tex:9; Fig. 4 caption (L176)
+o12-ind-10pct-50.7-52.9 | confirmed | medium | rung is closed-set YOLOv8 only; spec does not say so | Industrial semi-supervised rows: YOLOv8n 50.7, +STAC 51.5, v8s 52.6, +STAC 52.4, v8m 52.9, +STAC 52.7. No GroundingDINO row at 10% or full labels anywhere in the paper | Table 7 suppl.tex:247-252 (L176)
+o12-ind-full-64.3-68.2 | confirmed | medium | rung is YOLOv8/v11/LW-DETR only; spec does not say so | Industrial full rows: 64.3 (YOLOv8n), 64.6, 64.6, 64.7, 66.8 (LW-DETRs), 64.7, 65.1, 68.2 (LW-DETRm) | Table 7 suppl.tex:255-262 (L176)
+o12-ladder-unlike | confirmed | medium | UNLIKE COMPARISON: rungs 1-2 are MM-GroundingDINO-L*, rungs 3-4 are different closed-set detectors; budgets are in different units (10 instances per class vs a random 10% of train images vs all); the chart must not read as one model's trajectory | 10-shot single runs are also noisy: YOLOv8n w/ Fed Industrial 25.9 (Table 2) vs 30.1 +- .409 mean of 10 seeds (Table 8) | Table 2, Table 7, Table 8 (tab:overall_variance); Fig. 4 caption; App. F (L174-177)
+o12-cluster-22 | confirmed | | | "we cluster these 100 datasets using per-dataset CLIP embeddings into seven categories"; Fig. 5 pie "Industrial, 22" (sum of slices 100); App. R lists 22 Industrial names | Fig. 1 caption; figures/data_distribution.pdf; suppl.tex:689-712 (L176-177)
+o12-defect-about-7 | unverifiable | medium | the paper gives names only, so "about 7" cannot be sourced; label it "our reading, by name" | No per-dataset classes except recode-waste (App. Q); bib titles are uninformative ("GRCCS Dataset", "13 Dataset", "tube Dataset"). By name (our reading): defect/damage/distress 4 (cable-damage, defect-detection, wheel-defect-detection, asphaltdistressdetection); deeppcb is a PCB-defect set by outside knowledge; inspection-like 3 (infraredimageofpowerequipment, smd-components, screwdetectclassification) => 5 to 8; opaque 5 (-grccs, 13-lkc01, dataconvert, l10ul502, tube); not defect 9. Two defect sets sit OUTSIDE Industrial: label-printing-defect-version-2 (Document), new-defects-in-wood (Other) | App. R suppl.tex:689-712; references.bib (L177)
+o12-odinw-strip | confirmed | minor | spec does not say which Grounding DINO checkpoint (three per-dataset tables exist); values belong to OWL/GD groups and were not rechecked here | OWLv2 app. table (app:tab:odinw-full-results) row 12 OWL-ST CLIP L/14: mean35 24.4, median35 16.2, 35 per-dataset columns. GD per-dataset ODinW-35 tables: Swin-T O365+GoldG, Swin-T O365+GoldG+Cap4M, Swin-L | owlv2 src/odinw_table.tex:25; gdino src/tables/ODinW35_detail_*.tex (L178-179)
+o12-glip-de | confirmed | | | GLIP Table 8 has 0/1/3/5/10/full-shot columns on ODinW in one table; text: GLIP-T (A) has no deep fusion so prompt tuning ~ linear probing and lags full tuning; for GLIP-T and GLIP-L prompt tuning almost matches full tuning | GLIP Table 8, Table 13, Sec 5.2 (L180-181)
+o12-owlv2-median | confirmed | | | median35: B/16 11.6->6.0, L/14 16.2->6.3, G/14 17.5->9.5; LVIS val APr rises 29.6->36.2, 34.9->44.6, 37.5->47.2 | owlv2 odinw_table.tex rows 11-16; main_table.tex rows 11-16 (L182)
+o12-owlv2-ens-recovers | wrong | medium | UNLIKE METRICS: "recovers" uses the ensemble's ODinW-13 mean (56.3) against a median35 drop; its median35 is 10.6, still below OWL-ST L/14's 16.2. Already superseded by the 2026-10-10 corrections (outline L332-334) | ensemble = self-trained checkpoint + row 21 (curated-vocabulary OWL-ST+FT L/14), fine-tuned weight 0.4: mean13 56.3, mean35 25.6, median35 10.6 | owlv2 odinw_table.tex:34 and caption (L182-183)
+o12-decision-best10shot | confirmed | minor | "an open-vocabulary detector" over-generalises from one model | Only MM-GroundingDINO-L* is best at 10-shot (All 33.6). The other fine-tuned OV detector, Detic w/ Federated Loss (All 22.8), is below YOLOv8s w/ Federated Loss (23.6); in Industrial it is below plain YOLOv8n (25.9 vs 28.1). Say "Grounding DINO (MM-G-L* weights)" | RF100-VL Table 2 (L187)
+o12-decision-weightavg | unverifiable | minor | "keep a weight-averaged copy" is our reading; the evidence shows partial recovery only | ensemble: ODinW-13 mean 56.3 but median35 10.6 | owlv2 odinw_table.tex:34 (L188)
+o13-thunderbolt | confirmed | minor | "wire-rope defect" is our reading of the image; the text never says "wire rope" or "defect" for it; cite the panel | "Thunderbolt" is a box label in Fig. 2(a) "Context-Dependent Class-Names" (photo: a wire rope with a broken strand). Hard-example types (Fig. 2 caption, Sec 1): scientific names, acronyms, context-dependent names, material properties, plus imaging modalities (panel d) | RF100-VL Fig. 2, figures/figure2_1b.pdf; neurips_2025.tex:355 (L192-193)
+o13-glip-mushrooms | confirmed | | | original prompt "Cow. Chanterelle" 13.6 AP; manual prompt "flat mushroom. yellow mushroom" 73.8 (GLIP-T zero-shot; 73.8 equals GLIP-T Mushrooms in Table 14) | GLIP Table 10 (L193)
+o13-mmg-brain | confirmed | | | MM-GDINO Swin-T on Brain Tumor: not fine-tuned 0.4, fine-tuned 47.5; text: labels are numerical identifiers only | MM-G Table 11, Brain Tumor paragraph (L193-194)
+o13-gd-plantdoc | confirmed | | | plantdoc 0.36 for Swin-T O365+GoldG+Cap4M (0.34 O365+GoldG; 2.02 Swin-L); appendix GLIP-vs-GD table lists 1.10 vs 0.36 | gdino src/tables/ODinW35_detail_swinT_OGC.tex:37; src/sec/appendix.tex:253 (L194)
+o13-gd15-rename | confirmed | | | "we performed prompt engineering to refine category names on datasets where their performance was particularly poor" | GD 1.5 ODinW evaluation paragraph (/tmp/ovd-fc/gdino15.txt l.280-285) (L194-195)
+o13-fsod-truck | confirmed | | | "the nuImages dataset defines the cab of the truck as a separate concept from its trailer ... the VLM predicts the entire vehicle as a truck"; also bicycle includes its rider | FSOD-VLM Fig. 1 caption, Sec 3.2 (neurips_2024.tex:348,541) (L196-197)
+o13-texture | unverifiable | | labelled "our reading" in the spec; no source in this group | none of the five papers measures texture/region targets | n/a (L198-199)
+o13-tiny-objects | unverifiable | | labelled "our reading"; only one input size is in this group's sources | RF100-VL App. A: GroundingDINO images resized to (640, 1333) | suppl.tex:9 (L200)
+o13-calibration | confirmed | | "thresholds do not transfer" is our reading (already corrected at L335-337) | OWLv2 Sec 5: fine-tuned models' predictions on out-of-distribution queries "may be poorly calibrated"; ViLD App. B, Fig. 12: CLIP scores do not reflect localization quality | owlv2 text l.644; vild App. B (L201-202)
+o13-ovdeval-attr-neg | confirmed | minor | "ignored" is stronger than the source; OVDEval says "poor performance" | NMS-AP color 3.1-22.9, material 2.5-16.3 (OmDet best, VAW pretraining); negation NMS-AP 27.9-52.5 (Table 1 avg. negative labels 1.00); GLIP confidence for positive and negative negation labels has a similar distribution. GD and Detic COCO rows are supervised (*) | OVDEval Table 3, Sec "Limitations of Current OVD Models" (L203)
+o13-d3-negation | confirmed | minor | "for some models" undersells; and D3 Table 2 gives no PRES/ABS evidence that G-DINO ignores negation | D3 text: "performance ... on PRES is consistently superior to that on ABS". Table 2 intra-scenario: ABS >= PRES in 5 of 10 rows (OFA-base, OFA-large, OWL-ViT-base, G-DINO-tiny, G-DINO-base); all 20 cells: ABS > PRES in 7, ties in 2. D3's G-DINO failure is no-instance FPPC 100.0 (cannot reject absent targets, Table 3) | d3 sections/experiments.tex:30-31; tables/comparison.tex; tables/analysis_ref_num.tex (L203-204)
+o13-finetune-xref | confirmed | | cross-reference only | see o12-owlv2-median and o12-owlv2-ens-recovers | (L205)
+ev-table7-not-table1 | confirmed | | | Table 1 RF100-VL column 54.9/55.3/56.2/56.2/56.4/56.5 equals commented-out older rows (neurips_2025.tex:562-569); Table 7 All 55.4/56.1/56.5/57.0/56.9/57.0 equals Table 4 pycocotools column | RF100-VL Table 1, Table 4, Table 7 (L315-316)
+ev-owlv2-vs-gd-prompt | confirmed | | | App. A: OWLv2 "prompt the model with each class name independently"; GroundingDINO "all the class names combined into a single prompt" | suppl.tex:9,15 (L316-317)
+ev-owlvit-not-in-ovdeval | confirmed | | | OVDEval evaluates Detic, MDETR, GLIP, FIBER, OmDet, Grounding DINO only (D3 does evaluate OWL-ViT) | OVDEval Table 2, Table 3 (L317)
+ev-rf100vl-lt2pct | confirmed | minor | the "mismatch" is likely but not certain | abstract: GroundingDINO and Qwen2.5-VL "less than 2% zero-shot accuracy on challenging medical imaging datasets"; Table 2 Medical: GD 2.1, Qwen 1.6 (names) / 1.7 (instructions). The abstract may mean individual datasets; RF20-VL Table 3 has GD Medical 0.4 | neurips_2025.tex:299; Table 2; Table 3 (L318)
+ev-fsod-detic-3values | confirmed | | | 16.09: main Table 2 (row "TFA w/ LVIS, IN-21K, COCO + CLIP Classifier", 10-shot) and Table 3 (Detic Standard Fine-Tuning), identical row values; 15.53: supp Table 7 "+ Standard Fine-Tuning"; 15.28: supp Table 8 "Detic (Fine-Tuning, 10 shots)" | neurips_2024.tex:696,797; suppl.tex:233,332 (L318)
+ev-ovdeval-3k | confirmed | | | text: "20K high-quality images accompanied by 3K meticulously annotated labels"; Table 1 Labels sum to 10,268 (2,967 if Position's 7,301 are left out); images sum to 20,142 | OVDEval Sec 3 Statistics, Table 1 (L318)
+ev-extra-fsod-16.2 | confirmed | minor | NOT recorded in the outline: text-vs-table mismatch; do not quote "16.2" | text: GroundingDINO "outperforms DiGeo by 16.2% AP"; Table 1: 48.3 - 33.1 = 15.2 | FSOD-VLM Sec 4.1, Table 1 (neurips_2024.tex:630)
+ev-extra-rf100vl-cite | confirmed | minor | NOT recorded: citation slip; App. A is the only reliable identity | Sec 4.2 "fine-tuning GroundingDINO \cite{li2021grounded}" cites GLIP; Table 2 rows cite liu2023grounding; App. A says MM-GroundingDINO-L* weights | neurips_2025.tex:503; references.bib:152
+ev-extra-rf100vl-10pct-claim | confirmed | minor | NOT recorded: "outperforming all YOLO variants by more than 10%" is exactly 10.0 points in the All column | GD 10-shot All 33.6 vs best YOLO (YOLOv8s w/ Fed) 23.6 | neurips_2025.tex:503; Table 2
+
+## Part 2: notes/data/rf100vl.json (18)
+json-t2-industrial | confirmed | | | all 21 uncommented Table 2 rows: Industrial value matches LaTeX and PDF p8 | neurips_2025.tex:523-550
+json-t2-all | confirmed | | | all 21 Table 2 rows: All value matches | neurips_2025.tex:523-550
+json-t7-industrial | confirmed | | | all 14 Table 7 rows: Industrial value matches LaTeX and PDF p22 | suppl.tex:247-262
+json-t7-all | confirmed | | | all 14 Table 7 rows: All value matches | suppl.tex:247-262
+json-full-rows | confirmed | | | every column of all 35 Table 2/7 rows matches (script compare), including the two spot rows Detic zero-shot (12.2/4.5/17.9/6.0/0.8/7.6/11.2/9.5) and LW-DETRm full (57.1/60.1/56.7/68.2/52.8/57.5/61.0/59.8); each loc line number is correct | neurips_2025.tex:523,538; suppl.tex:262
+json-t3-t8-t4-t1 | confirmed | | | extra: Table 3 (18 rows), Table 8 (2 rows), Table 4 (6 rows) and Table 1 values all match | neurips_2025.tex:604-640, 452-490; suppl.tex:53-75, 320-335
+json-method-names | confirmed | | | JSON method strings equal the LaTeX row labels after removing \cite (e.g. "MQ-GLIP-Text (Class-Names Only)", "Gemini 2.5 Pro (Images)") | Table 2, Table 7
+json-gdino-identity | confirmed | minor | the exact pretraining data of "L*" is not determinable from local sources | App. A: "GroundingDINO \cite{liu2023grounding} with pretrained weights from mmdetection (MM-GroundingDINO-L*)", one prompt with all class names. "L*" is not defined in RF100-VL; the local MM-G paper says MM-G-Large (COCO, RefC, O365V2, GoldG, GRIT, Open-Images, V3Det) "is still in training" | rf100vl suppl.tex:9; mmgdino src/sec/tex/2_baseline.tex:37,155
+json-prompting-others | confirmed | | | OWLv2 HF, one class per prompt; Detic Swin-L, LVIS+COCO+IN-21K; MQ-GLIP Swin-L O365, FourODs, GoldG, Cap24M, prompts "fed into a frozen VLM" (Sec 3.2); Qwen at most 3 few-shot images, Gemini all; MLLM confidence set to 1.0; YOLO 100 epochs, batch 16 | suppl.tex:7-48; neurips_2025.tex:420
+json-cluster-sizes | confirmed | | | Aerial 11, Document 10, Flora & Fauna 23, Industrial 22, Medical 13, Sports 6, Other 15 (sum 100) | figures/data_distribution.pdf; App. R
+json-fig5-stats | confirmed | | | Industrial 122 classes / 29,758 images / 205,627 annos; All 564 / 164,149 / 1,355,491 | neurips_2025.tex:430-440
+json-industrial-names | confirmed | | | 22 names match App. R Industrial table exactly | suppl.tex:689-712
+json-defect-count | unverifiable | medium | the JSON (correctly) has no defect count; the paper lists no classes per dataset | see o12-defect-about-7: by name 5-8 of 22 (our reading) | App. R; references.bib
+json-eval-protocol-split | confirmed | minor | loc is partly off: Fig. 4 caption gives only the 10-shot TFA protocol; the largest-average-box-area choice is in App. E only, which evaluates it on nuImages (use on RF100-VL is implied, not stated) | App. E: "generate K random candidate few-shot splits for each class and pick the split that has the largest average bounding box area" | suppl.tex:130; Fig. 4 caption
+json-metric-note | confirmed | | | pycocotools with maxDets 500 (Sec 3.2); same test split for all regimes (Sec 4.1); App. H says "mAP 50:95" | neurips_2025.tex:416; suppl.tex:293
+json-ladder-industrial | confirmed | medium | values right; same unlike-rung flag as o12-ladder-unlike (no GroundingDINO at 10% or full) | 10.3, 37.8, 50.7-52.9, 64.3-68.2 | Table 2, Table 7
+json-table1-stale-note | confirmed | | | Table 1 column equals the commented-out rows, not Table 7 or Table 4 | neurips_2025.tex:474-490, 562-569
+json-table8-note | confirmed | | | 10-run mean YOLOv8n w/ Fed Industrial 30.1 +- .409 vs Table 2 single run 25.9 | suppl.tex Table 8 (tab:overall_variance)
+
+## Part 3: notes/factcheck/sample-evidence.json (50)
+trex2-fps-l | confirmed | | | Swin-L FPS 3.62 = 1/(sum of all five modules incl. both prompt encoders, 0.2766 s); RTX 3090, batch 1 | T-Rex2 Table 7 (tab:speed)
+fsod-vlm-coco-digeo-ap | confirmed | | | DiGeo 30-shot AP 33.1, highest prior FSOD row (Retentive R-CNN 32.9) | FSOD-VLM Table 1 (tab:gdino_zs)
+d3-uninext-huge-inter-pres | confirmed | | | 3.9 | D3 Table 2, tables/comparison.tex
+rf100vl-yolov8n-10shot-medical | confirmed | | | 13.7 | RF100-VL Table 2, neurips_2025.tex:540
+ovdeval-detic-color-nmsap | confirmed | | | 3.90 / 4.14 (NMS-AP / AP) | OVDEval Table 3
+rf100vl-mqglip-text-zs-industrial | confirmed | | | 7.8 | RF100-VL Table 2, neurips_2025.tex:526
+rf100vl-appK-gemini-siglip | confirmed | | | Instructions block: Gemini 5.7 -> + SigLIPv2 Score 8.3 (RF20-VL) | RF100-VL Table 12 (tab:post-processing), App. K
+trex2-visi-box-t-rf100 | confirmed | | | 30.6 (Roboflow100 = RF100, 100val AP_avg) | T-Rex2 Table 2 (tab:main_result_2)
+trex2-nprompts-4-lvis-apr | confirmed | minor | Table 5 does not state the backbone; Swin-T is inferred (row 16 equals Table 1 Swin-T Visual-G) | row 4: LVIS-val APr 32.0 | T-Rex2 Table 5 (tab:num_visual_promtps)
+trex2-queries | confirmed | | | "select indices with similarity of top 900 to initialize the position embeddings" | T-Rex2 Sec 3.1 Box Decoder, 3_method.tex:38
+fsod-vlm-mqglip-mm-few | confirmed | | | MQ-GLIP (Swin-L) Few 10.26 (All 21.42), no gradient fine-tuning | FSOD-VLM Table 3
+rf100vl-gemini-zs-all | confirmed | | | 11.6; Table 2 caption: multi-class prompts for MLLMs | RF100-VL Table 2, neurips_2025.tex:529
+trex2-fps-t-interactive | confirmed | | | 33.33 = 1/(0.0120+0.0180) s | T-Rex2 Table 7
+ovdeval-v2-date | confirmed | | | [v2] Mon, 18 Dec 2023 07:29:55 UTC | ovdeval abs.html
+ovdeval-n-subsets | confirmed | | | abstract "9 sub-tasks"; Table 1 caption "9 sub-datasets" | OVDEval abstract, Table 1
+ovdeval-glip-material-ap | confirmed | | | 7.40 / 15.87 | OVDEval Table 3
+ovdeval-mdetr-landmark-nmsap | confirmed | | | 1.80 / 7.80 | OVDEval Table 3
+trex2-vpe-ffn | confirmed | | | "set the hidden dimension of the feed-forward layer to 1024" (3 deformable cross-attention layers) | T-Rex2 Sec 4.2 Model Details
+ovdeval-glip-negation-nmsap | confirmed | | | 29.30 / 51.80 | OVDEval Table 3
+ovdeval-fiber-negation-ap | confirmed | | | 28.70 / 57.20 | OVDEval Table 3
+d3-gdino-base-inter-full | confirmed | | | 2.7 | D3 Table 2
+trex2-abl-align-visualg-lvis-apc | confirmed | minor | backbone not stated in Table 4; Swin-T inferred (row equals Table 1 Swin-T Visual-G) | W/ Contrastive Alignment, Visual-G: AP 34.9, APr 32.4, APc 30.3, APf 41.1 | T-Rex2 Table 4 (tab:synergy_ab)
+rf100vl-images-all | confirmed | | | 164,149 | RF100-VL Fig. 5 left table
+d3-gdino-thr08-map | confirmed | minor | name the variant and split | 9.5; unthresholded 20.7 equals G-DINO-base intra-scenario FULL, so this is G-DINO-base, intra-scenario | D3 Supp. Table 7 (tab:binfunctional_thres)
+d3-gdino-tiny-inter-full | confirmed | | | 2.3 | D3 Table 2
+ovdeval-gdino-total-average-ap | confirmed | minor | the average includes a supervised COCO score (55.30*); OVDEval's GD is Swin-B with COCO, ODinW-35, RefCOCO in pretraining | 33.69 (= mean of the 9 AP values, recomputed) | OVDEval Table 2, Table 3
+fsod-vlm-nuimages-classes | confirmed | | | "This dataset annotates 18 classes" | FSOD-VLM Sec 4 "Datasets and Metrics"
+d3-owlvit-large-inter-abs | confirmed | | | 2.1 | D3 Table 2
+d3-ofa-large-inter-full | confirmed | | | 0.1 | D3 Table 2
+rf100vl-appL-yolom-med | confirmed | | | App. L: "Detic achieves 8.5 AP on Medical while YOLOv8m achieves 16.0 AP" (= Table 2 YOLOv8m w/ Federated Loss) | RF100-VL App. L; Table 2 neurips_2025.tex:545
+trex2-swint-visualg-odinw-med | confirmed | | | 17.5 (35val AP_med); Visual-G default N=16 training exemplars | T-Rex2 Table 1
+d3-gdino-thr07-fppc | confirmed | | | 34.6 (FULL mAP 13.6), highlighted as closest to OFA-DOD's 35.6 | D3 Supp. Table 7
+ovdeval-glip-coco-ap | confirmed | minor | GLIP's COCO score is zero-shot while GD and Detic COCO scores in the same row are supervised (*); do not compare them | 48.90 / 51.30 | OVDEval Table 3
+trex2-nprompts-32-lvis-apr | confirmed | minor | backbone inferred as Swin-T, as for the 4-prompt row | row 32: LVIS-val APr 32.2 | T-Rex2 Table 5
+ovdeval-omdet-color-ap | confirmed | | | 22.90 / 24.56 | OVDEval Table 3
+trex2-swint-text-lvismv-apr | confirmed | | | 37.4 | T-Rex2 Table 1
+d3-uninext-huge-inter-abs | confirmed | | | 1.6 | D3 Table 2
+ovdeval-omdet-attribute-avg-nmsap | confirmed | | | 19.60 / 23.58 | OVDEval Table 3
+ovdeval-fiber-material-nmsap | confirmed | | | 12.40 / 17.72 | OVDEval Table 3
+rf100vl-appL-yolom-doc | confirmed | | | App. L: "Detic achieves 19.6 AP on Documents, while YOLOv8m achieves 23.3 AP" (= Table 2 YOLOv8m w/ Federated Loss) | RF100-VL App. L; Table 2
+d3-owlvit-one-inst | confirmed | | | 21.1 (Table 3 does not name the OWL-ViT size) | D3 Table 3 (tab:analysis_box_num)
+ovdeval-glip-backbone | confirmed | | | GLIP Swin-L, FourODs, GoldG, CC3M+12M, SBU, 430.42M params | OVDEval Table 2
+rf100vl-gemini-zs-industrial | confirmed | | | 8.6 | RF100-VL Table 2, neurips_2025.tex:529
+fsod-vlm-detic-fed-ft-few-t3 | confirmed | | | Detic (Swin-B) Federated Fine-Tuning: Few 4.18 (All 17.24) | FSOD-VLM Table 3
+d3-ofa-dod-inter-full | confirmed | | | 5.7 | D3 Table 2
+trex2-text-data-labeled | confirmed | | | "3.15M labeled images and 3.39M pseudo-labeled images for text prompt training" | T-Rex2 Sec 4.1
+trex2-swinl-text-lvisval-apr | confirmed | | | 42.7 | T-Rex2 Table 1
+trex2-visi-box-t-coco | confirmed | | | 56.6 | T-Rex2 Table 2
+ovdeval-fiber-attribute-avg-ap | confirmed | | | 9.60 / 13.56 | OVDEval Table 3
+d3-ofa-large-inter-pres | confirmed | | | 0.1 | D3 Table 2

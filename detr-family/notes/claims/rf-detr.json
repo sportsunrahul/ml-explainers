@@ -1,0 +1,2562 @@
+[
+ {
+  "id": "rfdetr-fig1-visual-read",
+  "claim": "Approximate endpoints of the continuous RF-DETR COCO Pareto curves read off Figure 1 (top left) by eye",
+  "value": "DINOv2-S: starts ~1.5 ms / ~36 AP, plateaus ~58.8 AP by ~16-18 ms; DINOv2-B: reaches ~60.4 AP near ~19.8 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Figure 1 top-left plot (figures/latency_accuracy_COCO_Object_Detection_mAPat50to95.png)",
+  "uncertain": true,
+  "note": "Visual estimate from the plot; the paper gives no data table for curve interiors."
+ },
+ {
+  "id": "rfdetr-ft-100ep",
+  "claim": "Paper posits RF-DETR benefits from post-NAS fine-tuning on RF100-VL because architecture-augmentation regularization needs more than this many epochs to converge on small datasets",
+  "value": "more than 100 epochs",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 3 End-to-End NAS paragraph; Appendix G",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-similar-trends",
+  "claim": "Sec 4 claims RF-DETR shows similar trends (beating D-FINE and LW-DETR) at small and medium sizes on COCO",
+  "value": "S: 52.9 vs D-FINE 50.6 (+2.3); M: 54.7 vs D-FINE 55.0 (-0.3; RF-DETR wins only AP50 73.5 vs 72.6 and latency 4.4 vs 5.4 ms)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4 Evaluating RF-DETR and RF-DETR-Seg on COCO; Table 2",
+  "uncertain": true,
+  "note": "Text claim not supported at M on AP50:95 by Table 2."
+ },
+ {
+  "id": "rfdetr-nano-coco-ap",
+  "claim": "RF-DETR (nano) COCO AP",
+  "value": "48.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract; Table 2 row RF-DETR N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-nano-beats-dfine",
+  "claim": "RF-DETR (nano) beats D-FINE (nano) on COCO by this many AP at similar latency",
+  "value": "5.3 AP (48.0 vs 42.7; 2.3 ms vs 2.1 ms)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract; Table 2",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-2xl-beats-gdino",
+  "claim": "RF-DETR (2x-large) outperforms GroundingDINO (tiny) on RF100-VL",
+  "value": "1.2 AP",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract",
+  "uncertain": true,
+  "note": "Table 4: non-fine-tuned 2XL 63.3 vs GDINO 62.3 = 1.0 AP; fine-tuned 2XL 63.5 gives 1.2 AP. Abstract does not say which row."
+ },
+ {
+  "id": "rfdetr-2xl-20x",
+  "claim": "RF-DETR (2x-large) runs this much faster than GroundingDINO (tiny) on RF100-VL",
+  "value": "20x (309.9 ms vs 15.6 ms = 19.9x)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract; Table 4",
+  "uncertain": false,
+  "note": "GDINO latency is PyTorch (starred), RF-DETR is TensorRT."
+ },
+ {
+  "id": "rfdetr-first-60ap",
+  "claim": "RF-DETR (2x-large) is the first real-time detector to surpass 60 AP on COCO",
+  "value": "60.1 AP at 17.2 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Abstract; Table 2/12 row RF-DETR 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-2xl-vs-dfinexl",
+  "claim": "RF-DETR (2x-large) beats D-FINE (x-large) on COCO",
+  "value": "0.8 AP (60.1 vs 59.3)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-le40ms",
+  "claim": "RF-DETR outperforms prior real-time methods at latencies up to this bound on COCO",
+  "value": "<= 40 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 1 Contributions",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-seg-nano-vs-yolo11x",
+  "claim": "RF-DETR-Seg (nano) outperforms YOLOv11-Seg (x-large) on COCO while running this much faster",
+  "value": "4x (40.3 AP at 3.4 ms vs 40.1 AP at 13.7 ms)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 1; Tables 3 and 13",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-seg-nano-vs-fastinst",
+  "claim": "RF-DETR-Seg (nano) beats FastInst on COCO seg",
+  "value": "5.4% (40.3 vs 34.9), \"almost ten times faster\" (3.4 ms vs 39.6 ms PyTorch)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4 COCO paragraph; Table 3 caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-lwdetr-25pct",
+  "claim": "D-FINE reported LW-DETR latency this much faster than LW-DETR originally reported",
+  "value": "25%",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 1; Sec 4 Standardizing Latency Benchmarking",
+  "uncertain": true,
+  "note": "No underlying numbers given in the paper."
+ },
+ {
+  "id": "rfdetr-buffer-200ms",
+  "claim": "Pause between consecutive forward passes used to mitigate power throttling",
+  "value": "200 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 caption; Sec 4",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-buffer-beyond",
+  "claim": "Buffering beyond this does not change latency measurements",
+  "value": "200 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix K, Table 20",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-hw",
+  "claim": "Latency hardware and software stack",
+  "value": "NVIDIA T4 GPU, TensorRT 10.4, CUDA 12.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4 Datasets and Metrics",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-cudagraphs",
+  "claim": "CUDA graphs are used in TensorRT; RT-DETR, LW-DETR and RF-DETR benefit, D-FINE does not",
+  "value": "qualitative",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Latency Evaluation",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-fp16-main",
+  "claim": "Main-table latencies (Tables 2-4) are FP16 TensorRT",
+  "value": "FP16 (inferred)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 FP-16 column; Table 6 caption",
+  "uncertain": true,
+  "note": "Not stated for Tables 2-4 directly. Inferred: Table 2 matches the Table 1 FP-16 column in both latency and AP for YOLOv8 M (47.3 / 5.4; FP32 is 49.3), LW-DETR M, D-FINE M (55.0 / 5.4), RT-DETR and RF-DETR M (54.7 / 4.4), so Table 2 accuracy is FP16 too (same artifact). Exception: YOLOv11 M latency is 5.1 in Table 2 vs 5.2 in Table 1 FP-16. Table 6 caption says \"we report FP16 TensorRT latency\"."
+ },
+ {
+  "id": "rfdetr-batchsize-latency",
+  "claim": "Batch size for latency measurement",
+  "value": "not stated in paper",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "n/a",
+  "uncertain": true,
+  "note": "Paper never states it; README says batch size 1."
+ },
+ {
+  "id": "rfdetr-latency-variance",
+  "claim": "Residual latency variance from TensorRT recompilation; latencies reported to one decimal",
+  "value": "up to 0.1 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4 Limitations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-dfine-fp16-collapse",
+  "claim": "D-FINE (M) naively quantized to FP16 drops to this AP; fixed by exporting with ONNX opset 17",
+  "value": "0.5 AP (fixed: 55.0)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 and caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-rf100-10pct",
+  "claim": "RF100-VL Pareto points: per target latency (N,S,M,L,XL,2XL), models within this band of the target are searched and their average performance after fine-tuning to convergence is reported",
+  "value": "within 10% of target latency",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Figure 1 caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-single-run",
+  "claim": "All points on RF-DETR COCO continuous Pareto curves come from a single training run",
+  "value": "1 training run (per backbone family; Fig 1 shows separate DINOv2-S and DINOv2-B curves)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Figure 1 caption; Figure 1 legend",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-search-count",
+  "claim": "Network configurations evaluated during architecture search",
+  "value": "6,468 (11 resolutions * 7 patch sizes * 7 decoder layers * 3 windows * 4 query settings)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Parameter Sampling Grid",
+  "uncertain": true,
+  "note": "The listed inference patch sizes have 8 values (8,10,12,14,16,20,24,32), not 7; product as written uses 7."
+ },
+ {
+  "id": "rfdetr-search-cost",
+  "claim": "Estimated cost of the search",
+  "value": "approximately 10,000 GPU hours (200 T4 GPUs * 48 hours)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": "200*48 = 9,600."
+ },
+ {
+  "id": "rfdetr-train-cost",
+  "claim": "RF-DETR total training time relative to a non-NAS baseline",
+  "value": "roughly two to four times as long",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-train-res",
+  "claim": "Training image resolutions",
+  "value": "320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Training Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-train-patch",
+  "claim": "Training patch sizes",
+  "value": "8, 10, 12, 16, 20, 24, 32",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Training Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-train-dec",
+  "claim": "Training number of decoder layers (fixed)",
+  "value": "6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Training Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-train-win",
+  "claim": "Training number of windows",
+  "value": "1, 2, 4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Training Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-train-q",
+  "claim": "Training number of queries (fixed)",
+  "value": "300",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Training Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-inf-patch",
+  "claim": "Inference patch sizes (14 not seen in training)",
+  "value": "8, 10, 12, 14, 16, 20, 24, 32",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Inference Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-inf-dec",
+  "claim": "Inference decoder layers",
+  "value": "0, 1, 2, 3, 4, 5, 6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Inference Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-inf-q",
+  "claim": "Inference number of queries",
+  "value": "50, 100, 200, 300",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A Inference Configurations",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-lr",
+  "claim": "Learning rate (LW-DETR uses 4e-4)",
+  "value": "1e-4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-bs",
+  "claim": "Batch size (same as LW-DETR)",
+  "value": "128",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": true,
+  "note": "Table 5 caption says \"smaller batch size\" and Sec 4 text says \"larger batch size\" than LW-DETR; Appendix A says the same (128)."
+ },
+ {
+  "id": "rfdetr-gradclip",
+  "claim": "Gradient clipping threshold",
+  "value": "0.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-layerdecay",
+  "claim": "Per-layer multiplicative LR decay in DINOv2 backbone",
+  "value": "0.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-winlayers",
+  "claim": "Window attention block placement (LW-DETR: {0,1,3,6,7,9})",
+  "value": "{0, 1, 3, 4, 6, 7, 9, 10}",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-msscale",
+  "claim": "Multi-scale resolution range (LW-DETR: 0.7 to 1.4)",
+  "value": "0.5 to 1.5 scale",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix A",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-caev2-layers",
+  "claim": "CAEv2 encoder layers / patch size vs DINOv2 encoder layers",
+  "value": "CAEv2: 10 layers, patch 16; DINOv2: 12 layers",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 3 Incorporating Internet-Scale Priors",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-drop-last-dec",
+  "claim": "Removing the final decoder layer: latency reduction and accuracy cost",
+  "value": "10% latency reduction, 2 mAP drop",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix B",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-drop-100q",
+  "claim": "Dropping the 100 lowest-confidence queries (RF-DETR nano)",
+  "value": "does not significantly reduce performance, modestly improves latency",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Figure 4 caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-nas-gain",
+  "claim": "Final model with weight-sharing NAS improves over LW-DETR (M) without increasing latency",
+  "value": "2% (52.6 -> 54.6 AP at 4.4 ms)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4 Impact of NAS; Table 5",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-gentler-drop",
+  "claim": "Gentler hyperparameters reduce performance vs LW-DETR",
+  "value": "1.0% (52.6 -> 51.6)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4; Table 5",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-dinov2-gain",
+  "claim": "DINOv2 over CAEv2 backbone",
+  "value": "2% (54.3 vs 52.3)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Sec 4; Table 6",
+  "uncertain": true,
+  "note": "Table 6 caption says 2.4%; rows give 2.0."
+ },
+ {
+  "id": "rfdetr-ptch-optimal",
+  "claim": "Pareto-optimal patch size per family",
+  "value": "16 (RF-DETR, DINOv2-S), 20 (RF-DETR, DINOv2-B), 12 (RF-DETR-Seg, DINOv2-S)",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-fixed-res-alt",
+  "claim": "Alternative family at fixed resolution 640 with patch sizes chosen to preserve spatial locations",
+  "value": "nano 27, small 21, medium 18; results nearly identical to Pareto family; 27 and 18 unseen in training",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-seg-feat-res",
+  "claim": "RF-DETR-Seg N/S/M input res 312/384/432 at patch 12 -> segmentation feature res and spatial locations",
+  "value": "78/96/108 and 26/32/36",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Appendix L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-reg-r2-win",
+  "claim": "Strongest dataset-to-knob correlation: spatial locations vs number of windows",
+  "value": "R-squared 0.492, p 0.000",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-o365-epochs",
+  "claim": "Backbone ablation models pretrained with this many epochs of Objects-365",
+  "value": "60",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 6 caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-yolo-nms-thr",
+  "claim": "NMS confidence threshold used for YOLO models",
+  "value": "0.01",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 caption",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-readme-scope",
+  "claim": "README latency protocol",
+  "value": "NVIDIA T4, TensorRT, FP16, batch size 1; COCO accuracy measured in-house with pycocotools in SAB (single_artifact_benchmarking) over full 5,000-image val2017",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-readme-N",
+  "claim": "README RF-DETR-N detection row",
+  "value": "COCO AP50 67.6; COCO AP50:95 48.4; RF100VL AP50 85.0; RF100VL AP50:95 57.7; 2.3 ms; 30.5M; 384x384; Apache 2.0",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "COCO matches paper Table 2 + Table 15 fine-tune delta (48.0+0.4, 67.0+0.6). RF100-VL matches Table 18 Fixed Architecture N, not Table 4 NAS row (57.8)."
+ },
+ {
+  "id": "rfdetr-readme-S",
+  "claim": "README RF-DETR-S detection row",
+  "value": "COCO AP50 72.1; COCO AP50:95 53.0; RF100VL AP50 86.7; RF100VL AP50:95 60.2; 3.5 ms; 32.1M; 512x512; Apache 2.0",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "COCO = paper 52.9+0.1 fine-tune. RF100-VL = Table 18 Fixed Architecture S (paper NAS row 60.9)."
+ },
+ {
+  "id": "rfdetr-readme-M",
+  "claim": "README RF-DETR-M detection row",
+  "value": "COCO AP50 73.6; COCO AP50:95 54.7; RF100VL AP50 87.4; RF100VL AP50:95 61.2; 4.4 ms; 33.7M; 576x576; Apache 2.0",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "COCO AP50 73.6 = Table 2 73.5 + Table 15 fine-tune +0.1 (AP50:95 54.7 + 0.0), so M is also the fine-tuned model. RF100-VL = Table 18 Fixed Architecture M (paper NAS row 61.7)."
+ },
+ {
+  "id": "rfdetr-readme-L",
+  "claim": "README RF-DETR-L detection row",
+  "value": "COCO AP50 75.1; COCO AP50:95 56.5; RF100VL AP50 88.2; RF100VL AP50:95 62.2; 6.8 ms; 33.9M; 704x704; Apache 2.0",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "RF100-VL = Table 18 Fixed Architecture L (paper NAS row 62.0)."
+ },
+ {
+  "id": "rfdetr-readme-XL",
+  "claim": "README RF-DETR-XL detection row (PML 1.0 license)",
+  "value": "COCO AP50 77.4; COCO AP50:95 58.6; RF100VL AP50 88.5; RF100VL AP50:95 62.9; 11.5 ms; 126.4M; 700x700; PML 1.0",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "COCO = Table 12 non-fine-tuned. RF100-VL = Table 18 Fixed Architecture XL (paper NAS row 62.6, 35.0M, 9.7 ms)."
+ },
+ {
+  "id": "rfdetr-readme-2XL",
+  "claim": "README RF-DETR-2XL detection row (PML 1.0 license)",
+  "value": "COCO AP50 78.5; COCO AP50:95 60.1; RF100VL AP50 89.0; RF100VL AP50:95 63.2; 17.2 ms; 126.9M; 880x880; PML 1.0",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "COCO = Table 12. RF100-VL = Table 18 Fixed Architecture 2XL (paper NAS row 63.3 at 15.6 ms)."
+ },
+ {
+  "id": "rfdetr-readme-seg",
+  "claim": "README RF-DETR-Seg COCO rows (N,S,M,L,XL,2XL)",
+  "value": "AP50:95 40.3/43.1/45.3/47.1/48.8/49.9; AP50 63.0/66.2/68.4/70.5/72.2/73.1; latency 3.4/4.4/5.9/8.8/13.5/21.8 ms; params 33.6/33.7/35.7/36.2/38.1/38.6M; res 312/384/432/504/624/768",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": "Identical to paper Tables 3 and 13 and Table 8 resolutions."
+ },
+ {
+  "id": "rfdetr-readme-yolo11n",
+  "claim": "README YOLO11-N row differs from paper",
+  "value": "COCO AP50:95 37.4, 2.5 ms (paper Table 2: 37.1, 2.2 ms)",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-readme-extras",
+  "claim": "README lists models not in the paper",
+  "value": "YOLO26 N-X rows, SAM 3 (RF100VL AP50:95 61.6, quoted from SAM 3 paper), keypoint preview (COCO AP 71.8, 9.7 ms, 40.7M)",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-readme-platform-nas",
+  "claim": "README claims platform NAS now beats paper NAS results on RF100-VL",
+  "value": "qualitative, chart only",
+  "paper": "RF-DETR README",
+  "version": "develop@990f5d9 (README last changed 2026-09-15)",
+  "loc": "github.com/roboflow/rf-detr README.md, Benchmarks section",
+  "uncertain": true,
+  "note": "No numbers given; chart only."
+ },
+ {
+  "id": "rfdetr-t1-latency-yolov8m",
+  "claim": "Table 1 row: YOLOv8 (M)",
+  "value": "Method=YOLOv8 (M); Reported AP_50:95=50.2; Reported latency ms=5.86; Buffering FP-32 AP_50:95=49.3; Buffering FP-32 latency ms=14.8; Buffering FP-16 AP_50:95=47.3; Buffering FP-16 latency ms=5.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 (tab:latency), row 'YOLOv8 (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t1-latency-yolov11m",
+  "claim": "Table 1 row: YOLOv11 (M)",
+  "value": "Method=YOLOv11 (M); Reported AP_50:95=51.5; Reported latency ms=4.7; Buffering FP-32 AP_50:95=49.7; Buffering FP-32 latency ms=18.7; Buffering FP-16 AP_50:95=48.3; Buffering FP-16 latency ms=5.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 (tab:latency), row 'YOLOv11 (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t1-latency-rtdetrr18",
+  "claim": "Table 1 row: RT-DETR (R18)",
+  "value": "Method=RT-DETR (R18); Reported AP_50:95=49.0; Reported latency ms=4.61; Buffering FP-32 AP_50:95=49.0; Buffering FP-32 latency ms=12.2; Buffering FP-16 AP_50:95=49.0; Buffering FP-16 latency ms=4.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 (tab:latency), row 'RT-DETR (R18)'",
+  "uncertain": true,
+  "note": "Reported latency 4.61 ms = 1000/217 FPS, RT-DETR-R18's figure (RT-DETR Table C). Same model as Table 2 row, whose 36.0M/100.0 GFLOPs match RT-DETR-R50-m, not R18; see rfdetr-t2-cocodet-rtdetrr18."
+ },
+ {
+  "id": "rfdetr-t1-latency-lwdetrm",
+  "claim": "Table 1 row: LW-DETR (M)",
+  "value": "Method=LW-DETR (M); Reported AP_50:95=52.5; Reported latency ms=5.6; Buffering FP-32 AP_50:95=52.6; Buffering FP-32 latency ms=26.8; Buffering FP-16 AP_50:95=52.6; Buffering FP-16 latency ms=4.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 (tab:latency), row 'LW-DETR (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t1-latency-dfinem",
+  "claim": "Table 1 row: D-FINE (M)",
+  "value": "Method=D-FINE (M); Reported AP_50:95=55.1; Reported latency ms=5.62; Buffering FP-32 AP_50:95=55.1; Buffering FP-32 latency ms=13.9; Buffering FP-16 AP_50:95=55.0 (0.5*); Buffering FP-16 latency ms=5.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 (tab:latency), row 'D-FINE (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t1-latency-rfdetrm",
+  "claim": "Table 1 row: RF-DETR (M)",
+  "value": "Method=RF-DETR (M); Reported AP_50:95=-; Reported latency ms=-; Buffering FP-32 AP_50:95=54.8; Buffering FP-32 latency ms=20.5; Buffering FP-16 AP_50:95=54.7; Buffering FP-16 latency ms=4.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 1 (tab:latency), row 'RF-DETR (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-yolov8n",
+  "claim": "Table 2 row: YOLOv8 (size N)",
+  "value": "Model=YOLOv8; Size=N; # Params.=3.2M; GFLOPS=8.7; Latency (ms)=2.1; AP=35.2; AP_50=49.2; AP_75=38.3; AP_S=15.8; AP_M=38.8; AP_L=51.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'YOLOv8' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-yolov11n",
+  "claim": "Table 2 row: YOLOv11 (size N)",
+  "value": "Model=YOLOv11; Size=N; # Params.=2.6M; GFLOPS=6.5; Latency (ms)=2.2; AP=37.1; AP_50=51.6; AP_75=40.4; AP_S=17.3; AP_M=40.7; AP_L=55.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'YOLOv11' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-yolov8s",
+  "claim": "Table 2 row: YOLOv8 (size S)",
+  "value": "Model=YOLOv8; Size=S; # Params.=11.2M; GFLOPS=28.6; Latency (ms)=2.9; AP=42.4; AP_50=57.6; AP_75=46.0; AP_S=22.2; AP_M=47.1; AP_L=59.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'YOLOv8' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-yolov11s",
+  "claim": "Table 2 row: YOLOv11 (size S)",
+  "value": "Model=YOLOv11; Size=S; # Params.=9.4M; GFLOPS=21.5; Latency (ms)=3.2; AP=44.1; AP_50=59.3; AP_75=47.9; AP_S=26.1; AP_M=48.5; AP_L=62.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'YOLOv11' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-yolov8m",
+  "claim": "Table 2 row: YOLOv8 (size M)",
+  "value": "Model=YOLOv8; Size=M; # Params.=25.9M; GFLOPS=78.9; Latency (ms)=5.4; AP=47.3; AP_50=62.5; AP_75=51.5; AP_S=27.5; AP_M=52.9; AP_L=65.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'YOLOv8' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-yolov11m",
+  "claim": "Table 2 row: YOLOv11 (size M)",
+  "value": "Model=YOLOv11; Size=M; # Params.=20.1M; GFLOPS=68.0; Latency (ms)=5.1; AP=48.3; AP_50=63.6; AP_75=52.5; AP_S=29.1; AP_M=53.8; AP_L=66.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'YOLOv11' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-groundingdinot",
+  "claim": "Table 2 row: GroundingDINO (size T)",
+  "value": "Model=GroundingDINO; Size=T; # Params.=173.0M; GFLOPS=1008.3; Latency (ms)=427.6*; AP=58.2; AP_50=-; AP_75=-; AP_S=-; AP_M=-; AP_L=-",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'GroundingDINO' size T",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-lwdetrt",
+  "claim": "Table 2 row: LW-DETR (size T)",
+  "value": "Model=LW-DETR; Size=T; # Params.=12.1M; GFLOPS=21.4; Latency (ms)=1.9; AP=42.9; AP_50=60.7; AP_75=45.9; AP_S=22.7; AP_M=47.3; AP_L=60.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'LW-DETR' size T",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-dfinen",
+  "claim": "Table 2 row: D-FINE (size N)",
+  "value": "Model=D-FINE; Size=N; # Params.=3.8M; GFLOPS=7.3; Latency (ms)=2.1; AP=42.7; AP_50=60.2; AP_75=45.4; AP_S=22.9; AP_M=46.6; AP_L=62.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'D-FINE' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-rfdetroursn",
+  "claim": "Table 2 row: RF-DETR (Ours) (size N)",
+  "value": "Model=RF-DETR (Ours); Size=N; # Params.=30.5M; GFLOPS=31.9; Latency (ms)=2.3; AP=48.0; AP_50=67.0; AP_75=51.4; AP_S=25.2; AP_M=53.5; AP_L=70.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RF-DETR (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-lwdetrs",
+  "claim": "Table 2 row: LW-DETR (size S)",
+  "value": "Model=LW-DETR; Size=S; # Params.=14.6M; GFLOPS=31.8; Latency (ms)=2.6; AP=48.0; AP_50=66.8; AP_75=51.6; AP_S=26.7; AP_M=52.5; AP_L=65.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'LW-DETR' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-dfines",
+  "claim": "Table 2 row: D-FINE (size S)",
+  "value": "Model=D-FINE; Size=S; # Params.=10.2M; GFLOPS=25.2; Latency (ms)=3.5; AP=50.6; AP_50=67.6; AP_75=55.0; AP_S=32.6; AP_M=54.6; AP_L=66.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'D-FINE' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-rfdetrourss",
+  "claim": "Table 2 row: RF-DETR (Ours) (size S)",
+  "value": "Model=RF-DETR (Ours); Size=S; # Params.=32.1M; GFLOPS=59.8; Latency (ms)=3.5; AP=52.9; AP_50=71.9; AP_75=57.0; AP_S=32.0; AP_M=58.3; AP_L=73.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RF-DETR (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-rtdetrr18",
+  "claim": "Table 2 row: RT-DETR (size R18)",
+  "value": "Model=RT-DETR; Size=R18; # Params.=36.0M; GFLOPS=100.0; Latency (ms)=4.4; AP=49.0; AP_50=66.6; AP_75=53.3; AP_S=32.8; AP_M=52.1; AP_L=65.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RT-DETR' size R18",
+  "uncertain": true,
+  "note": "Labelled R18, but 36.0M params / 100.0 GFLOPs are RT-DETR-R50-m's (RT-DETR README: R50-m 36M/100 GFLOPs; R18 20M/60-61 GFLOPs, RT-DETR paper Table C). 49.0 AP is near RT-DETR-R18's Objects365-pretrained result (49.2, RT-DETR Table C), not its COCO-only 46.5; RF-DETR does not say the baseline is O365-pretrained. Do not plot as RT-DETR's COCO-only R18."
+ },
+ {
+  "id": "rfdetr-t2-cocodet-lwdetrm",
+  "claim": "Table 2 row: LW-DETR (size M)",
+  "value": "Model=LW-DETR; Size=M; # Params.=28.2M; GFLOPS=83.9; Latency (ms)=4.4; AP=52.6; AP_50=72.0; AP_75=56.6; AP_S=32.5; AP_M=57.6; AP_L=70.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'LW-DETR' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-dfinem",
+  "claim": "Table 2 row: D-FINE (size M)",
+  "value": "Model=D-FINE; Size=M; # Params.=19.2M; GFLOPS=56.6; Latency (ms)=5.4; AP=55.0; AP_50=72.6; AP_75=59.7; AP_S=37.6; AP_M=59.4; AP_L=71.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'D-FINE' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-rfdetroursm",
+  "claim": "Table 2 row: RF-DETR (Ours) (size M)",
+  "value": "Model=RF-DETR (Ours); Size=M; # Params.=33.7M; GFLOPS=78.8; Latency (ms)=4.4; AP=54.7; AP_50=73.5; AP_75=59.2; AP_S=36.1; AP_M=59.7; AP_L=73.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RF-DETR (Ours)' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t2-cocodet-rfdetrours2xl",
+  "claim": "Table 2 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=126.9M; GFLOPS=438.4; Latency (ms)=17.2; AP=60.1; AP_50=78.5; AP_75=65.5; AP_S=43.2; AP_M=64.9; AP_L=76.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 2 (tab:coco_det), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-yolov8n",
+  "claim": "Table 3 row: YOLOv8 (size N)",
+  "value": "Model=YOLOv8; Size=N; # Params.=3.4M; GFLOPS=12.6; Latency (ms)=3.5; AP=28.3; AP_50=45.6; AP_75=29.8; AP_S=9.3; AP_M=31.3; AP_L=44.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'YOLOv8' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-yolov11n",
+  "claim": "Table 3 row: YOLOv11 (size N)",
+  "value": "Model=YOLOv11; Size=N; # Params.=2.9M; GFLOPS=10.4; Latency (ms)=3.6; AP=30.0; AP_50=47.8; AP_75=31.5; AP_S=10.0; AP_M=33.4; AP_L=47.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'YOLOv11' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-yolov8s",
+  "claim": "Table 3 row: YOLOv8 (size S)",
+  "value": "Model=YOLOv8; Size=S; # Params.=11.8M; GFLOPS=42.6; Latency (ms)=4.2; AP=34.0; AP_50=53.8; AP_75=36.0; AP_S=13.6; AP_M=38.5; AP_L=52.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'YOLOv8' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-yolov11s",
+  "claim": "Table 3 row: YOLOv11 (size S)",
+  "value": "Model=YOLOv11; Size=S; # Params.=10.1M; GFLOPS=35.5; Latency (ms)=4.6; AP=35.0; AP_50=55.4; AP_75=37.1; AP_S=15.3; AP_M=39.7; AP_L=53.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'YOLOv11' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-yolov8m",
+  "claim": "Table 3 row: YOLOv8 (size M)",
+  "value": "Model=YOLOv8; Size=M; # Params.=27.3M; GFLOPS=110.2; Latency (ms)=7.0; AP=37.3; AP_50=58.2; AP_75=39.9; AP_S=16.7; AP_M=43.0; AP_L=56.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'YOLOv8' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-yolov11m",
+  "claim": "Table 3 row: YOLOv11 (size M)",
+  "value": "Model=YOLOv11; Size=M; # Params.=22.4M; GFLOPS=123.3; Latency (ms)=6.9; AP=38.5; AP_50=60.0; AP_75=40.9; AP_S=18.0; AP_M=44.3; AP_L=57.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'YOLOv11' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-rfdetrsegoursn",
+  "claim": "Table 3 row: RF-DETR-Seg. (Ours) (size N)",
+  "value": "Model=RF-DETR-Seg. (Ours); Size=N; # Params.=33.6M; GFLOPS=50.0; Latency (ms)=3.4; AP=40.3; AP_50=63.0; AP_75=42.6; AP_S=16.3; AP_M=45.3; AP_L=63.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'RF-DETR-Seg. (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-rfdetrsegourss",
+  "claim": "Table 3 row: RF-DETR-Seg. (Ours) (size S)",
+  "value": "Model=RF-DETR-Seg. (Ours); Size=S; # Params.=33.7M; GFLOPS=70.6; Latency (ms)=4.4; AP=43.1; AP_50=66.2; AP_75=45.9; AP_S=21.9; AP_M=48.5; AP_L=64.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'RF-DETR-Seg. (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-fastinstr50",
+  "claim": "Table 3 row: FastInst (size R50)",
+  "value": "Model=FastInst; Size=R50; # Params.=29.7M; GFLOPS=99.7; Latency (ms)=39.6*; AP=34.9; AP_50=56.0; AP_75=36.2; AP_S=13.3; AP_M=38.0; AP_L=56.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'FastInst' size R50",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-maskdinor50",
+  "claim": "Table 3 row: MaskDINO (size R50)",
+  "value": "Model=MaskDINO; Size=R50; # Params.=52.1M; GFLOPS=586; Latency (ms)=242*; AP=46.3; AP_50=69.0; AP_75=50.7; AP_S=26.1; AP_M=49.3; AP_L=66.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'MaskDINO' size R50",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-rfdetrsegoursm",
+  "claim": "Table 3 row: RF-DETR-Seg. (Ours) (size M)",
+  "value": "Model=RF-DETR-Seg. (Ours); Size=M; # Params.=35.7M; GFLOPS=102.0; Latency (ms)=5.9; AP=45.3; AP_50=68.4; AP_75=48.8; AP_S=25.5; AP_M=50.4; AP_L=65.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'RF-DETR-Seg. (Ours)' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t3-cocoseg-rfdetrours2xl",
+  "claim": "Table 3 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=38.6M; GFLOPS=435.3; Latency (ms)=21.8; AP=49.9; AP_50=73.1; AP_75=54.5; AP_S=33.9; AP_M=54.1; AP_L=65.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 3 (tab:coco_seg), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": "Row is labelled 'RF-DETR (Ours)' in the LaTeX/PDF, but it sits in the segmentation table and its 38.6M / 435.3 / 21.8 ms / 49.9 match RF-DETR-Seg 2XL in Table 13; it is the Seg model."
+ },
+ {
+  "id": "rfdetr-t4-rf100-yolov8n",
+  "claim": "Table 4 row: YOLOv8 (size N)",
+  "value": "Model=YOLOv8; Size=N; # Params.=3.2M; GFLOPS=8.7; Latency (ms)=2.6; AP=55.0; AP_50=81.1; AP_75=59.5; AP_S=4.8; AP_M=44.1; AP_L=48.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'YOLOv8' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-yolov11n",
+  "claim": "Table 4 row: YOLOv11 (size N)",
+  "value": "Model=YOLOv11; Size=N; # Params.=2.6M; GFLOPS=6.5; Latency (ms)=3.0; AP=55.5; AP_50=81.3; AP_75=60.3; AP_S=4.7; AP_M=44.4; AP_L=49.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'YOLOv11' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-yolov8s",
+  "claim": "Table 4 row: YOLOv8 (size S)",
+  "value": "Model=YOLOv8; Size=S; # Params.=11.2M; GFLOPS=28.6; Latency (ms)=3.1; AP=56.3; AP_50=82.0; AP_75=60.9; AP_S=6.1; AP_M=45.6; AP_L=48.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'YOLOv8' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-yolov11s",
+  "claim": "Table 4 row: YOLOv11 (size S)",
+  "value": "Model=YOLOv11; Size=S; # Params.=9.4M; GFLOPS=21.5; Latency (ms)=3.3; AP=56.4; AP_50=82.5; AP_75=61.3; AP_S=6.5; AP_M=45.5; AP_L=48.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'YOLOv11' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-yolov8m",
+  "claim": "Table 4 row: YOLOv8 (size M)",
+  "value": "Model=YOLOv8; Size=M; # Params.=25.9M; GFLOPS=78.9; Latency (ms)=5.4; AP=56.5; AP_50=82.3; AP_75=60.9; AP_S=6.4; AP_M=45.7; AP_L=48.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'YOLOv8' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-yolov11m",
+  "claim": "Table 4 row: YOLOv11 (size M)",
+  "value": "Model=YOLOv11; Size=M; # Params.=20.1M; GFLOPS=68.0; Latency (ms)=5.1; AP=57.0; AP_50=82.5; AP_75=61.9; AP_S=7.3; AP_M=46.1; AP_L=48.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'YOLOv11' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-groundingdinot",
+  "claim": "Table 4 row: GroundingDINO (size T)",
+  "value": "Model=GroundingDINO; Size=T; # Params.=173.0M; GFLOPS=1008.3; Latency (ms)=309.9*; AP=62.3; AP_50=88.8; AP_75=67.8; AP_S=39.2; AP_M=57.7; AP_L=69.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'GroundingDINO' size T",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-llmdett",
+  "claim": "Table 4 row: LLMDet (size T)",
+  "value": "Model=LLMDet; Size=T; # Params.=173.0M; GFLOPS=1008.3; Latency (ms)=308.4*; AP=62.3; AP_50=88.3; AP_75=67.8; AP_S=39.1; AP_M=57.6; AP_L=70.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'LLMDet' size T",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-lwdetrn",
+  "claim": "Table 4 row: LW-DETR (size N)",
+  "value": "Model=LW-DETR; Size=N; # Params.=12.1M; GFLOPS=21.4; Latency (ms)=1.9; AP=57.1; AP_50=84.7; AP_75=61.5; AP_S=31.2; AP_M=51.8; AP_L=65.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'LW-DETR' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-dfinen",
+  "claim": "Table 4 row: D-FINE (size N)",
+  "value": "Model=D-FINE; Size=N; # Params.=3.8M; GFLOPS=7.3; Latency (ms)=2.0; AP=58.2; AP_50=84.4; AP_75=62.5; AP_S=32.4; AP_M=52.9; AP_L=65.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'D-FINE' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetroursn",
+  "claim": "Table 4 row: RF-DETR (Ours) (size N)",
+  "value": "Model=RF-DETR (Ours); Size=N; # Params.=31.2M; GFLOPS=34.5; Latency (ms)=2.5; AP=57.8; AP_50=85.1; AP_75=62.5; AP_S=30.1; AP_M=52.2; AP_L=67.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetrwfinetuningoursn",
+  "claim": "Table 4 row: RF-DETR w/ Fine-Tuning (Ours) (size N)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=N; # Params.=31.2M; GFLOPS=34.5; Latency (ms)=2.5; AP=58.6; AP_50=85.7; AP_75=63.0; AP_S=31.0; AP_M=53.2; AP_L=67.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR w/ Fine-Tuning (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-lwdetrs",
+  "claim": "Table 4 row: LW-DETR (size S)",
+  "value": "Model=LW-DETR; Size=S; # Params.=14.6M; GFLOPS=31.8; Latency (ms)=2.6; AP=57.4; AP_50=85.0; AP_75=62.0; AP_S=32.1; AP_M=52.1; AP_L=65.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'LW-DETR' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-dfines",
+  "claim": "Table 4 row: D-FINE (size S)",
+  "value": "Model=D-FINE; Size=S; # Params.=10.2M; GFLOPS=25.2; Latency (ms)=3.5; AP=60.3; AP_50=85.3; AP_75=65.4; AP_S=36.6; AP_M=56.0; AP_L=68.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'D-FINE' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetrourss",
+  "claim": "Table 4 row: RF-DETR (Ours) (size S)",
+  "value": "Model=RF-DETR (Ours); Size=S; # Params.=33.5M; GFLOPS=62.4; Latency (ms)=3.7; AP=60.9; AP_50=87.5; AP_75=66.1; AP_S=34.2; AP_M=55.7; AP_L=69.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetrwfinetuningourss",
+  "claim": "Table 4 row: RF-DETR w/ Fine-Tuning (Ours) (size S)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=S; # Params.=33.5M; GFLOPS=62.4; Latency (ms)=3.7; AP=61.2; AP_50=87.7; AP_75=66.1; AP_S=34.9; AP_M=55.6; AP_L=69.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR w/ Fine-Tuning (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rtdetrm",
+  "claim": "Table 4 row: RT-DETR (size M)",
+  "value": "Model=RT-DETR; Size=M; # Params.=36.0M; GFLOPS=100.0; Latency (ms)=4.3; AP=59.6; AP_50=85.7; AP_75=64.6; AP_S=36.4; AP_M=54.6; AP_L=67.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RT-DETR' size M",
+  "uncertain": true,
+  "note": "Same 36.0M / 100.0 GFLOPs model that Table 2 labels 'R18'; the params/GFLOPs match RT-DETR-R50-m. Which RT-DETR checkpoint was used on RF100-VL is ambiguous."
+ },
+ {
+  "id": "rfdetr-t4-rf100-lwdetrm",
+  "claim": "Table 4 row: LW-DETR (size M)",
+  "value": "Model=LW-DETR; Size=M; # Params.=28.2M; GFLOPS=83.9; Latency (ms)=4.3; AP=59.8; AP_50=86.8; AP_75=64.9; AP_S=34.0; AP_M=54.4; AP_L=68.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'LW-DETR' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-dfinem",
+  "claim": "Table 4 row: D-FINE (size M)",
+  "value": "Model=D-FINE; Size=M; # Params.=19.2M; GFLOPS=56.6; Latency (ms)=5.6; AP=60.6; AP_50=85.5; AP_75=65.8; AP_S=36.0; AP_M=56.6; AP_L=67.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'D-FINE' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetroursm",
+  "claim": "Table 4 row: RF-DETR (Ours) (size M)",
+  "value": "Model=RF-DETR (Ours); Size=M; # Params.=33.5M; GFLOPS=86.7; Latency (ms)=4.6; AP=61.7; AP_50=88.0; AP_75=66.9; AP_S=35.8; AP_M=56.5; AP_L=70.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR (Ours)' size M",
+  "uncertain": true,
+  "note": "Table 4 lists RF-DETR M on RF100-VL as 33.5M / 86.7 GFLOPs, but Table 18 lists the same AP row (61.7) as 33.6M / 91.0 GFLOPs. Internal inconsistency."
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetrwfinetuningoursm",
+  "claim": "Table 4 row: RF-DETR w/ Fine-Tuning (Ours) (size M)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=M; # Params.=33.5M; GFLOPS=86.7; Latency (ms)=4.6; AP=62.0; AP_50=88.1; AP_75=67.1; AP_S=36.2; AP_M=56.4; AP_L=70.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR w/ Fine-Tuning (Ours)' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetrours2xl",
+  "claim": "Table 4 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=123.5M; GFLOPS=410.2; Latency (ms)=15.6; AP=63.3; AP_50=88.9; AP_75=69.0; AP_S=38.7; AP_M=58.2; AP_L=71.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t4-rf100-rfdetrourswfinetuning2xl",
+  "claim": "Table 4 row: RF-DETR (Ours) w/ Fine-Tuning (size 2XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=2XL; # Params.=123.5M; GFLOPS=410.2; Latency (ms)=15.6; AP=63.5; AP_50=89.0; AP_75=69.2; AP_S=38.9; AP_M=58.3; AP_L=71.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 4 (tab:rf100-vl), row 'RF-DETR (Ours) w/ Fine-Tuning' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-lwdetrm",
+  "claim": "Table 5 row: LW-DETR (M)",
+  "value": "Model=LW-DETR (M); # Params.=28.2M; GFLOPS=83.7; Latency (ms)=4.4; AP=52.6; AP_50=72.0; AP_75=56.6; AP_S=32.5; AP_M=57.6; AP_L=70.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row 'LW-DETR (M)'",
+  "uncertain": true,
+  "note": "GFLOPS 83.7 here vs 83.9 for LW-DETR M in Table 2."
+ },
+ {
+  "id": "rfdetr-t5-nas-gentlerhyperparameters",
+  "claim": "Table 5 row: + Gentler Hyperparameters",
+  "value": "Model=+ Gentler Hyperparameters; # Params.=28.2M; GFLOPS=83.7; Latency (ms)=4.4; AP=51.6; AP_50=71.1; AP_75=55.5; AP_S=31.7; AP_M=56.4; AP_L=69.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ Gentler Hyperparameters'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-dinov2backbone",
+  "claim": "Table 5 row: + DINOv2 Backbone",
+  "value": "Model=+ DINOv2 Backbone; # Params.=32.3M; GFLOPS=78.2; Latency (ms)=4.7; AP=53.6; AP_50=72.7; AP_75=58.0; AP_S=34.3; AP_M=58.3; AP_L=72.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ DINOv2 Backbone'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-additionalo365pretraining",
+  "claim": "Table 5 row: + Additional O365 Pre-Training",
+  "value": "Model=+ Additional O365 Pre-Training; # Params.=32.3M; GFLOPS=78.2; Latency (ms)=4.7; AP=54.3; AP_50=73.4; AP_75=58.8; AP_S=35.8; AP_M=59.2; AP_L=72.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ Additional O365 Pre-Training'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-weightsharingnas",
+  "claim": "Table 5 row: + Weight Sharing NAS",
+  "value": "Model=+ Weight Sharing NAS; # Params.=32.3M; GFLOPS=78.2; Latency (ms)=4.7; AP=54.6; AP_50=73.4; AP_75=59.3; AP_S=36.3; AP_M=59.3; AP_L=72.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ Weight Sharing NAS'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-patchsize1416res560640",
+  "claim": "Table 5 row: + Patch Size 14->16, Res 560->640",
+  "value": "Model=+ Patch Size 14->16, Res 560->640; # Params.=32.3M; GFLOPS=78.5; Latency (ms)=4.7; AP=54.4; AP_50=73.2; AP_75=59.1; AP_S=35.9; AP_M=59.2; AP_L=72.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ Patch Size 14->16, Res 560->640'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-imageresolution640576",
+  "claim": "Table 5 row: + Image Resolution 640->576",
+  "value": "Model=+ Image Resolution 640->576; # Params.=32.2M; GFLOPS=64.2; Latency (ms)=4.0; AP=53.6; AP_50=72.4; AP_75=58.2; AP_S=34.8; AP_M=58.6; AP_L=72.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ Image Resolution 640->576'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-windowsperblock42",
+  "claim": "Table 5 row: + # Windows per Block 4->2",
+  "value": "Model=+ # Windows per Block 4->2; # Params.=32.2M; GFLOPS=63.7; Latency (ms)=4.3; AP=54.3; AP_50=73.3; AP_75=58.8; AP_S=35.6; AP_M=59.4; AP_L=73.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ # Windows per Block 4->2'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-decoderlayers34",
+  "claim": "Table 5 row: + # Decoder Layers 3->4",
+  "value": "Model=+ # Decoder Layers 3->4; # Params.=33.7M; GFLOPS=64.8; Latency (ms)=4.4; AP=54.6; AP_50=73.5; AP_75=59.1; AP_S=36.0; AP_M=59.8; AP_L=73.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ # Decoder Layers 3->4'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t5-nas-querytokens300300",
+  "claim": "Table 5 row: + # Query Tokens 300->300",
+  "value": "Model=+ # Query Tokens 300->300; # Params.=33.7M; GFLOPS=64.8; Latency (ms)=4.4; AP=54.6; AP_50=73.5; AP_75=59.1; AP_S=36.0; AP_M=59.8; AP_L=73.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 5 (tab:nas), row '+ # Query Tokens 300->300'",
+  "uncertain": true,
+  "note": "Final row is a no-op (300->300) and its 64.8 GFLOPs / 54.6 AP differ from Table 2 RF-DETR M (78.8 GFLOPs / 54.7 AP) at the same config."
+ },
+ {
+  "id": "rfdetr-t6-bb-wcaev2vits16truncatedbackbon",
+  "claim": "Table 6 row: w/ CAEv2 ViT/S-16-Truncated Backbone",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ CAEv2 ViT/S-16-Truncated Backbone; # Params.=28.3M; GFLOPS=83.7; Latency (ms)=4.4; AP=52.3; AP_50=71.4; AP_75=56.3; AP_S=32.3; AP_M=56.4; AP_L=70.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 6 (tab:backbone), row 'w/ CAEv2 ViT/S-16-Truncated Backbone'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t6-bb-wdinov2vits14backbone",
+  "claim": "Table 6 row: w/ DINOv2 ViT/S-14 Backbone",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ DINOv2 ViT/S-14 Backbone; # Params.=32.3M; GFLOPS=78.2; Latency (ms)=4.7; AP=54.3; AP_50=73.4; AP_75=58.8; AP_S=35.8; AP_M=59.2; AP_L=72.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 6 (tab:backbone), row 'w/ DINOv2 ViT/S-14 Backbone'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t6-bb-wsiglipv2vitb32backbone",
+  "claim": "Table 6 row: w/ SigLIPv2 ViT/B-32 Backbone*",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ SigLIPv2 ViT/B-32 Backbone*; # Params.=105.1M; GFLOPS=81.6; Latency (ms)=4.8; AP=50.4; AP_50=70.4; AP_75=53.7; AP_S=28.0; AP_M=55.3; AP_L=73.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 6 (tab:backbone), row 'w/ SigLIPv2 ViT/B-32 Backbone*'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t6-bb-wsam2hierasbackbone",
+  "claim": "Table 6 row: w/ SAM2 Hiera-S Backbone*",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ SAM2 Hiera-S Backbone*; # Params.=44.0M; GFLOPS=109.1; Latency (ms)=11.2; AP=53.6; AP_50=72.4; AP_75=57.9; AP_S=33.3; AP_M=58.3; AP_L=71.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 6 (tab:backbone), row 'w/ SAM2 Hiera-S Backbone*'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-n",
+  "claim": "Table 7 row: N",
+  "value": "Model Size=N; Resolution=384; Patch Size=16; Windows=2; Decoder Layers=2; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row 'N'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-s",
+  "claim": "Table 7 row: S",
+  "value": "Model Size=S; Resolution=512; Patch Size=16; Windows=2; Decoder Layers=3; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row 'S'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-m",
+  "claim": "Table 7 row: M",
+  "value": "Model Size=M; Resolution=576; Patch Size=16; Windows=2; Decoder Layers=4; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row 'M'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-l",
+  "claim": "Table 7 row: L",
+  "value": "Model Size=L; Resolution=704; Patch Size=16; Windows=2; Decoder Layers=4; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row 'L'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-xl",
+  "claim": "Table 7 row: XL",
+  "value": "Model Size=XL; Resolution=700; Patch Size=20; Windows=1; Decoder Layers=5; Queries=300; Backbone=DINOv2-B",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row 'XL'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-2xl",
+  "claim": "Table 7 row: 2XL",
+  "value": "Model Size=2XL; Resolution=880; Patch Size=20; Windows=2; Decoder Layers=5; Queries=300; Backbone=DINOv2-B",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row '2XL'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t7-detcfg-max",
+  "claim": "Table 7 row: Max",
+  "value": "Model Size=Max; Resolution=828; Patch Size=12; Windows=1; Decoder Layers=6; Queries=300; Backbone=DINOv2-B",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 7 (tab:coco_det_config), row 'Max'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-n",
+  "claim": "Table 8 row: N",
+  "value": "Model Size=N; Resolution=312; Patch Size=12; Windows=1; Decoder Layers=4; Queries=100; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row 'N'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-s",
+  "claim": "Table 8 row: S",
+  "value": "Model Size=S; Resolution=384; Patch Size=12; Windows=2; Decoder Layers=4; Queries=100; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row 'S'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-m",
+  "claim": "Table 8 row: M",
+  "value": "Model Size=M; Resolution=432; Patch Size=12; Windows=2; Decoder Layers=5; Queries=200; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row 'M'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-l",
+  "claim": "Table 8 row: L",
+  "value": "Model Size=L; Resolution=504; Patch Size=12; Windows=2; Decoder Layers=5; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row 'L'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-xl",
+  "claim": "Table 8 row: XL",
+  "value": "Model Size=XL; Resolution=624; Patch Size=12; Windows=2; Decoder Layers=6; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row 'XL'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-2xl",
+  "claim": "Table 8 row: 2XL",
+  "value": "Model Size=2XL; Resolution=768; Patch Size=12; Windows=2; Decoder Layers=6; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row '2XL'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t8-segcfg-max",
+  "claim": "Table 8 row: Max",
+  "value": "Model Size=Max; Resolution=890; Patch Size=10; Windows=1; Decoder Layers=6; Queries=300; Backbone=DINOv2-S",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 8 (tab:coco_seg_config), row 'Max'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t9-flops-dfine",
+  "claim": "Table 9 row: D-FINE",
+  "value": "Model=D-FINE; Size=S; Reported=25.2 M; CalFLOPs=25.2 M; FlopCounterMode=25.5 M",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 9 (tab:flops), row 'D-FINE'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t9-flops-lwdetr",
+  "claim": "Table 9 row: LW-DETR",
+  "value": "Model=LW-DETR; Size=S; Reported=16.6 M; CalFLOPs=22.9 M; FlopCounterMode=31.8 M",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 9 (tab:flops), row 'LW-DETR'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t9-flops-yolo11",
+  "claim": "Table 9 row: YOLO11",
+  "value": "Model=YOLO11; Size=S; Reported=21.5 M; CalFLOPs=23.9 M; FlopCounterMode=21.6 M",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 9 (tab:flops), row 'YOLO11'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t10-cls-groundingdinowstandardclassn",
+  "claim": "Table 10 row: GroundingDINO w/ Standard Class Names (size T)",
+  "value": "Model=GroundingDINO w/ Standard Class Names; Size=T; # Params.=173.0M; GFLOPS=1008.3; Latency (ms)=309.9*; AP=62.3; AP_50=88.8; AP_75=67.8; AP_S=39.2; AP_M=57.7; AP_L=69.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 10 (tab:rf100-vl-class-names), row 'GroundingDINO w/ Standard Class Names' size T",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t10-cls-groundingdinowclassindexname",
+  "claim": "Table 10 row: GroundingDINO w/ Class Index Names (size T)",
+  "value": "Model=GroundingDINO w/ Class Index Names; Size=T; # Params.=173.0M; GFLOPS=1008.3; Latency (ms)=309.9*; AP=62.5; AP_50=88.2; AP_75=68.3; AP_S=40.0; AP_M=58.4; AP_L=70.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 10 (tab:rf100-vl-class-names), row 'GroundingDINO w/ Class Index Names' size T",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t11-gap-dfine",
+  "claim": "Table 11 row: D-FINE",
+  "value": "Method (Backbone)=D-FINE; S=50.6; M=55.4; L=57.2; XL=59.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 11 (tab:scaling), row 'D-FINE'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t11-gap-rfdetrdinov2s",
+  "claim": "Table 11 row: RF-DETR (DINOv2-S)",
+  "value": "Method (Backbone)=RF-DETR (DINOv2-S); S=+2.3; M=+0.9; L=-0.4; XL=-1.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 11 (tab:scaling), row 'RF-DETR (DINOv2-S)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t11-gap-rfdetrdinov2b",
+  "claim": "Table 11 row: RF-DETR (DINOv2-B)",
+  "value": "Method (Backbone)=RF-DETR (DINOv2-B); S=-3.1; M=-1.3; L=-1.2; XL=-0.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 11 (tab:scaling), row 'RF-DETR (DINOv2-B)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-yolov8l",
+  "claim": "Table 12 row: YOLOv8 (size L)",
+  "value": "Model=YOLOv8; Size=L; # Params.=43.7M; GFLOPS=165.2; Latency (ms)=8.0; AP=49.5; AP_50=64.7; AP_75=54.0; AP_S=30.2; AP_M=55.1; AP_L=68.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'YOLOv8' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-yolov11l",
+  "claim": "Table 12 row: YOLOv11 (size L)",
+  "value": "Model=YOLOv11; Size=L; # Params.=25.3M; GFLOPS=86.9; Latency (ms)=6.5; AP=49.9; AP_50=64.9; AP_75=54.5; AP_S=30.4; AP_M=55.9; AP_L=68.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'YOLOv11' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-yolov8xl",
+  "claim": "Table 12 row: YOLOv8 (size XL)",
+  "value": "Model=YOLOv8; Size=XL; # Params.=68.2M; GFLOPS=257.8; Latency (ms)=11.3; AP=50.5; AP_50=65.6; AP_75=55.1; AP_S=30.0; AP_M=56.2; AP_L=69.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'YOLOv8' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-yolov11xl",
+  "claim": "Table 12 row: YOLOv11 (size XL)",
+  "value": "Model=YOLOv11; Size=XL; # Params.=56.9M; GFLOPS=194.9; Latency (ms)=10.5; AP=50.9; AP_50=66.1; AP_75=55.4; AP_S=31.5; AP_M=56.6; AP_L=68.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'YOLOv11' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-rtdetrr50",
+  "claim": "Table 12 row: RT-DETR (size R50)",
+  "value": "Model=RT-DETR; Size=R50; # Params.=42M; GFLOPS=136; Latency (ms)=8.5; AP=55.0; AP_50=73.3; AP_75=59.8; AP_S=37.9; AP_M=59.7; AP_L=71.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'RT-DETR' size R50",
+  "uncertain": false,
+  "note": "55.0 AP is close to RT-DETR-R50's Objects365-pretrained 55.3 (RT-DETR Table C), not its COCO-only 53.1; RF-DETR does not label O365 pretraining."
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-lwdetrl",
+  "claim": "Table 12 row: LW-DETR (size L)",
+  "value": "Model=LW-DETR; Size=L; # Params.=46.8M; GFLOPS=137.5; Latency (ms)=6.9; AP=56.1; AP_50=74.6; AP_75=61.0; AP_S=37.1; AP_M=60.4; AP_L=73.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'LW-DETR' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-dfinel",
+  "claim": "Table 12 row: D-FINE (size L)",
+  "value": "Model=D-FINE; Size=L; # Params.=31M; GFLOPS=91; Latency (ms)=7.5; AP=57.2; AP_50=74.9; AP_75=62.2; AP_S=40.6; AP_M=61.4; AP_L=73.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'D-FINE' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-rfdetroursl",
+  "claim": "Table 12 row: RF-DETR (Ours) (size L)",
+  "value": "Model=RF-DETR (Ours); Size=L; # Params.=33.9M; GFLOPS=125.6; Latency (ms)=6.8; AP=56.5; AP_50=75.1; AP_75=61.3; AP_S=39.0; AP_M=61.0; AP_L=73.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'RF-DETR (Ours)' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-rtdetrr101",
+  "claim": "Table 12 row: RT-DETR (size R101)",
+  "value": "Model=RT-DETR; Size=R101; # Params.=76M; GFLOPS=259; Latency (ms)=12.0; AP=56.1; AP_50=74.5; AP_75=61.1; AP_S=38.1; AP_M=60.4; AP_L=73.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'RT-DETR' size R101",
+  "uncertain": false,
+  "note": "56.1 AP is close to RT-DETR-R101's Objects365-pretrained 56.2 (RT-DETR Table C), not its COCO-only 54.3; RF-DETR does not label O365 pretraining."
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-lwdetrxl",
+  "claim": "Table 12 row: LW-DETR (size XL)",
+  "value": "Model=LW-DETR; Size=XL; # Params.=118.0M; GFLOPS=342.5; Latency (ms)=13.0; AP=58.3; AP_50=76.9; AP_75=63.3; AP_S=40.2; AP_M=63.3; AP_L=74.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'LW-DETR' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-dfinexl",
+  "claim": "Table 12 row: D-FINE (size XL)",
+  "value": "Model=D-FINE; Size=XL; # Params.=62M; GFLOPS=202; Latency (ms)=11.5; AP=59.3; AP_50=76.8; AP_75=64.6; AP_S=42.1; AP_M=64.2; AP_L=76.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'D-FINE' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-rfdetroursxl",
+  "claim": "Table 12 row: RF-DETR (Ours) (size XL)",
+  "value": "Model=RF-DETR (Ours); Size=XL; # Params.=126.4M; GFLOPS=299.3; Latency (ms)=11.5; AP=58.6; AP_50=77.4; AP_75=63.8; AP_S=40.3; AP_M=63.9; AP_L=76.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'RF-DETR (Ours)' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-rfdetrours2xl",
+  "claim": "Table 12 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=126.9M; GFLOPS=438.4; Latency (ms)=17.2; AP=60.1; AP_50=78.5; AP_75=65.5; AP_S=43.2; AP_M=64.9; AP_L=76.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t12-cocodetL-rfdetroursmax",
+  "claim": "Table 12 row: RF-DETR (Ours) (size Max)",
+  "value": "Model=RF-DETR (Ours); Size=Max; # Params.=132.4M; GFLOPS=1742.5; Latency (ms)=98.0; AP=61.8; AP_50=79.7; AP_75=67.7; AP_S=47.5; AP_M=66.1; AP_L=76.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 12 (tab:coco_det_scale), row 'RF-DETR (Ours)' size Max",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-yolov8l",
+  "claim": "Table 13 row: YOLOv8 (size L)",
+  "value": "Model=YOLOv8; Size=L; # Params.=46.0M; GFLOPS=220.5; Latency (ms)=9.7; AP=39.0; AP_50=60.5; AP_75=41.7; AP_S=18.0; AP_M=44.7; AP_L=57.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'YOLOv8' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-yolov11l",
+  "claim": "Table 13 row: YOLOv11 (size L)",
+  "value": "Model=YOLOv11; Size=L; # Params.=27.6M; GFLOPS=132.2; Latency (ms)=8.3; AP=39.5; AP_50=61.5; AP_75=42.1; AP_S=18.6; AP_M=45.5; AP_L=59.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'YOLOv11' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-yolov8xl",
+  "claim": "Table 13 row: YOLOv8 (size XL)",
+  "value": "Model=YOLOv8; Size=XL; # Params.=71.8M; GFLOPS=344.1; Latency (ms)=14.0; AP=39.5; AP_50=61.3; AP_75=42.1; AP_S=18.9; AP_M=45.6; AP_L=58.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'YOLOv8' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-yolov11xl",
+  "claim": "Table 13 row: YOLOv11 (size XL)",
+  "value": "Model=YOLOv11; Size=XL; # Params.=62.1M; GFLOPS=296.4; Latency (ms)=13.7; AP=40.1; AP_50=62.4; AP_75=42.6; AP_S=18.8; AP_M=46.4; AP_L=60.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'YOLOv11' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-rfdetroursl",
+  "claim": "Table 13 row: RF-DETR (Ours) (size L)",
+  "value": "Model=RF-DETR (Ours); Size=L; # Params.=36.2M; GFLOPS=151.1; Latency (ms)=8.8; AP=47.1; AP_50=70.5; AP_75=50.9; AP_S=28.4; AP_M=52.1; AP_L=65.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'RF-DETR (Ours)' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-rfdetroursxl",
+  "claim": "Table 13 row: RF-DETR (Ours) (size XL)",
+  "value": "Model=RF-DETR (Ours); Size=XL; # Params.=38.1M; GFLOPS=260.0; Latency (ms)=13.5; AP=48.8; AP_50=72.2; AP_75=53.1; AP_S=30.6; AP_M=53.3; AP_L=65.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'RF-DETR (Ours)' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-rfdetrours2xl",
+  "claim": "Table 13 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=38.6M; GFLOPS=435.3; Latency (ms)=21.8; AP=49.9; AP_50=73.1; AP_75=54.5; AP_S=33.9; AP_M=54.1; AP_L=65.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t13-cocosegL-rfdetroursmax",
+  "claim": "Table 13 row: RF-DETR (Ours) (size Max)",
+  "value": "Model=RF-DETR (Ours); Size=Max; # Params.=40.1M; GFLOPS=1668.2; Latency (ms)=95.6; AP=50.5; AP_50=74.0; AP_75=55.4; AP_S=34.6; AP_M=54.2; AP_L=65.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 13 (tab:coco_seg_scale), row 'RF-DETR (Ours)' size Max",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-yolov8l",
+  "claim": "Table 14 row: YOLOv8 (size L)",
+  "value": "Model=YOLOv8; Size=L; # Params.=43.7M; GFLOPS=165.2; Latency (ms)=7.9; AP=56.5; AP_50=82.1; AP_75=61.1; AP_S=7.1; AP_M=46.0; AP_L=48.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'YOLOv8' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-yolov11l",
+  "claim": "Table 14 row: YOLOv11 (size L)",
+  "value": "Model=YOLOv11; Size=L; # Params.=25.3M; GFLOPS=86.9; Latency (ms)=6.4; AP=56.5; AP_50=82.2; AP_75=61.0; AP_S=6.4; AP_M=45.5; AP_L=49.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'YOLOv11' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-yolov8xl",
+  "claim": "Table 14 row: YOLOv8 (size XL)",
+  "value": "Model=YOLOv8; Size=XL; # Params.=68.2M; GFLOPS=257.8; Latency (ms)=11.2; AP=56.5; AP_50=82.3; AP_75=61.0; AP_S=6.6; AP_M=45.7; AP_L=47.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'YOLOv8' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-yolov11xl",
+  "claim": "Table 14 row: YOLOv11 (size XL)",
+  "value": "Model=YOLOv11; Size=XL; # Params.=56.9M; GFLOPS=194.9; Latency (ms)=10.3; AP=56.2; AP_50=81.7; AP_75=60.8; AP_S=6.1; AP_M=45.9; AP_L=48.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'YOLOv11' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rtdetrr50",
+  "claim": "Table 14 row: RT-DETR (size R50)",
+  "value": "Model=RT-DETR; Size=R50; # Params.=42M; GFLOPS=136; Latency (ms)=8.4; AP=61.7; AP_50=87.7; AP_75=66.9; AP_S=38.1; AP_M=57.1; AP_L=69.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RT-DETR' size R50",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-lwdetrl",
+  "claim": "Table 14 row: LW-DETR (size L)",
+  "value": "Model=LW-DETR; Size=L; # Params.=46.8M; GFLOPS=137.5; Latency (ms)=6.8; AP=61.5; AP_50=87.4; AP_75=67.0; AP_S=37.1; AP_M=56.4; AP_L=69.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'LW-DETR' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-dfinel",
+  "claim": "Table 14 row: D-FINE (size L)",
+  "value": "Model=D-FINE; Size=L; # Params.=31M; GFLOPS=91; Latency (ms)=7.5; AP=61.6; AP_50=86.4; AP_75=67.2; AP_S=37.8; AP_M=56.5; AP_L=70.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'D-FINE' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rfdetroursl",
+  "claim": "Table 14 row: RF-DETR (Ours) (size L)",
+  "value": "Model=RF-DETR (Ours); Size=L; # Params.=34.1M; GFLOPS=119.1; Latency (ms)=6.2; AP=62.0; AP_50=88.1; AP_75=67.3; AP_S=36.9; AP_M=57.1; AP_L=70.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RF-DETR (Ours)' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rfdetrourswfinetuningl",
+  "claim": "Table 14 row: RF-DETR (Ours) w/ Fine-Tuning (size L)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=L; # Params.=34.1M; GFLOPS=119.1; Latency (ms)=6.2; AP=62.3; AP_50=88.2; AP_75=67.4; AP_S=37.1; AP_M=57.2; AP_L=70.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RF-DETR (Ours) w/ Fine-Tuning' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rtdetrr101",
+  "claim": "Table 14 row: RT-DETR (size R101)",
+  "value": "Model=RT-DETR; Size=R101; # Params.=76M; GFLOPS=259; Latency (ms)=11.9; AP=61.0; AP_50=87.4; AP_75=66.2; AP_S=36.6; AP_M=56.3; AP_L=68.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RT-DETR' size R101",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-lwdetrxl",
+  "claim": "Table 14 row: LW-DETR (size XL)",
+  "value": "Model=LW-DETR; Size=XL; # Params.=118.0M; GFLOPS=342.5; Latency (ms)=13.0; AP=62.1; AP_50=87.9; AP_75=67.6; AP_S=37.4; AP_M=57.1; AP_L=70.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'LW-DETR' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-dfinexl",
+  "claim": "Table 14 row: D-FINE (size XL)",
+  "value": "Model=D-FINE; Size=XL; # Params.=59.3; GFLOPS=76.8; Latency (ms)=11.4; AP=62.2; AP_50=86.9; AP_75=68.0; AP_S=37.6; AP_M=57.4; AP_L=69.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'D-FINE' size XL",
+  "uncertain": true,
+  "note": "Params '59.3' (no M suffix) and GFLOPS '76.8' look like COCO AP/AP50 of D-FINE XL (Table 12: 59.3 / 76.8) pasted into the wrong columns; Table 12 gives 62M / 202 GFLOPs. AP columns presumably fine."
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rfdetroursxl",
+  "claim": "Table 14 row: RF-DETR (Ours) (size XL)",
+  "value": "Model=RF-DETR (Ours); Size=XL; # Params.=35.0M; GFLOPS=199.0; Latency (ms)=9.7; AP=62.6; AP_50=88.5; AP_75=67.9; AP_S=39.0; AP_M=57.8; AP_L=70.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RF-DETR (Ours)' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rfdetrourswfinetuningxl",
+  "claim": "Table 14 row: RF-DETR (Ours) w/ Fine-Tuning (size XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=XL; # Params.=35.0M; GFLOPS=199.0; Latency (ms)=9.7; AP=63.0; AP_50=88.7; AP_75=68.2; AP_S=38.8; AP_M=58.2; AP_L=70.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RF-DETR (Ours) w/ Fine-Tuning' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rfdetrours2xl",
+  "claim": "Table 14 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=123.5M; GFLOPS=410.2; Latency (ms)=15.6; AP=63.3; AP_50=88.9; AP_75=69.0; AP_S=38.7; AP_M=58.2; AP_L=71.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t14-rf100L-rfdetrourswfinetuning2xl",
+  "claim": "Table 14 row: RF-DETR (Ours) w/ Fine-Tuning (size 2XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=2XL; # Params.=123.5M; GFLOPS=410.2; Latency (ms)=15.6; AP=63.5; AP_50=89.0; AP_75=69.2; AP_S=38.9; AP_M=58.3; AP_L=71.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 14 (tab:rf100vl-scale), row 'RF-DETR (Ours) w/ Fine-Tuning' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetroursn",
+  "claim": "Table 15 row: RF-DETR (Ours) (size N)",
+  "value": "Model=RF-DETR (Ours); Size=N; # Params.=30.5M; GFLOPS=31.9; Latency (ms)=2.3; AP=48.0; AP_50=67.0; AP_75=51.4; AP_S=25.2; AP_M=53.5; AP_L=70.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourswfinetuningn",
+  "claim": "Table 15 row: RF-DETR (Ours) w/ Fine-Tuning (size N)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=N; # Params.=30.5M; GFLOPS=31.9; Latency (ms)=2.3; AP=+0.4; AP_50=+0.6; AP_75=+0.3; AP_S=+0.1; AP_M=+0.1; AP_L=+1.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourss",
+  "claim": "Table 15 row: RF-DETR (Ours) (size S)",
+  "value": "Model=RF-DETR (Ours); Size=S; # Params.=32.1M; GFLOPS=59.8; Latency (ms)=3.5; AP=52.9; AP_50=71.9; AP_75=57.0; AP_S=32.0; AP_M=58.3; AP_L=73.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourswfinetunings",
+  "claim": "Table 15 row: RF-DETR (Ours) w/ Fine-Tuning (size S)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=S; # Params.=32.1M; GFLOPS=59.8; Latency (ms)=3.5; AP=+0.1; AP_50=+0.2; AP_75=+0.2; AP_S=-0.2; AP_M=+0.2; AP_L=+0.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetroursm",
+  "claim": "Table 15 row: RF-DETR (Ours) (size M)",
+  "value": "Model=RF-DETR (Ours); Size=M; # Params.=33.7M; GFLOPS=78.8; Latency (ms)=4.4; AP=54.7; AP_50=73.5; AP_75=59.2; AP_S=36.1; AP_M=59.7; AP_L=73.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours)' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourswfinetuningm",
+  "claim": "Table 15 row: RF-DETR (Ours) w/ Fine-Tuning (size M)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=M; # Params.=33.7M; GFLOPS=78.8; Latency (ms)=4.4; AP=+0.0; AP_50=+0.1; AP_75=+0.0; AP_S=-0.1; AP_M=+0.1; AP_L=-0.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetroursl",
+  "claim": "Table 15 row: RF-DETR (Ours) (size L)",
+  "value": "Model=RF-DETR (Ours); Size=L; # Params.=33.9M; GFLOPS=125.6; Latency (ms)=6.8; AP=56.5; AP_50=75.1; AP_75=61.3; AP_S=39.0; AP_M=61.0; AP_L=73.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours)' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourswfinetuningl",
+  "claim": "Table 15 row: RF-DETR (Ours) w/ Fine-Tuning (size L)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=L; # Params.=33.9M; GFLOPS=125.6; Latency (ms)=6.8; AP=+0.0; AP_50=+0.0; AP_75=+0.0; AP_S=-0.1; AP_M=+0.1; AP_L=+0.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetroursxl",
+  "claim": "Table 15 row: RF-DETR (Ours) (size XL)",
+  "value": "Model=RF-DETR (Ours); Size=XL; # Params.=126.4M; GFLOPS=299.3; Latency (ms)=11.5; AP=58.6; AP_50=77.4; AP_75=63.8; AP_S=40.3; AP_M=63.9; AP_L=76.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours)' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourswfinetuningxl",
+  "claim": "Table 15 row: RF-DETR (Ours) w/ Fine-Tuning (size XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=XL; # Params.=126.4M; GFLOPS=299.3; Latency (ms)=11.5; AP=+0.3; AP_50=+0.1; AP_75=+0.2; AP_S=+0.5; AP_M=+0.4; AP_L=+0.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrours2xl",
+  "claim": "Table 15 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=126.9M; GFLOPS=438.4; Latency (ms)=17.2; AP=60.1; AP_50=78.5; AP_75=65.5; AP_S=43.2; AP_M=64.9; AP_L=76.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t15-detft-rfdetrourswfinetuning2xl",
+  "claim": "Table 15 row: RF-DETR (Ours) w/ Fine-Tuning (size 2XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=2XL; # Params.=126.9M; GFLOPS=438.4; Latency (ms)=17.2; AP=+0.1; AP_50=+0.0; AP_75=+0.3; AP_S=+0.5; AP_M=+0.2; AP_L=+0.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 15 (tab:coco-det-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrsegoursn",
+  "claim": "Table 16 row: RF-DETR-Seg. (Ours) (size N)",
+  "value": "Model=RF-DETR-Seg. (Ours); Size=N; # Params.=33.6M; GFLOPS=50.0; Latency (ms)=3.4; AP=40.3; AP_50=63.0; AP_75=42.6; AP_S=16.3; AP_M=45.3; AP_L=63.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR-Seg. (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrsegwfinetuningoursn",
+  "claim": "Table 16 row: RF-DETR-Seg. w/ Fine-Tuning (Ours) (size N)",
+  "value": "Model=RF-DETR-Seg. w/ Fine-Tuning (Ours); Size=N; # Params.=33.6M; GFLOPS=50.0; Latency (ms)=3.4; AP=+0.1; AP_50=+0.4; AP_75=+0.0; AP_S=-0.5; AP_M=+0.2; AP_L=+0.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR-Seg. w/ Fine-Tuning (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrsegourss",
+  "claim": "Table 16 row: RF-DETR-Seg. (Ours) (size S)",
+  "value": "Model=RF-DETR-Seg. (Ours); Size=S; # Params.=33.7M; GFLOPS=70.6; Latency (ms)=4.4; AP=43.1; AP_50=66.2; AP_75=45.9; AP_S=21.9; AP_M=48.5; AP_L=64.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR-Seg. (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrwfinetuningourss",
+  "claim": "Table 16 row: RF-DETR w/ Fine-Tuning (Ours) (size S)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=S; # Params./GFLOPS/Latency cells read 'Did' / 'Not' / 'Improve' (the row says fine-tuning Did Not Improve; no numbers); AP=-; AP_50=-; AP_75=-; AP_S=-; AP_M=-; AP_L=-",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR w/ Fine-Tuning (Ours)' size S",
+  "uncertain": false,
+  "note": "Value rewritten: the earlier field-by-field form mapped the words 'Did', 'Not', 'Improve' onto Params/GFLOPS/Latency as if they were values."
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrsegoursm",
+  "claim": "Table 16 row: RF-DETR-Seg. (Ours) (size M)",
+  "value": "Model=RF-DETR-Seg. (Ours); Size=M; # Params.=35.7M; GFLOPS=102.0; Latency (ms)=5.9; AP=45.3; AP_50=68.4; AP_75=48.8; AP_S=25.5; AP_M=50.4; AP_L=65.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR-Seg. (Ours)' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrwfinetuningoursm",
+  "claim": "Table 16 row: RF-DETR w/ Fine-Tuning (Ours) (size M)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=M; # Params./GFLOPS/Latency cells read 'Did' / 'Not' / 'Improve' (the row says fine-tuning Did Not Improve; no numbers); AP=-; AP_50=-; AP_75=-; AP_S=-; AP_M=-; AP_L=-",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR w/ Fine-Tuning (Ours)' size M",
+  "uncertain": false,
+  "note": "Value rewritten: the earlier field-by-field form mapped the words 'Did', 'Not', 'Improve' onto Params/GFLOPS/Latency as if they were values."
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetroursl",
+  "claim": "Table 16 row: RF-DETR (Ours) (size L)",
+  "value": "Model=RF-DETR (Ours); Size=L; # Params.=36.2M; GFLOPS=151.1; Latency (ms)=8.8; AP=47.1; AP_50=70.5; AP_75=50.9; AP_S=28.4; AP_M=52.1; AP_L=65.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR (Ours)' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrourswfinetuningl",
+  "claim": "Table 16 row: RF-DETR (Ours) w/ Fine-Tuning (size L)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=L; # Params./GFLOPS/Latency cells read 'Did' / 'Not' / 'Improve' (the row says fine-tuning Did Not Improve; no numbers); AP=-; AP_50=-; AP_75=-; AP_S=-; AP_M=-; AP_L=-",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size L",
+  "uncertain": false,
+  "note": "Value rewritten: the earlier field-by-field form mapped the words 'Did', 'Not', 'Improve' onto Params/GFLOPS/Latency as if they were values."
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetroursxl",
+  "claim": "Table 16 row: RF-DETR (Ours) (size XL)",
+  "value": "Model=RF-DETR (Ours); Size=XL; # Params.=38.1M; GFLOPS=260.0; Latency (ms)=13.5; AP=48.8; AP_50=72.2; AP_75=53.1; AP_S=30.6; AP_M=53.3; AP_L=65.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR (Ours)' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrourswfinetuningxl",
+  "claim": "Table 16 row: RF-DETR (Ours) w/ Fine-Tuning (size XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=XL; # Params./GFLOPS/Latency cells read 'Did' / 'Not' / 'Improve' (the row says fine-tuning Did Not Improve; no numbers); AP=-; AP_50=-; AP_75=-; AP_S=-; AP_M=-; AP_L=-",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size XL",
+  "uncertain": false,
+  "note": "Value rewritten: the earlier field-by-field form mapped the words 'Did', 'Not', 'Improve' onto Params/GFLOPS/Latency as if they were values."
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrours2xl",
+  "claim": "Table 16 row: RF-DETR (Ours) (size 2XL)",
+  "value": "Model=RF-DETR (Ours); Size=2XL; # Params.=38.6M; GFLOPS=435.3; Latency (ms)=21.8; AP=49.9; AP_50=73.1; AP_75=54.5; AP_S=33.9; AP_M=54.1; AP_L=65.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR (Ours)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t16-segft-rfdetrourswfinetuning2xl",
+  "claim": "Table 16 row: RF-DETR (Ours) w/ Fine-Tuning (size 2XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=2XL; # Params./GFLOPS/Latency cells read 'Did' / 'Not' / 'Improve' (the row says fine-tuning Did Not Improve; no numbers); AP=-; AP_50=-; AP_75=-; AP_S=-; AP_M=-; AP_L=-",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 16 (tab:coco-seg-ft), row 'RF-DETR (Ours) w/ Fine-Tuning' size 2XL",
+  "uncertain": false,
+  "note": "Value rewritten: the earlier field-by-field form mapped the words 'Did', 'Not', 'Improve' onto Params/GFLOPS/Latency as if they were values."
+ },
+ {
+  "id": "rfdetr-t17-reg-averageobjectsizevsnumberofs",
+  "claim": "Table 17 row: Average Object Size vs Number of Spatial Locations",
+  "value": "Relationship=Average Object Size vs Number of Spatial Locations; Slope=-0.009; Intercept=0.384; R-squared=0.148; P-value=0.000; Std. Error=0.002",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Average Object Size vs Number of Spatial Locations'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-averageobjectsizevsnumberofd",
+  "claim": "Table 17 row: Average Object Size vs Number of Decoder Layers",
+  "value": "Relationship=Average Object Size vs Number of Decoder Layers; Slope=-0.000; Intercept=0.044; R-squared=0.000; P-value=0.971; Std. Error=0.006",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Average Object Size vs Number of Decoder Layers'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-averageobjectsizevsnumberofw",
+  "claim": "Table 17 row: Average Object Size vs Number of Windows",
+  "value": "Relationship=Average Object Size vs Number of Windows; Slope=-0.008; Intercept=0.065; R-squared=0.019; P-value=0.170; Std. Error=0.006",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Average Object Size vs Number of Windows'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-numberofclassesvsnumberofdec",
+  "claim": "Table 17 row: Number of Classes vs Number of Decoder Layers",
+  "value": "Relationship=Number of Classes vs Number of Decoder Layers; Slope=0.837; Intercept=2.125; R-squared=0.026; P-value=0.106; Std. Error=0.513",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Number of Classes vs Number of Decoder Layers'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-numberofannotationsvsnumbero",
+  "claim": "Table 17 row: Number of Annotations vs Number of Decoder Layers",
+  "value": "Relationship=Number of Annotations vs Number of Decoder Layers; Slope=698.763; Intercept=6654.795; R-squared=0.001; P-value=0.706; Std. Error=1848.733",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Number of Annotations vs Number of Decoder Layers'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-averageobjectsperimagevsnumb",
+  "claim": "Table 17 row: Average Objects per Image vs Number Decoder Layers",
+  "value": "Relationship=Average Objects per Image vs Number Decoder Layers; Slope=0.163; Intercept=7.618; R-squared=0.000; P-value=0.857; Std. Error=0.904",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Average Objects per Image vs Number Decoder Layers'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-averageobjectsperimagevsnumb-2",
+  "claim": "Table 17 row: Average Objects per Image vs Number of Queries",
+  "value": "Relationship=Average Objects per Image vs Number of Queries; Slope=0.020; Intercept=4.457; R-squared=0.019; P-value=0.171; Std. Error=0.015",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Average Objects per Image vs Number of Queries'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t17-reg-numberofspatiallocationsvsnu",
+  "claim": "Table 17 row: Number of Spatial Locations vs Number of Windows",
+  "value": "Relationship=Number of Spatial Locations vs Number of Windows; Slope=1.722; Intercept=32.984; R-squared=0.492; P-value=0.000; Std. Error=0.177",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 17 (tab:regression-results), row 'Number of Spatial Locations vs Number of Windows'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursfixedarchitecturen",
+  "claim": "Table 18 row: RF-DETR (Ours) Fixed Architecture (size N)",
+  "value": "Model=RF-DETR (Ours) Fixed Architecture; Size=N; # Params.=30.5M; GFLOPS=31.9; Latency (ms)=2.3; AP=57.7; AP_50=85.0; AP_75=61.9; AP_S=30.8; AP_M=51.5; AP_L=67.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours) Fixed Architecture' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursn",
+  "claim": "Table 18 row: RF-DETR (Ours) (size N)",
+  "value": "Model=RF-DETR (Ours); Size=N; # Params.=31.2M; GFLOPS=34.5; Latency (ms)=2.5; AP=57.8; AP_50=85.1; AP_75=62.5; AP_S=30.1; AP_M=52.2; AP_L=67.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrwfinetuningoursn",
+  "claim": "Table 18 row: RF-DETR w/ Fine-Tuning (Ours) (size N)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=N; # Params.=31.2M; GFLOPS=34.5; Latency (ms)=2.5; AP=58.6; AP_50=85.7; AP_75=63.0; AP_S=31.0; AP_M=53.2; AP_L=67.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR w/ Fine-Tuning (Ours)' size N",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursfixedarchitectures",
+  "claim": "Table 18 row: RF-DETR (Ours) Fixed Architecture (size S)",
+  "value": "Model=RF-DETR (Ours) Fixed Architecture; Size=S; # Params.=32.1M; GFLOPS=59.8; Latency (ms)=3.5; AP=60.2; AP_50=86.7; AP_75=65.0; AP_S=34.2; AP_M=54.4; AP_L=68.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours) Fixed Architecture' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrourss",
+  "claim": "Table 18 row: RF-DETR (Ours) (size S)",
+  "value": "Model=RF-DETR (Ours); Size=S; # Params.=33.5M; GFLOPS=62.4; Latency (ms)=3.7; AP=60.9; AP_50=87.5; AP_75=66.1; AP_S=34.2; AP_M=55.7; AP_L=69.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrwfinetuningourss",
+  "claim": "Table 18 row: RF-DETR w/ Fine-Tuning (Ours) (size S)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=S; # Params.=33.5M; GFLOPS=62.4; Latency (ms)=3.7; AP=61.2; AP_50=87.7; AP_75=66.1; AP_S=34.9; AP_M=55.6; AP_L=69.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR w/ Fine-Tuning (Ours)' size S",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursfixedarchitecturem",
+  "claim": "Table 18 row: RF-DETR (Ours) Fixed Architecture (size M)",
+  "value": "Model=RF-DETR (Ours) Fixed Architecture; Size=M; # Params.=33.7M; GFLOPS=78.8; Latency (ms)=4.4; AP=61.2; AP_50=87.4; AP_75=66.4; AP_S=35.8; AP_M=56.1; AP_L=69.8",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours) Fixed Architecture' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursm",
+  "claim": "Table 18 row: RF-DETR (Ours) (size M)",
+  "value": "Model=RF-DETR (Ours); Size=M; # Params.=33.6M; GFLOPS=91.0; Latency (ms)=4.6; AP=61.7; AP_50=88.0; AP_75=66.9; AP_S=35.8; AP_M=56.5; AP_L=70.0",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours)' size M",
+  "uncertain": true,
+  "note": "Conflicts with Table 4 (33.5M / 86.7 GFLOPs) for the same AP row."
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrwfinetuningoursm",
+  "claim": "Table 18 row: RF-DETR w/ Fine-Tuning (Ours) (size M)",
+  "value": "Model=RF-DETR w/ Fine-Tuning (Ours); Size=M; # Params.=33.6M; GFLOPS=91.0; Latency (ms)=4.6; AP=62.0; AP_50=88.1; AP_75=67.1; AP_S=36.2; AP_M=56.4; AP_L=70.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR w/ Fine-Tuning (Ours)' size M",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrourswfixedarchitecture",
+  "claim": "Table 18 row: RF-DETR (Ours) w/ Fixed Architecture (size L)",
+  "value": "Model=RF-DETR (Ours) w/ Fixed Architecture; Size=L; # Params.=33.9M; GFLOPS=125.6; Latency (ms)=6.8; AP=62.2; AP_50=88.2; AP_75=67.8; AP_S=37.7; AP_M=57.0; AP_L=70.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours) w/ Fixed Architecture' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursl",
+  "claim": "Table 18 row: RF-DETR (Ours) (size L)",
+  "value": "Model=RF-DETR (Ours); Size=L; # Params.=34.1M; GFLOPS=119.1; Latency (ms)=6.2; AP=62.0; AP_50=88.1; AP_75=67.3; AP_S=36.9; AP_M=57.1; AP_L=70.2",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours)' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrourswfinetuningl",
+  "claim": "Table 18 row: RF-DETR (Ours) w/ Fine-Tuning (size L)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=L; # Params.=34.1M; GFLOPS=119.1; Latency (ms)=6.2; AP=62.3; AP_50=88.2; AP_75=67.4; AP_S=37.1; AP_M=57.2; AP_L=70.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours) w/ Fine-Tuning' size L",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursdinov2basewfixedar",
+  "claim": "Table 18 row: RF-DETR (Ours, DINOv2-Base) w/ Fixed Architecture (size XL)",
+  "value": "Model=RF-DETR (Ours, DINOv2-Base) w/ Fixed Architecture; Size=XL; # Params.=126.4M; GFLOPS=299.3; Latency (ms)=11.5; AP=62.9; AP_50=88.5; AP_75=68.6; AP_S=37.0; AP_M=57.5; AP_L=71.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours, DINOv2-Base) w/ Fixed Architecture' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursxl",
+  "claim": "Table 18 row: RF-DETR (Ours) (size XL)",
+  "value": "Model=RF-DETR (Ours); Size=XL; # Params.=35.0M; GFLOPS=199.0; Latency (ms)=9.7; AP=62.6; AP_50=88.5; AP_75=67.9; AP_S=39.0; AP_M=57.8; AP_L=70.4",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours)' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetrourswfinetuningxl",
+  "claim": "Table 18 row: RF-DETR (Ours) w/ Fine-Tuning (size XL)",
+  "value": "Model=RF-DETR (Ours) w/ Fine-Tuning; Size=XL; # Params.=35.0M; GFLOPS=199.0; Latency (ms)=9.7; AP=63.0; AP_50=88.7; AP_75=68.2; AP_S=38.8; AP_M=58.2; AP_L=70.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours) w/ Fine-Tuning' size XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursdinov2basewfixedar-2",
+  "claim": "Table 18 row: RF-DETR (Ours, DINOv2-Base) w/ Fixed Architecture (size 2XL)",
+  "value": "Model=RF-DETR (Ours, DINOv2-Base) w/ Fixed Architecture; Size=2XL; # Params.=126.9M; GFLOPS=438.4; Latency (ms)=17.1; AP=63.2; AP_50=89.0; AP_75=69.3; AP_S=38.4; AP_M=58.4; AP_L=71.5",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours, DINOv2-Base) w/ Fixed Architecture' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursdinov2base2xl",
+  "claim": "Table 18 row: RF-DETR (Ours, DINOv2-Base) (size 2XL)",
+  "value": "Model=RF-DETR (Ours, DINOv2-Base); Size=2XL; # Params.=123.5M; GFLOPS=410.2; Latency (ms)=15.6; AP=63.3; AP_50=88.9; AP_75=69.0; AP_S=38.7; AP_M=58.2; AP_L=71.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours, DINOv2-Base)' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t18-fixed-rfdetroursdinov2basewfinetun",
+  "claim": "Table 18 row: RF-DETR (Ours, DINOv2-Base) w/ Fine-Tuning (size 2XL)",
+  "value": "Model=RF-DETR (Ours, DINOv2-Base) w/ Fine-Tuning; Size=2XL; # Params.=123.5M; GFLOPS=410.2; Latency (ms)=15.6; AP=63.5; AP_50=89.0; AP_75=69.2; AP_S=38.9; AP_M=58.3; AP_L=71.7",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 18 (tab:rf100-vl-fixed-arch), row 'RF-DETR (Ours, DINOv2-Base) w/ Fine-Tuning' size 2XL",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t19-bb20-wcaev2vits16truncatedbackbon",
+  "claim": "Table 19 row: w/ CAEv2 ViT/S-16-Truncated Backbone",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ CAEv2 ViT/S-16-Truncated Backbone; # Params.=28.3M; GFLOPS=83.7; Latency (ms)=4.3; AP=64.4; AP_50=92.2; AP_75=71.2; AP_S=33.8; AP_M=56.8; AP_L=71.9",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 19 (tab:backbone-rf20vl), row 'w/ CAEv2 ViT/S-16-Truncated Backbone'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t19-bb20-wdinov2vits14backbone",
+  "claim": "Table 19 row: w/ DINOv2 ViT/S-14 Backbone",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ DINOv2 ViT/S-14 Backbone; # Params.=32.3M; GFLOPS=78.2; Latency (ms)=4.6; AP=65.2; AP_50=92.5; AP_75=72.8; AP_S=37.8; AP_M=58.2; AP_L=72.6",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 19 (tab:backbone-rf20vl), row 'w/ DINOv2 ViT/S-14 Backbone'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t19-bb20-wsiglipv2vitb32backbone",
+  "claim": "Table 19 row: w/ SigLIPv2 ViT/B-32 Backbone*",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ SigLIPv2 ViT/B-32 Backbone*; # Params.=105.1M; GFLOPS=81.6; Latency (ms)=4.5; AP=62.2; AP_50=91.0; AP_75=67.8; AP_S=28.9; AP_M=54.1; AP_L=70.3",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 19 (tab:backbone-rf20vl), row 'w/ SigLIPv2 ViT/B-32 Backbone*'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t19-bb20-wsam2hierasbackbone",
+  "claim": "Table 19 row: w/ SAM2 Hiera-S Backbone*",
+  "value": "LW-DETR (M) + Gentler Hyperparameters=w/ SAM2 Hiera-S Backbone*; # Params.=44.0M; GFLOPS=109.1; Latency (ms)=11.2; AP=65.2; AP_50=92.5; AP_75=72.7; AP_S=37.8; AP_M=58.2; AP_L=72.1",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 19 (tab:backbone-rf20vl), row 'w/ SAM2 Hiera-S Backbone*'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t20-buf-yolov8m",
+  "claim": "Table 20 row: YOLOv8 (M)",
+  "value": "Model=YOLOv8 (M); mAP=47.3; 0 ms=5.5 ms; 200 ms=5.4 ms; 400 ms=5.4 ms; 800 ms=5.4 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 20 (tab:buffering), row 'YOLOv8 (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t20-buf-yolov11m",
+  "claim": "Table 20 row: YOLOv11 (M)",
+  "value": "Model=YOLOv11 (M); mAP=48.4; 0 ms=5.0 ms; 200 ms=5.0 ms; 400 ms=5.1 ms; 800 ms=5.1 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 20 (tab:buffering), row 'YOLOv11 (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t20-buf-rtdetrr18",
+  "claim": "Table 20 row: RT-DETR (R18)",
+  "value": "Model=RT-DETR (R18); mAP=49.0; 0 ms=4.4 ms; 200 ms=4.4 ms; 400 ms=4.4 ms; 800 ms=4.4 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 20 (tab:buffering), row 'RT-DETR (R18)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t20-buf-lwdetrm",
+  "claim": "Table 20 row: LW-DETR (M)",
+  "value": "Model=LW-DETR (M); mAP=52.6; 0 ms=4.5 ms; 200 ms=4.3 ms; 400 ms=4.3 ms; 800 ms=4.3 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 20 (tab:buffering), row 'LW-DETR (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t20-buf-dfinem",
+  "claim": "Table 20 row: D-FINE (M)",
+  "value": "Model=D-FINE (M); mAP=54.9; 0 ms=5.7 ms; 200 ms=5.4 ms; 400 ms=5.4 ms; 800 ms=5.4 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 20 (tab:buffering), row 'D-FINE (M)'",
+  "uncertain": false,
+  "note": ""
+ },
+ {
+  "id": "rfdetr-t20-buf-rfdetrm",
+  "claim": "Table 20 row: RF-DETR (M)",
+  "value": "Model=RF-DETR (M); mAP=54.7; 0 ms=4.7 ms; 200 ms=4.4 ms; 400 ms=4.4 ms; 800 ms=4.4 ms",
+  "paper": "RF-DETR",
+  "version": "v2",
+  "loc": "Table 20 (tab:buffering), row 'RF-DETR (M)'",
+  "uncertain": false,
+  "note": ""
+ }
+]

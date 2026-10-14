@@ -1,0 +1,119 @@
+<p class="kicker"><span class="act-n">Act V</span>Labels and language</p>
+<section id="ch-supcon" class="chapter">
+<h2>When you have labels: supervised contrastive</h2>
+<p>Everything so far assumed you have no labels. But often you do have some: you know that these forty photos are all "scratch" and those sixty are all "dent". Should you throw that knowledge away and play the two-views game anyway? This chapter shows the small change that uses the labels, and why it packs each class into a tight group.</p>
+
+<h3>The game, with labels</h3>
+<p>In the self-supervised game, each view has exactly one partner: the other view of the same photo. Every other view in the batch counts as a stranger, even a photo of the same kind of object. Without labels you cannot do better, because you do not know which strangers are secretly the same class. That was the false-negative problem of <a href="#ch-negatives">chapter 7</a>.</p>
+<p>With labels, you do know. So change one rule: <em>every view in the batch that carries the anchor's label is a partner</em>. The anchor now has many <b class="c-yellow">positives</b>, and the loss <b class="c-green">pulls</b> it toward all of them at once. Only views with a different label stay <b class="c-red">negatives</b>. This is <em>supervised contrastive learning</em>, or SupCon for short.</p>
+<p>The figure puts 15 made-up photos on the circle, two views each. Each photo belongs to one of three classes, drawn as circles, squares and triangles. The view marked "anchor" is blue; its positives are yellow.</p>
+
+<figure class="viz" id="viz-supcon" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Which views count as positives">
+    <span class="lbl">Positives</span>
+    <button type="button" id="btn-supcon-self" aria-pressed="false">One per anchor (its twin)</button>
+    <button type="button" id="btn-supcon-sup" aria-pressed="false">All same-class views</button>
+    <button type="button" id="btn-supcon-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="supcon-canvas" role="img" aria-label="Thirty points on a circle: two views each of fifteen made-up images in three classes, drawn as circles, squares and triangles. One view is the blue anchor and its positives are yellow, joined to it by green lines; red ticks mark nearby negatives. With one positive per anchor, twins meet but the classes stay mixed. With all same-class views as positives, each class gathers into one tight group and the three groups spread apart."></canvas>
+  <p class="readout" id="supcon-readout" aria-live="polite"></p>
+  <figcaption>Each view is a unit vector in two dimensions, stored as an angle. Both buttons start from the same random layout and run 300 real gradient steps with temperature 0.3. "One per anchor" is the self-supervised loss (SupCon's Eq. 1, the same as SimCLR's); "All same-class views" is SupCon's <span class="tex">\mathcal{L}_{out}</span> (Eq. 2 below). The readout counts the views whose nearest neighbour, not counting their own twin, has the same class. Settings and printed numbers: <code>notes/sim-supcon.txt</code>.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "One per anchor".</b> The loss pulls twins together and pushes everything else apart. Will views of the same class end up near each other?</p>
+<p>Press it. Every view finds its twin, and the pairs spread around the circle. But the circles, squares and triangles stay mixed, because the loss never saw the shapes. Worse, it actively pushed same-class views apart, since to this loss they are just strangers. If you searched for the nearest neighbour of a square, you would get a square only by luck.</p>
+<p>Now press "All same-class views". The anchor's green lines now reach every square. Each class slides into one group, and the three groups push each other to opposite sides of the circle. Nearest-neighbour search now always returns the right class.</p>
+<p>You might worry that each class ends on a single point. In this loss, nothing stops a class from shrinking to one point, and the toy shows it. Real encoders trained on finite data usually stop short of that, so you see tight clusters (our reading). Tight clusters are what you want for classification and search.</p>
+
+<h3>The same idea as an equation</h3>
+<p>Start from the lineup loss of <a href="#ch-infonce">chapter 3</a>. For anchor <span class="tex">i</span>, the softmax over every other view gives a probability to each candidate <span class="tex">a</span>. With one positive, the loss is minus the log of the positive's probability. With many positives, the simplest choice is to take that same term for each positive and average them:</p>
+<div class="eq" id="eq-supcon-out" data-build data-viz="viz-supcon"><div class="tex tex-display">
+\mathcal{L}_{out}^{sup} = \sum_{i\in I} \htmlData{step=4, link=avg}{\htmlClass{t-green}{\frac{-1}{|P(i)|}\sum_{p\in P(i)}}} \log \frac{\text{exp}\left(\htmlData{step=1, link=anchor}{\htmlClass{t-blue}{\boldsymbol{z}_i}} \cdot \htmlData{step=2, link=pos}{\htmlClass{t-yellow}{\boldsymbol{z}_p}}/\tau\right)}{\htmlData{step=3, link=denom}{\htmlClass{t-red}{\sum_{a\in A(i)}\text{exp}\left(\boldsymbol{z}_i\cdot\boldsymbol{z}_a/\tau\right)}}}
+</div></div>
+<p class="eqno">Eq. 2 in Khosla et al., "Supervised contrastive learning", NeurIPS 2020, arXiv <a href="https://arxiv.org/abs/2004.11362v5">2004.11362v5</a> (the paper's centered dot written as <span class="tex">\cdot</span>).</p>
+<ul class="gloss">
+  <li><span class="tex">I</span>: all views in the batch. With <span class="tex">N</span> photos and two views each, there are <span class="tex">2N</span>.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\boldsymbol{z}_i}</span>: the anchor's embedding, a unit vector from the encoder and a small projection head.</li>
+  <li><span class="tex">P(i)</span>: the anchor's positives, every other view with the same label, including its own twin. <span class="tex">|P(i)|</span> is how many there are.</li>
+  <li><span class="tex">A(i)</span>: every view except the anchor itself. Positives stay in the denominator too; only the anchor is left out.</li>
+  <li><span class="tex">\tau</span>: the temperature, as in <a href="#ch-infonce">chapter 3</a>. The paper uses <span data-claim="supcon-tau">0.1</span> for all its results.</li>
+  <li><span class="tex">\htmlClass{t-green}{\frac{-1}{|P(i)|}\sum_{p}}</span>: the average over positives. It sits <em>outside</em> the log, hence the name "out".</li>
+</ul>
+<p>Check what happens when every photo in the batch has a different label. Then <span class="tex">P(i)</span> holds only the twin, <span class="tex">|P(i)| = 1</span>, and Eq. 2 is exactly the self-supervised lineup loss. SupCon is the lineup loss with more right answers per row.</p>
+<p>Try it with numbers. An anchor has two positives and one negative, with cosines <span class="tex">0.9</span>, <span class="tex">0.1</span> and <span class="tex">0</span>, and <span class="tex">\tau = 0.5</span>. The scores are <span class="tex">1.8,\ 0.2,\ 0</span>, and the softmax gives <span class="tex">0.73,\ 0.15,\ 0.12</span>. Then</p>
+<ul>
+  <li><span class="tex">\mathcal{L}_{out} = -\tfrac12(\log 0.73 + \log 0.15) \approx 1.11</span>. The far positive, at <span class="tex">0.15</span>, costs most.</li>
+</ul>
+
+<h3>Where to put the average: inside or outside the log</h3>
+<p>There is a second way to average, and the paper tests it. Take the mean probability of the positives first, then the log:</p>
+<div class="eq" id="eq-supcon-in" data-build data-viz="viz-supcon"><div class="tex tex-display">
+\mathcal{L}_{in}^{sup} = \sum_{i\in I} -\log\left\{\htmlData{step=4, link=avg}{\htmlClass{t-green}{\frac{1}{|P(i)|}\sum_{p\in P(i)}}} \frac{\text{exp}\left(\htmlData{step=1, link=anchor}{\htmlClass{t-blue}{\boldsymbol{z}_i}} \cdot \htmlData{step=2, link=pos}{\htmlClass{t-yellow}{\boldsymbol{z}_p}}/\tau\right)}{\htmlData{step=3, link=denom}{\htmlClass{t-red}{\sum_{a\in A(i)}\text{exp}\left(\boldsymbol{z}_i\cdot\boldsymbol{z}_a/\tau\right)}}}\right\}
+</div></div>
+<p class="eqno">Eq. 3 in Khosla et al., arXiv 2004.11362v5.</p>
+<p>With the same numbers, <span class="tex">\mathcal{L}_{in} = -\log\tfrac12(0.73 + 0.15) \approx 0.82</span>, smaller than <span class="tex">\mathcal{L}_{out}</span>. That is always so: the log is concave, so the log of an average is at least the average of the logs (Jensen's inequality), which gives <span class="tex">\mathcal{L}_{in} \le \mathcal{L}_{out}</span>. Earlier arXiv versions printed this inequality the wrong way round; version 5 corrects it.</p>
+<p>You might expect the loss with the smaller value to be the better one. In fact <span class="tex">\mathcal{L}_{out}</span> trains much better: ResNet-50 reaches <span data-claim="supcon-lout-top1">78.7</span>% ImageNet top-1 with it and only <span data-claim="supcon-lin-top1">67.4</span>% with <span class="tex">\mathcal{L}_{in}</span> (batch <span data-claim="supcon-batch-r50">6144</span>, linear classifier on the frozen encoder; Table 1). A loss value says nothing about features. What matters is where the gradient sends each positive.</p>
+<p>The paper's argument is about that gradient (Eq. 4 and 5). Here it is in plain words, with our numbers, derived here from those equations. Each positive is pulled with a strength set by the gap between its softmax share and a target share.</p>
+<ul>
+  <li>In <span class="tex">\mathcal{L}_{out}</span>, the target share is the same for every positive, <span class="tex">1/|P(i)| = 0.5</span>. The far positive has <span class="tex">0.15</span>, a gap of <span class="tex">0.35</span>, so it gets the strongest pull. The pull goes where the work is.</li>
+  <li>In <span class="tex">\mathcal{L}_{in}</span>, the <span class="tex">1/|P(i)|</span> sits inside the log, so it becomes an added constant with no gradient. The target shares are instead the positives' own softmax among themselves: <span class="tex">0.83</span> and <span class="tex">0.17</span>. The far positive's gap shrinks to <span class="tex">0.02</span>, and the positive that is already close takes most of the pull.</li>
+</ul>
+<p>So <span class="tex">\mathcal{L}_{in}</span> keeps rewarding the easy positives and lets the hard ones drift. The paper says the same thing in its own words: the mean over positives "serves to remove bias present in the positives".</p>
+
+<details class="check">
+  <summary>Check yourself: a batch has one photo of a rare class, and nothing else with its label. What does SupCon do with its two views?</summary>
+  <p>Its only positive is its own twin, so for that anchor <span class="tex">\mathcal{L}_{out}</span> is the self-supervised lineup loss. Every other view is a negative. SupCon gracefully falls back to the two-views game wherever a label has no company in the batch, so it needs many same-class views per anchor: a large batch, or a memory bank of stored embeddings (<span data-claim="supcon-memory-top1">79.1</span>% at batch 256 with a memory of <span data-claim="supcon-memory-size">8192</span>, Sec. 4.1).</p>
+</details>
+
+<h3>The triplet loss is a special case</h3>
+<p>Remember the margin losses of <a href="#ch-compare">chapter 1</a>. The triplet loss takes one anchor, one positive and one negative, and asks the positive to be closer than the negative by a margin. The SupCon supplement (Sec. 8) takes one positive and one negative. When the anchor is already much closer to its positive than to its negative, SupCon behaves like a triplet loss on squared distances, <span class="tex">\lVert \boldsymbol{z}_a - \boldsymbol{z}_p\rVert^2 - \lVert \boldsymbol{z}_a - \boldsymbol{z}_n\rVert^2</span>. The margin is <span class="tex">\alpha = 2\tau</span>. The temperature plays the role of the margin. FaceNet trained faces with a margin of <span data-claim="facenet-margin">0.2</span>, and with SupCon's temperature of <span data-claim="supcon-tau">0.1</span> the two settings happen to match (our arithmetic).</p>
+<p>What SupCon adds over the triplet is the same thing the lineup added over the margin loss: many positives and many negatives in one step, with no hand-picked hard examples. Sohn's N-pair loss had already used labels to build a lineup, but with only one positive per anchor and no augmented views; in SupCon's own setup it reaches <span data-claim="supcon-npairs">57.4</span>% ImageNet top-1, far below SupCon.</p>
+
+<h3>What it buys you</h3>
+<p>The paper's main test trains a ResNet with SupCon, then freezes it and fits a linear classifier on top with the labels. It compares this with ordinary cross-entropy training of the same network, which the authors also ran themselves.</p>
+<table class="data">
+  <thead><tr><th>ImageNet, top-1 (%)</th><th>SupCon (linear classifier, frozen encoder)</th><th>Cross-entropy (authors' runs)</th></tr></thead>
+  <tbody>
+    <tr><td>ResNet-50 (SupCon: <span data-claim="supcon-epochs-small">350</span> epochs, batch <span data-claim="supcon-batch-r50">6144</span>)</td><td><span data-claim="supcon-r50-top1">78.7</span></td><td><span data-claim="supcon-ce-r50-ourimpl">77.6</span></td></tr>
+    <tr><td>ResNet-200 (SupCon: <span data-claim="supcon-epochs-r200">700</span> epochs, batch <span data-claim="supcon-batch-r200">4096</span>)</td><td><span data-claim="supcon-r200-top1">81.4</span></td><td><span data-claim="supcon-ce-r200-ourimpl">80.9</span></td></tr>
+  </tbody>
+  <caption>Table 3 of the SupCon paper. Published cross-entropy numbers for the same networks are <span data-claim="supcon-ce-r50-autoaug-published">78.2</span> (ResNet-50) and <span data-claim="supcon-ce-r200-published">80.6</span> (ResNet-200).</caption>
+</table>
+<p>The gain on clean ImageNet is small, about a point. The larger point is robustness. On ImageNet-C, the same images with noise, blur, weather and digital corruptions, the mean corruption error (mCE, lower is better) drops from <span data-claim="supcon-mce-ce-r50">68.6</span> to <span data-claim="supcon-mce-r50">67.2</span> for ResNet-50 and from <span data-claim="supcon-mce-ce-r200">52.4</span> to <span data-claim="supcon-mce-r200">50.6</span> for ResNet-200 (Fig. 3, left). Across changes of augmentation, optimizer and learning rate, SupCon's accuracy also shows <span data-claim="supcon-hparam-robust">significantly lower variance</span> than cross-entropy's (Fig. 4a).</p>
+<p>Does the toy's lesson, more positives per anchor, hold on real data? The supplement caps the number of positives per anchor (Table 5, ResNet-50, batch <span data-claim="supcon-batch-r50">6144</span>, <span data-claim="supcon-epochs-small">350</span> epochs). With at most one positive, top-1 is <span data-claim="supcon-pos-1">69.3</span>%. With no cap, about <span data-claim="supcon-pos-expected">13</span> positives per anchor on average, it is <span data-claim="supcon-pos-nocap">78.5</span>%. One caution: that capped run also drops the extra same-class views from the denominator, so it is not quite the toy's "One per anchor" button, which keeps them there as negatives.</p>
+
+<h3>Where this came from</h3>
+<p>Khosla and colleagues posted SupCon in April 2020 (NeurIPS 2020), right after SimCLR and MoCo had made the lineup loss work at scale. They kept SimCLR's recipe (two augmented views, a projection head thrown away after training, a large batch) and changed only the definition of a positive. The idea that labels can define the pairs is much older: the siamese and triplet work of <a href="#ch-compare">chapter 1</a> did exactly that, one pair or triplet at a time.</p>
+
+<h3>Where we go next: positives that are not images</h3>
+<p>A label is one way to say "these belong together". A caption is another. If the partner of a photo is a sentence describing it, the same lineup can teach a network to connect images and words. That is CLIP, in the <a href="#ch-clip">next chapter</a>.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>How SupCon changes the lineup loss: every same-label view in the batch is a positive.</li>
+    <li>Why that gathers each class into a tight group, while the self-supervised loss leaves classes mixed.</li>
+    <li>Why averaging outside the log beats averaging inside it, even though its loss value is larger.</li>
+    <li>How the triplet loss falls out as the one-positive, one-negative case, with the temperature as the margin.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>SupCon fits when you have some labels but want an embedding rather than just a classifier: similarity search, retrieval of near-duplicates, or grouping new samples by how close they sit to labelled ones. Start from a pretrained encoder and fine-tune with the supervised contrastive loss on your labelled set, then let a nearest-neighbour lookup or a small linear head do the classifying (our reading; the paper trains from scratch). Two cautions. It needs many same-class views per anchor: a large batch, or a memory bank of stored embeddings (<span data-claim="supcon-memory-top1">79.1</span>% at batch 256 with a memory of <span data-claim="supcon-memory-size">8192</span>, Sec. 4.1). And when a class has very few examples, it adds little over the plain two-views game, so pair it with self-supervised pretraining (our reading).</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-supcon'), out = document.getElementById('supcon-readout');
+  const kit = KIT.supcon(document.getElementById('supcon-canvas'), { fig });
+  const btns = { self: document.getElementById('btn-supcon-self'), sup: document.getElementById('btn-supcon-sup') };
+  const go = mode => { kit.set(mode); Object.entries(btns).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === mode))); out.textContent = KIT.supconText(mode); };
+  btns.self.addEventListener('click', () => go('self'));
+  btns.sup.addEventListener('click', () => go('sup'));
+  document.getElementById('btn-supcon-reset').addEventListener('click', () => go(null));
+  go(null);
+})();
+</script>
+</section>

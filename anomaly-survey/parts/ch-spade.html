@@ -1,0 +1,95 @@
+<p class="kicker"><span class="act-n">Act II</span>Remember normal</p>
+
+<section id="ch-spade" class="chapter">
+<h2>Pretrained features already know what normal looks like</h2>
+<p>Chapter 1 used hand-made toy features. SPADE takes its features from a network pretrained on ImageNet photos. It then finds and outlines defects by nearest-neighbor search alone, with no training at all.</p>
+
+<figure class="viz" id="viz-spade" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-spade" tabindex="0" aria-label="Left: the camera view of the cap under inspection, with a red heat map of pixel scores and a yellow box on the selected patch. Top right: twelve good caps in memory; the three most similar to the test cap are outlined in blue. Bottom right: the retrieved cap that holds the closest match, with a line from the selected patch to its match, and a small feature space with the gallery of patch features. Click a patch, or use the arrow keys, to select it."></canvas>
+  <div class="controls" role="group" aria-label="Cap under inspection">
+    <span>Inspect</span>
+    <button type="button" id="btn-spade-scratch" aria-pressed="true">A scratched cap</button>
+    <button type="button" id="btn-spade-hole" aria-pressed="false">A cap with a hole</button>
+    <button type="button" id="btn-spade-good" aria-pressed="false">A good cap</button>
+  </div>
+  <div class="controls" role="group" aria-label="Stage">
+    <span>Stage</span>
+    <button type="button" id="btn-spade-image" aria-pressed="false">1. Find similar images</button>
+    <button type="button" id="btn-spade-pixel" aria-pressed="true">2. Match every patch</button>
+    <button type="button" id="btn-spade-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model, with SPADE's two stages run on toy features. Stage 1 ranks the twelve remembered caps by a pooled feature of the whole image and keeps the three nearest (the paper keeps <span data-claim="spade-k-mvtec">50</span> of a few hundred). Stage 2 gives each patch the squared distance to its single nearest patch feature in those three caps. As in chapter 1, two of the toy's three features are shown, and distances are measured in this view.</figcaption>
+</figure>
+
+<p>Select a patch on the scratch: its best match among the retrieved caps is still far away, so the scratch lights up. Now inspect the cap with a hole and predict: <em>will SPADE flag the hole?</em> It does not. The hole patch finds an almost perfect match, and the line shows where: a bolt hole on another cap. SPADE asks only "does this patch look like some normal patch?", and never "does it belong <em>here</em>?". Chapter 5 adds that second question.</p>
+
+<h3>Why ImageNet features work on defects</h3>
+<p>A convolutional network trained to classify ImageNet photos learns a general vocabulary of edges, textures and parts. Its feature maps describe every region of an image with a vector. Two clean patches of brushed metal get similar vectors; a scratch gets a vector that no clean patch has. The network never saw a defect, but it does not need to: it only needs to describe patches well enough that "unlike anything normal" shows up as distance. DN2 (<a href="https://arxiv.org/abs/2002.10445v1">arXiv 2002.10445</a>) showed this for whole images. SPADE (Cohen and Hoshen, first posted <span data-claim="spade-published">2020-05-05</span>) extends it to every pixel.</p>
+
+<h3>Stage 1: find the most similar normal images</h3>
+<p>SPADE runs each image through a <span data-claim="spade-backbone">Wide-ResNet50x2</span> pretrained on ImageNet, after resizing to <span data-claim="spade-resize">256</span> pixels and cropping to <span data-claim="spade-crop">224</span>. The output of the last block is averaged over all positions into one <span data-claim="spade-global-dim">2048</span>-dimensional vector per image. For a test image, SPADE finds the <span class="tex">K</span> nearest normal images by this vector (<span class="tex">K</span> = <span data-claim="spade-k-mvtec">50</span> on MVTec AD). The image score is the mean squared distance to them:</p>
+<div class="eq" id="eq-spade-image" data-build data-viz="viz-spade"><div class="tex tex-display">
+\htmlData{step=1, link=img}{d(\htmlClass{t-yellow}{y})} = \htmlData{step=2, link=knn}{\frac{1}{K} \sum_{\htmlClass{t-blue}{f} \in N_K(f_{\htmlClass{t-yellow}{y}})}} \htmlData{step=3, link=dist}{\big\lVert \htmlClass{t-blue}{f} - f_{\htmlClass{t-yellow}{y}} \big\rVert^2}
+</div></div>
+<p class="eqno">Eq. <span data-claim="spade-eq-image">2</span> in SPADE v3.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{y}</span> is the test image and <span class="tex">f_{\htmlClass{t-yellow}{y}}</span> its pooled feature vector.</li>
+  <li><span class="tex">N_K(f_{\htmlClass{t-yellow}{y}})</span> is the set of the <span class="tex">K</span> nearest pooled features of normal training images; <span class="tex">\htmlClass{t-blue}{f}</span> is one of them.</li>
+  <li>The score is their mean squared Euclidean distance. A high score flags the whole image. This is exactly DN2's score.</li>
+</ul>
+<p>This image score comes from pooled features, not from the pixel map. PaDiM and PatchCore later take the image score as the maximum of the map instead.</p>
+
+<h3>Stage 2: match every pixel against the retrieved images</h3>
+<p>For localization, SPADE keeps a feature vector for every pixel position, taken from the ends of the first three blocks, at <span data-claim="spade-fmap-1">56</span>, <span data-claim="spade-fmap-2">28</span> and <span data-claim="spade-fmap-3">14</span> positions per side. The fine block sees small detail; the coarse blocks see more context. All pixel vectors of the <span class="tex">K</span> retrieved images form a gallery <span class="tex">G</span>. Each test pixel is scored against that gallery only, which keeps the search small:</p>
+<div class="eq" id="eq-spade-pixel" data-build data-viz="viz-spade"><div class="tex tex-display">
+\htmlData{step=1, link=pix}{d(\htmlClass{t-yellow}{y}, p)} = \htmlData{step=2, link=gallery}{\frac{1}{\kappa} \sum_{\htmlClass{t-blue}{f} \in N_\kappa(F(\htmlClass{t-yellow}{y}, p))}} \htmlData{step=3, link=match}{\big\lVert \htmlClass{t-blue}{f} - F(\htmlClass{t-yellow}{y}, p) \big\rVert^2}
+</div></div>
+<p class="eqno">Eq. <span data-claim="spade-eq-pixel">3</span> in SPADE v3.</p>
+<ul class="gloss">
+  <li><span class="tex">F(\htmlClass{t-yellow}{y}, p)</span> is the pyramid feature of the test image at pixel <span class="tex">p</span>.</li>
+  <li><span class="tex">N_\kappa</span> picks its <span class="tex">\kappa</span> nearest features in the gallery <span class="tex">G</span>. The paper uses <span class="tex">\kappa</span> = <span data-claim="spade-kappa">1</span> in all experiments, so the score is the squared distance to the single nearest gallery feature: the red segment in the figure.</li>
+  <li>The map is then smoothed with a Gaussian filter of width <span data-claim="spade-sigma">4</span> pixels.</li>
+</ul>
+<p>The nearest gallery feature is a <em>correspondence</em>: it names one pixel in one normal image that looks like the test pixel. That is the "deep pyramid correspondences" of the title, and it is what the figure's line draws. Using all three blocks matters. With only the finest block the PRO score on MVTec AD falls to <span data-claim="spade-abl-56">87.74</span>, against <span data-claim="spade-mvtec-pro">91.7</span> with all three (Table 6).</p>
+
+<h3>How well it works, and what it costs</h3>
+<p>On MVTec AD, SPADE reaches a pixel AUROC of <span data-claim="spade-mvtec-pix-auroc">96.0</span> and a PRO of <span data-claim="spade-mvtec-pro">91.7</span> (Tables 2 and 3). Its image AUROC, from stage 1, is <span data-claim="spade-mvtec-img-auroc">85.5</span> (Table 1). Chapter 2 explains these three metrics. The weak spot is cost: every test image needs a search over pixel features of normal images. PaDiM's authors re-ran SPADE and measured <span data-claim="padim-time-spade">7.10</span> seconds per image on a CPU, an Intel i7-4710HQ (the PaDiM paper reports no GPU timing; chapter 6 gives the PatchCore authors' GPU re-run) and <span data-claim="padim-mem-spade-mvtec">1.4</span> GB of memory on MVTec AD (PaDiM, Tables VII and VIII).</p>
+
+<h3>Inside SPADE: forward, then backward</h3>
+<figure class="viz archflow" id="viz-spadeflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-spadeflow-image" aria-pressed="false">1 Images</button>
+    <button type="button" id="btn-spadeflow-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-spadeflow-paths" aria-pressed="false">3 Two paths</button>
+    <button type="button" id="btn-spadeflow-retrieve" aria-pressed="false">4 Retrieve</button>
+    <button type="button" id="btn-spadeflow-gallery" aria-pressed="false">5 Gallery</button>
+    <button type="button" id="btn-spadeflow-pixel" aria-pressed="false">6 Pixel scores</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-spadeflow-backward" aria-pressed="false">7 Gradients</button>
+  </div>
+  <canvas id="spadeflow-canvas" role="img" aria-label="SPADE as a diagram: normal images and the test image pass through one frozen Wide-ResNet. One path pools the last block into a 2048-dimensional vector and retrieves the K nearest normal images, giving the image score. The other path keeps a feature pyramid from blocks 1 to 3; the pixel features of the retrieved images form a gallery, and each test pixel is scored by its nearest gallery feature. In the backward stage no arrow appears: nothing is trained."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-spadeflow-prev">Previous</button>
+    <button type="button" id="btn-spadeflow-next">Next</button>
+    <button type="button" id="btn-spadeflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="spadeflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>One <b class="c-brown">frozen</b> network, two paths. The upper path compares whole images and gives the image score; the lower path compares pixels against a gallery and gives the anomaly map. Press <b>1 Images</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. Normal images and one test image</h4><p>Every image is resized to 256 pixels and cropped to 224 (Sec. 3.5; the paper does not say where the crop is taken). The normal training images pass through the network once, at fitting time; the test image passes through at test time.</p></div>
+    <div data-stage="backbone" hidden><h4>2. One pretrained backbone</h4><p>A Wide-ResNet50x2 with its ImageNet weights, never changed. The paper states the spatial sizes of the blocks it uses, but not their channel widths; the widths in the diagram are the standard ones for this network (our reading).</p></div>
+    <div data-stage="paths" hidden><h4>3. Two paths</h4><p>The image path averages the last block over all positions into one 2048-dimensional vector. The pixel path keeps the ends of blocks 1, 2 and 3, at 56, 28 and 14 positions per side, with equal weights. The paper does not say how the three grids are brought to one size before they are joined, so the diagram does not show a specific resize.</p></div>
+    <div data-stage="retrieve" hidden><h4>4. Retrieve the K nearest normal images</h4><p>The test vector is compared with the stored vectors of all normal images. The <span class="tex">K</span> = 50 nearest give the image score (Eq. 2): their mean squared distance.</p></div>
+    <div data-stage="gallery" hidden><h4>5. The gallery</h4><p>All pixel features of those 50 images. At 56 by 56 positions that is 156,800 vectors (our computation). Searching 50 images instead of the whole training set is what keeps stage 2 affordable.</p></div>
+    <div data-stage="pixel" hidden><h4>6. Pixel scores</h4><p>Each test pixel gets the squared distance to its single nearest gallery feature (Eq. 3 with <span class="tex">\kappa</span> = 1). The map is smoothed with a Gaussian of width 4 and compared at 256 by 256 pixels.</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>Nowhere. There is no loss and no trainable weight: the backbone is frozen and everything else is storage and search. "Fitting" SPADE means running the normal images through the network once and keeping their features.</p></div>
+  </div>
+  <figcaption>Computed from the paper's configuration: input size, block resolutions and K = 50 are from Sec. 3.1 to 3.5, and the 2048-dimensional pooled vector from Sec. 5; channel widths are the standard Wide-ResNet-50-2 widths (our reading); the gallery size is our computation.</figcaption>
+</figure>
+
+<p>Related work in this branch: Patch SVDD (<a href="https://arxiv.org/abs/2006.16067v2">arXiv 2006.16067</a>) trains patch features with a patch-level SVDD loss plus a self-supervised task and scores each patch by its distance to the nearest normal patch; it reports an image AUROC of <span data-claim="patch-svdd-mvtec-img-auroc">0.921</span> on MVTec AD (Table 1). The MVTec AD paper itself evaluated reconstruction baselines, among them an autoencoder trained with a structural-similarity loss, the method of <a href="https://arxiv.org/abs/1807.02011v3">arXiv 1807.02011</a> (MVTec AD, Sec. 4.1). Feature-based scores overtook them: in SPADE's Table 3, that autoencoder has a PRO of <span data-claim="spade-t3-ssimae">69.4</span> against SPADE's <span data-claim="spade-mvtec-pro">91.7</span> (SPADE copies this baseline row from the Uninformed Students paper, which re-evaluated the autoencoder with PRO).</p>
+</section>

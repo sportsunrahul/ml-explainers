@@ -1,0 +1,12 @@
+  <article data-chapter="budget">
+    <header class="ch-head"><span class="num">5 of 9</span><h2>Why random is hard to beat</h2><p class="subhead">Budgets, baselines and bias</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-sr="0" aria-pressed="true">Plain training</button>
+      <button type="button" class="tool" data-sr="1" aria-pressed="false">Strong augmentation + SWA</button>
+    </div>
+    <div class="controls"><label class="slider"><span>share of easy, typical data p <b id="budget-pv">0.80</b></span><input id="atlas-budget-p" type="range" min="0.55" max="0.95" step="0.01" value="0.8"></label></div>
+    <p>Three reasons. A well-regularized model gains more than clever selection does: in Munjal et al., augmentation plus weight averaging lifted random sampling from 69.16% to 82.16% at 10% of CIFAR-10, and in a transfer test the active-learning gains over random shrank to under two points. At tiny budgets the right pick is the opposite of uncertain: label <button class="inline-term" data-open="typical">typical</button> images (TypiClust). And an actively chosen set is biased, so it cannot be your test set.</p>
+    <p class="note">Left: TypiClust's two-region model with the paper's toy settings, computed: positive means "label typical images". Right: Munjal et al. Table 4, each method minus random on ResNet-18 (VGG16-selected batches).</p>
+    <p class="inscription">Compare against random with strong augmentation, start cold projects with typical images, and keep a random slice for evaluation.</p>
+    <button type="button" class="continue" data-go="memorize">Continue with memorization</button>
+  </article>

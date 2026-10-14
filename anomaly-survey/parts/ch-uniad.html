@@ -1,0 +1,109 @@
+<section id="ch-uniad" class="chapter">
+<h2>One model for every product</h2>
+<p>Every method so far trains one model per product, and a factory has hundreds of products. One model for all of them sounds easy, but a single reconstruction model fails in a specific way: it learns to copy its input, defects included.</p>
+
+<figure class="viz" id="viz-uniad" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-uniad" tabindex="0" aria-label="Left: a scratched toy mesh with its 15 by 15 grid of feature tokens. One token is selected in yellow; blue squares show where it puts its attention, and in neighbor-mask mode its 7 by 7 neighborhood is greyed out. Right: the reconstruction error map in red. Click a token, or use the arrow keys, to select another."></canvas>
+  <div class="controls" role="group" aria-label="Attention variant">
+    <span>Attention</span>
+    <button type="button" id="btn-uniad-full" aria-pressed="true">Full attention</button>
+    <button type="button" id="btn-uniad-mask" aria-pressed="false">Neighbor mask</button>
+    <button type="button" id="btn-uniad-query" aria-pressed="false">Learned query</button>
+    <button type="button" id="btn-uniad-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. Tokens are the toy patch features of a scratched mesh. One attention layer rebuilds each token as a weighted average of tokens, with weights from feature similarity. "Full attention" lets a token see itself. "Neighbor mask" hides the token's own <span data-claim="uniad-neighbor">7</span> by 7 window, as UniAD does on its <span data-claim="uniad-feat-size">14</span> by 14 grid. "Learned query" asks with the average good-mesh feature at that position instead of the token itself, a stand-in for UniAD's learned query embeddings. The real model has trained weights and <span data-claim="uniad-corg">272</span> feature channels per position; this toy has neither.</figcaption>
+</figure>
+
+<p>Start with full attention and select a token on the scratch. Predict first: <em>if a token may look at itself, where will it look?</em> At itself, and at the overlapping tokens beside it that look almost the same: nothing is more similar to a token than the token. So every token is rebuilt from itself, the scratch is copied, and the error map stays nearly blank. Now press "Neighbor mask". The token cannot see itself or its neighbors, so it must rebuild itself from look-alikes elsewhere on the mesh. Normal texture has look-alikes everywhere; the scratch has none outside its own window, so it lights up.</p>
+
+<h3>One model per product does not scale</h3>
+<p>The setting so far has been <em>separate</em>: one model per category, trained on that category's good images. UniAD (<span data-claim="uniad-venue">NeurIPS 2022</span>, first posted <span data-claim="uniad-published">2022-06-08</span>) asks for the <em>unified</em> setting: one model trained on good images of all <span data-claim="efficientad-mvtec-ad-scenarios">15</span> MVTec AD categories together, with no category label at training or test time. The benchmarks now call this the multi-class setting.</p>
+<p>UniAD is a <em>reconstruction</em> method. A network learns to rebuild the features of good images; at test time, whatever it fails to rebuild is anomalous. That works only if the network rebuilds normal content and nothing else. In practice it can learn a shortcut: return the input unchanged. The paper calls this the <em>identical shortcut</em>. The model then rebuilds defects as well as anything else, and the error map goes blank. Learning the joint appearance of fifteen products is hard, so in the unified setting copying becomes the easy way out. The paper shows the effect directly: its baseline networks drive the training loss toward zero while the test AUROC peaks early and then falls.</p>
+
+<div class="eq" id="eq-uniad-fc" data-build data-viz="viz-uniad"><div class="tex tex-display">
+\htmlData{step=1, link=copy}{\bm{y} = \htmlClass{t-blue}{\bm{x}^+}\,\bm{w} + \bm{b}}, \qquad \htmlData{step=2, link=query}{\bm{y} = \operatorname{softmax}\!\big(\htmlClass{t-green}{\bm{q}}\,(\htmlClass{t-blue}{\bm{x}^+})^{T} / \sqrt{C}\big)\,\htmlClass{t-blue}{\bm{x}^+}}
+</div></div>
+<p class="eqno">Eq. 1 and Eq. 2 in UniAD v3.</p>
+<ul class="gloss">
+  <li>Left: a fully connected layer rebuilds the <span class="tex">K</span> normal tokens <span class="tex">\htmlClass{t-blue}{\bm{x}^+}</span> (each with <span class="tex">C</span> channels). Mean squared error is minimized by <span class="tex">\bm{w} \to I</span>, <span class="tex">\bm{b} \to 0</span>: the identity, which copies an anomalous input <span class="tex">\bm{x}^-</span> just as well. A convolution is the same trap.</li>
+  <li>Right: attention with a <em>learned</em> query <span class="tex">\htmlClass{t-green}{\bm{q}}</span>. To rebuild the input, the attention map must point each output at its own input token, so <span class="tex">\htmlClass{t-green}{\bm{q}}</span> must be tied to what normal tokens look like. A query trained on normal data cannot point at an anomalous token, so the anomaly is not copied.</li>
+</ul>
+
+<h3>Three ways to stop the copy</h3>
+<p>UniAD rebuilds frozen CNN features with a transformer that is built so that it cannot copy:</p>
+<ol>
+  <li><b class="c-green">A learned query in every decoder layer.</b> Each of the <span data-claim="uniad-dec-layers">4</span> decoder layers starts from its own learned query embedding and reads the encoder output through attention, so no output is a direct function of its own input token.</li>
+  <li><b>Neighbor-masked attention.</b> In every attention map, a token may not attend to keys in its own <span data-claim="uniad-neighbor">7</span> by 7 neighborhood, itself included, on the <span data-claim="uniad-feat-size">14</span> by 14 token grid. The figure's mask is this rule.</li>
+  <li><b>Feature jittering.</b> During training, Gaussian noise is added to the input tokens, while the target stays the clean feature. Training becomes denoising, and a copy of a noisy input is a bad answer.</li>
+</ol>
+<div class="eq" id="eq-uniad-jit" data-build data-viz="viz-uniad"><div class="tex tex-display">
+\htmlData{step=1}{D \sim \mathcal{N}\!\Big(\mu = 0,\ \sigma^2 = \big(\alpha\,\tfrac{\lVert \bm{f}_{tok} \rVert_2}{C}\big)^2\Big)}
+</div></div>
+<p class="eqno">Eq. 3 in UniAD v3. <span class="tex">\bm{f}_{tok}</span> is one token, <span class="tex">C</span> its channel count, <span class="tex">\alpha</span> the jitter scale (<span data-claim="uniad-alpha">20</span>), added with probability <span data-claim="uniad-p">1</span>.</p>
+<p>Which fix matters most? The ablation (Table 5a, unified MVTec AD, image AUROC) answers it. Without any query, the transformer scores <span data-claim="uniad-abl-noquery-det">69.5</span>. A query in the first decoder layer only, as in a vanilla transformer, lifts it to <span data-claim="uniad-abl-1query-det">87.6</span>, and a query in every layer to <span data-claim="uniad-abl-layerwise-det">95.0</span>. The neighbor mask on top of one query alone reaches <span data-claim="uniad-abl-1query-nma-det">96.1</span>, and all three together <span data-claim="uniad-abl-full-det">96.5</span>. The mask size matters too: masking only the token itself (1 by 1) gives <span data-claim="uniad-abl-nbr-1x1-det">94.6</span>, because the neighbors still leak the token's content.</p>
+
+<div class="eq" id="eq-uniad-loss" data-build data-viz="viz-uniad"><div class="tex tex-display">
+\htmlData{step=1, link=error}{\mathcal{L} = \frac{1}{H \times W}\, \lVert \htmlClass{t-brown}{\bm{f}_{org}} - \htmlClass{t-green}{\bm{f}_{rec}} \rVert_2^2}, \qquad \htmlData{step=2, link=error}{\htmlClass{t-red}{\bm{s}} = \lVert \htmlClass{t-brown}{\bm{f}_{org}} - \htmlClass{t-green}{\bm{f}_{rec}} \rVert_2 \in \mathbb{R}^{H \times W}}
+</div></div>
+<p class="eqno">Eq. 4 and Eq. 5 in UniAD v3.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-brown}{\bm{f}_{org}}</span> is the frozen backbone's clean feature map; <span class="tex">\htmlClass{t-green}{\bm{f}_{rec}}</span> is the transformer's reconstruction.</li>
+  <li>Training minimizes the mean squared error over the <span class="tex">H \times W</span> positions. At test time the per-position error <span class="tex">\htmlClass{t-red}{\bm{s}}</span> is the anomaly map, upsampled to the image; the image score is the maximum of the average-pooled map.</li>
+</ul>
+
+<h3>Does one model for all really cost accuracy?</h3>
+<p>UniAD re-ran earlier methods in the unified setting with public code, and set them beside one-model-per-category numbers that it says come from each method's own paper (Table 1, MVTec AD image AUROC). UniAD runs its own model at <span data-claim="uniad-input-res">224</span> pixels; it does not state the resolution of the re-runs. ADer, a later benchmark, re-ran methods in the multi-class setting under one protocol (<span data-claim="ader-resolution">256</span> by 256 pixels, the final epoch after <span data-claim="ader-epochs-100">100</span> or <span data-claim="ader-epochs-300">300</span> epochs, one <span data-claim="ader-gpu">L40S</span> GPU). The protocols differ, so read each column on its own.</p>
+<table class="data">
+  <thead><tr><th>Method</th><th>One model per category (as printed in UniAD)</th><th>One model for all (UniAD re-run)</th><th>One model for all (ADer, 100 / 300 epochs)</th></tr></thead>
+  <tbody>
+    <tr><td>PaDiM</td><td><span data-claim="uniad-img-padim-separate">95.5</span></td><td><span data-claim="uniad-img-padim-unified">84.2</span></td><td>not run</td></tr>
+    <tr><td>CutPaste</td><td><span data-claim="uniad-img-cutpaste-separate">96.1</span></td><td><span data-claim="uniad-img-cutpaste-unified">77.5</span></td><td>not run</td></tr>
+    <tr><td>DRAEM</td><td><span data-claim="uniad-img-draem-separate">98.0</span></td><td><span data-claim="uniad-img-draem-unified">88.1</span></td><td><span data-claim="ader-mvtec-img-auroc-draem-100e">54.5</span> / <span data-claim="ader-mvtec-img-auroc-draem-300e">55.2</span></td></tr>
+    <tr><td>PatchCore</td><td>see <a href="#ch-patchcore">chapter 6</a></td><td>not run</td><td><span data-claim="ader-mvtec-img-auroc-patchcore-100e">98.8</span> (no training)</td></tr>
+    <tr><td>UniAD</td><td><span data-claim="uniad-img-uniad-separate">96.6</span></td><td><span data-claim="uniad-img-uniad-unified">96.5</span></td><td><span data-claim="ader-mvtec-img-auroc-uniad-100e">92.5</span> / <span data-claim="ader-mvtec-img-auroc-uniad-300e">96.8</span></td></tr>
+    <tr><td>DiAD (later)</td><td></td><td></td><td><span data-claim="ader-mvtec-img-auroc-diad-100e">88.9</span> / <span data-claim="ader-mvtec-img-auroc-diad-300e">92.0</span></td></tr>
+    <tr><td>MambaAD (later)</td><td></td><td></td><td><span data-claim="ader-mvtec-img-auroc-mambaad-100e">97.8</span> / <span data-claim="ader-mvtec-img-auroc-mambaad-300e">98.5</span></td></tr>
+  </tbody>
+</table>
+<p class="note">Two cells of the first column need care. PaDiM's <span data-claim="uniad-img-padim-separate">95.5</span> matches DRAEM's run of PaDiM, class by class, not PaDiM's own paper, which reports <span data-claim="padim-mvtec-img-auroc-wr50-rd550">95.3</span>. CutPaste's <span data-claim="uniad-img-cutpaste-separate">96.1</span> does come from the CutPaste paper, but it is the ensemble of five models; one three-class model scores <span data-claim="cutpaste-mvtec-img-auroc-3way">95.2</span>.</p>
+<p>Three things stand out. Methods that learn from fake defects or density fits lose the most when one model must cover every product; DRAEM even falls to near chance in ADer's runs, far below UniAD's own re-run of it. The two re-runs disagree, and this page does not try to reconcile them. Second, UniAD needs long training: ADer's 100-epoch run is several points below its 300-epoch run, and the original paper trains for <span data-claim="uniad-epochs">1000</span> epochs. Third, and most surprising, PatchCore does not collapse at all: one memory bank holding every product's patches is the best row in ADer's MVTec AD table. Its cost is elsewhere. On MVTec AD its test run takes <span data-claim="ader-eff-mvtec-test-time-patchcore">9h22m</span> in total (UniAD's takes <span data-claim="ader-eff-mvtec-test-time-uniad">22s</span>), and on VisA it runs out of memory (<span data-claim="ader-eff-visa-test-time-patchcore">OOM</span>). These are totals for the whole test set, not per-image latencies.</p>
+
+<h3>Inside UniAD: forward, then backward</h3>
+<figure class="viz archflow" id="viz-uniadflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-uniadflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-uniadflow-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-uniadflow-tokens" aria-pressed="false">3 Tokens</button>
+    <button type="button" id="btn-uniadflow-transformer" aria-pressed="false">4 Encoder, decoder</button>
+    <button type="button" id="btn-uniadflow-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-uniadflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-uniadflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <canvas id="uniadflow-canvas" role="img" aria-label="UniAD's training step as a diagram: the image goes through a frozen EfficientNet-b4; four stages are resized to 14 by 14 and concatenated into 272 channels; tokens are projected to 256 channels and jittered; a neighbor-masked encoder and a decoder with learned queries rebuild them; a projection back to 272 channels meets the clean features in a mean squared error loss. In the backward stages the gradient reaches the projections, the encoder, the decoder and its queries, and stops at the frozen backbone."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-uniadflow-prev">Previous</button>
+    <button type="button" id="btn-uniadflow-next">Next</button>
+    <button type="button" id="btn-uniadflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="uniadflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>A frozen CNN turns the image into features; a transformer that cannot copy rebuilds them; the error is the anomaly map. Press <b>1 Image</b>, then <b>Next</b>. Which boxes will the gradient reach?</p></div>
+    <div data-stage="image" hidden><h4>1. One image, any product</h4><p>An image of any of the <span data-claim="efficientad-mvtec-ad-scenarios">15</span> categories, at <span data-claim="uniad-input-res">224</span> by 224 pixels, with no category label. Batch size <span data-claim="uniad-batch">64</span>.</p></div>
+    <div data-stage="backbone" hidden><h4>2. A frozen backbone</h4><p>An ImageNet-pretrained <span data-claim="uniad-backbone">EfficientNet-b4</span>, frozen. Training it too drops image AUROC to <span data-claim="uniad-abl-train-backbone-det">65.9</span>. The authors suspect that the backbone then learns features that are easy to rebuild but do not separate defects.</p></div>
+    <div data-stage="tokens" hidden><h4>3. Features become tokens</h4><p>Stages 1 to 4 are resized to <span data-claim="uniad-feat-size">14</span> by 14 and concatenated into <span data-claim="uniad-corg">272</span> channels; the per-stage widths are not stated in the paper. The grid gives <span data-claim="uniad-tokens">196</span> tokens (our arithmetic), each projected to <span data-claim="uniad-c">256</span> channels. In training, jitter noise is added here.</p></div>
+    <div data-stage="transformer" hidden><h4>4. Encoder and decoder</h4><p><span data-claim="uniad-enc-layers">4</span> encoder layers with neighbor-masked attention, then <span data-claim="uniad-dec-layers">4</span> decoder layers, each with its own learned query embedding. A projection maps the result back to <span data-claim="uniad-corg">272</span> channels on the 14 by 14 grid.</p></div>
+    <div data-stage="loss" hidden><h4>5. Mean squared error against the clean features</h4><p>The target is the un-jittered backbone feature map: Eq. 4 above.</p></div>
+    <div data-stage="backward" hidden><h4>6. Where the gradient goes</h4><p>Into the output projection, the decoder and its learned queries, the encoder and its position embeddings, and the input projection. The backbone is brown: frozen, with nothing trainable behind it, so the gradient stops there.</p></div>
+    <div data-stage="update" hidden><h4>7. Update</h4><p><span data-claim="uniad-optimizer">AdamW</span>, learning rate <span data-claim="uniad-lr">10^-4</span>, cut tenfold after <span data-claim="uniad-lr-drop">800</span> epochs, <span data-claim="uniad-epochs">1000</span> epochs on <span data-claim="uniad-n-gpus">8</span> <span data-claim="uniad-gpu">V100</span> GPUs. The trained parts hold <span data-claim="uniad-params">7.48</span> million weights.</p></div>
+  </div>
+  <figcaption>Computed: shapes from the paper's configuration (Sec. 4.2). The token count is our arithmetic from the 14 by 14 grid; the split of the 272 channels across the four stages is not stated.</figcaption>
+</figure>
+
+<h3>Limits and what came next</h3>
+<p>UniAD needs long training, and the paper reports neither latency nor VisA. Later multi-class designs replaced its transformer: HVQ-Trans (<a href="https://arxiv.org/abs/2310.14228">2310.14228</a>) with vector quantization, DiAD (<a href="https://arxiv.org/abs/2312.06607">2312.06607</a>) with diffusion, MambaAD (<a href="https://arxiv.org/abs/2404.06564">2404.06564</a>) with state-space layers, and Dinomaly with a DINOv2 backbone (<a href="#ch-dinov2">chapter 14</a>).</p>
+</section>

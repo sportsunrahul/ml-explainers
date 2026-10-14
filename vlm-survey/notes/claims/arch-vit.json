@@ -1,0 +1,317 @@
+[
+ {
+  "id": "vit-arch-base-layers",
+  "claim": "ViT-Base layers",
+  "value": "12",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-base-heads",
+  "claim": "ViT-Base heads",
+  "value": "12",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-base-mlp",
+  "claim": "ViT-Base MLP size",
+  "value": "3072",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-large-layers",
+  "claim": "ViT-Large layers",
+  "value": "24",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-large-d",
+  "claim": "ViT-Large hidden size",
+  "value": "1024",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-large-heads",
+  "claim": "ViT-Large heads",
+  "value": "16",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-huge-layers",
+  "claim": "ViT-Huge layers",
+  "value": "32",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-huge-d",
+  "claim": "ViT-Huge hidden size",
+  "value": "1280",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-preln",
+  "claim": "Block layout",
+  "value": "Layernorm (LN) is applied before every block, and residual connections after every block",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 4",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-gelu",
+  "claim": "MLP block",
+  "value": "The MLP contains two layers with a GELU non-linearity",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 4",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-dh",
+  "claim": "Head width",
+  "value": "D/k",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, Multihead self-attention (D_h is typically set to D/k)",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-head",
+  "claim": "Classification head",
+  "value": "a MLP with one hidden layer at pre-training time and by a single linear layer at fine-tuning time",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-tanh",
+  "claim": "Pre-training head non-linearity",
+  "value": "tanh as non-linearity in the single hidden layer",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, Head Type and class token",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-attached",
+  "claim": "Head input",
+  "value": "a classification head is attached to",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 2 (\"a classification head is attached to z_L^0\")",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-zerohead",
+  "claim": "Fine-tune head",
+  "value": "zero-initialized D x K feedforward layer",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.2 (\"a zero-initialized D x K feedforward layer, where K is the number of downstream classes\")",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-adam",
+  "claim": "Pre-training optimizer",
+  "value": "Adam",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Training & Fine-tuning",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-betas",
+  "claim": "Adam betas",
+  "value": "beta_1 = 0.9, beta_2 = 0.999",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Training & Fine-tuning",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-batch",
+  "claim": "Pre-training batch",
+  "value": "4096",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1; Appendix, training hyperparameters table caption",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-wd",
+  "claim": "Pre-training weight decay",
+  "value": "0.1",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1; Appendix, training hyperparameters table (JFT rows)",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-warmup",
+  "claim": "Warm-up",
+  "value": "10k steps",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table caption",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-decay",
+  "claim": "LR decay on JFT",
+  "value": "linear",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-lr-b",
+  "claim": "ViT-B/16 base LR",
+  "value": "8 x 10^-4",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-lr-l16",
+  "claim": "ViT-L/16 base LR",
+  "value": "4 x 10^-4",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-lr-h14",
+  "claim": "ViT-H/14 base LR",
+  "value": "3 x 10^-4",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ep-b",
+  "claim": "ViT-B/16 JFT epochs",
+  "value": "7",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ep-l16",
+  "claim": "ViT-L/16 JFT epochs",
+  "value": "7/14",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ep-h14",
+  "claim": "ViT-H/14 JFT epochs",
+  "value": "14",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-dropout",
+  "claim": "JFT dropout",
+  "value": "0.0",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, training hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-sgd",
+  "claim": "Fine-tune optimizer",
+  "value": "SGD with a momentum of 0.9",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, Fine-tuning subsection",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ftset",
+  "claim": "Fine-tune settings",
+  "value": "cosine learning rate decay, a batch size of 512, no weight decay, and grad clipping at global norm 1",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, fine-tuning hyperparameters table caption",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ft-steps",
+  "claim": "ImageNet fine-tune steps",
+  "value": "20,000",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, fine-tuning hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ft-lr",
+  "claim": "ImageNet fine-tune LR sweep",
+  "value": "{0.003, 0.01, 0.03, 0.06}",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Appendix, fine-tuning hyperparameters table",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-polyak",
+  "claim": "Polyak averaging factor",
+  "value": "0.9999",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Training & Fine-tuning",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-remove-head",
+  "claim": "Head swap",
+  "value": "remove the pre-trained prediction head",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-arch-ftbatch",
+  "claim": "Fine-tune batch",
+  "value": "512",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Training & Fine-tuning; Appendix, fine-tuning hyperparameters table caption",
+  "uncertain": false
+ }
+]

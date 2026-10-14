@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How CLIP works, explained in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F1F7; --panel:#FBFAFE; --ink:#1F1B2E; --muted:#5D5872; --line:#D3CFE0;
+  --img:#2F68D8; --txt:#E0533D; --pos:#1B9E6B; --neg:#9A93AE; --push:#C2410C;
+  --sans:"Bricolage Grotesque","Helvetica Neue",Arial,system-ui,sans-serif;
+  --serif:"Literata",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#13111C; --panel:#1B1827; --ink:#ECE9F5; --muted:#A39DB8; --line:#302B43;
+  --img:#6E9BFF; --txt:#FF7A63; --pos:#3CCB90; --neg:#6F6887; --push:#FB8A4C;}}
+:root[data-theme="dark"]{
+  --paper:#13111C; --panel:#1B1827; --ink:#ECE9F5; --muted:#A39DB8; --line:#302B43;
+  --img:#6E9BFF; --txt:#FF7A63; --pos:#3CCB90; --neg:#6F6887; --push:#FB8A4C;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:var(--muted);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--img);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.prose{max-width:700px}
+h1,h2,h3,h4{font-family:var(--sans)}
+h1{font-size:clamp(46px,8.6vw,108px);line-height:.9;letter-spacing:-.04em;font-weight:800;margin:0 0 22px}
+h1 .i{color:var(--img)} h1 .t{color:var(--txt)}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.02;letter-spacing:-.025em;font-weight:800;margin:0 0 14px}
+h3{font-size:24px;line-height:1.2;font-weight:700;margin:40px 0 10px}
+h4{font-size:18px;font-weight:700;margin:22px 0 6px}
+p{margin:0 0 16px}
+.lede{font-size:21px;line-height:1.55;color:var(--muted);max-width:620px}
+.mi{color:var(--img);font-weight:600}.mt{color:var(--txt);font-weight:600}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav.top .brand{font-family:var(--sans);font-weight:800;margin-right:14px;white-space:nowrap}
+nav.top a{font-family:var(--sans);font-size:15px;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+nav.top a:hover{color:var(--ink);background:var(--panel)}
+header.hero{padding:56px 0 20px}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:32px;align-items:center}
+@media (max-width:860px){.hero-grid{grid-template-columns:1fr}}
+.facts{display:flex;flex-wrap:wrap;gap:14px 30px;margin-top:24px;font-family:var(--sans);font-size:15px;color:var(--muted)}
+.facts b{display:block;color:var(--ink);font-size:24px;letter-spacing:-.01em}
+section{padding:52px 0 20px;border-top:1px solid var(--line)}
+figure.fig{margin:26px 0 34px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.canvas{position:relative;height:clamp(300px,50vw,470px);touch-action:pan-y;cursor:grab;user-select:none}
+.canvas:active{cursor:grabbing}
+.canvas canvas{display:block;width:100%;height:100%}
+.canvas .hint{position:absolute;right:12px;top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);pointer-events:none;background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 8px;border-radius:6px}
+.canvas .nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans);color:var(--muted)}
+figcaption{padding:14px 18px 16px;border-top:1px solid var(--line);font-family:var(--sans);font-size:15px;line-height:1.5}
+figcaption p{margin:8px 0 0;color:var(--muted);max-width:780px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{border:1px solid var(--line);border-radius:10px}
+.btn:hover,.seg button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.seg.emoji button{font-size:19px;padding:4px 10px}
+label.ctl{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+input[type=range]{accent-color:var(--img);width:160px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--img) 9%,transparent);font-size:14.5px}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);margin-right:14px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.probs{display:grid;grid-template-columns:auto 1fr auto;gap:5px 12px;align-items:center;margin-top:12px;max-width:560px;font-size:14px}
+.probs .bar{height:12px;border-radius:6px;background:color-mix(in srgb,var(--txt) 20%,transparent);overflow:hidden}
+.probs .bar i{display:block;height:100%;background:var(--txt);border-radius:6px;transition:width .35s}
+.probs .win{font-weight:700}
+.eq{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--img);border-radius:8px;padding:12px 16px;margin:14px 0 18px;overflow-x:auto;font-size:16.5px;line-height:1.65;white-space:nowrap}
+.eq small{display:block;white-space:normal;color:var(--muted);font-size:14px;margin-top:4px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14.5px;line-height:1.5}
+pre code{background:none;padding:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:720px){.pc{grid-template-columns:1fr}}
+.pc>div{border:1px solid var(--line);border-radius:14px;padding:14px 18px 6px;background:var(--panel)}
+.pc h4{margin-top:0}.pc .pro h4{color:var(--pos)}.pc .con h4{color:var(--push)}
+.pc ul{margin:0;padding-left:20px;font-size:16.5px;line-height:1.55}.pc li{margin-bottom:10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin:18px 0 28px}
+table{border-collapse:collapse;width:100%;min-width:780px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--line)}
+thead th{font-size:15px;border-bottom:2px solid var(--line)}
+tbody th{font-weight:700;white-space:nowrap}
+td.y{color:var(--muted);font-variant-numeric:tabular-nums}
+tr:last-child td,tr:last-child th{border-bottom:0}
+footer{border-top:1px solid var(--line);padding:32px 0 56px;font-family:var(--sans);font-size:14.5px;color:var(--muted)}
+footer ul{padding-left:18px}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Sections"><div class="wrap">
+  <span class="brand">CLIP in 3D</span>
+  <a href="#idea">The idea</a><a href="#data">Data</a><a href="#arch">Architecture</a><a href="#loss">Contrastive loss</a>
+  <a href="#zeroshot">Zero-shot</a><a href="#results">Results</a><a href="#limits">Limits</a><a href="#family">Improvements</a><a href="#choose">Which to use</a>
+</div></nav>
+
+<header class="hero"><div class="wrap hero-grid">
+  <div>
+    <h1>One space for <span class="i">pictures</span> and <span class="t">words</span></h1>
+    <p class="lede">How OpenAI's CLIP learned to connect images and language from 400 million captioned pictures on the internet, why that lets it recognise things it was never explicitly trained on, and what came after it.</p>
+    <div class="facts"><div><b>2021</b>Radford et al.</div><div><b>400M</b>image–text pairs</div><div><b>76.2%</b>zero-shot ImageNet</div></div>
+  </div>
+  <figure class="fig" id="f-hero" style="margin:0">
+    <div class="canvas" role="img" aria-label="A sphere where image points and caption points drift together into matched pairs and topic clusters"><span class="hint">Drag to rotate</span></div>
+    <figcaption><div class="controls"><button class="btn" id="hero-replay" type="button">Replay training</button>
+      <span class="legend"><i style="background:var(--img)"></i>Images</span><span class="legend"><i style="background:var(--txt);border-radius:50%"></i>Captions</span></div>
+      <p>Cubes are images and spheres are captions, all on one unit sphere. Training pulls each image next to its own caption, and related pairs end up near each other.</p></figcaption>
+  </figure>
+</div></header>
+
+<main>
+<section id="idea"><div class="wrap prose">
+  <h2>The idea</h2>
+  <p>Before CLIP, most vision models learned from a fixed list of labels, such as ImageNet's 1,000 classes. That makes them good at those classes and nothing else: to recognise a new category, you need new labelled data and retraining.</p>
+  <p>CLIP (Contrastive Language–Image Pre-training) learns from <strong>natural language</strong> instead. The internet is full of images with captions or alt text. CLIP trains an <span class="mi">image encoder</span> and a <span class="mt">text encoder</span> together so that an image and its caption map to nearby points in one shared embedding space, while unrelated images and captions are pushed apart.</p>
+  <p>The payoff is flexibility. Once images and text share a space, any sentence becomes a classifier. To ask “is this a photo of a pangolin?”, you embed that sentence and measure how close the image is to it. No pangolin-specific training is needed. This is called <strong>zero-shot</strong> classification.</p>
+</div></section>
+
+<section id="data"><div class="wrap prose">
+  <h2>The data</h2>
+  <p>OpenAI built a dataset called <strong>WIT</strong> (WebImageText) of 400 million image–text pairs collected from the public internet. To cover a broad range of visual concepts, they searched for pairs whose text contained one of about 500,000 queries (built from frequent Wikipedia words and phrases, WordNet synonyms and more) and capped each query at roughly 20,000 pairs so no topic dominated. The text is noisy: alt text, titles and captions rather than careful descriptions. The dataset itself was never released, which later motivated open replications such as LAION.</p>
+</div></section>
+
+<section id="arch"><div class="wrap">
+  <div class="prose">
+    <h2>Architecture</h2>
+    <p>CLIP has two separate towers that never share weights. They only meet at the very end, where a dot product compares their outputs.</p>
+  </div>
+  <figure class="fig" id="f-arch">
+    <div class="canvas" role="img" aria-label="3D diagram: an image goes through a vision transformer, a caption goes through a text transformer, each output is projected into a shared space where the two vectors are compared by cosine similarity"><span class="hint">Drag to rotate</span></div>
+    <figcaption><span class="legend"><i style="background:var(--img)"></i>Image tower</span><span class="legend"><i style="background:var(--txt)"></i>Text tower</span>
+      <p>The image is cut into patches and run through the image encoder. The caption is tokenised and run through the text encoder, and the output at the end-of-text token summarises it. Each tower's feature is multiplied by a learned projection matrix, normalised to length 1, and landed on the shared sphere. Their dot product is the cosine similarity.</p></figcaption>
+  </figure>
+  <div class="prose">
+    <h4>Image encoder</h4>
+    <p>The paper trained two families. <strong>ResNets</strong> (ResNet-50, 101, and wider versions RN50x4, RN50x16, RN50x64 scaled in the EfficientNet style) with a few changes: anti-aliased pooling and an <em>attention pooling</em> layer instead of global average pooling. And <strong>Vision Transformers</strong>: ViT-B/32, ViT-B/16 and ViT-L/14, with an extra layer norm before the transformer. The best model, ViT-L/14@336px, is a ViT-L/14 trained for one more epoch at 336-pixel resolution.</p>
+    <h4>Text encoder</h4>
+    <p>A 12-layer, 512-wide transformer with 8 attention heads (about 63M parameters), using masked (causal) self-attention. Text is lower-cased and tokenised with byte-pair encoding (49,152-token vocabulary), capped at 76 tokens, and wrapped in start and end tokens. The activation at the end token of the final layer is the text feature.</p>
+    <h4>Shared space</h4>
+    <p>Two linear projections, W<sub>i</sub> and W<sub>t</sub>, map each tower's feature into the same embedding size, followed by ℓ2 normalisation. There is no non-linear projection head; the paper found a linear map was enough.</p>
+  </div>
+</div></section>
+
+<section id="loss"><div class="wrap">
+  <div class="prose">
+    <h2>The contrastive loss</h2>
+    <p>Take a batch of N image–caption pairs. Embed all N images and all N captions, and compute every image–caption cosine similarity. That gives an N×N matrix. The N entries on the diagonal are the true pairs; the other N² − N are mismatches. Training makes each diagonal entry the largest in both its row and its column.</p>
+    <p>Concretely, each row is treated as an N-way classification problem, “which caption belongs to this image?”, and each column as “which image belongs to this caption?”. The loss is the average cross-entropy of both directions, a symmetric form of the InfoNCE loss.</p>
+    <div class="eq">s<sub>ij</sub> = ⟨ I<sub>i</sub>, T<sub>j</sub> ⟩ / τ &nbsp;&nbsp;(I, T unit vectors)<br>
+      L = ½ [ −(1/N) Σ<sub>i</sub> log softmax<sub>j</sub>(s<sub>ij</sub>)<sub>j=i</sub> &nbsp;−&nbsp; (1/N) Σ<sub>j</sub> log softmax<sub>i</sub>(s<sub>ij</sub>)<sub>i=j</sub> ]
+      <small>τ is a learned temperature, initialised at 0.07 and clipped so logits are never scaled by more than 100. The batch size was 32,768, so each positive competes with 32,767 negatives per direction.</small></div>
+  </div>
+  <figure class="fig" id="f-mat">
+    <div class="canvas" role="img" aria-label="3D bar chart of an 8 by 8 image-text similarity matrix whose diagonal grows as training progresses"><span class="hint">Drag to rotate</span></div>
+    <figcaption>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="What the bars show">
+          <button type="button" data-m="cos" aria-pressed="true">Cosine similarity</button>
+          <button type="button" data-m="i2t">Softmax over captions</button>
+          <button type="button" data-m="t2i">Softmax over images</button>
+          <button type="button" data-m="sig">Sigmoid (SigLIP)</button>
+        </div>
+        <label class="ctl">Training progress <input type="range" id="m-p" min="0" max="100" value="70"></label>
+        <label class="ctl">Temperature τ <input type="range" id="m-t" min="0" max="100" value="45"><span class="readout" id="m-tv"></span></label>
+      </div>
+      <div class="status" id="m-read" aria-live="polite"></div>
+      <p>Rows are images (emoji at the left), columns are captions. Row softmax is the image-to-text half of the loss, column softmax the text-to-image half. The sigmoid view shows SigLIP's alternative, where each cell is an independent yes/no decision and no row or column normalisation is needed. Notice the dog and cat cells: similar concepts make each other hard negatives.</p>
+    </figcaption>
+  </figure>
+
+  <div class="prose">
+    <h3>What the gradient actually does</h3>
+    <p>For one image, the loss pulls its embedding toward its own caption and pushes it away from every other caption in the batch. The push from each wrong caption is weighted by how probable the model currently thinks that caption is. Confusable negatives push hardest, easy ones barely matter. Below, the six pairs start in random positions and are trained with the real symmetric loss.</p>
+  </div>
+  <figure class="fig" id="f-force">
+    <div class="canvas" role="img" aria-label="Six images and six captions on a sphere with arrows showing the pull toward the correct caption and pushes away from the wrong ones"><span class="hint">Drag to rotate</span></div>
+    <figcaption>
+      <div class="controls">
+        <button class="btn" type="button" id="f-run">Start training</button><button class="btn" type="button" id="f-reset">Shuffle</button>
+        <span class="ctl">Show forces on</span>
+        <div class="seg emoji" role="group" aria-label="Focus image" id="f-focus"></div>
+      </div>
+      <div class="status" id="f-read" aria-live="polite"></div>
+      <span class="legend"><i style="background:var(--pos)"></i>Pull toward the true caption</span><span class="legend"><i style="background:var(--push)"></i>Push away from wrong captions</span>
+      <p>Arrow lengths come from the loss gradient: the pull is (1 − p<sub>ii</sub>) and each push is p<sub>ij</sub>, where p is the softmax over captions. As pairs lock together, all arrows shrink and learning slows, which is why CLIP needs huge batches full of fresh negatives.</p>
+    </figcaption>
+  </figure>
+
+  <div class="prose">
+    <h3>The training loop in code</h3>
+<pre><code># images: (N, 3, H, W)   texts: (N, 77) token ids
+img = F.normalize(image_encoder(images) @ W_i, dim=-1)   # (N, d)
+txt = F.normalize(text_encoder(texts)  @ W_t, dim=-1)    # (N, d)
+logits = img @ txt.T * logit_scale.exp()                 # (N, N), scale = 1/τ
+labels = torch.arange(N)
+loss = (F.cross_entropy(logits, labels) +                # image → text
+        F.cross_entropy(logits.T, labels)) / 2           # text → image</code></pre>
+    <h3>Why contrastive, not captioning?</h3>
+    <p>The authors first tried to predict the exact caption of each image, like an image-captioning model. That was slow to learn, because there are countless valid ways to describe a picture. Predicting a bag of words was about 3× more efficient, and switching to the contrastive task, which only asks <em>which</em> caption goes with the image, was another 4× more efficient. Discriminating is far easier than generating, and it is all zero-shot transfer needs.</p>
+    <h3>Training details</h3>
+    <p>All models were trained from scratch (no ImageNet initialisation) for 32 epochs with the Adam optimiser, decoupled weight decay and a cosine learning-rate schedule, in mixed precision. The largest ResNet (RN50x64) took 18 days on 592 V100 GPUs; the largest ViT took 12 days on 256 V100 GPUs. Data augmentation was minimal: only random square crops.</p>
+  </div>
+</div></section>
+
+<section id="zeroshot"><div class="wrap">
+  <div class="prose">
+    <h2>Zero-shot classification</h2>
+    <p>To classify an image into K classes, write one text prompt per class, embed them all with the text encoder, and pick the class whose embedding is closest to the image's. The text embeddings act as the weights of a linear classifier that was generated from words rather than learned from labelled examples.</p>
+    <p>Wording matters. A bare label like “boxer” is ambiguous (a dog or an athlete?) and looks nothing like a typical caption. The paper found the template <code>“a photo of a {label}.”</code> alone improved ImageNet accuracy by about 1.3 points, and averaging the embeddings of 80 different templates (“a blurry photo of a {label}”, “a drawing of a {label}” and so on), called <strong>prompt ensembling</strong>, added more, for roughly 5 points in total.</p>
+  </div>
+  <figure class="fig" id="f-zs">
+    <div class="canvas" role="img" aria-label="A sphere with one arrow for the image embedding and five arrows for class prompt embeddings; the closest prompt wins"><span class="hint">Drag to rotate</span></div>
+    <figcaption>
+      <div class="controls">
+        <span class="ctl">Image</span><div class="seg emoji" role="group" aria-label="Image" id="zs-img"></div>
+        <div class="seg" role="group" aria-label="Prompt style" id="zs-prompt">
+          <button type="button" data-p="bare">Label only</button>
+          <button type="button" data-p="photo" aria-pressed="true">“a photo of a …”</button>
+          <button type="button" data-p="ens">Ensemble of templates</button>
+        </div>
+      </div>
+      <div class="probs" id="zs-probs"></div>
+      <p>The blue arrow is the image embedding; red arrows are class prompts. Small red dots are individual templates, and the ensemble arrow is their average. Label-only prompts crowd together, which shrinks the margins between classes. The wolf has no class of its own, so CLIP picks the nearest option. Toy 3D embeddings; the real space has 512 to 768 dimensions.</p>
+    </figcaption>
+  </figure>
+</div></section>
+
+<section id="results"><div class="wrap prose">
+  <h2>Results</h2>
+  <p><strong>Zero-shot:</strong> without seeing a single ImageNet training label, ViT-L/14@336px reached 76.2% top-1 accuracy, matching the original supervised ResNet-50. Across 27 datasets, zero-shot CLIP beat a fully supervised linear classifier on ResNet-50 features on 16 of them.</p>
+  <p><strong>Linear probe:</strong> with a linear classifier trained on its frozen features, the best CLIP model outperformed the best ImageNet-trained models of the time on most of the 27 datasets, reaching about 85.4% on ImageNet itself.</p>
+  <p><strong>Robustness:</strong> the most striking result. Standard ImageNet models lose much of their accuracy on shifted versions such as sketches, renditions and adversarially filtered images. Zero-shot CLIP closed up to 75% of that robustness gap, because it never overfit to ImageNet's particular photo style.</p>
+</div></section>
+
+<section id="limits"><div class="wrap">
+  <div class="prose">
+    <h2>Strengths and limits</h2>
+    <p>One subtle property is worth seeing. CLIP's image and text embeddings do not actually mix: they occupy two separate regions of the sphere, a phenomenon called the <strong>modality gap</strong> (Liang et al., 2022). It comes partly from each encoder starting in its own narrow cone at initialisation and partly from the contrastive loss with a low temperature, which only needs relative ordering and never forces the two clouds to overlap.</p>
+  </div>
+  <figure class="fig" id="f-gap">
+    <div class="canvas" role="img" aria-label="Image and text embeddings forming two separate caps on a sphere, versus an idealised overlapping space"><span class="hint">Drag to rotate</span></div>
+    <figcaption>
+      <div class="controls"><div class="seg" role="group" aria-label="Embedding layout" id="gap-mode">
+        <button type="button" data-g="real" aria-pressed="true">What CLIP learns</button>
+        <button type="button" data-g="ideal">Idealised shared space</button></div>
+        <span class="readout" id="gap-read"></span></div>
+      <p>Lines join matched pairs. In the real layout each pair is still closer to each other than to other pairs, so retrieval works, yet images and captions sit in two distinct caps. This matters when you mix image and text embeddings directly, for example when using a text embedding in place of an image one.</p>
+    </figcaption>
+  </figure>
+  <div class="pc">
+    <div class="pro"><h4>Strengths</h4><ul>
+      <li>Zero-shot classification from any list of class names, in plain language.</li>
+      <li>Far more robust to distribution shift than models trained on a fixed labelled dataset.</li>
+      <li>One embedding space serves image search, text search, deduplication, filtering and clustering.</li>
+      <li>Scales predictably with data and compute, and its encoders became standard building blocks for text-to-image and multimodal models.</li>
+      <li>Simple, stable objective with no labels and no captioning decoder.</li>
+    </ul></div>
+    <div class="con"><h4>Weaknesses</h4><ul>
+      <li>Weak at counting, spatial relations and fine-grained categories (car models, flower species); it only got about 88% on handwritten digits (MNIST).</li>
+      <li>Behaves somewhat like a bag of words: “a horse riding an astronaut” and “an astronaut riding a horse” embed similarly.</li>
+      <li>Vulnerable to typographic attacks: writing “iPod” on an apple can make it classify the apple as an iPod.</li>
+      <li>Inherits social biases from unfiltered web text, which can surface in harmful classifications.</li>
+      <li>Needs very large batches and compute; the training data was never released.</li>
+      <li>Global embeddings only, so it is weak at dense tasks like segmentation without extra work.</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section id="family"><div class="wrap">
+  <div class="prose">
+    <h2>Improvements after CLIP</h2>
+    <p>CLIP started a family. Later work improved it along four axes: more or cleaner <strong>data</strong>, a better <strong>loss</strong>, cheaper <strong>training</strong>, and added <strong>generative</strong> objectives.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Model</th><th>Year</th><th>Axis</th><th>What changed</th></tr></thead>
+    <tbody>
+      <tr><th>ALIGN</th><td class="y">2021</td><td>Data</td><td>1.8B noisy alt-text pairs with minimal filtering, EfficientNet and BERT towers. Showed that scale can compensate for noise.</td></tr>
+      <tr><th>LiT</th><td class="y">2021</td><td>Training</td><td>Locks a strong pretrained image encoder and trains only the text tower to match it. Cheaper and better zero-shot accuracy.</td></tr>
+      <tr><th>CoCa</th><td class="y">2022</td><td>Generative</td><td>Adds a captioning decoder next to the contrastive loss, so one model both retrieves and describes.</td></tr>
+      <tr><th>OpenCLIP + LAION</th><td class="y">2022</td><td>Data</td><td>Open reproductions on LAION-400M and LAION-5B, with published scaling laws. Made CLIP-style research reproducible.</td></tr>
+      <tr><th>FLIP</th><td class="y">2022</td><td>Training</td><td>Randomly drops 50 to 75% of image patches during training, speeding it up several times with little accuracy cost.</td></tr>
+      <tr><th>SigLIP</th><td class="y">2023</td><td>Loss</td><td>Replaces the softmax with a pairwise sigmoid loss. No batch-wide normalisation, so it works well at smaller batches and scales more easily.</td></tr>
+      <tr><th>EVA-CLIP</th><td class="y">2023</td><td>Training</td><td>Initialises from a masked-image-modelling encoder and uses optimisation tricks for better accuracy per unit of compute.</td></tr>
+      <tr><th>MetaCLIP</th><td class="y">2023</td><td>Data</td><td>Reconstructs and publishes CLIP's metadata-based curation, balancing counts per concept. Beats CLIP with the same data size.</td></tr>
+      <tr><th>DFN</th><td class="y">2023</td><td>Data</td><td>Trains a “data filtering network” to score pairs, then keeps the best. Filtering quality matters more than raw volume.</td></tr>
+      <tr><th>SigLIP 2</th><td class="y">2025</td><td>Loss + generative</td><td>Adds captioning, self-distillation and masked prediction to SigLIP, plus multilingual data and variable resolution, improving dense and localisation features.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+    <h3>Where CLIP ended up</h3>
+    <p>CLIP's encoders became infrastructure. Its text encoder conditions Stable Diffusion; DALL·E 2 generates images from CLIP embeddings; CLIP-style vision towers feed many multimodal chat models such as LLaVA; open-vocabulary detectors like OWL-ViT build on it; and CLIPScore is a common metric for how well an image matches a caption.</p>
+  </div>
+</div></section>
+
+<section id="choose"><div class="wrap prose">
+  <h2>Which one should you use?</h2>
+  <p><strong>For zero-shot classification or retrieval today</strong>, a SigLIP or SigLIP 2 model, or a large OpenCLIP model trained on curated data, is usually more accurate than the original CLIP. <strong>For compatibility</strong> with tools built on the original (older Stable Diffusion versions, CLIPScore), use OpenAI's ViT-L/14. <strong>For dense tasks</strong> like segmentation, pair a CLIP-style model with a self-supervised backbone such as DINOv2 or DINOv3, or use SigLIP 2, which was trained with localisation in mind.</p>
+<pre><code>import torch, open_clip
+model, _, preprocess = open_clip.create_model_and_transforms("ViT-B-32", pretrained="openai")
+tok = open_clip.get_tokenizer("ViT-B-32")
+with torch.no_grad():
+    img = model.encode_image(preprocess(pil_image).unsqueeze(0))
+    txt = model.encode_text(tok(["a photo of a dog", "a photo of a cat"]))
+    img, txt = img / img.norm(dim=-1, keepdim=True), txt / txt.norm(dim=-1, keepdim=True)
+    probs = (100 * img @ txt.T).softmax(dim=-1)</code></pre>
+</div></section>
+</main>
+
+<footer><div class="wrap prose">
+  <p><strong style="color:var(--ink)">Sources</strong></p>
+  <ul>
+    <li>Radford et al., 2021. Learning Transferable Visual Models From Natural Language Supervision. <a href="https://arxiv.org/abs/2103.00020">arXiv:2103.00020</a></li>
+    <li>Jia et al., 2021. ALIGN. <a href="https://arxiv.org/abs/2102.05918">arXiv:2102.05918</a> · Zhai et al., 2021. LiT. <a href="https://arxiv.org/abs/2111.07991">arXiv:2111.07991</a></li>
+    <li>Yu et al., 2022. CoCa. <a href="https://arxiv.org/abs/2205.01917">arXiv:2205.01917</a> · Cherti et al., 2022. Reproducible scaling laws for contrastive language-image learning. <a href="https://arxiv.org/abs/2212.07143">arXiv:2212.07143</a></li>
+    <li>Li et al., 2022. FLIP. <a href="https://arxiv.org/abs/2212.00794">arXiv:2212.00794</a> · Zhai et al., 2023. SigLIP. <a href="https://arxiv.org/abs/2303.15343">arXiv:2303.15343</a></li>
+    <li>Sun et al., 2023. EVA-CLIP. <a href="https://arxiv.org/abs/2303.15389">arXiv:2303.15389</a> · Xu et al., 2023. MetaCLIP. <a href="https://arxiv.org/abs/2309.16671">arXiv:2309.16671</a> · Fang et al., 2023. DFN. <a href="https://arxiv.org/abs/2309.17425">arXiv:2309.17425</a></li>
+    <li>Tschannen et al., 2025. SigLIP 2. <a href="https://arxiv.org/abs/2502.14786">arXiv:2502.14786</a> · Liang et al., 2022. Mind the Gap. <a href="https://arxiv.org/abs/2203.02053">arXiv:2203.02053</a></li>
+  </ul>
+  <p>The 3D figures are teaching illustrations with toy embeddings, except the contrastive-training demo, which runs the real symmetric loss on a small batch. Numbers in the text come from the papers.</p>
+</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){"use strict";
+window.LABEL_FONT='"Bricolage Grotesque", Arial, sans-serif';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function setPressed(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+const C={};
+function readColors(keys){keys.forEach(k=>{C[k]=new THREE.Color(cssv('--'+k)||'#888888');});}
+function hex(k){return cssv('--'+k);}
+function label(text,size,color){size=size||.42;const c=document.createElement('canvas');const ctx=c.getContext('2d');const fs=64;
+ const font='600 '+fs+'px '+(window.LABEL_FONT||'Arial, sans-serif');ctx.font=font;const w=Math.ceil(ctx.measureText(text).width)+24;c.width=w;c.height=Math.ceil(fs*1.35);
+ ctx.font=font;ctx.fillStyle=color||cssv('--ink');ctx.textBaseline='middle';ctx.fillText(text,12,c.height/2+2);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size*w/c.height,size,1);sp.renderOrder=10;return sp;}
+function emojiSprite(ch,size){const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.font='72px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,48,54);
+ const t=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size||.5,size||.5,1);sp.renderOrder=11;return sp;}
+function dotTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(32,32,28,0,7);g.fill();return new THREE.CanvasTexture(c);}
+function line(pts,color,opts){opts=opts||{};const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=opts.dashed?new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.12,transparent:true,opacity:opts.opacity||1}):new THREE.LineBasicMaterial({color,transparent:true,opacity:opts.opacity==null?1:opts.opacity});
+ const l=new THREE.Line(g,m);if(opts.dashed)l.computeLineDistances();return l;}
+function std(color,o){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.55,metalness:.05},o||{}));}
+function disposeTree(o){o.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});}
+
+const stages=[];
+function base(camPos,target,hfov){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(40,1.6,.1,300);camera.position.set(...camPos);camera.lookAt(new THREE.Vector3(...target));
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,.95));const d=new THREE.DirectionalLight(0xffffff,.65);d.position.set(5,10,8);scene.add(d);
+ const root=new THREE.Group();scene.add(root);return {scene,camera,root,hfov:hfov||60};}
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=e.target._stage;s.visible=e.isIntersecting;if(s.visible&&!s.renderer)mk(s);else if(!s.visible&&s.renderer)kill(s);}),{rootMargin:'200px 0px'});
+function mk(s){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0,0);s.wrap.insertBefore(r.domElement,s.wrap.firstChild);s.renderer=r;s.w=0;}
+ catch(err){if(!s.wrap.querySelector('.nogl'))s.wrap.insertAdjacentHTML('beforeend','<div class="nogl">3D view unavailable: this browser has WebGL turned off.</div>');}}
+function kill(s){s.renderer.dispose();if(s.renderer.forceContextLoss)s.renderer.forceContextLoss();s.renderer.domElement.remove();s.renderer=null;}
+function drag(s){let down=false,px=0,py=0,sx=0,sy=0;const w=s.wrap;
+ w.addEventListener('pointerdown',e=>{down=true;px=sx=e.clientX;py=sy=e.clientY;});
+ w.addEventListener('pointerup',e=>{if(down&&s.onClick&&Math.hypot(e.clientX-sx,e.clientY-sy)<6){const r=w.getBoundingClientRect();s.onClick(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1));}down=false;});
+ addEventListener('pointerup',()=>down=false);w.addEventListener('pointercancel',()=>down=false);
+ w.addEventListener('pointermove',e=>{if(!down)return;s.tRotY+=(e.clientX-px)*.008;s.tRotX=clamp(s.tRotX+(e.clientY-py)*.005,-.7,.7);px=e.clientX;py=e.clientY;});}
+function stage(id,build){const fig=document.getElementById(id);const wrap=fig.querySelector('.canvas');const s={fig,wrap,rotY:0,rotX:0,tRotY:0,tRotX:0,auto:0};
+ Object.assign(s,build(s));s.rotY=s.tRotY;s.rotX=s.tRotX;wrap._stage=s;stages.push(s);io.observe(wrap);drag(s);return s;}
+let lastT=performance.now();
+function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;const t=now/1000;
+ for(const s of stages){if(!s.renderer)continue;const w=s.wrap.clientWidth,h=s.wrap.clientHeight;
+  if(w!==s.w||h!==s.h){s.renderer.setSize(w,h,false);const a=w/h;s.camera.aspect=a;const hf=s.hfov*Math.PI/180;s.camera.fov=clamp(Math.max(2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI,s.vmin||34),24,80);s.camera.updateProjectionMatrix();s.w=w;s.h=h;}
+  if(!reduced)s.tRotY+=s.auto*dt;s.rotY+=(s.tRotY-s.rotY)*.12;s.rotX+=(s.tRotX-s.rotX)*.12;s.root.rotation.set(s.rotX,s.rotY,0);
+  if(s.update)s.update(t,dt);s.renderer.render(s.scene,s.camera);}
+ requestAnimationFrame(loop);}
+function startAll(fn){if(typeof THREE==='undefined'){document.querySelectorAll('.canvas').forEach(c=>c.insertAdjacentHTML('beforeend','<div class="nogl">The 3D library could not load. Check your connection and reload the page.</div>'));return;}
+ const ready=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+ ready.then(()=>{fn();requestAnimationFrame(loop);});}
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+function rv(r){return V(randn(r),randn(r),randn(r));}
+function tangent(from,to){return to.clone().sub(from.clone().multiplyScalar(to.dot(from)));}
+const IMG=(()=>{const c=document.createElement('canvas');const S=256;c.width=c.height=S;const g=c.getContext('2d');
+ const gr=g.createLinearGradient(0,0,0,S);gr.addColorStop(0,'#86B7E0');gr.addColorStop(.7,'#DCEAF3');g.fillStyle=gr;g.fillRect(0,0,S,S);
+ g.fillStyle='#96BB82';g.beginPath();g.moveTo(0,.7*S);g.bezierCurveTo(.3*S,.62*S,.62*S,.8*S,S,.68*S);g.lineTo(S,S);g.lineTo(0,S);g.fill();
+ g.fillStyle='#7A3325';g.beginPath();g.moveTo(.3*S,.52*S);g.lineTo(.14*S,.44*S);g.lineTo(.18*S,.61*S);g.fill();
+ g.fillStyle='#B4462F';g.beginPath();g.ellipse(.47*S,.56*S,.2*S,.13*S,0,0,7);g.fill();
+ g.fillStyle='#8E3726';g.beginPath();g.arc(.66*S,.42*S,.09*S,0,7);g.fill();
+ g.fillStyle='#E8B33A';g.beginPath();g.moveTo(.735*S,.4*S);g.lineTo(.82*S,.43*S);g.lineTo(.735*S,.46*S);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(.685*S,.4*S,.018*S,0,7);g.fill();return c;})();
+function tile(u0,v0,du,dv,w){const tex=new THREE.CanvasTexture(IMG);const g=new THREE.PlaneGeometry(w,w);const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,u0+uv.getX(i)*du,v0+uv.getY(i)*dv);
+ return new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));}
+function wireSphere(R,op){return new THREE.Mesh(new THREE.SphereGeometry(R*.985,36,22),new THREE.MeshBasicMaterial({color:C.line,wireframe:true,transparent:true,opacity:op||.35}));}
+
+/* ---------- hero ---------- */
+function buildHero(s){const B=base([0,.5,7.4],[0,0,0],44);s.auto=.12;const R=2.3;B.root.add(wireSphere(R));
+ const r=rng(4),K=6,P=48;const cen=[...Array(K)].map(()=>rv(r).normalize());
+ const st=[],tg=[];for(let i=0;i<P;i++){const pc=cen[i%K].clone().add(rv(r).multiplyScalar(.2)).normalize();const off=rv(r).multiplyScalar(.05);
+  st.push([rv(r).normalize(),rv(r).normalize()]);tg.push([pc.clone().add(off).normalize(),pc.clone().sub(off).normalize()]);}
+ const im=new THREE.InstancedMesh(new THREE.BoxGeometry(.11,.11,.11),std(C.img),P),tx=new THREE.InstancedMesh(new THREE.SphereGeometry(.065,12,8),std(C.txt),P);B.root.add(im,tx);
+ const lp=new Float32Array(P*6);const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));B.root.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:C.muted,transparent:true,opacity:.45})));
+ const d=new THREE.Object3D(),a=V(0,0,0),b=V(0,0,0);let t0=performance.now()/1000;document.getElementById('hero-replay').onclick=()=>{t0=performance.now()/1000;};
+ function set(p){for(let i=0;i<P;i++){a.copy(st[i][0]).lerp(tg[i][0],p).normalize().multiplyScalar(R);b.copy(st[i][1]).lerp(tg[i][1],p).normalize().multiplyScalar(R);
+  d.position.copy(a);d.lookAt(0,0,0);d.updateMatrix();im.setMatrixAt(i,d.matrix);d.position.copy(b);d.updateMatrix();tx.setMatrixAt(i,d.matrix);lp.set([a.x,a.y,a.z,b.x,b.y,b.z],i*6);}
+  im.instanceMatrix.needsUpdate=tx.instanceMatrix.needsUpdate=true;lg.attributes.position.needsUpdate=true;}
+ set(reduced?1:0);
+ return Object.assign(B,{update(t){if(reduced)return;let ph=(t-t0)/7;if(ph>1.9){t0=t;ph=0;}set(ph<1?ph*ph*(3-2*ph):1);}});}
+
+/* ---------- architecture ---------- */
+function buildArch(s){const B=base([.2,1,13.5],[-.4,0,0],64);s.tRotY=-.2;s.tRotX=.1;s.vmin=27;const root=B.root;const ink=hex('ink');
+ const src=tile(0,0,1,1,2);src.position.set(-7.4,1.7,0);root.add(src);const l1=label('image',.32,ink);l1.position.set(-7.4,2.95,0);root.add(l1);
+ const packets=[];const pg=new THREE.BoxGeometry(.14,.14,.14);const iIn=V(-2.4,1.7,0),tIn=V(-2.4,-1.7,0);
+ for(let j=0;j<3;j++)for(let i=0;i<3;i++){const p=tile(i/3,1-(j+1)/3,1/3,1/3,.58);p.position.set(-5+i*.66,2.35-j*.66,0);root.add(p);if((i+j)%2===0)packets.push({m:new THREE.Mesh(pg,std(C.img)),from:p.position.clone(),to:iIn,off:(i*.3+j*.17)%1});}
+ const lpch=label('patches',.28,hex('img'));lpch.position.set(-4.35,3.15,0);root.add(lpch);
+ const toks=['[SOS]','a','photo','of','a','bird','[EOS]'];toks.forEach((w,i)=>{const x=-7.6+i*.82;const m=new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.5),std(i===6?C.txt:C.line.clone().lerp(C.txt,.35)));m.position.set(x,-1.7,0);root.add(m);
+  const lb=label(w,.26,ink);lb.position.set(x,-1.15,0);root.add(lb);packets.push({m:new THREE.Mesh(pg,std(C.txt)),from:m.position.clone(),to:tIn,off:i/7});});
+ const lcap=label('caption tokens',.28,hex('txt'));lcap.position.set(-5.1,-2.4,0);root.add(lcap);
+ packets.forEach(p=>root.add(p.m));
+ function tower(y,col,name){for(let k=0;k<6;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(.13,1.3,1.3),std(col,{transparent:true,opacity:.88}));b.position.set(-2+k*.48,y,0);root.add(b);}
+  const lb=label(name,.3,'#'+col.getHexString());lb.position.set(-.8,y+(y>0?1:-1),0);root.add(lb);}
+ tower(1.7,C.img,'image encoder (ViT or ResNet)');tower(-1.7,C.txt,'text encoder (transformer)');
+ const bg=new THREE.BoxGeometry(.1,1,.1);bg.translate(0,.5,0);const r=rng(2);
+ [[1.7,C.img,'W_i'],[-1.7,C.txt,'W_t']].forEach(([y,col,nm])=>{for(let k=0;k<8;k++){const b=new THREE.Mesh(bg,std(col));b.position.set(1.3+k*.14,y-.5,0);b.scale.y=.15+r()*.9;root.add(b);}
+  const pj=new THREE.Mesh(new THREE.BoxGeometry(.7,.7,.7),std(C.panel,{transparent:true,opacity:.95}));pj.position.set(3.1,y,0);root.add(pj);root.add(new THREE.LineSegments(new THREE.EdgesGeometry(pj.geometry),new THREE.LineBasicMaterial({color:col})).translateX(3.1).translateY(y));
+  const l=label(nm,.3,'#'+col.getHexString());l.position.set(3.1,y+.7,0);root.add(l);root.add(line([V(3.5,y,0),V(5.2,y*.45,0)],col,{opacity:.7}));});
+ const SC=V(6.1,0,0),R=1.25;const sph=wireSphere(R,.5);sph.position.copy(SC);root.add(sph);
+ const di=V(-.1,.8,.6).normalize(),dt=V(.25,.65,.72).normalize();
+ root.add(new THREE.ArrowHelper(di,SC,R,C.img.getHex(),.26,.16));root.add(new THREE.ArrowHelper(dt,SC,R,C.txt.getHex(),.26,.16));
+ const arc=[];for(let k=0;k<=20;k++){arc.push(di.clone().lerp(dt,k/20).normalize().multiplyScalar(.7).add(SC));}root.add(line(arc,C.ink));
+ const lc=label('cosine similarity',.3,ink);lc.position.set(6.1,1.75,0);root.add(lc);const ls=label('shared embedding space',.28,hex('muted'));ls.position.set(6.1,-1.6,0);root.add(ls);
+ return Object.assign(B,{update(t){const sp=reduced?0:t;packets.forEach(p=>{const q=(sp*.3+p.off)%1;p.m.position.lerpVectors(p.from,p.to,q*q*(3-2*q));p.m.scale.setScalar(Math.max(.01,q>.85?(1-q)/.15:1));});}});}
+
+/* ---------- similarity matrix ---------- */
+const EMO=['🐶','🐱','🚗','🍕','🌊','🎸','🏔️','⏰'];const CAP=['dog','cat','red car','pizza','ocean','guitar','mountain','clock'];
+function buildMat(s){const B=base([0,5.6,8.6],[0,.4,.2],56);s.tRotY=.55;s.vmin=33;const N=8,sp=.52;const r=rng(8);
+ const sem=[...Array(N)].map(()=>Array(N).fill(.06));sem[0][1]=sem[1][0]=.5;sem[4][6]=sem[6][4]=.3;sem[2][7]=sem[7][2]=.15;sem[5][7]=sem[7][5]=.12;for(let i=0;i<N;i++)sem[i][i]=.82;
+ const rnd=[...Array(N)].map(()=>[...Array(N)].map(()=>-.1+r()*.4));for(let i=0;i<N;i++)for(let j=0;j<N;j++)sem[i][j]+=(r()-.5)*.06*(i!==j);
+ const g=new THREE.BoxGeometry(.38,1,.38);g.translate(0,.5,0);const bars=[];
+ for(let i=0;i<N;i++){bars.push([]);for(let j=0;j<N;j++){const m=new THREE.Mesh(g,std(C.neg.clone()));m.position.set((j-(N-1)/2)*sp,0,(i-(N-1)/2)*sp);m.scale.y=.02;m.userData.h=.02;B.root.add(m);bars[i].push(m);}
+  const e=emojiSprite(EMO[i],.42);e.position.set(-(N+1)/2*sp-.1,.2,(i-(N-1)/2)*sp);B.root.add(e);}
+ for(let j=0;j<N;j++){const l=label(CAP[j],.22,hex('txt'));l.position.set((j-(N-1)/2)*sp,.25,-(N+1)/2*sp-.1);B.root.add(l);}
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(N*sp+.3,N*sp+.3),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.5,side:THREE.DoubleSide}));fl.rotation.x=-Math.PI/2;fl.position.y=-.01;B.root.add(fl);
+ const la=label('captions →',.26,hex('muted'));la.position.set(1.4,.05,(N+1)/2*sp+.2);B.root.add(la);
+ let mode='cos';const pS=document.getElementById('m-p'),tS=document.getElementById('m-t'),tv=document.getElementById('m-tv'),rd=document.getElementById('m-read');
+ function compute(){const p=+pS.value/100,tau=.01*Math.pow(10,+tS.value/100*1.3);tv.textContent=tau.toFixed(3);
+  const S=[...Array(N)].map((_,i)=>[...Array(N)].map((_,j)=>(1-p)*rnd[i][j]+p*sem[i][j]));
+  const Z=S.map(row=>row.map(v=>v/tau));const sm=a=>{const m=Math.max(...a);const e=a.map(v=>Math.exp(v-m));const z=e.reduce((x,y)=>x+y,0);return e.map(v=>v/z);};
+  const Pr=Z.map(sm);const colsT=[...Array(N)].map((_,j)=>sm(Z.map(row=>row[j])));const Pc=Z.map((row,i)=>row.map((_,j)=>colsT[j][i]));
+  const b=-.45/tau;const sig=v=>1/(1+Math.exp(-v));const Ps=Z.map(row=>row.map(v=>sig(v+b)));
+  let li=0,lt=0,ls=0,acc=0;for(let i=0;i<N;i++){li-=Math.log(Pr[i][i]+1e-12);lt-=Math.log(Pc[i][i]+1e-12);if(Pr[i].indexOf(Math.max(...Pr[i]))===i)acc++;for(let j=0;j<N;j++){const y=i===j?1:-1;ls-=Math.log(sig(y*(Z[i][j]+b))+1e-12);}}
+  const info=((li+lt)/2/N).toFixed(3),sigl=(ls/N).toFixed(3);
+  rd.innerHTML=mode==='sig'?`<b>SigLIP loss</b> ${sigl} per image (sum of ${N*N} independent yes/no terms, bias b = −0.45/τ). Correct matches: ${acc} of ${N}.`:`<b>Symmetric InfoNCE loss</b> ${info}. Images whose best caption is correct: ${acc} of ${N}. ${p<.3?'Early training: the diagonal is not yet special.':'The diagonal dominates; dog and cat still compete.'}`;
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++){let v,h;if(mode==='cos'){v=S[i][j];h=Math.max(.02,(v+.2)*2.2);}else{v=mode==='i2t'?Pr[i][j]:mode==='t2i'?Pc[i][j]:Ps[i][j];h=Math.max(.02,v*2.4);}
+   const m=bars[i][j];m.userData.h=h;m.material.color.copy(i===j?C.pos:C.neg).lerp(C.panel,i===j?0:.3*(1-clamp(v,0,1)));}}
+ pS.oninput=tS.oninput=compute;document.querySelectorAll('#f-mat [data-m]').forEach(bt=>bt.onclick=()=>{setPressed(bt.parentNode,bt);mode=bt.dataset.m;compute();});compute();
+ return Object.assign(B,{update(){for(const row of bars)for(const m of row)m.scale.y+=(m.userData.h-m.scale.y)*.15;}});}
+
+/* ---------- contrastive forces (real gradient) ---------- */
+function buildForce(s){const B=base([0,.6,7],[0,0,0],46);const R=2,N=6,tau=.25;B.root.add(wireSphere(R,.3));
+ const names=['🐶','🐱','🚗','🍕','🌊','🎸'],caps=['dog','cat','car','pizza','ocean','guitar'];let U=[],T=[];
+ const im=[],tx=[],pl=[];for(let i=0;i<N;i++){const a=new THREE.Mesh(new THREE.BoxGeometry(.2,.2,.2),std(C.img));const b=new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),std(C.txt));
+  const ea=emojiSprite(names[i],.4),eb=label(caps[i],.26,hex('txt'));a.add(ea);ea.position.set(0,.3,0);b.add(eb);eb.position.set(0,.28,0);B.root.add(a,b);im.push(a);tx.push(b);
+  const l=line([V(0,0,0),V(0,0,0)],C.muted,{opacity:.5});B.root.add(l);pl.push(l);}
+ const arrows=[];for(let k=0;k<N;k++){const ah=new THREE.ArrowHelper(V(1,0,0),V(0,0,0),1,(k===0?C.pos:C.push).getHex(),.16,.1);B.root.add(ah);arrows.push(ah);}
+ let focus=0,running=false;const fr=document.getElementById('f-focus');names.forEach((n,i)=>{const b=document.createElement('button');b.type='button';b.textContent=n;b.setAttribute('aria-label',caps[i]+' image');b.setAttribute('aria-pressed',i===0?'true':'false');b.onclick=()=>{focus=i;setPressed(fr,b);};fr.appendChild(b);});
+ function reset(){const r=rng(Math.floor(Math.random()*1e6));U=[...Array(N)].map(()=>rv(r).normalize());T=[...Array(N)].map(()=>rv(r).normalize());}reset();
+ const run=document.getElementById('f-run'),rd=document.getElementById('f-read');run.onclick=()=>{running=!running;run.textContent=running?'Pause':'Start training';};document.getElementById('f-reset').onclick=reset;
+ function probs(){const S=U.map(u=>T.map(t=>u.dot(t)/tau));const P=S.map(row=>{const m=Math.max(...row);const e=row.map(v=>Math.exp(v-m));const z=e.reduce((a,b)=>a+b,0);return e.map(v=>v/z);});
+  const Q=[...Array(N)].map((_,j)=>{const col=S.map(row=>row[j]);const m=Math.max(...col);const e=col.map(v=>Math.exp(v-m));const z=e.reduce((a,b)=>a+b,0);return e.map(v=>v/z);});return {P,Q};}
+ function step(){const {P,Q}=probs();const gU=U.map(()=>V(0,0,0)),gT=T.map(()=>V(0,0,0));
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++){const d=(i===j?1:0);const c1=(P[i][j]-d),c2=(Q[j][i]-d);gU[i].addScaledVector(T[j],c1+c2);gT[j].addScaledVector(U[i],c1+c2);}
+  const lr=.06;for(let i=0;i<N;i++){U[i].addScaledVector(gU[i],-lr).normalize();T[i].addScaledVector(gT[i],-lr).normalize();}}
+ let fc=0;
+ return Object.assign(B,{update(){if(running&&!reduced){step();step();}else if(running&&reduced){step();}
+  const {P,Q}=probs();for(let i=0;i<N;i++){im[i].position.copy(U[i]).multiplyScalar(R);tx[i].position.copy(T[i]).multiplyScalar(R);const pa=pl[i].geometry.attributes.position;pa.setXYZ(0,im[i].position.x,im[i].position.y,im[i].position.z);pa.setXYZ(1,tx[i].position.x,tx[i].position.y,tx[i].position.z);pa.needsUpdate=true;}
+  const u=U[focus],o=u.clone().multiplyScalar(R*1.01);const order=[focus,...[...Array(N).keys()].filter(j=>j!==focus)];
+  order.forEach((j,k)=>{const ah=arrows[k];let d=tangent(u,T[j]);if(d.length()<1e-4)d=V(0,1,0);d.normalize();let len;if(k===0)len=(1-P[focus][focus])*1.4;else{d.negate();len=P[focus][j]*1.4;}
+   ah.position.copy(o);ah.setDirection(d);ah.setLength(Math.max(.02,len),Math.min(.16,len*.5+.02),Math.min(.1,len*.3+.02));ah.visible=len>.03;});
+  if(fc++%8===0){let L=0,acc=0;for(let i=0;i<N;i++){L-=(Math.log(P[i][i])+Math.log(Q[i][i]))/2;if(P[i].indexOf(Math.max(...P[i]))===i)acc++;}rd.innerHTML=`<b>Loss</b> ${(L/N).toFixed(3)} &nbsp; <b>Images matched to their own caption</b> ${acc} of ${N} &nbsp; <span style="color:var(--muted)">τ = ${tau}</span>`;}}});}
+
+/* ---------- zero-shot ---------- */
+function buildZS(s){const B=base([0,.8,6.4],[0,.3,0],48);s.tRotY=-.5;const R=2;B.root.add(wireSphere(R,.25));const r=rng(17);
+ const cls=['dog','cat','bird','car','pizza'];const base_=[V(.25,.5,.83),V(.6,.42,.68),V(-.35,.82,.46),V(.82,-.38,.43),V(-.62,-.48,.62)].map(v=>v.normalize());
+ const bias=V(0,-.25,1).normalize();const temps=base_.map(b=>[...Array(6)].map(()=>b.clone().add(rv(r).multiplyScalar(.22)).normalize()));
+ const bare=base_.map(b=>b.clone().add(bias.clone().multiplyScalar(1.1)).add(rv(r).multiplyScalar(.18)).normalize());
+ const ens=temps.map(ts=>ts.reduce((a,v)=>a.add(v),V(0,0,0)).normalize());
+ const imgs=[['🐶',base_[0].clone().add(rv(r).multiplyScalar(.12)).normalize()],['🐱',base_[1].clone().add(rv(r).multiplyScalar(.12)).normalize()],['🐦',base_[2].clone().add(rv(r).multiplyScalar(.12)).normalize()],
+  ['🚗',base_[3].clone().add(rv(r).multiplyScalar(.12)).normalize()],['🍕',base_[4].clone().add(rv(r).multiplyScalar(.12)).normalize()],['🐺',base_[0].clone().multiplyScalar(.7).add(base_[1].clone().multiplyScalar(.3)).add(V(-.35,.1,-.2)).normalize()]];
+ const arrows=base_.map(()=>{const a=new THREE.ArrowHelper(V(1,0,0),V(0,0,0),R,C.txt.getHex(),.22,.13);B.root.add(a);return a;});
+ const labs=cls.map(c=>{const l=label(c,.3,hex('txt'));B.root.add(l);return l;});
+ const dots=[];temps.forEach(ts=>ts.forEach(v=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.05,10,8),std(C.txt,{transparent:true,opacity:.8}));m.position.copy(v).multiplyScalar(R);B.root.add(m);dots.push(m);}));
+ const ia=new THREE.ArrowHelper(V(1,0,0),V(0,0,0),R,C.img.getHex(),.26,.16);B.root.add(ia);const iem=emojiSprite('🐶',.55);B.root.add(iem);
+ let im=0,mode='photo';const cur=base_.map(v=>v.clone()),tgt=base_.map(v=>v.clone());const icur=imgs[0][1].clone();
+ const sg=document.getElementById('zs-img'),pr=document.getElementById('zs-probs');imgs.forEach(([e],i)=>{const b=document.createElement('button');b.type='button';b.textContent=e;b.setAttribute('aria-label',i===5?'wolf image':cls[i]+' image');b.setAttribute('aria-pressed',i===0?'true':'false');b.onclick=()=>{im=i;setPressed(sg,b);iem.material.map.dispose();const ns=emojiSprite(e,.55);iem.material=ns.material;compute();};sg.appendChild(b);});
+ document.querySelectorAll('#zs-prompt [data-p]').forEach(b=>b.onclick=()=>{setPressed(b.parentNode,b);mode=b.dataset.p;compute();});
+ function compute(){const src=mode==='bare'?bare:mode==='ens'?ens:temps.map(t=>t[0]);src.forEach((v,k)=>tgt[k].copy(v));dots.forEach(d=>d.visible=mode==='ens');
+  const iv=imgs[im][1];const sims=src.map(v=>v.dot(iv));const z=sims.map(v=>Math.exp(v*14));const tot=z.reduce((a,b)=>a+b,0);const P=z.map(v=>v/tot);const w=P.indexOf(Math.max(...P));
+  const pre=mode==='bare'?'':'a photo of a ';pr.innerHTML=cls.map((c,k)=>`<span class="${k===w?'win':''}">${mode==='ens'?'ensemble: ':''}${pre}${c}</span><span class="bar"><i style="width:${(P[k]*100).toFixed(1)}%"></i></span><span class="readout ${k===w?'win':''}">${(P[k]*100).toFixed(1)}%</span>`).join('')
+   +`<span style="grid-column:1/-1;color:var(--muted)">Cosine similarities range from ${Math.min(...sims).toFixed(2)} to ${Math.max(...sims).toFixed(2)}; probabilities use a logit scale of 14.</span>`;}
+ compute();
+ return Object.assign(B,{update(){for(let k=0;k<5;k++){cur[k].lerp(tgt[k],.12).normalize();arrows[k].setDirection(cur[k]);labs[k].position.copy(cur[k]).multiplyScalar(R+.3);}
+  icur.lerp(imgs[im][1],.12).normalize();ia.setDirection(icur);iem.position.copy(icur).multiplyScalar(R+.4);}});}
+
+/* ---------- modality gap ---------- */
+function buildGap(s){const B=base([0,.5,6.6],[0,.2,0],46);s.auto=.08;const R=2,N=40;B.root.add(wireSphere(R,.25));const r=rng(29);
+ const a=V(-.55,.55,.63).normalize(),b=V(.55,.55,.63).normalize();const sem=[...Array(N)].map(()=>rv(r).multiplyScalar(.3));
+ const real=sem.map(v=>[a.clone().add(v).normalize(),b.clone().add(v).add(rv(r).multiplyScalar(.05)).normalize()]);
+ const ideal=sem.map(v=>{const m=a.clone().add(b).normalize().add(v);return [m.clone().add(rv(r).multiplyScalar(.04)).normalize(),m.clone().add(rv(r).multiplyScalar(.04)).normalize()];});
+ const cur=real.map(p=>[p[0].clone(),p[1].clone()]);let tgt=real;
+ const im=new THREE.InstancedMesh(new THREE.BoxGeometry(.1,.1,.1),std(C.img),N),tx=new THREE.InstancedMesh(new THREE.SphereGeometry(.06,10,8),std(C.txt),N);B.root.add(im,tx);
+ const lp=new Float32Array(N*6);const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(lp,3));B.root.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:C.muted,transparent:true,opacity:.5})));
+ const ci=new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),std(C.img,{transparent:true,opacity:.5})),ct=new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),std(C.txt,{transparent:true,opacity:.5}));B.root.add(ci,ct);
+ const gl=line([V(0,0,0),V(0,0,0)],C.ink,{dashed:true});B.root.add(gl);
+ const rd=document.getElementById('gap-read');document.querySelectorAll('#gap-mode [data-g]').forEach(bt=>bt.onclick=()=>{setPressed(bt.parentNode,bt);tgt=bt.dataset.g==='real'?real:ideal;});
+ const d=new THREE.Object3D();let fc=0;
+ return Object.assign(B,{update(){const mi=V(0,0,0),mt=V(0,0,0);let cs=0;
+  for(let i=0;i<N;i++){cur[i][0].lerp(tgt[i][0],.08).normalize();cur[i][1].lerp(tgt[i][1],.08).normalize();const p=cur[i][0].clone().multiplyScalar(R),q=cur[i][1].clone().multiplyScalar(R);
+   d.position.copy(p);d.updateMatrix();im.setMatrixAt(i,d.matrix);d.position.copy(q);d.updateMatrix();tx.setMatrixAt(i,d.matrix);lp.set([p.x,p.y,p.z,q.x,q.y,q.z],i*6);mi.add(cur[i][0]);mt.add(cur[i][1]);cs+=cur[i][0].dot(cur[i][1]);}
+  im.instanceMatrix.needsUpdate=tx.instanceMatrix.needsUpdate=true;lg.attributes.position.needsUpdate=true;mi.divideScalar(N);mt.divideScalar(N);
+  ci.position.copy(mi).multiplyScalar(R);ct.position.copy(mt).multiplyScalar(R);const ga=gl.geometry.attributes.position;ga.setXYZ(0,ci.position.x,ci.position.y,ci.position.z);ga.setXYZ(1,ct.position.x,ct.position.y,ct.position.z);ga.needsUpdate=true;gl.computeLineDistances();
+  if(fc++%10===0)rd.textContent=`Mean cosine of matched pairs ${(cs/N).toFixed(2)}, distance between image and text centres ${mi.distanceTo(mt).toFixed(2)}`;}});}
+
+startAll(()=>{readColors(['ink','muted','line','panel','img','txt','pos','neg','push']);
+ stage('f-hero',buildHero);stage('f-arch',buildArch);stage('f-mat',buildMat);stage('f-force',buildForce);stage('f-zs',buildZS);stage('f-gap',buildGap);});
+})();
+</script>
+</body>
+</html>

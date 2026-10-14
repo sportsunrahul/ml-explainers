@@ -1,0 +1,1785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The DETR Family</title>
+<meta name="description" content="An intuition-first explainer of DETR, Deformable DETR, DAB-DETR, DN-DETR, DINO, RT-DETR and RF-DETR.">
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--fg);
+  font:1.125rem/1.7 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+/* Display face: KaTeX_Main (Computer Modern) is embedded with the math CSS, so headings share the equations' face. */
+h1, h2, .kicker { font-family:KaTeX_Main, Charter, Georgia, serif; font-weight:700; letter-spacing:-.005em; }
+header.hero { padding:2.2rem 0 1rem; max-width:none; }
+.hero-stage { position:relative; margin:0 0 1.4rem; }
+.hero-stage canvas { display:block; width:100%; }
+.hero-stage button { position:absolute; right:0; bottom:-.2rem; font:.82rem system-ui, sans-serif; color:var(--muted); background:none; border:1px solid var(--rule); border-radius:999px; padding:.2rem .7rem; cursor:pointer; }
+.hero-stage button:hover { color:var(--fg); border-color:var(--muted); }
+.hero-stage button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+header.hero h1 { font-size:clamp(2.5rem, 5.6vw, 4.2rem); line-height:1.04; margin:0 0 .9rem; text-wrap:balance; }
+header.hero p.hook { font-size:1.3rem; line-height:1.5; color:var(--fg); opacity:.86; margin:0 0 1.4rem; max-width:34rem; }
+.papers { display:flex; flex-wrap:wrap; gap:.35rem .4rem; margin:0; padding:0; list-style:none; font:.82rem system-ui, sans-serif; max-width:var(--stage, 60rem); }
+.papers li a { display:inline-block; color:var(--muted); text-decoration:none; border:1px solid var(--rule); border-radius:999px; padding:.18rem .6rem; }
+.papers li a:hover { color:var(--fg); border-color:var(--muted); }
+.papers li a:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.papers-note { font:.82rem system-ui, sans-serif; color:var(--muted); margin:0 0 .5rem; }
+h2 { font-size:2.1rem; line-height:1.15; margin:3.6rem 0 1rem; text-wrap:balance; }
+h3 { font:600 1.3rem/1.3 Charter, "Bitstream Charter", Georgia, serif; margin:2.2rem 0 .5rem; }
+a { color:var(--blue); text-underline-offset:.15em; text-decoration-thickness:1px; }
+p { margin:0 0 1.05rem; }
+/* Acts are a real sequence: a numbered divider, not an eyebrow label. */
+.kicker { font-size:2.7rem; line-height:1.1; color:var(--fg); margin:6rem 0 -1.4rem; padding-top:1.6rem; border-top:1px solid var(--rule); }
+.kicker .act-n { display:block; font:400 1rem/1.4 system-ui, sans-serif; color:var(--muted); margin-bottom:.3rem; }
+nav.toc { font-family:system-ui, sans-serif; font-size:.95rem; margin:2.2rem 0 2.4rem; columns:2 18rem; column-gap:2.5rem; }
+nav.toc > strong { display:none; }
+nav.toc ol { margin:0; padding:0; list-style:none; counter-reset:toc; }
+nav.toc li { margin:.15rem 0; break-inside:avoid; counter-increment:toc; padding-left:1.8rem; position:relative; }
+nav.toc li:not(.act)::before { content:counter(toc); position:absolute; left:0; color:var(--muted); font-variant-numeric:tabular-nums; }
+nav.toc li a { color:var(--fg); text-decoration:none; }
+nav.toc li a:hover { color:var(--blue); }
+nav.toc .act { counter-increment:none; padding-left:0; margin:1rem 0 .25rem; font:700 1.05rem/1.3 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); break-after:avoid; }
+nav.toc .act:first-child { margin-top:0; }
+nav.toc .toc-more { break-inside:avoid; margin-top:1rem; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:.3rem 1.2rem; }
+nav.toc .toc-more li { counter-increment:none; padding-left:0; }
+nav.toc .toc-more li::before { content:none; }
+.key { display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; font:.9rem system-ui, sans-serif; margin:.4rem 0 1rem; }
+.key span::before { content:""; display:inline-block; width:.8em; height:.8em; border-radius:50%; margin-right:.4em; vertical-align:-.05em; background:currentColor; }
+.c-blue{color:var(--blue)} .c-yellow{color:var(--yellow)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-brown{color:var(--brown)}
+.t-blue{color:var(--blue)} .t-yellow{color:var(--yellow)} .t-green{color:var(--green)} .t-red{color:var(--red)} .t-brown{color:var(--brown)}
+b.c-blue, b.c-yellow, b.c-green, b.c-red, b.c-brown { font-weight:700; }
+figure.viz { margin:1.8rem 0; padding:1rem; background:var(--panel); border-radius:14px; position:relative; }
+figure.viz canvas, figure.viz svg.chart { display:block; width:100%; border-radius:9px; background:var(--bg); touch-action:none; }
+figure.viz canvas:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.8rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.34rem .85rem; cursor:pointer; transition:border-color .15s, background-color .15s, color .15s, transform .08s; }
+.controls button:hover { border-color:var(--muted); }
+.controls button:active { transform:scale(.97); }
+.controls button[aria-pressed="true"] { border-color:var(--fg); color:var(--fg); background:color-mix(in srgb, var(--fg) 13%, var(--panel2)); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; color:var(--muted); }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+@media (prefers-reduced-motion: reduce) { .controls button { transition:none; } .controls button:active { transform:none; } }
+.readout { font:.92rem/1.5 system-ui, sans-serif; color:var(--fg); margin:.6rem 0 0; min-height:2.9em; }
+figcaption { font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.6rem; max-width:var(--measure, 40rem); }
+.badge { position:absolute; top:.65rem; right:.75rem; font:600 .74rem/1 system-ui, sans-serif; padding:.3rem .6rem; border-radius:999px; border:1px solid currentColor; background:var(--panel); z-index:2; }
+.badge.toy { color:var(--brown); } .badge.computed { color:var(--blue); } .badge.sourced { color:var(--green); }
+.eq { overflow-x:auto; overflow-y:hidden; margin:.8rem 0 1.1rem; padding:.3rem 0; }
+.eq.scrolls:not(.at-end) { -webkit-mask-image:linear-gradient(90deg, #000 calc(100% - 3rem), transparent); mask-image:linear-gradient(90deg, #000 calc(100% - 3rem), transparent); }
+.eq[data-viz] [data-link] { box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--fg) 35%, transparent); }
+.gloss { font-size:1rem; margin:-.3rem 0 1.3rem; padding-left:1rem; border-left:2px solid var(--rule); }
+.gloss li { margin:.25rem 0; }
+.note { font:.9rem/1.55 system-ui, sans-serif; color:var(--muted); margin:1rem 0; }
+/* Only the narrated build (the player adds body.pe-has-bar) needs to say which chapters have no audio. */
+.narrated-only { display:none; }
+body.pe-has-bar .narrated-only { display:block; }
+.matrix { overflow-x:auto; }
+.matrix table { border-collapse:separate; border-spacing:3px; font:.85rem system-ui, sans-serif; margin:.4rem 0; }
+.matrix th { font-weight:600; padding:.2rem .4rem; }
+.matrix td button { font:inherit; width:4.1rem; padding:.35rem .1rem; border-radius:6px; border:1px solid var(--rule); background:var(--bg); color:var(--fg); cursor:pointer; font-variant-numeric:tabular-nums; transition:background-color .2s, border-color .2s, color .2s, box-shadow .2s; }
+.matrix td button:hover { border-color:var(--muted); }
+.matrix td button.sel { background:var(--green); color:var(--bg); border-color:var(--green); font-weight:700; }
+.matrix td button.opt { box-shadow:0 0 0 2px var(--yellow) inset; }
+.matrix td button:focus-visible { outline:2px solid var(--yellow); outline-offset:1px; }
+@media (prefers-reduced-motion: reduce) { .matrix td button { transition:none; } }
+.timeline { list-style:none; padding:0; margin:1rem 0; border-left:3px solid var(--rule); }
+.timeline li { border-radius:0 8px 8px 0; transition:background-color .25s; }
+.timeline li.tl-on { background:var(--panel); }
+.timeline li.tl-on::before { background:var(--green); }
+#tree-svg .tn { cursor:pointer; outline:none; }
+#tree-svg .tn rect { fill:var(--panel2); stroke:var(--rule); stroke-width:1.5; transition:stroke .25s, opacity .25s; }
+#tree-svg .tn .nm { fill:var(--fg); font:600 13px system-ui, sans-serif; }
+#tree-svg .tn .dt { fill:var(--muted); font:400 11px system-ui, sans-serif; }
+#tree-svg .tn.on rect { stroke:var(--fg); stroke-width:2; }
+#tree-svg .tn.anc rect { stroke:var(--green); stroke-width:2; }
+#tree-svg .tn:focus-visible rect { stroke:var(--yellow); stroke-width:2.5; }
+#tree-svg .te { fill:none; stroke:var(--muted); stroke-width:1.5; opacity:.8; transition:stroke .25s, opacity .25s, stroke-width .25s; }
+#tree-svg .te.dash { stroke-dasharray:5 4; }
+#tree-svg .ah { fill:var(--muted); opacity:.8; transition:fill .25s, opacity .25s; }
+#tree-svg .te.on { stroke:var(--green); stroke-width:2.5; opacity:1; }
+#tree-svg .ah.on { fill:var(--green); opacity:1; }
+#tree-svg .el { font:600 11px system-ui, sans-serif; fill:var(--green); opacity:0; paint-order:stroke; stroke:var(--panel); stroke-width:4px; stroke-linejoin:round; pointer-events:none; transition:opacity .25s; }
+#tree-svg .el.on { opacity:1; }
+#tree-svg.hot .tn:not(.on):not(.anc), #tree-svg.hot .te:not(.on), #tree-svg.hot .ah:not(.on) { opacity:.25; }
+#mask-svg { max-width:34rem; margin:0 auto; }
+@media (min-width:720px) { nav.toc .col-break { break-before:column; } }
+@media (prefers-reduced-motion: reduce) { #tree-svg *, .timeline li { transition:none; } }
+.timeline li { position:relative; padding:0 0 1.1rem 1.2rem; }
+.timeline li::before { content:""; position:absolute; left:-.5rem; top:.45rem; width:.7rem; height:.7rem; border-radius:50%; background:var(--blue); }
+.timeline .when { font:600 .85rem system-ui, sans-serif; color:var(--muted); }
+.timeline .inh { font-size:.95rem; color:var(--muted); }
+.deeper li { margin:.35rem 0; }
+.katex { font-size:1.05em; }
+.tex-display .katex-display { margin:.4rem 0; text-align:left; }
+.tex-display .katex-display > .katex { text-align:left; }
+@media (max-width: 520px) {
+  h2 { font-size:1.75rem; }
+  .kicker { font-size:2.15rem; margin-top:4.5rem; }
+  .matrix td button { width:3.3rem; font-size:.78rem; }
+  .eq .katex-display > .katex { font-size:.92em; }
+}
+/* The rail lists the chapters on wide screens, so the in-page list is only for narrower ones. */
+@media (min-width:1180px) { nav.toc { display:none; } }
+</style>
+<script>
+/* Shared helpers for all interactives. */
+const PE = (() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.cueReplay === '1';
+  const redrawers = [];
+  const onTheme = fn => { redrawers.push(fn); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => redrawers.forEach(f => f()));
+  // Canvas sized to its box, DPR-aware; draw(ctx, w, h) gets CSS-pixel dimensions.
+  function canvas(el, aspect, draw) {
+    const ctx = el.getContext('2d');
+    const state = { w: 0, h: 0 };
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * (typeof aspect === 'function' ? aspect(w) : aspect)), r = devicePixelRatio || 1;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); state.w = w; state.h = h; draw(ctx, w, h);
+    }
+    new ResizeObserver(resize).observe(el);
+    onTheme(() => draw(ctx, state.w, state.h));
+    return { redraw: () => draw(ctx, state.w, state.h), state, ctx };
+  }
+  function animate(ms, step, done) {
+    if (instant()) { step(1); done && done(); return () => {}; }
+    let t0 = null, id = 0, stop = false;
+    const f = t => { if (stop) return; if (t0 === null) t0 = t; const u = Math.min(1, (t - t0) / ms);
+      step(u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2); if (u < 1) id = requestAnimationFrame(f); else done && done(); };
+    id = requestAnimationFrame(f);
+    return () => { stop = true; cancelAnimationFrame(id); };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Boxes are {x1,y1,x2,y2} in [0,1].
+  const area = b => Math.max(0, b.x2 - b.x1) * Math.max(0, b.y2 - b.y1);
+  function iou(a, b) { const i = area({ x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), x2: Math.min(a.x2, b.x2), y2: Math.min(a.y2, b.y2) });
+    return i / (area(a) + area(b) - i); }
+  function giou(a, b) { const i = area({ x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), x2: Math.min(a.x2, b.x2), y2: Math.min(a.y2, b.y2) });
+    const u = area(a) + area(b) - i, c = area({ x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) });
+    return i / u - (c - u) / c; }
+  const cxcywh = b => [(b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, b.x2 - b.x1, b.y2 - b.y1];
+  const fromC = (cx, cy, w, h) => ({ x1: cx - w / 2, y1: cy - h / 2, x2: cx + w / 2, y2: cy + h / 2 });
+  function strokeBox(ctx, b, W, H, color, lw = 2, dash = null, alpha = 1) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.strokeRect(b.x1 * W, b.y1 * H, (b.x2 - b.x1) * W, (b.y2 - b.y1) * H); ctx.restore(); }
+  function label(ctx, text, x, y, color, size = 12, align = 'left') {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  function scene(ctx, W, H) { // calm toy "street" background
+    ctx.fillStyle = css('--bg'); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = css('--panel2'); ctx.fillRect(0, H * .78, W, H * .22);
+  }
+  function person(ctx, b, W, H, color) {
+    const [cx, , w, h] = cxcywh(b); ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .55;
+    ctx.beginPath(); ctx.arc(cx * W, (b.y1 + h * .14) * H, Math.min(w * W, h * H) * .22, 0, 7); ctx.fill();
+    ctx.fillRect((cx - w * .28) * W, (b.y1 + h * .3) * H, w * .56 * W, h * .7 * H); ctx.restore(); }
+  function thing(ctx, b, W, H, color) {
+    ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .45; const r = 6;
+    const x = b.x1 * W + 4, y = b.y1 * H + 4, w = (b.x2 - b.x1) * W - 8, h = (b.y2 - b.y1) * H - 8;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); ctx.restore(); }
+  // Hungarian (Kuhn-Munkres) for a square cost matrix; returns col index per row.
+  function hungarian(C) {
+    const n = C.length, INF = 1e18, u = Array(n + 1).fill(0), v = Array(n + 1).fill(0), p = Array(n + 1).fill(0), way = Array(n + 1).fill(0);
+    for (let i = 1; i <= n; i++) { p[0] = i; let j0 = 0; const minv = Array(n + 1).fill(INF), used = Array(n + 1).fill(false);
+      do { used[j0] = true; const i0 = p[j0]; let d = INF, j1 = 0;
+        for (let j = 1; j <= n; j++) if (!used[j]) { const cur = C[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; } if (minv[j] < d) { d = minv[j]; j1 = j; } }
+        for (let j = 0; j <= n; j++) if (used[j]) { u[p[j]] += d; v[j] -= d; } else minv[j] -= d; j0 = j1; } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0); }
+    const a = Array(n); for (let j = 1; j <= n; j++) if (p[j]) a[p[j] - 1] = j - 1; return a;
+  }
+  // Keyboard + pointer dragging of a point in [0,1]^2 on a canvas.
+  function draggable(el, get, set) {
+    let drag = false;
+    const pos = e => { const r = el.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };
+    el.addEventListener('pointerdown', e => { drag = true; el.setPointerCapture(e.pointerId); set(...pos(e)); });
+    el.addEventListener('pointermove', e => { if (drag) set(...pos(e)); });
+    el.addEventListener('pointerup', () => { drag = false; });
+    el.addEventListener('keydown', e => { const [x, y] = get(), s = e.shiftKey ? .05 : .015;
+      const m = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
+      if (m) { e.preventDefault(); e.stopPropagation(); set(x + m[0], y + m[1]); } });
+  }
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  // Mix two colors given as "#rrggbb" or "rgb(r,g,b)".
+  function mix(c1, c2, u) {
+    const p = c => c[0] === '#' ? [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)) : c.match(/[\d.]+/g).slice(0, 3).map(Number);
+    const a = p(c1), b = p(c2); return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], u))).join(',')})`;
+  }
+  function dot(ctx, x, y, r, color, alpha = 1) { ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); }
+  function arrow(ctx, x1, y1, x2, y2, color, lw = 2, head = 8, alpha = 1) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = Math.hypot(x2 - x1, y2 - y1), hd = Math.min(head, L * .45);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - hd * .6 * Math.cos(a), y2 - hd * .6 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - hd * Math.cos(a - .42), y2 - hd * Math.sin(a - .42));
+    ctx.lineTo(x2 - hd * Math.cos(a + .42), y2 - hd * Math.sin(a + .42)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  // Tween numeric fields of obj toward target; instant() jumps straight to the end. Returns a stop function.
+  function tween(obj, target, ms, redraw, done) {
+    const from = {}; for (const k in target) from[k] = obj[k];
+    return animate(ms, u => { for (const k in target) obj[k] = from[k] + (target[k] - from[k]) * u; redraw(); }, done);
+  }
+  function tag(ctx, text, x, y, color, size = 11, align = 'left') {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; const w = ctx.measureText(text).width, x0 = align === 'right' ? x - w : x;
+    ctx.globalAlpha = .82; ctx.fillStyle = css('--bg'); ctx.beginPath(); ctx.roundRect(x0 - 3, y - size, w + 6, size + 4, 3); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  return { css, instant, onTheme, canvas, animate, tween, tag, rng, iou, giou, cxcywh, fromC, strokeBox, label, scene, person, thing, hungarian, draggable, clamp, lerp, mix, dot, arrow };
+})();
+</script>
+</head>
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="A set of object-query slots fires predicted boxes, all at once, at a toy street scene with a car, a person and a dog. Two of the boxes are duplicates, a second box on the car and one on the person, and the rest land on nothing in particular. The three ground-truth boxes appear. During training, one-to-one matching links each object to exactly one slot, drawn in green. All the other slots, the duplicates included, get the target &quot;no object&quot; and fade to brown. The loss teaches those slots to stay silent, so at test time the model outputs three boxes with no NMS step."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+  </div>
+  <h1>The DETR family, intuition first</h1>
+  <p class="hook">How object detection became a set-prediction problem, why that first version trained so slowly, and how six follow-ups made it fast to train and then fast to run.</p>
+  <p class="papers-note">The seven papers, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/2005.12872v3" title="arXiv 2005.12872v3">DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2010.04159v4" title="arXiv 2010.04159v4">Deformable DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2201.12329v4" title="arXiv 2201.12329v4">DAB-DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2203.01305v3" title="arXiv 2203.01305v3">DN-DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2203.03605v4" title="arXiv 2203.03605v4">DINO</a></li>
+    <li><a href="https://arxiv.org/abs/2304.08069v3" title="arXiv 2304.08069v3">RT-DETR</a></li>
+    <li><a href="https://arxiv.org/abs/2511.09554v2" title="arXiv 2511.09554v2">RF-DETR</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: DETR</li>
+    <li><a href="#ch-set-problem" data-rail="A set problem">Detection is a set problem</a></li>
+    <li><a href="#ch-matching" data-rail="Hungarian matching">One prediction per object: Hungarian matching</a></li>
+    <li><a href="#ch-queries" data-rail="Object queries">Object queries and a decoder that talks to itself</a></li>
+    <li><a href="#ch-training" data-rail="Training step">One training step, end to end</a></li>
+    <li><a href="#ch-detr-limits" data-rail="What it cost">What it cost: long training and small objects</a></li>
+    <li class="act col-break">Act II: making DETR train fast</li>
+    <li><a href="#ch-deformable" data-rail="Deformable DETR">Deformable DETR: look at a few points, not every pixel</a></li>
+    <li><a href="#ch-anchor-queries" data-rail="DAB-DETR">DAB-DETR: a query is a box</a></li>
+    <li><a href="#ch-denoising" data-rail="DN-DETR, DINO">DN-DETR and DINO: teach with noisy answers</a></li>
+    <li class="act">Act III: making DETR run fast</li>
+    <li><a href="#ch-rt-detr" data-rail="RT-DETR">RT-DETR: DETRs beat YOLOs once you count NMS</a></li>
+    <li><a href="#ch-rf-detr" data-rail="RF-DETR">RF-DETR: train once, pick your latency</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Family tree</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">predictions and queries</span>
+  <span class="c-yellow">ground truth</span>
+  <span class="c-green">matched, kept, positive</span>
+  <span class="c-red">cost, loss, removed, negative</span>
+  <span class="c-brown">"no object", background, baseline models</span>
+</div>
+<script>
+// Mark display equations that still overflow (on a phone), so CSS can fade their edge until scrolled to the end.
+addEventListener('DOMContentLoaded', () => {
+  const mark = () => document.querySelectorAll('.eq').forEach(e => { e.classList.toggle('scrolls', e.scrollWidth > e.clientWidth + 2); e.classList.toggle('at-end', e.scrollLeft + e.clientWidth >= e.scrollWidth - 2); });
+  document.querySelectorAll('.eq').forEach(e => e.addEventListener('scroll', mark, { passive: true }));
+  addEventListener('resize', mark); mark();
+});
+</script>
+<p class="note">Each interactive carries a badge. <b>Toy model</b> means an illustration of the mechanism, not the paper's network. <b>Computed</b> means a real formula from the paper evaluated on toy inputs. <b>Sourced</b> means the numbers come from the paper's tables. <b>Diagram</b> means a drawing of a structure or rule that the papers state. Numbers in the text are checked against a claim list kept with this page. In the matching equations, hover or tap a term that names part of the figure: that part of the figure lights up.</p>
+
+<style>
+/* Page chrome: chapter rail with reading progress, a sticky bar below the rail breakpoint, figures as wide stages,
+   and equation terms that light up their figure. Include once, anywhere in <main>, after nav.toc. */
+:root { --rail-w:13.5rem; --measure:40rem; --stage:60rem; }
+main { max-width:calc(var(--measure) + 6rem); margin:0 auto; padding:0 16px 5rem; }
+main > *:not(figure):not(header):not(nav):not(section):not(.eq),
+main > section > *:not(figure):not(.eq):not(.pe-wide) { max-width:var(--measure); }
+figure.viz { margin:1.8rem 0; }
+@media (max-width:520px) { figure.viz { margin:1.4rem -16px; padding:.7rem; border-radius:0; } }
+h2[data-n]::before { content:attr(data-n); display:block; font-size:1rem; font-weight:400; color:var(--blue); margin-bottom:.35rem; }
+@media (min-width:1180px) {
+  main { max-width:var(--stage); margin-left:max(calc(var(--rail-w) + 3rem), calc((100vw - var(--stage)) / 2)); margin-right:auto; padding-left:0; }
+}
+
+.pe-rail { font:.86rem/1.35 system-ui, sans-serif; color:var(--muted); }
+.pe-rail ol { list-style:none; margin:0; padding:0; }
+.pe-rail a { color:inherit; text-decoration:none; display:flex; gap:.6rem; align-items:baseline; padding:.18rem 0; border-radius:4px; }
+.pe-rail a:hover { color:var(--fg); }
+.pe-rail a:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.pe-rail .pe-act { font:1rem/1.2 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); margin:1rem 0 .3rem; }
+.pe-rail .pe-act:first-child { margin-top:0; }
+.pe-rail .pe-act i { font-style:normal; color:var(--muted); margin-right:.35rem; }
+.pe-rail li.pe-node { position:relative; padding-left:1.25rem; }
+.pe-rail li.pe-node::before { content:""; position:absolute; left:.2rem; top:.5rem; width:.55rem; height:.55rem; border-radius:50%;
+  border:1.5px solid var(--rule); background:var(--bg); z-index:1; transition:background .3s, border-color .3s; }
+.pe-rail li.pe-node::after { content:""; position:absolute; left:calc(.475rem - 1px); top:1.05rem; bottom:-.55rem; width:2px;
+  background:linear-gradient(var(--muted) calc(var(--p, 0) * 100%), var(--rule) 0); }
+.pe-rail li.pe-node:last-child::after, .pe-rail li.pe-node.pe-end::after { display:none; }
+.pe-rail li.pe-done::before { background:var(--muted); border-color:var(--muted); }
+.pe-rail li.pe-done::after { --p:1; }
+.pe-rail li.pe-cur::before { background:var(--blue); border-color:var(--blue); box-shadow:0 0 0 3px color-mix(in srgb, var(--blue) 30%, transparent); }
+.pe-rail li.pe-cur > a { color:var(--fg); }
+.pe-rail .pe-n { min-width:1.3em; font-variant-numeric:tabular-nums; }
+.pe-rail .pe-extra { margin-top:1rem; padding-left:1.25rem; }
+.pe-rail-title { font:1.05rem/1.25 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); margin:0 0 1.2rem; display:block; text-decoration:none; }
+.pe-chbar { display:none; }
+@media (min-width:1180px) {
+  .pe-rail { position:fixed; top:0; bottom:0; left:0; width:var(--rail-w); padding:2rem 1rem 2rem 1.4rem; overflow-y:auto; border-right:1px solid var(--rule); background:var(--bg); z-index:20; }
+}
+@media (max-width:1179.98px) {
+  .pe-chbar { display:flex; position:sticky; top:0; z-index:30; align-items:center; gap:.7rem; height:2.7rem; padding:0 16px;
+    background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(6px); border-bottom:1px solid var(--rule);
+    font:.9rem system-ui, sans-serif; }
+  .pe-chbar-label { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--fg); }
+  .pe-chbar-label b { color:var(--blue); margin-right:.45rem; font-variant-numeric:tabular-nums; }
+  .pe-chbar button { font:inherit; color:var(--fg); background:var(--panel2, var(--panel)); border:1px solid var(--rule); border-radius:999px; padding:.25rem .8rem; cursor:pointer; }
+  .pe-chbar button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+  .pe-chbar-progress { position:absolute; left:0; bottom:-1px; height:2px; width:100%; background:var(--blue); transform-origin:0 50%; transform:scaleX(var(--g, 0)); }
+  .pe-rail { display:none; }
+  body.pe-rail-open .pe-rail { display:block; position:fixed; top:2.7rem; left:0; right:0; max-height:72vh; overflow-y:auto; z-index:29;
+    background:var(--bg); border-bottom:1px solid var(--rule); padding:1rem 16px 1.2rem; }
+}
+body.pe-watch .pe-rail, body.pe-watch .pe-chbar { display:none !important; }
+body.pe-watch main { margin-left:auto; margin-right:auto; }
+
+/* Equation terms that name part of a figure. */
+.eq[data-viz] [data-link].pe-term { cursor:pointer; border-radius:3px; transition:background-color .2s; }
+.eq[data-viz] [data-link].pe-term:hover, .eq[data-viz] [data-link].pe-term:focus-visible { background:color-mix(in srgb, var(--fg) 12%, transparent); outline:none; }
+.pe-lit { background:color-mix(in srgb, var(--yellow) 22%, transparent) !important; border-radius:3px; transition:background-color .2s; }
+@media (prefers-reduced-motion: reduce) { .pe-rail li.pe-node::before, .pe-term, .pe-lit { transition:none !important; } }
+</style>
+<script>
+// Runs after parsing: the chapters come after this script in the page.
+addEventListener('DOMContentLoaded', () => {
+  const toc = document.querySelector('nav.toc');
+  const sections = [...document.querySelectorAll('section.chapter[id]')];
+  const byId = Object.fromEntries(sections.map(s => [s.id, s]));
+  // Rail items come from nav.toc (acts are li.act, chapters are numbered li > a); without a toc, from the h2s.
+  const items = [];
+  if (toc) {
+    toc.querySelectorAll('ol > li').forEach(li => {
+      if (li.classList.contains('act')) { items.push({ act: li.textContent.trim() }); return; }
+      const a = li.querySelector('a[href^="#"]'); if (!a || !byId[a.getAttribute('href').slice(1)]) return;
+      const full = a.textContent.trim(), paren = /\(([^()]*)\)\s*$/.exec(full);
+      items.push({ id: a.getAttribute('href').slice(1), label: a.dataset.rail || (paren ? paren[1] : full), full });
+    });
+  } else sections.forEach(s => items.push({ id: s.id, label: s.querySelector('h2').textContent.trim() }));
+  let n = 0; items.forEach(it => { if (it.id) it.n = ++n; });
+  const numbered = new Set(items.filter(i => i.id).map(i => i.id));
+  const extras = sections.filter(s => !numbered.has(s.id));
+  items.forEach(it => { if (it.id) byId[it.id].querySelector('h2').dataset.n = it.n; });
+
+  const rail = document.createElement('nav'); rail.className = 'pe-rail'; rail.id = 'pe-rail'; rail.setAttribute('aria-label', 'Chapters and reading progress');
+  const title = document.querySelector('h1');
+  const ol = document.createElement('ol');
+  const actName = t => { const m = /^Act ([IVXLC]+):?\s*(.*)$/i.exec(t); return m ? `<i>${m[1]}</i>${m[2].charAt(0).toUpperCase() + m[2].slice(1)}` : t; };
+  items.forEach((it, k) => {
+    const li = document.createElement('li');
+    if (it.act) { li.className = 'pe-act'; li.innerHTML = actName(it.act); }
+    else {
+      li.className = 'pe-node'; li.dataset.id = it.id; if (!items[k + 1] || items[k + 1].act) li.classList.add('pe-end');
+      li.innerHTML = `<a href="#${it.id}" title="${(it.full || it.label).replace(/"/g, '&quot;')}"><span class="pe-n">${it.n}</span><span>${it.label}</span></a>`;
+    }
+    ol.appendChild(li);
+  });
+  rail.innerHTML = title ? `<a class="pe-rail-title" href="#top">${title.textContent}</a>` : '';
+  rail.appendChild(ol);
+  if (extras.length) { const ex = document.createElement('ol'); ex.className = 'pe-extra';
+    extras.forEach(s => { const li = document.createElement('li'); li.innerHTML = `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`; ex.appendChild(li); }); rail.appendChild(ex); }
+  if (!document.getElementById('top')) { const t = document.createElement('span'); t.id = 'top'; document.body.prepend(t); }
+  const bar = document.createElement('div'); bar.className = 'pe-chbar';
+  bar.innerHTML = '<span class="pe-chbar-label" aria-live="polite"></span><button type="button" id="pe-rail-toggle" aria-expanded="false" aria-controls="pe-rail">Chapters</button><span class="pe-chbar-progress"></span>';
+  document.body.insertBefore(bar, document.body.firstChild.nextSibling);
+  document.body.insertBefore(rail, bar.nextSibling);
+  const toggle = bar.querySelector('button'), label = bar.querySelector('.pe-chbar-label');
+  const setOpen = o => { document.body.classList.toggle('pe-rail-open', o); toggle.setAttribute('aria-expanded', String(o)); };
+  toggle.addEventListener('click', () => setOpen(!document.body.classList.contains('pe-rail-open')));
+  rail.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+
+  const nodes = [...rail.querySelectorAll('li.pe-node')];
+  let queued = false;
+  function spy() {
+    queued = false;
+    const line = innerHeight * .35; let cur = -1;
+    nodes.forEach((li, k) => { if (byId[li.dataset.id].getBoundingClientRect().top <= line) cur = k; });
+    nodes.forEach((li, k) => {
+      li.classList.toggle('pe-done', k < cur); li.classList.toggle('pe-cur', k === cur);
+      if (k === cur) { const r = byId[li.dataset.id].getBoundingClientRect(); li.style.setProperty('--p', Math.min(1, Math.max(0, (line - r.top) / r.height)).toFixed(3)); }
+      else li.style.removeProperty('--p');
+    });
+    const it = cur >= 0 ? items.find(i => i.id === nodes[cur].dataset.id) : null;
+    label.innerHTML = it ? `<b>${it.n}</b>${it.label}` : (title ? title.textContent : '');
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.setProperty('--g', max > 0 ? (scrollY / max).toFixed(4) : 0);
+  }
+  addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(spy); } }, { passive: true });
+  addEventListener('resize', spy); spy();
+
+  // Hover, focus or tap an equation term: light it, light the figure parts with the same data-link, and pulse the canvas.
+  document.querySelectorAll('.eq[data-viz]').forEach(eq => {
+    const fig = document.getElementById(eq.dataset.viz); if (!fig) return;
+    eq.querySelectorAll('[data-link]').forEach(t => {
+      t.classList.add('pe-term'); t.tabIndex = 0; t.setAttribute('role', 'button');
+      t.setAttribute('aria-label', 'Show ' + t.dataset.link.replace(/\s+/g, ' and ') + ' in the figure');
+      let last = 0;
+      const fire = () => {
+        const now = performance.now(); if (now - last < 600) return; last = now;
+        const lit = [t];
+        t.dataset.link.split(/\s+/).forEach(l => { fig.querySelectorAll(`[data-link~="${l}"]`).forEach(x => lit.push(x)); fig.dispatchEvent(new CustomEvent('pe-link', { detail: l })); });
+        lit.forEach(x => x.classList.add('pe-lit')); setTimeout(() => lit.forEach(x => x.classList.remove('pe-lit')), 1100);
+      };
+      t.addEventListener('mouseenter', fire); t.addEventListener('focus', fire); t.addEventListener('click', fire);
+      t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); last = 0; fire(); } });
+    });
+  });
+});
+</script>
+<script>
+(() => {
+  const el = document.getElementById('hero-canvas'), btn = document.getElementById('btn-hero-replay');
+  const T_END = 5.8;
+  let t = 0, raf = 0;
+  const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const ease = x => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const seg = (a, b) => ease((t - a) / (b - a));
+  // Scene boxes are fractions of the photo panel. Slot k fires box k; slots 0, 2, 4 win the matching.
+  const GT = [{ n: 'car', b: [.06, .48, .40, .86] }, { n: 'person', b: [.50, .17, .62, .86] }, { n: 'dog', b: [.70, .60, .92, .86] }];
+  const PRED = [
+    { b: [.07, .50, .39, .85], gt: 0 }, { b: [.11, .43, .44, .81], dup: 'above' }, { b: [.505, .19, .615, .85], gt: 1 },
+    { b: [.29, .07, .41, .29] }, { b: [.705, .62, .915, .86], gt: 2 }, { b: [.46, .25, .59, .79], dup: 'left' },
+    { b: [.79, .09, .95, .38] }, { b: [.61, .41, .73, .58] }, { b: [.14, .11, .26, .35] }, { b: [.38, .56, .49, .76] }];
+  const NS = PRED.length;
+  // Two virtual stages, wide (960 x 380) and narrow (360 x 540); everything is laid out in virtual units.
+  const L = wide => wide ? {
+    vw: 960, vh: 380, fs: 13, slot: k => ({ x: 64, y: 50 + k * 29, w: 30, h: 21 }), out: 'right',
+    pan: { x: 330, y: 34, w: 600, h: 312 }, qlab: [48, 30], qsub: [48, 362], match: [214, 196], none: [48, 362], fin: [930, 24],
+  } : {
+    vw: 360, vh: 540, fs: 12, slot: k => ({ x: 18 + k * 33, y: 40, w: 27, h: 22 }), out: 'down',
+    pan: { x: 18, y: 120, w: 324, h: 300 }, qlab: [18, 28], qsub: [18, 82], match: [18, 452], none: [18, 474], fin: [18, 500],
+  };
+  let C = {};
+  const tint = (c, a) => PE.mix(C.BG, c, a);
+  function rr(ctx, x, y, w, h, r, fill, stroke, lw = 1.5) {
+    r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+  }
+  const box = (P, b) => ({ x: P.x + b[0] * P.w, y: P.y + b[1] * P.h, w: (b[2] - b[0]) * P.w, h: (b[3] - b[1]) * P.h });
+  // Stroke the first fraction u of a rectangle's outline, starting at its top-left corner.
+  function rectPart(ctx, r, u, col, lw, dash = null, alpha = 1) {
+    if (u <= 0) return;
+    const pts = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h], [r.x, r.y]];
+    let left = u * 2 * (r.w + r.h);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(r.x, r.y);
+    for (let i = 1; i < pts.length && left > 0; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], d = Math.hypot(x1 - x0, y1 - y0), f = Math.min(1, left / d);
+      ctx.lineTo(x0 + (x1 - x0) * f, y0 + (y1 - y0) * f); left -= d; }
+    ctx.stroke(); ctx.restore();
+  }
+  // A quadratic curve from a slot to a box, drawn up to fraction u, with an arrowhead at its tip.
+  function wire(ctx, a, b, ctl, u, col, lw, alpha) {
+    if (u <= 0 || alpha <= 0) return;
+    const at = s => [(1 - s) * (1 - s) * a[0] + 2 * (1 - s) * s * ctl[0] + s * s * b[0], (1 - s) * (1 - s) * a[1] + 2 * (1 - s) * s * ctl[1] + s * s * b[1]];
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(a[0], a[1]);
+    const n = 28; for (let i = 1; i <= n * u; i++) { const p = at(i / n); ctx.lineTo(p[0], p[1]); }
+    const end = at(u); ctx.lineTo(end[0], end[1]); ctx.stroke(); ctx.restore();
+    const pre = at(Math.max(0, u - .06)); PE.arrow(ctx, pre[0], pre[1], end[0], end[1], col, lw, 7, alpha);
+  }
+  function scene(ctx, P) {
+    rr(ctx, P.x, P.y, P.w, P.h, 10, tint(C.F, .05));
+    ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y + P.h * .8, P.w, P.h * .2); ctx.clip(); rr(ctx, P.x, P.y, P.w, P.h, 10, tint(C.F, .1)); ctx.restore();
+    const Y = C.Y, f = tint(Y, .32), q = (fx, fy) => [P.x + fx * P.w, P.y + fy * P.h];
+    ctx.fillStyle = f;
+    // car
+    let [x, y] = q(.07, .62); rr(ctx, x, y, .32 * P.w, .17 * P.h, 8, f);
+    [x, y] = q(.13, .5); rr(ctx, x, y, .18 * P.w, .14 * P.h, 8, f);
+    [[.13, .82], [.32, .82]].forEach(([a, b]) => { const [cx, cy] = q(a, b); PE.dot(ctx, cx, cy, .045 * P.h, tint(Y, .5)); });
+    // person
+    [x, y] = q(.56, .25); PE.dot(ctx, x, y, .055 * P.h, f);
+    [x, y] = q(.525, .34); rr(ctx, x, y, .07 * P.w, .5 * P.h, 6, f);
+    // dog
+    [x, y] = q(.79, .72); ctx.beginPath(); ctx.ellipse(x, y, .075 * P.w, .055 * P.h, 0, 0, 7); ctx.fill();
+    [x, y] = q(.875, .655); PE.dot(ctx, x, y, .05 * P.h, f);
+    ctx.strokeStyle = f; ctx.lineWidth = Math.max(2, .012 * P.w); ctx.lineCap = 'round';
+    [[.74, .76, .735, .85], [.77, .77, .77, .85], [.82, .77, .825, .85], [.845, .76, .855, .85], [.72, .7, .7, .62]].forEach(([a, b, c, d]) => {
+      const [x0, y0] = q(a, b), [x1, y1] = q(c, d); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); });
+  }
+  const font = (ctx, fs, w = 600) => { ctx.font = `${w} ${fs}px system-ui, sans-serif`; };
+  const lab = (ctx, s, x, y, col, fs, al = 'left', alpha = 1) => { if (alpha <= 0) return; ctx.save(); ctx.globalAlpha = alpha; PE.label(ctx, s, x, y, col, fs, al); ctx.restore(); };
+
+  const cv = PE.canvas(el, w => w >= 620 ? 380 / 960 : 540 / 360, (ctx, W, H) => {
+    C = { B: PE.css('--blue'), Y: PE.css('--yellow'), G: PE.css('--green'), Br: PE.css('--brown'), F: PE.css('--fg'), M: PE.css('--muted'), BG: PE.css('--bg') };
+    ctx.clearRect(0, 0, W, H);
+    const wide = W >= 620, S = L(wide), k = W / S.vw, P = S.pan;
+    ctx.save(); ctx.scale(k, k);
+    // A: the photo and the slots appear.
+    const aIn = seg(0, .5);
+    ctx.save(); ctx.globalAlpha = aIn; scene(ctx, P); ctx.restore();
+    lab(ctx, 'object queries', S.qlab[0], S.qlab[1], C.B, S.fs, 'left', aIn);
+    lab(ctx, `${NS} of DETR's 100 slots`, S.qsub[0], S.qsub[1], C.M, S.fs - 1, 'left', aIn * (1 - seg(3.7, 4.2)));
+    // B: each slot fires a predicted box.
+    // The decoder predicts every slot in parallel, so the slots fire as one burst.
+    const fire = i => seg(.6 + i * .03, 1.3 + i * .03), draw = i => seg(1.05 + i * .03, 1.7 + i * .03);
+    // C: the ground truth. D: one-to-one matching. E: everything else becomes "no object".
+    const gtA = seg(1.9, 2.5), mt = i => seg(2.6 + i * .1, 3.3 + i * .1), none = seg(3.7, 4.5), fin = seg(4.7, 5.5);
+    const anchor = (s, r) => S.out === 'right' ? [[s.x + s.w + 4, s.y + s.h / 2], [r.x - 3, r.y + Math.min(14, r.h / 2)]] : [[s.x + s.w / 2, s.y + s.h + 4], [r.x + Math.min(14, r.w / 2), r.y - 3]];
+    PRED.forEach((p, i) => {
+      const s = S.slot(i), r = box(P, p.b), win = p.gt !== undefined, [a, b] = anchor(s, r);
+      const ctl = S.out === 'right' ? [(a[0] + b[0]) / 2, a[1]] : [a[0], (a[1] + b[1]) / 2];
+      const lowConf = !win && p.dup === undefined;
+      // Wires: blue while firing; winners turn green; losers fade with the "no object" step.
+      const wa = (win ? 1 : 1 - none) * (lowConf ? .45 : .8) * (1 - .55 * gtA * (win ? 0 : 1));
+      const mixG = win ? mt(p.gt) : 0;
+      wire(ctx, a, b, ctl, fire(i), mixG > 0 ? PE.mix(C.B, C.G, mixG) : C.B, win ? 1.4 + 1.2 * mixG : 1.2, wa);
+      // Predicted boxes.
+      const u = draw(i);
+      if (win) rectPart(ctx, r, u, mixG > 0 ? PE.mix(C.B, C.G, mixG) : C.B, 2 + 1.2 * mixG);
+      else { const al = (lowConf ? .5 : .95) * (1 - .6 * none), col = none > 0 ? PE.mix(C.B, C.Br, none) : C.B;
+        rectPart(ctx, r, u, col, lowConf ? 1.2 : 1.8, none > .5 ? [4, 4] : null, al); }
+      if (p.dup === 'above') lab(ctx, 'duplicate', r.x + 3, r.y - 5, C.Br, S.fs - 2, 'left', none);
+      if (p.dup === 'left') lab(ctx, 'duplicate', r.x - 5, r.y + 14, C.Br, S.fs - 2, 'right', none);
+      // The slot itself.
+      const sIn = seg(.05 + i * .04, .45 + i * .04), flash = Math.max(0, 1 - Math.abs((t - (.6 + i * .03)) / .25));
+      ctx.save(); ctx.globalAlpha = sIn;
+      const fill = win ? PE.mix(tint(C.B, .25 + .5 * flash), C.G, mixG) : PE.mix(tint(C.B, .25 + .5 * flash), tint(C.Br, .18), none);
+      const edge = win ? PE.mix(C.B, C.G, mixG) : PE.mix(C.B, C.Br, none);
+      rr(ctx, s.x, s.y, s.w, s.h, 5, fill, edge, 1.4);
+      if (!win && none > 0) { font(ctx, S.fs); ctx.globalAlpha = sIn * none; ctx.fillStyle = C.Br; ctx.textAlign = 'center'; ctx.fillText('\u2205', s.x + s.w / 2, s.y + s.h / 2 + 4.5); }
+      ctx.restore();
+      if (win && mixG > .2) {
+        const ring = Math.sin(Math.PI * cl((t - (3.0 + p.gt * .1)) / .8));
+        if (ring > 0) { ctx.save(); ctx.globalAlpha = .45 * ring; ctx.strokeStyle = C.G; ctx.lineWidth = 2; rr(ctx, s.x - 4, s.y - 4, s.w + 8, s.h + 8, 8, null, C.G, 2); ctx.restore(); }
+      }
+    });
+    // Ground truth, on top of the predictions.
+    GT.forEach((g, j) => { const r = box(P, g.b); rectPart(ctx, r, gtA, C.Y, 1.5, [3, 3]);
+      lab(ctx, g.n, r.x + 3, r.y + r.h + 15, C.Y, S.fs - 1, 'left', gtA); });
+    lab(ctx, 'ground truth', P.x + P.w - 8, P.y + P.h - 8, C.Y, S.fs - 1, 'right', gtA * (1 - fin));
+    lab(ctx, 'in training: one-to-one matching', S.match[0], S.match[1], C.G, wide ? S.fs - 1 : S.fs, wide ? 'center' : 'left', seg(2.7, 3.3));
+    lab(ctx, 'all other slots: target "no object"', S.none[0], S.none[1], C.Br, S.fs, 'left', none);
+    lab(ctx, 'after training: 3 objects, 3 boxes, no NMS', S.fin[0], S.fin[1], C.G, S.fs + 1, wide ? 'right' : 'left', fin);
+    ctx.restore();
+  });
+  function play() {
+    cancelAnimationFrame(raf);
+    if (PE.instant()) { t = T_END; cv.redraw(); return; }
+    const t0 = performance.now();
+    const f = now => { t = (now - t0) / 1000; cv.redraw(); if (t < T_END) raf = requestAnimationFrame(f); };
+    raf = requestAnimationFrame(f);
+  }
+  btn.addEventListener('click', play);
+  play();
+})();
+</script>
+<!-- ============================ ACT I ============================ -->
+<p class="kicker"><span class="act-n">Act I</span>DETR</p>
+<section id="ch-set-problem" class="chapter">
+<h2>Detection is a set problem</h2>
+<p>Ask a person what is in a photo and you get a short list: two people, one dog, a car. No order, no duplicates. That list is a <em>set</em> of (class, box) pairs, and it is exactly what an object detector is supposed to produce.</p>
+<p>Classic detectors never produce that set directly. They lay down thousands of candidate boxes (anchors, proposals, or a grid of centers), score every one, and end up with a cloud of overlapping guesses around each object. A cleanup step called <b>non-maximum suppression</b> (NMS) then keeps the highest-scoring box and deletes any other box that overlaps it by more than a threshold.</p>
+<p>That threshold is a hand-set guess about what "duplicate" means. Push two people close together and see what it does.</p>
+
+<figure class="viz" id="viz-nms-overlap" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="nms-canvas" aria-label="Two people with clouds of candidate boxes; NMS keeps or deletes boxes" role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-nms-apart">People apart</button>
+    <button type="button" id="btn-nms-close">People overlapping</button>
+    <button type="button" id="btn-nms-run">Run NMS</button>
+    <button type="button" id="btn-nms-low">Threshold 0.3</button>
+    <button type="button" id="btn-nms-high">Threshold 0.8</button>
+    <label>IoU threshold <input type="range" id="nms-iou" min="0.3" max="0.9" step="0.05" value="0.5"><span id="nms-iou-val">0.50</span></label>
+    <button type="button" id="btn-nms-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="nms-readout" aria-live="polite"></p>
+  <figcaption>Toy model: two ground-truth people (yellow) and a cloud of scored candidate boxes (blue). NMS keeps boxes in green and deletes overlapping ones in red. With the people overlapping, a low threshold (0.3) deletes the second person, and a high threshold (0.8) leaves duplicates.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('nms-canvas'), out = document.getElementById('nms-readout');
+  const iouIn = document.getElementById('nms-iou'), iouVal = document.getElementById('nms-iou-val');
+  const S = { gap: 0.30, tg: 0.30, nms: false, k: 0 };
+  const base = [{ cx: .5, cy: .52, w: .16, h: .5 }, { cx: .5, cy: .55, w: .15, h: .46 }];
+  function gts() { return [PE.fromC(base[0].cx - S.gap / 2, base[0].cy, base[0].w, base[0].h), PE.fromC(base[1].cx + S.gap / 2, base[1].cy, base[1].w, base[1].h)]; }
+  function candidates() {
+    const r = PE.rng(7), out = [];
+    gts().forEach((g, gi) => { const [cx, cy, w, h] = PE.cxcywh(g);
+      for (let k = 0; k < 7; k++) { const j = k === 0 ? 0 : 1;
+        out.push({ b: PE.fromC(cx + j * (r() - .5) * w * .5, cy + j * (r() - .5) * h * .25, w * (1 + j * (r() - .5) * .45), h * (1 + j * (r() - .5) * .25)),
+          s: k === 0 ? (gi ? .86 : .93) : .35 + r() * .45, gt: gi }); } });
+    return out.sort((a, b) => b.s - a.s);
+  }
+  function nms(c, thr) { const keep = []; c.forEach(x => { x.kept = !keep.some(k => PE.iou(k.b, x.b) > thr); if (x.kept) keep.push(x); }); return keep; }
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); const g = gts(), c = candidates();
+    g.forEach(b => PE.person(ctx, b, W, H, PE.css('--yellow')));
+    let keep = null; if (S.nms) keep = nms(c, +iouIn.value);
+    const B = PE.css('--blue'), G = PE.css('--green'), R = PE.css('--red');
+    c.forEach((x, i) => { const d = S.nms ? PE.clamp(S.k - i, 0, 1) : 0;
+      if (d <= 0) PE.strokeBox(ctx, x.b, W, H, B, 1.4, null, .75);
+      else if (x.kept) PE.strokeBox(ctx, x.b, W, H, PE.mix(B, G, d), 1.4 + 1.2 * d, null, .75 + .25 * d);
+      else PE.strokeBox(ctx, x.b, W, H, PE.mix(B, R, d), 1.4 - .4 * d, d > .5 ? [4, 4] : null, .75 - .3 * d); });
+    if (S.nms && S.k < c.length) PE.strokeBox(ctx, c[Math.floor(S.k)].b, W, H, PE.css('--fg'), 3, null, .9);
+    g.forEach(b => PE.strokeBox(ctx, b, W, H, PE.css('--yellow'), 1.5, [2, 3]));
+    if (!S.nms) { out.textContent = `${c.length} candidate boxes for 2 people. Press "Run NMS".`; return; }
+    const found = new Set(keep.filter(k => PE.iou(k.b, g[k.gt]) > .5).map(k => k.gt)), dups = keep.length - found.size;
+    out.textContent = `NMS kept ${keep.length} box${keep.length === 1 ? '' : 'es'}: ${found.size} of 2 people found, ${Math.max(0, dups)} duplicate${dups === 1 ? '' : 's'} left.`;
+  });
+  const N = candidates().length;
+  let stop = () => {}, stopSweep = () => {};
+  const mark = () => [['btn-nms-apart', S.tg === .30], ['btn-nms-close', S.tg === .04], ['btn-nms-low', +iouIn.value === .3], ['btn-nms-high', +iouIn.value === .8]]
+    .forEach(([id, v]) => document.getElementById(id).setAttribute('aria-pressed', String(v)));
+  function moveTo(gap) { stop(); S.tg = gap; mark(); stop = PE.tween(S, { gap }, 700, cv.redraw); }
+  function sweep() { stopSweep(); S.nms = true; S.k = 0; stopSweep = PE.tween(S, { k: N }, 1100, cv.redraw); }
+  document.getElementById('btn-nms-apart').onclick = () => moveTo(0.30);
+  document.getElementById('btn-nms-close').onclick = () => moveTo(0.04);
+  document.getElementById('btn-nms-run').onclick = sweep;
+  document.getElementById('btn-nms-reset').onclick = () => { stop(); stopSweep(); S.gap = 0.30; S.tg = 0.30; S.nms = false; S.k = 0; iouIn.value = 0.5; iouVal.textContent = '0.50'; mark(); cv.redraw(); };
+  iouIn.oninput = () => { stopSweep(); S.k = N; iouVal.textContent = (+iouIn.value).toFixed(2); mark(); cv.redraw(); };
+  const setThr = v => { iouIn.value = v; iouVal.textContent = (+iouIn.value).toFixed(2); mark(); if (S.nms) sweep(); else cv.redraw(); };
+  document.getElementById('btn-nms-low').onclick = () => setThr(0.3);
+  document.getElementById('btn-nms-high').onclick = () => setThr(0.8);
+  mark();
+})();
+</script>
+
+<p>With the people apart, any threshold up to about 0.5 works. Overlapping, a threshold of 0.3 deletes the second person entirely, because their best box overlaps the first person's best box, and NMS cannot tell "another person" from "the same person again". Raise it to 0.8 and a pile of duplicates survives. A middle value happens to work for this toy image, but the right setting depends on how crowded the scene is, and it is chosen by hand. The detector itself never learned to avoid duplicates; a heuristic cleans up after it.</p>
+<p>DETR's question is simple: can the network output the final set directly, with no duplicates and no cleanup step?</p>
+</section>
+
+<section id="ch-matching" class="chapter">
+<h2>One prediction per object: Hungarian matching</h2>
+<p>DETR predicts a fixed number of slots, <span data-claim="pg-detr-n">N = 100</span>, all at once. Each slot outputs a class (including a special <b class="c-brown">"no object"</b> class) and a box. A typical COCO image has far fewer objects than that, so most slots should say "no object".</p>
+<p>Training needs to know which slot is responsible for which object. DETR pads the ground-truth list with "no object" up to N entries and finds the <b>one-to-one</b> assignment between slots and entries that costs the least. Here is the trick: because each object can be claimed by exactly one slot, a second slot sitting on the same object gets assigned "no object", and the loss then trains it to say so. Duplicates become expensive during training, so no NMS is needed afterwards.</p>
+<p>Try it. Each row is a <b class="c-blue">predicted slot</b>, each column a <b class="c-yellow">ground-truth object</b> (or a "no object" pad). Click one cell per row to build an assignment and compare your total with the optimum.</p>
+
+<figure class="viz" id="viz-match-matrix">
+  <span class="badge computed">Computed</span>
+  <canvas id="match-canvas" aria-label="Toy image with three ground-truth objects and five predicted boxes, with lines for the current assignment" role="img"></canvas>
+  <div class="matrix" id="match-matrix" data-link="cost class box"></div>
+  <div class="controls">
+    <button type="button" id="btn-match-optimal">Show optimal matching</button>
+    <button type="button" id="btn-match-dup">Highlight the duplicate</button>
+    <button type="button" id="btn-match-reset" data-cue-reset>Clear</button>
+  </div>
+  <p class="readout" id="match-readout" aria-live="polite"></p>
+  <figcaption>Computed: the cost of pairing a prediction with a real object is <span class="c-red">minus its probability for the object's class, plus 5 x the L1 box distance, plus 2 x the GIoU loss</span>, DETR's matching cost and weights. Pairing with "no object" costs 0. The boxes and probabilities are a toy example. Solved with the Hungarian algorithm.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('match-canvas'), mt = document.getElementById('match-matrix'), out = document.getElementById('match-readout');
+  const GT = [{ n: 'car', b: { x1: .06, y1: .45, x2: .36, y2: .8 } }, { n: 'person', b: { x1: .46, y1: .2, x2: .58, y2: .8 } }, { n: 'dog', b: { x1: .7, y1: .55, x2: .9, y2: .8 } }];
+  const P = [ // toy predictions: box + class probabilities
+    { b: { x1: .07, y1: .47, x2: .35, y2: .79 }, p: { car: .84, person: .02, dog: .03 } },
+    { b: { x1: .10, y1: .43, x2: .39, y2: .76 }, p: { car: .71, person: .03, dog: .04 } },
+    { b: { x1: .47, y1: .22, x2: .59, y2: .79 }, p: { car: .02, person: .9, dog: .02 } },
+    { b: { x1: .69, y1: .52, x2: .88, y2: .81 }, p: { car: .05, person: .03, dog: .78 } },
+    { b: { x1: .30, y1: .05, x2: .44, y2: .22 }, p: { car: .05, person: .06, dog: .04 } } ];
+  const COLS = [...GT.map(g => g.n), 'no obj', 'no obj'];
+  const l1 = (a, b) => { const A = PE.cxcywh(a), B = PE.cxcywh(b); return A.reduce((s, v, i) => s + Math.abs(v - B[i]), 0); };
+  const C = P.map(p => COLS.map((c, j) => j < 3 ? -p.p[GT[j].n] + 5 * l1(p.b, GT[j].b) + 2 * (1 - PE.giou(p.b, GT[j].b)) : 0));
+  const OPT = PE.hungarian(C), optCost = OPT.reduce((s, j, i) => s + C[i][j], 0);
+  const S = { a: Array(5).fill(-1), showOpt: false, dup: false, lineT: 1, glow: { gt: 0, pred: 0, dup: 0, assign: 0 } };
+  let stopL = () => {};
+  const pulse = k => PE.animate(1100, u => { S.glow[k] = Math.sin(Math.PI * u); cv.redraw(); }, () => { S.glow[k] = 0; cv.redraw(); });
+  let html = '<table><thead><tr><th scope="col">slot</th>' + COLS.map(c => `<th scope="col" class="${c === 'no obj' ? 'c-brown' : 'c-yellow'}">${c}</th>`).join('') + '</tr></thead><tbody>';
+  C.forEach((row, i) => { html += `<tr><th scope="row" class="c-blue">p${i + 1}</th>` + row.map((v, j) => `<td><button type="button" id="btn-cell-${i}-${j}" aria-label="assign p${i + 1} to ${COLS[j]} ${j > 2 ? j - 2 : ''}, cost ${v.toFixed(2)}">${v.toFixed(2)}</button></td>`).join('') + '</tr>'; });
+  mt.innerHTML = html + '</tbody></table>';
+  function assign(i, j) { const k = S.a.indexOf(j); if (k >= 0 && k !== i) S.a[k] = S.a[i]; S.a[i] = j; render(); }
+  C.forEach((r, i) => r.forEach((v, j) => document.getElementById(`btn-cell-${i}-${j}`).onclick = () => { S.showOpt = false; assign(i, j); }));
+  const cv = PE.canvas(el, .45, (ctx, W, H) => {
+    PE.scene(ctx, W, H);
+    GT.forEach(g => PE.thing(ctx, g.b, W, H, PE.css('--yellow')));
+    GT.forEach((g, j) => { PE.strokeBox(ctx, g.b, W, H, PE.css('--yellow'), 1.5 + 3 * S.glow.gt, [3, 3]); PE.label(ctx, g.n, g.b.x1 * W + 3, g.b.y2 * H + 13, PE.css('--yellow')); });
+    // assignment lines grow from each slot to its object as lineT goes 0 -> 1
+    P.forEach((p, i) => { const j = S.a[i]; if (j < 0 || j > 2) return; const [px, py] = PE.cxcywh(p.b), [gx, gy] = PE.cxcywh(GT[j].b), t = PE.clamp(S.lineT * 5 - i, 0, 1);
+      if (t <= 0) return; ctx.save(); ctx.strokeStyle = PE.css('--green'); ctx.lineWidth = 2 + 3 * S.glow.assign; ctx.globalAlpha = .8; ctx.beginPath();
+      ctx.moveTo(px * W, py * H); ctx.lineTo((px + (gx - px) * t) * W, (py + (gy - py) * t) * H); ctx.stroke(); ctx.restore(); });
+    P.forEach((p, i) => { const j = S.a[i], isDup = S.dup && i === 1, shown = PE.clamp(S.lineT * 5 - i, 0, 1) > .5 || !S.showOpt;
+      const col = j < 0 || !shown ? PE.css('--blue') : j > 2 ? PE.css('--brown') : PE.css('--green');
+      PE.strokeBox(ctx, p.b, W, H, isDup ? PE.css('--red') : col, (isDup ? 3 + 3 * S.glow.dup : 2) + 2.5 * S.glow.pred, j > 2 && shown ? [5, 3] : null);
+      const odd = i % 2; PE.tag(ctx, `p${i + 1}`, odd ? p.b.x2 * W - 4 : p.b.x1 * W + 4, p.b.y1 * H + 14, isDup ? PE.css('--red') : col, 12, odd ? 'right' : 'left'); });
+  });
+  function render() {
+    C.forEach((r, i) => r.forEach((v, j) => { const b = document.getElementById(`btn-cell-${i}-${j}`);
+      b.classList.toggle('sel', S.a[i] === j); b.classList.toggle('opt', S.showOpt && OPT[i] === j); }));
+    cv.redraw();
+    const done = S.a.every(j => j >= 0), cost = S.a.reduce((s, j, i) => s + (j >= 0 ? C[i][j] : 0), 0);
+    out.textContent = done ? `Your total cost ${cost.toFixed(2)}; optimum ${optCost.toFixed(2)}${Math.abs(cost - optCost) < 1e-9 ? ': you found it.' : '.'}`
+      : `${S.a.filter(j => j >= 0).length} of 5 slots assigned. Optimum total cost: ${optCost.toFixed(2)}.`;
+    if (S.dup) out.textContent += ' p2 is a second box on the car: the optimum sends it to "no object", so training teaches it to be silent.';
+  }
+  document.getElementById('btn-match-optimal').onclick = () => { stopL(); S.a = OPT.slice(); S.showOpt = true; S.lineT = 0; render();
+    stopL = PE.animate(900, u => { S.lineT = u; cv.redraw(); }); };
+  document.getElementById('btn-match-dup').onclick = () => { S.dup = true; render(); pulse('dup'); };
+  document.getElementById('btn-match-reset').onclick = () => { stopL(); S.a = Array(5).fill(-1); S.showOpt = false; S.dup = false; S.lineT = 1; render(); };
+  // Equation terms name what they refer to; light it up when the narration reveals them.
+  document.getElementById('viz-match-matrix').addEventListener('pe-link', e => {
+    if (e.detail === 'gt') pulse('gt'); if (e.detail === 'pred') pulse('pred');
+    if (e.detail === 'assign') { if (S.a.every(j => j < 0)) document.getElementById('btn-match-optimal').click(); else pulse('assign'); } });
+  render();
+})();
+</script>
+
+<p>Now the math, which says exactly what you just did. First, choose the cheapest one-to-one assignment <span class="tex">\hat\sigma</span> of the N padded ground-truth entries to the N slots (DETR Eq. 1):</p>
+<div class="eq" id="eq-assign" data-build data-viz="viz-match-matrix"><div class="tex tex-display">\htmlData{step=1, link=assign}{\hat{\sigma} = \arg\min_{\sigma\in\mathfrak{S}_N}} \htmlData{step=2, link=cost}{\sum_{i}^{N} \htmlClass{t-red}{\mathcal{L}_{\rm match}}}\htmlData{step=3, link=gt pred}{\big(\htmlClass{t-yellow}{y_i}, \htmlClass{t-blue}{\hat{y}_{\sigma(i)}}\big)}</div></div>
+<ul class="gloss">
+  <li><span class="tex">\mathfrak{S}_N</span>: every possible way to pair the N entries with the N slots.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{y_i}</span>: ground-truth entry i, a real object or a "no object" pad.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\hat{y}_{\sigma(i)}}</span>: the prediction in the slot that assignment <span class="tex">\sigma</span> gives to entry i.</li>
+</ul>
+<p>The cost of one pairing is what the matrix cells show:</p>
+<div class="eq" id="eq-cost" data-build data-viz="viz-match-matrix"><div class="tex tex-display">\htmlClass{t-red}{\mathcal{L}_{\rm match}} = \htmlData{step=1, link=class pred}{-\mathbb{1}_{\{c_i\neq\varnothing\}}\,\htmlClass{t-blue}{\hat{p}_{\sigma(i)}(c_i)}} \htmlData{step=2, link=box gt}{+ \mathbb{1}_{\{c_i\neq\varnothing\}}\,\mathcal{L}_{\rm box}\big(\htmlClass{t-yellow}{b_i}, \htmlClass{t-blue}{\hat{b}_{\sigma(i)}}\big)}</div></div>
+<ul class="gloss">
+  <li>For a real object: minus how much probability the slot puts on the right class, plus how far its box is from the true box.</li>
+  <li>For a "no object" entry the indicator is 0, so the cost is zero whatever the slot predicts.</li>
+</ul>
+<p>With the assignment fixed, the training loss (the paper's "Hungarian loss", Eq. 2) trains every slot's class, real or "no object", with cross-entropy, and trains the box only for slots matched to real objects:</p>
+<div class="eq" id="eq-loss" data-build data-viz="viz-match-matrix"><div class="tex tex-display">\mathcal{L}_{\rm Hungarian} = \sum_{i=1}^{N}\Big[\htmlData{step=1, link=pred}{-\log \htmlClass{t-blue}{\hat{p}_{\hat\sigma(i)}(c_i)}} \htmlData{step=2, link=gt pred}{+ \mathbb{1}_{\{c_i\neq\varnothing\}}\,\mathcal{L}_{\rm box}\big(\htmlClass{t-yellow}{b_i}, \htmlClass{t-blue}{\hat{b}_{\hat\sigma(i)}}\big)}\Big]</div></div>
+<p>The box loss mixes two distances: <span class="tex">\mathcal{L}_{\rm box} = \lambda_{\rm iou}\,\mathcal{L}_{\rm GIoU} + \lambda_{\rm L1}\,\lVert b - \hat b\rVert_1</span>, with <span class="tex">\lambda_{\rm L1}</span> = <span data-claim="pg-detr-lambda-l1">5</span> and <span class="tex">\lambda_{\rm iou}</span> = <span data-claim="pg-detr-lambda-iou">2</span>. L1 alone would treat a 10-pixel error the same on a tiny box and a huge one; the GIoU (generalized intersection over union) term is scale-invariant and still gives a signal when two boxes do not overlap at all. Because most slots are "no object", their class term is down-weighted by a <span data-claim="pg-detr-noobj">factor 10</span>.</p>
+</section>
+
+<section id="ch-queries" class="chapter">
+<h2>Object queries and a decoder that talks to itself</h2>
+<p>Where do the 100 slots come from? The architecture is almost boring, which is the point. A ResNet turns the image into a coarse grid of features, a transformer encoder lets every grid cell attend to every other, and a transformer decoder reads that grid through 100 learned input vectors called <b class="c-blue">object queries</b>. Each query becomes one slot's (class, box).</p>
+<p>The decoder has two kinds of attention. Cross-attention lets each query read the image. Self-attention lets the queries read <em>each other</em>, and that is how they coordinate: if two queries are drifting toward the same car, self-attention gives them a way to notice, and the matching loss gives one of them a reason to back off.</p>
+<p>The paper tests this directly. It attaches the prediction heads after every decoder layer and runs classic NMS on each layer's output. NMS helps the first layer, which still produces duplicates, but the benefit fades with depth and slightly hurts at the last layers. From the first decoder layer to the last, AP rises by <span data-claim="pg-detr-decoder-gain">+8.2 AP</span>.</p>
+
+<figure class="viz" id="viz-decoder-layers" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="dec-canvas" aria-label="Predicted boxes per decoder layer; duplicates fade layer by layer" role="img"></canvas>
+  <div class="controls">
+    <label>Decoder layer <input type="range" id="dec-layer" min="1" max="6" step="1" value="1"><span id="dec-layer-val">1</span></label>
+    <button type="button" id="btn-dec-l1">Layer 1</button>
+    <button type="button" id="btn-dec-l6">Layer 6</button>
+    <button type="button" id="btn-dec-play">Play layers 1 to 6</button>
+    <button type="button" id="btn-dec-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="dec-readout" aria-live="polite"></p>
+  <figcaption>Toy model of the paper's qualitative finding: early decoder layers leave several confident slots on the same object; later layers settle on one slot per object while the others drift to "no object" (brown, faded). The animation is illustrative; only the first-to-last-layer AP gain quoted above is from the paper.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('dec-canvas'), out = document.getElementById('dec-readout');
+  const rng = document.getElementById('dec-layer'), rv = document.getElementById('dec-layer-val');
+  const OBJ = [{ x1: .08, y1: .35, x2: .34, y2: .82 }, { x1: .44, y1: .18, x2: .56, y2: .82 }, { x1: .66, y1: .5, x2: .92, y2: .82 }];
+  const r = PE.rng(11), SL = [];
+  OBJ.forEach((o, oi) => { const [cx, cy, w, h] = PE.cxcywh(o);
+    for (let k = 0; k < 3; k++) SL.push({ o: oi, n: k, win: k === 0, j: [(r() - .5) * w * .5, (r() - .5) * h * .3, 1 + (r() - .5) * .5, 1 + (r() - .5) * .3], b0: [cx, cy, w, h] }); });
+  let L = 1;
+  function conf(s, l) { const t = (l - 1) / 5; return s.win ? .55 + .4 * t : Math.max(.03, .6 - .62 * t); }
+  const cv = PE.canvas(el, .45, (ctx, W, H) => {
+    PE.scene(ctx, W, H); OBJ.forEach(o => { PE.thing(ctx, o, W, H, PE.css('--yellow')); PE.strokeBox(ctx, o, W, H, PE.css('--yellow'), 1.2, [3, 3]); });
+    const t = (L - 1) / 5; let shown = 0;
+    SL.forEach(s => { const [cx, cy, w, h] = s.b0, k = s.win ? 1 - t : 1 - .3 * t;
+      const b = PE.fromC(cx + s.j[0] * k, cy + s.j[1] * k, w * (1 + (s.j[2] - 1) * k), h * (1 + (s.j[3] - 1) * k)), c = conf(s, L);
+      const on = c > .3; if (on) shown++;
+      const col = s.win && t > .6 ? PE.css('--green') : PE.css('--blue');
+      PE.strokeBox(ctx, b, W, H, on ? col : PE.css('--brown'), on ? 2.2 : 1, on ? null : [3, 4], on ? 1 : .4);
+      if (on) { const at = [[b.x1 * W + 4, b.y1 * H + 13, 'left'], [b.x2 * W - 4, b.y1 * H + 13, 'right'], [b.x1 * W + 4, b.y2 * H - 5, 'left']][s.n];
+        PE.tag(ctx, c.toFixed(2), at[0], at[1], col, 11, at[2]); } });
+    const txt = `Layer ${Math.round(L)}: ${shown} confident boxes for 3 objects (${shown - 3} duplicate${shown - 3 === 1 ? '' : 's'}).`;
+    if (out.textContent !== txt) out.textContent = txt;
+  });
+  function setL(l) { L = l; rng.value = String(Math.round(l)); rv.textContent = String(Math.round(l)); cv.redraw(); }
+  let stop = () => {};
+  rng.oninput = () => { stop(); tgt = +rng.value; mark(); setL(+rng.value); };
+  let tgt = 1;
+  const mark = () => [['btn-dec-l1', tgt === 1], ['btn-dec-l6', tgt === 6]].forEach(([id, v]) => document.getElementById(id).setAttribute('aria-pressed', String(v)));
+  const glide = l => { stop(); tgt = l; mark(); const l0 = L; stop = PE.animate(Math.max(350, 160 * Math.abs(l - l0)), u => setL(l0 + (l - l0) * u)); };
+  document.getElementById('btn-dec-l1').onclick = () => glide(1);
+  document.getElementById('btn-dec-l6').onclick = () => glide(6);
+  document.getElementById('btn-dec-play').onclick = () => { stop(); tgt = 6; mark(); stop = PE.animate(3000, u => setL(1 + 5 * u)); };
+  document.getElementById('btn-dec-reset').onclick = () => glide(1);
+  mark();
+})();
+</script>
+
+<p>Two details matter for what comes next. First, the object queries are just learned vectors; they do not depend on the image, and nothing in them says "I am a box at this position". Second, because attention is blind to order, DETR adds its positional information at every attention layer, not only once at the input: sine encodings of pixel position on the image side, and the learned object queries on the decoder side. Keep both in mind: the follow-up papers are largely about what an object query should really be.</p>
+</section>
+
+<style>
+.tr-stages { display:flex; flex-wrap:wrap; gap:.3rem; margin:0 0 .6rem; padding-right:6rem; font:.85rem system-ui, sans-serif; counter-reset:trs; }
+.tr-stages button { counter-increment:trs; font:inherit; color:var(--muted); background:var(--bg); border:1px solid var(--rule); border-radius:999px; padding:.22rem .6rem; cursor:pointer; }
+.tr-stages button::before { content:counter(trs) "\00a0"; font-weight:700; }
+.tr-stages button.done { color:var(--fg); border-color:var(--muted); }
+.tr-stages button[aria-current="step"] { color:var(--bg); background:var(--fg); border-color:var(--fg); }
+.tr-stages button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.tr-text { font:.95rem/1.55 system-ui, sans-serif; margin:.7rem 0 0; min-height:9em; max-width:var(--measure, 40rem); }
+.tr-text h3 { font-size:1rem; margin:0 0 .3rem; }
+.tr-text p { margin:0 0 .5rem; }
+@media (max-width: 520px) { .tr-stages { padding-right:0; margin-top:1.8rem; } }
+</style>
+<section id="ch-training" class="chapter">
+<h2>One training step, end to end</h2>
+<p class="note narrated-only">This chapter has no narration: step through it at your own pace.</p>
+<p>You have now seen every part of DETR. Here they are running together in one training step: a batch leaves the data loader, flows through the network, gets matched to its ground truth, and becomes one loss and one weight update. Click a stage or press <b>Next</b> to walk through it, or <b>Run a step</b> to watch the whole pass. <b>New batch</b> draws fresh augmented image sizes, and every tensor shape below updates with them.</p>
+
+<figure class="viz" id="viz-train-step">
+  <span class="badge computed">Computed</span>
+  <div class="tr-stages" id="tr-stages" aria-label="Training step stages">
+    <button type="button" id="btn-tr-s0">Batch</button>
+    <button type="button" id="btn-tr-s1">Backbone</button>
+    <button type="button" id="btn-tr-s2">Tokens</button>
+    <button type="button" id="btn-tr-s3">Encoder</button>
+    <button type="button" id="btn-tr-s4">Decoder</button>
+    <button type="button" id="btn-tr-s5">Heads</button>
+    <button type="button" id="btn-tr-s6">Match</button>
+    <button type="button" id="btn-tr-s7">Loss and update</button>
+  </div>
+  <canvas id="tr-canvas" role="img" aria-label="Drawing of the current stage of one DETR training step"></canvas>
+  <p class="readout" id="tr-shape" aria-live="polite"></p>
+  <div class="tr-text">
+    <div data-stage="0">
+      <h3>Batch: resize, pad, keep the targets as lists</h3>
+      <p>Each image is rescaled so its short side is somewhere from <span data-claim="pg-tr-short">480 to 800 pixels</span>, with the long side <span data-claim="pg-tr-long">at most 1333</span>; with <span data-claim="pg-tr-crop">probability 0.5</span> it is randomly cropped first (DETR's code also flips images horizontally at random). The images in a batch now differ in size, so each is <b>zero-padded</b> to the batch's largest height and largest width, which may come from different images (<span class="c-brown">brown hatching</span>). DETR's code pads on the right and bottom and keeps a pixel mask of which pixels are padding.</p>
+      <p>The targets are not padded to a common length: each image keeps its own list of <b class="c-yellow">classes and boxes</b>, with boxes written as (center x, center y, width, height) divided by the image size. The "no object" padding from <a href="#ch-matching">chapter 2</a> happens implicitly at the Match stage. The paper trains with <span data-claim="pg-tr-img-gpu">4 images per GPU</span> on <span data-claim="pg-tr-gpus">16 V100 GPUs</span>, a <span data-claim="pg-tr-batch">batch of 64</span>; the figure shows one GPU's share.</p>
+    </div>
+    <div data-stage="1" hidden>
+      <h3>Backbone: a coarse grid of features</h3>
+      <p>A ResNet turns each padded image into a feature map with <span data-claim="pg-tr-c">2048 channels</span> at <span data-claim="pg-tr-stride">stride 32</span>: one feature vector per grid cell. DETR's code downsamples the pixel mask to the same grid by nearest-neighbour sampling, marking each cell as real or padding (<span class="c-brown">brown cells</span>); a boundary cell that is entirely padding can still come out marked real. That coarse grid is also why DETR struggles with small objects, which <a href="#ch-detr-limits">the next chapter</a> takes up.</p>
+    </div>
+    <div data-stage="2" hidden>
+      <h3>Tokens: project, flatten, add positions</h3>
+      <p>A <code>1x1</code> convolution cuts the channels to <span data-claim="pg-tr-d">d = 256</span>, and the grid is flattened row by row into one sequence of H x W tokens (padding tokens stay in the sequence, marked by the mask). Attention on its own ignores order, so each token also gets a fixed sine positional encoding of its (x, y) cell. DETR adds that encoding to the queries and keys of every attention layer rather than once at the input, and the same encodings are shared between all layers.</p>
+    </div>
+    <div data-stage="3" hidden>
+      <h3>Encoder: every token looks at every token</h3>
+      <p><span data-claim="pg-tr-enc">6 encoder layers</span>, each one self-attention with <span data-claim="pg-tr-heads">8 heads</span> followed by an FFN, with <span data-claim="pg-tr-drop">dropout 0.1</span>. The FFN's <span data-claim="pg-tr-ffn">hidden size 2048</span> is DETR's code default; the paper does not give it. Tokens marked as padding are masked out as keys, so no token attends to them (also from the code; the paper does not spell it out).</p>
+      <p>Every token is scored against every other token, so the work grows with the square of the token count; the readout gives it for this batch. The output, called the <b>memory</b>, is one d-dimensional vector per cell that now carries context from the whole image.</p>
+    </div>
+    <div data-stage="4" hidden>
+      <h3>Decoder: the slots read the memory</h3>
+      <p>The decoder holds <span data-claim="pg-tr-n">100 queries</span>, the slots. Their content starts at zero, and the learned object queries are added as positional encodings at every layer. Each of the <span data-claim="pg-tr-dec">6 decoder layers</span> runs self-attention among the <b class="c-blue">slots</b> (so they can agree who takes which object), then cross-attention into the memory (padding masked again), then an FFN.</p>
+      <p>Every layer's output is kept, not only the last one's. The remaining stages use all six.</p>
+    </div>
+    <div data-stage="5" hidden>
+      <h3>Heads: a class and a box for every slot, at every layer</h3>
+      <p>A linear layer gives each slot <span data-claim="pg-tr-cls">91 + 1</span> class scores (COCO's category ids plus "no object"), turned into probabilities by a softmax. A <span data-claim="pg-tr-mlp">3-layer</span> MLP gives a box, squashed by a sigmoid into (center x, center y, width, height) relative to the image. The same two heads, with shared weights and a shared layer norm in front of them, run on the output of all six decoder layers.</p>
+    </div>
+    <div data-stage="6" hidden>
+      <h3>Match: choose each slot's target (no gradients)</h3>
+      <p>Now the matching from <a href="#ch-matching">chapter 2</a> runs: build the <a href="#eq-cost">matching cost</a> between this image's slots and its objects, and take the cheapest one-to-one assignment (<a href="#eq-assign">the argmin</a>). It runs separately for every image and for every decoder layer, since each layer makes its own predictions. It is a discrete choice, so no gradient flows through it; DETR's code runs it with SciPy under <code>no_grad</code>, one image at a time.</p>
+      <p>The result is just a target per slot: <b class="c-green">matched slots</b> get their object, every other slot gets <b class="c-brown">"no object"</b>.</p>
+    </div>
+    <div data-stage="7" hidden>
+      <h3>Loss and update</h3>
+      <p>For every layer, apply the <a href="#eq-loss">Hungarian loss</a>: cross-entropy on every slot's class, with the "no object" term at <span data-claim="pg-tr-noobj">weight 0.1</span> because it is so common, plus <span data-claim="pg-tr-l1">5 x L1</span> and <span data-claim="pg-tr-giou">2 x GIoU</span> loss on the boxes of matched slots. The box losses are divided by the number of objects in the whole batch, summed over all GPUs, so every object carries the same weight; dividing by each GPU's own count would make an object on a sparsely filled GPU count for more than one on a crowded GPU.</p>
+      <p>The six per-layer losses are added up. The five on the intermediate layers are the <b>auxiliary decoding losses</b>, which the paper found help, especially for getting the number of objects of each class right. Then one backward pass through heads, decoder, encoder and backbone, gradients clipped to <span data-claim="pg-tr-clip">norm 0.1</span>, and one AdamW step with learning rate <span data-claim="pg-tr-lr">1e-4</span> (<span data-claim="pg-tr-lrbb">1e-5 for the backbone</span>) and <span data-claim="pg-tr-wd">weight decay 1e-4</span>.</p>
+    </div>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-tr-prev">Previous</button>
+    <button type="button" id="btn-tr-next">Next</button>
+    <button type="button" id="btn-tr-run" aria-pressed="false">Run a step</button>
+    <button type="button" id="btn-tr-batch">New batch</button>
+    <button type="button" id="btn-tr-reset" data-cue-reset>Reset</button>
+  </div>
+  <figcaption>Computed: the image sizes follow DETR's scale augmentation (short side from its 480-800 list, long side capped at 1333), padding and the stride-32 grid follow the paper and DETR's code, and every tensor shape in the readout is computed from them. Toy: the aspect ratios, the scenes, the predicted boxes and their probabilities, and the loss bar lengths. The matching in stage 7 is solved exactly on those toy boxes with DETR's cost, and only a few of the slots are drawn.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('tr-canvas'), out = document.getElementById('tr-shape');
+  const fig = document.getElementById('viz-train-step');
+  const chips = [...fig.querySelectorAll('#tr-stages button')], texts = [...fig.querySelectorAll('.tr-text > div')];
+  const NS = chips.length, B = 4, NQ = 100, NL = 6, SHOWN = 14, MAX = 1333;
+  const SCALES = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800];
+  const NAMES = ['car', 'person', 'dog', 'bike'];
+  const S = { stage: 0, t: 1, seed: 1, running: false };
+  let stopA = () => {}, runTimer = 0, batch;
+  const fmt = n => n.toLocaleString('en-US');
+
+  function makeBatch(seed) {
+    const r = PE.rng(seed * 7919), imgs = [];
+    for (let i = 0; i < B; i++) {
+      const ar = [4 / 3, 3 / 4, 16 / 9, 1, 3 / 2][Math.floor(r() * 5)], s = SCALES[Math.floor(r() * SCALES.length)];
+      let h = ar >= 1 ? s : Math.round(s / ar), w = ar >= 1 ? Math.round(s * ar) : s;
+      const m = Math.max(h, w); if (m > MAX) { h = Math.round(h * MAX / m); w = Math.round(w * MAX / m); }
+      const objs = [];
+      for (let k = 0, n = 1 + Math.floor(r() * 3), tries = 0; objs.length < n && tries < 40; tries++) {
+        const bw = .16 + r() * .26, bh = .2 + r() * .34, b = PE.fromC(bw / 2 + r() * (1 - bw), bh / 2 + r() * (1 - bh), bw, bh);
+        if (objs.every(o => PE.iou(o.b, b) < .05)) objs.push({ n: NAMES[objs.length % 4], b });
+      }
+      imgs.push({ h, w, objs });
+    }
+    const H0 = Math.max(...imgs.map(i => i.h)), W0 = Math.max(...imgs.map(i => i.w)), Hf = Math.ceil(H0 / 32), Wf = Math.ceil(W0 / 32);
+    // F.interpolate(mode='nearest') reads pixel floor(i * float32(N / F)); count the cells that land inside the image.
+    const real = (n, N, F) => { const sc = Math.fround(N / F); let k = 0; for (let i = 0; i < F; i++) if (Math.min(Math.floor(Math.fround(i * sc)), N - 1) < n) k++; return k; };
+    imgs.forEach(im => { im.hf = real(im.h, H0, Hf); im.wf = real(im.w, W0, Wf); });
+    // Toy predictions for image 1: a good and a sloppy copy per object, then clutter.
+    const im = imgs[0], P = [];
+    im.objs.forEach((o, k) => [.02, .09].forEach((j, c) => { const [cx, cy, w, h] = PE.cxcywh(o.b);
+      P.push({ b: PE.fromC(cx + (r() - .5) * j, cy + (r() - .5) * j, w * (1 + (r() - .5) * j * 2), h * (1 + (r() - .5) * j * 2)), k, p: c ? .3 + r() * .2 : .75 + r() * .2 }); }));
+    while (P.length < SHOWN) { const w = .08 + r() * .22, h = .1 + r() * .28; P.push({ b: PE.fromC(w / 2 + r() * (1 - w), h / 2 + r() * (1 - h), w, h), k: -1, p: .02 + r() * .12 }); }
+    const prob = (p, k) => p.k === k ? p.p : .03;
+    const l1 = (a, b) => { const A = PE.cxcywh(a), Bc = PE.cxcywh(b); return A.reduce((s, v, i) => s + Math.abs(v - Bc[i]), 0); };
+    const C = P.map(p => P.map((_, j) => j < im.objs.length ? -prob(p, j) + 5 * l1(p.b, im.objs[j].b) + 2 * (1 - PE.giou(p.b, im.objs[j].b)) : 0));
+    const match = PE.hungarian(C);
+    const losses = Array.from({ length: NL }, (_, l) => { const f = 1 - l * .11; return [(.5 + r() * .15) * f, (.35 + r() * .1) * f, (.3 + r() * .1) * f]; });
+    const cells = Array.from({ length: 70 }, () => [r(), r(), r()]);
+    return { imgs, H0, W0, Hf, Wf, P, match, cost: C, losses, cells };
+  }
+
+  function hatch(ctx, x, y, w, h) {
+    if (w <= 0 || h <= 0) return;
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    ctx.fillStyle = PE.css('--brown'); ctx.globalAlpha = .16; ctx.fillRect(x, y, w, h);
+    ctx.globalAlpha = .45; ctx.strokeStyle = PE.css('--brown'); ctx.lineWidth = 1;
+    for (let d = -h; d < w; d += 7) { ctx.beginPath(); ctx.moveTo(x + d, y + h); ctx.lineTo(x + d + h, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  // Padded frame of H0 x W0 fitted into box (x, y, w, h); returns where image `im` lands.
+  function frame(ctx, bx, by, bw, bh, im, padA = 1) {
+    const sc = Math.min(bw / batch.W0, bh / batch.H0), fw = batch.W0 * sc, fh = batch.H0 * sc;
+    const x = bx + (bw - fw) / 2, y = by, iw = im.w * sc, ih = im.h * sc;
+    ctx.save(); ctx.strokeStyle = PE.css('--rule'); ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, fw - 1, fh - 1); ctx.restore();
+    ctx.fillStyle = PE.css('--panel2'); ctx.fillRect(x, y, iw, ih);
+    if (padA > 0) { ctx.save(); ctx.globalAlpha = padA; hatch(ctx, x + iw, y, fw - iw, fh); hatch(ctx, x, y + ih, iw, fh - ih); ctx.restore(); }
+    return { x, y, fw, fh, iw, ih, sc };
+  }
+  function boxIn(ctx, f, b, color, lw, dash, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha ?? 1; ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.strokeRect(f.x + b.x1 * f.iw, f.y + b.y1 * f.ih, (b.x2 - b.x1) * f.iw, (b.y2 - b.y1) * f.ih); ctx.restore();
+  }
+  function objects(ctx, f, im, withBoxes = true) {
+    im.objs.forEach(o => { ctx.save(); ctx.fillStyle = PE.css('--yellow'); ctx.globalAlpha = .35;
+      ctx.fillRect(f.x + o.b.x1 * f.iw + 2, f.y + o.b.y1 * f.ih + 2, (o.b.x2 - o.b.x1) * f.iw - 4, (o.b.y2 - o.b.y1) * f.ih - 4); ctx.restore();
+      if (withBoxes) boxIn(ctx, f, o.b, PE.css('--yellow'), 1.5, [3, 3]); });
+  }
+  function grid(ctx, f, im, alpha, fillPad = true) {
+    const cw = 32 * f.sc; ctx.save(); ctx.strokeStyle = PE.css('--muted'); ctx.lineWidth = .5; ctx.globalAlpha = .55 * alpha;
+    for (let c = 0; c <= batch.Wf; c++) { const x = f.x + Math.min(c * cw, f.fw); ctx.beginPath(); ctx.moveTo(x, f.y); ctx.lineTo(x, f.y + f.fh); ctx.stroke(); }
+    for (let r = 0; r <= batch.Hf; r++) { const y = f.y + Math.min(r * cw, f.fh); ctx.beginPath(); ctx.moveTo(f.x, y); ctx.lineTo(f.x + f.fw, y); ctx.stroke(); }
+    ctx.restore();
+    if (fillPad) { ctx.save(); ctx.fillStyle = PE.css('--brown'); ctx.globalAlpha = .35 * alpha;
+      for (let r = 0; r < batch.Hf; r++) for (let c = 0; c < batch.Wf; c++) if (r >= im.hf || c >= im.wf)
+        ctx.fillRect(f.x + c * cw + .5, f.y + r * cw + .5, Math.min(cw, f.fw - c * cw) - 1, Math.min(cw, f.fh - r * cw) - 1);
+      ctx.restore(); }
+    return cw;
+  }
+  function slab(ctx, x, y, w, h, n, color, label, sub) {
+    for (let i = n - 1; i >= 0; i--) { ctx.save(); ctx.fillStyle = PE.css('--panel2'); ctx.strokeStyle = color; ctx.globalAlpha = .9;
+      ctx.fillRect(x + i * 5, y - i * 5, w, h); ctx.strokeRect(x + i * 5 + .5, y - i * 5 + .5, w, h); ctx.restore(); }
+    PE.label(ctx, label, x, y + h + 16, color, 12); if (sub) PE.label(ctx, sub, x, y + h + 31, PE.css('--muted'), 11);
+  }
+  function arrow(ctx, x1, y1, x2, y2, color) {
+    ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    const a = Math.atan2(y2 - y1, x2 - x1); ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 8 * Math.cos(a - .4), y2 - 8 * Math.sin(a - .4)); ctx.lineTo(x2 - 8 * Math.cos(a + .4), y2 - 8 * Math.sin(a + .4)); ctx.fill(); ctx.restore();
+  }
+
+  const DRAW = [
+    (ctx, W, H, t) => { // batch
+      const gap = 10, lab = 22, fit = (cols, rows) => Math.min((W - gap * (cols - 1)) / cols / batch.W0, ((H - 8) / rows - lab) / batch.H0);
+      const cols = fit(4, 1) >= fit(2, 2) ? 4 : 2, rows = B / cols, bw = (W - gap * (cols - 1)) / cols, bh = (H - 8) / rows;
+      batch.imgs.forEach((im, i) => { const c = i % cols, r = Math.floor(i / cols);
+        const f = frame(ctx, c * (bw + gap), 4 + r * bh, bw, bh - lab, im, PE.clamp(t * 2 - .6, 0, 1)); objects(ctx, f, im);
+        PE.label(ctx, `img ${i + 1}: ${im.h} x ${im.w}`, f.x, f.y + f.fh + 14, PE.css('--fg'), 11); });
+      const fh = Math.min(bw / batch.W0, bh - lab) * batch.H0, yb = 4 + fh + 40;
+      if (cols === 4 && yb + 8 < H) { ctx.save(); ctx.globalAlpha = PE.clamp(t * 2 - .8, 0, 1); ctx.strokeStyle = PE.css('--muted'); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(2, yb - 6); ctx.lineTo(2, yb); ctx.lineTo(W - 2, yb); ctx.lineTo(W - 2, yb - 6); ctx.stroke(); ctx.restore();
+        PE.label(ctx, `one tensor: all four padded to ${batch.H0} x ${batch.W0} (brown is padding)`, W / 2, yb + 18, PE.css('--muted'), 12, 'center'); }
+    },
+    (ctx, W, H, t) => { // backbone
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .56, H - 30, im); objects(ctx, f, im, false); grid(ctx, f, im, t);
+      PE.label(ctx, 'img 1, stride-32 grid', f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+      const x = W * .64, s = Math.min(W * .22, H * .45);
+      arrow(ctx, f.x + f.fw + 8, H * .4, x - 8, H * .4, PE.css('--muted'));
+      slab(ctx, x, H * .22, s * (batch.Wf / Math.max(batch.Wf, batch.Hf)), s * (batch.Hf / Math.max(batch.Wf, batch.Hf)), Math.round(2 + 6 * t), PE.css('--blue'),
+        `2048 x ${batch.Hf} x ${batch.Wf}`, 'one vector per cell');
+    },
+    (ctx, W, H, t) => { // tokens
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .34, H - 30, im, 0); ctx.save(); ctx.globalAlpha = .35; objects(ctx, f, im, false); grid(ctx, f, im, 1); ctx.restore();
+      const cw = 32 * f.sc, n = batch.Hf * batch.Wf, ax = W * .4, aw = W * .6 - 4, ay = 26, ah = H - 50;
+      let side = 0, cols = batch.Wf;
+      for (let k = 1; k <= 8; k++) { const s2 = Math.min(aw / (k * batch.Wf), ah / Math.ceil(batch.Hf / k)); if (s2 > side) { side = s2; cols = k * batch.Wf; } }
+      PE.label(ctx, `${n} tokens, flattened row by row`, ax, 14, PE.css('--fg'), 11);
+      for (let r = 0; r < batch.Hf; r++) for (let c = 0; c < batch.Wf; c++) {
+        const i = r * batch.Wf + c, pad = r >= im.hf || c >= im.wf, u = PE.clamp(t * 1.6 - i / n * .6, 0, 1);
+        const sx = f.x + c * cw, sy = f.y + r * cw, tx = ax + (i % cols) * side, ty = ay + Math.floor(i / cols) * side;
+        ctx.fillStyle = pad ? PE.css('--brown') : PE.css('--fg'); ctx.globalAlpha = pad ? .45 : .55;
+        const sz = cw + (side - cw) * u; ctx.fillRect(sx + (tx - sx) * u, sy + (ty - sy) * u, Math.max(1, sz - .6), Math.max(1, sz - .6));
+      }
+      ctx.globalAlpha = 1;
+      const wy = ay + Math.ceil(n / cols) * side + 12;
+      if (t > .7 && wy < H - 6) { ctx.save(); ctx.strokeStyle = PE.css('--muted'); ctx.globalAlpha = (t - .7) / .3; ctx.beginPath();
+        for (let x = 0; x < Math.min(aw, cols * side); x++) ctx.lineTo(ax + x, wy + 4 * Math.sin(x / 6)); ctx.stroke(); ctx.restore();
+        PE.label(ctx, '+ sine position per token', ax, Math.min(H - 2, wy + 20), PE.css('--muted'), 11); }
+    },
+    (ctx, W, H, t) => { // encoder
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .7, H - 30, im); objects(ctx, f, im, false); const cw = grid(ctx, f, im, 1);
+      const o = im.objs[0].b, qc = Math.min(im.wf - 1, Math.floor((o.x1 + o.x2) / 2 * im.w / 32)), qr = Math.min(im.hf - 1, Math.floor((o.y1 + o.y2) / 2 * im.h / 32));
+      const qx = f.x + (qc + .5) * cw, qy = f.y + (qr + .5) * cw, k = Math.round(batch.cells.length * t);
+      batch.cells.slice(0, k).forEach(([u, v, a]) => { const c = Math.floor(u * im.wf), r = Math.floor(v * im.hf);
+        ctx.save(); ctx.strokeStyle = PE.css('--fg'); ctx.globalAlpha = .1 + .45 * a * a; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(qx, qy);
+        ctx.lineTo(f.x + (c + .5) * cw, f.y + (r + .5) * cw); ctx.stroke(); ctx.restore(); });
+      ctx.fillStyle = PE.css('--fg'); ctx.beginPath(); ctx.arc(qx, qy, 4.5, 0, 7); ctx.fill();
+      const lx = f.x + f.fw + 12; PE.label(ctx, 'one token', lx, 30, PE.css('--fg'), 12);
+      PE.label(ctx, 'attends to', lx, 46, PE.css('--muted'), 11); PE.label(ctx, 'every real token', lx, 62, PE.css('--fg'), 12);
+      PE.label(ctx, 'padding masked', lx, 86, PE.css('--brown'), 12); PE.label(ctx, `x ${NL} layers`, lx, 110, PE.css('--fg'), 12);
+    },
+    (ctx, W, H, t) => { // decoder
+      const im = batch.imgs[0], qs = Math.min(W * .3, H - 50), cell = qs / 10, ox = 6, oy = 22;
+      const f = frame(ctx, W * .45, 8, W * .55, H - 30, im); objects(ctx, f, im, false); const cw = grid(ctx, f, im, .6);
+      PE.label(ctx, `${NQ} slots`, ox, 14, PE.css('--blue'), 12); PE.label(ctx, 'memory (encoder output)', f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+      const hot = im.objs.map((_, k) => 11 + k * 27);
+      for (let i = 0; i < NQ; i++) { const x = ox + (i % 10 + .5) * cell, y = oy + (Math.floor(i / 10) + .5) * cell, h = hot.includes(i);
+        ctx.fillStyle = PE.css('--blue'); ctx.globalAlpha = h ? 1 : .35; ctx.beginPath(); ctx.arc(x, y, h ? cell * .32 : cell * .22, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      const pos = i => [ox + (i % 10 + .5) * cell, oy + (Math.floor(i / 10) + .5) * cell];
+      hot.forEach((i, k) => { const [x, y] = pos(i), o = im.objs[k].b, u = PE.clamp(t * 1.5 - k * .15, 0, 1);
+        for (let s = 0; s < 5; s++) { const tx = f.x + (o.x1 + (o.x2 - o.x1) * (.2 + .15 * s)) * f.iw, ty = f.y + (o.y1 + (o.y2 - o.y1) * (.3 + .1 * (s % 3))) * f.ih;
+          ctx.save(); ctx.strokeStyle = PE.css('--blue'); ctx.globalAlpha = .45; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (tx - x) * u, y + (ty - y) * u); ctx.stroke(); ctx.restore(); } });
+      if (hot.length > 1 && t > .5) { ctx.save(); ctx.strokeStyle = PE.css('--blue'); ctx.setLineDash([4, 3]); ctx.globalAlpha = (t - .5) * 2; ctx.lineWidth = 1.5;
+        for (let a = 0; a < hot.length; a++) for (let b = a + 1; b < hot.length; b++) { const [x1, y1] = pos(hot[a]), [x2, y2] = pos(hot[b]);
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo((x1 + x2) / 2 - cell * 2, (y1 + y2) / 2, x2, y2); ctx.stroke(); } ctx.restore(); }
+      PE.label(ctx, 'dashed: self-attention', ox, oy + qs + 16, PE.css('--blue'), 11); PE.label(ctx, 'solid: cross-attention', ox, oy + qs + 30, PE.css('--blue'), 11);
+    },
+    (ctx, W, H, t) => { // heads
+      const im = batch.imgs[0], f = frame(ctx, 0, 8, W * .62, H - 30, im); objects(ctx, f, im, false);
+      batch.P.forEach(p => boxIn(ctx, f, p.b, PE.css('--blue'), 1 + 2 * p.p, null, PE.clamp(t * 1.4 - (1 - p.p) * .4, 0, 1) * (.25 + .75 * p.p)));
+      batch.P.filter(p => p.p > .7).forEach(p => PE.label(ctx, `${im.objs[p.k].n} ${p.p.toFixed(2)}`, f.x + p.b.x1 * f.iw + 2, f.y + p.b.y1 * f.ih - 3, PE.css('--blue'), 11));
+      const lx = f.x + f.fw + 14; PE.label(ctx, 'per slot:', lx, 30, PE.css('--muted'), 11);
+      PE.label(ctx, 'class probs (92)', lx, 48, PE.css('--blue'), 12); PE.label(ctx, 'box (cx, cy, w, h)', lx, 66, PE.css('--blue'), 12);
+      for (let l = 0; l < NL; l++) { ctx.save(); ctx.globalAlpha = PE.clamp(t * 2 - l * .15, 0, 1); ctx.fillStyle = PE.css('--panel2'); ctx.strokeStyle = PE.css('--blue');
+        ctx.fillRect(lx, 90 + l * 18, 90, 13); ctx.strokeRect(lx + .5, 90.5 + l * 18, 90, 13); ctx.restore(); PE.label(ctx, `layer ${l + 1}`, lx + 6, 101 + l * 18, PE.css('--fg'), 10); }
+      PE.label(ctx, 'same heads on each', lx, 90 + NL * 18 + 12, PE.css('--muted'), 11);
+      PE.label(ctx, `${SHOWN} of ${NQ} slots drawn`, f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+    },
+    (ctx, W, H, t) => { // match
+      const im = batch.imgs[0], n = im.objs.length, rows = SHOWN, top = 24, ch = (H - top - 14) / rows, cwid = Math.min(46, W * .09), lx = 34;
+      PE.label(ctx, 'slot', 2, 16, PE.css('--blue'), 11);
+      im.objs.forEach((o, j) => PE.label(ctx, o.n, lx + j * cwid + 3, 16, PE.css('--yellow'), 11));
+      const vals = batch.cost.flatMap(r => r.slice(0, n)), cmin = Math.min(...vals), cmax = Math.max(...vals);
+      for (let i = 0; i < rows; i++) { ctx.globalAlpha = 1; PE.label(ctx, `p${i + 1}`, 2, top + i * ch + ch * .75, PE.css('--blue'), 10);
+        for (let j = 0; j < n; j++) { const v = batch.cost[i][j], sel = batch.match[i] === j && t > .35;
+          ctx.fillStyle = sel ? PE.css('--green') : PE.css('--red'); ctx.globalAlpha = sel ? .95 : .08 + .62 * (v - cmin) / (cmax - cmin || 1);
+          ctx.fillRect(lx + j * cwid, top + i * ch + 1, cwid - 3, ch - 2); } }
+      ctx.globalAlpha = 1;
+      const f = frame(ctx, lx + n * cwid + 16, 8, W - (lx + n * cwid + 16), H - 30, im); objects(ctx, f, im);
+      batch.P.forEach((p, i) => { const j = batch.match[i], hit = j < n;
+        boxIn(ctx, f, p.b, hit && t > .35 ? PE.css('--green') : PE.css('--brown'), hit && t > .35 ? 2.5 : 1, hit && t > .35 ? null : [4, 3], hit && t > .35 ? 1 : .45); });
+      PE.label(ctx, 'redder = costlier; green = assigned', f.x, f.y + f.fh + 16, PE.css('--muted'), 11);
+    },
+    (ctx, W, H, t) => { // loss and update
+      const lx = 64, top = 18, bh = Math.min(18, (H - 70) / (NL + 1.6)), tot = batch.losses.reduce((a, l) => a.map((v, i) => v + l[i]), [0, 0, 0]);
+      const scale = (W - lx - 20) / (tot[0] + tot[1] + tot[2]);
+      const seg = (y, vals, a) => { let x = lx; vals.forEach((v, i) => { ctx.save(); ctx.fillStyle = PE.css('--red'); ctx.globalAlpha = [.9, .55, .3][i] * a;
+        ctx.fillRect(x, y, v * scale * t, bh); ctx.restore(); x += v * scale * t; }); };
+      batch.losses.forEach((l, i) => { PE.label(ctx, `layer ${i + 1}`, 4, top + i * (bh + 5) + bh * .8, PE.css('--fg'), 11); seg(top + i * (bh + 5), l, 1); });
+      const ty = top + NL * (bh + 5) + 6; PE.label(ctx, 'total', 4, ty + bh * .8, PE.css('--red'), 12); seg(ty, tot, 1);
+      ['class', '5 x L1', '2 x GIoU loss'].forEach((k, i) => { const x = lx + i * 80; ctx.save(); ctx.fillStyle = PE.css('--red'); ctx.globalAlpha = [.9, .55, .3][i];
+        ctx.fillRect(x, ty + bh + 7, 11, 11); ctx.restore(); PE.label(ctx, k, x + 15, ty + bh + 17, PE.css('--fg'), 11); });
+      if (t > .5) { // backward order; one row when wide, a two-row snake when narrow
+        const flow = ['loss', 'heads', 'decoder', 'encoder', 'backbone', 'AdamW step'], wide = W >= 560, per = wide ? 6 : 3;
+        const y0 = ty + bh + 34, hgt = 24, sw = (W - 8) / per, bw = sw - 22;
+        const at = i => { const r = Math.floor(i / per), c = i % per, col = r % 2 === 0 ? per - 1 - c : c; return { x: 4 + col * sw, y: y0 + r * (hgt + 22) }; };
+        ctx.save(); ctx.globalAlpha = PE.clamp((t - .5) * 2, 0, 1);
+        flow.forEach((k, i) => { const p = at(i); ctx.strokeStyle = PE.css('--red'); ctx.strokeRect(p.x + .5, p.y + .5, bw, hgt);
+          PE.label(ctx, k, p.x + 5, p.y + hgt / 2 + 4, PE.css('--fg'), 11);
+          if (i > 0) { const q = at(i - 1);
+            if (q.y === p.y) { const dir = Math.sign(p.x - q.x); arrow(ctx, dir < 0 ? q.x - 2 : q.x + bw + 2, p.y + hgt / 2, dir < 0 ? p.x + bw + 4 : p.x - 4, p.y + hgt / 2, PE.css('--red')); }
+            else arrow(ctx, q.x + bw / 2, q.y + hgt + 2, p.x + bw / 2, p.y - 3, PE.css('--red')); } });
+        const last = at(flow.length - 1);
+        PE.label(ctx, 'gradients of the loss flow back, get clipped, then one AdamW step', 4, last.y + hgt + 16, PE.css('--red'), 11); ctx.restore(); }
+    },
+  ];
+
+  const cv = PE.canvas(el, w => w < 560 ? .85 : .46, (ctx, W, H) => { if (!W) return; ctx.fillStyle = PE.css('--bg'); ctx.fillRect(0, 0, W, H); DRAW[S.stage](ctx, W, H, S.t); });
+
+  function readout() {
+    const b = batch, im = b.imgs[0], n = b.Hf * b.Wf, nobj = b.imgs.map(i => i.objs.length), tot = nobj.reduce((a, c) => a + c, 0);
+    const pad = 1 - b.imgs.reduce((a, i) => a + i.h * i.w, 0) / (B * b.H0 * b.W0), mpad = 1 - im.hf * im.wf / n, matched = im.objs.length;
+    out.textContent = [
+      `Batch tensor 4 x 3 x ${b.H0} x ${b.W0} after padding, pixel mask 4 x ${b.H0} x ${b.W0}; ${Math.round(pad * 100)}% of its pixels are padding. Targets: [${nobj.join(', ')}] objects per image.`,
+      `Features 4 x 2048 x ${b.Hf} x ${b.Wf}; mask downsampled to 4 x ${b.Hf} x ${b.Wf}. For image 1 the code marks ${im.hf} x ${im.wf} of those cells as real.`,
+      `1x1 conv to 4 x 256 x ${b.Hf} x ${b.Wf}, flattened to ${n} tokens per image: 4 x ${n} x 256, plus a positional encoding of the same shape.`,
+      `Per encoder layer and head: ${n} x ${n} = ${fmt(n * n)} attention scores per image; ${Math.round(mpad * 100)}% of image 1's tokens are marked as padding and masked. Memory: 4 x ${n} x 256.`,
+      `Slots 100 x 256, shared by all images; cross-attention is 100 x ${n} scores per head. Kept outputs, one per layer: 6 x 4 x 100 x 256.`,
+      `Class logits 6 x 4 x 100 x 92 and boxes 6 x 4 x 100 x 4, one set per decoder layer.`,
+      `${NL} layers x ${B} images = ${NL * B} separate assignments this step. Image 1: ${matched} of 100 slots get an object, ${100 - matched} are trained toward "no object".`,
+      `This GPU's images hold ${tot} objects; the box losses divide by that count summed over all GPUs. ${NL} layer losses are summed, then one backward pass and one optimizer step.`,
+    ][S.stage];
+  }
+  function show(k, animate = true) {
+    stopA(); S.stage = (k + NS) % NS;
+    chips.forEach((c, i) => { c.classList.toggle('done', i < S.stage); if (i === S.stage) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
+    texts.forEach((d, i) => { d.hidden = i !== S.stage; });
+    readout();
+    if (animate) { S.t = 0; stopA = PE.animate(900, u => { S.t = u; cv.redraw(); }); } else { S.t = 1; cv.redraw(); }
+  }
+  function stopRun() { clearTimeout(runTimer); S.running = false; document.getElementById('btn-tr-run').setAttribute('aria-pressed', 'false'); }
+  function run() {
+    stopRun(); S.running = true; document.getElementById('btn-tr-run').setAttribute('aria-pressed', 'true');
+    const still = PE.instant();
+    let k = 0; const tick = () => { show(k, !still); if (++k < NS) runTimer = setTimeout(tick, 2200); else stopRun(); }; tick();
+  }
+  chips.forEach((c, i) => c.onclick = () => { stopRun(); show(i); });
+  document.getElementById('btn-tr-prev').onclick = () => { stopRun(); show(S.stage - 1); };
+  document.getElementById('btn-tr-next').onclick = () => { stopRun(); show(S.stage + 1); };
+  document.getElementById('btn-tr-run').onclick = () => { if (S.running) stopRun(); else run(); };
+  document.getElementById('btn-tr-batch').onclick = () => { S.seed++; batch = makeBatch(S.seed); show(S.stage); };
+  document.getElementById('btn-tr-reset').onclick = () => { stopRun(); S.seed = 1; batch = makeBatch(1); show(0, false); };
+  batch = makeBatch(1); show(0, false);
+})();
+</script>
+
+<p>At inference there is no matching and no loss: take the last decoder layer's 100 slots and give each one its most likely real class (ignoring "no object") and its box. For its COCO AP numbers the paper keeps all of them this way, even slots whose top class is "no object", and reports that this scores <span data-claim="pg-tr-override">2 AP</span> higher than filtering those slots out. To draw a clean picture you would instead keep only the slots whose score clears a threshold. No NMS either way.</p>
+<p>Training repeats this step for every batch: <span data-claim="pg-tr-300">300 epochs</span> with the learning rate cut tenfold <span data-claim="pg-tr-300drop">after 200</span> for the paper's ablations, or <span data-claim="pg-tr-500">500 epochs</span> with the drop <span data-claim="pg-tr-500drop">after 400</span> for the headline model. The paper reports <span data-claim="pg-tr-3days">3 days</span> on <span data-claim="pg-tr-gpus">16 V100 GPUs</span> for the shorter schedule. Why it needs so many epochs is where the next chapter starts.</p>
+</section>
+
+<section id="ch-detr-limits" class="chapter">
+<h2>What it cost: long training and small objects</h2>
+<p>The headline result was a clean tie. DETR with a ResNet-50 reached <span data-claim="pg-detr-ap">42.0 AP</span> on COCO, the same as a carefully tuned Faster R-CNN with FPN (<span data-claim="pg-frcnn-ap">42.0 AP</span>), with no anchors and no NMS. But the tie hides two very different profiles.</p>
+<p>On large objects DETR was much better: <span data-claim="pg-detr-apl">61.1</span> versus <span data-claim="pg-frcnn-apl">53.4</span> AP<sub>L</sub>. On small objects it was much worse: <span data-claim="pg-detr-aps">20.5</span> versus <span data-claim="pg-frcnn-aps">26.6</span> AP<sub>S</sub>. And it needed <span data-claim="pg-detr-500">500 epochs</span> of training for the headline number, against <span data-claim="pg-frcnn-109">109 epochs</span> for the baseline.</p>
+<p>The small-object problem traces back to the encoder. Every one of the HW feature-map cells attends to every other, so the cost grows with the square of the number of cells. DETR can only afford the coarse stride-32 map, where a small object may cover a single cell. The long training has more than one suspect, and the next chapters meet them: attention over image features that starts out nearly uniform over thousands of pixels (Deformable DETR's diagnosis), and object queries that carry no clear notion of position (DAB-DETR's). Doubling the resolution (the paper's DC5 variant) multiplies encoder self-attention cost by <span data-claim="pg-detr-dc5-16x">16x</span> and drops speed from <span data-claim="pg-detr-28fps">28</span> to <span data-claim="pg-detr-dc5-12fps">12</span> FPS. Slide the stride to feel the square.</p>
+
+<figure class="viz" id="viz-attn-cost">
+  <span class="badge computed">Computed + sourced</span>
+  <svg class="chart" id="cost-svg" viewBox="0 0 640 300" role="img" aria-label="Dense self-attention pair count by feature stride, and sourced AP and epoch bars"></svg>
+  <div class="controls">
+    <button type="button" id="btn-cost-s32">Stride 32 (DETR)</button>
+    <button type="button" id="btn-cost-s16">Stride 16 (DC5)</button>
+    <button type="button" id="btn-cost-s8">Stride 8</button>
+  </div>
+  <p class="readout" id="cost-readout" aria-live="polite"></p>
+  <figcaption>Left, computed: cells HW and query-key pairs (HW)<sup>2</sup> for an 800 x 1333 image (DETR's largest training size), on a log scale. Right, sourced from DETR Table 1: small- and large-object AP for DETR-R50 and Faster RCNN-FPN+.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('cost-svg'), out = document.getElementById('cost-readout');
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const cells = s => Math.ceil(800 / s) * Math.ceil(1333 / s);
+  const SRC = [ { l: 'small objects', d: 20.5, f: 26.6, cd: 'pg-detr-aps-v', cf: 'pg-frcnn-aps-v' }, { l: 'large objects', d: 61.1, f: 53.4, cd: 'pg-detr-apl-v', cf: 'pg-frcnn-apl-v' } ];
+  const STRIDES = [32, 16, 8];
+  let S = 32, stop = () => {};
+  const hl = { 32: 1, 16: 0, 8: 0 };
+  // Wide: the two panels side by side. Narrow (under 520 px): stacked, so the labels stay readable on a phone.
+  const LAY = {
+    wide: { vw: 640, vh: 300, bx: 30, gap: 90, bw: 60, base: 260, hmax: 200, div: [320, 30, 320, 285],
+      ax: 340, at: 22, ap: 350, agap: 130, abw: 42, astep: 50, abase: 230, leg: [350, 440, 262] },
+    narrow: { vw: 360, vh: 596, bx: 30, gap: 105, bw: 70, base: 250, hmax: 190, div: [10, 292, 350, 292],
+      ax: 10, at: 318, ap: 20, agap: 170, abw: 48, astep: 56, abase: 540, leg: [20, 150, 572] } };
+  const text = (x, y, fill, size, t, extra = {}) => mk('text', { x, y, fill, 'font-size': size, 'font-family': 'system-ui', ...extra }, t);
+  // On a phone the figure badge sits over the first line, so the narrow layout starts one line lower.
+  function clearBadge(narrow, vw, vh) { if (!narrow) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0,24)');
+    while (svg.firstChild) g.append(svg.firstChild); svg.append(g); svg.setAttribute('viewBox', `0 0 ${vw} ${vh + 24}`); }
+  function draw() {
+    const L = svg.clientWidth && svg.clientWidth < 520 ? LAY.narrow : LAY.wide;
+    svg.setAttribute('viewBox', `0 0 ${L.vw} ${L.vh}`);
+    svg.replaceChildren(); const fg = PE.css('--fg'), mu = PE.css('--muted'), red = PE.css('--red'), p2 = PE.css('--panel2');
+    svg.append(text(10, 22, mu, 13, 'query-key pairs per encoder layer (log scale)'));
+    STRIDES.forEach((s, i) => { const n = cells(s), p = n * n, h = L.hmax * Math.log10(p) / 9, x = L.bx + i * L.gap, k = hl[s];
+      svg.append(mk('rect', { x, y: L.base - h, width: L.bw, height: h, rx: 4, fill: PE.mix(p2, red, k) }));
+      svg.append(text(x + L.bw / 2, L.base - 8 - h, PE.mix(mu, fg, k), 12, p >= 1e6 ? (p / 1e6).toFixed(1) + 'M' : p.toLocaleString(), { 'text-anchor': 'middle', 'data-computed': '' }));
+      svg.append(text(x + L.bw / 2, L.base + 20, PE.mix(mu, fg, k), 12, 'stride ' + s, { 'text-anchor': 'middle' })); });
+    svg.append(mk('line', { x1: L.div[0], y1: L.div[1], x2: L.div[2], y2: L.div[3], stroke: PE.css('--rule') }));
+    svg.append(text(L.ax, L.at, mu, 13, 'COCO AP by object size'));
+    SRC.forEach((r, i) => { const x = L.ap + i * L.agap;
+      [[r.d, PE.css('--blue'), r.cd], [r.f, PE.css('--brown'), r.cf]].forEach(([v, c, cid], k) => {
+        const h = v * 3, bx = x + k * L.astep; svg.append(mk('rect', { x: bx, y: L.abase - h, width: L.abw, height: h, rx: 3, fill: c }));
+        svg.append(text(bx + L.abw / 2, L.abase - 6 - h, fg, 12, v.toFixed(1), { 'text-anchor': 'middle', 'data-claim': cid })); });
+      svg.append(text(x + (L.astep + L.abw) / 2, L.abase + 18, mu, 12, r.l, { 'text-anchor': 'middle' })); });
+    [[L.leg[0], '--blue', 'DETR-R50'], [L.leg[1], '--brown', 'Faster RCNN-FPN+']].forEach(([x, c, t]) => {
+      svg.append(mk('rect', { x, y: L.leg[2], width: 10, height: 10, fill: PE.css(c) })); svg.append(text(x + 14, L.leg[2] + 9, mu, 11, t)); });
+    clearBadge(L === LAY.narrow, L.vw, L.vh);
+  }
+  function readout() {
+    const n = cells(S), r = (n * n) / (cells(32) ** 2);
+    out.textContent = `Stride ${S}: ${n.toLocaleString()} cells, so ${(n * n / 1e6).toFixed(1)} million query-key pairs per attention head per layer${S === 32 ? '' : `, ${Math.round(r)}x the stride-32 cost`}.`;
+    document.querySelectorAll('#viz-attn-cost .controls button').forEach(b => b.setAttribute('aria-pressed', String(b.id === 'btn-cost-s' + S)));
+  }
+  function pick(s) { stop(); S = s; readout(); const to = {}; STRIDES.forEach(t => { to[t] = t === s ? 1 : 0; }); stop = PE.tween(hl, to, 600, draw); }
+  STRIDES.forEach(s => document.getElementById('btn-cost-s' + s).onclick = () => pick(s));
+  new ResizeObserver(draw).observe(svg);
+  PE.onTheme(draw); draw(); readout();
+})();
+</script>
+
+<p>In the paper's own accounting (Appendix A.3), one encoder self-attention layer costs</p>
+<div class="eq"><div class="tex tex-display">\mathcal{O}\big(d^2\,\htmlClass{t-blue}{HW} + d\,(\htmlClass{t-red}{HW})^2\big)</div></div>
+<ul class="gloss">
+  <li><span class="tex">d</span>: the feature width (<span data-claim="pg-detr-d">d = 256</span>). The first term is the linear projections, one per cell.</li>
+  <li>The second term is every cell comparing itself with every other cell. Once HW is in the thousands it dominates, and it is the one that explodes when you ask for finer features.</li>
+</ul>
+<p>The paper names the long schedule and small objects as the "new challenges" of its design. Everything in Act II is an answer to them.</p>
+</section>
+
+<!-- ============================ ACT II ============================ -->
+<p class="kicker"><span class="act-n">Act II</span>Making DETR train fast</p>
+<section id="ch-deformable" class="chapter">
+<h2>Deformable DETR: look at a few points, not every pixel</h2>
+<p>Here is the idea that fixed attention over image features, in the encoder and in the decoder's cross-attention alike. A query does not need to compare itself against every pixel. Give it a <b>reference point</b>, and let it predict a handful of <b class="c-blue">sampling points</b> near it: where to look, and how much to trust each look. No query-key dot products at all; the offsets and the weights both come from the query through one linear layer.</p>
+<p>Deformable DETR uses <span data-claim="pg-ddetr-mk">M = 8, K = 4</span>: eight heads, each sampling four points, on each of <span data-claim="pg-ddetr-l">L = 4</span> feature levels. That is <span data-claim="pg-ddetr-128">128 per query</span> sampled points, no matter how large the feature maps are. Drag the reference point around.</p>
+
+<figure class="viz" id="viz-deform-points">
+  <span class="badge computed">Paper's initialization + toy</span>
+  <canvas id="deform-canvas" tabindex="0" aria-label="Reference point with deformable sampling points; drag or use arrow keys to move it" role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-deform-init">At initialization</button>
+    <button type="button" id="btn-deform-trained">After training (toy)</button>
+    <button type="button" id="btn-deform-single">One level</button>
+    <button type="button" id="btn-deform-multi">Four levels</button>
+    <button type="button" id="btn-deform-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="deform-readout" aria-live="polite"></p>
+  <figcaption>The "initialization" pattern is the paper's (Appendix A.4): head m points in one of 8 compass directions, and its k-th point sits k steps out, with equal weights. "After training" is a toy: the points move onto the object's edges, as the paper's visualizations describe, but these positions are illustrative. With four levels, the same offsets land on coarser maps (strides 8 to 64), so they cover more of the image.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('deform-canvas'), out = document.getElementById('deform-readout');
+  const DIRS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+  const CAR = { x1: .28, y1: .38, x2: .72, y2: .78 };
+  const S = { p: [.5, .58], mode: 'init', multi: false, t: 0, lv: 0 };
+  let stop = () => {}, stopL = () => {};
+  function target(h, k) { // toy "trained" location: spread the head's points along the car's outline
+    const u = (h * 4 + k) / 32, per = 2 * ((CAR.x2 - CAR.x1) + (CAR.y2 - CAR.y1)); let d = u * per;
+    const w = CAR.x2 - CAR.x1, hh = CAR.y2 - CAR.y1;
+    if (d < w) return [CAR.x1 + d, CAR.y1]; d -= w; if (d < hh) return [CAR.x2, CAR.y1 + d]; d -= hh;
+    if (d < w) return [CAR.x2 - d, CAR.y2]; d -= w; return [CAR.x1, CAR.y2 - d];
+  }
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); PE.thing(ctx, CAR, W, H, PE.css('--brown'));
+    const unit = .028, lv = S.lv;
+    [0, 1, 2, 3].forEach(l => { if (l > 0 && lv <= 0) return;
+      const sc = PE.lerp(1, Math.pow(2, l) * .5, lv), alpha = l === 0 ? .9 : lv * (.9 - l * .18), rad = PE.lerp(3.4, 3.2 - l * .4, lv);
+      DIRS.forEach(([dx, dy], h) => { for (let k = 1; k <= 4; k++) {
+        const ix = S.p[0] + dx * k * unit * sc * H / W, iy = S.p[1] + dy * k * unit * sc;
+        const [tx, ty] = target(h, k - 1), x = ix + (tx - ix) * S.t * (l === 0 ? 1 : .6), y = iy + (ty - iy) * S.t * (l === 0 ? 1 : .6);
+        ctx.fillStyle = PE.css('--blue'); ctx.globalAlpha = alpha;
+        ctx.beginPath(); ctx.arc(x * W, y * H, rad, 0, 7); ctx.fill(); ctx.globalAlpha = 1; } }); });
+    ctx.fillStyle = PE.css('--fg'); ctx.beginPath(); ctx.arc(S.p[0] * W, S.p[1] * H, 6, 0, 7); ctx.fill();
+    ctx.strokeStyle = PE.css('--bg'); ctx.lineWidth = 2; ctx.stroke();
+    const dense = Math.ceil(800 / 8) * Math.ceil(1333 / 8), n = S.multi ? 128 : 32;
+    const txt = `${n} sampled points for this query${S.multi ? ' (8 heads x 4 levels x 4 points)' : ' (8 heads x 4 points, one level)'}. Dense attention on one stride-8 map of an 800 x 1333 image would compare against ${dense.toLocaleString()} pixels.`;
+    if (out.textContent !== txt) out.textContent = txt;
+  });
+  function setMode(m) { stop(); S.mode = m; stop = PE.tween(S, { t: m === 'trained' ? 1 : 0 }, 900, cv.redraw);
+    document.getElementById('btn-deform-init').setAttribute('aria-pressed', String(m === 'init'));
+    document.getElementById('btn-deform-trained').setAttribute('aria-pressed', String(m === 'trained')); }
+  function setMulti(v) { stopL(); S.multi = v; stopL = PE.tween(S, { lv: v ? 1 : 0 }, 800, cv.redraw);
+    document.getElementById('btn-deform-single').setAttribute('aria-pressed', String(!v));
+    document.getElementById('btn-deform-multi').setAttribute('aria-pressed', String(v)); }
+  document.getElementById('btn-deform-init').onclick = () => setMode('init');
+  document.getElementById('btn-deform-trained').onclick = () => setMode('trained');
+  document.getElementById('btn-deform-single').onclick = () => setMulti(false);
+  document.getElementById('btn-deform-multi').onclick = () => setMulti(true);
+  document.getElementById('btn-deform-reset').onclick = () => { S.p = [.5, .58]; setMode('init'); setMulti(false); };
+  PE.draggable(el, () => S.p, (x, y) => { S.p = [PE.clamp(x, .03, .97), PE.clamp(y, .05, .95)]; cv.redraw(); });
+  setMode('init'); setMulti(false);
+})();
+</script>
+
+<p>Written out, deformable attention for one query (Deformable DETR Eq. 2) is</p>
+<div class="eq"><div class="tex tex-display">\mathrm{DeformAttn}(\mathbf{z}_q, \mathbf{p}_q, \mathbf{x}) = \sum_{m=1}^{M} \mathbf{W}_m \Big[\sum_{k=1}^{K} \htmlClass{t-green}{A_{mqk}} \cdot \mathbf{W}'_m\, \mathbf{x}\big(\mathbf{p}_q + \htmlClass{t-blue}{\Delta\mathbf{p}_{mqk}}\big)\Big]</div></div>
+<ul class="gloss">
+  <li><span class="tex">\mathbf{z}_q</span>: the query's feature; <span class="tex">\mathbf{p}_q</span>: its reference point.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\Delta\mathbf{p}_{mqk}}</span>: where head m's k-th point looks, relative to the reference point, predicted from <span class="tex">\mathbf{z}_q</span>. Fractional, so the feature is read by bilinear interpolation.</li>
+  <li><span class="tex">\htmlClass{t-green}{A_{mqk}}</span>: how much that look counts; the K weights of a head sum to 1. Also predicted from <span class="tex">\mathbf{z}_q</span>, not from comparing with keys.</li>
+  <li><span class="tex">\mathbf{W}'_m, \mathbf{W}_m</span>: the usual value and output projections.</li>
+</ul>
+<p>The multi-scale version (Eq. 3) is the same sum with an extra loop over the L levels, and one softmax across all L x K points of a head, so a head can weigh fine and coarse evidence against each other. That is FPN-style fusion done by attention itself; adding an actual FPN on top gave no gain in the paper's ablation.</p>
+<p>The effect on training was dramatic. Deformable DETR reached <span data-claim="pg-ddetr-ap">43.8 AP</span> in <span data-claim="pg-ddetr-50">50 epochs</span>, against DETR's <span data-claim="pg-ddetr-detr-ap">42.0 AP</span> in <span data-claim="pg-ddetr-detr-500">500 epochs</span>, and small-object AP rose to <span data-claim="pg-ddetr-aps">26.4</span> AP<sub>S</sub>. Sparse attention also starts out focused, instead of spread uniformly over thousands of pixels, which the paper gives as a reason for the faster convergence. Two variants mattered for the future: <b>iterative box refinement</b>, where each decoder layer corrects the previous layer's box (<span data-claim="pg-ddetr-refine">45.4 AP</span>), and a <b>two-stage</b> version whose queries start from the encoder's best proposals (<span data-claim="pg-ddetr-2stage">46.2 AP</span>). The cost: it runs <span data-claim="pg-ddetr-slower">25% slower</span> than Faster R-CNN at similar FLOPs, because scattered sampling is unfriendly to memory.</p>
+</section>
+
+<section id="ch-anchor-queries" class="chapter">
+<h2>DAB-DETR: a query is a box</h2>
+<p>Back to that loose end: what <em>is</em> an object query? DAB-DETR's answer starts by splitting it in two. A decoder query has a <b>content part</b> (what it has seen so far) and a <b>positional part</b> (where it is looking). In DETR the positional part is an opaque learned vector, and the paper's visualizations show it spreads attention over several unrelated regions at once, which it conjectures is a root cause of the slow training.</p>
+<p>So make the positional part literally a box. Each of the <span data-claim="pg-dab-300">300</span> queries owns an anchor <span class="tex">(\htmlClass{t-blue}{x}, \htmlClass{t-blue}{y}, \htmlClass{t-blue}{w}, \htmlClass{t-blue}{h})</span>. Its center steers where attention looks, its width and height stretch attention into an oval of the right size, and after every decoder layer the box is nudged toward the object. Drag the box, change its size, and watch the positional attention follow.</p>
+
+<figure class="viz" id="viz-anchor-attn">
+  <span class="badge computed">Computed</span>
+  <canvas id="anchor-canvas" tabindex="0" aria-label="Positional attention heatmap for an anchor box; drag or use arrow keys to move it" role="img"></canvas>
+  <div class="controls">
+    <label>width <input type="range" id="anchor-w" min="0.06" max="0.6" step="0.01" value="0.3"></label>
+    <label>height <input type="range" id="anchor-h" min="0.06" max="0.8" step="0.01" value="0.3"></label>
+    <button type="button" id="btn-anchor-mod-on">Size-modulated</button>
+    <button type="button" id="btn-anchor-mod-off">Unmodulated</button>
+    <button type="button" id="btn-anchor-t20">T = 20</button>
+    <button type="button" id="btn-anchor-t10000">T = 10000</button>
+    <button type="button" id="btn-anchor-refine">Refine over 6 layers</button>
+    <button type="button" id="btn-anchor-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="anchor-readout" aria-live="polite"></p>
+  <figcaption>Computed: the heatmap is the softmax over image positions of DAB-DETR's positional attention (Eq. 5, and Eq. 6 when size-modulated), using sine encodings with temperature T (Eq. 8, 128 dimensions per coordinate, coordinates scaled by 2&pi; as in the official code). The reference size w<sub>ref</sub>, h<sub>ref</sub> is fixed at 0.3 here; the paper predicts it from the content query. The paper states T = 20 for all models; the official code uses 20 for image positions and 10000 for queries, so treat the exact sharpness as illustrative. The 6-step refinement uses the logit-space update rule with toy corrections.</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('anchor-canvas'), out = document.getElementById('anchor-readout');
+  const wIn = document.getElementById('anchor-w'), hIn = document.getElementById('anchor-h');
+  const GTB = PE.fromC(.66, .56, .22, .5);
+  const HOME = { cx: .35, cy: .45, w: .3, h: .3, m: 1, lt: Math.log(20) };
+  const S = { ...HOME, mod: true, T: 20, trail: [], busy: false };
+  const GX = 96, GY = 48, D = 256;
+  const kernel = (d, T) => { let s = 0; for (let i = 0; i < 64; i++) s += Math.cos(2 * Math.PI * d / Math.pow(T, 2 * i / 128)); return s; };
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); PE.thing(ctx, GTB, W, H, PE.css('--yellow')); PE.strokeBox(ctx, GTB, W, H, PE.css('--yellow'), 1.4, [3, 3]);
+    // m blends unmodulated (0) into size-modulated (1); lt is log T, so the temperature morphs smoothly too.
+    const w = S.w, h = S.h, sx = 1 + S.m * (.3 / w - 1), sy = 1 + S.m * (.3 / h - 1), T = Math.exp(S.lt);
+    wIn.value = w; hIn.value = h;
+    const kx = [], ky = []; for (let i = 0; i < GX; i++) kx.push(kernel((i + .5) / GX - S.cx, T) * sx);
+    for (let j = 0; j < GY; j++) ky.push(kernel((j + .5) / GY - S.cy, T) * sy);
+    let mx = -1e9; const L = []; for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) { const v = (kx[i] + ky[j]) / Math.sqrt(D); L.push(v); if (v > mx) mx = v; }
+    let Z = 0; const P = L.map(v => { const e = Math.exp(v - mx); Z += e; return e; }); let pm = 0; P.forEach((p, i) => { P[i] = p / Z; if (P[i] > pm) pm = P[i]; });
+    // Paint the GX x GY heatmap into a tiny offscreen canvas, then scale it up smoothly.
+    const off = document.createElement('canvas'); off.width = GX; off.height = GY; const oc = off.getContext('2d'), img = oc.createImageData(GX, GY);
+    const rgb = PE.css('--blue').match(/[0-9a-f]{2}/gi).map(h => parseInt(h, 16));
+    P.forEach((p, k) => { img.data.set([rgb[0], rgb[1], rgb[2], Math.round(175 * p / pm)], k * 4); });
+    oc.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, W, H);
+    S.trail.forEach((b, k) => PE.strokeBox(ctx, b, W, H, PE.css('--blue'), 1, [2, 3], .35 + .1 * k));
+    const ab = PE.fromC(S.cx, S.cy, w, h); PE.strokeBox(ctx, ab, W, H, PE.css('--bg'), 5.5, null, .75); PE.strokeBox(ctx, ab, W, H, PE.css('--blue'), 2.4);
+    let near = 0; for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) { const x = (i + .5) / GX, y = (j + .5) / GY;
+      if (Math.abs(x - S.cx) < w / 2 && Math.abs(y - S.cy) < h / 2) near += P[j * GX + i]; }
+    if (!S.busy) out.textContent = `${Math.round(near * 100)}% of the positional attention falls inside the anchor box (${S.mod ? 'size-modulated' : 'unmodulated'}, T = ${S.T}).`;
+    [['btn-anchor-mod-on', S.mod], ['btn-anchor-mod-off', !S.mod], ['btn-anchor-t20', S.T === 20], ['btn-anchor-t10000', S.T === 10000]]
+      .forEach(([id, v]) => document.getElementById(id).setAttribute('aria-pressed', String(v)));
+  });
+  let stop = () => {};
+  // The readout waits for the end of a tween, so a screen reader hears one value, not every frame.
+  const go = (to, ms, done) => { stop(); S.busy = true; stop = PE.tween(S, to, ms, cv.redraw, () => { S.busy = false; cv.redraw(); if (done) done(); }); };
+  const halt = () => { stop(); S.busy = false; };
+  const sig = x => 1 / (1 + Math.exp(-x)), isig = p => Math.log(p / (1 - p));
+  // "Refine" restarts from where the box stood before the first refinement, so pressing it twice equals pressing it once.
+  function refine() {
+    halt(); if (S.trail.length) { const [x, y, w, h] = PE.cxcywh(S.trail[0]); Object.assign(S, { cx: x, cy: y, w, h }); }
+    S.trail = []; const [gx, gy, gw, gh] = PE.cxcywh(GTB); let step = 0;
+    const run = () => { if (step >= 6) return; const cur = [S.cx, S.cy, S.w, S.h], tgt = [gx, gy, gw, gh];
+      S.trail.push(PE.fromC(...cur)); const nxt = cur.map((v, i) => sig(isig(v) + .45 * (isig(tgt[i]) - isig(v))));
+      step++; go({ cx: nxt[0], cy: nxt[1], w: nxt[2], h: nxt[3] }, 420, run); };
+    run();
+  }
+  wIn.oninput = hIn.oninput = () => { halt(); S.w = +wIn.value; S.h = +hIn.value; S.trail = []; cv.redraw(); };
+  const setMod = v => { S.mod = v; go({ m: v ? 1 : 0 }, 700); };
+  const setT = T => { S.T = T; go({ lt: Math.log(T) }, 700); };
+  document.getElementById('btn-anchor-mod-on').onclick = () => setMod(true);
+  document.getElementById('btn-anchor-mod-off').onclick = () => setMod(false);
+  document.getElementById('btn-anchor-t20').onclick = () => setT(20);
+  document.getElementById('btn-anchor-t10000').onclick = () => setT(10000);
+  document.getElementById('btn-anchor-refine').onclick = refine;
+  document.getElementById('btn-anchor-reset').onclick = () => { S.mod = true; S.T = 20; S.trail = []; go({ ...HOME }, 600); };
+  PE.draggable(el, () => [S.cx, S.cy], (x, y) => { halt(); S.cx = PE.clamp(x, .05, .95); S.cy = PE.clamp(y, .05, .95); S.trail = []; cv.redraw(); });
+})();
+</script>
+
+<p>The anchor becomes the positional query in two steps (DAB-DETR Eq. 1-2): encode each of the four numbers with sines and cosines, then map the concatenation through a small MLP shared by all layers.</p>
+<div class="eq"><div class="tex tex-display">P_q = \mathrm{MLP}\big(\mathrm{PE}(\htmlClass{t-blue}{A_q})\big),\qquad \mathrm{PE}(\htmlClass{t-blue}{A_q}) = \mathrm{Cat}\big(\mathrm{PE}(\htmlClass{t-blue}{x_q}), \mathrm{PE}(\htmlClass{t-blue}{y_q}), \mathrm{PE}(\htmlClass{t-blue}{w_q}), \mathrm{PE}(\htmlClass{t-blue}{h_q})\big)</div></div>
+<p>The oval comes from Eq. 6: the similarity between an image position <span class="tex">(x, y)</span> and the anchor center is computed separately along x and along y, and each part is divided by the anchor's size relative to a reference size.</p>
+<div class="eq"><div class="tex tex-display">\mathrm{ModulateAttn} = \Big(\mathrm{PE}(x)\cdot \mathrm{PE}(\htmlClass{t-blue}{x_{\rm ref}})\,\frac{w_{q,\rm ref}}{\htmlClass{t-blue}{w_q}} + \mathrm{PE}(y)\cdot \mathrm{PE}(\htmlClass{t-blue}{y_{\rm ref}})\,\frac{h_{q,\rm ref}}{\htmlClass{t-blue}{h_q}}\Big) \big/ \sqrt{D}</div></div>
+<ul class="gloss">
+  <li>A wide anchor (large <span class="tex">\htmlClass{t-blue}{w_q}</span>) shrinks the x term, so attention flattens and spreads horizontally. A narrow one sharpens it.</li>
+  <li>This happens before the softmax, so it reshapes where the query looks, not what it does with what it finds.</li>
+</ul>
+<p>DAB-DETR also found that the standard temperature <span class="tex">T = 10000</span> in the sine encoding, designed for integer word positions, is a poor fit for box coordinates between 0 and 1; it uses <span data-claim="pg-dab-t20">T=20</span>. Flip between the two temperatures above to see why: at 10000 the attention is nearly flat.</p>
+<p>After each of the six decoder layers a shared head predicts a correction, and the anchor is updated in logit space, <span class="tex">\sigma(\sigma^{-1}(\text{old}) + \Delta)</span>: the rule Deformable DETR prints in its Appendix A.4, which DAB-DETR says it follows. In the paper's ablation, removing this layer-by-layer update costs <span data-claim="pg-dab-update">1.7 AP</span>. The full model reaches <span data-claim="pg-dab-ap">45.7</span> AP in <span data-claim="pg-dab-50">50 epochs</span> (ResNet-50 with dilated last stage and 3 pattern embeddings).</p>
+</section>
+
+<section id="ch-denoising" class="chapter">
+<h2>DN-DETR and DINO: teach with noisy answers</h2>
+<p>Even with better queries, DETR-style training has a quieter problem. Early on, the Hungarian matching is unstable: for the same image, a slot matched to the dog this epoch may be matched to the car the next. Its training target keeps flipping, so it keeps unlearning. DN-DETR measures this directly, counting how many slots change their assigned object between consecutive epochs.</p>
+<p>The fix is a piece of teaching folklore: give the student problems whose answer is known. Alongside the normal queries, DN-DETR feeds the decoder <b class="c-green">noised copies of the ground-truth boxes</b>, shifted and rescaled a little, sometimes with a wrong label, and trains them to recover the original. These queries skip matching entirely; their target is fixed by construction. The model learns to refine a nearby box, a skill the matching queries then share, and the whole denoising part is dropped at test time, so inference costs nothing extra.</p>
+
+<figure class="viz" id="viz-noise-box">
+  <span class="badge computed">Computed</span>
+  <canvas id="noise-canvas" aria-label="A ground-truth box with noised denoising queries; positives in green, negatives in red" role="img"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-noise-dn">DN-DETR noise</button>
+    <button type="button" id="btn-noise-cdn">DINO contrastive noise</button>
+    <button type="button" id="btn-noise-sample">Sample again</button>
+    <button type="button" id="btn-noise-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="noise-readout" aria-live="polite"></p>
+  <figcaption>Computed from the papers' noise rules on a toy box. DN-DETR: the center moves by less than 0.4 x half the width (and height), and the width and height are scaled within plus or minus 40%; every noised box must be reconstructed. DINO: each corner moves by up to 0.2 of the box size for a positive (reconstruct it), and between 0.2 and 0.4 for a negative (predict "no object"). The DINO corner rule is how the official code implements the paper's thresholds; the paper states <span class="tex">\lambda_1 = 1.0</span> and <span class="tex">\lambda_2 = 2.0</span> as noise scales and lists <code>dn_box_noise_scale = 0.4</code> among its hyperparameters (Appendix D.4).</figcaption>
+</figure>
+<script>
+(() => {
+  const el = document.getElementById('noise-canvas'), out = document.getElementById('noise-readout');
+  const G = PE.fromC(.5, .55, .34, .56), S = { mode: 'dn', seed: 1, u: 1 };
+  const toward = (b, u) => ({ x1: PE.lerp(G.x1, b.x1, u), y1: PE.lerp(G.y1, b.y1, u), x2: PE.lerp(G.x2, b.x2, u), y2: PE.lerp(G.y2, b.y2, u) });
+  function dn(r) { const [cx, cy, w, h] = PE.cxcywh(G), l = .4, u = () => r() * 2 - 1;
+    return PE.fromC(cx + u() * l * w / 2, cy + u() * l * h / 2, w * (1 + u() * l), h * (1 + u() * l)); }
+  function cdn(r, neg) { const [, , w, h] = PE.cxcywh(G), s = () => (r() < .5 ? -1 : 1), u = () => (neg ? 1 : 0) + r();
+    return { x1: G.x1 + s() * u() * w / 2 * .4, y1: G.y1 + s() * u() * h / 2 * .4, x2: G.x2 + s() * u() * w / 2 * .4, y2: G.y2 + s() * u() * h / 2 * .4 }; }
+  const cv = PE.canvas(el, .5, (ctx, W, H) => {
+    PE.scene(ctx, W, H); PE.thing(ctx, G, W, H, PE.css('--yellow'));
+    const r = PE.rng(S.seed * 97 + (S.mode === 'dn' ? 0 : 5)), [, , w, h] = PE.cxcywh(G);
+    // Shell guides: each corner moves up to 0.2 w (h) for positives and 0.2-0.4 w (h) for negatives.
+    if (S.mode === 'cdn') [.2, .4].forEach(f => [1, -1].forEach(sgn => PE.strokeBox(ctx,
+      { x1: G.x1 - sgn * f * w, y1: G.y1 - sgn * f * h, x2: G.x2 + sgn * f * w, y2: G.y2 + sgn * f * h }, W, H, PE.css('--muted'), 1, [2, 5], .6 * S.u)));
+    const Q = [];
+    if (S.mode === 'dn') for (let k = 0; k < 5; k++) Q.push({ b: dn(r), pos: true });
+    else for (let k = 0; k < 5; k++) { Q.push({ b: cdn(r, false), pos: true }); Q.push({ b: cdn(r, true), pos: false }); }
+    Q.forEach((q, i) => { const e = PE.clamp(S.u * 1.5 - i * .05, 0, 1); if (e > 0) PE.strokeBox(ctx, toward(q.b, e), W, H, q.pos ? PE.css('--green') : PE.css('--red'), 1.8, q.pos ? null : [5, 3], .9 * Math.min(1, e * 3)); });
+    PE.strokeBox(ctx, G, W, H, PE.css('--yellow'), 2.6);
+    PE.tag(ctx, 'ground truth', G.x1 * W + 4, G.y1 * H - 6, PE.css('--yellow'), 12);
+    const txt = S.mode === 'dn' ? '5 noised copies (one per denoising group). Each one is trained to move back onto the yellow box.'
+      : '5 positives (green, trained to recover the box) and 5 negatives (red, trained to say "no object"). The negatives teach the model to reject a box that is close but not right.';
+    if (out.textContent !== txt) out.textContent = txt;
+    document.getElementById('btn-noise-dn').setAttribute('aria-pressed', String(S.mode === 'dn'));
+    document.getElementById('btn-noise-cdn').setAttribute('aria-pressed', String(S.mode === 'cdn'));
+  });
+  let stop = () => {};
+  const fly = () => { stop(); S.u = 0; stop = PE.tween(S, { u: 1 }, 900, cv.redraw); };
+  document.getElementById('btn-noise-dn').onclick = () => { S.mode = 'dn'; fly(); };
+  document.getElementById('btn-noise-cdn').onclick = () => { S.mode = 'cdn'; fly(); };
+  document.getElementById('btn-noise-sample').onclick = () => { S.seed++; fly(); };
+  document.getElementById('btn-noise-reset').onclick = () => { S.mode = 'dn'; S.seed = 1; fly(); };
+})();
+</script>
+
+<p>In DN-DETR's words, a box is shifted so its center moves by <span class="tex">|\Delta x| < \lambda_1 w/2</span> and <span class="tex">|\Delta y| < \lambda_1 h/2</span>, and rescaled so its width lies in <span class="tex">[(1-\lambda_2)w, (1+\lambda_2)w]</span> (height likewise), with <span data-claim="pg-dn-lambda">0.4</span> for both scales. Labels are flipped to a random class at rate <span data-claim="pg-dn-gamma">0.2</span>, which forces the model to use the box to recover the class. There are <span data-claim="pg-dn-groups">5</span> noised groups by default.</p>
+<p>One detail is load-bearing: an <b>attention mask</b>. The matching queries must not see the denoising queries (they would just copy near-perfect boxes), and one noised group must not see another (another noisy copy of the same object leaks the answer). Denoising without the mask does not just fail to help; it collapses to <span data-claim="pg-dn-nomask">24.0</span> AP against <span data-claim="pg-dn-mask">43.4</span> with it.</p>
+
+<figure class="viz" id="viz-dn-mask">
+  <span class="badge computed">Diagram</span>
+  <svg class="chart" id="mask-svg" viewBox="0 0 420 222" role="img" aria-label="Attention mask: rows are queries, columns are what they may attend to; blocked cells are red"></svg>
+  <div class="controls">
+    <button type="button" id="btn-mask-g1">A group 1 query</button>
+    <button type="button" id="btn-mask-g2">A group 2 query</button>
+    <button type="button" id="btn-mask-match">A matching query</button>
+    <button type="button" id="btn-mask-all" data-cue-reset>All rows</button>
+  </div>
+  <p class="readout" id="mask-readout" aria-live="polite"></p>
+  <figcaption>The mask of DN-DETR Eq. 7 for 2 noised groups of 3 objects and 4 matching queries. Row = the query doing the looking; column = what it looks at. Red = blocked. Denoising queries may look at matching queries (those hold no ground-truth information), but not across groups; matching queries may not look at any denoising query.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('mask-svg'), out = document.getElementById('mask-readout'), NS = 'http://www.w3.org/2000/svg', P = 2, M = 3, N = 4, W = P * M + N;
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const blocked = (i, j) => j < P * M && (Math.floor(i / M) !== Math.floor(j / M) || i >= P * M);
+  const group = i => i < P * M ? Math.floor(i / M) : 2;
+  const SAY = ['Click a kind of query, or hover a row: green is what that query may look at, red is blocked.',
+    'A query in denoising group 1 may look at its own group and at the matching queries, but not at group 2.',
+    'A query in denoising group 2 may look at its own group and at the matching queries, but not at group 1.',
+    'A matching query may look only at matching queries, itself included: every denoising query is hidden from it, so it cannot copy a noised answer.'];
+  // V.d dims the rows outside the focused group; V.f<i> lights row i.
+  const V = { d: 0 }; for (let i = 0; i < W; i++) V['f' + i] = 0;
+  let focus = -1, stop = () => {};
+  function draw() { svg.replaceChildren(); const c = 18, x0 = 150, y0 = 30, R = PE.css('--red'), G = PE.css('--green'), P2 = PE.css('--panel2');
+    for (let i = 0; i < W; i++) for (let j = 0; j < W; j++) {
+      const bl = blocked(i, j), f = V['f' + i];
+      const r = mk('rect', { x: x0 + j * c, y: y0 + i * c, width: c - 2, height: c - 2, rx: 2, fill: bl ? R : PE.mix(P2, G, f), opacity: (1 - .7 * V.d * (1 - f)).toFixed(3) });
+      r.addEventListener('mouseenter', () => setFocus(group(i))); svg.append(r); }
+    [[0, 'group 1'], [3, 'group 2'], [6, 'matching']].forEach(([i, t]) => {
+      svg.append(mk('text', { x: x0 - 8, y: y0 + i * c + 12, 'text-anchor': 'end', fill: PE.css('--muted'), 'font-size': 11, 'font-family': 'system-ui' }, t));
+      svg.append(mk('text', { x: x0 + i * c, y: y0 - 8, fill: PE.css('--muted'), 'font-size': 11, 'font-family': 'system-ui' }, t)); });
+  }
+  function setFocus(g) {
+    if (g === focus) return; focus = g; out.textContent = SAY[g + 1];
+    ['btn-mask-g1', 'btn-mask-g2', 'btn-mask-match'].forEach((id, k) => document.getElementById(id).setAttribute('aria-pressed', String(k === g)));
+    const to = { d: g < 0 ? 0 : 1 }; for (let i = 0; i < W; i++) to['f' + i] = group(i) === g ? 1 : 0;
+    stop(); stop = PE.tween(V, to, 450, draw);
+  }
+  document.getElementById('btn-mask-g1').onclick = () => setFocus(0);
+  document.getElementById('btn-mask-g2').onclick = () => setFocus(1);
+  document.getElementById('btn-mask-match').onclick = () => setFocus(2);
+  document.getElementById('btn-mask-all').onclick = () => setFocus(-1);
+  svg.addEventListener('mouseleave', () => setFocus(-1));
+  PE.onTheme(draw); draw(); out.textContent = SAY[0];
+})();
+</script>
+
+<p>DINO then stacks the best ideas so far, DAB-style box queries, DN-style denoising and Deformable attention, and adds three of its own:</p>
+<ul>
+  <li><b>Contrastive denoising.</b> Plain denoising only teaches "fix a nearby box". DINO adds <b class="c-red">hard negatives</b>: noised boxes a bit further out that must be answered with "no object". That teaches the model to reject a near-miss, which cuts duplicates. Toggle DINO's noise above to see the two shells.</li>
+  <li><b>Mixed query selection.</b> The decoder's anchor boxes start from the encoder's top-scoring locations for this image, while the content part of each query stays a learned vector. The encoder's rough features are good at <em>where</em>, not yet at <em>what</em>.</li>
+  <li><b>Look forward twice.</b> In box refinement, layer i's correction is normally trained only by layer i's loss. DINO lets the refined box of the next layer also send gradient back, so a layer is judged partly by how much it helps its successor.</li>
+</ul>
+<p>In DINO's ablation (ResNet-50), engineering improvements and query selection borrowed from Deformable DETR first lift DN-DETR from <span data-claim="pg-dino-abl-start">43.4</span> to a strong baseline of <span data-claim="pg-dino-abl-base">46.5</span> AP; DINO's own three additions then take it to <span data-claim="pg-dino-abl-end">47.9</span>. DINO-4scale reaches <span data-claim="pg-dino-12ep">49.0</span> AP in only <span data-claim="pg-dino-12">12 epochs</span> (4 feature scales, no extra data). The famous 63.3 AP on COCO test-dev needs a Swin-L backbone, pre-training on Objects365 and test-time augmentation, so it is a different kind of number.</p>
+</section>
+
+<!-- ============================ ACT III ============================ -->
+<p class="kicker"><span class="act-n">Act III</span>Making DETR run fast</p>
+<section id="ch-rt-detr" class="chapter">
+<h2>RT-DETR: DETRs beat YOLOs once you count NMS</h2>
+<p>By 2023 DETRs trained fast enough, but they were still too slow at inference for real-time use, where YOLO dominated. RT-DETR starts by pointing out something odd about the comparison: YOLO speed numbers usually leave out NMS. And NMS time is not a constant. It depends on how many boxes survive the confidence threshold, and on the IoU threshold. Step through the thresholds the paper measured.</p>
+
+<figure class="viz" id="viz-nms-threshold">
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="thr-svg" viewBox="0 0 640 280" role="img" aria-label="Boxes left after each confidence threshold for YOLOv5 and YOLOv8, with measured NMS times"></svg>
+  <div class="controls" id="thr-controls"></div>
+  <p class="readout" id="thr-readout" aria-live="polite"></p>
+  <figcaption>Box counts are read off RT-DETR Figure 2 (the paper prints no values, so they are approximate, and it says only that they were counted "on the same input"). NMS time and AP are RT-DETR Table 1: YOLOv8 on COCO val2017, IoU threshold 0.7, TensorRT EfficientNMS kernel only, T4 GPU with TensorRT FP16; the paper measured time at three of these thresholds only. RT-DETR has no NMS: its only post-processing is a score threshold, which the paper reports does not change inference speed.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('thr-svg'), out = document.getElementById('thr-readout'), ctl = document.getElementById('thr-controls'), NS = 'http://www.w3.org/2000/svg';
+  const T = [.001, .005, .01, .05, .1, .25], V5 = [9281, 5877, 4690, 2142, 1304, 581], V8 = [3570, 2523, 2057, 1124, 764, 381];
+  const MEAS = { 0: [2.36, 52.9], 2: [1.73, 52.4], 3: [1.06, 51.2] };
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const text = (x, y, fill, size, t, extra = {}) => mk('text', { x, y, fill, 'font-size': size, 'font-family': 'system-ui', ...extra }, t);
+  const kb = v => '~' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v);
+  let S = 0, stop = () => {};
+  const hl = T.map((_, i) => i === 0 ? 1 : 0);
+  T.forEach((t, i) => { const b = document.createElement('button'); b.type = 'button'; b.id = `btn-thr-${i}`; b.textContent = `conf ${t}`;
+    b.onclick = () => pick(i); ctl.append(b); });
+  // On a phone the figure badge sits over the first line, so the narrow layout starts one line lower.
+  function clearBadge(narrow, vw, vh) { if (!narrow) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0,24)');
+    while (svg.firstChild) g.append(svg.firstChild); svg.append(g); svg.setAttribute('viewBox', `0 0 ${vw} ${vh + 24}`); }
+  // Wide: every bar labelled. Narrow (under 520 px): the legend moves under the title and only the chosen threshold carries values.
+  function draw() {
+    const narrow = svg.clientWidth && svg.clientWidth < 520;
+    const L = narrow ? { vw: 360, vh: 300, gx: 12, gap: 58, bw: 22, step: 25, base: 250, hmax: 150, ty: 268, my: 284, fs: 10 }
+      : { vw: 640, vh: 280, gx: 40, gap: 100, bw: 30, step: 34, base: 230, hmax: 190, ty: 250, my: 268, fs: 12 };
+    svg.setAttribute('viewBox', `0 0 ${L.vw} ${L.vh}`);
+    svg.replaceChildren(); const mu = PE.css('--muted'), fg = PE.css('--fg'), red = PE.css('--red');
+    svg.append(text(narrow ? 6 : 10, narrow ? 16 : 20, mu, narrow ? 11 : 13, 'boxes left after the confidence threshold (approximate)'));
+    T.forEach((t, i) => { const x = L.gx + i * L.gap, k = hl[i];
+      const br = PE.css('--brown'), bars = [[V5[i], br, 'none'], [V8[i], PE.mix(PE.css('--bg'), br, .35), br]];
+      bars.forEach(([v, c, st], j) => { const h = L.hmax * v / 10000;
+        svg.append(mk('rect', { x: x + j * L.step, y: L.base - h, width: L.bw, height: h, rx: 3, fill: c, stroke: st, 'stroke-width': 1.5, opacity: (.45 + .55 * k).toFixed(3) }));
+        if (!narrow) svg.append(text(x + j * L.step + L.bw / 2, L.base - 6 - h, PE.mix(mu, fg, k), 10, kb(v), { 'text-anchor': 'middle', 'data-approx': '' })); });
+      if (narrow && k > .01) { const top = L.base - L.hmax * V5[i] / 10000;
+        svg.append(text(x + (L.step + L.bw) / 2, top - 6, fg, 10, `${kb(V5[i])} / ${kb(V8[i])}`, { 'text-anchor': 'middle', 'data-approx': '', opacity: k.toFixed(3) })); }
+      svg.append(text(x + (L.step + L.bw) / 2, L.ty, PE.mix(mu, fg, k), L.fs, String(t), { 'text-anchor': 'middle' }));
+      if (MEAS[i]) svg.append(text(x + (L.step + L.bw) / 2, L.my, red, L.fs - 1, MEAS[i][0] + ' ms', { 'text-anchor': 'middle' }));
+    });
+    const lx = narrow ? 8 : 420, ly = narrow ? 30 : 32, dy = narrow ? 14 : 16;
+    const br = PE.css('--brown');
+    [[br, 'none', 'YOLOv5 (anchor-based)'], [PE.mix(PE.css('--bg'), br, .35), br, 'YOLOv8 (anchor-free)']].forEach(([c, st, t], k) => {
+      svg.append(mk('rect', { x: lx, y: ly + k * dy, width: 10, height: 10, fill: c, stroke: st, 'stroke-width': 1.5 })); svg.append(text(lx + 14, ly + 9 + k * dy, mu, 11, t)); });
+    svg.append(text(lx + 14, ly + 25 + dy, red, 11, 'red: YOLOv8 NMS time (measured)'));
+    clearBadge(narrow, L.vw, L.vh);
+  }
+  function readout() {
+    const m = MEAS[S], k = v => v >= 1000 ? '~' + (v / 1000).toFixed(1) + 'k' : '~' + (Math.round(v / 10) * 10);
+    out.textContent = `Confidence ${T[S]}: ${k(V5[S])} YOLOv5 boxes and ${k(V8[S])} YOLOv8 boxes (read off the figure). `
+      + (m ? `Table 1 (val2017 average): YOLOv8 NMS kernel time ${m[0]} ms, AP ${m[1]}.` : 'The paper did not time NMS at this threshold.');
+    ctl.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === S)));
+  }
+  function pick(i) { stop(); S = i; readout(); const v = { ...hl }, to = {}; T.forEach((_, j) => { to[j] = j === i ? 1 : 0; });
+    stop = PE.tween(v, to, 500, () => { T.forEach((_, j) => { hl[j] = v[j]; }); draw(); }); }
+  new ResizeObserver(draw).observe(svg);
+  PE.onTheme(draw); draw(); readout();
+})();
+</script>
+
+<p>Lower thresholds keep more boxes and slightly more AP, and they cost more NMS time: at the paper's best-accuracy setting YOLOv8's NMS kernel alone takes <span data-claim="pg-rt-nms-0001">2.36 ms</span>. A set predictor has no such knob to trade.</p>
+<p>RT-DETR's own changes attack the remaining cost, the encoder. It runs self-attention only on the coarsest feature map, where each cell already stands for a whole object part (the paper calls this AIFI), and fuses the finer scales with a cheap convolutional path (CCFF). Its queries are chosen from the encoder's best features, with a training loss that makes a high class score also mean a well-placed box; in the ablation that is worth <span data-claim="pg-rt-qs">48.7</span> versus <span data-claim="pg-rt-qs-vanilla">47.9</span> AP. And because every decoder layer is supervised, you can drop layers at inference to trade accuracy for speed without retraining: stopping one layer early costs <span data-claim="pg-rt-dec">0.1 AP</span> and saves half a millisecond.</p>
+<p>The result, measured end to end with NMS included for the YOLOs, on a T4 GPU with TensorRT FP16 at <span data-claim="pg-rt-640">640 x 640</span>: RT-DETR-R50 reaches <span data-claim="pg-rt-ap">53.1</span> AP at <span data-claim="pg-rt-fps">108</span> FPS, against YOLOv8-L at <span data-claim="pg-yolov8l-ap">52.9</span> AP and <span data-claim="pg-yolov8l-fps">71</span> FPS. Barely more accurate, about half again as fast.</p>
+</section>
+
+<section id="ch-rf-detr" class="chapter">
+<h2>RF-DETR: train once, pick your latency</h2>
+<p>Real-time detectors usually come as a hand-designed ladder of sizes, N, S, M, L, X, each trained separately and tuned on COCO. RF-DETR asks why. It takes a DETR with a pretrained DINOv2 vision-transformer backbone and trains <b>one weight-sharing network</b> per backbone size: at every training step it samples a random patch size, input resolution and number of attention windows, so the same weights learn to work under all of them. The number of decoder layers and queries is cut only at inference.</p>
+<p>After training, a grid search over thousands of configurations measures accuracy and latency for each, and keeps the best trade-offs. Picking a model is then picking a latency budget. Slide the budget.</p>
+
+<figure class="viz" id="viz-latency-budget">
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="lat-svg" viewBox="0 0 640 320" role="img" aria-label="COCO AP versus T4 latency for RF-DETR sizes and baselines, with the latency budget marked"></svg>
+  <div class="controls">
+    <label>Latency budget <input type="range" id="lat-budget" min="0" max="100" step="1" value="30"><span id="lat-budget-val" data-computed></span></label>
+    <button type="button" id="btn-budget-3">3 ms</button>
+    <button type="button" id="btn-budget-7">7 ms</button>
+    <button type="button" id="btn-budget-18">18 ms</button>
+    <button type="button" id="btn-budget-100">100 ms</button>
+    <button type="button" id="btn-base-on">Show baselines</button>
+    <button type="button" id="btn-base-off">Hide baselines</button>
+    <button type="button" id="btn-budget-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="lat-readout" aria-live="polite"></p>
+  <figcaption>Sourced from RF-DETR Tables 2, 7 and 12: COCO val2017 AP against latency on a T4 GPU (TensorRT 10.4, 200 ms pause between runs; YOLO latency includes NMS). RF-DETR points are the paper's named sizes N to Max; tokens per side is resolution divided by patch size, computed here. The RT-DETR rows in these tables appear to be RT-DETR's Objects365-pretrained variants, so they are left out.</figcaption>
+</figure>
+<script>
+(() => {
+  const svg = document.getElementById('lat-svg'), out = document.getElementById('lat-readout'), bIn = document.getElementById('lat-budget'), bVal = document.getElementById('lat-budget-val'), NS = 'http://www.w3.org/2000/svg';
+  const RF = [ // size, ms, AP, backbone, res, patch, windows, decoder layers, queries (Tables 2, 7, 12)
+    ['N', 2.3, 48.0, 'DINOv2-S', 384, 16, 2, 2, 300], ['S', 3.5, 52.9, 'DINOv2-S', 512, 16, 2, 3, 300], ['M', 4.4, 54.7, 'DINOv2-S', 576, 16, 2, 4, 300],
+    ['L', 6.8, 56.5, 'DINOv2-S', 704, 16, 2, 4, 300], ['XL', 11.5, 58.6, 'DINOv2-B', 700, 20, 1, 5, 300], ['2XL', 17.2, 60.1, 'DINOv2-B', 880, 20, 2, 5, 300],
+    ['Max', 98.0, 61.8, 'DINOv2-B', 828, 12, 1, 6, 300]];
+  const DF = [['N', 2.1, 42.7], ['S', 3.5, 50.6], ['M', 5.4, 55.0], ['L', 7.5, 57.2], ['XL', 11.5, 59.3]];
+  const YO = [['N', 2.2, 37.1], ['S', 3.2, 44.1], ['M', 5.1, 48.3], ['L', 6.5, 49.9], ['XL', 10.5, 50.9]];
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const text = (x, y, fill, size, t, extra = {}) => mk('text', { x, y, fill, 'font-size': size, 'font-family': 'system-ui', ...extra }, t);
+  // The slider position runs 0..100 on a log scale from 1.5 ms to 120 ms.
+  const msAt = pos => 1.5 * Math.pow(120 / 1.5, pos / 100), posAt = ms => 100 * Math.log(ms / 1.5) / Math.log(120 / 1.5);
+  const S = { pos: posAt(3), baseA: 1 };
+  let base = true, stop = () => {}, stopB = () => {};
+  // On a phone the figure badge sits over the first line, so the narrow layout starts one line lower.
+  function clearBadge(narrow, vw, vh) { if (!narrow) return; const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', 'translate(0,24)');
+    while (svg.firstChild) g.append(svg.firstChild); svg.append(g); svg.setAttribute('viewBox', `0 0 ${vw} ${vh + 24}`); }
+  function draw() {
+    const narrow = svg.clientWidth && svg.clientWidth < 520;
+    const L = narrow ? { vw: 360, vh: 320, x0: 44, xw: 304, y0: 270, yh: 230, top: 28, fs: 9, leg: [258, 252] }
+      : { vw: 640, vh: 320, x0: 60, xw: 540, y0: 280, yh: 250, top: 30, fs: 11, leg: [470, 250] };
+    svg.setAttribute('viewBox', `0 0 ${L.vw} ${L.vh}`);
+    const X = ms => L.x0 + L.xw * Math.log(ms / 1.5) / Math.log(120 / 1.5), Y = ap => L.y0 - L.yh * (ap - 35) / 28;
+    svg.replaceChildren(); const mu = PE.css('--muted'), B = msAt(S.pos);
+    [2, 5, 10, 20, 50, 100].forEach(t => { svg.append(mk('line', { x1: X(t), y1: L.top, x2: X(t), y2: L.y0, stroke: PE.css('--rule') }));
+      svg.append(text(X(t), L.y0 + 18, mu, L.fs, t + ' ms', { 'text-anchor': 'middle' })); });
+    [40, 50, 60].forEach(a => { svg.append(mk('line', { x1: L.x0, y1: Y(a), x2: L.x0 + L.xw, y2: Y(a), stroke: PE.css('--rule') }));
+      svg.append(text(L.x0 - 8, Y(a) + 4, mu, L.fs, a + ' AP', { 'text-anchor': 'end' })); });
+    svg.append(mk('rect', { x: L.x0, y: L.top, width: Math.max(0, X(B) - L.x0), height: L.y0 - L.top, fill: PE.css('--green'), opacity: .08 }));
+    svg.append(mk('line', { x1: X(B), y1: L.top, x2: X(B), y2: L.y0, stroke: PE.css('--green'), 'stroke-width': 2 }));
+    const series = (d, color, dash, op) => { const g = mk('g', { opacity: op.toFixed(3) });
+      g.append(mk('polyline', { points: d.map(r => `${X(r[1])},${Y(r[2])}`).join(' '), fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-dasharray': dash || '' }));
+      d.forEach(r => g.append(mk('circle', { cx: X(r[1]), cy: Y(r[2]), r: 4, fill: color }))); svg.append(g); };
+    const br = PE.css('--brown'), light = PE.mix(br, PE.css('--fg'), .4);
+    if (S.baseA > .01) { series(YO, light, '2 3', S.baseA); series(DF, br, '5 3', S.baseA); }
+    series(RF.slice(0, 4), PE.css('--blue'), null, 1); series(RF.slice(4), PE.css('--blue'), null, 1);
+    const pick = RF.filter(r => r[1] <= B).pop();
+    if (pick) svg.append(mk('circle', { cx: X(pick[1]), cy: Y(pick[2]), r: 9, fill: 'none', stroke: PE.css('--green'), 'stroke-width': 3 }));
+    // The small sizes climb steeply, so their labels go up and to the left; the flatter large sizes get labels above.
+    RF.forEach((r, i) => svg.append(i < 4 ? text(X(r[1]) - 7, Y(r[2]) - 3, PE.css('--blue'), L.fs, r[0], { 'text-anchor': 'end' }) : text(X(r[1]), Y(r[2]) - 11, PE.css('--blue'), L.fs, r[0], { 'text-anchor': 'middle' })));
+    [['RF-DETR', PE.css('--blue'), 1], ['D-FINE', br, S.baseA], ['YOLOv11', light, S.baseA]].forEach(([n, c, op], i) => { if (op <= .01) return;
+      const g = mk('g', { opacity: op.toFixed(3) });
+      g.append(mk('rect', { x: L.leg[0], y: L.leg[1] - i * 16, width: 10, height: 10, fill: c }));
+      g.append(text(L.leg[0] + 14, L.leg[1] + 9 - i * 16, mu, 11, n)); svg.append(g); });
+    bIn.value = String(S.pos); bVal.textContent = B.toFixed(1) + ' ms';
+    clearBadge(narrow, L.vw, L.vh);
+  }
+  // The readout describes where a click is heading, set once, so a screen reader is not flooded mid-glide.
+  function readout(pos) {
+    const B = msAt(pos), pick = RF.filter(r => r[1] <= B).pop();
+    if (!pick) { out.textContent = `No RF-DETR size fits in ${B.toFixed(1)} ms; the smallest (N) needs 2.3 ms.`; }
+    else { const df = DF.filter(r => r[1] <= B).pop();
+      out.textContent = `Budget ${B.toFixed(1)} ms: RF-DETR ${pick[0]} (${pick[3]}, ${pick[4]} px, patch ${pick[5]} = ${Math.round(pick[4] / pick[5])} tokens per side, ${pick[6]} window${pick[6] > 1 ? 's' : ''}, ${pick[7]} decoder layers, ${pick[8]} queries): ${pick[2].toFixed(1)} AP at ${pick[1]} ms.`
+        + (base && df ? ` Best D-FINE in budget: ${df[0]}, ${df[2].toFixed(1)} AP at ${df[1]} ms.` : ''); }
+    [['btn-base-on', base], ['btn-base-off', !base]].forEach(([id, v]) => document.getElementById(id).setAttribute('aria-pressed', String(v)));
+  }
+  const markB = ms => [3, 7, 18, 100].forEach(m => document.getElementById('btn-budget-' + m).setAttribute('aria-pressed', String(m === ms)));
+  const setB = ms => { stop(); markB(ms); const to = Math.round(posAt(ms)); readout(to); stop = PE.tween(S, { pos: to }, 700, draw); };
+  const setBase = v => { stopB(); base = v; readout(Math.round(S.pos)); stopB = PE.tween(S, { baseA: v ? 1 : 0 }, 500, draw); };
+  bIn.oninput = () => { stop(); markB(null); S.pos = +bIn.value; draw(); readout(S.pos); };
+  [3, 7, 18, 100].forEach(ms => document.getElementById('btn-budget-' + ms).onclick = () => setB(ms));
+  document.getElementById('btn-base-on').onclick = () => setBase(true);
+  document.getElementById('btn-base-off').onclick = () => setBase(false);
+  document.getElementById('btn-budget-reset').onclick = () => { setBase(true); setB(3); };
+  new ResizeObserver(draw).observe(svg);
+  PE.onTheme(draw); S.pos = Math.round(posAt(3)); draw(); readout(S.pos); markB(3);
+})();
+</script>
+
+<p>Two numbers stand out. The nano model reaches <span data-claim="pg-rf-n-ap">48.0</span> AP at <span data-claim="pg-rf-n-ms">2.3</span> ms, <span data-claim="pg-rf-n-gain">5.3 AP</span> above D-FINE's nano at a similar latency. And the 2XL model is the first real-time detector above 60: <span data-claim="pg-rf-2xl">60.1 AP at 17.2 ms</span>. It does not win everywhere; turn on the baselines and you can see D-FINE ahead at the M, L and XL sizes on COCO.</p>
+<p>There are really two base networks here, one on a small DINOv2 backbone (N to L) and one on a larger one (XL to Max), each trained once. Watch the readout as you raise the budget: on the small backbone the patch size stays at 16 while resolution and decoder depth grow; the large backbone switches to patch 20, and Max changes again to patch 12. The paper notes that accuracy tracks the number of spatial locations, resolution divided by patch size, more closely than either alone. The search itself is paid for once: about <span data-claim="pg-rf-search">10,000 GPU hours</span> on T4s to evaluate the configurations. On the 100-dataset RF100-VL benchmark, the paper finds that COCO-tuned architectures already transfer remarkably well, and a per-dataset search adds a further 0.1 to 0.7 AP at most sizes.</p>
+<p>Notice what never changed from 2020 to here: a fixed set of queries, one-to-one matching, and no NMS. Everything else, the attention, the queries, the training signal, the backbone and the search, was rebuilt around that idea.</p>
+</section>
+
+<!-- ============================ CLOSING ============================ -->
+<section id="ch-timeline" class="chapter">
+<h2>Family tree</h2>
+<p>Each paper rebuilt part of DETR's recipe and kept the rest. Hover or focus a paper to light up what it took from which ancestor; click it to open its chapter.</p>
+<figure class="viz" id="viz-tree">
+  <span class="badge computed">Diagram</span>
+  <svg class="chart" id="tree-svg" role="img" aria-label="Family tree of the seven papers. DETR leads to Deformable DETR. Deformable DETR leads to DAB-DETR, to DINO, and through LW-DETR to RF-DETR. DAB-DETR leads to DN-DETR and DINO. DN-DETR leads to DINO. DINO leads to RT-DETR, and RT-DETR leads to RF-DETR."></svg>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Dates are each paper's arXiv v1 submission date. The arrows follow the inheritance noted under each paper below; the dashed arrow passes through LW-DETR, which this page does not cover.</figcaption>
+</figure>
+<ol class="timeline">
+  <li data-node="detr"><div class="when"><span data-claim="pg-date-detr">2020-05-26</span></div><b>DETR</b>: set prediction with Hungarian matching; 100 learned object queries; no anchors, no NMS.</li>
+  <li data-node="ddetr"><div class="when"><span data-claim="pg-date-ddetr">2020-10-08</span></div><b>Deformable DETR</b>: sparse multi-scale deformable attention; reference points; iterative box refinement; two-stage queries.<div class="inh">inherits DETR's set loss</div></li>
+  <li data-node="dab"><div class="when"><span data-claim="pg-date-dab">2022-01-28</span></div><b>DAB-DETR</b>: queries become explicit 4D anchor boxes, refined layer by layer, with size-modulated attention.<div class="inh">inherits Deformable DETR's layer-by-layer box refinement, in standard attention</div></li>
+  <li data-node="dn"><div class="when"><span data-claim="pg-date-dn">2022-03-02</span></div><b>DN-DETR</b>: denoising queries with fixed targets and an attention mask stabilize matching.<div class="inh">built on DAB-DETR</div></li>
+  <li data-node="dino"><div class="when"><span data-claim="pg-date-dino">2022-03-07</span></div><b>DINO</b>: contrastive denoising, mixed query selection, look forward twice.<div class="inh">DAB anchors + DN denoising + Deformable attention and two-stage selection</div></li>
+  <li data-node="rt"><div class="when"><span data-claim="pg-date-rt">2023-04-17</span></div><b>RT-DETR</b>: efficient hybrid encoder, uncertainty-minimal query selection, end-to-end speed with NMS counted.<div class="inh">decoder training follows DINO</div></li>
+  <li data-node="rf"><div class="when"><span data-claim="pg-date-rf">2025-11-12</span></div><b>RF-DETR</b>: DINOv2 backbone, weight-sharing architecture search, one training for many latencies.<div class="inh">via LW-DETR; Deformable-style decoder, prunable decoder layers as in RT-DETR</div></li>
+</ol>
+<script>
+(() => {
+  const svg = document.getElementById('tree-svg'), out = document.getElementById('tree-readout'), NS = 'http://www.w3.org/2000/svg';
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const NODES = {
+    detr: { n: 'DETR', d: '2020-05-26', c: 'pg-date-detr', ch: 'ch-set-problem' }, ddetr: { n: 'Deformable DETR', d: '2020-10-08', c: 'pg-date-ddetr', ch: 'ch-deformable' },
+    dab: { n: 'DAB-DETR', d: '2022-01-28', c: 'pg-date-dab', ch: 'ch-anchor-queries' }, dn: { n: 'DN-DETR', d: '2022-03-02', c: 'pg-date-dn', ch: 'ch-denoising' },
+    dino: { n: 'DINO', d: '2022-03-07', c: 'pg-date-dino', ch: 'ch-denoising' }, rt: { n: 'RT-DETR', d: '2023-04-17', c: 'pg-date-rt', ch: 'ch-rt-detr' },
+    rf: { n: 'RF-DETR', d: '2025-11-12', c: 'pg-date-rf', ch: 'ch-rf-detr' } };
+  // Edges as the list below states them; the dashed one runs through LW-DETR.
+  const EDGES = [['detr', 'ddetr'], ['ddetr', 'dab'], ['dab', 'dn'], ['dab', 'dino'], ['dn', 'dino'], ['ddetr', 'dino'], ['dino', 'rt'], ['rt', 'rf'], ['ddetr', 'rf', 'dash']];
+  const SAY = { detr: 'DETR is the root: set prediction with Hungarian matching, no anchors, no NMS.',
+    ddetr: "Deformable DETR inherits DETR's set loss.", dab: "DAB-DETR inherits Deformable DETR's layer-by-layer box refinement, in standard attention.",
+    dn: 'DN-DETR is built on DAB-DETR.', dino: 'DINO combines DAB anchors, DN denoising, and Deformable attention and two-stage selection.',
+    rt: "RT-DETR's decoder training follows DINO.", rf: 'RF-DETR comes via LW-DETR (not covered here): a Deformable-style decoder, and decoder layers that can be dropped at inference, as in RT-DETR.' };
+  const IDLE = 'Hover or focus a paper to see what it took from which ancestor; click it to open its chapter.';
+  // What each arrow carries, in the list's words; shown while its paper is highlighted.
+  const TOOK = { 'detr>ddetr': 'set loss', 'ddetr>dab': 'box refinement', 'dab>dn': 'built on DAB-DETR', 'dab>dino': 'anchors', 'dn>dino': 'denoising',
+    'ddetr>dino': 'attention, two-stage', 'dino>rt': 'decoder training', 'rt>rf': 'prunable decoder layers', 'ddetr>rf': 'via LW-DETR: Deformable-style decoder' };
+  // Each layout: node centers, box size, and per edge the start point, end point and path. Wide: three lanes left to right. Narrow: top to bottom.
+  const WIDE = { vw: 960, vh: 300, bw: 124, bh: 34, labelAt: { 'rt>rf': [826, 140, 'end'], 'dn>dino': [566, 222, 'start'], 'dab>dino': [470, 182, 'middle'] }, P: { detr: [75, 170], ddetr: [215, 90], dab: [355, 250], dn: [500, 250], dino: [640, 170], rt: [775, 90], rf: [893, 170] },
+    path: (e, p, q, B) => {
+      const [f, t] = e, h = B.bw / 2, v = B.bh / 2;
+      if (e[2]) return { d: `M${p[0]} ${p[1] - v} V36 H${q[0] + 32} V${q[1] - v - 8}`, tip: [q[0] + 32, q[1] - v], dir: Math.PI / 2 };
+      if (f === 'dn' && t === 'dino') return { d: `M${p[0] + 30} ${p[1] - v} C${p[0] + 30} ${q[1] + 9} ${q[0] - h - 30} ${q[1] + 9} ${q[0] - h - 8} ${q[1] + 9}`, tip: [q[0] - h, q[1] + 9], dir: 0 };
+      const io = { 'ddetr>dino': [[p[0] + h, p[1]], [q[0], q[1] - v], 'top'], 'rt>rf': [[p[0] + h, p[1]], [q[0], q[1] - v], 'top'] }[f + '>' + t];
+      const a = io ? io[0] : [p[0] + h, p[1]], z = io ? io[1] : [q[0] - h, q[1] + (f === 'dab' && t === 'dino' ? -8 : 0)], end = io ? io[2] : 'left';
+      if (end === 'left') { const m = (a[0] + z[0]) / 2, c1 = f === 'dab' && t === 'dino' ? [a[0] + 55, a[1] - 50] : [m, a[1]];
+        return { d: `M${a[0]} ${a[1]} C${c1[0]} ${c1[1]} ${m} ${z[1]} ${z[0] - 8} ${z[1]}`, tip: z, dir: 0 }; }
+      const sy = end === 'top' ? -1 : 1;
+      return { d: `M${a[0]} ${a[1]} C${(a[0] + z[0]) / 2} ${a[1]} ${z[0]} ${z[1] + sy * 40} ${z[0]} ${z[1] + sy * 8}`, tip: z, dir: end === 'top' ? Math.PI / 2 : -Math.PI / 2 }; } };
+  const NARROW = { vw: 360, vh: 580, bw: 128, bh: 42, inside: true, P: { detr: [180, 30], ddetr: [96, 112], dab: [264, 194], dn: [264, 276], dino: [180, 358], rt: [96, 440], rf: [180, 522] },
+    path: (e, p, q, B) => {
+      const [f, t] = e, h = B.bw / 2, v = B.bh / 2;
+      if (e[2]) return { d: `M${p[0] - h} ${p[1]} H12 V${q[1]} H${q[0] - h - 8}`, tip: [q[0] - h, q[1]], dir: 0 };
+      if (f === 'ddetr' && t === 'dino') return { d: `M${p[0] - 30} ${p[1] + v} C${p[0] - 30} ${q[1] - 60} ${q[0] - h - 40} ${q[1]} ${q[0] - h - 8} ${q[1]}`, tip: [q[0] - h, q[1]], dir: 0 };
+      if (f === 'dab' && t === 'dino') return { d: `M${p[0] - h} ${p[1]} C${p[0] - h - 40} ${p[1] + 40} ${q[0]} ${q[1] - 70} ${q[0]} ${q[1] - v - 8}`, tip: [q[0], q[1] - v], dir: Math.PI / 2 };
+      if (f === 'dn' && t === 'dino') return { d: `M${p[0]} ${p[1] + v} C${p[0]} ${q[1]} ${q[0] + h + 30} ${q[1]} ${q[0] + h + 8} ${q[1]}`, tip: [q[0] + h, q[1]], dir: Math.PI };
+      const a = [p[0], p[1] + v], z = [q[0], q[1] - v];
+      return { d: `M${a[0]} ${a[1]} C${a[0]} ${a[1] + 34} ${z[0]} ${z[1] - 34} ${z[0]} ${z[1] - 8}`, tip: z, dir: Math.PI / 2 }; } };
+  let hot = null, layout = null;
+  function build() {
+    const B = svg.clientWidth && svg.clientWidth < 520 ? NARROW : WIDE; if (B === layout) return; layout = B;
+    svg.setAttribute('viewBox', `0 0 ${B.vw} ${B.vh}`); svg.replaceChildren();
+    EDGES.forEach(e => { const g = B.path(e, B.P[e[0]], B.P[e[1]], B), [x, y] = g.tip, a = g.dir;
+      const ep = mk('path', { d: g.d, class: 'te' + (e[2] ? ' dash' : ''), 'data-e': e[0] + '>' + e[1] }); svg.append(ep);
+      const mid = ep.getPointAtLength(ep.getTotalLength() * (e[2] ? .3 : .5)), at = (B.labelAt || {})[e[0] + '>' + e[1]] || [mid.x, mid.y - 6, 'middle'];
+      svg.append(mk('text', { x: at[0], y: at[1], 'text-anchor': at[2], class: 'el', 'data-e': e[0] + '>' + e[1] }, TOOK[e[0] + '>' + e[1]]));
+      svg.append(mk('path', { d: `M${x} ${y} L${x - 9 * Math.cos(a - .45)} ${y - 9 * Math.sin(a - .45)} L${x - 9 * Math.cos(a + .45)} ${y - 9 * Math.sin(a + .45)} Z`, class: 'ah', 'data-e': e[0] + '>' + e[1] })); });
+    Object.entries(NODES).forEach(([id, n]) => { const [x, y] = B.P[id];
+      const g = mk('g', { class: 'tn', 'data-node': id, tabindex: 0, role: 'link', 'aria-label': `${n.n}, ${n.d}: open its chapter` });
+      g.append(mk('rect', { x: x - B.bw / 2, y: y - B.bh / 2, width: B.bw, height: B.bh, rx: 9 }));
+      g.append(mk('text', { x, y: B.inside ? y - 3 : y + 4.5, 'text-anchor': 'middle', class: 'nm' }, n.n));
+      g.append(mk('text', { x, y: B.inside ? y + 13 : y + B.bh / 2 + 15, 'text-anchor': 'middle', class: 'dt', 'data-claim': n.c }, n.d));
+      g.addEventListener('mouseenter', () => setHot(id)); g.addEventListener('focus', () => setHot(id));
+      g.addEventListener('mouseleave', () => setHot(null)); g.addEventListener('blur', () => { g.dataset.armed = ''; setHot(null); });
+      const go = () => { location.hash = n.ch; };
+      // On touch there is no hover: the first tap highlights, a second tap on the same paper opens its chapter.
+      g.addEventListener('pointerdown', e => { g.dataset.touch = e.pointerType === 'touch' ? '1' : ''; });
+      g.addEventListener('click', () => { if (g.dataset.touch && g.dataset.armed !== '1') { g.dataset.armed = '1'; setHot(id); return; } go(); }); g.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      svg.append(g); });
+    setHot(hot, true);
+  }
+  function setHot(id, force) {
+    if (id === hot && !force) return; hot = id;
+    const inc = EDGES.filter(e => e[1] === id).map(e => e[0] + '>' + e[1]), anc = new Set(EDGES.filter(e => e[1] === id).map(e => e[0]));
+    svg.classList.toggle('hot', !!id);
+    svg.querySelectorAll('.tn').forEach(g => { g.classList.toggle('on', g.dataset.node === id); g.classList.toggle('anc', anc.has(g.dataset.node)); });
+    svg.querySelectorAll('.te, .ah, .el').forEach(p => p.classList.toggle('on', inc.includes(p.dataset.e)));
+    document.querySelectorAll('#ch-timeline .timeline li').forEach(li => li.classList.toggle('tl-on', li.dataset.node === id));
+    out.textContent = id ? SAY[id] : IDLE;
+  }
+  document.querySelectorAll('#ch-timeline .timeline li').forEach(li => { li.addEventListener('mouseenter', () => setHot(li.dataset.node)); li.addEventListener('mouseleave', () => setHot(null)); });
+  new ResizeObserver(build).observe(svg);
+  build(); out.textContent = IDLE;
+})();
+</script>
+</section>
+
+<section id="ch-summary" class="chapter">
+<h2>Summary</h2>
+<p>DETR reframed detection as predicting a set: a fixed number of query slots, trained with a one-to-one Hungarian matching so that duplicates are punished by the loss itself, which removes anchors and NMS. The price was dense attention over every pixel, which made training long and small objects hard. Deformable DETR made attention sparse and multi-scale; DAB-DETR made each query an explicit box refined layer by layer; DN-DETR and DINO stabilized training with denoising queries and hard negatives, reaching strong accuracy in a dozen epochs. RT-DETR then showed that, once NMS is counted, a DETR can beat YOLO at real-time speed, and RF-DETR trained a single weight-sharing network from which a whole family of speed-accuracy trade-offs can be chosen after training.</p>
+</section>
+
+<section id="ch-deeper" class="chapter">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>DETR</b> (2005.12872v3): Sec. 3.1 for Eq. 1-2 and the matching cost; Appendix A.2, Eq. 9-10, for the box and GIoU losses; Sec. 4.2 and Fig. 4 for NMS per decoder layer; Appendix A.3 for the complexity terms.</li>
+  <li><b>Deformable DETR</b> (2010.04159v4): Sec. 4.1, Eq. 2-3; Appendix A.1 for the complexity derivation; Appendix A.4 for iterative refinement, two-stage, and the offset initialization drawn above.</li>
+  <li><b>DAB-DETR</b> (2201.12329v4): Sec. 3 for why a positional prior speeds up training; Sec. 4, Eq. 1-8; Table 3 for the ablation.</li>
+  <li><b>DN-DETR</b> (2203.01305v3): Sec. 3.1, Eq. 1-2, for the instability metric; Sec. 4.3-4.4 and Eq. 7 for noise and the attention mask; Table 5 for the mask ablation.</li>
+  <li><b>DINO</b> (2203.03605v4): Sec. 3.3-3.5 for contrastive denoising, mixed query selection and look forward twice (Eq. 2); Table 4 for the ablation; Appendix D.3-D.4 for implementation details and hyperparameters.</li>
+  <li><b>RT-DETR</b> (2304.08069v3): Sec. 3 with Table 1 and Fig. 2 for the NMS analysis; Sec. 4.2, Eq. 1, for the hybrid encoder; Sec. 4.3, Eq. 2-3, for query selection; Table 5 for decoder-layer truncation.</li>
+  <li><b>RF-DETR</b> (2511.09554v2): Sec. 3 and Fig. 3 for the search space; the latency protocol in Sec. 4; Table 7 for the chosen configurations; Appendix L for what the search discovered.</li>
+</ul>
+</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,2472 @@
+[
+ {
+  "id": "owlvit-v1-date",
+  "claim": "OWL-ViT arXiv v1 submission date",
+  "value": "2022-05-12",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "abs.html, Submission history [v1]"
+ },
+ {
+  "id": "owlvit-v2-date",
+  "claim": "OWL-ViT arXiv v2 (version read) date",
+  "value": "2022-07-20",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "abs.html, Submission history [v2]"
+ },
+ {
+  "id": "owlvit-venue",
+  "claim": "OWL-ViT venue (arXiv comment: camera-ready)",
+  "value": "ECCV 2022",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "abs.html, Comments field"
+ },
+ {
+  "id": "owlvit-b32-768-tokens",
+  "claim": "OWL-ViT ViT-B/32 at 768x768: sequence length = max predicted objects",
+  "value": "576",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 3.1 Architecture (PDF p5)"
+ },
+ {
+  "id": "owlvit-lvis-max-instances",
+  "claim": "Maximum instances per image in LVIS (why 576 tokens is not a bottleneck)",
+  "value": "294",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 3.1 Architecture (PDF p5)"
+ },
+ {
+  "id": "owlvit-b16-768-tokens",
+  "claim": "our reading: OWL-ViT B/16 at 768 -> (768/16)^2 output tokens (not printed)",
+  "value": "2304",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Computed from Table A3 image size 768 and patch 16",
+  "our_reading": true
+ },
+ {
+  "id": "owlvit-l14-840-tokens",
+  "claim": "our reading: OWL-ViT L/14 at 840 -> (840/14)^2 output tokens (not printed; CLIP class token merged into patch tokens per A1.3)",
+  "value": "3600",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Computed from Table A3 image size 840 and patch 14; Appendix A1.3 CLIP-based models",
+  "our_reading": true
+ },
+ {
+  "id": "owlvit-h14-840-tokens",
+  "claim": "our reading: OWL-ViT LiT H/14 at 840 -> output tokens (not printed)",
+  "value": "3600",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Computed from Table A3 (H/14, 840)",
+  "our_reading": true
+ },
+ {
+  "id": "owlvit-l16-768-tokens",
+  "claim": "our reading: OWL-ViT LiT L/16 at 768 -> output tokens (not printed)",
+  "value": "2304",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Computed from Table A3 (L/16, 768)",
+  "our_reading": true
+ },
+ {
+  "id": "owlvit-r26b32-768-tokens",
+  "claim": "our reading: OWL-ViT R26+B/32 hybrid (stride 32) at 768 -> output tokens (not printed)",
+  "value": "576",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Computed from Table A3 (R26+B/32, 768); stride per Sec 4.1 nomenclature",
+  "our_reading": true
+ },
+ {
+  "id": "owlvit-r50h32-960-tokens",
+  "claim": "our reading: OWL-ViT R50+H/32 one-shot model (stride 32) at 960 -> output tokens (not printed)",
+  "value": "900",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Computed from Table A3 (R50+H/32, 960)",
+  "our_reading": true
+ },
+ {
+  "id": "owlvit-text-layers",
+  "claim": "OWL-ViT (LiT) text encoder layers",
+  "value": "12",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.1 Model Details (PDF p7)"
+ },
+ {
+  "id": "owlvit-text-width",
+  "claim": "OWL-ViT (LiT) text encoder hidden size D",
+  "value": "512",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.1 Model Details (PDF p7)"
+ },
+ {
+  "id": "owlvit-text-mlp",
+  "claim": "OWL-ViT (LiT) text encoder MLP size",
+  "value": "2048",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.1 Model Details (PDF p7)"
+ },
+ {
+  "id": "owlvit-text-heads",
+  "claim": "OWL-ViT (LiT) text encoder heads",
+  "value": "8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.1 Model Details (PDF p7)"
+ },
+ {
+  "id": "owlvit-text-maxlen",
+  "claim": "OWL-ViT text encoder input length limit (LiT and CLIP models), tokens",
+  "value": "16",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Appendix A1.3 Hyper-parameters, last bullet (PDF p20)"
+ },
+ {
+  "id": "owlvit-lit-pairs",
+  "claim": "LiT image-text pre-training dataset size (pairs)",
+  "value": "3.6 billion",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.1 Model Details (PDF p7)"
+ },
+ {
+  "id": "owlvit-head-params",
+  "claim": "Detection-specific heads, max share of model parameters",
+  "value": "1.1%",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 3.2 Image-Level Contrastive Pre-Training (PDF p6)"
+ },
+ {
+  "id": "owlvit-det-images",
+  "claim": "Total detection training images across OI, O365, VG (approx.)",
+  "value": "2 million",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.2 Detection Data (PDF p7)"
+ },
+ {
+  "id": "owlvit-ft-batch",
+  "claim": "OWL-ViT detection fine-tuning batch size",
+  "value": "256",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.1; Table A3 Batch size column (PDF p21)"
+ },
+ {
+  "id": "owlvit-ft-steps-max",
+  "claim": "OWL-ViT maximum fine-tuning steps (B/32, B/16 models)",
+  "value": "140k",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A3 Training steps column (PDF p21); Sec 4.1 'at most 140'000 steps'"
+ },
+ {
+  "id": "owlvit-ft-steps-l14",
+  "claim": "OWL-ViT CLIP L/14 fine-tuning steps",
+  "value": "70k",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A3, row CLIP L/14"
+ },
+ {
+  "id": "owlvit-lr-clip-b",
+  "claim": "OWL-ViT CLIP B/32 and B/16 fine-tuning learning rate",
+  "value": "5e-5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A3, CLIP rows, Learning rate (fine-tuning); printed 5e-05"
+ },
+ {
+  "id": "owlvit-lr-clip-l14",
+  "claim": "OWL-ViT CLIP L/14 fine-tuning learning rate",
+  "value": "2e-5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A3, row CLIP L/14; printed 2e-05"
+ },
+ {
+  "id": "owlvit-lr-image-baseline",
+  "claim": "OWL-ViT image encoder LR in ablation baseline",
+  "value": "2e-4",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5 'Text encoder learning rate' header (PDF p28)"
+ },
+ {
+  "id": "owlvit-lr-text",
+  "claim": "OWL-ViT text encoder fine-tuning LR",
+  "value": "2e-6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Stabilizing Optimization (PDF p13); printed 2x10^-6"
+ },
+ {
+  "id": "owlvit-lr-text-ratio",
+  "claim": "Text encoder LR is this much smaller than image encoder LR (ablation baseline)",
+  "value": "100x",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Stabilizing Optimization (PDF p13)"
+ },
+ {
+  "id": "owlvit-droplayer",
+  "claim": "OWL-ViT stochastic depth probability for larger models (text); Table A3 gives .2/.1 for CLIP models",
+  "value": "0.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Stabilizing Optimization; Table A3 Droplayer rate"
+ },
+ {
+  "id": "owlvit-focal-alpha",
+  "claim": "OWL-ViT focal loss alpha",
+  "value": "0.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Appendix A1.3 bullets (PDF p20)"
+ },
+ {
+  "id": "owlvit-focal-gamma",
+  "claim": "OWL-ViT focal loss gamma",
+  "value": "2.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Appendix A1.3 bullets (PDF p20)"
+ },
+ {
+  "id": "owlvit-grad-clip",
+  "claim": "OWL-ViT per-example gradient norm clip value",
+  "value": "1.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Appendix A1.9 Loss normalization and gradient clipping (PDF p25)"
+ },
+ {
+  "id": "owlvit-min-negatives",
+  "claim": "Minimum negative labels per image after adding frequency-sampled pseudo-negatives",
+  "value": "50",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 3.2 Training the Detector; Appendix A1.5 Random Negatives"
+ },
+ {
+  "id": "owlvit-train-prompts",
+  "claim": "Number of CLIP prompt templates sampled during training",
+  "value": "80",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Augmentations; Appendix A1.9 Prompting"
+ },
+ {
+  "id": "owlvit-eval-prompts",
+  "claim": "Number of 'best' CLIP prompt templates ensembled at evaluation",
+  "value": "7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.3 and Sec 4.6 Augmentations (PDF p8, p14)"
+ },
+ {
+  "id": "owlvit-lvis-queries",
+  "claim": "Queries per image for LVIS evaluation (all category names)",
+  "value": "1203",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.3 (PDF p8)"
+ },
+ {
+  "id": "owlvit-mosaic-p-1x1",
+  "claim": "Mosaic sampling probability for 1x1 grids (text; Table A3 lists .4/.3/.3 for Table 1 models)",
+  "value": "0.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Augmentations (PDF p14); Appendix A1.6"
+ },
+ {
+  "id": "owlvit-mosaic-p-2x2",
+  "claim": "Mosaic sampling probability for 2x2 grids (text; Table A3 lists .4/.3/.3 for Table 1 models)",
+  "value": "0.33",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Augmentations (PDF p14); Appendix A1.6"
+ },
+ {
+  "id": "owlvit-mosaic-p-3x3",
+  "claim": "Mosaic sampling probability for 3x3 grids (text; Table A3 lists .4/.3/.3 for Table 1 models)",
+  "value": "0.17",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Augmentations (PDF p14); Appendix A1.6"
+ },
+ {
+  "id": "owlvit-mosaic-probs-main",
+  "claim": "Mosaic proportions listed for the Table 1 (main) models",
+  "value": ".4/.3/.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A3, Mosaic proportions column, CLIP and LiT rows (PDF p21)"
+ },
+ {
+  "id": "owlvit-crop-keep",
+  "claim": "Cropped boxes kept if at least this share of original area remains",
+  "value": "60%",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.6 Careful Use of Data; Appendix A1.6"
+ },
+ {
+  "id": "owlvit-merge-iou",
+  "claim": "Instance merging IoU threshold in baseline",
+  "value": "0.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5, Instance merging header (PDF p28)"
+ },
+ {
+  "id": "owlvit-oneshot-iou",
+  "claim": "One-shot query extraction: candidate boxes need IoU above this with the query box",
+  "value": "0.65",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Appendix A1.7 (PDF p23)"
+ },
+ {
+  "id": "owlvit-oneshot-fallback",
+  "claim": "Share of one-shot cases with no predicted box above IoU 0.65 (fallback to text query)",
+  "value": "10%",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Appendix A1.7 (PDF p23)"
+ },
+ {
+  "id": "owlvit-b32-gflops",
+  "claim": "ViT-B/32 inference compute (OWL-ViT Table 1 caption)",
+  "value": "139.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 caption (PDF p8)"
+ },
+ {
+  "id": "owlvit-r50-gflops",
+  "claim": "ResNet50 inference compute for comparison",
+  "value": "141.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 caption (PDF p8)"
+ },
+ {
+  "id": "owlvit-pearson-det",
+  "claim": "Pearson r between ImageNet zero-shot accuracy and LVIS APr after detection fine-tuning",
+  "value": "0.73",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Fig. 3 caption (PDF p11)"
+ },
+ {
+  "id": "owlvit-pearson-img",
+  "claim": "Pearson r between image-level transfer and pre-training-task performance",
+  "value": "0.98",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Fig. 3 caption (PDF p11)"
+ },
+ {
+  "id": "owlvit-lvis-lit-h14-base-ap",
+  "claim": "OWL-ViT LiT ViT-H/14, 840, LVIS base training: LVIS v1.0 val AP (box AP, our reading: model is box-only); AP gray (trained on LVIS base)",
+  "value": "35.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 5, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-lit-h14-base-apr",
+  "claim": "OWL-ViT LiT ViT-H/14, 840, LVIS base training: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "23.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 5, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-clip-l14-base-ap",
+  "claim": "OWL-ViT CLIP ViT-L/14, 840, LVIS base training: LVIS v1.0 val AP (box AP, our reading: model is box-only); AP gray (trained on LVIS base)",
+  "value": "34.7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 6, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-clip-l14-base-apr",
+  "claim": "OWL-ViT CLIP ViT-L/14, 840, LVIS base training: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "25.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 6, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-lit-b32-ap",
+  "claim": "OWL-ViT LiT ViT-B/32, 768, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only)",
+  "value": "23.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 9, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-lit-b32-apr",
+  "claim": "OWL-ViT LiT ViT-B/32, 768, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "19.7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 9, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-lit-r26b32-ap",
+  "claim": "OWL-ViT LiT R26+B/32, 768, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only); printed row 11 appears before row 10",
+  "value": "25.7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 11, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-lit-r26b32-apr",
+  "claim": "OWL-ViT LiT R26+B/32, 768, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "21.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 11, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-lit-b16-ap",
+  "claim": "OWL-ViT LiT ViT-B/16, 768, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only)",
+  "value": "26.7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 10, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-lit-b16-apr",
+  "claim": "OWL-ViT LiT ViT-B/16, 768, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "23.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 10, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-lit-l16-ap",
+  "claim": "OWL-ViT LiT ViT-L/16, 768, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only)",
+  "value": "30.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 12, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-lit-l16-apr",
+  "claim": "OWL-ViT LiT ViT-L/16, 768, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "28.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 12, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-lit-h14-ap",
+  "claim": "OWL-ViT LiT ViT-H/14, 840, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only)",
+  "value": "33.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 13, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-lit-h14-apr",
+  "claim": "OWL-ViT LiT ViT-H/14, 840, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "30.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 13, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-clip-b32-ap",
+  "claim": "OWL-ViT CLIP ViT-B/32, 768, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only)",
+  "value": "22.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 14, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-clip-b32-apr",
+  "claim": "OWL-ViT CLIP ViT-B/32, 768, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "18.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 14, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-clip-b16-ap",
+  "claim": "OWL-ViT CLIP ViT-B/16, 768, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only)",
+  "value": "27.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 15, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-clip-b16-apr",
+  "claim": "OWL-ViT CLIP ViT-B/16, 768, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "20.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 15, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-lvis-clip-l14-ap",
+  "claim": "OWL-ViT CLIP ViT-L/14, 840, O365+VG: LVIS v1.0 val AP (box AP, our reading: model is box-only); best APr",
+  "value": "34.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 16, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-lvis-clip-l14-apr",
+  "claim": "OWL-ViT CLIP ViT-L/14, 840, O365+VG: LVIS v1.0 val APr, zero-shot (rare box labels removed from training)",
+  "value": "31.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, printed row 16, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-t1-vild-ens-r50-ap",
+  "claim": "ViLD-ens ResNet50 (CLIP), as quoted by OWL-ViT from ViLD Table 3; metric (mask vs box) not stated here: LVIS AP",
+  "value": "25.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 1, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-t1-vild-ens-r50-apr",
+  "claim": "ViLD-ens ResNet50 (CLIP), as quoted by OWL-ViT from ViLD Table 3; metric (mask vs box) not stated here: LVIS APr",
+  "value": "16.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 1, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-t1-vild-ens-effb7-ap",
+  "claim": "ViLD-ens EffNet-b7 (ALIGN), as quoted by OWL-ViT from ViLD Table 3; metric not stated here: LVIS AP",
+  "value": "29.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 2, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-t1-vild-ens-effb7-apr",
+  "claim": "ViLD-ens EffNet-b7 (ALIGN), as quoted by OWL-ViT from ViLD Table 3; metric not stated here: LVIS APr",
+  "value": "26.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 2, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-t1-regionclip-r50x4-ap",
+  "claim": "RegionCLIP R50x4-C4, as quoted by OWL-ViT: LVIS AP",
+  "value": "32.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 4, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-t1-regionclip-r50x4-apr",
+  "claim": "RegionCLIP R50x4-C4, as quoted by OWL-ViT: LVIS APr",
+  "value": "22.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 4, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-t1-glip-t-ap",
+  "claim": "GLIP Swin-T, as quoted by OWL-ViT from GLIP Table 4: LVIS AP",
+  "value": "17.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 7, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-t1-glip-t-apr",
+  "claim": "GLIP Swin-T, as quoted by OWL-ViT from GLIP Table 4: LVIS APr",
+  "value": "10.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 7, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-t1-glip-l-ap",
+  "claim": "GLIP Swin-L, as quoted by OWL-ViT from GLIP Table 4: LVIS AP",
+  "value": "26.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 8, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-t1-glip-l-apr",
+  "claim": "GLIP Swin-L, as quoted by OWL-ViT from GLIP Table 4: LVIS APr",
+  "value": "17.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 1 (PDF p8), LVIS v1.0 val, row 8, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-coco-l14-ap",
+  "claim": "OWL-ViT CLIP L/14 (O365+VG, 840) COCO AP (not zero-shot: COCO classes in training data)",
+  "value": "43.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A4 (PDF p24), row CLIP ViT-L/14, col AP^COCO; also Sec 4.3"
+ },
+ {
+  "id": "owlvit-coco-l14-ap50",
+  "claim": "OWL-ViT CLIP L/14 COCO AP50",
+  "value": "64.7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A4 (PDF p24), row CLIP ViT-L/14, col AP50^COCO"
+ },
+ {
+  "id": "owlvit-o365-text",
+  "claim": "Text claim: model trained without O365 reaches this O365 AP (Table A4 best is 15.5, LiT H/14 OI+VG; mismatch)",
+  "value": "15.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 4.3 (PDF p8) vs Table A4",
+  "uncertain": true
+ },
+ {
+  "id": "owlvit-oneshot-unseen-split1",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (ours), Split 1",
+  "value": "43.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (ours), col Split 1"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-split2",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (ours), Split 2",
+  "value": "41.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (ours), col Split 2"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-split3",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (ours), Split 3",
+  "value": "40.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (ours), col Split 3"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-split4",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (ours), Split 4",
+  "value": "41.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (ours), col Split 4"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-mean",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (ours), Mean",
+  "value": "41.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (ours), col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-k10-split1",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (k=10; ours), Split 1",
+  "value": "49.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (k=10; ours), col Split 1"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-k10-split2",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (k=10; ours), Split 2",
+  "value": "51.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (k=10; ours), col Split 2"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-k10-split3",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (k=10; ours), Split 3",
+  "value": "42.4",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (k=10; ours), col Split 3"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-k10-split4",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (k=10; ours), Split 4",
+  "value": "44.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (k=10; ours), col Split 4"
+ },
+ {
+  "id": "owlvit-oneshot-unseen-k10-mean",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Unseen categories, OWL-ViT (k=10; ours), Mean",
+  "value": "46.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row OWL-ViT (k=10; ours), col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-seen-split1",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (ours), Split 1",
+  "value": "49.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (ours), col Split 1"
+ },
+ {
+  "id": "owlvit-oneshot-seen-split2",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (ours), Split 2",
+  "value": "49.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (ours), col Split 2"
+ },
+ {
+  "id": "owlvit-oneshot-seen-split3",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (ours), Split 3",
+  "value": "49.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (ours), col Split 3"
+ },
+ {
+  "id": "owlvit-oneshot-seen-split4",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (ours), Split 4",
+  "value": "48.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (ours), col Split 4"
+ },
+ {
+  "id": "owlvit-oneshot-seen-mean",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (ours), Mean",
+  "value": "49.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (ours), col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-seen-k10-split1",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (k=10; ours), Split 1",
+  "value": "54.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (k=10; ours), col Split 1"
+ },
+ {
+  "id": "owlvit-oneshot-seen-k10-split2",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (k=10; ours), Split 2",
+  "value": "55.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (k=10; ours), col Split 2"
+ },
+ {
+  "id": "owlvit-oneshot-seen-k10-split3",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (k=10; ours), Split 3",
+  "value": "56.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (k=10; ours), col Split 3"
+ },
+ {
+  "id": "owlvit-oneshot-seen-k10-split4",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (k=10; ours), Split 4",
+  "value": "54.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (k=10; ours), col Split 4"
+ },
+ {
+  "id": "owlvit-oneshot-seen-k10-mean",
+  "claim": "OWL-ViT image-conditioned detection, COCO AP50, Seen categories, OWL-ViT (k=10; ours), Mean",
+  "value": "55.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row OWL-ViT (k=10; ours), col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-ait-unseen-mean",
+  "claim": "AIT (prior SOTA) one-shot COCO AP50, unseen, mean",
+  "value": "24.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row AIT, col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-ait-unseen-split1",
+  "claim": "AIT one-shot COCO AP50, unseen, split 1 (the '26.0' in the intro)",
+  "value": "26.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row AIT, col Split 1; Sec 1"
+ },
+ {
+  "id": "owlvit-oneshot-coae-unseen-mean",
+  "claim": "CoAE one-shot COCO AP50, unseen, mean",
+  "value": "22.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Unseen, row CoAE, col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-ait-seen-mean",
+  "claim": "AIT one-shot COCO AP50, seen, mean",
+  "value": "47.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 2 (PDF p10), one-shot COCO AP50, R50+H/32, mean of 3 runs, block Seen, row AIT, col Mean"
+ },
+ {
+  "id": "owlvit-oneshot-gain",
+  "claim": "Relative gain over best prior one-shot result on unseen COCO (41.8 vs 24.3 means, our reading of the arithmetic)",
+  "value": "72%",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Sec 1 and Sec 4.4 (PDF p2, p10)"
+ },
+ {
+  "id": "owlvit-abl-base-ap",
+  "claim": "Ablation baseline LVIS AP",
+  "value": "21.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row Baseline, col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-base-apr",
+  "claim": "Ablation baseline LVIS APr",
+  "value": "18.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row Baseline, col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-base-coco",
+  "claim": "Ablation baseline COCO AP",
+  "value": "30.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row Baseline, col AP^COCO"
+ },
+ {
+  "id": "owlvit-abl-base-oi",
+  "claim": "Ablation baseline OI AP",
+  "value": "54.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row Baseline, col AP^OI"
+ },
+ {
+  "id": "owlvit-abl-only-vg-dap",
+  "claim": "Ablation (1) Only use VG for training: change in LVIS AP vs baseline",
+  "value": "-14.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (1), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-only-vg-dapr",
+  "claim": "Ablation (1) Only use VG for training: change in LVIS APr vs baseline",
+  "value": "-14.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (1), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-only-oi-dap",
+  "claim": "Ablation (2) Only use OI for training: change in LVIS AP vs baseline",
+  "value": "-6.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (2), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-only-oi-dapr",
+  "claim": "Ablation (2) Only use OI for training: change in LVIS APr vs baseline",
+  "value": "-5.7",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (2), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-same-lr-dap",
+  "claim": "Ablation (3) Same LR for image and text encoders: change in LVIS AP vs baseline",
+  "value": "-3.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (3), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-same-lr-dapr",
+  "claim": "Ablation (3) Same LR for image and text encoders: change in LVIS APr vs baseline",
+  "value": "-8.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (3), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-prompt-ens-dap",
+  "claim": "Ablation (4) No prompt ensembling at inference: change in LVIS AP vs baseline",
+  "value": "-2.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (4), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-prompt-ens-dapr",
+  "claim": "Ablation (4) No prompt ensembling at inference: change in LVIS APr vs baseline",
+  "value": "-5.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (4), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-prompts-dap",
+  "claim": "Ablation (5) No prompts (train or inference): change in LVIS AP vs baseline",
+  "value": "-1.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (5), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-prompts-dapr",
+  "claim": "Ablation (5) No prompts (train or inference): change in LVIS APr vs baseline",
+  "value": "-1.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (5), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-rand-neg-dap",
+  "claim": "Ablation (6) No random negatives: change in LVIS AP vs baseline",
+  "value": "-1.0",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (6), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-rand-neg-dapr",
+  "claim": "Ablation (6) No random negatives: change in LVIS APr vs baseline",
+  "value": "-2.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (6), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-mosaics-dap",
+  "claim": "Ablation (7) No mosaics: change in LVIS AP vs baseline",
+  "value": "-2.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (7), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-mosaics-dapr",
+  "claim": "Ablation (7) No mosaics: change in LVIS APr vs baseline",
+  "value": "-1.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (7), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-mosaics-3x-dap",
+  "claim": "Ablation (9) No mosaics, train 3x longer: change in LVIS AP vs baseline",
+  "value": "-3.4",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (9), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-mosaics-3x-dapr",
+  "claim": "Ablation (9) No mosaics, train 3x longer: change in LVIS APr vs baseline",
+  "value": "-3.6",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (9), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-merge-dap",
+  "claim": "Ablation (10) Do not merge overlapping instances: change in LVIS AP vs baseline",
+  "value": "-0.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (10), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-merge-dapr",
+  "claim": "Ablation (10) Do not merge overlapping instances: change in LVIS APr vs baseline",
+  "value": "-1.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (10), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-no-loc-bias-dap",
+  "claim": "Ablation (11) No location bias in box predictor: change in LVIS AP vs baseline",
+  "value": "-1.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (11), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-no-loc-bias-dapr",
+  "claim": "Ablation (11) No location bias in box predictor: change in LVIS APr vs baseline",
+  "value": "-1.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (11), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-keep-rare-dap",
+  "claim": "Ablation (15) Do not remove LVIS rare labels: change in LVIS AP vs baseline",
+  "value": "0.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (15), col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-keep-rare-dapr",
+  "claim": "Ablation (15) Do not remove LVIS rare labels: change in LVIS APr vs baseline",
+  "value": "0.2",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table 3 (PDF p13), ablations, R26+B/32, 70k steps, OI+VG, mean of 2 replicates, row (15), col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-frozen-text-dap",
+  "claim": "Text encoder not fine-tuned (frozen), R26+B/32: change in LVIS AP",
+  "value": "-1.5",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5 (PDF p28), additional ablations, block Text encoder learning rate, row 'Do not fine-tune text enc.', ViT-R26+B/32 col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-frozen-text-dapr",
+  "claim": "Text encoder not fine-tuned (frozen), R26+B/32: change in LVIS APr",
+  "value": "-2.3",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5 (PDF p28), additional ablations, same row, ViT-R26+B/32 col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-b32-no-loc-bias-dap",
+  "claim": "No location bias, pure ViT-B/32: change in LVIS AP",
+  "value": "-2.8",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5 (PDF p28), additional ablations, block Other, row No location bias, ViT-B/32 col AP^LVIS"
+ },
+ {
+  "id": "owlvit-abl-b32-no-loc-bias-dapr",
+  "claim": "No location bias, pure ViT-B/32: change in LVIS APr",
+  "value": "-2.9",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5 (PDF p28), additional ablations, block Other, row No location bias, ViT-B/32 col AP^LVIS_rare"
+ },
+ {
+  "id": "owlvit-abl-text-lr-2e-3-dapr",
+  "claim": "Text encoder LR 2e-3, R26+B/32: change in LVIS APr",
+  "value": "-14.1",
+  "paper": "OWL-ViT",
+  "arxiv": "2205.06230v2",
+  "loc": "Table A5 (PDF p28), additional ablations, block Text encoder learning rate, row LR 2x10^-3, ViT-R26+B/32 col AP^LVIS_rare"
+ },
+ {
+  "id": "owlv2-v1-date",
+  "claim": "OWLv2 arXiv v1 submission date",
+  "value": "2023-06-16",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "abs.html, Submission history [v1]"
+ },
+ {
+  "id": "owlv2-v2-date",
+  "claim": "OWLv2 arXiv v2 date",
+  "value": "2023-07-20",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "abs.html, Submission history [v2]"
+ },
+ {
+  "id": "owlv2-v3-date",
+  "claim": "OWLv2 arXiv v3 (version read) date",
+  "value": "2024-05-22",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "abs.html, Submission history [v3]; PDF p1 margin"
+ },
+ {
+  "id": "owlv2-venue",
+  "claim": "OWLv2 venue, inferred only from neurips_2023.sty in the LaTeX source (no arXiv comment)",
+  "value": "NeurIPS 2023",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "src/neurips_2023.sty; abs.html has no Comments field",
+  "uncertain": true
+ },
+ {
+  "id": "owlv2-webli-size",
+  "claim": "WebLI size (images with alt-text) annotated by the teacher",
+  "value": "10B",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.1 (PDF p3) 'approximately 10B images'; Sec 4.1 '10 billion image-text pairs'"
+ },
+ {
+  "id": "owlv2-teacher",
+  "claim": "Teacher/annotator model: public OWL-ViT CLIP backbone",
+  "value": "L/14",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.1 and Sec 4.1 (PDF p3, p6), 'OWL-ViT CLIP L/14'"
+ },
+ {
+  "id": "owlv2-curated-classes",
+  "claim": "Human-curated pseudo-label space size (LVIS+O365+OIv4+VG, deduplicated, plurals removed)",
+  "value": "2520",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.1 Human-curated label space (PDF p4)"
+ },
+ {
+  "id": "owlv2-ngram-maxlen",
+  "claim": "Maximum word N-gram length for machine-generated queries",
+  "value": "10",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.1 Machine-generated label space (PDF p4); Appendix A.2 code max_ngram_len=10"
+ },
+ {
+  "id": "owlv2-ngram-maxqueries",
+  "claim": "Maximum N-gram queries per image (example command in code listing)",
+  "value": "300",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Appendix A.2 code, max_num_queries=300 (PDF p13)"
+ },
+ {
+  "id": "owlv2-prompt-templates",
+  "claim": "Prompt templates ensembled by the annotator (printed as 'seven')",
+  "value": "7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.1 (PDF p4)"
+ },
+ {
+  "id": "owlv2-curated-rescale",
+  "claim": "Score rescale factor for curated-query pseudo-boxes in the combined label space",
+  "value": "0.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Appendix A.3 (PDF p14)"
+ },
+ {
+  "id": "owlv2-thr-box",
+  "claim": "Main results: keep all pseudo-boxes above this score",
+  "value": "0.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.4 (PDF p8); Fig. A2 caption"
+ },
+ {
+  "id": "owlv2-thr-image",
+  "claim": "Main results: keep only images with at least one box above this score",
+  "value": "0.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.4 (PDF p8); also A.7 bullet 'confidence score threshold: 0.3'"
+ },
+ {
+  "id": "owlv2-thr-0.1-images",
+  "claim": "Images remaining at confidence threshold 0.1 (N-gram pseudo-labels)",
+  "value": "5B",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Fig. 3 caption (PDF p7)"
+ },
+ {
+  "id": "owlv2-thr-0.3-images",
+  "claim": "Images remaining at confidence threshold 0.3",
+  "value": "2B",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Fig. 3 caption (PDF p7)"
+ },
+ {
+  "id": "owlv2-thr-0.5-images",
+  "claim": "Images remaining at confidence threshold 0.5",
+  "value": "782M",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Fig. 3 caption (PDF p7)"
+ },
+ {
+  "id": "owlv2-thr-0.7-images",
+  "claim": "Images remaining at confidence threshold 0.7",
+  "value": "224M",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Fig. 3 caption (PDF p7)"
+ },
+ {
+  "id": "owlv2-st-dataset-size",
+  "claim": "Self-training dataset size (images, approx.)",
+  "value": "2B",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.5 Scaling (PDF p8)"
+ },
+ {
+  "id": "owlv2-token-drop",
+  "claim": "Share of patches (lowest pixel variance) dropped during training; none dropped at inference",
+  "value": "50%",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 Token dropping (PDF p4); A.7 'Token dropping rate during training: 0.5'"
+ },
+ {
+  "id": "owlv2-token-drop-noise",
+  "claim": "Max uniform noise added before computing patch variance (images in [0,1])",
+  "value": "0.01",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Appendix A.5 (PDF p14)"
+ },
+ {
+  "id": "owlv2-l14-1008-tokens",
+  "claim": "Encoder tokens for resolution 1008x1008 and patch 14x14",
+  "value": "5184",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 Instance selection (PDF p4)"
+ },
+ {
+  "id": "owlv2-b16-960-tokens",
+  "claim": "our reading: OWLv2 B/16 at 960 -> (960/16)^2 tokens (not printed)",
+  "value": "3600",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Computed from Sec 4.1 image size 960 and patch 16",
+  "our_reading": true
+ },
+ {
+  "id": "owlv2-l14-kept-tokens",
+  "claim": "our reading: tokens kept for L/14 at 1008 after 50% token drop (training)",
+  "value": "2592",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Computed: 5184 x 0.5",
+  "our_reading": true
+ },
+ {
+  "id": "owlv2-b16-kept-tokens",
+  "claim": "our reading: tokens kept for B/16 at 960 after 50% token drop (training)",
+  "value": "1800",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Computed: 3600 x 0.5",
+  "our_reading": true
+ },
+ {
+  "id": "owlv2-topk-share",
+  "claim": "Share of instances selected by objectness during training",
+  "value": "10%",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 Instance selection (PDF p5) 'approximately 10%'"
+ },
+ {
+  "id": "owlv2-topk-b16",
+  "claim": "Instance top k for B/16 models",
+  "value": "256",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), rows 11/14/20, col Instance top k"
+ },
+ {
+  "id": "owlv2-topk-l14-g14",
+  "claim": "Instance top k for L/14 and G/14 models",
+  "value": "512",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), rows 12/13/15/16/21, col Instance top k"
+ },
+ {
+  "id": "owlv2-mosaic-max",
+  "claim": "Largest self-training mosaic grid",
+  "value": "6x6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 Mosaics (PDF p5); grids 1x1, 2x2, 3x3, 4x4, 6x6 in equal proportions"
+ },
+ {
+  "id": "owlv2-mosaic-avg",
+  "claim": "Average raw images per self-training example",
+  "value": "13.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 Mosaics (PDF p5)"
+ },
+ {
+  "id": "owlv2-gflops-owlvit",
+  "claim": "Training GFLOPs/example, original OWL-ViT L/14 at 840 (TPUv3)",
+  "value": "11945.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 (PDF p5); printed 11'945.4"
+ },
+ {
+  "id": "owlv2-gflops-owlv2",
+  "claim": "Training GFLOPs/example, OWLv2 L/14 at 840 (TPUv3)",
+  "value": "5357.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 (PDF p5)"
+ },
+ {
+  "id": "owlv2-throughput-owlvit",
+  "claim": "Training examples/s/core, original OWL-ViT L/14 at 840 (TPUv3)",
+  "value": "1.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 (PDF p5)"
+ },
+ {
+  "id": "owlv2-throughput-owlv2",
+  "claim": "Training examples/s/core, OWLv2 L/14 at 840 (TPUv3)",
+  "value": "2.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 (PDF p5)"
+ },
+ {
+  "id": "owlv2-flops-reduction",
+  "claim": "Approximate reduction in training FLOPS vs OWL-ViT",
+  "value": "50%",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 (PDF p5)"
+ },
+ {
+  "id": "owlv2-throughput-gain",
+  "claim": "Training throughput increase vs OWL-ViT",
+  "value": "2x",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 3.2 (PDF p5), printed 2x"
+ },
+ {
+  "id": "owlv2-g14-params",
+  "claim": "G/14 parameters relative to L/14",
+  "value": "5.2x",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.5 Scaling (PDF p8)"
+ },
+ {
+  "id": "owlv2-g14-flops",
+  "claim": "G/14 inference FLOPs relative to L/14",
+  "value": "4.3x",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.5 Scaling (PDF p8)"
+ },
+ {
+  "id": "owlv2-res-16",
+  "claim": "Image size for /16 models",
+  "value": "960",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.1 Training (PDF p6); Table A2"
+ },
+ {
+  "id": "owlv2-res-14",
+  "claim": "Image size for /14 models",
+  "value": "1008",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.1 Training (PDF p6); Table A2"
+ },
+ {
+  "id": "owlv2-ft-mosaics",
+  "claim": "Fine-tuning length in mosaics seen (printed 256'000)",
+  "value": "256000",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.1 Training (PDF p6)"
+ },
+ {
+  "id": "owlv2-ft-images",
+  "claim": "Fine-tuning length in individual images",
+  "value": "1.1M",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.1 Training (PDF p6)"
+ },
+ {
+  "id": "owlv2-ft-epochs",
+  "claim": "Fine-tuning length in LVIS epochs (roughly)",
+  "value": "100",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.1 Training (PDF p6)"
+ },
+ {
+  "id": "owlv2-lr-text",
+  "claim": "Text encoder learning rate, all OWLv2 models",
+  "value": "2e-6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Appendix A.7 bullets (PDF p14); printed 2e-06"
+ },
+ {
+  "id": "owlv2-lr-b16",
+  "claim": "Learning rate, B/16 models",
+  "value": "5e-5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2, col Learning rate; printed 5.0 x 10^-5"
+ },
+ {
+  "id": "owlv2-lr-l14",
+  "claim": "Learning rate, L/14 and G/14 models",
+  "value": "2e-5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2, col Learning rate; printed 2.0 x 10^-5"
+ },
+ {
+  "id": "owlv2-lr-timescale",
+  "claim": "Inverse square-root LR schedule timescale, steps (printed 10'000)",
+  "value": "10000",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Appendix A.6 and A.7 (PDF p14)"
+ },
+ {
+  "id": "owlv2-g14-switch-steps",
+  "claim": "G/14 hyperparameters switched after this many self-training steps (printed 740'000)",
+  "value": "740000",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Appendix A.7 SigLIP G/14 (PDF p15)"
+ },
+ {
+  "id": "owlv2-batch-st-b16-l14",
+  "claim": "Self-training batch size, B/16 and L/14",
+  "value": "256",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2, col Batch size (ST)"
+ },
+ {
+  "id": "owlv2-batch-st-g14",
+  "claim": "Self-training batch size, G/14",
+  "value": "128",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2, col Batch size (ST)"
+ },
+ {
+  "id": "owlv2-batch-ft-l14-g14",
+  "claim": "Fine-tuning batch size, L/14 and G/14 (B/16: 256)",
+  "value": "128",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2, col Batch size (FT)"
+ },
+ {
+  "id": "owlv2-examples-st-b16",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 11; exact LaTeX value 365260288; value = PDF-printed mantissa x 10^8",
+  "value": "3.7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 11, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-st-l14",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 12; exact LaTeX value 225893376; value = PDF-printed mantissa x 10^8",
+  "value": "2.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 12, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-st-g14",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 13; exact LaTeX value 160396032; value = PDF-printed mantissa x 10^8",
+  "value": "1.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 13, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-stft-b16",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 14; exact LaTeX value 361573632; value = PDF-printed mantissa x 10^8",
+  "value": "3.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 14, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-stft-l14",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 15; exact LaTeX value 228197248; value = PDF-printed mantissa x 10^8",
+  "value": "2.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 15, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-stft-g14",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 16; exact LaTeX value 162904704; value = PDF-printed mantissa x 10^8",
+  "value": "1.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 16, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-stft-cur-b16",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 20; exact LaTeX value 816945920; value = PDF-printed mantissa x 10^8",
+  "value": "8.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 20, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-examples-stft-cur-l14",
+  "claim": "Examples seen (mosaics; self-training + fine-tuning), Table A2 row 21; exact LaTeX value 360215936; value = PDF-printed mantissa x 10^8",
+  "value": "3.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A2 (PDF p15), row 21, col Examples seen; LaTeX src/hparams_table.tex"
+ },
+ {
+  "id": "owlv2-intro-pairs",
+  "claim": "Intro: L/14 model 'trained on 2.3B image-text pairs' (Table A2 prints 2.3 x 10^8 examples for L/14; not reconciled)",
+  "value": "2.3B",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 1 Introduction (PDF p2)",
+  "uncertain": true
+ },
+ {
+  "id": "owlv2-ens-weight",
+  "claim": "Weight of fine-tuned checkpoint in the ODinW weight-space ensemble (row 21 model)",
+  "value": "0.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 caption (PDF p17)"
+ },
+ {
+  "id": "owlv2-ft-ens-ckpt-steps",
+  "claim": "B/16 trade-off figure: ensembles use the checkpoint fine-tuned for this many steps",
+  "value": "20k",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Fig. 5 caption (PDF p9)"
+ },
+ {
+  "id": "owlv2-main-st-b16-odinw13",
+  "claim": "OWL-ST CLIP B/16 (N-grams): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "48.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 11, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-st-b16-mini-ap",
+  "claim": "OWL-ST CLIP B/16 (N-grams): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "31.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 11, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-st-b16-mini-apr",
+  "claim": "OWL-ST CLIP B/16 (N-grams): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "35.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 11, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-st-b16-val-ap",
+  "claim": "OWL-ST CLIP B/16 (N-grams): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "27.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 11, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-st-b16-val-apr",
+  "claim": "OWL-ST CLIP B/16 (N-grams): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "29.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 11, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-st-l14-odinw13",
+  "claim": "OWL-ST CLIP L/14 (N-grams): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "53.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 12, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-st-l14-mini-ap",
+  "claim": "OWL-ST CLIP L/14 (N-grams): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "38.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 12, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-st-l14-mini-apr",
+  "claim": "OWL-ST CLIP L/14 (N-grams): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "39.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 12, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-st-l14-val-ap",
+  "claim": "OWL-ST CLIP L/14 (N-grams): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "33.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 12, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-st-l14-val-apr",
+  "claim": "OWL-ST CLIP L/14 (N-grams): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "34.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 12, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-st-g14-odinw13",
+  "claim": "OWL-ST SigLIP G/14 (N-grams): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "49.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 13, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-st-g14-mini-ap",
+  "claim": "OWL-ST SigLIP G/14 (N-grams): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "37.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 13, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-st-g14-mini-apr",
+  "claim": "OWL-ST SigLIP G/14 (N-grams): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "40.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 13, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-st-g14-val-ap",
+  "claim": "OWL-ST SigLIP G/14 (N-grams): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "33.7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 13, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-st-g14-val-apr",
+  "claim": "OWL-ST SigLIP G/14 (N-grams): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "37.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 13, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-stft-b16-odinw13",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams, FT on LVIS base): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "48.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 14, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-stft-b16-mini-ap",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams, FT on LVIS base): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "47.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 14, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-stft-b16-mini-apr",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams, FT on LVIS base): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "37.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 14, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-stft-b16-val-ap",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams, FT on LVIS base): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "41.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 14, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-stft-b16-val-apr",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams, FT on LVIS base): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "36.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 14, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-stft-l14-odinw13",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams, FT on LVIS base): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "50.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 15, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-stft-l14-mini-ap",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams, FT on LVIS base): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "54.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 15, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-stft-l14-mini-apr",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams, FT on LVIS base): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "46.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 15, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-stft-l14-val-ap",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams, FT on LVIS base): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "49.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 15, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-stft-l14-val-apr",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams, FT on LVIS base): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "44.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 15, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-stft-g14-odinw13",
+  "claim": "OWL-ST+FT SigLIP G/14 (N-grams, FT on LVIS base): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "50.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 16, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-stft-g14-mini-ap",
+  "claim": "OWL-ST+FT SigLIP G/14 (N-grams, FT on LVIS base): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "51.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 16, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-stft-g14-mini-apr",
+  "claim": "OWL-ST+FT SigLIP G/14 (N-grams, FT on LVIS base): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "50.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 16, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-stft-g14-val-ap",
+  "claim": "OWL-ST+FT SigLIP G/14 (N-grams, FT on LVIS base): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "47.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 16, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-stft-g14-val-apr",
+  "claim": "OWL-ST+FT SigLIP G/14 (N-grams, FT on LVIS base): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "47.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 16, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-stft-cur-b16-odinw13",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams + curated, FT on LVIS base): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "48.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 20, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-stft-cur-b16-mini-ap",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams + curated, FT on LVIS base): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "51.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 20, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-stft-cur-b16-mini-apr",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams + curated, FT on LVIS base): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "41.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 20, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-stft-cur-b16-val-ap",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams + curated, FT on LVIS base): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "45.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 20, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-stft-cur-b16-val-apr",
+  "claim": "OWL-ST+FT CLIP B/16 (N-grams + curated, FT on LVIS base): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "40.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 20, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-stft-cur-l14-odinw13",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams + curated, FT on LVIS base): ODinW13 zero-shot mean AP (standard AP, not fixed AP)",
+  "value": "48.7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 21, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-stft-cur-l14-mini-ap",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams + curated, FT on LVIS base): LVIS minival AP_all (standard AP, not fixed AP)",
+  "value": "55.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 21, col LVIS AP^mini_all"
+ },
+ {
+  "id": "owlv2-main-stft-cur-l14-mini-apr",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams + curated, FT on LVIS base): LVIS minival AP_rare (standard AP, not fixed AP)",
+  "value": "50.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 21, col LVIS AP^mini_rare"
+ },
+ {
+  "id": "owlv2-main-stft-cur-l14-val-ap",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams + curated, FT on LVIS base): LVIS val AP_all (standard AP, not fixed AP)",
+  "value": "50.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 21, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-stft-cur-l14-val-apr",
+  "claim": "OWL-ST+FT CLIP L/14 (N-grams + curated, FT on LVIS base): LVIS val AP_rare (zero-shot: no human rare boxes at any stage) (standard AP, not fixed AP)",
+  "value": "45.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 21, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-owl-b16-val-ap",
+  "claim": "OWL-ViT CLIP B/16 (row 2): LVIS val AP_all",
+  "value": "27.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 2, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-owl-b16-val-apr",
+  "claim": "OWL-ViT CLIP B/16 (row 2): LVIS val AP_rare",
+  "value": "20.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 2, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-owl-l14-odinw13",
+  "claim": "OWL-ViT CLIP L/14 (row 3): ODinW13 zero-shot mean AP (first reported here)",
+  "value": "48.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 3, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-owl-l14-val-apr",
+  "claim": "OWL-ViT CLIP L/14 (row 3): LVIS val AP_rare",
+  "value": "31.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 3, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-fvlm-r50x64-val-apr",
+  "claim": "F-VLM R50x64 (prior SOTA, open vocab): LVIS val AP_rare",
+  "value": "32.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 8, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-fvlm-r50x64-val-ap",
+  "claim": "F-VLM R50x64: LVIS val AP_all",
+  "value": "34.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 8, col LVIS AP^val_all"
+ },
+ {
+  "id": "owlv2-main-3ways-f6-val-apr",
+  "claim": "3Ways NFNet-F6: LVIS val AP_rare",
+  "value": "30.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 10, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-detclipv2-l-val-apr",
+  "claim": "DetCLIPv2 Swin-L (prior SOTA, curated vocab): LVIS val AP_rare",
+  "value": "33.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 19, col LVIS AP^val_rare"
+ },
+ {
+  "id": "owlv2-main-glipv2-t-odinw13",
+  "claim": "GLIPv2 Swin-T: ODinW13",
+  "value": "48.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 4, col ODinW 13"
+ },
+ {
+  "id": "owlv2-main-glipv2-h-odinw13",
+  "claim": "GLIPv2 Swin-H: ODinW13 (gray: trained on OpenImages, overlaps ODinW)",
+  "value": "55.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table 1 (PDF p5), LVIS standard AP (AP^old) and ODinW13 zero-shot, row 6, col ODinW 13"
+ },
+ {
+  "id": "owlv2-gain-b16-vs-owl",
+  "claim": "OWL-ST B/16 APr gain over OWL-ViT B/16 (points)",
+  "value": "9 points",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.2 (PDF p6)"
+ },
+ {
+  "id": "owlv2-gain-g14-st",
+  "claim": "OWL-ST G/14 APr above F-VLM R50x64 (points)",
+  "value": "4.7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.2 (PDF p6); Table 1 row 13 delta"
+ },
+ {
+  "id": "owlv2-gain-g14-stft",
+  "claim": "OWL-ST+FT G/14 APr above F-VLM R50x64 (points)",
+  "value": "14.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.2 (PDF p7); Table 1 row 16 delta"
+ },
+ {
+  "id": "owlv2-gain-l14-rel-abstract",
+  "claim": "Abstract: L/14 APr 31.2 -> 44.6, relative improvement",
+  "value": "43%",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Abstract"
+ },
+ {
+  "id": "owlv2-gain-l14-rel-fvlm",
+  "claim": "Intro: L/14 44.6 APr vs F-VLM 32.8, relative improvement",
+  "value": "36%",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 1 Introduction (PDF p2)"
+ },
+ {
+  "id": "owlv2-coco-b16",
+  "claim": "OWLv2 B/16 fine-tuned on COCO: COCO mAP",
+  "value": "54.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.2 (PDF p7)"
+ },
+ {
+  "id": "owlv2-coco-l14",
+  "claim": "OWLv2 L/14 fine-tuned on COCO: COCO mAP",
+  "value": "56.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Sec 4.2 (PDF p7)"
+ },
+ {
+  "id": "owlv2-fixed-st-b16-val-apr",
+  "claim": "Row 11 LVIS val AP_rare with fixed AP (top 10'000 predictions per class)",
+  "value": "30.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A3 (PDF p17), LVIS fixed AP, row 11, col AP^val_rare fixed"
+ },
+ {
+  "id": "owlv2-fixed-st-l14-val-apr",
+  "claim": "Row 12 LVIS val AP_rare with fixed AP (top 10'000 predictions per class)",
+  "value": "36.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A3 (PDF p17), LVIS fixed AP, row 12, col AP^val_rare fixed"
+ },
+ {
+  "id": "owlv2-fixed-stft-b16-val-apr",
+  "claim": "Row 14 LVIS val AP_rare with fixed AP (top 10'000 predictions per class)",
+  "value": "39.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A3 (PDF p17), LVIS fixed AP, row 14, col AP^val_rare fixed"
+ },
+ {
+  "id": "owlv2-fixed-stft-l14-val-apr",
+  "claim": "Row 15 LVIS val AP_rare with fixed AP (top 10'000 predictions per class)",
+  "value": "47.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A3 (PDF p17), LVIS fixed AP, row 15, col AP^val_rare fixed"
+ },
+ {
+  "id": "owlv2-fixed-stft-cur-b16-val-apr",
+  "claim": "Row 20 LVIS val AP_rare with fixed AP (top 10'000 predictions per class)",
+  "value": "42.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A3 (PDF p17), LVIS fixed AP, row 20, col AP^val_rare fixed"
+ },
+ {
+  "id": "owlv2-fixed-stft-cur-l14-val-apr",
+  "claim": "Row 21 LVIS val AP_rare with fixed AP (top 10'000 predictions per class)",
+  "value": "48.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A3 (PDF p17), LVIS fixed AP, row 21, col AP^val_rare fixed"
+ },
+ {
+  "id": "owlv2-tokdrop-000-ap",
+  "claim": "Token drop rate 0.00: LVIS val AP_all",
+  "value": "33.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.00, row AP^val_all"
+ },
+ {
+  "id": "owlv2-tokdrop-000-apr",
+  "claim": "Token drop rate 0.00: LVIS val AP_rare",
+  "value": "31.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.00, row AP^val_rare"
+ },
+ {
+  "id": "owlv2-tokdrop-025-ap",
+  "claim": "Token drop rate 0.25: LVIS val AP_all",
+  "value": "33.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.25, row AP^val_all"
+ },
+ {
+  "id": "owlv2-tokdrop-025-apr",
+  "claim": "Token drop rate 0.25: LVIS val AP_rare",
+  "value": "31.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.25, row AP^val_rare"
+ },
+ {
+  "id": "owlv2-tokdrop-033-ap",
+  "claim": "Token drop rate 0.33: LVIS val AP_all",
+  "value": "33.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.33, row AP^val_all"
+ },
+ {
+  "id": "owlv2-tokdrop-033-apr",
+  "claim": "Token drop rate 0.33: LVIS val AP_rare",
+  "value": "32.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.33, row AP^val_rare"
+ },
+ {
+  "id": "owlv2-tokdrop-050-ap",
+  "claim": "Token drop rate 0.50: LVIS val AP_all",
+  "value": "32.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.50, row AP^val_all"
+ },
+ {
+  "id": "owlv2-tokdrop-050-apr",
+  "claim": "Token drop rate 0.50: LVIS val AP_rare",
+  "value": "30.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.50, row AP^val_rare"
+ },
+ {
+  "id": "owlv2-tokdrop-070-ap",
+  "claim": "Token drop rate 0.70: LVIS val AP_all",
+  "value": "30.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.70, row AP^val_all"
+ },
+ {
+  "id": "owlv2-tokdrop-070-apr",
+  "claim": "Token drop rate 0.70: LVIS val AP_rare",
+  "value": "28.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.70, row AP^val_rare"
+ },
+ {
+  "id": "owlv2-tokdrop-000-ap-sd",
+  "claim": "Token drop 0.00: std over 3 runs, LVIS val AP_all",
+  "value": "0.33",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.00, row AP^val_all"
+ },
+ {
+  "id": "owlv2-tokdrop-000-apr-sd",
+  "claim": "Token drop 0.00: std over 3 runs, LVIS val AP_rare",
+  "value": "1.16",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A1 (PDF p14), token dropping, standard OWL-ViT L/14 on O365+VG, LVIS val, col 0.00, row AP^val_rare"
+ },
+ {
+  "id": "owlv2-odinw-st-b16-mean13",
+  "claim": "OWL-ST CLIP B/16 (Table 1 row 11, open vocabulary): ODinW mean AP over 13 datasets",
+  "value": "48.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 11, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-b16-mean35",
+  "claim": "OWL-ST CLIP B/16 (Table 1 row 11, open vocabulary): ODinW mean AP over 35 datasets",
+  "value": "22.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 11, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-b16-median35",
+  "claim": "OWL-ST CLIP B/16 (Table 1 row 11, open vocabulary): ODinW median AP over 35 datasets",
+  "value": "11.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 11, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-l14-mean13",
+  "claim": "OWL-ST CLIP L/14 (Table 1 row 12, open vocabulary): ODinW mean AP over 13 datasets",
+  "value": "53.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-l14-mean35",
+  "claim": "OWL-ST CLIP L/14 (Table 1 row 12, open vocabulary): ODinW mean AP over 35 datasets",
+  "value": "24.4",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-l14-median35",
+  "claim": "OWL-ST CLIP L/14 (Table 1 row 12, open vocabulary): ODinW median AP over 35 datasets",
+  "value": "16.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-g14-mean13",
+  "claim": "OWL-ST SigLIP G/14 (Table 1 row 13, open vocabulary): ODinW mean AP over 13 datasets",
+  "value": "49.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 13, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-g14-mean35",
+  "claim": "OWL-ST SigLIP G/14 (Table 1 row 13, open vocabulary): ODinW mean AP over 35 datasets",
+  "value": "22.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 13, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-g14-median35",
+  "claim": "OWL-ST SigLIP G/14 (Table 1 row 13, open vocabulary): ODinW median AP over 35 datasets",
+  "value": "17.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 13, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-b16-mean13",
+  "claim": "OWL-ST+FT CLIP B/16 (Table 1 row 14, open vocabulary): ODinW mean AP over 13 datasets",
+  "value": "48.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 14, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-b16-mean35",
+  "claim": "OWL-ST+FT CLIP B/16 (Table 1 row 14, open vocabulary): ODinW mean AP over 35 datasets",
+  "value": "20.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 14, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-b16-median35",
+  "claim": "OWL-ST+FT CLIP B/16 (Table 1 row 14, open vocabulary): ODinW median AP over 35 datasets",
+  "value": "6.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 14, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-l14-mean13",
+  "claim": "OWL-ST+FT CLIP L/14 (Table 1 row 15, open vocabulary): ODinW mean AP over 13 datasets",
+  "value": "50.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 15, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-l14-mean35",
+  "claim": "OWL-ST+FT CLIP L/14 (Table 1 row 15, open vocabulary): ODinW mean AP over 35 datasets",
+  "value": "22.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 15, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-l14-median35",
+  "claim": "OWL-ST+FT CLIP L/14 (Table 1 row 15, open vocabulary): ODinW median AP over 35 datasets",
+  "value": "6.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 15, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-g14-mean13",
+  "claim": "OWL-ST+FT SigLIP G/14 (Table 1 row 16, open vocabulary): ODinW mean AP over 13 datasets",
+  "value": "50.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 16, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-g14-mean35",
+  "claim": "OWL-ST+FT SigLIP G/14 (Table 1 row 16, open vocabulary): ODinW mean AP over 35 datasets",
+  "value": "22.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 16, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-g14-median35",
+  "claim": "OWL-ST+FT SigLIP G/14 (Table 1 row 16, open vocabulary): ODinW median AP over 35 datasets",
+  "value": "9.5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 16, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-cur-b16-mean13",
+  "claim": "OWL-ST+FT CLIP B/16 (Table 1 row 20, human-curated vocabulary): ODinW mean AP over 13 datasets",
+  "value": "48.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 20, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-cur-b16-mean35",
+  "claim": "OWL-ST+FT CLIP B/16 (Table 1 row 20, human-curated vocabulary): ODinW mean AP over 35 datasets",
+  "value": "21.7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 20, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-cur-b16-median35",
+  "claim": "OWL-ST+FT CLIP B/16 (Table 1 row 20, human-curated vocabulary): ODinW median AP over 35 datasets",
+  "value": "6.8",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 20, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-cur-l14-mean13",
+  "claim": "OWL-ST+FT CLIP L/14 (Table 1 row 21, human-curated vocabulary): ODinW mean AP over 13 datasets",
+  "value": "48.7",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 21, col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-cur-l14-mean35",
+  "claim": "OWL-ST+FT CLIP L/14 (Table 1 row 21, human-curated vocabulary): ODinW mean AP over 35 datasets",
+  "value": "21.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 21, col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-stft-cur-l14-median35",
+  "claim": "OWL-ST+FT CLIP L/14 (Table 1 row 21, human-curated vocabulary): ODinW median AP over 35 datasets",
+  "value": "7.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 21, col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-ens-l14-mean13",
+  "claim": "OWL-ST/FT ens CLIP L/14 (weight ensemble of row 21 self-trained and fine-tuned, FT weight 0.4): ODinW mean AP over 13 datasets",
+  "value": "56.3",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, last row (OWL-ST/FT ens, no number), col Mean (13 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-ens-l14-mean35",
+  "claim": "OWL-ST/FT ens CLIP L/14 (weight ensemble of row 21 self-trained and fine-tuned, FT weight 0.4): ODinW mean AP over 35 datasets",
+  "value": "25.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, last row (OWL-ST/FT ens, no number), col Mean (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-ens-l14-median35",
+  "claim": "OWL-ST/FT ens CLIP L/14 (weight ensemble of row 21 self-trained and fine-tuned, FT weight 0.4): ODinW median AP over 35 datasets",
+  "value": "10.6",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, last row (OWL-ST/FT ens, no number), col Median (35 datasets)"
+ },
+ {
+  "id": "owlv2-odinw-st-l14-n-below1",
+  "claim": "our reading: OWL-ST L/14, number of the 35 ODinW datasets with AP below 1.0",
+  "value": "5",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Counted from Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12",
+  "our_reading": true
+ },
+ {
+  "id": "owlv2-odinw-st-l14-n-below5",
+  "claim": "our reading: OWL-ST L/14, number of the 35 ODinW datasets with AP below 5.0",
+  "value": "15",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Counted from Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12",
+  "our_reading": true
+ },
+ {
+  "id": "owlv2-odinw-st-l14-hardhat",
+  "claim": "OWL-ST CLIP L/14 (row 12): ODinW Hard Hat Workers zero-shot AP",
+  "value": "1.9",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12, col Hard Hat Workers"
+ },
+ {
+  "id": "owlv2-odinw-st-l14-pklot",
+  "claim": "OWL-ST CLIP L/14 (row 12): ODinW Pk Lot zero-shot AP",
+  "value": "0.0",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 12, col Pk Lot"
+ },
+ {
+  "id": "owlv2-odinw-stft-l14-hardhat",
+  "claim": "OWL-ST+FT CLIP L/14 (row 15): ODinW Hard Hat Workers zero-shot AP",
+  "value": "2.1",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 15, col Hard Hat Workers"
+ },
+ {
+  "id": "owlv2-odinw-stft-l14-pklot",
+  "claim": "OWL-ST+FT CLIP L/14 (row 15): ODinW Pk Lot zero-shot AP",
+  "value": "0.2",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, row 15, col Pk Lot"
+ },
+ {
+  "id": "owlv2-odinw-n-datasets",
+  "claim": "Number of ODinW datasets in the full appendix table",
+  "value": "35",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, caption"
+ },
+ {
+  "id": "owlv2-odinw-n-subset",
+  "claim": "Number of datasets in the GLIP-defined ODinW subset used in the main paper",
+  "value": "13",
+  "paper": "OWLv2",
+  "arxiv": "2306.09683v3",
+  "loc": "Table A4 (PDF p17), zero-shot AP on 35 ODinW datasets; src/odinw_table.tex, caption; Sec 4.1"
+ }
+]

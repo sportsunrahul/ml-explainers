@@ -1,0 +1,163 @@
+[
+ {
+  "id": "ssd-t5-125m-layers",
+  "claim": "Layers in the 125M multi-input (multi-value) head-pattern model",
+  "value": "24",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "Table 5 top, row Multi-input (MIS), column Layers"
+ },
+ {
+  "id": "ssd-t5-360m-heads",
+  "claim": "Heads (A and X heads) in the 360M multi-input head-pattern model",
+  "value": "32",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "Table 5 bottom, row Multi-input (MIS), columns A heads and X heads"
+ },
+ {
+  "id": "ssd-t5-360m-layers",
+  "claim": "Layers in the 360M multi-input head-pattern model",
+  "value": "48",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "Table 5 bottom, row Multi-input (MIS), column Layers"
+ },
+ {
+  "id": "ssd-t5-360m-params",
+  "claim": "Parameters of the 360M multi-input head-pattern model",
+  "value": "361.8M",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "Table 5 bottom, row Multi-input (MIS), column Params"
+ },
+ {
+  "id": "ssd-t5-np",
+  "claim": "State size N and head size P in all head-pattern ablation models",
+  "value": "64",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "Table 5 caption ('state expansion factor N=64 and head size P=64')"
+ },
+ {
+  "id": "ssd-t5-bc-heads",
+  "claim": "B and C heads in the multi-input (multi-value) pattern",
+  "value": "1",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "Table 5, rows Multi-input (MIS), columns B heads and C heads"
+ },
+ {
+  "id": "ssd-125m-dmodel",
+  "claim": "Model width of the 125M Mamba-2 ablation model",
+  "value": "768",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 24 heads x P 64 = 1536 = expansion 2 x 768 (Table 5, Sec 8.1 'typically 2'); matches Table 9 125M d_model",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-360m-dmodel",
+  "claim": "Model width of the 360M Mamba-2 ablation model",
+  "value": "1024",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 32 heads x P 64 = 2048 = expansion 2 x 1024 (Table 5, Sec 8.1)",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-27b-heads",
+  "claim": "Heads per block of Mamba-2 2.7B if P = 64 (not stated in the paper)",
+  "value": "80",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 2 x 2560 / 64, with P = 64 assumed from Sec 2.4 'Typically P = {64, 128}'",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-state-125m",
+  "claim": "SSD state per layer of the 125M ablation model, in numbers (H x P x N)",
+  "value": "98,304",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 24 x 64 x 64 (Table 5; total state HPN per Sec 9.4.2)",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-state-tokens",
+  "claim": "Tokens of a same-width attention layer's KV cache that equal one SSD layer's state (H P N / 2D = N with H P = 2D)",
+  "value": "64",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 98,304 / (2 x 768) for the 125M model; in general H P N / (2 D) = N when H P = 2 D",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-clip",
+  "claim": "Gradient clip value in all Mamba-2 training runs",
+  "value": "1.0",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "App D.2, Training Recipes"
+ },
+ {
+  "id": "ssd-lr-final",
+  "claim": "Cosine decay end learning rate (improved recipe)",
+  "value": "1e-5",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "App D.2, improved recipe"
+ },
+ {
+  "id": "ssd-mqar-dmin",
+  "claim": "Smallest model dimension in the MQAR sweep",
+  "value": "32",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "App D.1 (D in {32, 64, 128, 256}); Fig 8 x-axis"
+ },
+ {
+  "id": "ssd-mqar-dmax",
+  "claim": "Largest model dimension in the MQAR sweep",
+  "value": "256",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "App D.1; Fig 8 x-axis"
+ },
+ {
+  "id": "ssd-work-quad-4k",
+  "claim": "Quadratic-mode multiply-adds per head at T = 4096, N = P = 64, counting T^2 (N + P)",
+  "value": "2.1 billion",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 4096^2 x 128 = 2,147,483,648 (dense products, our count following Sec 6.3)",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-work-chunk-4k",
+  "claim": "Chunked SSD multiply-adds per head at T = 4096, N = P = Q = 64",
+  "value": "67 million",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: T Q (N+P) + 2 T N P + (T/Q) N P = 33,554,432 + 33,554,432 + 262,144 = 67,371,008 (Sec 6.3 pieces, our count)",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-work-rec-4k",
+  "claim": "Recurrent-mode multiply-adds per head at T = 4096, N = P = 64, counting 3 T N P",
+  "value": "50 million",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 3 x 4096 x 64 x 64 = 50,331,648 (decay, write, read per step; our count)",
+  "our_reading": true
+ },
+ {
+  "id": "ssd-work-chunk-mm-4k",
+  "claim": "Share of chunked SSD work in matrix products at T = 4096, N = P = Q = 64",
+  "value": "99.6%",
+  "paper": "Transformers are SSMs (Mamba-2)",
+  "arxiv": "2405.21060v1",
+  "loc": "computed: 1 - 262,144 / 67,371,008 (only the chunk-to-chunk scan is not a matrix product)",
+  "our_reading": true
+ }
+]

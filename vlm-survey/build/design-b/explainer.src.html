@@ -1,0 +1,1729 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vision-Language Models, Intuition First</title>
+<meta name="description" content="An intuition-first survey of vision-language models, from ViT and CLIP through Flamingo, BLIP-2, LLaVA, Qwen2-VL, Florence-2, Idefics2, Molmo, Chameleon and Qwen3-VL.">
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--fg);
+  font:1.125rem/1.7 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+/* Display face: KaTeX_Main (Computer Modern) is embedded with the math CSS, so headings share the equations' face. */
+h1, h2, .kicker, .hero-tag { font-family:KaTeX_Main, Charter, Georgia, serif; font-weight:700; letter-spacing:-.005em; }
+header.hero { padding:2.2rem 0 1rem; max-width:none; }
+.hero-stage { position:relative; margin:0 0 1.4rem; }
+.hero-stage canvas { display:block; width:100%; }
+.hero-stage button { position:absolute; right:0; bottom:-.2rem; font:.82rem system-ui, sans-serif; color:var(--muted); background:none; border:1px solid var(--rule); border-radius:999px; padding:.2rem .7rem; cursor:pointer; }
+.hero-stage button:hover { color:var(--fg); border-color:var(--muted); }
+.hero-stage button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+header.hero h1 { font-size:clamp(2.5rem, 5.6vw, 4.2rem); line-height:1.04; margin:0 0 .9rem; text-wrap:balance; }
+header.hero p.hook { font-size:1.3rem; line-height:1.5; color:var(--fg); opacity:.86; margin:0 0 1.4rem; max-width:34rem; }
+.papers { display:flex; flex-wrap:wrap; gap:.35rem .4rem; margin:0; padding:0; list-style:none; font:.82rem system-ui, sans-serif; max-width:var(--stage, 60rem); }
+.papers li a { display:inline-block; color:var(--muted); text-decoration:none; border:1px solid var(--rule); border-radius:999px; padding:.18rem .6rem; }
+.papers li a:hover { color:var(--fg); border-color:var(--muted); }
+.papers li a:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.papers-note { font:.82rem system-ui, sans-serif; color:var(--muted); margin:0 0 .5rem; }
+h2 { font-size:2.1rem; line-height:1.15; margin:3.6rem 0 1rem; text-wrap:balance; }
+h2[data-n]::before { content:attr(data-n); display:block; font-size:1rem; font-weight:400; color:var(--blue); margin-bottom:.35rem; font-variant-numeric:lining-nums; }
+h3 { font:600 1.3rem/1.3 Charter, "Bitstream Charter", Georgia, serif; margin:2.2rem 0 .5rem; }
+a { color:var(--blue); text-underline-offset:.15em; text-decoration-thickness:1px; }
+p { margin:0 0 1.05rem; }
+/* Acts are a real sequence: a numbered divider, not an eyebrow label. */
+.kicker { font-size:2rem; line-height:1.15; color:var(--fg); margin:5.5rem 0 -1.6rem; padding-top:1.4rem; border-top:1px solid var(--rule); }
+.kicker .act-n { display:block; font:400 1rem/1.4 system-ui, sans-serif; color:var(--muted); margin-bottom:.3rem; }
+nav.toc { font-family:system-ui, sans-serif; font-size:.95rem; margin:2.2rem 0 2.4rem; columns:2 18rem; column-gap:2.5rem; }
+nav.toc > strong { display:none; }
+nav.toc ol { margin:0; padding:0; list-style:none; counter-reset:toc; }
+nav.toc li { margin:.15rem 0; break-inside:avoid; counter-increment:toc; padding-left:1.8rem; position:relative; }
+nav.toc li:not(.act)::before { content:counter(toc); position:absolute; left:0; color:var(--muted); font-variant-numeric:tabular-nums; }
+nav.toc li a { color:var(--fg); text-decoration:none; }
+nav.toc li a:hover { color:var(--blue); }
+nav.toc .act { counter-increment:none; padding-left:0; margin:1rem 0 .25rem; font:700 1.05rem/1.3 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); break-after:avoid; }
+nav.toc .act:first-child { margin-top:0; }
+nav.toc .toc-more { break-inside:avoid; margin-top:1rem; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:.3rem 1.2rem; }
+.key { display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; font:.9rem system-ui, sans-serif; margin:.4rem 0 1rem; }
+.key span::before { content:""; display:inline-block; width:.8em; height:.8em; border-radius:50%; margin-right:.4em; vertical-align:-.05em; background:currentColor; }
+.c-blue{color:var(--blue)} .c-yellow{color:var(--yellow)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-brown{color:var(--brown)}
+.t-blue{color:var(--blue)} .t-yellow{color:var(--yellow)} .t-green{color:var(--green)} .t-red{color:var(--red)} .t-brown{color:var(--brown)}
+b.c-blue, b.c-yellow, b.c-green, b.c-red, b.c-brown { font-weight:700; }
+figure.viz { margin:1.8rem 0; padding:1rem; background:var(--panel); border-radius:14px; position:relative; }
+figure.viz canvas, figure.viz svg.chart { display:block; width:100%; border-radius:9px; background:var(--bg); touch-action:none; }
+figure.viz canvas:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.8rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.34rem .85rem; cursor:pointer; transition:border-color .15s, background-color .15s, transform .08s; }
+.controls button:hover { border-color:var(--muted); }
+.controls button:active { transform:scale(.97); }
+.controls button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; color:var(--muted); }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+@media (prefers-reduced-motion: reduce) { .controls button { transition:none; } .controls button:active { transform:none; } }
+.readout { font:.92rem/1.5 system-ui, sans-serif; color:var(--fg); margin:.6rem 0 0; min-height:2.9em; }
+figcaption { font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.6rem; max-width:var(--measure, 40rem); }
+.badge { position:absolute; top:.65rem; right:.75rem; font:600 .74rem/1 system-ui, sans-serif; padding:.3rem .6rem; border-radius:999px; border:1px solid currentColor; background:var(--panel); z-index:2; }
+.badge.toy { color:var(--brown); } .badge.computed { color:var(--blue); } .badge.sourced { color:var(--green); }
+.eq { overflow-x:auto; overflow-y:hidden; margin:.8rem 0 1.1rem; padding:.3rem 0; }
+.eqno { font:.82rem system-ui, sans-serif; color:var(--muted); margin:-.8rem 0 .9rem; }
+.gloss { font-size:1rem; margin:-.3rem 0 1.3rem; padding-left:1rem; border-left:2px solid var(--rule); }
+.gloss li { margin:.25rem 0; }
+.note { font:.9rem/1.55 system-ui, sans-serif; color:var(--muted); margin:1rem 0; }
+.aside { font-size:1rem; background:var(--panel); border-left:3px solid var(--blue); border-radius:0 10px 10px 0; padding:.8rem 1rem; margin:1.4rem 0; }
+.aside h4 { font:600 .98rem system-ui, sans-serif; margin:0 0 .35rem; }
+.aside p:last-child { margin-bottom:0; }
+table.data { border-collapse:collapse; font:.88rem system-ui, sans-serif; width:100%; margin:.6rem 0 1rem; }
+table.data th, table.data td { border-bottom:1px solid var(--rule); padding:.3rem .4rem; text-align:right; }
+table.data th:first-child, table.data td:first-child { text-align:left; }
+.katex { font-size:1.05em; }
+.tex-display .katex-display { margin:.4rem 0; }
+@media (max-width: 520px) {
+  h2 { font-size:1.75rem; }
+  .kicker { font-size:1.6rem; margin-top:4rem; }
+  figure.viz { margin:1.2rem -12px; padding:.7rem; border-radius:0; }
+}
+</style>
+<script>
+/* Shared helpers for all interactives. */
+const PE = (() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.cueReplay === '1';
+  const redrawers = [];
+  const onTheme = fn => { redrawers.push(fn); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => redrawers.forEach(f => f()));
+  // Canvas sized to its box, DPR-aware; draw(ctx, w, h) gets CSS-pixel dimensions.
+  function canvas(el, aspect, draw) {
+    const ctx = el.getContext('2d');
+    const state = { w: 0, h: 0 };
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * (typeof aspect === 'function' ? aspect(w) : aspect)), r = devicePixelRatio || 1;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); state.w = w; state.h = h; draw(ctx, w, h);
+    }
+    new ResizeObserver(resize).observe(el);
+    onTheme(() => draw(ctx, state.w, state.h));
+    return { redraw: () => draw(ctx, state.w, state.h), state, ctx };
+  }
+  function animate(ms, step, done) {
+    if (instant()) { step(1); done && done(); return () => {}; }
+    let t0 = null, id = 0, stop = false;
+    const f = t => { if (stop) return; if (t0 === null) t0 = t; const u = Math.min(1, (t - t0) / ms);
+      step(u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2); if (u < 1) id = requestAnimationFrame(f); else done && done(); };
+    id = requestAnimationFrame(f);
+    return () => { stop = true; cancelAnimationFrame(id); };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function gauss(r) { return () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r()); }
+  function label(ctx, text, x, y, color, size = 12, align = 'left') {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  // Mix two "#rrggbb" colors.
+  function mix(c1, c2, u) {
+    const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+    const a = p(c1), b = p(c2); return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], u))).join(',')})`;
+  }
+
+  // World-to-canvas mapping centered on the origin; `span` world units fit the canvas height.
+  function view(W, H, span) { const s = H / span; return { s, X: x => W / 2 + x * s, Y: y => H / 2 - y * s, ix: px => (px - W / 2) / s, iy: py => (H / 2 - py) / s }; }
+  function dot(ctx, x, y, r, color, alpha = 1) { ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+  // Pulse a named layer when an equation term with that link word is shown.
+  function linkPulses(fig, redraw) {
+    const glow = {};
+    fig.addEventListener('pe-link', e => { const k = e.detail;
+      animate(1100, u => { glow[k] = Math.sin(Math.PI * u); redraw(); }, () => { glow[k] = 0; redraw(); }); });
+    return k => glow[k] || 0;
+  }
+  function arrow(ctx, x1, y1, x2, y2, color, lw = 2, head = 8, alpha = 1) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = Math.hypot(x2 - x1, y2 - y1), hd = Math.min(head, L * .45);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - hd * .6 * Math.cos(a), y2 - hd * .6 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - hd * Math.cos(a - .42), y2 - hd * Math.sin(a - .42));
+    ctx.lineTo(x2 - hd * Math.cos(a + .42), y2 - hd * Math.sin(a + .42)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  // Minimal chart frame: returns scale functions for box b = {x, y, w, h} and ranges; log axes when asked.
+  function axes(ctx, b, xr, yr, o = {}) {
+    const lx = o.logx ? Math.log10 : v => v, ly = o.logy ? Math.log10 : v => v;
+    const X = v => b.x + (lx(v) - lx(xr[0])) / (lx(xr[1]) - lx(xr[0])) * b.w, Y = v => b.y + b.h - (ly(v) - ly(yr[0])) / (ly(yr[1]) - ly(yr[0])) * b.h;
+    const M = css('--muted'), R = css('--rule');
+    ctx.save(); ctx.strokeStyle = R; ctx.lineWidth = 1; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = M;
+    (o.xt || []).forEach(v => { ctx.beginPath(); ctx.moveTo(X(v), b.y); ctx.lineTo(X(v), b.y + b.h); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(o.xf ? o.xf(v) : v, X(v), b.y + b.h + 14); });
+    (o.yt || []).forEach(v => { ctx.beginPath(); ctx.moveTo(b.x, Y(v)); ctx.lineTo(b.x + b.w, Y(v)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(o.yf ? o.yf(v) : v, b.x - 5, Y(v) + 4); });
+    ctx.textAlign = 'center'; if (o.xl) ctx.fillText(o.xl, b.x + b.w / 2, b.y + b.h + 29);
+    if (o.yl) { ctx.translate(b.x - (o.ylo || 34), b.y + b.h / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(o.yl, 0, 0); }
+    ctx.restore(); return { X, Y };
+  }
+  function polyline(ctx, pts, color, lw = 2, dash = null, alpha = 1) {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.globalAlpha = alpha; if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); ctx.restore(); }
+    // ---- Contrastive toy kit: N image and N caption embeddings as angles on the unit circle. ----
+  // kind 'softmax' = CLIP's symmetric cross-entropy over cosine/tau; 'sigmoid' = SigLIP's per-pair loss with bias b.
+  // Returns loss, gradients w.r.t. the angles (and b), and the similarity matrix S[i][j] = cos(th_i - ph_j).
+  function contrast(th, ph, tau, kind = 'softmax', b = 0) {
+    const N = th.length, gth = new Array(N).fill(0), gph = new Array(N).fill(0);
+    const S = th.map(t => ph.map(p => Math.cos(t - p))), D = th.map(t => ph.map(p => -Math.sin(t - p)));
+    let L = 0, gb = 0;
+    const add = (i, j, g) => { gth[i] += g * D[i][j]; gph[j] -= g * D[i][j]; };
+    if (kind === 'softmax') {
+      for (const dir of [0, 1]) for (let i = 0; i < N; i++) {
+        const lg = Array.from({ length: N }, (_, j) => (dir ? S[j][i] : S[i][j]) / tau);
+        const m = Math.max(...lg), e = lg.map(x => Math.exp(x - m)), Z = e.reduce((s, x) => s + x, 0);
+        L -= (lg[i] - m - Math.log(Z)) / (2 * N);
+        for (let j = 0; j < N; j++) { const g = (e[j] / Z - (i === j ? 1 : 0)) / tau / (2 * N); dir ? add(j, i, g) : add(i, j, g); }
+      }
+    } else {
+      for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+        const z = i === j ? 1 : -1, x = z * (S[i][j] / tau + b);
+        L += Math.log1p(Math.exp(-x)) / N; const g = -z / (1 + Math.exp(x)) / N; add(i, j, g / tau); gb += g;
+      }
+    }
+    return { L, gth, gph, gb, S };
+  }
+  const softmax = v => { const m = Math.max(...v), e = v.map(x => Math.exp(x - m)), Z = e.reduce((s, x) => s + x, 0); return e.map(x => x / Z); };
+  return { css, instant, onTheme, canvas, animate, rng, gauss, label, clamp, lerp, mix, view, dot, arrow, axes, polyline, linkPulses, contrast, softmax };
+})();
+</script>
+</head>
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="A photo is cut into patches that become blue tokens; its caption is split into yellow word tokens; each goes through its own encoder and lands as a point in one shared space, where the photo and its caption meet, joined by a green line."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+  </div>
+  <h1>Vision-language models, intuition first</h1>
+  <p class="hook">How machines learned to read pictures and talk about them: a chain of fixes, where every paper broke through the wall the one before it hit.</p>
+  <p class="papers-note">The 16 papers, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/2010.11929v2" title="arXiv 2010.11929v2">ViT</a></li>
+    <li><a href="https://arxiv.org/abs/2103.00020v1" title="arXiv 2103.00020v1">CLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2102.05918v2" title="arXiv 2102.05918v2">ALIGN</a></li>
+    <li><a href="https://arxiv.org/abs/2303.15343v4" title="arXiv 2303.15343v4">SigLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2201.12086v2" title="arXiv 2201.12086v2">BLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2204.14198v2" title="arXiv 2204.14198v2">Flamingo</a></li>
+    <li><a href="https://arxiv.org/abs/2301.12597v3" title="arXiv 2301.12597v3">BLIP-2</a></li>
+    <li><a href="https://arxiv.org/abs/2304.08485v2" title="arXiv 2304.08485v2">LLaVA</a></li>
+    <li><a href="https://arxiv.org/abs/2310.03744v2" title="arXiv 2310.03744v2">LLaVA-1.5</a></li>
+    <li><a href="https://arxiv.org/abs/2308.12966v3" title="arXiv 2308.12966v3">Qwen-VL</a></li>
+    <li><a href="https://arxiv.org/abs/2311.06242v1" title="arXiv 2311.06242v1">Florence-2</a></li>
+    <li><a href="https://arxiv.org/abs/2409.12191v2" title="arXiv 2409.12191v2">Qwen2-VL</a></li>
+    <li><a href="https://arxiv.org/abs/2405.02246v1" title="arXiv 2405.02246v1">Idefics2</a></li>
+    <li><a href="https://arxiv.org/abs/2409.17146v2" title="arXiv 2409.17146v2">Molmo</a></li>
+    <li><a href="https://arxiv.org/abs/2405.09818v2" title="arXiv 2405.09818v2">Chameleon</a></li>
+    <li><a href="https://arxiv.org/abs/2511.21631v2" title="arXiv 2511.21631v2">Qwen3-VL</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: a shared space for pictures and words</li>
+    <li value="1"><a href="#ch-shared-space">Classifiers only know their labels (CLIP, ALIGN)</a></li>
+    <li><a href="#ch-sigmoid">The softmax needs the whole batch (SigLIP)</a></li>
+    <li><a href="#ch-patches">How an encoder sees: images as tokens (ViT)</a></li>
+    <li class="act">Act II: teaching a language model to see</li>
+    <li value="4"><a href="#ch-bootstrap">Web captions are noisy (BLIP)</a></li>
+    <li><a href="#ch-flamingo">Don't break the language model (Flamingo)</a></li>
+    <li><a href="#ch-qformer">A small bridge between two frozen giants (BLIP-2)</a></li>
+    <li class="act">Act III: from describing to conversing</li>
+    <li value="7"><a href="#ch-llava" data-rail="LLaVA">Chat needs conversations to learn from (LLaVA, LLaVA-1.5)</a></li>
+    <li><a href="#ch-training-step" data-rail="Training step">One training step, end to end (how images and text train together)</a></li>
+    <li class="act">Act IV: seeing sharply and pointing</li>
+    <li value="9"><a href="#ch-resolution" data-rail="Qwen2-VL">A fixed small square cannot read a page (Qwen-VL, Qwen2-VL)</a></li>
+    <li><a href="#ch-grounding">Say where, not just what (Qwen-VL, Florence-2, Molmo)</a></li>
+    <li class="act">Act V: what actually matters</li>
+    <li value="11"><a href="#ch-recipes" data-rail="Idefics2, Molmo">Most design choices were never tested (Idefics2, Molmo)</a></li>
+    <li class="act">Act VI: other paths, and where it lands</li>
+    <li value="12"><a href="#ch-early-fusion">Why not make images words? (Chameleon)</a></li>
+    <li><a href="#ch-qwen3">Putting it together (Qwen3-VL)</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Family tree</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Almost every model on this page has the same three parts: a <b class="c-blue">vision encoder</b> that turns pixels into vectors, a <b class="c-green">connector</b> that hands those vectors over, and a <b class="c-yellow">language model</b> that reads them and writes. One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">vision: pixels, patches, image embeddings</span>
+  <span class="c-yellow">language: text tokens, captions, the LLM</span>
+  <span class="c-green">the bridge, a correct match</span>
+  <span class="c-red">loss, error, cost</span>
+  <span class="c-brown">frozen weights, negatives, background</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means a real formula from a paper, evaluated directly or run on a small toy. <b>Toy model</b> means an illustration of the mechanism, not the paper's numbers. <b>Sourced</b> means what is drawn comes from the papers themselves: numbers from their tables, or structure and dates as they state them (the family tree's arcs are the page's own reading). Hover or tap a colored term in an equation to light up the part of the figure it names.</p>
+<script>
+(() => {
+  const el = document.getElementById('hero-canvas'), btn = document.getElementById('btn-hero-replay');
+  const words = ['a', 'dog', 'catching', 'a', 'frisbee'];
+  const T_END = 5.2;
+  let t = 0, raf = 0;
+  const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const ease = x => { x = cl(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const seg = (a, b) => ease((t - a) / (b - a));
+  // Two virtual stages: wide (960 x 365) and narrow (360 x 600); everything is laid out in virtual units.
+  const L = wide => wide ? {
+    vw: 960, vh: 365, photo: { x: 34, y: 34, s: 176 }, cap: { x: 34, y: 262, fs: 18 },
+    row: { x: 288, y: 113, s: 14, g: 4 }, chips: { x: 288, y: 249, h: 26, fs: 13 },
+    encI: { x: 612, y: 88, w: 112, h: 64 }, encT: { x: 612, y: 230, w: 112, h: 64 },
+    circ: { x: 852, y: 178, r: 88 }, fs: 13, angI: 166, angT: 190,
+  } : {
+    vw: 360, vh: 620, photo: { x: 18, y: 18, s: 136 }, cap: { x: 170, y: 52, fs: 16 },
+    row: { x: 18, y: 214, s: 13, g: 4 }, chips: { x: 18, y: 268, h: 24, fs: 12 },
+    encI: { x: 18, y: 336, w: 150, h: 50 }, encT: { x: 192, y: 336, w: 150, h: 50 },
+    circ: { x: 180, y: 492, r: 66 }, fs: 12, angI: 99, angT: 81,
+  };
+  let C = {};
+  const tint = (c, a) => PE.mix(C.BG.length === 7 ? C.BG : '#16181d', c.length === 7 ? c : '#58c4dd', a);
+  function rr(ctx, x, y, w, h, r, fill, stroke, lw = 1.5) {
+    r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+  }
+  // The photo, in vision blue only: sky, ground, a dog leaping for a frisbee.
+  function photo(ctx, x, y, s) {
+    ctx.fillStyle = tint(C.B, .2); ctx.fillRect(x, y, s, s);
+    ctx.fillStyle = tint(C.B, .42); ctx.fillRect(x, y + s * .72, s, s * .28);
+    ctx.fillStyle = C.B;
+    ctx.beginPath(); ctx.ellipse(x + s * .44, y + s * .58, s * .2, s * .1, -.35, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + s * .65, y + s * .43, s * .085, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + s * .7, y + s * .36); ctx.lineTo(x + s * .72, y + s * .27); ctx.lineTo(x + s * .76, y + s * .38); ctx.fill();
+    ctx.lineWidth = s * .04; ctx.strokeStyle = C.B; ctx.lineCap = 'round';
+    for (const [a, b, c2, d] of [[.32, .64, .22, .76], [.4, .66, .36, .8], [.52, .64, .6, .76], [.56, .6, .66, .7]]) {
+      ctx.beginPath(); ctx.moveTo(x + s * a, y + s * b); ctx.lineTo(x + s * c2, y + s * d); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(x + s * .26, y + s * .54); ctx.quadraticCurveTo(x + s * .14, y + s * .44, x + s * .18, y + s * .36); ctx.stroke();
+    ctx.fillStyle = tint(C.B, .7); ctx.beginPath(); ctx.ellipse(x + s * .82, y + s * .2, s * .1, s * .035, -.25, 0, 7); ctx.fill();
+    ctx.fillStyle = tint(C.B, .55); ctx.beginPath(); ctx.arc(x + s * .16, y + s * .16, s * .06, 0, 7); ctx.fill();
+  }
+  // Draw the first fraction u of a polyline, with an arrowhead at its current end.
+  function path(ctx, pts, u, col) {
+    const lens = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1])), tot = lens.reduce((a, b) => a + b, 0);
+    let left = u * tot; const out = [pts[0]];
+    for (let i = 0; i < lens.length && left > 0; i++) { const f = Math.min(1, left / lens[i]); out.push([PE.lerp(pts[i][0], pts[i + 1][0], f), PE.lerp(pts[i][1], pts[i + 1][1], f)]); left -= lens[i]; }
+    if (out.length < 2) return;
+    const a = out[out.length - 2], b = out[out.length - 1];
+    PE.polyline(ctx, out.slice(0, -1).concat([[PE.lerp(a[0], b[0], .999), PE.lerp(a[1], b[1], .999)]]), col, 1.6, null, .8);
+    PE.arrow(ctx, a[0], a[1], b[0], b[1], col, 1.6, 7, .8);
+  }
+  const font = (ctx, fs, w = 600) => { ctx.font = `${w} ${fs}px system-ui, sans-serif`; };
+  const lab = (ctx, s, x, y, col, fs, al = 'left', alpha = 1) => { ctx.save(); ctx.globalAlpha = alpha; PE.label(ctx, s, x, y, col, fs, al); ctx.restore(); };
+  function diamond(ctx, x, y, r, col) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill(); }
+
+  const cv = PE.canvas(el, w => w >= 620 ? 365 / 960 : 620 / 360, (ctx, W, H) => {
+    C = { B: PE.css('--blue'), Y: PE.css('--yellow'), G: PE.css('--green'), Br: PE.css('--brown'), F: PE.css('--fg'), M: PE.css('--muted'), R: PE.css('--rule'), BG: PE.css('--bg') };
+    ctx.clearRect(0, 0, W, H);
+    const wide = W >= 620, S = L(wide), k = W / S.vw;
+    ctx.save(); ctx.scale(k, k);
+    const P = S.photo, n = 4, ts = P.s / n;
+    const aIn = seg(0, .6), split = seg(.6, 1.3), gap = 5 * split;
+    // A: the photo and its caption.
+    const leave = i => seg(1.3 + i * .045, 2.1 + i * .045);
+    const ghost = .28 * seg(1.4, 2.4);
+    if (ghost > 0) { ctx.save(); ctx.globalAlpha = ghost; photo(ctx, P.x, P.y, P.s); ctx.restore(); }
+    // B + C: tiles separate, then fly to the token row and turn into solid tokens.
+    for (let i = 0; i < n * n; i++) {
+      const r = Math.floor(i / n), c = i % n, u = leave(i);
+      const sx = P.x + c * ts + (c - 1.5) * gap, sy = P.y + r * ts + (r - 1.5) * gap;
+      const dx = S.row.x + i * (S.row.s + S.row.g), dy = S.row.y;
+      const x = PE.lerp(sx, dx, u), y = PE.lerp(sy, dy, u) - Math.sin(Math.PI * u) * 26, s = PE.lerp(ts, S.row.s, u);
+      ctx.save(); ctx.globalAlpha = aIn;
+      ctx.beginPath(); ctx.rect(x, y, s, s); ctx.clip();
+      ctx.translate(x - c * ts * (s / ts), y - r * ts * (s / ts)); ctx.scale(s / ts, s / ts); photo(ctx, 0, 0, P.s);
+      ctx.restore();
+      const solid = cl((u - .55) / .45);
+      if (solid > 0) { ctx.save(); ctx.globalAlpha = solid; rr(ctx, x, y, s, s, 2.5, C.B); ctx.restore(); }
+    }
+    // Caption: words separate, then become word tokens.
+    font(ctx, S.cap.fs); const sp = ctx.measureText(' ').width;
+    let cx0 = S.cap.x; const capPos = words.map(w => { const p = cx0; cx0 += ctx.measureText(w).width + sp; return p; });
+    font(ctx, S.chips.fs); let kx = S.chips.x; const chipPos = words.map(w => { const wd = ctx.measureText(w).width + 14, p = kx; kx += wd + 5; return [p, wd]; });
+    if (ghost > 0) { font(ctx, S.cap.fs); ctx.save(); ctx.globalAlpha = ghost; ctx.fillStyle = C.Y; ctx.fillText(words.join(' '), S.cap.x, S.cap.y); ctx.restore(); }
+    words.forEach((w, j) => {
+      const u = seg(1.5 + j * .08, 2.3 + j * .08), wsp = 3 * split * j;
+      const x = PE.lerp(capPos[j] + wsp, chipPos[j][0] + 7, u), y = PE.lerp(S.cap.y, S.chips.y + S.chips.h * .68, u) - Math.sin(Math.PI * u) * 22;
+      const chip = cl((u - .5) / .5);
+      ctx.save(); ctx.globalAlpha = aIn;
+      if (chip > 0) { ctx.globalAlpha = aIn * chip; rr(ctx, x - 7, y - S.chips.h * .68, chipPos[j][1], S.chips.h, 6, tint(C.Y, .3), C.Y, 1.2); ctx.globalAlpha = aIn; }
+      font(ctx, PE.lerp(S.cap.fs, S.chips.fs, u)); ctx.fillStyle = C.Y; ctx.fillText(w, x, y);
+      ctx.restore();
+    });
+    const rowEnd = S.row.x + n * n * (S.row.s + S.row.g) - S.row.g, chipEnd = kx - 5;
+    lab(ctx, 'each patch becomes a token', S.row.x, S.row.y - 12, C.M, S.fs, 'left', seg(1.9, 2.5));
+    lab(ctx, 'each word becomes a token', S.chips.x, S.chips.y - 12, C.M, S.fs, 'left', seg(2.0, 2.6));
+    // D: rows feed their encoders.
+    const encA = seg(2.4, 3.0), arr1 = seg(2.5, 3.2);
+    const E = [[S.encI, C.B, 'image', 'encoder', rowEnd, S.row.y + S.row.s / 2], [S.encT, C.Y, 'text', 'encoder', chipEnd, S.chips.y + S.chips.h / 2]];
+    E.forEach(([e, col, l1, l2, fx, fy]) => {
+      let x1, y1, x2, y2;
+      let pts;
+      if (wide) pts = [[fx + 10, fy], [e.x - 6, e.y + e.h / 2]];
+      else if (e === S.encI) pts = [[S.row.x - 3, S.row.y + S.row.s / 2], [8, S.row.y + S.row.s / 2], [8, e.y + e.h / 2], [e.x - 4, e.y + e.h / 2]];
+      else pts = [[fx + 6, fy], [e.x + e.w / 2, fy], [e.x + e.w / 2, e.y - 6]];
+      if (arr1 > 0) path(ctx, pts, arr1, col);
+      ctx.save(); ctx.globalAlpha = encA; rr(ctx, e.x, e.y, e.w, e.h, 9, tint(col, .14), col, 1.6);
+      if (wide) { lab(ctx, l1, e.x + e.w / 2, e.y + e.h / 2 - 3, col, S.fs, 'center'); lab(ctx, l2, e.x + e.w / 2, e.y + e.h / 2 + 13, col, S.fs, 'center'); }
+      else lab(ctx, l1 + ' ' + l2, e.x + e.w / 2, e.y + e.h / 2 + 4, col, S.fs, 'center');
+      ctx.restore();
+    });
+    // E: one vector each lands in the shared space; the other points are the rest of the batch.
+    const Cc = S.circ, circA = seg(3.0, 3.6);
+    ctx.save(); ctx.globalAlpha = circA; ctx.strokeStyle = C.R; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(Cc.x, Cc.y, Cc.r, 0, 7); ctx.stroke();
+    (wide ? [118, 62, 12, 322, 248, 286] : [160, 205, 250, 295, 340, 20]).forEach((a, q) => { const ar = a * Math.PI / 180, px = Cc.x + Cc.r * Math.cos(ar), py = Cc.y - Cc.r * Math.sin(ar);
+      if (q % 2) diamond(ctx, px, py, 4.5, tint(C.Br, .8)); else PE.dot(ctx, px, py, 4, tint(C.Br, .8)); });
+    lab(ctx, 'one shared space', Cc.x, Cc.y + 4, C.M, S.fs, 'center');
+    ctx.restore();
+    const angI = S.angI * Math.PI / 180, angT = S.angT * Math.PI / 180;
+    const ptI = [Cc.x + Cc.r * Math.cos(angI), Cc.y - Cc.r * Math.sin(angI)], ptT = [Cc.x + Cc.r * Math.cos(angT), Cc.y - Cc.r * Math.sin(angT)];
+    const go = seg(3.3, 4.3);
+    [[S.encI, C.B, ptI, 0], [S.encT, C.Y, ptT, 1]].forEach(([e, col, pt, isT]) => {
+      const x1 = wide ? e.x + e.w + 6 : e.x + e.w / 2, y1 = wide ? e.y + e.h / 2 : e.y + e.h + 6;
+      if (go > 0) PE.arrow(ctx, x1, y1, PE.lerp(x1, pt[0], go), PE.lerp(y1, pt[1], go), col, 1.4, 7, .45);
+      if (go > 0) { const x = PE.lerp(x1, pt[0], go), y = PE.lerp(y1, pt[1], go); if (isT) diamond(ctx, x, y, 7, col); else PE.dot(ctx, x, y, 6.5, col); }
+    });
+    // F: the match.
+    const m = seg(4.3, 5.0);
+    if (m > 0) {
+      PE.polyline(ctx, [ptI, [PE.lerp(ptI[0], ptT[0], m), PE.lerp(ptI[1], ptT[1], m)]], C.G, 3);
+      ctx.save(); ctx.globalAlpha = .35 * m; ctx.strokeStyle = C.G; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc((ptI[0] + ptT[0]) / 2, (ptI[1] + ptT[1]) / 2, 15, 0, 7); ctx.stroke(); ctx.restore();
+      const lx = wide ? Cc.x - Cc.r - 4 : Cc.x, ly = Cc.y + Cc.r + 22, al = wide ? 'left' : 'center';
+      lab(ctx, 'a photo and its caption', wide ? Cc.x : lx, ly, C.G, S.fs, 'center', m);
+      lab(ctx, 'point the same way', wide ? Cc.x : lx, ly + S.fs + 4, C.G, S.fs, 'center', m);
+    }
+    ctx.restore();
+  });
+  function play() {
+    cancelAnimationFrame(raf);
+    if (PE.instant()) { t = T_END; cv.redraw(); return; }
+    const t0 = performance.now();
+    const f = now => { t = (now - t0) / 1000; cv.redraw(); if (t < T_END) raf = requestAnimationFrame(f); };
+    raf = requestAnimationFrame(f);
+  }
+  btn.addEventListener('click', play);
+  play();
+})();
+</script>
+<style>
+/* Page chrome: chapter rail with reading progress, a sticky bar below the rail breakpoint, figures as wide stages,
+   and equation terms that light up their figure. Include once, anywhere in <main>, after nav.toc. */
+:root { --rail-w:13.5rem; --measure:40rem; --stage:60rem; }
+main { max-width:calc(var(--measure) + 6rem); margin:0 auto; padding:0 16px 5rem; }
+main > *:not(figure):not(header):not(nav):not(section):not(.eq),
+section.chapter > *:not(figure):not(.eq):not(.pe-wide) { max-width:var(--measure); }
+figure.viz { margin:1.8rem 0; }
+@media (min-width:1180px) {
+  main { max-width:var(--stage); margin-left:max(calc(var(--rail-w) + 3rem), calc((100vw - var(--stage)) / 2)); margin-right:auto; padding-left:0; }
+}
+
+.pe-rail { font:.86rem/1.35 system-ui, sans-serif; color:var(--muted); }
+.pe-rail ol { list-style:none; margin:0; padding:0; }
+.pe-rail a { color:inherit; text-decoration:none; display:flex; gap:.6rem; align-items:baseline; padding:.18rem 0; border-radius:4px; }
+.pe-rail a:hover { color:var(--fg); }
+.pe-rail a:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.pe-rail .pe-act { font:1rem/1.2 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); margin:1rem 0 .3rem; }
+.pe-rail .pe-act:first-child { margin-top:0; }
+.pe-rail .pe-act i { font-style:normal; color:var(--muted); margin-right:.35rem; }
+.pe-rail li.pe-node { position:relative; padding-left:1.25rem; }
+.pe-rail li.pe-node::before { content:""; position:absolute; left:.2rem; top:.5rem; width:.55rem; height:.55rem; border-radius:50%;
+  border:1.5px solid var(--rule); background:var(--bg); z-index:1; transition:background .3s, border-color .3s; }
+.pe-rail li.pe-node::after { content:""; position:absolute; left:calc(.475rem - 1px); top:1.05rem; bottom:-.55rem; width:2px;
+  background:linear-gradient(var(--muted) calc(var(--p, 0) * 100%), var(--rule) 0); }
+.pe-rail li.pe-node:last-child::after, .pe-rail li.pe-node.pe-end::after { display:none; }
+.pe-rail li.pe-done::before { background:var(--muted); border-color:var(--muted); }
+.pe-rail li.pe-done::after { --p:1; }
+.pe-rail li.pe-cur::before { background:var(--blue); border-color:var(--blue); box-shadow:0 0 0 3px color-mix(in srgb, var(--blue) 30%, transparent); }
+.pe-rail li.pe-cur > a { color:var(--fg); }
+.pe-rail .pe-n { min-width:1.3em; font-variant-numeric:tabular-nums; }
+.pe-rail .pe-extra { margin-top:1rem; padding-left:1.25rem; }
+.pe-rail-title { font:1.05rem/1.25 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); margin:0 0 1.2rem; display:block; text-decoration:none; }
+.pe-bar { display:none; }
+@media (min-width:1180px) {
+  .pe-rail { position:fixed; top:0; bottom:0; left:0; width:var(--rail-w); padding:2rem 1rem 2rem 1.4rem; overflow-y:auto; border-right:1px solid var(--rule); background:var(--bg); z-index:20; }
+}
+@media (max-width:1179.98px) {
+  .pe-bar { display:flex; position:sticky; top:0; z-index:30; align-items:center; gap:.7rem; height:2.7rem; padding:0 16px;
+    background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(6px); border-bottom:1px solid var(--rule);
+    font:.9rem system-ui, sans-serif; }
+  .pe-bar-label { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--fg); }
+  .pe-bar-label b { color:var(--blue); margin-right:.45rem; font-variant-numeric:tabular-nums; }
+  .pe-bar button { font:inherit; color:var(--fg); background:var(--panel2, var(--panel)); border:1px solid var(--rule); border-radius:999px; padding:.25rem .8rem; cursor:pointer; }
+  .pe-bar button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+  .pe-bar-progress { position:absolute; left:0; bottom:-1px; height:2px; width:100%; background:var(--blue); transform-origin:0 50%; transform:scaleX(var(--g, 0)); }
+  .pe-rail { display:none; }
+  body.pe-rail-open .pe-rail { display:block; position:fixed; top:2.7rem; left:0; right:0; max-height:72vh; overflow-y:auto; z-index:29;
+    background:var(--bg); border-bottom:1px solid var(--rule); padding:1rem 16px 1.2rem; }
+}
+body.pe-watch .pe-rail, body.pe-watch .pe-bar { display:none !important; }
+body.pe-watch main { margin-left:auto; margin-right:auto; }
+
+/* Equation terms that name part of a figure. */
+.eq[data-viz] [data-link].pe-term { cursor:pointer; border-radius:3px; transition:background-color .2s; }
+.eq[data-viz] [data-link].pe-term:hover, .eq[data-viz] [data-link].pe-term:focus-visible { background:color-mix(in srgb, var(--fg) 12%, transparent); outline:none; }
+.pe-lit { background:color-mix(in srgb, var(--yellow) 22%, transparent) !important; border-radius:3px; transition:background-color .2s; }
+@media (prefers-reduced-motion: reduce) { .pe-rail li.pe-node::before, .pe-term, .pe-lit { transition:none !important; } }
+</style>
+<script>
+// Runs after parsing: the chapters come after this script in the page.
+addEventListener('DOMContentLoaded', () => {
+  const toc = document.querySelector('nav.toc');
+  const sections = [...document.querySelectorAll('section.chapter[id]')];
+  const byId = Object.fromEntries(sections.map(s => [s.id, s]));
+  // Rail items come from nav.toc (acts are li.act, chapters are numbered li > a); without a toc, from the h2s.
+  const items = [];
+  if (toc) {
+    toc.querySelectorAll('ol > li').forEach(li => {
+      if (li.classList.contains('act')) { items.push({ act: li.textContent.trim() }); return; }
+      const a = li.querySelector('a[href^="#"]'); if (!a || !byId[a.getAttribute('href').slice(1)]) return;
+      const full = a.textContent.trim(), paren = /\(([^()]*)\)\s*$/.exec(full);
+      items.push({ id: a.getAttribute('href').slice(1), label: a.dataset.rail || (paren ? paren[1] : full), full });
+    });
+  } else sections.forEach(s => items.push({ id: s.id, label: s.querySelector('h2').textContent.trim() }));
+  let n = 0; items.forEach(it => { if (it.id) it.n = ++n; });
+  const numbered = new Set(items.filter(i => i.id).map(i => i.id));
+  const extras = sections.filter(s => !numbered.has(s.id));
+  items.forEach(it => { if (it.id) byId[it.id].querySelector('h2').dataset.n = it.n; });
+
+  const rail = document.createElement('nav'); rail.className = 'pe-rail'; rail.id = 'pe-rail'; rail.setAttribute('aria-label', 'Chapters and reading progress');
+  const title = document.querySelector('h1');
+  const ol = document.createElement('ol');
+  const actName = t => { const m = /^Act ([IVXLC]+):?\s*(.*)$/i.exec(t); return m ? `<i>${m[1]}</i>${m[2].charAt(0).toUpperCase() + m[2].slice(1)}` : t; };
+  items.forEach((it, k) => {
+    const li = document.createElement('li');
+    if (it.act) { li.className = 'pe-act'; li.innerHTML = actName(it.act); }
+    else {
+      li.className = 'pe-node'; li.dataset.id = it.id; if (!items[k + 1] || items[k + 1].act) li.classList.add('pe-end');
+      li.innerHTML = `<a href="#${it.id}" title="${(it.full || it.label).replace(/"/g, '&quot;')}"><span class="pe-n">${it.n}</span><span>${it.label}</span></a>`;
+    }
+    ol.appendChild(li);
+  });
+  rail.innerHTML = title ? `<a class="pe-rail-title" href="#top">${title.textContent}</a>` : '';
+  rail.appendChild(ol);
+  if (extras.length) { const ex = document.createElement('ol'); ex.className = 'pe-extra';
+    extras.forEach(s => { const li = document.createElement('li'); li.innerHTML = `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`; ex.appendChild(li); }); rail.appendChild(ex); }
+  if (!document.getElementById('top')) { const t = document.createElement('span'); t.id = 'top'; document.body.prepend(t); }
+  const bar = document.createElement('div'); bar.className = 'pe-bar';
+  bar.innerHTML = '<span class="pe-bar-label" aria-live="polite"></span><button type="button" id="pe-rail-toggle" aria-expanded="false" aria-controls="pe-rail">Chapters</button><span class="pe-bar-progress"></span>';
+  document.body.insertBefore(bar, document.body.firstChild.nextSibling);
+  document.body.insertBefore(rail, bar.nextSibling);
+  const toggle = bar.querySelector('button'), label = bar.querySelector('.pe-bar-label');
+  const setOpen = o => { document.body.classList.toggle('pe-rail-open', o); toggle.setAttribute('aria-expanded', String(o)); };
+  toggle.addEventListener('click', () => setOpen(!document.body.classList.contains('pe-rail-open')));
+  rail.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+
+  const nodes = [...rail.querySelectorAll('li.pe-node')];
+  let queued = false;
+  function spy() {
+    queued = false;
+    const line = innerHeight * .35; let cur = -1;
+    nodes.forEach((li, k) => { if (byId[li.dataset.id].getBoundingClientRect().top <= line) cur = k; });
+    nodes.forEach((li, k) => {
+      li.classList.toggle('pe-done', k < cur); li.classList.toggle('pe-cur', k === cur);
+      if (k === cur) { const r = byId[li.dataset.id].getBoundingClientRect(); li.style.setProperty('--p', Math.min(1, Math.max(0, (line - r.top) / r.height)).toFixed(3)); }
+      else li.style.removeProperty('--p');
+    });
+    const it = cur >= 0 ? items.find(i => i.id === nodes[cur].dataset.id) : null;
+    label.innerHTML = it ? `<b>${it.n}</b>${it.label}` : (title ? title.textContent : '');
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.setProperty('--g', max > 0 ? (scrollY / max).toFixed(4) : 0);
+  }
+  addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(spy); } }, { passive: true });
+  addEventListener('resize', spy); spy();
+
+  // Hover, focus or tap an equation term: light it, light the figure parts with the same data-link, and pulse the canvas.
+  document.querySelectorAll('.eq[data-viz]').forEach(eq => {
+    const fig = document.getElementById(eq.dataset.viz); if (!fig) return;
+    eq.querySelectorAll('[data-link]').forEach(t => {
+      t.classList.add('pe-term'); t.tabIndex = 0; t.setAttribute('role', 'button');
+      t.setAttribute('aria-label', 'Show ' + t.dataset.link.replace(/\s+/g, ' and ') + ' in the figure');
+      let last = 0;
+      const fire = () => {
+        const now = performance.now(); if (now - last < 600) return; last = now;
+        const lit = [t];
+        t.dataset.link.split(/\s+/).forEach(l => { fig.querySelectorAll(`[data-link~="${l}"]`).forEach(x => lit.push(x)); fig.dispatchEvent(new CustomEvent('pe-link', { detail: l })); });
+        lit.forEach(x => x.classList.add('pe-lit')); setTimeout(() => lit.forEach(x => x.classList.remove('pe-lit')), 1100);
+      };
+      t.addEventListener('mouseenter', fire); t.addEventListener('focus', fire); t.addEventListener('click', fire);
+      t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); last = 0; fire(); } });
+    });
+  });
+});
+</script>
+<style>
+figure.archflow .cf-row { display:flex; flex-wrap:wrap; gap:.3rem; margin:0 0 .5rem; padding-right:9rem; font:.84rem system-ui, sans-serif; align-items:center; }
+figure.archflow .cf-row span { color:var(--muted); margin-right:.2rem; }
+figure.archflow .cf-row button { font:inherit; color:var(--muted); background:var(--bg); border:1px solid var(--rule); border-radius:999px; padding:.2rem .55rem; cursor:pointer; }
+figure.archflow .cf-row button[aria-pressed="true"] { color:var(--bg); background:var(--blue); border-color:var(--blue); }
+figure.archflow .cf-row button.cf-back[aria-pressed="true"] { background:var(--red); border-color:var(--red); }
+figure.archflow .cf-row button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+figure.archflow .cf-text { font:.95rem/1.55 system-ui, sans-serif; margin:.6rem 0 0; min-height:9em; }
+figure.archflow .cf-text h4 { font-size:1rem; margin:0 0 .3rem; }
+figure.archflow .cf-text p { margin:0 0 .5rem; }
+@media (max-width: 560px) { figure.archflow .cf-row { padding-right:0; } figure.archflow .cf-row:first-of-type { margin-top:1.9rem; } }
+</style>
+<script>
+/* ArchFlow: forward/backward architecture stepper driven by a per-chapter spec. Needs PE (canvas, animate, label, arrow, dot, mix, css, clamp, lerp).
+   Spec:
+   { prefix, grid: { cols, rows },                      // desktop grid; mobile transposes it (rows -> columns, cols -> rows)
+     boxes: { id: { c, r, lane: 'blue'|'yellow'|'green'|'red'|'mixed', title: [lines], glyph, data?: true } },
+     edges: [[from, to], ...],                          // forward direction; the loss box is the one with no outgoing edge
+     stages: [{ key, show: [ids] } | { key, back: true } | { key, back: true, done: true }],
+     variants: { key: config }, variant: 'default key', // buttons btn-<prefix>-<key>; may be empty
+     shape(id, v) -> string, sub?(id, v) -> string,     // forward label under each box ('|' splits lines)
+     params(id, v) -> string|null,                      // trainable parameter names, or null when the box has none
+     frozen(id, v) -> bool,                             // frozen weights (brown)
+     readout(stage, v) -> string }
+   Variants change shapes, labels and frozen sets only, never the graph or stage list: mount one figure per
+   differently-shaped training stage, and keep any second button row in the chapter's own code.
+   Ids used: viz-<prefix>, <prefix>-canvas, <prefix>-readout, btn-<prefix>-<stage>, btn-<prefix>-<variant>, btn-<prefix>-prev|next|reset,
+   and stage texts as <div data-stage="..."> inside .cf-text (one with data-stage="overview"). */
+const ArchFlow = (() => {
+  function mount(spec) {
+    const P = spec.prefix, fig = document.getElementById('viz-' + P), el = document.getElementById(P + '-canvas'), out = document.getElementById(P + '-readout');
+    const ORDER = spec.stages.map(s => s.key), ST = Object.fromEntries(spec.stages.map((s, i) => [s.key, { ...s, i }]));
+    const chips = ORDER.map(k => document.getElementById('btn-' + P + '-' + k));
+    const VK = Object.keys(spec.variants || {}), vBtns = VK.map(k => document.getElementById('btn-' + P + '-' + k));
+    const texts = [...fig.querySelectorAll('.cf-text > div')];
+    const ids = Object.keys(spec.boxes), B = spec.boxes;
+    const S = { scene: 'overview', v: spec.variant, u: 1 };
+    let stop = () => {};
+    // First forward stage that shows each box.
+    const firstStep = {}; spec.stages.forEach((s, i) => (s.show || []).forEach(id => { if (!(id in firstStep)) firstStep[id] = i; }));
+    // Distance from the loss box(es) (no outgoing edge) along reversed edges: the order in which the backward pass reaches boxes.
+    const dist = Object.fromEntries(ids.filter(id => !spec.edges.some(e => e[0] === id)).map(id => [id, 0])); let changed = true;
+    while (changed) { changed = false; for (const [a, b] of spec.edges) if (b in dist && (!(a in dist) || dist[a] > dist[b] + 1)) { dist[a] = dist[b] + 1; changed = true; } }
+    const maxD = Math.max(...Object.values(dist));
+    const conf = () => (spec.variants || {})[S.v];
+    const trainable = id => !B[id].data && spec.params(id, conf()) != null && !spec.frozen(id, conf());
+    // A box needs a gradient if it, or anything upstream of it, has trainable weights.
+    function needsGrad(id, seen = {}) { if (seen[id]) return false; seen[id] = 1; return trainable(id) || spec.edges.some(([a, b]) => b === id && needsGrad(a, seen)); }
+
+    let C = {};
+    const hex = (c, d) => (c && c.length === 7 ? c : d);
+    const tint = (c, a) => PE.mix(hex(C.BG, '#16181d'), hex(c, '#888888'), a);
+    function rr(ctx, x0, y0, w, h, r, fill, stroke, lw = 1.5, dash) {
+      ctx.beginPath(); ctx.moveTo(x0 + r, y0); ctx.arcTo(x0 + w, y0, x0 + w, y0 + h, r); ctx.arcTo(x0 + w, y0 + h, x0, y0 + h, r);
+      ctx.arcTo(x0, y0 + h, x0, y0, r); ctx.arcTo(x0, y0, x0 + w, y0, r); ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.save(); ctx.strokeStyle = stroke; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash); ctx.stroke(); ctx.restore(); }
+    }
+    const laneC = id => ({ blue: C.B, yellow: C.Y, green: C.G, red: C.Rd, mixed: C.F })[B[id].lane] || C.F;
+    const lines = s => String(s).split('|');
+    const labN = {};
+    const titleN = id => B[id].title.length;
+
+    function glyph(ctx, id, b, col) {
+      const g = B[id].glyph || 'layers', cx = b.x + b.w / 2, cy = b.y + b.h / 2, seed = id.length * 7 + id.charCodeAt(0);
+      ctx.save(); ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 1.3;
+      if (g === 'photos') for (let k = 2; k >= 0; k--) { const s = 24; rr(ctx, cx - s / 2 + k * 5 - 5, cy - s / 2 - k * 4 + 4, s, s, 3, tint(C.B, .25 + .15 * (2 - k)), C.B, 1.2); }
+      else if (g === 'photo') { rr(ctx, cx - 14, cy - 13, 28, 26, 3, tint(C.B, .35), C.B, 1.2); ctx.fillStyle = C.B; ctx.beginPath(); ctx.arc(cx + 4, cy - 3, 5, 0, 7); ctx.fill(); }
+      else if (g === 'grid') { const s = 6; for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) rr(ctx, cx - 10 + c * (s + 1), cy - 14 + r * (s + 1), s, s, 1, tint(C.B, .55), null);
+        if (B[id].cls !== false) rr(ctx, cx - 22, cy - 14, s, s, 1, C.F, null); }
+      else if (g === 'layers') for (let k = 0; k < 4; k++) rr(ctx, cx - 22, cy - 16 + k * 8, 44, 6, 2, tint(col, .3 + .15 * k), null);
+      else if (g === 'vector' || g === 'unit') { for (let k = 0; k < 8; k++) { const h = g === 'unit' ? 9 : 5 + 10 * Math.abs(Math.sin(k * 1.7 + seed)); ctx.fillRect(cx - 20 + k * 5.2, cy + 8 - h, 3.6, h); }
+        if (g === 'unit') { ctx.beginPath(); ctx.arc(cx + 30, cy + 2, 7, 0, 7); ctx.stroke(); } }
+      else if (g === 'text') for (let k = 0; k < 3; k++) rr(ctx, cx - 22, cy - 12 + k * 9, 44 - k * 8, 5, 2, tint(C.Y, .6), null);
+      else if (g === 'tokens') for (let k = 0; k < 5; k++) rr(ctx, cx - 24 + k * 10, cy - 8, 8, 12, 2, k === 0 || k === 4 ? C.F : tint(C.Y, .55), null);
+      else if (g === 'seq') { const pat = B[id].pattern || 'yybbbbyyy'; const n = pat.length, w = Math.min(8, (b.w - 12) / n - 1.5);
+        for (let k = 0; k < n; k++) rr(ctx, cx - n * (w + 1.5) / 2 + k * (w + 1.5), cy - 7, w, 12, 2, pat[k] === 'b' ? C.B : pat[k] === 'g' ? C.G : tint(C.Y, .7), null); }
+      else if (g === 'latents') for (let k = 0; k < 6; k++) { ctx.fillStyle = tint(C.G, .45 + .1 * (k % 2)); ctx.beginPath(); ctx.arc(cx - 20 + k * 8, cy, 3.4, 0, 7); ctx.fill(); }
+      else if (g === 'matrix') { const s = 7; for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) rr(ctx, cx - 15 + c * (s + 1), cy - 17 + r * (s + 1), s, s, 1, r === c ? C.G : tint(C.Br, .5), null); }
+      else if (g === 'loss') { rr(ctx, cx - 22, cy - 4, 44, 8, 3, tint(C.Rd, .25), null); rr(ctx, cx - 22, cy - 4, 30, 8, 3, C.Rd, null); }
+      else if (g === 'gate') { ctx.beginPath(); for (let k = 0; k <= 20; k++) { const xx = -1 + k / 10, X = cx + xx * 20, Y = cy - 12 * Math.tanh(2.2 * xx); k ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); } ctx.lineWidth = 2; ctx.stroke(); }
+      else if (g === 'mlp') { for (const [xx, n] of [[-16, 4], [0, 6], [16, 4]]) for (let k = 0; k < n; k++) { ctx.beginPath(); ctx.arc(cx + xx, cy - (n - 1) * 3.5 + k * 7, 2.4, 0, 7); ctx.fill(); } }
+      else if (g === 'codebook') { const s = 6; for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) rr(ctx, cx - 18 + c * (s + 1.5), cy - 11 + r * (s + 1.5), s, s, 1, tint(col, .3 + .6 * (((r * 5 + c) * 7) % 5) / 5), null); }
+      ctx.restore();
+    }
+
+    function layout(W, H) {
+      const R = {}, { cols, rows } = spec.grid, horiz = W >= 600;
+      if (horiz) {
+        const cw = (W - 16) / cols, bw = Math.min(cw - 16, 104), bh = 50;
+        const rowY = r => rows === 1 ? (H - bh) / 2 + 6 : 34 + r * (H - bh - 72) / (rows - 1);
+        ids.forEach(id => { const b = B[id], cx = 8 + cw * (b.c + .5); R[id] = { x: cx - bw / 2, y: rowY(b.r), w: bw, h: bh }; });
+        return { R, horiz };
+      }
+      const colW = W / rows, bw = Math.min(colW - 14, 150), bh = 50, rh = (H - 40) / cols;
+      ids.forEach(id => { const b = B[id], cx = colW * (b.r + .5); R[id] = { x: cx - bw / 2, y: 36 + rh * b.c, w: bw, h: bh }; });
+      return { R, horiz };
+    }
+    const aspect = w => { const { cols, rows } = spec.grid; return w >= 600 ? (rows === 1 ? 150 : 72 + 50 + (rows - 1) * 114) / w : (40 + cols * 134) / w; };
+    function edgePts(L, a, b) {
+      const A = L.R[a], Bx = L.R[b], down = L.horiz ? B[a].c === B[b].c : B[a].r !== B[b].r && B[a].c === B[b].c;
+      if (L.horiz && !down) return B[b].c > B[a].c ? [A.x + A.w, A.y + A.h / 2, Bx.x, Bx.y + Bx.h / 2] : [A.x, A.y + A.h / 2, Bx.x + Bx.w, Bx.y + Bx.h / 2];
+      if (!L.horiz && B[a].c === B[b].c) return B[b].r > B[a].r ? [A.x + A.w, A.y + A.h / 2, Bx.x, Bx.y + Bx.h / 2] : [A.x, A.y + A.h / 2, Bx.x + Bx.w, Bx.y + Bx.h / 2];
+      const upward = L.horiz ? B[b].r < B[a].r : false;
+      if (upward) return [A.x + A.w / 2, A.y - 8 - 12 * titleN(a), Bx.x + Bx.w / 2, Bx.y + Bx.h + 7 + 11 * (labN[b] || 1)];
+      return [A.x + A.w / 2, A.y + A.h + 7 + 11 * (labN[a] || 1), Bx.x + Bx.w / 2, Bx.y - 8 - 12 * titleN(b)];
+    }
+
+    const cv = PE.canvas(el, aspect, (ctx, W, H) => {
+      C = { B: PE.css('--blue'), Y: PE.css('--yellow'), G: PE.css('--green'), Rd: PE.css('--red'), Br: PE.css('--brown'), F: PE.css('--fg'), Mu: PE.css('--muted'), BG: PE.css('--bg') };
+      ctx.fillStyle = C.BG; ctx.fillRect(0, 0, W, H);
+      const L = layout(W, H), v = conf(), k = S.scene === 'overview' ? -1 : ST[S.scene].i, back = S.scene !== 'overview' && ST[S.scene].back;
+      const alphaOf = id => { if (S.scene === 'overview' || back) return 1; const s = firstStep[id] ?? 0; return s < k ? .7 : s === k ? .25 + .75 * S.u : .12; };
+      const gradAt = id => { if (!back) return 0; if (ST[S.scene].done) return 1; const d = (dist[id] ?? maxD) / Math.max(1, maxD); return PE.clamp((S.u * 1.15 - d) / .15, 0, 1); };
+      const labelOf = id => {
+        const fz = !B[id].data && spec.frozen(id, v);
+        if (back) {
+          if (B[id].data) return ['data, no weights', C.Mu];
+          if (trainable(id)) return [spec.params(id, v), C.Rd];
+          if (fz) return [needsGrad(id) ? 'frozen: gradient|passes, no update' : 'frozen: gradient|stops here', C.Br];
+          return [spec.shape(id, v), C.Mu];
+        }
+        return [(spec.sub && spec.sub(id, v)) || spec.shape(id, v), fz ? C.Br : C.F];
+      };
+      ids.forEach(id => { labN[id] = lines(labelOf(id)[0]).length; });
+      for (const [a, b] of spec.edges) {
+        const [x1, y1, x2, y2] = edgePts(L, a, b), al = Math.min(alphaOf(a), alphaOf(b)), col = laneC(a);
+        PE.arrow(ctx, x1 + 2 * Math.sign(x2 - x1), y1, x2 - 2 * Math.sign(x2 - x1), y2, col, 1.6, 7, al * .8);
+        if (!back && (firstStep[b] ?? 0) === k && S.u < 1) PE.dot(ctx, PE.lerp(x1, x2, S.u), PE.lerp(y1, y2, S.u), 4, col);
+        if (back && needsGrad(a) && gradAt(b) > 0) {
+          const vert = Math.abs(x2 - x1) < Math.abs(y2 - y1), off = vert ? [9, 0] : [0, 9], t = Math.max(gradAt(a), .35);
+          PE.arrow(ctx, x2 + off[0], y2 + off[1], PE.lerp(x2, x1, t) + off[0], PE.lerp(y2, y1, t) + off[1], C.Rd, 2, 7, .45 + .55 * gradAt(a));
+        }
+      }
+      for (const id of ids) {
+        const b = L.R[id], al = alphaOf(id), col = laneC(id), g = gradAt(id), fz = !B[id].data && spec.frozen(id, v), cur = !back && k >= 0 && firstStep[id] === k;
+        ctx.save(); ctx.globalAlpha = al;
+        rr(ctx, b.x, b.y, b.w, b.h, 7, fz ? tint(C.Br, .22) : tint(col, cur ? .2 : .1), fz ? C.Br : col, cur ? 2.4 : 1.4, fz ? [4, 3] : null);
+        if (g > 0 && trainable(id)) rr(ctx, b.x - 3, b.y - 3, b.w + 6, b.h + 6, 9, null, C.Rd, 2.2 * g);
+        glyph(ctx, id, b, fz ? C.Br : col);
+        const T = B[id].title; T.forEach((t, j) => PE.label(ctx, t, b.x + b.w / 2, b.y - 5 - (T.length - 1 - j) * 12, col, 10.5, 'center'));
+        ctx.restore();
+        ctx.save(); ctx.globalAlpha = Math.max(al, .12);
+        const [lab, lc] = labelOf(id);
+        lines(lab).forEach((t, j) => PE.label(ctx, t, b.x + b.w / 2, b.y + b.h + 12 + 11 * j, lc, 10, 'center'));
+        ctx.restore();
+      }
+    });
+    function show() {
+      texts.forEach(d => { d.hidden = d.dataset.stage !== S.scene; });
+      chips.forEach((c, i) => c.setAttribute('aria-pressed', String(ORDER[i] === S.scene)));
+      vBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(VK[i] === S.v)));
+      out.textContent = spec.readout(S.scene, conf());
+    }
+    function go(scene) { stop(); S.scene = scene; S.u = 0; show(); stop = PE.animate(ST[scene].back && !ST[scene].done ? 2200 : 800, u => { S.u = u; cv.redraw(); }); }
+    const idx = () => ORDER.indexOf(S.scene);
+    ORDER.forEach((k, i) => chips[i].addEventListener('click', () => go(k)));
+    VK.forEach((k, i) => vBtns[i].addEventListener('click', () => { S.v = k; show(); cv.redraw(); }));
+    document.getElementById('btn-' + P + '-next').addEventListener('click', () => go(ORDER[Math.min(ORDER.length - 1, idx() + 1)]));
+    document.getElementById('btn-' + P + '-prev').addEventListener('click', () => { const i = idx(); if (i <= 0) { stop(); S.scene = 'overview'; S.u = 1; show(); cv.redraw(); } else go(ORDER[i - 1]); });
+    document.getElementById('btn-' + P + '-reset').addEventListener('click', () => { stop(); S.scene = 'overview'; S.v = spec.variant; S.u = 1; show(); cv.redraw(); });
+    show();
+    return { go, state: S };
+  }
+  return { mount };
+})();
+</script>
+
+<!-- ============================ ACT I ============================ -->
+<p class="kicker"><span class="act-n">Act I</span>A shared space for pictures and words</p>
+<section id="ch-shared-space" class="chapter">
+<h2>Classifiers only know their labels</h2>
+<p>A classic image classifier can only answer with one of the labels it was trained on; to teach it a new concept you collect new labeled photos. CLIP's fix was to stop predicting labels and instead play a matching game: given a pile of photos and a pile of captions, say which caption goes with which photo.</p>
+
+<figure class="viz" id="viz-contrastive" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="contrastive-canvas" tabindex="0" role="img" aria-label="Five photo points (blue) and five caption points (yellow) on a circle, with a five by five similarity table and a loss bar. Drag points; arrow keys select and rotate."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-contrastive-before">Scrambled start</button>
+    <button type="button" id="btn-contrastive-train">Train</button>
+    <button type="button" id="btn-contrastive-hot">Train hot (&tau; = 1)</button>
+    <button type="button" id="btn-contrastive-cold">Train cold (&tau; = 0.07)</button>
+    <button type="button" id="btn-contrastive-zeroshot">Zero-shot a new photo</button>
+    <button type="button" id="btn-contrastive-reset" data-cue-reset>Reset</button>
+    <label for="rng-contrastive-tau">temperature <input type="range" id="rng-contrastive-tau" min="-150" max="0" step="1" value="-115"> <span id="contrastive-tau-val">0.07</span></label>
+  </div>
+  <p class="readout" id="contrastive-readout" aria-live="polite"></p>
+  <figcaption>Before you press Train, guess: which way will the dog photo move, and what happens to the photos that are sitting next to the wrong caption? The loss is CLIP's real symmetric loss, and training is real gradient descent on it. What is toy: the embedding space is a circle (two dimensions) instead of hundreds, and there are five pairs instead of tens of thousands. A circle is cramped: from <span data-computed>about half</span> of random starts, cold training jams pairs on top of each other; the real space, with hundreds of dimensions, has far more room.</figcaption>
+</figure>
+
+<h3>The wall: a fixed list of answers</h3>
+<p>Before CLIP, the strongest vision models were trained to pick one entry from a predetermined list of object categories. The CLIP paper names the cost directly: this <span data-claim="clip-fixed-set">restricted form of supervision limits their generality and usability since additional labeled data is needed to specify any other visual concept</span>. A model that knows "dog" and "cat" has nothing to say about "a corgi wearing sunglasses", and it cannot even be asked.</p>
+<p>The internet, meanwhile, is full of images that already come with text: alt-text, titles, captions. That text is messy, but it describes an open-ended world. CLIP gathered <span data-claim="clip-dataset-size">400 million (image, text) pairs</span> from the internet, found by searching for <span data-claim="clip-queries">500,000</span> different queries, and asked a model to learn from the text directly.</p>
+
+<h3>The matching game</h3>
+<p>CLIP has two encoders. The image encoder (a ResNet or a vision transformer) turns a photo into a vector; the text encoder (a transformer) turns a caption into a vector. A learned linear projection maps both into the same space, and each vector is scaled to length one, so every photo and every caption becomes a <em>direction</em>. In the figure the space is a circle and each direction is a point on it: <b class="c-blue">blue dots</b> are photos, <b class="c-yellow">yellow diamonds</b> are captions.</p>
+<p>How similar two directions are is measured by the cosine of the angle between them: 1 when they point the same way, 0 at right angles, -1 when opposite. Take a batch of <span class="tex">N</span> photo-caption pairs and compute the cosine of every photo against every caption. That is the <span class="tex">N \times N</span> table on the right. The correct answers are all on the <b class="c-green">diagonal</b>: photo 1 goes with caption 1, and so on. Every off-diagonal cell is a <b class="c-brown">negative</b>, a pairing that is wrong, and the batch provides them for free.</p>
+<p>The task is then a classification problem inside each row: out of the <span class="tex">N</span> captions, pick the one that belongs to this photo. And the same inside each column: out of the <span class="tex">N</span> photos, pick the one that belongs to this caption. Press <b>Train</b>. Every point moves at once. Each photo is pulled toward its own caption and pushed away from all the others, so the pairs close up and spread apart around the circle. The lines show, for each photo, which caption it currently sits closest to: <b class="c-green">green</b> if that is its own caption, <b class="c-red">red</b> dashes if not.</p>
+<p>CLIP played this game with a batch of <span data-claim="clip-batch-size">32,768</span>, so each training step filled in a table of <span data-computed>32,768 &times; 32,768 &asymp; 1.07 billion</span> similarities, almost all of them negatives. Keep that number in mind: the next chapter is about what it costs.</p>
+
+<h3>The loss, term by term</h3>
+<p>For one row (one photo), turn the row's similarities into probabilities with a softmax and ask for a high probability on the correct caption. The loss for photos is the average, over all rows, of the negative log of that probability:</p>
+<div class="eq" id="eq-clip" data-build data-viz="viz-contrastive"><div class="tex tex-display">
+\htmlData{step=4}{\htmlClass{t-red}{\mathcal{L}_{\text{img}}} = -\frac{1}{N}\sum_{i=1}^{N}} \log \frac{\htmlData{step=1, link=pos}{\htmlClass{t-green}{\exp(s_{ii}/\tau)}}}{\htmlData{step=2, link=neg}{\sum_{j=1}^{N} \exp(s_{ij}/\tau)}} \qquad \htmlData{step=5}{\htmlClass{t-red}{\mathcal{L}} = \tfrac{1}{2}\big(\htmlClass{t-red}{\mathcal{L}_{\text{img}}} + \htmlClass{t-red}{\mathcal{L}_{\text{txt}}}\big)} \qquad \htmlData{step=3, link=sim}{s_{ij} = \htmlClass{t-blue}{u_i}^{\top}\htmlClass{t-yellow}{v_j}}
+</div></div>
+<p class="eqno">Written out from the Fig. 3 pseudocode of CLIP v1, which has no numbered equation; ALIGN v2 Eq. 1 and 2 are the two halves in the same form.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{u_i}</span>, <span class="tex">\htmlClass{t-yellow}{v_j}</span>: the unit-length embeddings of photo <span class="tex">i</span> and caption <span class="tex">j</span> (a blue dot and a yellow diamond).</li>
+  <li><span class="tex">s_{ij}</span>: their cosine similarity, the number printed in cell <span class="tex">(i, j)</span> of the table.</li>
+  <li><span class="tex">\htmlClass{t-green}{\exp(s_{ii}/\tau)}</span>: the score of the correct pair, the green diagonal cell.</li>
+  <li>The denominator: the same score summed over every caption in the row, the right one and all the negatives. The fraction is the softmax probability of the correct caption; it reaches 1 only when the right caption beats every wrong one by a wide margin.</li>
+  <li><span class="tex">\tau</span>: the temperature, which divides every similarity before the softmax (below).</li>
+  <li><span class="tex">\htmlClass{t-red}{\mathcal{L}_{\text{txt}}}</span>: the same thing down each column (for each caption, find its photo). CLIP averages the two: <span data-claim="clip-loss-line"><code>loss = (loss_i + loss_t)/2</code></span>.</li>
+</ul>
+<p>Notice what the denominator does: the loss for photo <span class="tex">i</span> depends on its similarity to <em>every</em> caption in the batch. That coupling is what makes the game informative, and, as the next chapter shows, what makes it expensive.</p>
+
+<h3>Temperature: how sharp the verdict is</h3>
+<p>Cosines only range from -1 to 1, so a softmax over raw cosines is mushy: even a perfect layout gives the right caption only a modest lead. Dividing by a small temperature <span class="tex">\tau</span> stretches the gaps before the softmax. Drag the temperature slider and watch the table's colors: at high temperature every row is washed out; at low temperature each row snaps to its best match.</p>
+<p>Now predict, then check: what will training do differently when it is hot? Press <b>Train hot</b>, then <b>Train cold</b>. Hot, the pairs still end up on top of their captions, but the loss stalls high and the table stays washed out: when cosines are divided by 1, even a perfect layout cannot earn a confident probability. Cold, the loss falls to almost zero within a few dozen steps; once every photo's own caption wins clearly, the gradient all but vanishes, so from this start two pairs (car and pizza) are still slightly open when the run ends (their diagonal cells read <span data-computed>0.91</span>, not 1.00). CLIP does not hand-tune this: the temperature is <span data-claim="clip-temp-param">directly optimized during training as a log-parameterized multiplicative scalar</span>, starting from the <span data-claim="clip-temp-init">equivalent of 0.07</span> and <span data-claim="clip-temp-clip">clipped to prevent scaling the logits by more than 100</span>.</p>
+
+<h3>Inside CLIP: one forward pass, shape by shape</h3>
+<p>So far the encoders were black boxes that output dots on a circle. Open them up: below is one training step of the real model, as a slide per stage. Step through it with <b>Next</b>; the line under the drawing gives the exact tensor shapes, computed from the model sizes in CLIP's appendix table (pick a model to change them).</p>
+
+<figure class="viz archflow" id="viz-clipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-clipflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-clipflow-tokens" aria-pressed="false">2 Tokens</button>
+    <button type="button" id="btn-clipflow-encode" aria-pressed="false">3 Encoders</button>
+    <button type="button" id="btn-clipflow-pool" aria-pressed="false">4 Pool</button>
+    <button type="button" id="btn-clipflow-embed" aria-pressed="false">5 Project</button>
+    <button type="button" id="btn-clipflow-sim" aria-pressed="false">6 Logits</button>
+    <button type="button" id="btn-clipflow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-clipflow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-clipflow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-clipflow-b32" aria-pressed="false">ViT-B/32</button>
+    <button type="button" id="btn-clipflow-b16" aria-pressed="false">ViT-B/16</button>
+    <button type="button" id="btn-clipflow-l14" aria-pressed="true">ViT-L/14</button>
+    <button type="button" id="btn-clipflow-l336" aria-pressed="false">ViT-L/14@336px</button>
+  </div>
+  <canvas id="clipflow-canvas" role="img" aria-label="CLIP's training step as a diagram: an image lane (blue) and a text lane (yellow), each going through tokens, an encoder, pooling and a projection, meeting in an N by N logits table (green diagonal) and a loss (red). In the backward stages red arrows run from the loss back through both lanes."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-clipflow-prev">Previous</button>
+    <button type="button" id="btn-clipflow-next">Next</button>
+    <button type="button" id="btn-clipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="clipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Two lanes that never touch until the end: the image lane (<b class="c-blue">blue</b>) and the text lane (<b class="c-yellow">yellow</b>). Each lane turns its input into tokens, runs a transformer, keeps one vector, projects it and scales it to length one. The lanes meet only in the similarity table (<b class="c-green">green</b> diagonal) and the loss (<b class="c-red">red</b>). Press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of pairs</h4>
+      <p>Draw <span data-claim="clip-batch-size">32,768</span> (image, caption) pairs from the web set. Each image is resized and randomly cropped to a square; <span data-claim="clip-aug">A random square crop from resized images is the only data augmentation used during training</span>. Captions stay as raw strings for now. We call the batch size <span class="tex">N</span>; the drawing shows four pairs.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>2. Both inputs become token sequences</h4>
+      <p><b class="c-blue">Image:</b> the ViT recipe (<a href="#ch-patches">the patches chapter</a>, two chapters on, takes it apart). Cut the image into <span class="tex">P \times P</span> patches, flatten each patch into <span class="tex">P \cdot P \cdot 3</span> numbers, multiply by a learned matrix <span class="tex">E</span> to get one vector per patch, prepend a learned <code>[class]</code> token, and add learned position embeddings. CLIP's main change to ViT, besides that they <span data-claim="clip-vit-init">use a slightly different initialization scheme</span>, is <span data-claim="clip-vit-extra-ln">adding an additional layer normalization to the combined patch and position embeddings before the transformer</span>.</p>
+      <p><b class="c-yellow">Text:</b> a <span data-claim="clip-lowercase">lower-cased byte pair encoding</span> splits the caption into subword ids from a vocabulary of <span data-claim="clip-bpe-vocab">49,152</span> (the appendix table lists <span data-claim="clip-vocab-table">49408</span>; the paper does not explain the gap). The ids are bracketed with <span data-claim="clip-sos-eos">[SOS] and [EOS]</span>, the length is <span data-claim="clip-ctx-len">capped at 76</span>, and each id looks up a learned row of the token embedding table.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>3. Two transformers, side by side</h4>
+      <p>Each lane runs its own stack of transformer layers; nothing is shared between them. The line under the drawing gives each encoder's depth, width and heads for the chosen model. The text encoder's base size is a <span data-claim="clip-text-base">63M-parameter 12-layer 512-wide model with 8 attention heads</span>, and it only gets wider for bigger models. <span data-claim="clip-masked-attn">Masked self-attention was used in the text encoder</span>: each token sees only itself and the tokens to its left, as in a language model, to <span data-claim="clip-masked-why">preserve the ability to initialize with a pre-trained language model or add language modeling as an auxiliary objective</span>.</p>
+      <p>Both encoders start from random weights: <span data-claim="clip-from-scratch">We train CLIP from scratch without initializing the image encoder with ImageNet weights or the text encoder with pre-trained weights</span>.</p>
+    </div>
+    <div data-stage="pool" hidden>
+      <h4>4. Keep one vector per example</h4>
+      <p><b class="c-blue">Image:</b> as in ViT, keep the <code>[class]</code> token, <span data-claim="vit-class-token">whose state at the output of the Transformer encoder</span> serves as the image representation, after one more layer norm (ViT's Eq. 4). It holds no patch of its own; attention let it gather information from every patch.</p>
+      <p><b class="c-yellow">Text:</b> the <span data-claim="clip-eos-feature">activations of the highest layer of the transformer at the [EOS] token are treated as the feature representation of the text which is layer normalized and then linearly projected</span>. Why the last token? Our reading: because attention is masked, <code>[EOS]</code> is the only position that has seen every word of the caption.</p>
+    </div>
+    <div data-stage="embed" hidden>
+      <h4>5. Project into the shared space, then normalize</h4>
+      <p>Each lane has one matrix, <span class="tex">W_i</span> or <span class="tex">W_t</span>, that maps its feature to the shared width. CLIP uses <span data-claim="clip-linear-proj">only a linear projection to map from each encoder's representation to the multi-modal embedding space</span>: no extra MLP head. Then every row is divided by its length, so each photo and each caption is a unit vector: a point on the circle of the first figure, in hundreds of dimensions instead of two. Now a dot product <em>is</em> a cosine.</p>
+    </div>
+    <div data-stage="sim" hidden>
+      <h4>6. The similarity table</h4>
+      <p>One matrix multiply compares every photo with every caption: <span data-claim="clip-logits-line"><code>logits = np.dot(I_e, T_e.T) * np.exp(t)</code></span>. The factor <span class="tex">e^{t}</span> is <span class="tex">1/\tau</span>; storing its log keeps it positive, and it is capped so that logits are never scaled by more than <span data-claim="clip-max-temp">100.0</span>. The table is <span class="tex">N \times N</span> and is never held by one GPU: <span data-claim="clip-sharded-sim">individual GPUs computing only the subset of the pairwise similarities necessary for their local batch of embeddings</span>.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. One number</h4>
+      <p>Cross-entropy down each row (for photo <span class="tex">i</span>, which caption?) and down each column (for caption <span class="tex">j</span>, which photo?), with the diagonal as the right answer, then <span data-claim="clip-loss-line"><code>loss = (loss_i + loss_t)/2</code></span>. That is <a href="#eq-clip">the equation above</a>, term by term.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. The gradient runs the same road backwards</h4>
+      <p>Backpropagation starts at the loss and retraces every arrow in reverse. First into the table: each logit gets <span class="tex">\tfrac{1}{2N}\big[(p_{ij} - \delta_{ij}) + (q_{ij} - \delta_{ij})\big]</span>, where <span class="tex">p</span> and <span class="tex">q</span> are the row and column softmax. Then the table splits it: photo <span class="tex">i</span> receives a weighted sum of all caption vectors, caption <span class="tex">j</span> a weighted sum of all photo vectors (the next figure draws this). Through the normalization, through <span class="tex">W_i</span> and <span class="tex">W_t</span>, down every layer of both transformers, to the patch matrix <span class="tex">E</span> and the token embedding table. The temperature gets a gradient too.</p>
+      <p>Look at the colors: nothing is <b class="c-brown">brown</b>. In CLIP every weight learns. From Act II on, most models freeze big parts, and the brown boxes will show where the gradient is stopped.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p>All the red-outlined parameters move at once: the <span data-claim="clip-optimizer">Adam optimizer with decoupled weight decay regularization applied to all weights that are not gains or biases</span>, weight decay <span data-claim="clip-wd">0.2</span>, <span data-claim="clip-warmup">2000</span> warm-up iterations, then a <span data-claim="clip-cosine">cosine schedule</span>; the learning rate for ViT-L/14 is <span data-claim="clip-vitl14-lr">4 x 10^-4</span>. Then the next batch, for <span data-claim="clip-epochs">32 epochs</span>. The ViT-L/14@336px model is not a separate run: after those epochs the authors <span data-claim="clip-l14-336">pre-train at a higher 336 pixel resolution for one additional epoch</span>, at a learning rate of <span data-claim="clip-l336-lr">2 x 10^-5</span>.</p>
+    </div>
+  </div>
+  <figcaption>Computed: every shape comes from the model's input resolution, patch size and widths in CLIP's appendix table ("CLIP-ViT hyperparameters"); the drawing uses four pairs instead of <span class="tex">N</span>, and text shapes use the paper's length cap of 76. Before you open stage 8, guess: which boxes will the gradient reach, and which will it skip?</figcaption>
+</figure>
+
+<p>Some arithmetic makes the training run concrete. At <span data-claim="clip-batch-size">32,768</span> pairs per step, one pass over <span data-claim="clip-dataset-size">400 million (image, text) pairs</span> is <span data-computed>about 12,200</span> steps, and <span data-claim="clip-epochs">32 epochs</span> is <span data-computed>about 390,000</span> optimizer steps. To fit that in memory the authors used <span data-claim="clip-mixed-precision">Mixed-precision</span> training plus <span data-claim="clip-memory-tricks">gradient checkpointing, half-precision Adam statistics, and half-precision stochastically rounded text encoder weights</span>. The largest vision transformer took <span data-claim="clip-vit-compute">12 days on 256 V100 GPUs</span>.</p>
+
+<h3>Backward: where the gradient goes</h3>
+<p>Stage 8 said the gradient "splits" at the table. Here is what that means for one photo. The arrows show which way training pushes the dog photo's vector, one arrow per caption.</p>
+
+<figure class="viz" id="viz-clipgrad" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="clipgrad-canvas" tabindex="0" role="img" aria-label="The dog photo (blue) on a circle of five captions (yellow), with a green arrow pulling it toward its own caption and brown arrows pushing it away from confusable captions. Drag the photo, or focus the canvas and use the left and right arrow keys."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-clipgrad-far">Far from its caption</button>
+    <button type="button" id="btn-clipgrad-confused">Sitting on "cat"</button>
+    <button type="button" id="btn-clipgrad-solved">Next to its caption</button>
+    <button type="button" id="btn-clipgrad-radial">Apply the normalization</button>
+    <button type="button" id="btn-clipgrad-descend">Take gradient steps</button>
+    <button type="button" id="btn-clipgrad-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="clipgrad-readout" aria-live="polite"></p>
+  <figcaption>Before you press <b>Sitting on "cat"</b>, guess: four captions are wrong for this photo; which of them will push it, and how hard? The arrows are the exact gradient of CLIP's symmetric loss at temperature 0.07 on the dog photo's vector, with the shared factor <span class="tex">1/(N\tau)</span> left out. What is toy: two dimensions, five pairs, and the other four photos held still.</figcaption>
+</figure>
+
+<p>Press <b>Sitting on "cat"</b>. Only one caption pushes: <b class="c-brown">"cat"</b>, the one the photo is currently confused with. The other three wrong captions barely register, because their softmax probability is already close to zero. The loss spends its effort on the negatives that are hard <em>right now</em>, and (our reading) that is one reason a huge batch helps: more captions per step means more chances that one of them is a hard negative for each photo. Press <b>Next to its caption</b>: once the right caption wins its row and column, the pull shrinks to almost nothing too.</p>
+
+<div class="eq" id="eq-clip-grad" data-build data-viz="viz-clipgrad"><div class="tex tex-display">
+\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-blue}{u_i}} = \htmlData{step=3, link=tau}{\frac{1}{N\tau}} \sum_{j=1}^{N} \Big( \htmlData{step=2, link=neg}{\htmlClass{t-brown}{\tfrac{p_{ij} + q_{ij}}{2}}} \htmlData{step=1, link=pos}{\htmlClass{t-green}{{} - \delta_{ij}}} \Big)\, \htmlClass{t-yellow}{v_j} \qquad \htmlData{step=4, link=radial}{\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial x_i} = \frac{1}{\lVert x_i \rVert}\big(I - \htmlClass{t-blue}{u_i}\htmlClass{t-blue}{u_i}^{\top}\big)\frac{\partial \htmlClass{t-red}{\mathcal{L}}}{\partial \htmlClass{t-blue}{u_i}}}
+</div></div>
+<p class="eqno">Derived here from the loss above (CLIP v1 prints no gradient); <span class="tex">u_i = x_i / \lVert x_i \rVert</span>, where <span class="tex">x_i</span> is photo <span class="tex">i</span>'s vector before normalization.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{-\delta_{ij}}</span>: minus one for the photo's own caption (<span class="tex">j = i</span>), zero otherwise. Gradient descent moves against the gradient, so this term <em>pulls</em> <span class="tex">u_i</span> toward its own caption <span class="tex">v_i</span>: the <b class="c-green">green</b> arrow.</li>
+  <li><span class="tex">\htmlClass{t-brown}{p_{ij}}</span>: the probability that photo <span class="tex">i</span>'s row gives to caption <span class="tex">j</span>. <span class="tex">\htmlClass{t-brown}{q_{ij}}</span>: the probability that caption <span class="tex">j</span>'s column gives to photo <span class="tex">i</span>. Caption <span class="tex">j</span> <em>pushes</em> the photo away in proportion to how confused the two are: <span class="tex">p_{ij}</span> is how much of the photo's row the wrong caption steals, <span class="tex">q_{ij}</span> how much of that caption's column the photo steals. These are the <b class="c-brown">brown</b> arrows. All the arrows shrink toward zero as the photo wins its own row and column outright.</li>
+  <li><span class="tex">1/(N\tau)</span>: the same for every arrow. A small temperature enlarges this factor, but it also saturates the softmax, so easy pairs get almost no gradient. (The paper's stated reason for capping the logit scale is only that it was <em>necessary to prevent training instability</em>.)</li>
+  <li>The second formula is the normalization step on the way back. The factor <span class="tex">I - u_i u_i^{\top}</span> deletes the part of the gradient that points along <span class="tex">u_i</span> itself: changing a vector's length cannot change a cosine. Press <b>Apply the normalization</b>: the dashed arrow is the raw sum, the grey arrow is the part that gets deleted, and the bold arrow is what is left, which can only slide the photo around the circle.</li>
+</ul>
+<p>From <span class="tex">\partial\mathcal{L}/\partial x_i</span> on it is ordinary backpropagation: <span class="tex">x_i = W_i^{\top} f_i</span>, so <span class="tex">W_i</span> gets <span class="tex">\sum_{n=1}^{N} f_n\,(\partial\mathcal{L}/\partial x_n)^{\top}</span>, and each <span class="tex">f_n</span> (the <code>[class]</code> output) passes the rest down through the vision transformer. Captions get the mirror image: each <span class="tex">v_j</span> is pulled toward its own photo and pushed by the photos it is confused with (the same <span class="tex">p</span> and <span class="tex">q</span> terms, seen from the caption's side), and that gradient flows down the text lane to the <code>[EOS]</code> position and, through masked attention, to every word before it. The temperature's gradient is the sum over the whole table of each logit's gradient times the logit itself: it gets sharper when sharpening would lower the loss.</p>
+<p>Press <b>Take gradient steps</b> from any starting point. The photo slides around the circle toward its caption and slows as it arrives, the same saturating gradient as the cold training run in the first figure.</p>
+
+<h3>Zero-shot: the text is the classifier</h3>
+<p>Here is the payoff. To classify a photo into any set of classes, write one caption per class, embed the captions, and pick the caption whose direction is closest to the photo. No new training, no labeled examples: the class names themselves become the classifier. Press <b>Zero-shot a new photo</b>: an unseen photo lands near the trained dog photo (that placement is the toy's assumption, standing in for a trained image encoder), and the bars show its softmax over the five prompts.</p>
+<p>The wording of those captions matters. Alt-text is rarely a single word, so CLIP wraps each class name in a sentence. The template <span data-claim="clip-prompt-template"><code>A photo of a {label}.</code></span> alone <span data-claim="clip-prompt-gain">improves accuracy on ImageNet by 1.3%</span>, and averaging the embeddings of <span data-claim="clip-ensemble-n">80</span> differently worded prompts per class adds a further <span data-claim="clip-ensemble-gain">3.5%</span>.</p>
+<p>The headline: with no ImageNet training images at all, CLIP's best model (ViT-L/14 at 336 pixels) reaches <span data-claim="clip-zs-imagenet">76.2</span>% top-1 zero-shot on ImageNet, which <span data-claim="clip-matches-rn50">matches the performance of the original ResNet-50 despite using none of the 1.28 million crowd-labeled training examples</span> that ResNet-50 was trained on. The 336-pixel version is the 224-pixel model with one extra step: the authors <span data-claim="clip-l14-336">pre-train at a higher 336 pixel resolution for one additional epoch</span>, an early sign of how much input resolution will matter later on this page.</p>
+
+<div class="aside">
+  <h4>ALIGN: the same game on noisier data</h4>
+  <p>In the same month, Google's ALIGN played the same game with far less cleaning. It used <span data-claim="align-dataset-size">1.8B image-text pairs</span> of raw alt-text with only simple frequency filters, for example <span data-claim="align-filter-txt-share">exclude alt-texts shared by more than 10 images</span> and <span data-claim="align-filter-txt-len">discard texts shorter than 3 unigrams or longer than 20 unigrams</span>. Its point was that the <em>scale of the corpus can make up for its noise</em>: in a controlled comparison, its noisy <span data-claim="align-scale-vs-noise">data outperforms Conceptual Captions with only 4x size</span>, and it edged CLIP on zero-shot ImageNet, <span data-claim="align-zs-imagenet">76.4 vs 76.2</span>.</p>
+  <p>The loss is the same shape with small differences: the ALIGN authors <span data-claim="align-loss-combo">minimize the sum of two losses</span> rather than their average, add label smoothing of <span data-claim="align-label-smooth">0.1</span>, and learn the temperature from an initial <span data-claim="align-temp-init">1.0</span> (in the paper's ablations, on a smaller EfficientNet-B5 and BERT-Base model, it converged to <span data-claim="align-temp-converged">about 1/64</span>).</p>
+</div>
+
+<p>What CLIP and ALIGN leave behind is an image encoder whose vectors <em>already mean something in words</em>. Almost every later model on this page starts from an encoder trained this way; the exceptions are BLIP (Act II), whose ViT starts from weights pre-trained on ImageNet, and Chameleon (Act VI), which has no image encoder at all. But the matching game only ever says "which caption?"; it cannot write a sentence. Getting from matching to talking is Act II. First, the loss itself hit a wall.</p>
+</section>
+<script>
+(() => {
+  const fig = document.getElementById('viz-contrastive'), el = document.getElementById('contrastive-canvas');
+  const slider = document.getElementById('rng-contrastive-tau'), tauOut = document.getElementById('contrastive-tau-val');
+  const out = document.getElementById('contrastive-readout');
+  const names = ['dog', 'cat', 'car', 'pizza', 'tree'], N = names.length;
+  // A photo is matched only when its own caption is strictly closest: argmax would hand an exact tie to the first caption.
+  const wins = (row, i) => row.every((s, j) => j === i || row[i] - s > 1e-9);
+  // A fixed random start, so every visit (and every cue replay) begins from the same scramble.
+  const r0 = PE.rng(65), init = { th: names.map(() => r0() * 2 * Math.PI), ph: names.map(() => r0() * 2 * Math.PI) };
+  const S = { th: init.th.slice(), ph: init.ph.slice(), tau: .07, sel: null, zs: 0, trained: false };
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  let stop = () => {};
+  const tauFromSlider = v => Math.pow(10, v / 100);            // slider -150..0 -> tau 0.03..1
+  const sliderFromTau = t => Math.round(100 * Math.log10(t));
+
+  function trainFrames(tau) {
+    let th = init.th.slice(), ph = init.ph.slice(); const F = [[th, ph]];
+    const lr = .05;
+    for (let k = 0; k < 400; k++) { const g = PE.contrast(th, ph, tau);
+      th = th.map((v, i) => v - lr * g.gth[i]); ph = ph.map((v, i) => v - lr * g.gph[i]); if (k % 4 === 3) F.push([th, ph]); }
+    return F;
+  }
+  // Zero-shot probe: an image the model never saw. Toy assumption: a trained encoder puts it near the dog photos.
+  const probeAngle = () => S.th[0] + .35;
+
+  const layout = (W, H) => {
+    const stacked = W < 560;
+    if (stacked) { const R = W * .27; return { stacked, cx: W / 2, cy: R + 34, R, mx: 64, my: 2 * R + 118, cell: Math.min(44, (W - 84) / N) }; }
+    const R = Math.min(H * .36, W * .19), cx = R + 82, mx = cx + R + 118; return { stacked, cx, cy: H / 2 + 4, R, mx, my: 66, cell: Math.min(46, (W - mx - 16) / N) };
+  };
+
+  const cv = PE.canvas(el, w => w < 560 ? 1.8 : .56, (ctx, W, H) => {
+    const B = PE.css('--blue'), Y = PE.css('--yellow'), G = PE.css('--green'), Rd = PE.css('--red'), Br = PE.css('--brown'),
+      F = PE.css('--fg'), M = PE.css('--muted'), Rule = PE.css('--rule'), BG = PE.css('--bg');
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+    const Lh = layout(W, H), { cx, cy, R } = Lh;
+    const P = a => [cx + R * Math.cos(a), cy - R * Math.sin(a)];
+    const res = PE.contrast(S.th, S.ph, S.tau), Sm = res.S;
+    // The shared embedding space: every image and every caption is a direction (a point on the circle).
+    ctx.strokeStyle = Rule; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    PE.label(ctx, 'shared embedding space', cx, cy + 4, M, 11, 'center');
+    const gp = glow('pos'), gn = glow('neg');
+    // Each image draws a line to the caption it currently finds most similar: green if right, red if wrong.
+    for (let i = 0; i < N; i++) {
+      let best = 0; for (let j = 1; j < N; j++) if (Sm[i][j] > Sm[i][best]) best = j;
+      const [x1, y1] = P(S.th[i]), [x2, y2] = P(S.ph[best]), ok = best === i && wins(Sm[i], i);
+      PE.polyline(ctx, [[x1, y1], [x2, y2]], ok ? G : Rd, 2 + 2 * (ok ? gp : gn), ok ? null : [5, 4], .8);
+    }
+    const lab = (a, text, color, rr) => { const [x, y] = [cx + rr * Math.cos(a), cy - rr * Math.sin(a)];
+      PE.label(ctx, text, x, y + 4, color, Lh.stacked ? 10.5 : 11.5, Math.cos(a) > .3 ? 'left' : Math.cos(a) < -.3 ? 'right' : 'center'); };
+    for (let j = 0; j < N; j++) { const [x, y] = P(S.ph[j]), s = 7 + (S.sel === 'p' + j ? 3 : 0);
+      ctx.fillStyle = Y; ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s, y); ctx.closePath(); ctx.fill();
+      lab(S.ph[j], '"' + names[j] + '"', Y, R - 26); }
+    for (let i = 0; i < N; i++) { const [x, y] = P(S.th[i]); PE.dot(ctx, x, y, 7 + (S.sel === 't' + i ? 3 : 0), B);
+      lab(S.th[i], names[i] + ' photo', B, R + 14); }
+    if (S.zs > 0) { const a = probeAngle(), [x, y] = P(a); ctx.save(); ctx.globalAlpha = S.zs;
+      ctx.strokeStyle = B; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.stroke();
+      lab(a, 'new photo?', F, R + 14); ctx.restore(); }
+
+    // Right: the N x N table the loss actually sees.
+    const { mx, my, cell } = Lh, gs = glow('sim'), gt = glow('tau');
+    if (S.zs > 0) {
+      // Zero-shot: the class names ARE the classifier. Probabilities over "a photo of a {label}".
+      const pr = PE.softmax(S.ph.map(p => Math.cos(probeAngle() - p) / S.tau)), bw = cell * N - 40;
+      PE.label(ctx, 'new photo vs "a photo of a {label}"', Lh.stacked ? 8 : mx - 50, my - 30, F, 12);
+      pr.forEach((p, j) => { const y = my + j * cell * .78, h = cell * .6;
+        PE.label(ctx, names[j], mx - 8, y + h * .7, Y, 11.5, 'right');
+        ctx.fillStyle = Rule; ctx.fillRect(mx, y, bw, h);
+        ctx.globalAlpha = S.zs; ctx.fillStyle = j === 0 ? G : Br; ctx.fillRect(mx, y, bw * p, h); ctx.globalAlpha = 1;
+        PE.label(ctx, (100 * p).toFixed(0) + '%', mx + bw + 6, y + h * .7, M, 11); });
+    } else {
+      PE.label(ctx, 'similarity: rows photos, columns captions', Lh.stacked ? 8 : mx - 50, my - 30, F, 12);
+      for (let i = 0; i < N; i++) {
+        const row = PE.softmax(Sm[i].map(s => s / S.tau));
+        PE.label(ctx, names[i], mx - 6, my + i * cell + cell * .6, B, 11, 'right');
+        for (let j = 0; j < N; j++) {
+          const x = mx + j * cell, y = my + i * cell, diag = i === j, p = row[j];
+          ctx.fillStyle = PE.mix(BG.length === 7 ? BG : '#16181d', diag ? G : Br, .12 + .88 * p); ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+          if (diag) { ctx.strokeStyle = G; ctx.lineWidth = 1.5 + 2.5 * gp; ctx.strokeRect(x + 1.5, y + 1.5, cell - 3, cell - 3); }
+          else if (gn > 0) { ctx.strokeStyle = Br; ctx.lineWidth = 2.5 * gn; ctx.strokeRect(x + 1.5, y + 1.5, cell - 3, cell - 3); }
+          if (gs > 0) { ctx.strokeStyle = F; ctx.globalAlpha = gs; ctx.lineWidth = 1.5; ctx.strokeRect(x + 3, y + 3, cell - 6, cell - 6); ctx.globalAlpha = 1; }
+          PE.label(ctx, Sm[i][j].toFixed(2), x + cell / 2, y + cell * .58, F, cell < 40 ? 9.5 : 10.5, 'center');
+        }
+      }
+      for (let j = 0; j < N; j++) PE.label(ctx, names[j], mx + j * cell + cell / 2, my - 6, Y, 11, 'center');
+      // Loss bar: red, shrinking as training succeeds.
+      const ly = my + N * cell + 28, bw = cell * N, frac = Math.min(1, res.L / 6);
+      PE.label(ctx, 'loss ' + res.L.toFixed(2), mx, ly - 5, Rd, 12);
+      ctx.fillStyle = Rule; ctx.fillRect(mx, ly, bw, 12); ctx.fillStyle = Rd; ctx.fillRect(mx, ly, bw * frac, 12);
+      PE.label(ctx, 'temperature ' + S.tau.toFixed(2) + '; color = row softmax', Lh.stacked ? 8 : mx - 50, ly + 30, gt > 0 ? F : M, 11 + gt);
+    }
+  });
+
+  function readout() {
+    const res = PE.contrast(S.th, S.ph, S.tau);
+    let right = 0; res.S.forEach((row, i) => { if (wins(row, i)) right++; });
+    if (S.zs > 0) {
+      const pr = PE.softmax(S.ph.map(p => Math.cos(probeAngle() - p) / S.tau));
+      out.textContent = `Zero-shot: the new photo is compared with the caption "a photo of a {label}" for each class name. It is called "${names[pr.indexOf(Math.max(...pr))]}" with ${(100 * Math.max(...pr)).toFixed(0)}% of the probability. No classifier was trained for these classes; the text is the classifier.`;
+      return;
+    }
+    out.textContent = `${right} of ${N} photos currently sit closest to their own caption. Loss ${res.L.toFixed(2)} at temperature ${S.tau.toFixed(2)}. ` +
+      (right === N && res.L < .1 ? 'With the loss this low the gradient has all but vanished: training slows to a crawl.' : S.trained ? 'Training moved every point at once: matched pairs pull together, mismatched pairs push apart.' : 'Drag any photo or caption around the circle and watch the table and the loss.');
+  }
+  function tweenTo(th, ph, ms, done) {
+    stop(); const a0 = S.th.slice(), b0 = S.ph.slice();
+    stop = PE.animate(ms, u => { S.th = a0.map((v, i) => PE.lerp(v, th[i], u)); S.ph = b0.map((v, i) => PE.lerp(v, ph[i], u)); cv.redraw(); readout(); }, done);
+  }
+  function setTau(t) { S.tau = t; slider.value = sliderFromTau(t); tauOut.textContent = t.toFixed(2); }
+  function scramble() { S.zs = 0; S.trained = false; tweenTo(init.th, init.ph, 700); }
+  function train(then) {
+    stop(); S.zs = 0; S.th = init.th.slice(); S.ph = init.ph.slice(); S.trained = true;
+    const Fr = trainFrames(S.tau);
+    stop = PE.animate(2600, u => { const f = u * (Fr.length - 1), k = Math.floor(f), w = f - k, A = Fr[k], Bn = Fr[Math.min(k + 1, Fr.length - 1)];
+      S.th = A[0].map((v, i) => PE.lerp(v, Bn[0][i], w)); S.ph = A[1].map((v, i) => PE.lerp(v, Bn[1][i], w)); cv.redraw(); readout(); }, then);
+  }
+  document.getElementById('btn-contrastive-before').addEventListener('click', scramble);
+  document.getElementById('btn-contrastive-train').addEventListener('click', () => train());
+  document.getElementById('btn-contrastive-hot').addEventListener('click', () => { setTau(1); train(); });
+  document.getElementById('btn-contrastive-cold').addEventListener('click', () => { setTau(.07); train(); });
+  document.getElementById('btn-contrastive-zeroshot').addEventListener('click', () => {
+    stop(); const Fr = trainFrames(S.tau), last = Fr[Fr.length - 1]; S.th = last[0].slice(); S.ph = last[1].slice(); S.trained = true;
+    stop = PE.animate(700, u => { S.zs = u; cv.redraw(); readout(); });
+  });
+  document.getElementById('btn-contrastive-reset').addEventListener('click', () => {
+    stop(); setTau(.07); S.th = init.th.slice(); S.ph = init.ph.slice(); S.zs = 0; S.sel = null; S.trained = false; cv.redraw(); readout(); });
+  slider.addEventListener('input', () => { S.tau = tauFromSlider(+slider.value); tauOut.textContent = S.tau.toFixed(2); cv.redraw(); readout(); });
+
+  // Drag a point around the circle (pointer), or Tab to the canvas, pick with Up/Down, rotate with Left/Right.
+  const keyOrder = names.flatMap((_, i) => ['t' + i, 'p' + i]);
+  const angleOf = k => k[0] === 't' ? S.th[+k.slice(1)] : S.ph[+k.slice(1)];
+  const setAngle = (k, a) => { if (k[0] === 't') S.th[+k.slice(1)] = a; else S.ph[+k.slice(1)] = a; };
+  let dragging = false;
+  const local = e => { const b = el.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top, b.width, b.height]; };
+  el.addEventListener('pointerdown', e => { const [x, y, W, H] = local(e), L = layout(W, H); let best = null, bd = 18 * 18;
+    keyOrder.forEach(k => { const a = angleOf(k), px = L.cx + L.R * Math.cos(a), py = L.cy - L.R * Math.sin(a), d = (px - x) ** 2 + (py - y) ** 2; if (d < bd) { bd = d; best = k; } });
+    if (best) { stop(); S.zs = 0; S.sel = best; dragging = true; el.setPointerCapture(e.pointerId); cv.redraw(); } });
+  el.addEventListener('pointermove', e => { if (!dragging) return; const [x, y, W, H] = local(e), L = layout(W, H);
+    setAngle(S.sel, Math.atan2(L.cy - y, x - L.cx)); cv.redraw(); readout(); });
+  el.addEventListener('pointerup', () => { dragging = false; });
+  el.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); const i = keyOrder.indexOf(S.sel);
+      S.sel = keyOrder[(i + (e.key === 'ArrowUp' ? 1 : keyOrder.length - 1) + (i < 0 ? 1 : 0)) % keyOrder.length]; cv.redraw(); }
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && S.sel) { e.preventDefault(); stop(); S.zs = 0;
+      setAngle(S.sel, angleOf(S.sel) + (e.key === 'ArrowLeft' ? .08 : -.08)); cv.redraw(); readout(); }
+  });
+  setTau(.07); readout();
+})();
+</script>
+<script>
+(() => {
+  const x = '×', CTX = 76;
+  // Rows of CLIP's "CLIP-ViT hyperparameters" appendix table: patch, input resolution, embedding dim, vision L/W/H, text L/W/H.
+  const V = {
+    b32: { name: 'ViT-B/32', P: 32, r: 224, de: 512, vl: 12, vw: 768, vh: 12, tl: 12, tw: 512, th: 8 },
+    b16: { name: 'ViT-B/16', P: 16, r: 224, de: 512, vl: 12, vw: 768, vh: 12, tl: 12, tw: 512, th: 8 },
+    l14: { name: 'ViT-L/14', P: 14, r: 224, de: 768, vl: 24, vw: 1024, vh: 16, tl: 12, tw: 768, th: 12 },
+    l336: { name: 'ViT-L/14@336px', P: 14, r: 336, de: 768, vl: 24, vw: 1024, vh: 16, tl: 12, tw: 768, th: 12 },
+  };
+  const n = m => (m.r / m.P) ** 2 + 1;
+  const SH = {
+    i0: m => `N${x}3${x}${m.r}${x}${m.r}`, i1: m => `N${x}${n(m)}${x}${m.vw}`, i2: m => `N${x}${n(m)}${x}${m.vw}`, i3: m => `N${x}${m.vw}`, i4: m => `N${x}${m.de}`,
+    t0: () => 'N strings', t1: m => `N${x}${CTX}${x}${m.tw}`, t2: m => `N${x}${CTX}${x}${m.tw}`, t3: m => `N${x}${m.tw}`, t4: m => `N${x}${m.de}`, sim: () => `N${x}N`, loss: () => 'one number' };
+  const PARAMS = { i1: 'E, class, pos, LN', t1: 'token embeddings', i2: 'all layers', t2: 'all layers', i3: 'LN', t3: 'LN', i4: 'W_i', t4: 'W_t', sim: 't' };
+  ArchFlow.mount({
+    prefix: 'clipflow', grid: { cols: 7, rows: 2 },
+    boxes: {
+      i0: { c: 0, r: 0, lane: 'blue', title: ['photos'], glyph: 'photos', data: true },
+      i1: { c: 1, r: 0, lane: 'blue', title: ['patches', '+ [class]'], glyph: 'grid' },
+      i2: { c: 2, r: 0, lane: 'blue', title: ['ViT'], glyph: 'layers' },
+      i3: { c: 3, r: 0, lane: 'blue', title: ['[class] out', '+ LN'], glyph: 'vector' },
+      i4: { c: 4, r: 0, lane: 'blue', title: ['project', '+ L2 norm'], glyph: 'unit' },
+      t0: { c: 0, r: 1, lane: 'yellow', title: ['captions'], glyph: 'text', data: true },
+      t1: { c: 1, r: 1, lane: 'yellow', title: ['BPE tokens', '+ embed'], glyph: 'tokens' },
+      t2: { c: 2, r: 1, lane: 'yellow', title: ['text', 'transformer'], glyph: 'layers' },
+      t3: { c: 3, r: 1, lane: 'yellow', title: ['[EOS] out', '+ LN'], glyph: 'vector' },
+      t4: { c: 4, r: 1, lane: 'yellow', title: ['project', '+ L2 norm'], glyph: 'unit' },
+      sim: { c: 5, r: .5, lane: 'green', title: ['logits'], glyph: 'matrix' },
+      loss: { c: 6, r: .5, lane: 'red', title: ['loss'], glyph: 'loss' },
+    },
+    edges: [['i0', 'i1'], ['i1', 'i2'], ['i2', 'i3'], ['i3', 'i4'], ['i4', 'sim'], ['t0', 't1'], ['t1', 't2'], ['t2', 't3'], ['t3', 't4'], ['t4', 'sim'], ['sim', 'loss']],
+    stages: [
+      { key: 'batch', show: ['i0', 't0'] }, { key: 'tokens', show: ['i1', 't1'] }, { key: 'encode', show: ['i2', 't2'] }, { key: 'pool', show: ['i3', 't3'] },
+      { key: 'embed', show: ['i4', 't4'] }, { key: 'sim', show: ['sim'] }, { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: V, variant: 'l14',
+    shape: (id, m) => SH[id](m),
+    sub: (id, m) => id === 'i2' ? `${m.vl} layers` : id === 't2' ? `${m.tl} layers, masked` : null,
+    params: id => PARAMS[id] || null,
+    frozen: () => false,
+    readout: (s, m) => {
+      const g = m.r / m.P;
+      return {
+        overview: `${m.name}: an image of ${m.r} ${x} ${m.r} pixels becomes ${g * g} patch tokens plus one [class] token; a caption becomes at most ${CTX} tokens. Both end as one ${m.de}-number unit vector.`,
+        batch: `Step 1: a batch of N image-caption pairs. Images ${SH.i0(m)}; captions are N strings. In CLIP, N = 32,768.`,
+        tokens: `Step 2: image cut into ${g} ${x} ${g} = ${g * g} patches of ${m.P} ${x} ${m.P} ${x} 3 = ${m.P * m.P * 3} numbers, each mapped to ${m.vw} numbers, plus the [class] token: ${SH.i1(m)}. Caption: ids N${x}${CTX}, embedded to ${SH.t1(m)}.`,
+        encode: `Step 3: the vision transformer (${m.vl} layers, width ${m.vw}, ${m.vh} heads) and the text transformer (${m.tl} layers, width ${m.tw}, ${m.th} heads) run side by side. Shapes do not change inside an encoder.`,
+        pool: `Step 4: keep one vector per example. Image: the [class] token's output, layer-normalized, ${SH.i3(m)}. Text: the [EOS] token's output, layer-normalized, ${SH.t3(m)}.`,
+        embed: `Step 5: W_i is ${m.vw} ${x} ${m.de}, W_t is ${m.tw} ${x} ${m.de}. After the projection both sides are N${x}${m.de}, then each row is scaled to length 1.`,
+        sim: `Step 6: logits = I_e T_e^T ${x} exp(t): one N ${x} N table. At N = 32,768 that is about 1.07 billion numbers per step.`,
+        loss: 'Step 7: cross-entropy down every row (which caption?) and every column (which image?), averaged: one number.',
+        backward: 'Backward: the gradient starts at the loss and flows right to left into both lanes. Red outlines mark what it updates; nothing in CLIP is frozen.',
+        update: 'Update: every red-outlined parameter takes one AdamW step, including the temperature t, then the next batch starts.' +
+          (m === V.l336 ? ' (ViT-L/14@336px is not trained this way from scratch: it is ViT-L/14 continued for one epoch at 336 px.)' : ''),
+      }[s];
+    },
+  });
+})();
+</script>
+<script>
+(() => {
+  const fig = document.getElementById('viz-clipgrad'), el = document.getElementById('clipgrad-canvas');
+  const out = document.getElementById('clipgrad-readout');
+  const names = ['dog', 'cat', 'car', 'pizza', 'tree'], N = names.length, TAU = .07;
+  const deg = d => d * Math.PI / 180;
+  // Captions evenly spread; the other four photos already sit near their own captions (same as build/sim/clipgrad.cjs).
+  const PH = [90, 162, 234, 306, 18].map(deg), OTH = [0, 168, 228, 300, 24].map(deg);
+  const START = { far: deg(330), confused: deg(160), solved: deg(96) };
+  const S = { a: START.far, rad: 0, sel: true };
+  let stop = () => {};
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  const sm = v => PE.softmax(v);
+  // Exact gradient of CLIP's symmetric loss w.r.t. the dog photo's unit vector u, without the common 1/(N tau) factor:
+  // coefficient c_j = (p_j + q_j)/2 - [j=0]; dL/du is proportional to sum_j c_j v_j.
+  function grad(a) {
+    const th = OTH.map((t, i) => i === 0 ? a : t), cos = (x, y) => Math.cos(x - y);
+    const p = sm(PH.map(ph => cos(a, ph) / TAU)), q = PH.map(ph => sm(th.map(t => cos(t, ph) / TAU))[0]);
+    const c = PH.map((_, j) => (p[j] + q[j]) / 2 - (j === 0 ? 1 : 0));
+    let gx = 0, gy = 0; PH.forEach((ph, j) => { gx += c[j] * Math.cos(ph); gy += c[j] * Math.sin(ph); });
+    const ux = Math.cos(a), uy = Math.sin(a), r = gx * ux + gy * uy;
+    return { p, q, c, gx, gy, r, tx: gx - r * ux, ty: gy - r * uy };
+  }
+  const layout = (W, H) => { const R = Math.min(W, H) * .31; return { cx: W / 2, cy: H / 2 - 4, R }; };
+  const cv = PE.canvas(el, w => w < 560 ? 1.15 : .62, (ctx, W, H) => {
+    const B = PE.css('--blue'), Y = PE.css('--yellow'), G = PE.css('--green'), Br = PE.css('--brown'), F = PE.css('--fg'), M = PE.css('--muted'), Rule = PE.css('--rule'), BG = PE.css('--bg');
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+    const { cx, cy, R } = layout(W, H), P = a => [cx + R * Math.cos(a), cy - R * Math.sin(a)], small = W < 560;
+    ctx.strokeStyle = Rule; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    const lab = (a, t, col, rr) => PE.label(ctx, t, cx + rr * Math.cos(a), cy - rr * Math.sin(a) + 4, col, small ? 10.5 : 11.5, Math.cos(a) > .3 ? 'left' : Math.cos(a) < -.3 ? 'right' : 'center');
+    PH.forEach((ph, j) => { const [x, y] = P(ph), s = 7; ctx.fillStyle = Y; ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s, y); ctx.closePath(); ctx.fill();
+      lab(ph, '"' + names[j] + '"', Y, R - 26); });
+    OTH.forEach((t, i) => { if (i) { const [x, y] = P(t); PE.dot(ctx, x, y, 5, B, .45); } });
+    const g = grad(S.a), [px, py] = P(S.a), k = R * .62, gp = glow('pos'), gn = glow('neg'), gt = glow('tau'), gr = glow('radial');
+    PE.dot(ctx, px, py, 9, B); lab(S.a, 'dog photo', B, R + 16);
+    // Descent direction is minus the gradient: each caption contributes -c_j v_j (drawn from the photo).
+    PH.forEach((ph, j) => { const c = -g.c[j]; if (Math.abs(c) < .02) return;
+      const dx = c * Math.cos(ph) * k, dy = -c * Math.sin(ph) * k, own = j === 0, w = own ? gp : gn;
+      PE.arrow(ctx, px, py, px + dx, py + dy, own ? G : Br, 2.5 + 2 * w + gt, 9, .95);
+      PE.label(ctx, (own ? 'pull ' : 'push ') + Math.abs(c).toFixed(2), px + dx * 1.08 + (dx >= 0 ? 4 : -4), py + dy * 1.08 + 4, own ? G : Br, 10.5, dx >= 0 ? 'left' : 'right'); });
+    if (S.rad > 0) {
+      const nx = -g.gx * k, ny = g.gy * k, ux = Math.cos(S.a), uy = -Math.sin(S.a), rr = -g.r * k, tx = -g.tx * k, ty = g.ty * k;
+      ctx.save(); ctx.globalAlpha = S.rad;
+      PE.polyline(ctx, [[px, py], [px + nx, py + ny]], F, 1.2, [3, 3], .6);
+      PE.arrow(ctx, px, py, px + rr * ux, py + rr * uy, M, 2 + 2 * gr, 8, .9);
+      PE.arrow(ctx, px, py, px + tx, py + ty, F, 3 + 2 * gr, 10, 1);
+      const ly = H - 34; PE.label(ctx, 'dashed: raw sum of the arrows', small ? 8 : 12, ly, F, 10.5);
+      PE.label(ctx, 'grey: radial part, deleted by the normalization', small ? 8 : 12, ly + 14, M, 10.5);
+      PE.label(ctx, 'bold: what is left, it slides the photo along the circle', small ? 8 : 12, ly + 28, F, 10.5);
+      ctx.restore();
+    }
+    if (S.sel && document.activeElement === el) { ctx.strokeStyle = F; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(px, py, 13, 0, 7); ctx.stroke(); }
+    PE.label(ctx, 'arrows: minus the gradient on the dog photo (τ = 0.07)', small ? 8 : 12, small ? 44 : 18, M, 11);
+  });
+  function readout() {
+    const g = grad(S.a), push = PH.map((_, j) => j).filter(j => j && g.c[j] > .02);
+    const tan = Math.hypot(g.tx, g.ty);
+    out.textContent = `Pull toward "dog": ${(-g.c[0]).toFixed(2)}. ` + (push.length ? 'Pushes: ' + push.map(j => `"${names[j]}" ${g.c[j].toFixed(2)}`).join(', ') + '. ' : 'No caption pushes. ') +
+      `The other ${N - 1 - push.length} captions push with less than 0.02: they are already far away. ` + (tan < .02 ? 'The photo already wins its row and column, so the gradient is almost zero.' : '');
+  }
+  function tweenTo(a, ms = 700) { stop(); const a0 = S.a; let d = a - a0; d = Math.atan2(Math.sin(d), Math.cos(d));
+    stop = PE.animate(ms, u => { S.a = a0 + d * u; cv.redraw(); readout(); }); }
+  const set = key => { S.rad = 0; tweenTo(START[key]); };
+  document.getElementById('btn-clipgrad-far').addEventListener('click', () => set('far'));
+  document.getElementById('btn-clipgrad-confused').addEventListener('click', () => set('confused'));
+  document.getElementById('btn-clipgrad-solved').addEventListener('click', () => set('solved'));
+  document.getElementById('btn-clipgrad-radial').addEventListener('click', () => { stop(); const r0 = S.rad; stop = PE.animate(600, u => { S.rad = PE.lerp(r0, 1, u); cv.redraw(); }); });
+  // Plain gradient descent on the photo's angle, starting from where it is now.
+  document.getElementById('btn-clipgrad-descend').addEventListener('click', () => {
+    stop(); S.rad = 0; let a = S.a; const F = [a];
+    for (let s = 0; s < 240; s++) { const g = grad(a); a -= .08 * (g.gx * -Math.sin(a) + g.gy * Math.cos(a)); if (s % 3 === 2) F.push(a); }
+    stop = PE.animate(2400, u => { const f = u * (F.length - 1), i = Math.floor(f), w = f - i; S.a = PE.lerp(F[i], F[Math.min(i + 1, F.length - 1)], w); cv.redraw(); readout(); });
+  });
+  document.getElementById('btn-clipgrad-reset').addEventListener('click', () => { stop(); S.a = START.far; S.rad = 0; cv.redraw(); readout(); });
+  let drag = false;
+  const ang = e => { const b = el.getBoundingClientRect(), L = layout(b.width, b.height); return Math.atan2(L.cy - (e.clientY - b.top), e.clientX - b.left - L.cx); };
+  el.addEventListener('pointerdown', e => { const b = el.getBoundingClientRect(), L = layout(b.width, b.height), X = e.clientX - b.left, Yp = e.clientY - b.top;
+    const px = L.cx + L.R * Math.cos(S.a), py = L.cy - L.R * Math.sin(S.a); if ((px - X) ** 2 + (py - Yp) ** 2 < 22 * 22) { stop(); drag = true; el.setPointerCapture(e.pointerId); } });
+  el.addEventListener('pointermove', e => { if (!drag) return; S.a = ang(e); cv.redraw(); readout(); });
+  el.addEventListener('pointerup', () => { drag = false; });
+  el.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); stop(); S.a += e.key === 'ArrowLeft' ? .06 : -.06; cv.redraw(); readout(); } });
+  el.addEventListener('focus', () => cv.redraw()); el.addEventListener('blur', () => cv.redraw());
+  readout();
+})();
+</script>
+<section id="ch-sigmoid" class="chapter">
+<h2>The softmax needs the whole batch</h2>
+<p>CLIP's loss asks every photo to pick its caption out of the whole batch, so no single cell of the table can be scored without looking at its entire row and column. SigLIP replaced that softmax with a plain yes/no question per cell, and the same five photos and captions from the last chapter show what changes.</p>
+
+<figure class="viz" id="viz-siglip" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="siglip-canvas" tabindex="0" role="img" aria-label="The five photos (blue) and five captions (yellow) from chapter 1 on a circle, a five by five table colored by either the softmax or the sigmoid, a loss bar and the bias. Click a cell or use the arrow keys to pick one."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglip-softmax">Softmax view</button>
+    <button type="button" id="btn-siglip-sigmoid">Sigmoid view</button>
+    <button type="button" id="btn-siglip-b10">Train, bias starts at -10</button>
+    <button type="button" id="btn-siglip-b0">Train, bias starts at 0</button>
+    <button type="button" id="btn-siglip-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siglip-readout" aria-live="polite"></p>
+  <figcaption>The red outlines show what the loss term for the picked cell touches: in the softmax view, its whole row (solid) and whole column (dashed); in the sigmoid view, the cell alone. Before you press either Train button, guess: does it matter where the bias starts? Both buttons train from the same scrambled start as chapter 1 (seed 65), with real gradient descent on the sigmoid loss. What is toy: two dimensions and five pairs; the scale t (the inverse temperature) is held at SigLIP's starting value t = 10 while only the bias is learned (SigLIP learns both). From this start the bias-0 run ends with <span data-computed>two of five</span> pairs matched (the three collapsed photos tie between their three captions); over 200 random starts it averages <span data-computed>about one and a half</span>, against <span data-computed>almost five</span> for bias -10.</figcaption>
+</figure>
+
+<h3>The wall: every cell depends on the whole batch</h3>
+<p>Look again at CLIP's loss for one photo: a softmax over its row. The probability of the right caption is its score divided by the sum of the scores of <em>every</em> caption in the batch. Press <b>Softmax view</b> and pick any cell: the loss that cell feeds into spans its whole row, and the mirror-image loss for captions spans its whole column. One similarity is tied to <span class="tex">2N - 1</span> cells (<span data-computed>9 of the 25</span> here).</p>
+<p>At toy size that is harmless. At CLIP's batch of <span data-claim="clip-batch-size">32,768</span>, the photos and captions are spread across many accelerators, each holding a slice of the batch. To finish even one row, a device needs every caption embedding from every other device (an <em>all-gather</em>), and the textbook implementation then builds the full table of pairwise similarities in memory. Even the numerics want the whole batch: a softmax is usually stabilised by subtracting the row's maximum first, <span data-claim="page-siglip-another-pass">which requires another pass over the full batch</span>.</p>
+
+<h3>A yes/no question per cell</h3>
+<p>SigLIP (Sigmoid loss for Language-Image Pre-training) drops the competition. Each cell asks its own question: <em>do this photo and this caption belong together?</em> The diagonal cells should say yes, every other cell should say no, and each answer is scored by a logistic (sigmoid) loss, the same loss as any binary classifier. The paper's phrase is that the loss <span data-claim="page-siglip-independent">processes every image-text pair independently</span>: the batch of <span class="tex">N</span> pairs becomes <span class="tex">N^2</span> separate binary examples. Press <b>Sigmoid view</b>. The table now shows, for each cell, the probability the model gives to "match", computed from that cell alone, and the red outline shrinks to the single cell you picked.</p>
+<p>There is a catch hiding in that table: in a batch of <span class="tex">N</span> pairs there are only <span class="tex">N</span> yes-cells and <span class="tex">N^2 - N</span> no-cells. The softmax never noticed, because each row had exactly one right answer. The sigmoid sees <span data-computed>20 no-cells for every 5 yes-cells</span> here, and a real batch is far more lopsided.</p>
+
+<h3>Predict: what if the bias starts at 0?</h3>
+<p>SigLIP adds a learnable bias <span class="tex">b</span> to every cell's score before the sigmoid, and starts it at <span data-claim="siglip-init-b">-10</span>, with the scale <span class="tex">t</span> (the inverse temperature) starting at <span data-claim="siglip-init-t">log 10 (t = 10)</span> in its log form. A cosine is at most 1, so at <span class="tex">t = 10</span> a score is at most 10, and with the bias at -10 every cell starts out saying "no": the <em>prior</em>, correct for all the negatives. With the bias at 0, a cell at right angles is a coin flip and every cell with a positive cosine says "yes". Before pressing, guess which start ends with all five pairs matched.</p>
+<p>Press <b>Train, bias starts at -10</b>. Nothing in the table says yes at first (the readout counts <span data-computed>0 of 25</span>), so the only strong signal is the five diagonal cells asking to be pulled together; they close up within a few dozen steps, the pairs spread around the circle, and all five match. Now press <b>Train, bias starts at 0</b> from the same start. <span data-computed>12 of the 25</span> cells begin as "yes", <span data-computed>9</span> of them wrongly, and the twenty negatives dominate the first steps: the fastest way to silence them is to push everything apart, correct pairs included. Three photos and their three captions end up clumped in two lumps, the bias has only crawled part of the way down, and those three photos can no longer tell their captions apart.</p>
+<p>That is the toy's picture of what the paper describes: without the bias, <span data-claim="page-siglip-imbalance">the heavy imbalance coming from the many negatives dominates the loss, leading to large initial optimization steps attempting to correct this bias</span>, while the -10 start <span data-claim="page-siglip-prior">starts roughly close to the prior and does not require massive over-correction</span>. The toy exaggerates the effect (it is two-dimensional and keeps <span class="tex">t</span> fixed). In the paper's ablation (Table 4, a Base model), ImageNet zero-shot accuracy is <span data-claim="siglip-bias-ablation">62.0 vs 63.0</span> for no bias against the -10 start, and a bias started at 0 gives <span data-claim="page-siglip-b0-ablation">61.7</span>; with the scale <span class="tex">t</span> also started small (<span class="tex">t' = \log 1</span>, so <span class="tex">t = 1</span>: a hot start in chapter 1's terms), it falls to <span data-claim="page-siglip-b0-t1">53.7</span>.</p>
+
+<h3>The two losses, side by side</h3>
+<p>First the softmax loss, as SigLIP writes it for CLIP, with <span class="tex">t</span> the inverse of the temperature <span class="tex">\tau</span> from chapter 1. Each term is a whole row or a whole column:</p>
+<div class="eq" id="eq-siglip-soft" data-build data-viz="viz-siglip"><div class="tex tex-display">
+\htmlData{step=3}{\htmlClass{t-red}{\mathcal{L}_{\text{soft}}} = -\frac{1}{2|B|}\sum_{i=1}^{|B|}\Big(} \htmlData{step=1, link=row}{\log \frac{e^{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_i}}}{\sum_{j=1}^{|B|} e^{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_j}}}} + \htmlData{step=2, link=col}{\log \frac{e^{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_i}}}{\sum_{j=1}^{|B|} e^{t\,\htmlClass{t-blue}{x_j}\cdot \htmlClass{t-yellow}{y_i}}}} \htmlData{step=3}{\Big)}
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.1 of SigLIP v4 (the same loss as CLIP's Fig. 3 pseudocode, with t = 1/&tau;).</p>
+<p>Then the sigmoid loss. One term per cell, and nothing in the term mentions any other cell:</p>
+<div class="eq" id="eq-siglip" data-build data-viz="viz-siglip"><div class="tex tex-display">
+\htmlData{step=4, link=pairs}{\htmlClass{t-red}{\mathcal{L}_{\text{sig}}} = -\frac{1}{|B|}\sum_{i=1}^{|B|}\sum_{j=1}^{|B|}} \log \sigma\big(\htmlData{step=1, link=label}{\htmlClass{t-green}{z_{ij}}} \cdot \big(\htmlData{step=2, link=logit}{t\,\htmlClass{t-blue}{x_i}\cdot \htmlClass{t-yellow}{y_j}} \htmlData{step=3, link=bias}{+\, b}\big)\big)
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.2 of SigLIP v4, written in the form of Algorithm 1 (<code>logits = t x.y + b</code>). The equation printed in Sec. 3.2 has the opposite sign on b; with b starting at -10, only the Algorithm 1 form makes every cell start at "no", so we follow Algorithm 1.</p>
+<ul class="gloss">
+  <li><span class="tex">B</span>: the batch of photo-caption pairs; <span class="tex">|B|</span> is its size, the <span class="tex">N</span> of the toy.</li>
+  <li><span class="tex">\htmlClass{t-blue}{x_i}</span>, <span class="tex">\htmlClass{t-yellow}{y_j}</span>: the unit-length embeddings of photo <span class="tex">i</span> and caption <span class="tex">j</span>, so <span class="tex">x_i \cdot y_j</span> is the cosine in cell <span class="tex">(i, j)</span>.</li>
+  <li><span class="tex">\htmlClass{t-green}{z_{ij}}</span>: the label, +1 on the diagonal (a true pair) and -1 everywhere else.</li>
+  <li><span class="tex">t</span>: the inverse temperature, learned as <span class="tex">t = e^{t'}</span>; it stretches cosines from [-1, 1] into scores from <span class="tex">-t</span> to <span class="tex">t</span>.</li>
+  <li><span class="tex">b</span>: the learned bias, shared by every cell; it sets where "no" turns into "yes".</li>
+  <li><span class="tex">\sigma(u) = 1/(1 + e^{-u})</span>: the sigmoid, the probability of the answer the label asks for. Its log is 0 when the cell answers confidently and correctly, and very negative when it is confidently wrong.</li>
+  <li>The sum runs over all <span class="tex">|B|^2</span> cells but is divided by <span class="tex">|B|</span>, not <span class="tex">|B|^2</span>.</li>
+</ul>
+
+<h3>Why this lets the batch grow</h3>
+<p>Because each cell's term stands alone, the table never has to exist all at once. SigLIP splits the loss by device. With the batch spread over <span class="tex">D</span> devices, each device holds its own slice of photos and captions, the per-device batch <span class="tex">b_{\text{dev}} = |B|/D</span> (the paper calls this <span class="tex">b</span> too, a different quantity from the bias). Each device scores its own photos against its own captions, which contains all its positives, then passes its captions to the next device and scores the new block, which is all negatives, and so on around the ring until every photo has met every caption. A final sum across devices adds up the pieces.</p>
+
+<figure class="viz" id="viz-siglip-batch" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="siglip-batch-canvas" tabindex="0" role="img" aria-label="The full similarity table split into device blocks. Softmax: the whole table in memory at once. Chunked sigmoid: each device holds one block at a time, stepping through the table as captions pass between devices. Bars compare the memory on a log scale."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglip-batch-mock">The paper's mock setup</button>
+    <button type="button" id="btn-siglip-batch-full">Softmax: full table</button>
+    <button type="button" id="btn-siglip-batch-chunk">Sigmoid: one block at a time</button>
+    <button type="button" id="btn-siglip-batch-reset" data-cue-reset>Reset</button>
+    <label for="rng-siglip-batch-dev">devices <input type="range" id="rng-siglip-batch-dev" min="0" max="8" step="1" value="2"> <span id="siglip-batch-dev-val">3</span></label>
+    <label for="rng-siglip-batch-per">per-device batch <input type="range" id="rng-siglip-batch-per" min="2" max="12" step="1" value="2"> <span id="siglip-batch-per-val">4</span></label>
+  </div>
+  <p class="readout" id="siglip-batch-readout" aria-live="polite"></p>
+  <figcaption>Rows are photos (blue, they stay on their device); columns are captions (yellow, they move one device along at each step). Red is what sits in memory: the whole table for the softmax, one block per device for the chunked sigmoid; pale red blocks are already scored and summed. The counts are computed from the sliders; they are similarities held at once, not bytes, and the devices and per-device batch are knobs, not settings from the paper. The first state is the paper's own Fig. 1 example.</figcaption>
+</figure>
+
+<p>Press <b>The paper's mock setup</b>: it is the example in SigLIP's Fig. 1, <span data-claim="page-siglip-fig1-mock">3 devices and a global batch size of 12</span>. The captions hop around three times and every cell gets scored, yet at any moment each device holds only one block of <span data-claim="page-siglip-fig1-block">size 4 x 4</span>, and there are no all-gathers. Press <b>Softmax: full table</b> for comparison, then drag the devices slider. The paper states the scaling: memory at any moment falls <span data-claim="siglip-memory-full">from |B|^2 to b^2 (b = |B|/D per-device batch)</span>, a factor of <span class="tex">D^2</span>. The paper adds that "<span data-claim="page-siglip-b-constant">Usually b is constant as scaling |B| is achieved by increasing the number of accelerators</span>", so the per-device block stays the same size while the full table grows with the square of the device count. Passing captions around is cheap too: the paper notes that <span data-claim="page-siglip-permute">D collective permutes is typically faster than two all-gathers between D devices</span>.</p>
+<div class="eq" id="eq-siglip-batch" data-build data-viz="viz-siglip-batch"><div class="tex tex-display">
+\htmlData{step=1, link=devices}{\htmlClass{t-red}{\mathcal{L}_{\text{sig}}} = -\frac{1}{|B|}\sum_{d_i=1}^{D}} \htmlData{step=2, link=swap}{\sum_{d_j=1}^{D}} \htmlData{step=3, link=block}{\sum_{i=b_{\text{dev}} d_i}^{b_{\text{dev}}(d_i+1)}\ \sum_{j=b_{\text{dev}} d_j}^{b_{\text{dev}}(d_j+1)} \htmlClass{t-red}{\mathcal{L}_{ij}}}
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.3 of SigLIP v4; the paper writes the per-device batch as b, we write b<sub>dev</sub> to keep it apart from the bias.</p>
+<ul class="gloss">
+  <li>First sum, over devices <span class="tex">d_i</span>: every device works in parallel on its own photos; the final cross-device sum adds their results.</li>
+  <li>Second sum, over <span class="tex">d_j</span>: the captions of device <span class="tex">d_j</span> visit each device in turn (the paper's label: "swap negs across devices").</li>
+  <li>Inner double sum: one <span class="tex">b_{\text{dev}} \times b_{\text{dev}}</span> block of cells, the only part of the table in memory at that moment; <span class="tex">\mathcal{L}_{ij}</span> is the per-cell term of the sigmoid loss above.</li>
+</ul>
+<p>The softmax cannot be split this simply: each row's sum needs every caption before that row's term can be finished. In practice the saving is concrete. The paper reports that four TPU-v4 chips fit a batch of <span data-claim="siglip-fit-4chips">4096 vs 2048</span> for a Base SigLIP model against the corresponding CLIP model.</p>
+
+<h3>What the bigger batches bought</h3>
+<p>The surprise is that SigLIP's authors, having made huge batches cheap, found they barely need them. The sigmoid loss wins most clearly at small batch: when the batch is <span data-claim="siglip-gap-threshold">smaller than 16 k</span> it beats the softmax by a large margin, for example ImageNet zero-shot at <span data-claim="siglip-s512-3b">batch 512: 51.5 vs 47.7</span> (SigLIP, sigmoid first) and <span data-claim="siglip-lit-512-3b">77.2 vs 74.6</span> for SigLiT (below). As the batch grows the gap closes. SigLIP performs best at batch size <span data-claim="page-siglip-peaks">32 k, whereas the softmax loss required 98 k</span>, and the softmax did not beat it even there. The abstract's conclusion: <span data-claim="page-siglip-diminish">the benefits of growing batch size quickly diminish</span>, and a batch of <span data-claim="siglip-saturate-32k">32 k</span> is enough.</p>
+<p>The extreme experiment was run on SigLiT, a cheaper variant: the image tower is a frozen, already-trained ViT whose embeddings are precomputed (the "Locked-image Tuning" setup), and only the text tower learns. SigLiT trained at a batch of <span data-claim="page-siglip-1m">one million</span>; performance saturated around <span data-claim="siglip-saturate-32k">32 k</span> and the model peaks at <span data-claim="page-siglip-peak256">256 k</span>. No from-scratch SigLIP was trained at a million. The frozen tower also makes SigLiT very cheap. In the abstract's words, "<span data-claim="page-siglip-g14">with only four TPUv4 chips, we train a SigLiT model that achieves 84.5% ImageNet zero-shot accuracy in two days</span>."</p>
+
+<h3>Inside SigLIP: forward, then backward</h3>
+<p>SigLIP keeps CLIP's two-lane machine and changes one box: the loss. Step through it below and watch for the three differences, the per-cell sigmoid with its learnable <span class="tex">t</span> and <span class="tex">b</span>, a backward pass in which no cell's gradient waits for its row, and (in the SigLiT variant) an image lane that is frozen solid.</p>
+
+<figure class="viz archflow" id="viz-siglipflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-siglipflow-batch" aria-pressed="false">1 Batch</button>
+    <button type="button" id="btn-siglipflow-tokens" aria-pressed="false">2 Tokens</button>
+    <button type="button" id="btn-siglipflow-encode" aria-pressed="false">3 Encoders</button>
+    <button type="button" id="btn-siglipflow-embed" aria-pressed="false">4 Normalize</button>
+    <button type="button" id="btn-siglipflow-sim" aria-pressed="false">5 Logits</button>
+    <button type="button" id="btn-siglipflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-siglipflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-siglipflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Recipe">
+    <span>recipe</span>
+    <button type="button" id="btn-siglipflow-b16" aria-pressed="true">SigLIP B/16, 224 px</button>
+    <button type="button" id="btn-siglipflow-b16x" aria-pressed="false">B/16, 256 px, 64 tokens</button>
+    <button type="button" id="btn-siglipflow-siglit" aria-pressed="false">SigLiT (frozen image tower)</button>
+  </div>
+  <canvas id="siglipflow-canvas" role="img" aria-label="SigLIP's training step as a diagram: an image lane (blue) and a text lane (yellow), each going through tokens, an encoder with pooling and a normalization, meeting in an N by N logits table (green diagonal) and a per-cell sigmoid loss (red). In the SigLiT recipe the image patches and encoder are brown (frozen). In the backward stages red arrows run from the loss back into the lanes that learn."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglipflow-prev">Previous</button>
+    <button type="button" id="btn-siglipflow-next">Next</button>
+    <button type="button" id="btn-siglipflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siglipflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map: CLIP's, with a new loss box</h4>
+      <p>The lanes are the ones from the <a href="#viz-clipflow">CLIP stepper</a>: photos (<b class="c-blue">blue</b>) and captions (<b class="c-yellow">yellow</b>) go through their own transformer, end as unit vectors, and meet only in the table of logits (<b class="c-green">green</b>). What is new sits on the right: the table gets a bias, and the loss (<b class="c-red">red</b>) scores every cell alone. Pick a recipe, press <b>1 Batch</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="batch" hidden>
+      <h4>1. A batch of pairs</h4>
+      <p>SigLIP trains on English image-text pairs from WebLI. The batch the paper settles on is <span data-claim="siglip-saturate-32k">32 k</span>, where its batch-size study saturates; the drawing shows four pairs. In the SigLiT recipe the photos are never loaded as pixels during training: the authors <span data-claim="siglip-arch-siglit-precompute">precompute embeddings to accelerate the training</span>, once, with the frozen tower.</p>
+    </div>
+    <div data-stage="tokens" hidden>
+      <h4>2. Tokens</h4>
+      <p><b class="c-blue">Image:</b> the base recipe is <span data-claim="siglip-arch-b16">B/16 ViT for image embeddings and B-sized transformer for text embeddings</span>, with photos resized to <span data-claim="siglip-arch-res">224</span> pixels square: <span data-computed>14 &times; 14 = 196</span> patches of 16 pixels, cut and embedded the ViT way (<a href="#ch-patches">next chapter</a>). The scaled-up recipe uses <span data-claim="siglip-arch-scaled">256 image patches and 64 text tokens</span>, which is <span data-computed>256 pixels</span> at the same patch size.</p>
+      <p><b class="c-yellow">Text:</b> a <span data-claim="siglip-arch-vocab">32 k vocabulary sentencepiece tokenizer</span> (trained on English C4), and <span data-claim="siglip-arch-text16">a maximum of 16 text tokens are kept</span>: a much shorter cap than CLIP's 76.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>3. Two encoders, one vector each</h4>
+      <p>The paper's model card says, for the released models, "<span data-claim="siglip-arch-samesize">The vision and language encoders always have the same size</span>" (SigLiT, below, pairs a B/8 image tower with a Large text tower, so the rule is not general), and that each outputs one vector of width <span class="tex">d</span>: <span data-claim="siglip-arch-d">768, 1024 and 1152</span> for B, L and SoViT-400M. Depth, width and heads of ViT-B come from the ViT paper that SigLIP cites (<span data-claim="vit-arch-base-layers">12</span> layers, width <span data-claim="page-tokens-base-d">768</span>, <span data-claim="vit-arch-base-heads">12</span> heads); for the text model the paper states only its width, <span data-claim="siglip-arch-textw">W = 768</span> for Base, not its depth.</p>
+      <p>How each lane turns a sequence of tokens into one vector is <em>not stated in the paper</em>, so the drawing just says "pool". SigLiT's text tower is <span data-claim="siglip-arch-siglit-text">a Large Transformer, but with a depth of only 12 layers (instead of 24)</span>; its image tower is the public <span data-claim="siglip-arch-siglit-tower">ViT-AugReg-B/8</span>, frozen.</p>
+    </div>
+    <div data-stage="embed" hidden>
+      <h4>4. Unit vectors</h4>
+      <p>Exactly as in CLIP, and as in Algorithm 1 (<code>zimg = l2_normalize(img_emb)</code>): each row is divided by its length, so a dot product is a cosine. The paper gives only the output width <span class="tex">d</span>, so the drawing does not assert whether a separate projection sits before this step.</p>
+    </div>
+    <div data-stage="sim" hidden>
+      <h4>5. The table, with a bias</h4>
+      <p><code>logits = dot(zimg, ztxt.T) * t + b</code>: CLIP's table, plus one learned number <span class="tex">b</span> added to every cell. The scale starts at <span data-claim="siglip-init-t">log 10 (t = 10)</span> and the bias at <span data-claim="siglip-init-b">-10</span>, so every cell starts as a confident "no". The table is never materialized whole: each device scores its own photos against one block of captions at a time, as the <a href="#viz-siglip-batch">device figure above</a> animates (this stepper cannot draw devices, so it points there). The line under the drawing computes the block size.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>6. What the loss grades</h4>
+      <p>Every one of the <span class="tex">N^2</span> cells: the <span class="tex">N</span> diagonal cells are graded against "yes" (<span class="tex">z = +1</span>), the <span class="tex">N^2 - N</span> others against "no" (<span class="tex">z = -1</span>), each by its own log-sigmoid, summed and divided by <span class="tex">N</span> (<a href="#eq-siglip">the equation above</a>). No softmax, no normalization across a row: in the paper's words <span data-claim="siglip-arch-symmetric">the sigmoid loss is symmetric, requires just a single pass</span>. On devices, each block's cells are summed where they were computed, and then <span data-claim="siglip-arch-final-sum">Losses can then simply be summed across all devices</span>.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>7. Each cell sends back its own error</h4>
+      <p>The gradient on one logit is <span class="tex">\tfrac{1}{N}\big(\sigma(\ell_{ij}) - \delta_{ij}\big)</span> (derived below): the cell's own "yes" probability minus 1 on the diagonal (0 elsewhere). CLIP's was <span class="tex">\tfrac{1}{N}\big(\tfrac{p_{ij} + q_{ij}}{2} - \delta_{ij}\big)</span>, where <span class="tex">p</span> and <span class="tex">q</span> are softmaxes over the whole row and column. From the table the gradient splits into the two lanes the same way as in CLIP, and <span class="tex">t</span> and <span class="tex">b</span> get theirs directly from the table.</p>
+      <p>Switch to <b>SigLiT</b> and replay this stage: the patch embedding and the ViT are <b class="c-brown">brown</b> and the gradient stops at the table's image side, because nothing upstream of it can learn. The paper also tried the middle road, an image tower that starts pretrained but is not frozen, with a <span data-claim="siglip-arch-unlocked-mult">0.1 learning rate multiplier to the pre-trained image tower</span> and weight decay switched off for it: "<span data-claim="siglip-arch-unlocked-wd">Weight decay is therefore only applied to the randomly initialized weights in the text model</span>".</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>8. One optimizer step</h4>
+      <p>SigLIP uses the <span data-claim="siglip-arch-adafactor">ScalingViT-Adafactor optimizer</span> with <span class="tex">\beta_2</span> lowered to <span data-claim="siglip-arch-beta2">0.95</span> to stop gradient spikes from derailing large-batch runs, and one default for every batch size from 512 up: <span data-claim="siglip-arch-lrwd">0.001 learning rate and 0.0001 weight decay</span>, with the <span data-claim="siglip-arch-cosine">default cosine learning rate scheduler</span>. The from-scratch B/16 reached its best Table 1 result in <span data-claim="siglip-arch-b16-chips">5 days with 32 TPUv4 chips</span>. The scaled-up recipe trains <span data-claim="siglip-arch-scaled-sizes">ViT-B, ViT-L or So-400m</span> for <span data-claim="siglip-arch-scaled-examples">40 billion examples seen at batch size 32 k</span>, then, for each higher resolution, <span data-claim="siglip-arch-resft">5 billion more examples at the target resolution, with a 100x smaller learning rate and no weight decay</span> (SO400M ends at <span data-claim="siglip-arch-so-patches">729</span> patches).</p>
+      <p>SigLiT on <span data-claim="siglip-arch-siglit-chips">four TPU-v4 chips</span> uses <span data-claim="siglip-arch-lion">LION</span> instead: peak learning rate <span data-claim="siglip-arch-lion-lr">1 x 10^-4</span> after <span data-claim="siglip-arch-lion-warm">6.5k steps</span> of warm-up, weight decay <span data-claim="siglip-arch-lion-wd">1 x 10^-7</span>, cosine to zero, <span data-claim="siglip-arch-siglit-steps">65,000</span> steps in all.</p>
+    </div>
+  </div>
+  <figcaption>Computed: shapes come from the paper's resolution, patch size, token cap and model-card widths; ViT-B's depth, width and heads come from the ViT paper; where SigLIP gives no number (text depth, SigLiT's input size and output width) the drawing writes a symbol. Block sizes assume one device per TPU chip (our reading). Before you open stage 7 on the SigLiT recipe, guess: which boxes will the gradient reach?</figcaption>
+</figure>
+
+<h3>Backward: no cell waits for its row</h3>
+<p>Stage 7 claimed that a cell's gradient depends only on that cell. Here is the check. Both tables start mostly solved; then one wrong cell, the dog photo against the caption "cat", rises. Before you press, guess: in each table, which cells' gradients will change?</p>
+
+<figure class="viz" id="viz-siglipgrad" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="siglipgrad-canvas" role="img" aria-label="Two five by five tables of per-logit gradients, softmax on one side and sigmoid on the other. Green cells are pulled up, brown cells pushed down; the cell for the dog photo and the caption cat is outlined in red, and cells whose gradient changed get a white outline."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siglipgrad-before">Every wrong cell low</button>
+    <button type="button" id="btn-siglipgrad-raise">Dog photo drifts toward "cat"</button>
+    <button type="button" id="btn-siglipgrad-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siglipgrad-readout" aria-live="polite"></p>
+  <figcaption>Each cell shows the exact gradient of the loss on that logit, times <span class="tex">N</span>; green means gradient descent will raise the logit, brown lower it, and an outline marks a cell whose gradient changed. Both use scale <span class="tex">t = 10</span>, the sigmoid also SigLIP's starting bias <span class="tex">b = -10</span>. What is toy: five pairs and a hand-picked table of cosines (the same in both), and only one cell moving.</figcaption>
+</figure>
+
+<p>Press <b>Dog photo drifts toward "cat"</b>. On the softmax side the red cell turns brown, as expected, but it drags others with it: the dog photo's own cell and the caption "cat"'s own cell suddenly pull hard, because they share a row or column with the intruder and their softmax probability has dropped. Every cell of that row and column changes a little. On the sigmoid side only the red cell changes. The true pairs were already being pulled (a cosine of <span data-toy>0.80</span> is still below the "yes" line that <span class="tex">b = -10</span> draws), and they are pulled exactly as hard as before.</p>
+
+<div class="eq" id="eq-siglipgrad" data-build data-viz="viz-siglipgrad"><div class="tex tex-display">
+\frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{sig}}}}{\partial \ell_{ij}} = \frac{1}{|B|}\big(\htmlData{step=1, link=cell}{\sigma(\ell_{ij})} \htmlData{step=2, link=own}{\htmlClass{t-green}{{} - \delta_{ij}}}\big) \qquad \htmlData{step=3, link=rowcol}{\frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{soft}}}}{\partial \ell_{ij}} = \frac{1}{|B|}\Big(\htmlClass{t-brown}{\tfrac{p_{ij} + q_{ij}}{2}} \htmlClass{t-green}{{} - \delta_{ij}}\Big)} \qquad \htmlData{step=4}{\frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{sig}}}}{\partial \htmlClass{t-blue}{x_i}} = t \sum_{j} \frac{\partial \htmlClass{t-red}{\mathcal{L}_{\text{sig}}}}{\partial \ell_{ij}}\, \htmlClass{t-yellow}{y_j}}
+</div></div>
+<p class="eqno">Derived here from the Algorithm 1 form of the loss (SigLIP v4 prints no gradient); <span class="tex">\ell_{ij} = t\,x_i \cdot y_j + b</span>. The softmax version is the one derived in chapter 1, with <span class="tex">t = 1/\tau</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">\sigma(\ell_{ij})</span>: the probability that cell <span class="tex">(i, j)</span> says "yes". It is computed from that one logit, so nothing else in the batch can change it. Write <span class="tex">u = z_{ij}\ell_{ij}</span>; the cell's loss is <span class="tex">-\log\sigma(u)</span>, whose derivative is <span class="tex">-(1 - \sigma(u))\,z_{ij}</span>, and for <span class="tex">z = +1</span> and <span class="tex">z = -1</span> both cases come out as the formula shown.</li>
+  <li><span class="tex">\htmlClass{t-green}{-\delta_{ij}}</span>: minus one on the diagonal, the pull toward "yes" for a true pair. It fades only as that pair's own <span class="tex">\sigma</span> approaches 1.</li>
+  <li><span class="tex">\htmlClass{t-brown}{p_{ij}}, \htmlClass{t-brown}{q_{ij}}</span>: the row and column softmax of CLIP's loss. Each has a denominator summed over the whole row or column, which is why raising one wrong cell changed the gradients of its neighbours.</li>
+  <li>The last formula is the step into the image lane. Photo <span class="tex">i</span> still collects from every caption in its row: its gradient is a sum over <span class="tex">j</span>. What changed is that each term of that sum is known the moment its own cell is computed, so the sum can be built one block at a time as captions pass between devices (our reading: the paper describes the chunked forward pass, not its backward). The bias gets the plain sum of all cell gradients, and <span class="tex">t</span> gets <span class="tex">\sum_{ij} (\partial\mathcal{L}/\partial\ell_{ij})\, x_i \cdot y_j</span>.</li>
+</ul>
+
+<p>After this chapter we have what the rest of the page builds on: an image encoder and a text encoder whose vectors line up, trained with a loss that works at any batch size. SigLIP-trained image encoders turn up again in later chapters, feeding language models. But so far the image encoder has been a black box that turns a photo into one vector. Next: what it actually looks at, the grid of patches a vision transformer cuts every image into.</p>
+</section>
+<script>
+(() => {
+  const fig = document.getElementById('viz-siglip'), el = document.getElementById('siglip-canvas');
+  const out = document.getElementById('siglip-readout');
+  const names = ['dog', 'cat', 'car', 'pizza', 'tree'], N = names.length, TAU = .1;  // t = 1/TAU = 10, SigLIP's init
+  // Same scramble as chapter 1 (seed 65, angles drawn photos first, then captions).
+  const r0 = PE.rng(65), init = { th: names.map(() => r0() * 2 * Math.PI), ph: names.map(() => r0() * 2 * Math.PI) };
+  const S = { th: init.th.slice(), ph: init.ph.slice(), b: -10, mt: 0, cell: [0, 1], trained: null };
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  let stop = () => {};
+  const sig = u => 1 / (1 + Math.exp(-u));
+  // A photo is matched only when its own caption is strictly closest. Collapsed points tie exactly, and argmax would hand the tie to the first caption.
+  const wins = (row, i) => row.every((s, j) => j === i || row[i] - s > 1e-9);
+
+  // Real gradient descent on the sigmoid loss: angles and the bias b are learned, t stays at 10.
+  function trainFrames(b0) {
+    let th = init.th.slice(), ph = init.ph.slice(), b = b0; const F = [[th, ph, b]], lr = .05;
+    for (let k = 0; k < 400; k++) { const g = PE.contrast(th, ph, TAU, 'sigmoid', b);
+      th = th.map((v, i) => v - lr * g.gth[i]); ph = ph.map((v, i) => v - lr * g.gph[i]); b -= lr * g.gb;
+      if (k % 4 === 3) F.push([th, ph, b]); }
+    return F;
+  }
+
+  const layout = (W, H) => {
+    const stacked = W < 560;
+    if (stacked) { const R = W * .27; return { stacked, cx: W / 2, cy: R + 34, R, mx: 64, my: 2 * R + 118, cell: Math.min(44, (W - 84) / N) }; }
+    const R = Math.min(H * .36, W * .19), cx = R + 82, mx = cx + R + 118; return { stacked, cx, cy: H / 2 + 4, R, mx, my: 66, cell: Math.min(46, (W - mx - 16) / N) };
+  };
+
+  const cv = PE.canvas(el, w => w < 560 ? 1.95 : .6, (ctx, W, H) => {
+    const B = PE.css('--blue'), Y = PE.css('--yellow'), G = PE.css('--green'), Rd = PE.css('--red'), Br = PE.css('--brown'),
+      F = PE.css('--fg'), M = PE.css('--muted'), Rule = PE.css('--rule'), BG = PE.css('--bg');
+    const bg = BG.length === 7 ? BG : '#16181d';
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+    const Lh = layout(W, H), { cx, cy, R } = Lh;
+    const P = a => [cx + R * Math.cos(a), cy - R * Math.sin(a)];
+    const res = PE.contrast(S.th, S.ph, TAU, 'sigmoid', S.b), Sm = res.S;
+    const gLab = glow('label'), gLog = glow('logit'), gBias = glow('bias'), gPairs = glow('pairs'), gRow = glow('row'), gCol = glow('col');
+
+    ctx.strokeStyle = Rule; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    PE.label(ctx, 'shared embedding space', cx, cy + 4, M, 11, 'center');
+    for (let i = 0; i < N; i++) {
+      let best = 0; for (let j = 1; j < N; j++) if (Sm[i][j] > Sm[i][best]) best = j;
+      const [x1, y1] = P(S.th[i]), [x2, y2] = P(S.ph[best]), ok = best === i && wins(Sm[i], i);
+      PE.polyline(ctx, [[x1, y1], [x2, y2]], ok ? G : Rd, 2, ok ? null : [5, 4], .8);
+    }
+    const lab = (a, text, color, rr) => { const [x, y] = [cx + rr * Math.cos(a), cy - rr * Math.sin(a)];
+      PE.label(ctx, text, x, y + 4, color, Lh.stacked ? 10.5 : 11.5, Math.cos(a) > .3 ? 'left' : Math.cos(a) < -.3 ? 'right' : 'center'); };
+    // Points that have collapsed onto one spot share one label, so the collapse reads as a collapse, not as overprinting.
+    const groups = A => { const G = []; A.forEach((a, k) => { const g = G.find(g => Math.abs(Math.atan2(Math.sin(a - A[g[0]]), Math.cos(a - A[g[0]]))) < .14);
+      g ? g.push(k) : G.push([k]); }); return G; };
+    const [si, sj] = S.cell;
+    for (let j = 0; j < N; j++) { const [x, y] = P(S.ph[j]), s = 7 + (j === sj ? 2 : 0);
+      ctx.fillStyle = Y; ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s, y); ctx.closePath(); ctx.fill();
+    }
+    groups(S.ph).forEach(g => lab(S.ph[g[0]], g.map(j => '"' + names[j] + '"').join(' '), Y, R - 26));
+    for (let i = 0; i < N; i++) { const [x, y] = P(S.th[i]); PE.dot(ctx, x, y, 7 + (i === si ? 2 : 0), B);
+    }
+    groups(S.th).forEach(g => lab(S.th[g[0]], g.map(i => names[i]).join('/') + (g.length > 1 ? ' photos' : ' photo'), B, R + 14));
+
+    // The table. Color = what the loss sees for that cell: the row softmax (mt = 0) or the cell's own sigmoid (mt = 1).
+    const { mx, my, cell } = Lh, mt = S.mt;
+    PE.label(ctx, mt < .5 ? 'softmax view: color = share of its row' : 'sigmoid view: color = P(match) for this cell alone', Lh.stacked ? 8 : mx - 50, my - 30, F, 12);
+    for (let i = 0; i < N; i++) {
+      const row = PE.softmax(Sm[i].map(s => s / TAU));
+      PE.label(ctx, names[i], mx - 6, my + i * cell + cell * .6, B, 11, 'right');
+      for (let j = 0; j < N; j++) {
+        const x = mx + j * cell, y = my + i * cell, diag = i === j, ps = sig(Sm[i][j] / TAU + S.b), p = PE.lerp(row[j], ps, mt);
+        ctx.fillStyle = PE.mix(bg, diag ? G : Br, .1 + .9 * p); ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+        if (gLab > 0) { ctx.strokeStyle = diag ? G : Br; ctx.lineWidth = 3 * gLab; ctx.strokeRect(x + 1.5, y + 1.5, cell - 3, cell - 3); }
+        if (gPairs > 0) { ctx.strokeStyle = F; ctx.globalAlpha = gPairs; ctx.lineWidth = 1.5; ctx.strokeRect(x + 3, y + 3, cell - 6, cell - 6); ctx.globalAlpha = 1; }
+        PE.label(ctx, Math.round(100 * (mt < .5 ? row[j] : ps)) + '%', x + cell / 2, y + cell * .6, F, cell < 40 ? 9.5 : 10.5, 'center');
+      }
+    }
+    for (let j = 0; j < N; j++) PE.label(ctx, names[j], mx + j * cell + cell / 2, my - 6, Y, 11, 'center');
+    // What one loss term touches: the softmax couples a whole row and a whole column; the sigmoid touches one cell.
+    ctx.save(); ctx.strokeStyle = Rd;
+    const coup = 1 - mt;
+    ctx.globalAlpha = Math.max(coup, gRow); ctx.lineWidth = 2.5 + 2 * gRow; ctx.strokeRect(mx - 1, my + si * cell - 1, N * cell + 2, cell + 2);
+    ctx.globalAlpha = Math.max(coup, gCol); ctx.lineWidth = 2.5 + 2 * gCol; ctx.setLineDash([6, 4]); ctx.strokeRect(mx + sj * cell - 1, my - 1, cell + 2, N * cell + 2);
+    ctx.setLineDash([]); ctx.globalAlpha = 1; ctx.lineWidth = 3 + 2.5 * gLog; ctx.strokeRect(mx + sj * cell + 1, my + si * cell + 1, cell - 2, cell - 2);
+    ctx.restore();
+
+    const ly = my + N * cell + 24, bw = cell * N;
+    PE.label(ctx, 'sigmoid loss ' + res.L.toFixed(2), mx, ly - 5, Rd, 12);
+    ctx.fillStyle = Rule; ctx.fillRect(mx, ly, bw, 10); ctx.fillStyle = Rd; ctx.fillRect(mx, ly, bw * Math.min(1, res.L / 14), 10);
+    // Bias: where the "no" prior sits. Axis from -12 to 2; tick at 0.
+    const by = ly + 36, bx = v => mx + (v + 12) / 14 * bw;
+    PE.label(ctx, 'bias b = ' + S.b.toFixed(2), mx, by - 7, gBias > 0 ? F : M, 11.5 + 1.5 * gBias);
+    ctx.fillStyle = Rule; ctx.fillRect(mx, by, bw, 3);
+    ctx.fillStyle = M; ctx.fillRect(bx(0) - 1, by - 4, 2, 11); PE.label(ctx, '0', bx(0), by + 18, M, 10, 'center');
+    PE.label(ctx, '-10', bx(-10), by + 18, M, 10, 'center');
+    PE.dot(ctx, bx(PE.clamp(S.b, -12, 2)), by + 1.5, 6 + 3 * gBias, F);
+  });
+
+  function stats() {
+    const res = PE.contrast(S.th, S.ph, TAU, 'sigmoid', S.b);
+    let right = 0, yes = 0, wrongYes = 0;
+    res.S.forEach((row, i) => { if (wins(row, i)) right++;
+      row.forEach((s, j) => { if (s / TAU + S.b > 0) { yes++; if (i !== j) wrongYes++; } }); });
+    return { res, right, yes, wrongYes };
+  }
+  function readout() {
+    const { res, right, yes, wrongYes } = stats(), [i, j] = S.cell;
+    const term = S.mt < .5
+      ? `Softmax view: the cell (${names[i]} photo, "${names[j]}") sits inside the ${names[i]} photo's row softmax and the "${names[j]}" caption's column softmax, so its loss terms couple ${2 * N - 1} cells.`
+      : `Sigmoid view: the cell (${names[i]} photo, "${names[j]}") is its own yes/no question; its loss term touches only that cell.`;
+    const state = S.trained === null ? '' : ` Trained from bias ${S.trained}: ${right} of ${N} photos are closer to their own caption than to any other; bias now ${S.b.toFixed(2)}, loss ${res.L.toFixed(2)}.`;
+    out.textContent = `${term} ${yes} of ${N * N} cells currently say "match" (${wrongYes} of them wrongly).${state}`;
+  }
+  function tweenMode(to, ms = 600) { const m0 = S.mt; stop(); stop = PE.animate(ms, u => { S.mt = PE.lerp(m0, to, u); cv.redraw(); readout(); }); }
+  function train(b0) {
+    stop(); S.th = init.th.slice(); S.ph = init.ph.slice(); S.b = b0; S.trained = b0; const m0 = S.mt;
+    const Fr = trainFrames(b0);
+    stop = PE.animate(2800, u => { S.mt = PE.lerp(m0, 1, Math.min(1, u * 6));
+      const f = u * (Fr.length - 1), k = Math.floor(f), w = f - k, A = Fr[k], Bn = Fr[Math.min(k + 1, Fr.length - 1)];
+      S.th = A[0].map((v, i) => PE.lerp(v, Bn[0][i], w)); S.ph = A[1].map((v, i) => PE.lerp(v, Bn[1][i], w)); S.b = PE.lerp(A[2], Bn[2], w);
+      cv.redraw(); readout(); });
+  }
+  document.getElementById('btn-siglip-softmax').addEventListener('click', () => tweenMode(0));
+  document.getElementById('btn-siglip-sigmoid').addEventListener('click', () => tweenMode(1));
+  document.getElementById('btn-siglip-b10').addEventListener('click', () => train(-10));
+  document.getElementById('btn-siglip-b0').addEventListener('click', () => train(0));
+  document.getElementById('btn-siglip-reset').addEventListener('click', () => {
+    stop(); S.th = init.th.slice(); S.ph = init.ph.slice(); S.b = -10; S.mt = 0; S.cell = [0, 1]; S.trained = null; cv.redraw(); readout(); });
+
+  // Pick a cell: click it, or Tab to the canvas and use the arrow keys.
+  el.addEventListener('pointerdown', e => { const b = el.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top, L = layout(b.width, b.height);
+    const j = Math.floor((x - L.mx) / L.cell), i = Math.floor((y - L.my) / L.cell);
+    if (i >= 0 && i < N && j >= 0 && j < N) { S.cell = [i, j]; cv.redraw(); readout(); } });
+  el.addEventListener('keydown', e => { const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+    if (!d) return; e.preventDefault(); S.cell = [(S.cell[0] + d[0] + N) % N, (S.cell[1] + d[1] + N) % N]; cv.redraw(); readout(); });
+  readout();
+})();
+</script>
+<script>
+(() => {
+  const fig = document.getElementById('viz-siglip-batch'), el = document.getElementById('siglip-batch-canvas');
+  const out = document.getElementById('siglip-batch-readout');
+  const rD = document.getElementById('rng-siglip-batch-dev'), rP = document.getElementById('rng-siglip-batch-per');
+  const oD = document.getElementById('siglip-batch-dev-val'), oP = document.getElementById('siglip-batch-per-val');
+  // D devices, per-device batch pb; global batch |B| = D * pb. mode: 'full' (vanilla softmax) or 'chunk' (sigmoid, s = steps done).
+  const S = { D: 3, pb: 4, mode: 'chunk', s: 0, fa: 1 };
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  let stop = () => {};
+  const fmt = n => n >= 1e12 ? (n / 1e12).toPrecision(3) + ' trillion' : n >= 1e9 ? (n / 1e9).toPrecision(3) + ' billion'
+    : n >= 1e6 ? (n / 1e6).toPrecision(3) + ' million' : n.toLocaleString('en-US');
+
+  const cv = PE.canvas(el, w => w < 560 ? 1.35 : .5, (ctx, W, H) => {
+    const B = PE.css('--blue'), Y = PE.css('--yellow'), Rd = PE.css('--red'), F = PE.css('--fg'), M = PE.css('--muted'),
+      Rule = PE.css('--rule'), BG = PE.css('--bg');
+    const bg = BG.length === 7 ? BG : '#16181d';
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+    const stacked = W < 560, D = S.D, NB = D * S.pb;
+    const Q = stacked ? Math.min(W - 70, H * .52) : H - 70, ox = 46, oy = stacked ? 54 : 40;
+    const gDev = glow('devices'), gSwap = glow('swap'), gBlock = glow('block');
+    const q = Q / D;
+    // Image embeddings stay on their device (blue bands, left); text embeddings travel (yellow bands, top).
+    for (let d = 0; d < D; d++) {
+      ctx.fillStyle = PE.mix(bg, B, .35 + .5 * gDev + .15 * (d % 2)); ctx.fillRect(ox - 12, oy + d * q, 8, q - (D <= 32 ? 1 : 0));
+      const k = S.mode === 'chunk' ? Math.min(D - 1, Math.floor(S.s)) : 0;
+      ctx.fillStyle = PE.mix(bg, Y, .35 + .5 * gSwap + .15 * (d % 2)); ctx.fillRect(ox + d * q, oy - 12, q - (D <= 32 ? 1 : 0), 8);
+      if (D <= 6) { PE.label(ctx, 'dev ' + (d + 1), ox - 16, oy + d * q + q / 2 + 4, B, 10.5, 'right');
+        if (S.mode === 'chunk') PE.label(ctx, 'on dev ' + (((d - k) % D + D) % D + 1), ox + d * q + q / 2, oy - 17, Y, 10, 'center'); }
+    }
+    PE.label(ctx, 'images (rows) x texts (columns), ' + NB.toLocaleString('en-US') + ' each', ox, oy + Q + 18, M, 11);
+    ctx.strokeStyle = Rule; ctx.lineWidth = 1; ctx.strokeRect(ox, oy, Q, Q);
+    if (NB <= 24) { ctx.globalAlpha = .5; for (let c = 1; c < NB; c++) { const t = Q * c / NB;
+      ctx.beginPath(); ctx.moveTo(ox + t, oy); ctx.lineTo(ox + t, oy + Q); ctx.moveTo(ox, oy + t); ctx.lineTo(ox + Q, oy + t); ctx.stroke(); } ctx.globalAlpha = 1; }
+    if (D > 1 && D <= 32) { ctx.strokeStyle = M; ctx.lineWidth = 1.2; for (let d = 1; d < D; d++) { const t = d * q;
+      ctx.beginPath(); ctx.moveTo(ox + t, oy); ctx.lineTo(ox + t, oy + Q); ctx.moveTo(ox, oy + t); ctx.lineTo(ox + Q, oy + t); ctx.stroke(); } }
+    if (S.mode === 'full') {
+      ctx.fillStyle = Rd; ctx.globalAlpha = (.55 + .3 * gBlock) * S.fa; ctx.fillRect(ox, oy, Q, Q); ctx.globalAlpha = 1;
+      PE.label(ctx, 'whole table in memory', ox + Q / 2, oy + Q / 2 + 4, F, 12, 'center');
+    } else {
+      // Step k: device d holds image block d and the text block that started on device (d + k) mod D.
+      const k = Math.floor(S.s), frac = S.s - k;
+      for (let d = 0; d < D; d++) {
+        const y = oy + d * q;
+        for (let kk = 0; kk < Math.min(k, D); kk++) { const c = (d + kk) % D; ctx.fillStyle = PE.mix(bg, Rd, .22); ctx.fillRect(ox + c * q, y, q, q); }
+        if (k < D) { const c = (d + k) % D; ctx.fillStyle = Rd; ctx.globalAlpha = Math.min(1, .75 + .25 * gBlock) * (k === 0 ? 1 : Math.min(1, .6 + frac * 2)); ctx.fillRect(ox + c * q, y, q, q); ctx.globalAlpha = 1;
+          if (gBlock > 0) { ctx.strokeStyle = F; ctx.lineWidth = 2 * gBlock; ctx.strokeRect(ox + c * q + 1, y + 1, q - 2, q - 2); } }
+      }
+    }
+    // Memory: cells held at once, log scale from 1 to 10^13.
+    const bx = stacked ? 12 : ox + Q + 40, by = stacked ? oy + Q + 44 : oy + 30, bw = stacked ? W - 24 : W - bx - 16, lg = v => Math.min(1, Math.log10(Math.max(1, v)) / 15);
+    const full = NB * NB, blk = S.pb * S.pb;
+    PE.label(ctx, 'similarities held in memory at once (log scale)', bx, by, F, 12);
+    const bar = (y, v, txt, c) => { ctx.fillStyle = Rule; ctx.fillRect(bx, y, bw, 14); ctx.fillStyle = c; ctx.fillRect(bx, y, bw * lg(v), 14); PE.label(ctx, txt, bx, y - 5, c === Rd ? F : M, 11); };
+    bar(by + 26, full, 'softmax, full table: |B|^2 = ' + fmt(full), S.mode === 'full' ? Rd : M);
+    bar(by + 66, blk, 'sigmoid, chunked: (per-device batch)^2 = ' + fmt(blk), S.mode === 'chunk' ? Rd : M);
+    PE.label(ctx, 'ratio ' + fmt(D * D) + ' = D^2', bx, by + 104, M, 11);
+    const steps = S.mode === 'chunk' ? `permute step ${Math.min(D, Math.floor(S.s) + 1)} of ${D}` : 'after all-gathers';
+    PE.label(ctx, steps, bx, by + 124, S.mode === 'chunk' ? Y : M, 11);
+  });
+
+  function readout() {
+    const NB = S.D * S.pb;
+    out.textContent = `Global batch ${NB.toLocaleString('en-US')} on ${S.D} device${S.D > 1 ? 's' : ''} (per-device batch ${S.pb.toLocaleString('en-US')}). ` +
+      (S.mode === 'full' ? `Softmax: all ${fmt(NB * NB)} similarities are materialised together.`
+        : `Chunked sigmoid: each device holds one ${S.pb} by ${S.pb} block (${fmt(S.pb * S.pb)} similarities), then passes its texts on; ${S.D} steps cover the whole table, ${S.D * S.D} times less memory at any moment.`);
+  }
+  function syncSliders() { rD.value = Math.round(Math.log2(S.D)); rP.value = Math.round(Math.log2(S.pb)); oD.textContent = S.D; oP.textContent = S.pb.toLocaleString('en-US'); }
+  function sweep() { stop(); S.mode = 'chunk'; S.s = 0; const D = S.D;
+    stop = PE.animate(Math.min(6000, 900 * D), u => { S.s = u * D; cv.redraw(); readout(); }, () => { S.s = D; cv.redraw(); readout(); }); }
+  function full() { stop(); S.mode = 'full'; S.fa = 0; readout(); stop = PE.animate(700, u => { S.fa = u; cv.redraw(); }); }
+  document.getElementById('btn-siglip-batch-full').addEventListener('click', full);
+  document.getElementById('btn-siglip-batch-chunk').addEventListener('click', sweep);
+  document.getElementById('btn-siglip-batch-mock').addEventListener('click', () => { S.D = 3; S.pb = 4; syncSliders(); sweep(); });
+  document.getElementById('btn-siglip-batch-reset').addEventListener('click', () => { stop(); S.D = 3; S.pb = 4; S.mode = 'chunk'; S.s = 0; syncSliders(); cv.redraw(); readout(); });
+  rD.addEventListener('input', () => { stop(); S.D = 2 ** +rD.value; S.s = S.mode === 'chunk' ? 0 : S.s; syncSliders(); cv.redraw(); readout(); });
+  rP.addEventListener('input', () => { stop(); S.pb = 2 ** +rP.value; syncSliders(); cv.redraw(); readout(); });
+  syncSliders(); readout();
+})();
+</script>
+<script>
+(() => {
+  const x = '×';
+  // SigLIP (PDF): Sec. 4.2 base recipe, Sec. 4.6 scaled-up recipe, Sec. 4.4 / Table 1 row 1 SigLiT. Vision widths from ViT Table 1 (SigLIP cites ViT [17]).
+  // chips: Table 1 (null where the paper gives none); text: token cap; tw: text width, null when the paper does not state it.
+  const V = {
+    b16: { name: 'SigLIP B/16 at 224 px', P: 16, r: 224, tok: 16, tw: 768, d: 768, batch: '32 k', bn: 32768, chips: 32, lit: false },
+    b16x: { name: 'SigLIP B/16 at 256 px, 64 tokens', P: 16, r: 256, tok: 64, tw: 768, d: 768, batch: '32 k', bn: 32768, chips: null, lit: false },
+    siglit: { name: 'SigLiT: frozen B/8 image tower', P: 8, r: null, tok: 16, tw: null, d: null, batch: '32 k', bn: 32768, chips: 4, lit: true },
+  };
+  const np = m => m.r ? String((m.r / m.P) ** 2) : 'n';
+  const W = m => m.tw ? String(m.tw) : 'W';
+  const D = m => m.d ? String(m.d) : 'd';
+  const SH = {
+    i0: m => m.r ? `N${x}3${x}${m.r}${x}${m.r}` : 'N photos, offline', i1: m => `N${x}${np(m)}${x}768`, i2: m => `N${x}${D(m)}`, i3: m => `N${x}${D(m)}, unit`,
+    t0: () => 'N strings', t1: m => `N${x}${m.tok}${x}${W(m)}`, t2: m => `N${x}${D(m)}`, t3: m => `N${x}${D(m)}, unit`, sim: () => `N${x}N, in blocks`, loss: () => 'one number' };
+  const PARAMS = { i1: 'patch embedding', t1: 'token embeddings', i2: 'all layers', t2: 'all layers', sim: 't and b' };
+  const fmt = v => Math.round(v).toLocaleString('en-US');
+  ArchFlow.mount({
+    prefix: 'siglipflow', grid: { cols: 6, rows: 2 },
+    boxes: {
+      i0: { c: 0, r: 0, lane: 'blue', title: ['photos'], glyph: 'photos', data: true },
+      i1: { c: 1, r: 0, lane: 'blue', title: ['patches'], glyph: 'grid', cls: false },
+      i2: { c: 2, r: 0, lane: 'blue', title: ['ViT', '+ pool'], glyph: 'layers' },
+      i3: { c: 3, r: 0, lane: 'blue', title: ['L2 norm'], glyph: 'unit' },
+      t0: { c: 0, r: 1, lane: 'yellow', title: ['captions'], glyph: 'text', data: true },
+      t1: { c: 1, r: 1, lane: 'yellow', title: ['tokens', '+ embed'], glyph: 'tokens' },
+      t2: { c: 2, r: 1, lane: 'yellow', title: ['text', 'transformer'], glyph: 'layers' },
+      t3: { c: 3, r: 1, lane: 'yellow', title: ['L2 norm'], glyph: 'unit' },
+      sim: { c: 4, r: .5, lane: 'green', title: ['logits', 't x·y + b'], glyph: 'matrix' },
+      loss: { c: 5, r: .5, lane: 'red', title: ['sigmoid', 'per cell'], glyph: 'loss' },
+    },
+    edges: [['i0', 'i1'], ['i1', 'i2'], ['i2', 'i3'], ['i3', 'sim'], ['t0', 't1'], ['t1', 't2'], ['t2', 't3'], ['t3', 'sim'], ['sim', 'loss']],
+    stages: [
+      { key: 'batch', show: ['i0', 't0'] }, { key: 'tokens', show: ['i1', 't1'] }, { key: 'encode', show: ['i2', 't2'] }, { key: 'embed', show: ['i3', 't3'] },
+      { key: 'sim', show: ['sim'] }, { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: V, variant: 'b16',
+    shape: (id, m) => SH[id](m),
+    sub: (id, m) => id === 'i2' ? `12 layers, pool|${SH.i2(m)}` : id === 't2' ? (m.lit ? `12 layers, pool|${SH.t2(m)}` : `B-sized, pool|${SH.t2(m)}`) : null,
+    params: id => PARAMS[id] || null,
+    frozen: (id, m) => m.lit && (id === 'i1' || id === 'i2'),
+    readout: (s, m) => {
+      const g = m.r ? m.r / m.P : null, cells = m.bn * m.bn, per = m.chips ? m.bn / m.chips : null;
+      return {
+        overview: `${m.name}: the same two lanes as CLIP. ` + (m.lit ? 'The image lane is frozen and its outputs are computed once, ahead of training; only the text lane, t and b learn.' : `A ${m.r} ${x} ${m.r} photo becomes ${np(m)} patch tokens, a caption at most ${m.tok} tokens; both end as one ${D(m)}-number unit vector.`),
+        batch: `Step 1: a batch of N = ${m.batch} image-caption pairs. ` + (m.lit ? 'Images: already turned into embeddings by the frozen tower, read from disk.' : `Images ${SH.i0(m)}; captions are N strings.`),
+        tokens: m.lit ? `Step 2: the B/8 tower cuts each photo into 8 ${x} 8-pixel patches (the paper does not give its input size, so the count is n). Caption: at most ${m.tok} ids (the Sec. 4.1 SigLiT setup, which Sec. 4.4 says it follows), embedded to ${SH.t1(m)} (width not stated).`
+          : `Step 2: ${g} ${x} ${g} = ${np(m)} patches of ${m.P} ${x} ${m.P} ${x} 3 = ${m.P * m.P * 3} numbers, each mapped to 768 numbers: ${SH.i1(m)}. Caption: at most ${m.tok} sentencepiece ids, embedded to ${SH.t1(m)}.`,
+        encode: m.lit ? `Step 3: frozen ViT-B/8 (12 layers, width 768), then a text transformer of 12 layers. Each ends with one vector per example, width d (not stated for SigLiT).`
+          : `Step 3: ViT-B (12 layers, width 768, 12 heads) and a B-sized text transformer (width 768). Each lane pools to one vector: ${SH.i2(m)} and ${SH.t2(m)}.`,
+        embed: `Step 4: each row is divided by its length: two ${SH.i3(m)} matrices. A dot product is now a cosine, between -1 and 1.`,
+        sim: `Step 5: logits = t (x·y) + b, one N ${x} N table (taking 32 k as 32,768: about ${fmt(cells / 1e6)} million cells), but it never exists at once: it is computed one block at a time.` + (per ? ` Over ${m.chips} chips (one device per chip, our reading) each block is ${fmt(per)} ${x} ${fmt(per)} = ${(per * per / 1e6).toFixed(1)} million cells.` : ' The paper gives no device count for this run.'),
+        loss: 'Step 6: every cell is its own yes/no question: log-sigmoid of (label ' + x + ' logit), label +1 on the diagonal and -1 elsewhere, summed over all N' + x + 'N cells and divided by N. One number.',
+        backward: m.lit ? 'Backward: the gradient reaches t, b and the whole text lane. The image tower is brown and gets nothing: it is not even run during training.'
+          : 'Backward: each cell sends back its own error, sigmoid(logit) minus 1 on the diagonal, 0 elsewhere, divided by N. Red outlines: everything learns, including t and b.',
+        update: m.lit ? 'Update: LION, peak learning rate 1e-4 after 6.5k warm-up steps, weight decay 1e-7, cosine to zero; 65,000 steps at batch 32 k on four TPU-v4 chips.'
+          : 'Update: ScalingViT-Adafactor with beta2 = 0.95, learning rate 0.001, weight decay 0.0001, cosine schedule.' + (m === V.b16x ? ` This recipe runs 40 billion examples at 32 k, about ${(40e9 / 32768 / 1e6).toFixed(2)} million steps.` : ''),
+      }[s];
+    },
+  });
+})();
+</script>
+<script>
+(() => {
+  const fig = document.getElementById('viz-siglipgrad'), el = document.getElementById('siglipgrad-canvas'), out = document.getElementById('siglipgrad-readout');
+  const names = ['dog', 'cat', 'car', 'pizza', 'tree'], N = 5, T = 10, BIAS = -10, LOW = .10, HIGH = .85;
+  // Cosines of a table that is already mostly solved (same as build/sim/arch-siglip-grad.cjs); cell (0, 1) is the one that rises.
+  const BASE = [[.80, .10, -.20, .05, -.10], [.15, .80, .00, -.25, .10], [-.10, .05, .80, .20, -.15], [.00, -.20, .10, .80, .05], [-.05, .15, -.10, .00, .80]];
+  const S = { c01: LOW };
+  let stop = () => {};
+  const glow = PE.linkPulses(fig, () => cv.redraw());
+  const table = c => BASE.map((r, i) => r.map((v, j) => (i === 0 && j === 1 ? c : v)));
+  const sig = u => 1 / (1 + Math.exp(-u));
+  // Per-logit gradients times N (the shared 1/N is left out). Softmax: CLIP's symmetric loss, (p_ij + q_ij)/2 - delta_ij. Sigmoid: sigma(t c + b) - delta_ij.
+  function gSoft(c) {
+    const L = c.map(r => r.map(v => T * v)), sm = a => { const m = Math.max(...a), e = a.map(v => Math.exp(v - m)), s = e.reduce((x, y) => x + y); return e.map(v => v / s); };
+    const p = L.map(sm), q = L.map(r => r.slice()); for (let j = 0; j < N; j++) { const col = sm(L.map(r => r[j])); for (let i = 0; i < N; i++) q[i][j] = col[i]; }
+    return L.map((r, i) => r.map((_, j) => (p[i][j] + q[i][j]) / 2 - (i === j ? 1 : 0)));
+  }
+  const gSig = c => c.map((r, i) => r.map((v, j) => sig(T * v + BIAS) - (i === j ? 1 : 0)));
+  const G0 = { soft: gSoft(table(LOW)), sig: gSig(table(LOW)) };
+  const f2 = v => (Math.abs(v) < .005 ? 0 : v).toFixed(2);
+  const changed = (A, B, eps) => { let n = 0; for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (Math.abs(A[i][j] - B[i][j]) > eps) n++; return n; };
+
+  const cv = PE.canvas(el, w => w < 560 ? 1.62 : .54, (ctx, W, H) => {
+    const B = PE.css('--blue'), Y = PE.css('--yellow'), G = PE.css('--green'), Br = PE.css('--brown'), Rd = PE.css('--red'), F = PE.css('--fg'), M = PE.css('--muted'), BG = PE.css('--bg');
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+    const small = W < 560, c = table(S.c01), grids = [['soft', 'softmax (CLIP)', gSoft(c)], ['sig', 'sigmoid (SigLIP)', gSig(c)]];
+    const cs = small ? Math.min((W - 70) / N, (H / 2 - 72) / N) : Math.min((W / 2 - 80) / N, (H - 90) / N);
+    grids.forEach(([key, title, g], k) => {
+      const x0 = small ? (W - N * cs) / 2 + 22 : W / 2 * k + (W / 2 - N * cs) / 2 + 26, y0 = small ? 60 + k * (H / 2 - 8) : 66;
+      PE.label(ctx, title, x0 + N * cs / 2, y0 - 26, F, 12.5, 'center');
+      names.forEach((n, j) => PE.label(ctx, '"' + n + '"', x0 + (j + .5) * cs, y0 - 8, Y, small ? 9 : 10, 'center'));
+      names.forEach((n, i) => PE.label(ctx, n, x0 - 6, y0 + (i + .5) * cs + 4, B, small ? 9 : 10, 'right'));
+      const rc = key === 'soft' ? glow('rowcol') : 0, own = glow('own'), cell = glow('cell');
+      for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+        const v = g[i][j], a = PE.clamp(Math.abs(v) / .6, 0, 1), x = x0 + j * cs, y = y0 + i * cs;
+        ctx.fillStyle = v < 0 ? PE.mix(BG, G, .12 + .8 * a) : PE.mix(BG, Br, .12 + .8 * a); ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
+        if (rc > 0 && (i === 0 || j === 1)) { ctx.fillStyle = Rd; ctx.globalAlpha = .25 * rc; ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2); ctx.globalAlpha = 1; }
+        if (Math.abs(v - G0[key][i][j]) > .005 && !(i === 0 && j === 1)) { ctx.strokeStyle = F; ctx.lineWidth = 2; ctx.strokeRect(x + 2.5, y + 2.5, cs - 5, cs - 5); }
+        if (i === j && own > 0) { ctx.strokeStyle = G; ctx.lineWidth = 2 + 2 * own; ctx.strokeRect(x + 2, y + 2, cs - 4, cs - 4); }
+        PE.label(ctx, (v >= .005 ? '+' : '') + f2(v), x + cs / 2, y + cs / 2 + 4, a > .45 ? BG : F, small ? 9.5 : 10.5, 'center');
+      }
+      ctx.strokeStyle = Rd; ctx.lineWidth = 2.5 + 2 * cell; ctx.strokeRect(x0 + cs + 1, y0 + 1, cs - 2, cs - 2);
+    });
+    PE.label(ctx, 'cells: gradient on each logit, times N', 8, H - 6, M, 10.5);
+  });
+  function readout() {
+    const c = table(S.c01), s = gSoft(c), g = gSig(c), up = S.c01 > (LOW + HIGH) / 2;
+    out.textContent = `The dog photo and the caption "cat" now have cosine ${S.c01.toFixed(2)}. ` +
+      (up ? `Softmax: ${changed(G0.soft, s, 1e-6)} cells' gradients changed (all of row "dog" and column "cat"), ${changed(G0.soft, s, .005)} of them visibly; the dog photo's own cell now pulls with ${f2(s[0][0])} instead of ${f2(G0.soft[0][0])}. ` +
+        `Sigmoid: ${changed(G0.sig, g, 1e-6)} cell changed, the one that rose (+${f2(g[0][1])}); the dog photo's own cell pulls with ${f2(g[0][0])} either way.`
+        : 'Every wrong cell is low, so the softmax gradients are all near zero: each row and column already picks its own caption. The sigmoid still pulls every true pair, because a cosine of 0.80 gives a logit of 10 x 0.80 - 10 = -2, still on the "no" side.');
+  }
+  function tween(to) { stop(); const a = S.c01; stop = PE.animate(800, u => { S.c01 = PE.lerp(a, to, u); cv.redraw(); readout(); }); }
+  document.getElementById('btn-siglipgrad-before').addEventListener('click', () => tween(LOW));
+  document.getElementById('btn-siglipgrad-raise').addEventListener('click', () => tween(HIGH));
+  document.getElementById('btn-siglipgrad-reset').addEventListener('click', () => { stop(); S.c01 = LOW; cv.redraw(); readout(); });
+  readout();
+})();
+</script>
+</main>
+</body>
+</html>

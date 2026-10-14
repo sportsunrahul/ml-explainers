@@ -1,0 +1,341 @@
+[
+ {
+  "name": "ae-ssim",
+  "display": "AE-SSIM",
+  "arxiv": "1807.02011v3",
+  "date": "2018-07-05",
+  "venue": null,
+  "family": "precursor/reconstruction",
+  "parent_chapter": "ch-spade",
+  "one_line": "Autoencoder trained and scored with SSIM instead of per-pixel L2, so structural defects show up in the residual map.",
+  "key": {
+   "claim_id": "ae-ssim-nanotwice-pix-auroc",
+   "label": "SSIM autoencoder, pixel-level ROC AUC on NanoTWICE (nanofibrous materials); this paper has no MVTec AD result",
+   "value": "0.966",
+   "loc": "Sec. 4.3 Results text (p6): 'improves from 0.688 to 0.966'; Table 2 bold cells (d=500, K=11, patch 128x128)",
+   "protocol": "unsupervised, defect-free training patches only; pixel-level ROC over the whole NanoTWICE test set; not MVTec AD"
+  }
+ },
+ {
+  "name": "uninformed-students",
+  "display": "Uninformed Students",
+  "arxiv": "1911.02357v2",
+  "date": "2019-11-06",
+  "venue": "CVPR 2020",
+  "family": "student-teacher",
+  "parent_chapter": "ch-efficientad",
+  "one_line": "Ensemble of students regresses a pretrained teacher's patch descriptors on normal images; regression error plus student variance flags anomalies.",
+  "key": {
+   "claim_id": "uninformed-students-mvtec-aupro-multiscale",
+   "label": "Uninformed Students, multiscale (p=17, 33, 65 combined), MVTec AD mean normalized area under the PRO curve up to 30% FPR; no image AUROC reported",
+   "value": "0.914",
+   "loc": "Table 3 (p7), row Mean, col Multiscale",
+   "protocol": "one-class (one model per category), full-shot; metric is AU-PRO to FPR 0.3, not AUROC"
+  }
+ },
+ {
+  "name": "dn2",
+  "display": "DN2",
+  "arxiv": "2002.10445v1",
+  "date": "2020-02-24",
+  "venue": null,
+  "family": "feature embedding precursor",
+  "parent_chapter": "ch-spade",
+  "one_line": "Plain kNN distance in ImageNet-pretrained ResNet feature space beats self-supervised anomaly detectors at image level.",
+  "key": {
+   "claim_id": "dn2-cifar10-auroc",
+   "label": "DN2, CIFAR-10 one-class mean ROCAUC (%); this paper has no MVTec AD result",
+   "value": "92.5",
+   "loc": "Table 1 (Anomaly Detection Accuracy on Cifar10), row Avg, col DN2",
+   "protocol": "one-class image-level (one CIFAR-10 class is normal, the rest anomalous), ImageNet-pretrained ResNet features, kNN distance; not MVTec AD"
+  }
+ },
+ {
+  "name": "gaussian-ad",
+  "display": "Gaussian AD",
+  "arxiv": "2005.14140v2",
+  "date": "2020-05-28",
+  "venue": "ICPR 2020",
+  "family": "feature embedding precursor",
+  "parent_chapter": "ch-padim",
+  "one_line": "One multivariate Gaussian on average-pooled pretrained EfficientNet features per level; summed Mahalanobis distance scores whole images.",
+  "key": {
+   "claim_id": "gaussian-ad-mvtec-img-auroc",
+   "label": "Mahalanobis (ours), NPCA 1%, EfficientNet-B4, MVTec AD mean image AUROC (%), SEM 1.2",
+   "value": "95.8",
+   "loc": "Table V, row 'Mahalanobis (ours) / NPCA 1% / EfficientNet-B4', col Mean; also abstract",
+   "protocol": "one-class, full-shot, image-level only; 5-fold evaluation over each category's training set, mean over categories and folds"
+  }
+ },
+ {
+  "name": "patch-svdd",
+  "display": "Patch SVDD",
+  "arxiv": "2006.16067v2",
+  "date": "2020-06-29",
+  "venue": null,
+  "family": "precursor",
+  "parent_chapter": "ch-spade",
+  "one_line": "Deep SVDD trained on patches with a self-supervised position task; distance to the nearest normal patch embedding localizes defects.",
+  "key": {
+   "claim_id": "patch-svdd-mvtec-img-auroc",
+   "label": "Patch SVDD, MVTec AD mean image AUROC (anomaly detection)",
+   "value": "0.921",
+   "loc": "Table 1 left (Task: Anomaly Detection), row 'Patch SVDD (Ours)'",
+   "protocol": "one-class, full-shot, images downsampled to 256x256 (Appendix)",
+   "pixel_claim_id": "patch-svdd-mvtec-pix-auroc",
+   "pixel_value": "0.957"
+  }
+ },
+ {
+  "name": "cfa",
+  "display": "CFA",
+  "arxiv": "2206.04325v1",
+  "date": "2022-06-09",
+  "venue": null,
+  "family": "feature embedding",
+  "parent_chapter": "ch-patchcore",
+  "one_line": "Adds a small trainable patch descriptor that pulls normal patch features toward their nearest memory-bank centers (coupled hyperspheres).",
+  "key": {
+   "claim_id": "cfa-mvtec-img-auroc",
+   "label": "CFA++ (WRN50-2), MVTec AD mean image AUROC (%)",
+   "value": "99.5",
+   "loc": "Table 2, row I-AUROC / All, col CFA++; also abstract",
+   "protocol": "one-class, full-shot, WRN50-2, resize 256 then center crop 224; CFA++ ensembles results on cropped and on resized-only inputs (text under Table 2)",
+   "pixel_claim_id": "cfa-mvtec-pix-auroc",
+   "pixel_value": "98.5"
+  }
+ },
+ {
+  "name": "pni",
+  "display": "PNI",
+  "arxiv": "2211.12634v3",
+  "date": "2022-11-22",
+  "venue": null,
+  "family": "feature embedding",
+  "parent_chapter": "ch-patchcore",
+  "one_line": "Memory-bank scoring conditioned on neighborhood features (an MLP) and per-position histograms; a refine net trained on synthetic defects sharpens maps.",
+  "key": {
+   "claim_id": "pni-mvtec-img-auroc",
+   "label": "PNI (single model, WideResNet-101), MVTec AD mean image AUROC (%)",
+   "value": "99.56",
+   "loc": "Table 2 (v3 PDF p6), row PNI, col AUROC Image; also abstract",
+   "protocol": "one-class, full-shot, WideResNet-101, resize 512 then center crop 480",
+   "pixel_claim_id": "pni-mvtec-pix-auroc",
+   "pixel_value": "98.98"
+  }
+ },
+ {
+  "name": "reconpatch",
+  "display": "ReConPatch",
+  "arxiv": "2305.16713v3",
+  "date": "2023-05-26",
+  "venue": "WACV 2024",
+  "family": "feature embedding",
+  "parent_chapter": "ch-patchcore",
+  "one_line": "Learns a linear modulation of pretrained patch features by contrastive learning with similarity pseudo-labels, then scores PatchCore-style.",
+  "key": {
+   "claim_id": "reconpatch-mvtec-img-auroc",
+   "label": "ReConPatch ensemble (WRN-101 + RNext-101 + DenseN-201), MVTec AD mean image AUROC (%)",
+   "value": "99.72",
+   "loc": "Table 6, row Detection, col Ours (480x480); also abstract",
+   "protocol": "one-class, full-shot, 3-backbone ensemble, 480x480",
+   "pixel_claim_id": "reconpatch-mvtec-pix-auroc",
+   "pixel_value": "98.67"
+  }
+ },
+ {
+  "name": "differnet",
+  "display": "DifferNet",
+  "arxiv": "2008.12577v1",
+  "date": "2020-08-28",
+  "venue": null,
+  "family": "flow",
+  "parent_chapter": "ch-fastflow",
+  "one_line": "Normalizing flow on pooled multi-scale AlexNet image features; image-level only, scored over several test-time transforms of each image.",
+  "key": {
+   "claim_id": "differnet-mvtec-img-auroc",
+   "label": "DifferNet, MVTec AD mean image AUROC (%); no pixel metric",
+   "value": "94.9",
+   "loc": "Table 1, row Average, col 'DifferNet (ours)'",
+   "protocol": "one-class, full-shot, image-level only; AlexNet features at 3 scales (448x448, 224x224, 112x112 inputs)"
+  }
+ },
+ {
+  "name": "cflow-ad",
+  "display": "CFLOW-AD",
+  "arxiv": "2107.12571v1",
+  "date": "2021-07-27",
+  "venue": "WACV 2022",
+  "family": "flow",
+  "parent_chapter": "ch-fastflow",
+  "one_line": "Conditional flows on each pyramid level of a frozen encoder, with positional encoding as the condition, giving per-pixel likelihoods.",
+  "key": {
+   "claim_id": "cflow-ad-mvtec-img-auroc",
+   "label": "CFLOW-AD (WideResNet-50), MVTec AD mean image AUROC (%)",
+   "value": "98.26",
+   "loc": "Table 4, row 'CFLOW-AD (ours)', col AUROC Detection",
+   "protocol": "one-class, full-shot, WideResNet-50, per-class best hyperparameters from the ablation (input 256x256 or 512x512 per class, Table 3), mean of 4 runs",
+   "pixel_claim_id": "cflow-ad-mvtec-pix-auroc",
+   "pixel_value": "98.62"
+  }
+ },
+ {
+  "name": "cs-flow",
+  "display": "CS-Flow",
+  "arxiv": "2110.02855v1",
+  "date": "2021-10-06",
+  "venue": null,
+  "family": "flow",
+  "parent_chapter": "ch-fastflow",
+  "one_line": "Fully convolutional flow that processes three image scales jointly with cross-scale connections, keeping the spatial layout of feature maps.",
+  "key": {
+   "claim_id": "cs-flow-mvtec-img-auroc",
+   "label": "CS-Flow (full training set), MVTec AD mean image AUROC (%); no pixel metric",
+   "value": "98.7",
+   "loc": "Table 1, row Average, col 'CS-Flow (ours) (16 shots/full set)', second value of '93.5 98.7'",
+   "protocol": "one-class, full-shot, image-level only; EfficientNet-B5 features at 3 scales (768x768, 384x384, 192x192 inputs)"
+  }
+ },
+ {
+  "name": "msflow",
+  "display": "MSFlow",
+  "arxiv": "2308.15300v1",
+  "date": "2023-08-29",
+  "venue": "IEEE TNNLS (under review, per PDF header)",
+  "family": "flow",
+  "parent_chapter": "ch-fastflow",
+  "one_line": "Parallel flows per scale plus a fusion flow that exchanges information across scales; different scale aggregation for detection versus localization.",
+  "key": {
+   "claim_id": "msflow-mvtec-img-auroc",
+   "label": "MSFlow (WRN-50), MVTec AD mean image AUROC (%)",
+   "value": "99.7",
+   "loc": "Table I, row 'Total Average', col MSFlow; also abstract",
+   "protocol": "one-class, full-shot, WRN-50, 512x512 (256x256 for transistor)"
+  }
+ },
+ {
+  "name": "nsa",
+  "display": "NSA",
+  "arxiv": "2109.15222v3",
+  "date": "2021-09-30",
+  "venue": "ECCV 2022",
+  "family": "synthetic",
+  "parent_chapter": "ch-synthetic",
+  "one_line": "Poisson-blends resized patches from other normal images into seamless fake defects; a network predicts their pixel labels end to end.",
+  "key": {
+   "claim_id": "nsa-mvtec-img-auroc",
+   "label": "NSA (logistic), MVTec AD mean image AUROC (%), standard error 0.3 over 5 seeds",
+   "value": "97.2",
+   "loc": "Table 1, row 'overall average', col 'NSA (logistic)'; also abstract",
+   "protocol": "one-class, full-shot, no external data; objects resized to 256x256 with 224x224 center crop at test, textures 256x256; mean over 5 seeds"
+  }
+ },
+ {
+  "name": "memseg",
+  "display": "MemSeg",
+  "arxiv": "2205.00908v1",
+  "date": "2022-05-02",
+  "venue": null,
+  "family": "synthetic",
+  "parent_chapter": "ch-synthetic",
+  "one_line": "U-Net segmenter trained on simulated defects, with a memory of normal-image features compared against the input for guidance.",
+  "key": {
+   "claim_id": "memseg-mvtec-img-auroc",
+   "label": "MemSeg, MVTec AD mean image AUROC (%)",
+   "value": "99.56",
+   "loc": "Table 1 (PDF p9; no LaTeX source downloaded), row Average, col Ours, first value of '(99.56,98.84)'; also abstract",
+   "protocol": "one-class, full-shot, ResNet18 encoder, input 256x256",
+   "pixel_claim_id": "memseg-mvtec-pix-auroc",
+   "pixel_value": "98.84"
+  }
+ },
+ {
+  "name": "dsr",
+  "display": "DSR",
+  "arxiv": "2208.01521v2",
+  "date": "2022-08-02",
+  "venue": "ECCV 2022",
+  "family": "synthetic",
+  "parent_chapter": "ch-synthetic",
+  "one_line": "Samples fake anomalies from a learned quantized feature space, not image space, so near-in-distribution defects can be synthesized.",
+  "key": {
+   "claim_id": "dsr-mvtec-img-auroc",
+   "label": "DSR, MVTec AD mean image AUROC (%)",
+   "value": "98.2",
+   "loc": "Table 3, row DSR, col average",
+   "protocol": "one-class, full-shot"
+  }
+ },
+ {
+  "name": "simplenet",
+  "display": "SimpleNet",
+  "arxiv": "2303.15140v2",
+  "date": "2023-03-27",
+  "venue": "CVPR 2023",
+  "family": "synthetic",
+  "parent_chapter": "ch-synthetic",
+  "one_line": "Adds Gaussian noise to adapted pretrained patch features as fake anomalies; a small discriminator learns to separate them.",
+  "key": {
+   "claim_id": "simplenet-mvtec-img-auroc",
+   "label": "SimpleNet (WideResNet50), MVTec AD mean image AUROC (%)",
+   "value": "99.6",
+   "loc": "Table 1, row Average, col SimpleNet, first value of '99.6/98.1'; also abstract",
+   "protocol": "one-class, full-shot, WideResNet50, resize 256 then center crop 224",
+   "pixel_claim_id": "simplenet-mvtec-pix-auroc",
+   "pixel_value": "98.1"
+  }
+ },
+ {
+  "name": "glass",
+  "display": "GLASS",
+  "arxiv": "2407.09359v1",
+  "date": "2024-07-12",
+  "venue": null,
+  "family": "synthetic",
+  "parent_chapter": "ch-synthetic",
+  "one_line": "Feature-level fake anomalies from Gaussian noise steered by gradient ascent, plus image-level synthetic defects, to cover weak defects.",
+  "key": {
+   "claim_id": "glass-mvtec-img-auroc",
+   "label": "GLASS-j, MVTec AD mean image AUROC (%)",
+   "value": "99.9",
+   "loc": "Table 1, row Average, col GLASS-j, first value of '99.9/99.3'; also abstract",
+   "protocol": "one-class, full-shot, WideResNet50 (level2 + level3), resize and center crop to 288x288; GLASS-j picks GLASS-m or GLASS-h per category by image-level spectrogram analysis",
+   "pixel_claim_id": "glass-mvtec-pix-auroc",
+   "pixel_value": "99.3"
+  }
+ },
+ {
+  "name": "stpm",
+  "display": "STPM",
+  "arxiv": "2103.04257v3",
+  "date": "2021-03-07",
+  "venue": "BMVC 2021",
+  "family": "student-teacher",
+  "parent_chapter": "ch-efficientad",
+  "one_line": "One student with the teacher's architecture matches the teacher's feature pyramid at several scales; pyramid differences give the anomaly map.",
+  "key": {
+   "claim_id": "stpm-mvtec-img-auroc",
+   "label": "STPM, MVTec AD mean image AUC-ROC",
+   "value": "0.955",
+   "loc": "Table 2 (image-level anomaly detection), col Ours",
+   "protocol": "one-class, full-shot, ResNet-18 teacher and student (conv2_x, conv3_x, conv4_x)"
+  }
+ },
+ {
+  "name": "rd4ad",
+  "display": "Reverse Distillation",
+  "arxiv": "2201.10703v2",
+  "date": "2022-01-26",
+  "venue": "CVPR 2022",
+  "family": "student-teacher",
+  "parent_chapter": "ch-efficientad",
+  "one_line": "Reverse distillation: a student decoder rebuilds the teacher encoder's multi-scale features from a compact one-class bottleneck embedding.",
+  "key": {
+   "claim_id": "rd4ad-mvtec-img-auroc",
+   "label": "Reverse Distillation (WideResNet50, 256x256), MVTec AD mean image AUROC (%)",
+   "value": "98.5",
+   "loc": "Table 1, row 'Total Average', last col Ours (image size 256)",
+   "protocol": "one-class, full-shot, WideResNet50 teacher, 256x256"
+  }
+ }
+]

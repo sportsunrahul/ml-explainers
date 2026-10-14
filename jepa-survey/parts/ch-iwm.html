@@ -1,0 +1,36 @@
+<section id="ch-iwm" class="chapter">
+<h2>The predictor is a world model</h2>
+<p>So far the predictor has been told one thing about the hole it fills: where it is. Image World Models (Garrido et al., <span data-claim="iwm-arxiv">2403.00504v1</span>) ask what happens if you also tell it <em>what changed</em>. Build the target from one view of an image and the context from another with a different color jitter, maybe blurred or turned grey, then hand the predictor the parameters of that difference. Now it is not filling a hole; it is simulating a transformation in embedding space. That is what a world model does: given a state and an action, predict the next state.</p>
+
+<figure class="viz" id="viz-iwm" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="iwm-canvas" role="img" aria-label="A plane of embeddings with one input point. Action buttons apply a transformation; a green arrow shows where the predictor sends the point. With the conditioned predictor each action lands at a different target; with the blind predictor every action must land at the same spot, so the targets of different actions are pulled together."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-iwm-cond" data-pred="cond" aria-pressed="true">Conditioned predictor</button>
+    <button type="button" id="btn-iwm-blind" data-pred="blind" aria-pressed="false">Blind predictor</button>
+    <button type="button" id="btn-iwm-jitter" data-act="jitter" aria-pressed="true">color jitter</button>
+    <button type="button" id="btn-iwm-blur" data-act="blur" aria-pressed="false">blur</button>
+    <button type="button" id="btn-iwm-gray" data-act="gray" aria-pressed="false">grayscale</button>
+    <button type="button" id="btn-iwm-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="iwm-readout" aria-live="polite"></p>
+  <figcaption>Toy model: a two-dimensional embedding plane, three hand-placed targets. The conditioned predictor can send the point to a different place per action; the blind predictor has one output for all three, so the only way to make the loss small is for the encoder to put the three targets in one place, which is invariance. Before pressing "Blind predictor", guess what must happen to the three targets.</figcaption>
+</figure>
+
+<h3>Invariant or equivariant</h3>
+<p>The paper's vocabulary: a representation is <b>invariant</b> to a transformation if the embedding does not change under it, and <b>equivariant</b> if the change can be tracked, that is, if a predictor can apply it in embedding space. A JEPA whose predictor is not told the transformation (I-JEPA with color jitter between the views) can only lower its loss by becoming invariant: it discards color. Tell the predictor, and give it enough capacity, and it becomes a "capable" world model; the encoder may then keep color, and the predictor learns to shift it. The action is a small vector: the difference in brightness, contrast, saturation and hue between the two views, plus flags for whether blur, grayscale or solarisation were applied; crop and flip are shared by both views and are not part of it. The loss is I-JEPA's with one more input:</p>
+<div class="eq" id="eq-iwm" data-build data-viz="viz-iwm"><div class="tex tex-display">
+\mathcal{L} = \big\lVert \htmlData{step=1, link=arrow}{\htmlClass{t-green}{p_\phi\big(z_x,\ a_{x\to y},\ m_a\big)}} - \htmlData{step=2, link=target}{\htmlClass{t-yellow}{z_y}} \big\rVert_2^2,\qquad z_x = f_\theta(x),\quad z_y = f^{\mathrm{EMA}}_\theta(y)
+</div></div>
+<p class="eqno">IWM, Sec. 3 (squared <span data-claim="iwm-loss">L2</span>, as in I-JEPA; the paper sums this over the target positions, omitted here); <span class="tex">a_{x \to y}</span> is the action vector and <span class="tex">m_a</span> the mask tokens, each built from a position embedding and the action through a <span data-claim="iwm-cond-mlp-layers">three layer</span> network.</p>
+<p>Whether the world model actually becomes equivariant depends on three knobs, and the paper measures it directly: encode a bank of <span data-claim="iwm-bank-size">256</span> transformed images, ask the predictor to produce the embedding of the transformed version from the original plus the action, and check whether the right image is ranked first (<span data-claim="iwm-metric">Mean Reciprocal Rank</span>, 1 = always). Table 2: with the default jitter and destructive augmentations, a 12-layer predictor scores <span data-claim="iwm-mrr-12-destructive">0.09</span> (invariant) and an 18-layer predictor <span data-claim="iwm-mrr-18-jitter">0.25</span> on jitter alone and <span data-claim="iwm-mrr-12-strong">0.81</span> or more once the jitter is made strong; the unconditioned I-JEPA predictor scores <span data-claim="iwm-mrr-ijepa">0.00</span> everywhere. Conditioning, capacity and the difficulty of the transformation all have to be there.</p>
+
+<div class="aside">
+  <h4>Claim card: a pretrained predictor is a cheap task head (IWM Table 4)</h4>
+  <p><b>Claim.</b> Once the predictor is a capable world model, fine-tuning the <em>predictor</em> on a downstream task, with the encoder frozen, competes with fine-tuning the whole encoder, at a fraction of the trainable parameters.</p>
+  <p><b>How it was measured.</b> ImageNet-1k top-1 with a ViT-B/16 encoder pretrained for <span data-claim="iwm-pretrain-epochs">300</span> epochs; four protocols: fine-tune the encoder alone, freeze the encoder and train a freshly initialised predictor, freeze the encoder and fine-tune the pretrained predictor, or fine-tune everything.</p>
+  <p><b>Result.</b> For the equivariant model the pretrained predictor reaches <span data-claim="iwm-ft-equi-pretrained">83.3</span>, a gain of <span data-claim="iwm-ft-equi-gain">+1.8</span> over a random-init predictor, matching encoder fine-tuning of the invariant model (<span data-claim="iwm-ft-inv-encoder">83.3</span>); end to end it reaches <span data-claim="iwm-ft-equi-e2e">84.4</span>. For MAE the same trick gains only <span data-claim="iwm-ft-mae300-gain">+0.3</span>; for I-JEPA <span data-claim="iwm-ft-ijepa-gain">+0.9</span>. The trade: the equivariant model's linear probe is worse (<span data-claim="iwm-linear-equi">67.5</span> vs <span data-claim="iwm-linear-inv">74.5</span>), because keeping color and blur in the embedding makes it less linearly separable.</p>
+  <p><b>What would falsify it.</b> A random-init predictor matching the pretrained one on the equivariant model, or the invariant model beating the equivariant one under predictor fine-tuning.</p>
+</div>
+<p>Hold on to the shape of this result. An action-conditioned predictor over frozen features, fine-tuned or planned with, is exactly what V-JEPA 2 does with robot actions two chapters from now, and what Act IV builds planners from.</p>
+</section>

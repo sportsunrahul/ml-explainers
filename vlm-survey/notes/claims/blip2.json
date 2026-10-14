@@ -1,0 +1,245 @@
+[
+ {
+  "id": "blip2-queries",
+  "claim": "Number and dimension of learnable queries",
+  "value": "32 queries, each 768-d (Z is 32x768)",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 2 (\"In our experiments, we use 32 queries ... 768\")",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-qformer-init",
+  "claim": "Q-Former initialisation",
+  "value": "BERT-base weights; cross-attention layers randomly initialised",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-qformer-params",
+  "claim": "Q-Former total parameters",
+  "value": "188M",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1; Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-xattn-freq",
+  "claim": "Cross-attention to frozen image features inserted",
+  "value": "every other transformer block",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-image-feat-size",
+  "claim": "Frozen image feature size vs Z",
+  "value": "257x1024 (ViT-L/14) vs 32x768",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.1 para 2 (257x1024 vs 32x768)",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-itc-mask",
+  "claim": "ITC self-attention mask",
+  "value": "unimodal: queries and text cannot see each other; similarity = max over queries vs text [CLS]",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITC paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-itg-mask",
+  "claim": "ITG self-attention mask",
+  "value": "multimodal causal: queries attend to queries only; each text token attends to all queries and previous text tokens",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITG paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-itm-mask",
+  "claim": "ITM self-attention mask",
+  "value": "bi-directional: all queries and all text tokens attend to each other; per-query 2-class logits averaged",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITM paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-itc-negatives",
+  "claim": "ITC negatives",
+  "value": "in-batch negatives, not BLIP's momentum queue",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.2 ITC paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-stage2-connection",
+  "claim": "Stage-2 connection to LLM",
+  "value": "FC layer projects Z to LLM embedding dim; projected queries prepended to input text embeddings as soft visual prompts",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-stage2-loss",
+  "claim": "Stage-2 loss for decoder LLM vs encoder-decoder LLM",
+  "value": "language modeling loss (OPT) vs prefix language modeling loss (FlanT5: prefix + visual to encoder, suffix as decoder target)",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.3 para 2 (\"We experiment with two types of LLMs ...\")",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-frozen-encoders",
+  "claim": "Frozen image encoders",
+  "value": "ViT-L/14 from CLIP; ViT-g/14 from EVA-CLIP (second-to-last layer features)",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 'Pre-trained image encoder and LLM'",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-frozen-llms",
+  "claim": "Frozen LLM families",
+  "value": "OPT (decoder-based) and FlanT5 (encoder-decoder-based)",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-data",
+  "claim": "Pre-training images",
+  "value": "129M (COCO, VG, CC3M, CC12M, SBU, 115M LAION400M)",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 'Pre-training data'",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-capfilt",
+  "claim": "Synthetic captions per image and kept",
+  "value": "10 from BLIP-large, CLIP ViT-L/14 ranked with original; top-2 kept, one sampled per step",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 'Pre-training data'",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-steps",
+  "claim": "Pre-training steps stage 1 / stage 2",
+  "value": "250k / 80k",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 'Pre-training settings'",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-compute",
+  "claim": "Compute for largest model (ViT-g + FlanT5-XXL), one 16-A100(40G) machine",
+  "value": "less than 6 days stage 1, less than 3 days stage 2",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Sec. 3.4 'Pre-training settings'",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-flamingo80b-vqa",
+  "claim": "Zero-shot VQAv2 test-dev: Flamingo80B vs BLIP-2 ViT-g FlanT5XXL",
+  "value": "56.3 vs 65.0",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 2 (vqa_zeroshot)",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-gain-8p7",
+  "claim": "Claimed VQAv2 gain over Flamingo80B (absolute points: 65.0 - 56.3)",
+  "value": "8.7% (paper wording); equals 8.7 points",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Abstract; Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-54x",
+  "claim": "Claimed trainable-param reduction vs Flamingo80B",
+  "value": "54x fewer (10.2B / 188M)",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Abstract; Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-flamingo80b-params",
+  "claim": "Flamingo80B trainable / total params",
+  "value": "10.2B / 80B",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-blip2-xxl-params",
+  "claim": "BLIP-2 ViT-g FlanT5XXL trainable / total params",
+  "value": "108M / 12.1B",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-blip2-trainable-range",
+  "claim": "Trainable params across BLIP-2 rows in Table 2",
+  "value": "103M to 108M",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-ratio-94x",
+  "claim": "10.2B / 108M (my arithmetic; paper's 54x uses 188M)",
+  "value": "about 94x",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Derived from Table 2",
+  "uncertain": true
+ },
+ {
+  "id": "blip2-okvqa",
+  "claim": "OK-VQA test: Flamingo80B vs BLIP-2 ViT-g FlanT5XXL",
+  "value": "50.6 vs 45.9",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-table1-zeroshot",
+  "claim": "BLIP-2 zero-shot NoCaps CIDEr / Flickr TR@1 / IR@1 (188M trainable)",
+  "value": "121.6 / 97.6 / 89.7",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "blip2-gqa",
+  "claim": "GQA test-dev best BLIP-2 (ViT-g FlanT5XXL)",
+  "value": "44.7",
+  "paper": "BLIP-2",
+  "version": "v3",
+  "loc": "Table 2",
+  "uncertain": false
+ }
+]

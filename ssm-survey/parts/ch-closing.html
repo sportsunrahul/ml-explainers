@@ -1,0 +1,22 @@
+
+<section id="ch-summary">
+<h2>Summary</h2>
+<p>Attention keeps every token and re-reads all of them, so its cache grows with the context and its prompt cost grows with the square of the length. A state-space model keeps a fixed-size state instead. Making that work took four steps. Drop the nonlinearity inside the recurrence, so the sequence becomes a sum that trains in parallel (LRU). Treat the recurrence as a sampled continuous system and choose its matrix so the state is the best summary of the past (HiPPO). Exploit the fixed matrix to compute the whole layer as one long convolution (S4). Then let the input choose what to keep, which breaks the convolution, and recover the speed with a hardware-aware parallel scan (Mamba). Mamba-2 showed that this selective state space is masked linear attention with a decay: one matrix, computable either way. The same idea spread to images (Vim, VMamba), where scanning order matters and short sequences may not need it (MambaOut). The honest limit is recall: a fixed state cannot keep everything verbatim, and pure SSMs fall behind on copying, phonebook lookup and some in-context tasks unless the state is large compared with what must be remembered. The answer that shipped is the hybrid: mostly state-space layers, with a few attention layers kept for lookup.</p>
+</section>
+
+<section id="ch-deeper">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>Linear attention (2006.16236v3)</b>: Eq. (6) for the associativity rewrite and Eqs. (18)-(20) for the causal recurrence with its matrix state.</li>
+  <li><b>HiPPO (2008.07669v2)</b>: Theorem 2 and Eq. (3) for the LegS matrices; Appendix B.3 for the discrete update (mind the sign convention).</li>
+  <li><b>LSSL (2110.13985v1)</b>: Fig. 1 and Eqs. (6)-(7) for the three views; Lemma 3.1 for gates as a discretization; Table 1 for the first stacked linear-SSM results.</li>
+  <li><b>S4 (2111.00396v3)</b>: Eq. (5) for the kernel; Theorem 3 for the complexity; Tables 4 and 10 for the updated LRA row; Appendix A for what the code actually computes. <b>S4D (2206.11893v2)</b>: Eq. (4) for HiPPO's B; Table 5 for the diagonal initializations on Path-X.</li>
+  <li><b>LRU (2303.06349v1)</b>: Tables 1-3 for the ablation ladder; Eq. (6) for the gain that motivates normalization; Appendix A for the parameterization in code.</li>
+  <li><b>Mamba (2312.00752v2)</b>: Sec. 3.1 and Fig. 2 for why time-invariance fails; Algorithm 2 for selection with shapes; Theorem 1 for the gate; Sec. 3.3 for the hardware-aware scan; Fig. 3 for the block; Table 10 for state size and selectivity; Table 11 for the synthetic-task accuracies; Fig. 8 for throughput.</li>
+  <li><b>Mamba-2 (2405.21060v1)</b>: Sec. 5.1 with Eqs. (3) and (16) for the matrix form; Theorem 5.2 for why the mask must be semiseparable; the Sec. 6.3 table for costs; Tables 2-3 for hybrids; Fig. 8 for recall versus state size.</li>
+  <li><b>Vision Mamba (2401.09417v3)</b>: Table 1 for ImageNet; the class-token ablation; the efficiency figure at 1248 px. <b>VMamba (2401.10166v4)</b>: the SS2D section for the four routes; Table 5 for the speed-up steps. <b>MambaOut (2405.07992v3)</b>: the long-sequence rule L > 6D.</li>
+  <li><b>Zoology (2312.04927v1)</b>: the MQAR definition; Appendix F, Fig. 6 and Corollary H.24 for fixed-state recall. <b>Repeat After Me (2402.01032v2)</b>: Corollary 2.8 for the copying bound. <b>NVIDIA study (2406.07887v1)</b>: Fig. 4 for the attention share; the phonebook results for the context length where pure SSMs fail.</li>
+  <li><b>Jamba (2403.19887v2)</b>: Table 1 for KV-cache sizes; the ablation section for the 1:3 versus 1:7 ratio and in-context learning. <b>Gated DeltaNet (2412.06464v3)</b> and <b>Mamba-3 (2603.15569v1)</b>: the two layers that came next; Mamba-3 Table 3 for the comparison at 1.5B.</li>
+  <li>For attention and the KV cache themselves, the <a href="../transformers/Transformers%20and%20LLMs,%20explained%20in%203D.html">transformers explainer</a>, chapters "Attention" and "The KV cache".</li>
+</ul>
+</section>

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The DETR Family</title>
+<meta name="description" content="An intuition-first explainer of DETR, Deformable DETR, DAB-DETR, DN-DETR, DINO, RT-DETR and RF-DETR.">
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--fg);
+  font:1.125rem/1.7 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+/* Display face: KaTeX_Main (Computer Modern) is embedded with the math CSS, so headings share the equations' face. */
+h1, h2, .kicker { font-family:KaTeX_Main, Charter, Georgia, serif; font-weight:700; letter-spacing:-.005em; }
+header.hero { padding:2.2rem 0 1rem; max-width:none; }
+.hero-stage { position:relative; margin:0 0 1.4rem; }
+.hero-stage canvas { display:block; width:100%; }
+.hero-stage button { position:absolute; right:0; bottom:-.2rem; font:.82rem system-ui, sans-serif; color:var(--muted); background:none; border:1px solid var(--rule); border-radius:999px; padding:.2rem .7rem; cursor:pointer; }
+.hero-stage button:hover { color:var(--fg); border-color:var(--muted); }
+.hero-stage button:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+header.hero h1 { font-size:clamp(2.5rem, 5.6vw, 4.2rem); line-height:1.04; margin:0 0 .9rem; text-wrap:balance; }
+header.hero p.hook { font-size:1.3rem; line-height:1.5; color:var(--fg); opacity:.86; margin:0 0 1.4rem; max-width:34rem; }
+.papers { display:flex; flex-wrap:wrap; gap:.35rem .4rem; margin:0; padding:0; list-style:none; font:.82rem system-ui, sans-serif; max-width:var(--stage, 60rem); }
+.papers li a { display:inline-block; color:var(--muted); text-decoration:none; border:1px solid var(--rule); border-radius:999px; padding:.18rem .6rem; }
+.papers li a:hover { color:var(--fg); border-color:var(--muted); }
+.papers li a:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.papers-note { font:.82rem system-ui, sans-serif; color:var(--muted); margin:0 0 .5rem; }
+h2 { font-size:2.1rem; line-height:1.15; margin:3.6rem 0 1rem; text-wrap:balance; }
+h3 { font:600 1.3rem/1.3 Charter, "Bitstream Charter", Georgia, serif; margin:2.2rem 0 .5rem; }
+a { color:var(--blue); text-underline-offset:.15em; text-decoration-thickness:1px; }
+p { margin:0 0 1.05rem; }
+/* Acts are a real sequence: a numbered divider, not an eyebrow label. */
+.kicker { font-size:2.7rem; line-height:1.1; color:var(--fg); margin:6rem 0 -1.4rem; padding-top:1.6rem; border-top:1px solid var(--rule); }
+.kicker .act-n { display:block; font:400 1rem/1.4 system-ui, sans-serif; color:var(--muted); margin-bottom:.3rem; }
+nav.toc { font-family:system-ui, sans-serif; font-size:.95rem; margin:2.2rem 0 2.4rem; columns:2 18rem; column-gap:2.5rem; }
+nav.toc > strong { display:none; }
+nav.toc ol { margin:0; padding:0; list-style:none; counter-reset:toc; }
+nav.toc li { margin:.15rem 0; break-inside:avoid; counter-increment:toc; padding-left:1.8rem; position:relative; }
+nav.toc li:not(.act)::before { content:counter(toc); position:absolute; left:0; color:var(--muted); font-variant-numeric:tabular-nums; }
+nav.toc li a { color:var(--fg); text-decoration:none; }
+nav.toc li a:hover { color:var(--blue); }
+nav.toc .act { counter-increment:none; padding-left:0; margin:1rem 0 .25rem; font:700 1.05rem/1.3 KaTeX_Main, Charter, Georgia, serif; color:var(--fg); break-after:avoid; }
+nav.toc .act:first-child { margin-top:0; }
+nav.toc .toc-more { break-inside:avoid; margin-top:1rem; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:.3rem 1.2rem; }
+nav.toc .toc-more li { counter-increment:none; padding-left:0; }
+nav.toc .toc-more li::before { content:none; }
+.key { display:flex; flex-wrap:wrap; gap:.4rem 1.1rem; font:.9rem system-ui, sans-serif; margin:.4rem 0 1rem; }
+.key span::before { content:""; display:inline-block; width:.8em; height:.8em; border-radius:50%; margin-right:.4em; vertical-align:-.05em; background:currentColor; }
+.c-blue{color:var(--blue)} .c-yellow{color:var(--yellow)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-brown{color:var(--brown)}
+.t-blue{color:var(--blue)} .t-yellow{color:var(--yellow)} .t-green{color:var(--green)} .t-red{color:var(--red)} .t-brown{color:var(--brown)}
+b.c-blue, b.c-yellow, b.c-green, b.c-red, b.c-brown { font-weight:700; }
+figure.viz { margin:1.8rem 0; padding:1rem; background:var(--panel); border-radius:14px; position:relative; }
+figure.viz canvas, figure.viz svg.chart { display:block; width:100%; border-radius:9px; background:var(--bg); touch-action:none; }
+figure.viz canvas:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.8rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.34rem .85rem; cursor:pointer; transition:border-color .15s, background-color .15s, color .15s, transform .08s; }
+.controls button:hover { border-color:var(--muted); }
+.controls button:active { transform:scale(.97); }
+.controls button[aria-pressed="true"] { border-color:var(--fg); color:var(--fg); background:color-mix(in srgb, var(--fg) 13%, var(--panel2)); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; color:var(--muted); }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+@media (prefers-reduced-motion: reduce) { .controls button { transition:none; } .controls button:active { transform:none; } }
+.readout { font:.92rem/1.5 system-ui, sans-serif; color:var(--fg); margin:.6rem 0 0; min-height:2.9em; }
+figcaption { font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.6rem; max-width:var(--measure, 40rem); }
+.badge { position:absolute; top:.65rem; right:.75rem; font:600 .74rem/1 system-ui, sans-serif; padding:.3rem .6rem; border-radius:999px; border:1px solid currentColor; background:var(--panel); z-index:2; }
+.badge.toy { color:var(--brown); } .badge.computed { color:var(--blue); } .badge.sourced { color:var(--green); }
+.eq { overflow-x:auto; overflow-y:hidden; margin:.8rem 0 1.1rem; padding:.3rem 0; }
+.eq.scrolls:not(.at-end) { -webkit-mask-image:linear-gradient(90deg, #000 calc(100% - 3rem), transparent); mask-image:linear-gradient(90deg, #000 calc(100% - 3rem), transparent); }
+.eq[data-viz] [data-link] { box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--fg) 35%, transparent); }
+.gloss { font-size:1rem; margin:-.3rem 0 1.3rem; padding-left:1rem; border-left:2px solid var(--rule); }
+.gloss li { margin:.25rem 0; }
+.note { font:.9rem/1.55 system-ui, sans-serif; color:var(--muted); margin:1rem 0; }
+/* Only the narrated build (the player adds body.pe-has-bar) needs to say which chapters have no audio. */
+.narrated-only { display:none; }
+body.pe-has-bar .narrated-only { display:block; }
+.matrix { overflow-x:auto; }
+.matrix table { border-collapse:separate; border-spacing:3px; font:.85rem system-ui, sans-serif; margin:.4rem 0; }
+.matrix th { font-weight:600; padding:.2rem .4rem; }
+.matrix td button { font:inherit; width:4.1rem; padding:.35rem .1rem; border-radius:6px; border:1px solid var(--rule); background:var(--bg); color:var(--fg); cursor:pointer; font-variant-numeric:tabular-nums; transition:background-color .2s, border-color .2s, color .2s, box-shadow .2s; }
+.matrix td button:hover { border-color:var(--muted); }
+.matrix td button.sel { background:var(--green); color:var(--bg); border-color:var(--green); font-weight:700; }
+.matrix td button.opt { box-shadow:0 0 0 2px var(--yellow) inset; }
+.matrix td button:focus-visible { outline:2px solid var(--yellow); outline-offset:1px; }
+@media (prefers-reduced-motion: reduce) { .matrix td button { transition:none; } }
+.timeline { list-style:none; padding:0; margin:1rem 0; border-left:3px solid var(--rule); }
+.timeline li { border-radius:0 8px 8px 0; transition:background-color .25s; }
+.timeline li.tl-on { background:var(--panel); }
+.timeline li.tl-on::before { background:var(--green); }
+#tree-svg .tn { cursor:pointer; outline:none; }
+#tree-svg .tn rect { fill:var(--panel2); stroke:var(--rule); stroke-width:1.5; transition:stroke .25s, opacity .25s; }
+#tree-svg .tn .nm { fill:var(--fg); font:600 13px system-ui, sans-serif; }
+#tree-svg .tn .dt { fill:var(--muted); font:400 11px system-ui, sans-serif; }
+#tree-svg .tn.on rect { stroke:var(--fg); stroke-width:2; }
+#tree-svg .tn.anc rect { stroke:var(--green); stroke-width:2; }
+#tree-svg .tn:focus-visible rect { stroke:var(--yellow); stroke-width:2.5; }
+#tree-svg .te { fill:none; stroke:var(--muted); stroke-width:1.5; opacity:.8; transition:stroke .25s, opacity .25s, stroke-width .25s; }
+#tree-svg .te.dash { stroke-dasharray:5 4; }
+#tree-svg .ah { fill:var(--muted); opacity:.8; transition:fill .25s, opacity .25s; }
+#tree-svg .te.on { stroke:var(--green); stroke-width:2.5; opacity:1; }
+#tree-svg .ah.on { fill:var(--green); opacity:1; }
+#tree-svg .el { font:600 11px system-ui, sans-serif; fill:var(--green); opacity:0; paint-order:stroke; stroke:var(--panel); stroke-width:4px; stroke-linejoin:round; pointer-events:none; transition:opacity .25s; }
+#tree-svg .el.on { opacity:1; }
+#tree-svg.hot .tn:not(.on):not(.anc), #tree-svg.hot .te:not(.on), #tree-svg.hot .ah:not(.on) { opacity:.25; }
+#mask-svg { max-width:34rem; margin:0 auto; }
+@media (min-width:720px) { nav.toc .col-break { break-before:column; } }
+@media (prefers-reduced-motion: reduce) { #tree-svg *, .timeline li { transition:none; } }
+.timeline li { position:relative; padding:0 0 1.1rem 1.2rem; }
+.timeline li::before { content:""; position:absolute; left:-.5rem; top:.45rem; width:.7rem; height:.7rem; border-radius:50%; background:var(--blue); }
+.timeline .when { font:600 .85rem system-ui, sans-serif; color:var(--muted); }
+.timeline .inh { font-size:.95rem; color:var(--muted); }
+.deeper li { margin:.35rem 0; }
+.katex { font-size:1.05em; }
+.tex-display .katex-display { margin:.4rem 0; text-align:left; }
+.tex-display .katex-display > .katex { text-align:left; }
+@media (max-width: 520px) {
+  h2 { font-size:1.75rem; }
+  .kicker { font-size:2.15rem; margin-top:4.5rem; }
+  .matrix td button { width:3.3rem; font-size:.78rem; }
+  .eq .katex-display > .katex { font-size:.92em; }
+}
+/* The rail lists the chapters on wide screens, so the in-page list is only for narrower ones. */
+@media (min-width:1180px) { nav.toc { display:none; } }
+</style>
+<script>
+/* Shared helpers for all interactives. */
+const PE = (() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.cueReplay === '1';
+  const redrawers = [];
+  const onTheme = fn => { redrawers.push(fn); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => redrawers.forEach(f => f()));
+  // Canvas sized to its box, DPR-aware; draw(ctx, w, h) gets CSS-pixel dimensions.
+  function canvas(el, aspect, draw) {
+    const ctx = el.getContext('2d');
+    const state = { w: 0, h: 0 };
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * (typeof aspect === 'function' ? aspect(w) : aspect)), r = devicePixelRatio || 1;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); state.w = w; state.h = h; draw(ctx, w, h);
+    }
+    new ResizeObserver(resize).observe(el);
+    onTheme(() => draw(ctx, state.w, state.h));
+    return { redraw: () => draw(ctx, state.w, state.h), state, ctx };
+  }
+  function animate(ms, step, done) {
+    if (instant()) { step(1); done && done(); return () => {}; }
+    let t0 = null, id = 0, stop = false;
+    const f = t => { if (stop) return; if (t0 === null) t0 = t; const u = Math.min(1, (t - t0) / ms);
+      step(u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2); if (u < 1) id = requestAnimationFrame(f); else done && done(); };
+    id = requestAnimationFrame(f);
+    return () => { stop = true; cancelAnimationFrame(id); };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Boxes are {x1,y1,x2,y2} in [0,1].
+  const area = b => Math.max(0, b.x2 - b.x1) * Math.max(0, b.y2 - b.y1);
+  function iou(a, b) { const i = area({ x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), x2: Math.min(a.x2, b.x2), y2: Math.min(a.y2, b.y2) });
+    return i / (area(a) + area(b) - i); }
+  function giou(a, b) { const i = area({ x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), x2: Math.min(a.x2, b.x2), y2: Math.min(a.y2, b.y2) });
+    const u = area(a) + area(b) - i, c = area({ x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) });
+    return i / u - (c - u) / c; }
+  const cxcywh = b => [(b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, b.x2 - b.x1, b.y2 - b.y1];
+  const fromC = (cx, cy, w, h) => ({ x1: cx - w / 2, y1: cy - h / 2, x2: cx + w / 2, y2: cy + h / 2 });
+  function strokeBox(ctx, b, W, H, color, lw = 2, dash = null, alpha = 1) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+    ctx.strokeRect(b.x1 * W, b.y1 * H, (b.x2 - b.x1) * W, (b.y2 - b.y1) * H); ctx.restore(); }
+  function label(ctx, text, x, y, color, size = 12, align = 'left') {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  function scene(ctx, W, H) { // calm toy "street" background
+    ctx.fillStyle = css('--bg'); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = css('--panel2'); ctx.fillRect(0, H * .78, W, H * .22);
+  }
+  function person(ctx, b, W, H, color) {
+    const [cx, , w, h] = cxcywh(b); ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .55;
+    ctx.beginPath(); ctx.arc(cx * W, (b.y1 + h * .14) * H, Math.min(w * W, h * H) * .22, 0, 7); ctx.fill();
+    ctx.fillRect((cx - w * .28) * W, (b.y1 + h * .3) * H, w * .56 * W, h * .7 * H); ctx.restore(); }
+  function thing(ctx, b, W, H, color) {
+    ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .45; const r = 6;
+    const x = b.x1 * W + 4, y = b.y1 * H + 4, w = (b.x2 - b.x1) * W - 8, h = (b.y2 - b.y1) * H - 8;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); ctx.restore(); }
+  // Hungarian (Kuhn-Munkres) for a square cost matrix; returns col index per row.
+  function hungarian(C) {
+    const n = C.length, INF = 1e18, u = Array(n + 1).fill(0), v = Array(n + 1).fill(0), p = Array(n + 1).fill(0), way = Array(n + 1).fill(0);
+    for (let i = 1; i <= n; i++) { p[0] = i; let j0 = 0; const minv = Array(n + 1).fill(INF), used = Array(n + 1).fill(false);
+      do { used[j0] = true; const i0 = p[j0]; let d = INF, j1 = 0;
+        for (let j = 1; j <= n; j++) if (!used[j]) { const cur = C[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; } if (minv[j] < d) { d = minv[j]; j1 = j; } }
+        for (let j = 0; j <= n; j++) if (used[j]) { u[p[j]] += d; v[j] -= d; } else minv[j] -= d; j0 = j1; } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0); }
+    const a = Array(n); for (let j = 1; j <= n; j++) if (p[j]) a[p[j] - 1] = j - 1; return a;
+  }
+  // Keyboard + pointer dragging of a point in [0,1]^2 on a canvas.
+  function draggable(el, get, set) {
+    let drag = false;
+    const pos = e => { const r = el.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };
+    el.addEventListener('pointerdown', e => { drag = true; el.setPointerCapture(e.pointerId); set(...pos(e)); });
+    el.addEventListener('pointermove', e => { if (drag) set(...pos(e)); });
+    el.addEventListener('pointerup', () => { drag = false; });
+    el.addEventListener('keydown', e => { const [x, y] = get(), s = e.shiftKey ? .05 : .015;
+      const m = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
+      if (m) { e.preventDefault(); e.stopPropagation(); set(x + m[0], y + m[1]); } });
+  }
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  // Mix two colors given as "#rrggbb" or "rgb(r,g,b)".
+  function mix(c1, c2, u) {
+    const p = c => c[0] === '#' ? [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)) : c.match(/[\d.]+/g).slice(0, 3).map(Number);
+    const a = p(c1), b = p(c2); return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], u))).join(',')})`;
+  }
+  function dot(ctx, x, y, r, color, alpha = 1) { ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore(); }
+  function arrow(ctx, x1, y1, x2, y2, color, lw = 2, head = 8, alpha = 1) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = Math.hypot(x2 - x1, y2 - y1), hd = Math.min(head, L * .45);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - hd * .6 * Math.cos(a), y2 - hd * .6 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - hd * Math.cos(a - .42), y2 - hd * Math.sin(a - .42));
+    ctx.lineTo(x2 - hd * Math.cos(a + .42), y2 - hd * Math.sin(a + .42)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  // Tween numeric fields of obj toward target; instant() jumps straight to the end. Returns a stop function.
+  function tween(obj, target, ms, redraw, done) {
+    const from = {}; for (const k in target) from[k] = obj[k];
+    return animate(ms, u => { for (const k in target) obj[k] = from[k] + (target[k] - from[k]) * u; redraw(); }, done);
+  }
+  function tag(ctx, text, x, y, color, size = 11, align = 'left') {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; const w = ctx.measureText(text).width, x0 = align === 'right' ? x - w : x;
+    ctx.globalAlpha = .82; ctx.fillStyle = css('--bg'); ctx.beginPath(); ctx.roundRect(x0 - 3, y - size, w + 6, size + 4, 3); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  return { css, instant, onTheme, canvas, animate, tween, tag, rng, iou, giou, cxcywh, fromC, strokeBox, label, scene, person, thing, hungarian, draggable, clamp, lerp, mix, dot, arrow };
+})();
+</script>
+</head>

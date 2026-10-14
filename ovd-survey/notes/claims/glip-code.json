@@ -1,0 +1,97 @@
+[
+ {
+  "id": "glip-code-dyhead-t",
+  "claim": "GLIP-T DyHead layers (NUM_CONVS) in the official Swin-T O365+GoldG pretraining config",
+  "value": "6",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "github.com/microsoft/GLIP configs/pretrain/glip_Swin_T_O365_GoldG.yaml, MODEL.DYHEAD.NUM_CONVS (fetched 2026-10-09)",
+  "code_only": true
+ },
+ {
+  "id": "glip-code-dyhead-l",
+  "claim": "GLIP-L DyHead layers (NUM_CONVS) in the official Swin-L config",
+  "value": "8",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "configs/pretrain/glip_Swin_L.yaml, MODEL.DYHEAD.NUM_CONVS",
+  "code_only": true
+ },
+ {
+  "id": "glip-code-channels",
+  "claim": "GLIP-T DyHead channels / FPN out channels",
+  "value": "256",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, MODEL.DYHEAD.CHANNELS and BACKBONE.OUT_CHANNELS",
+  "code_only": true
+ },
+ {
+  "id": "glip-code-bert",
+  "claim": "GLIP-T language backbone",
+  "value": "bert-base-uncased",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, MODEL.LANGUAGE_BACKBONE.MODEL_TYPE (FREEZE: False)",
+  "code_only": true
+ },
+ {
+  "id": "glip-code-min-size",
+  "claim": "GLIP-T training/test short side (test size; training uses multi-scale short sides 480-800, AUGMENT.MULT_MIN_SIZE_TRAIN)",
+  "value": "800",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, INPUT.MIN_SIZE_TRAIN / MIN_SIZE_TEST",
+  "code_only": true
+ },
+ {
+  "id": "glip-code-max-size",
+  "claim": "GLIP-T training/test long side cap (test size; training uses multi-scale short sides 480-800, AUGMENT.MULT_MIN_SIZE_TRAIN)",
+  "value": "1333",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, INPUT.MAX_SIZE_TRAIN / MAX_SIZE_TEST",
+  "code_only": true
+ },
+ {
+  "id": "glip-code-batch",
+  "claim": "GLIP-T pretraining images per batch",
+  "value": "64",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "GLIP App. C.1 (src/sections/5_appendix_for_all.tex:75): Swin-Tiny 32 GPUs, batch 64, lr 1e-4, language backbone 1e-5; also the official yaml"
+ },
+ {
+  "id": "glip-code-lr",
+  "claim": "GLIP-T base learning rate (AdamW)",
+  "value": "0.0001",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "GLIP App. C.1 (src/sections/5_appendix_for_all.tex:75): Swin-Tiny 32 GPUs, batch 64, lr 1e-4, language backbone 1e-5; also the official yaml"
+ },
+ {
+  "id": "glip-code-lang-lr",
+  "claim": "GLIP-T language backbone learning rate",
+  "value": "0.00001",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "GLIP App. C.1 (src/sections/5_appendix_for_all.tex:75): Swin-Tiny 32 GPUs, batch 64, lr 1e-4, language backbone 1e-5; also the official yaml"
+ },
+ {
+  "id": "glip-code-neg",
+  "claim": "GLIP pretraining prompt holds at most 85 category names (all positives kept, random negatives fill up to 85 with probability 0.5)",
+  "value": "85",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "GLIP App. C.1 (sampling of negative categories); yaml DATASETS.RANDOM_SAMPLE_NEG"
+ },
+ {
+  "id": "glip-code-sep",
+  "claim": "GLIP prompt separation token",
+  "value": ". ",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "glip_Swin_T_O365_GoldG.yaml, DATASETS.SEPARATION_TOKENS",
+  "code_only": true
+ }
+]

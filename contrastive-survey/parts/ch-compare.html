@@ -1,0 +1,188 @@
+<p class="kicker"><span class="act-n">Act I</span>The idea</p>
+<section id="ch-compare" class="chapter">
+<h2>Learning by comparing</h2>
+<p>Suppose you have a million photos and no labels at all. Can a network still learn something useful from them? This chapter answers yes, and shows the one trap you must avoid on the way.</p>
+
+<h3>The game: two views of one photo</h3>
+<p>Take one photo of a mug. Crop it in two different places and change the colors a little. You now have two <em>views</em>. They look different pixel by pixel, but they show the same mug. Now take a photo of a bicycle. Its views share nothing with the mug's views.</p>
+<p>Here is the game you give the network: <em>put the two views of one photo close together, and keep views of different photos apart</em>. No one has to label anything, because you made the pairs yourself. To play well, the network must ignore what you changed (the crop, the colors) and keep what you did not change (the mug). That is exactly what we want a good feature to do.</p>
+<p>A few words you will see on every page from here on. The network that turns an image into a vector is the <em>encoder</em>. Its output vector is the <em>embedding</em>. Two views of the same photo form a <em>positive pair</em>. Views of different photos form <em>negative pairs</em>.</p>
+
+<h3>First attempt: only pull</h3>
+<p>The simplest loss you could write is "the distance between the two views of each photo". Minimize it, and the views of each photo <b class="c-green">pull</b> together. The figure below trains a small encoder this way. Eight made-up photos each have two views; each blue dot is one view, its yellow ring is the other, and a green line joins them.</p>
+
+<figure class="viz" id="viz-pullpush" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Training objective">
+    <span class="lbl">Train with</span>
+    <button type="button" id="btn-pullpush-pull" aria-pressed="false">Pull only</button>
+    <button type="button" id="btn-pullpush-both" aria-pressed="false">Pull and push</button>
+    <button type="button" id="btn-pullpush-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="pullpush-canvas" role="img" aria-label="A plane with eight numbered blue dots and eight yellow rings: two views of each of eight made-up images, placed by a shared linear encoder. A green line joins the two views of each image. With pull only, every point slides into the centre. With pull and push, partners stay close and a red ring of radius m around image 1 marks how far other images are pushed."></canvas>
+  <p class="readout" id="pullpush-readout" aria-live="polite"></p>
+  <figcaption>Eight made-up "images" are random points in four dimensions. Each view adds small noise. One shared linear encoder maps all sixteen views to the plane, and 240 real gradient steps train it on the margin loss below, with only its first term (pull only) or with both terms (pull and push). The setup and the printed numbers are in the project notes (<code>notes/sim-pullpush.txt</code>).</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "Pull only".</b> What is the cheapest way for the encoder to make every pair close?</p>
+<p>Press it and watch. Every point slides into the middle. The encoder found a trick: if it sends <em>every</em> image to the same point, every pair has distance zero and the loss is perfect. But now a mug and a bicycle get the same embedding, so the encoder has learned nothing. This failure is called <em>collapse</em>.</p>
+<p>Think of a student who answers "same" to every question "are these two the same?". The student is never wrong on the positive pairs, and is useless.</p>
+<p>Keep this picture in mind. Every method on this page is, at heart, a way to stop collapse.</p>
+
+<h3>The fix: also push</h3>
+<p>The student cheats because we never ask about different photos. So ask. For every negative pair, add a cost that <b class="c-red">pushes</b> the two views apart. Give each point a personal-space bubble of radius <span class="tex">m</span>, called the <em>margin</em>: a negative pair inside the bubble pays a cost, and a negative pair outside it pays nothing.</p>
+<p>Now press "Pull and push". Collapse has become the most expensive answer, because when everything sits on one point, every negative pair is deep inside the bubble. The cheapest answer is now the one we wanted: partners close, different photos apart.</p>
+
+<h3>The same idea as an equation</h3>
+<p>Here is the whole loss for one pair of inputs. Read it as "if the pair is positive, pay for distance; if it is negative, pay for closeness inside the margin".</p>
+<div class="eq" id="eq-drlim" data-build data-viz="viz-pullpush"><div class="tex tex-display">
+L = \htmlData{step=1, link=pull}{(1-Y)\,\tfrac12\,\htmlClass{t-green}{D_W^2}} + \htmlData{step=2, link=push}{Y\,\tfrac12\,\htmlClass{t-red}{\{\max(0,\; \htmlData{step=3, link=margin}{m} - \htmlData{step=4, link=dist}{D_W})\}^2}}
+</div></div>
+<p class="eqno">Eq. 4 in Hadsell, Chopra and LeCun, "Dimensionality reduction by learning an invariant mapping", CVPR 2006 (written there as <span class="tex">L(W, Y, \vec X_1, \vec X_2)</span>).</p>
+<ul class="gloss">
+  <li><span class="tex">D_W</span>: the distance between the two outputs of the encoder with weights <span class="tex">W</span>, one output per input of the pair.</li>
+  <li><span class="tex">Y</span>: 0 if the pair is similar (two views of one image), 1 if it is dissimilar (views of different images). Only one of the two terms is active for any pair.</li>
+  <li><span class="tex">\htmlClass{t-green}{D_W^2}</span>: the pull. It is zero only when partners coincide.</li>
+  <li><span class="tex">\htmlClass{t-red}{\max(0, m - D_W)^2}</span>: the push. It is zero once a dissimilar pair is at least <span class="tex">m</span> apart, so far-away pairs cost nothing and only near ones are pushed.</li>
+</ul>
+<p>Try it with numbers. Say the margin is <span class="tex">m = 1</span>.</p>
+<ul>
+  <li>A positive pair at distance 0.3 pays <span class="tex">\tfrac12 \cdot 0.3^2 = 0.045</span>. It still wants to get closer.</li>
+  <li>A negative pair at distance 0.3 pays <span class="tex">\tfrac12 (1 - 0.3)^2 = 0.245</span>. It is inside the bubble, so it gets pushed.</li>
+  <li>A negative pair at distance 1.5 pays <span class="tex">0</span>. It is already far enough, so the loss leaves it alone.</li>
+</ul>
+<p>That last line matters more than it looks. The push only spends effort on negatives that are close. Far-away negatives teach nothing. You will meet this idea again in <a href="#ch-negatives">chapter 7</a>, on hard negatives.</p>
+
+<h3>Inside the siamese network: forward, then backward</h3>
+<p>The loss needs two outputs, one per input of the pair. The network that makes them is called <em>siamese</em>: two copies of one encoder that share every weight. Step through one training pair from the figure above. <b>Make a guess before you press "5 Gradients": there are two encoder copies, so how many sets of weights does one step update?</b></p>
+
+<figure class="viz archflow" id="viz-siamflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pair type">
+    <span>pair</span>
+    <button type="button" id="btn-siamflow-pos" aria-pressed="true">Positive (Y = 0)</button>
+    <button type="button" id="btn-siamflow-neg" aria-pressed="false">Negative (Y = 1)</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-siamflow-inputs" aria-pressed="false">1 Two inputs</button>
+    <button type="button" id="btn-siamflow-encode" aria-pressed="false">2 Encode</button>
+    <button type="button" id="btn-siamflow-dist" aria-pressed="false">3 Distance</button>
+    <button type="button" id="btn-siamflow-loss" aria-pressed="false">4 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-siamflow-backward" aria-pressed="false">5 Gradients</button>
+    <button type="button" class="cf-back" id="btn-siamflow-update" aria-pressed="false">6 Update</button>
+  </div>
+  <canvas id="siamflow-canvas" role="img" aria-label="One training pair as a diagram. Two inputs, a blue view and a yellow view, each go through a copy of the same encoder W. The two outputs meet in a green distance box, which feeds the red margin loss. In the backward stages red arrows run from the loss through the distance into both encoder copies, which are the same weights."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-siamflow-prev">Previous</button>
+    <button type="button" id="btn-siamflow-next">Next</button>
+    <button type="button" id="btn-siamflow-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="siamflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Top lane: the <b class="c-blue">first input</b>. Bottom lane: the <b class="c-yellow">second input</b>. Both pass through the same encoder, then meet in the <b class="c-green">distance</b> and the <b class="c-red">loss</b>. Pick a pair type, press <b>1 Two inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>1. Two inputs and a label</h4>
+      <p>Take two views from the toy above. Each is a list of 4 numbers. The label <span class="tex">Y</span> says whether they come from the same made-up image (<span class="tex">Y = 0</span>, a positive pair) or from different ones (<span class="tex">Y = 1</span>, a negative pair). You made the label yourself, by choosing the pair.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>2. Two copies, one set of weights</h4>
+      <p>The encoder is a 2 x 4 matrix <span class="tex">W</span>: it turns 4 numbers into 2, a point in the plane of the figure. Both inputs go through the <em>same</em> <span class="tex">W</span>. The two boxes are drawn twice only to show two inputs at once. Sharing is what makes the outputs comparable: the same input always lands on the same point.</p>
+    </div>
+    <div data-stage="dist" hidden>
+      <h4>3. One number: the distance</h4>
+      <p>The two points are compared by their Euclidean distance <span class="tex">D_W</span>. This is the only place the two branches meet.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>4. The margin loss</h4>
+      <p>Eq. 4 turns the distance into a cost. For a positive pair it is <span class="tex">\tfrac12 D_W^2</span>; for a negative pair it is <span class="tex">\tfrac12 \max(0, m - D_W)^2</span>, with <span class="tex">m = 1</span> in the toy. Switch the pair type to see which term grades it.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>5. The gradient reaches both copies</h4>
+      <p>The gradient flows from the loss to the distance, then down both branches into both copies of <span class="tex">W</span>. A positive pair's gradient pulls the two outputs together. A negative pair inside the margin pushes them apart; outside the margin its gradient is zero, and nothing moves.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>6. One update</h4>
+      <p>There is only one <span class="tex">W</span>, so the two branch gradients are added and applied once. In the toy above, each gradient step does this for every pair of the 16 views at once: 8 positive pairs and 112 negative pairs.</p>
+    </div>
+  </div>
+  <figcaption>Computed from the toy above: 4 input numbers, a linear encoder <span class="tex">W</span> of shape 2 x 4, margin <span class="tex">m = 1</span> (our choice; the paper states no value). The two encoder boxes are one set of weights.</figcaption>
+</figure>
+
+<p>The answer to the guess: one. The two copies are the same weights, so their gradients add up into a single update. This is why the method is called siamese, after twins who share one body.</p>
+
+<details class="check">
+  <summary>Check yourself: what would happen if you trained with the push term only?</summary>
+  <p>Different photos would spread apart, but nothing would pull the two views of one photo together. The encoder would have no reason to ignore the crop and the colors, so two views of the same mug could land far apart. You need both forces: the pull teaches what to ignore, and the push stops collapse.</p>
+</details>
+
+<h3>Where this came from</h3>
+<p>This loss is from Hadsell, Chopra and LeCun (CVPR 2006), who call it the <em>contrastive loss</em>, the name the whole field now carries. A year earlier, Chopra, Hadsell and LeCun had trained a <em>siamese</em> network for face verification. It is two copies of one network with shared weights, one per input, scored on the distance between their outputs. FaceNet (<a href="https://arxiv.org/abs/1503.03832v3">1503.03832</a>) later used a <em>triplet</em> of anchor, positive and negative, and asked the positive to be closer than the negative by a margin.</p>
+
+<h3>Where we go next: from a margin to a lineup</h3>
+<p>The margin loss has two weak spots. It looks at one pair at a time, so each step sees very few negatives. And you must pick the margin <span class="tex">m</span> by hand, in units of distance.</p>
+<p>Now picture a police lineup instead. Show the network one view (the anchor) and a row of candidates: its true partner and many strangers. Ask it to point at the partner. One question now checks many negatives at once, and "most similar of all" needs no distance scale: a softmax over the candidates measures it.</p>
+<p>Sohn's N-pair loss (NeurIPS 2016) made exactly this change for faces and products, using class labels to form the pairs. Later work showed that N-pair is the same loss as InfoNCE, which chapter 3 builds, up to constants, when both inputs go through one encoder and the score is a dot product (Tschannen et al., <a href="https://arxiv.org/abs/1907.13625v2">1907.13625</a>, Sec. 4). The <a href="#hero-canvas">figure at the top of the page</a> already plays the lineup game, and <a href="#ch-infonce">chapter 3</a> builds it step by step.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why two augmented views of one photo give a training signal with no labels.</li>
+    <li>Why pulling partners together on its own makes the encoder collapse.</li>
+    <li>How a push with a margin makes collapse expensive, and why far-away negatives cost nothing.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>Comparison is the only signal in self-supervised pretraining, so something must always stop collapse. On this page that something is negatives (Acts I to III), a balancing constraint (<a href="#ch-beyond">chapter 8</a>), labels (<a href="#ch-supcon">chapter 9</a>), or a caption (<a href="#ch-clip">chapter 10</a>). If a contrastive model you train gives almost the same embedding for very different inputs, suspect collapse first.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-pullpush'), out = document.getElementById('pullpush-readout');
+  const kit = KIT.pullpush(document.getElementById('pullpush-canvas'), { fig });
+  const btns = { pull: document.getElementById('btn-pullpush-pull'), both: document.getElementById('btn-pullpush-both') };
+  const go = mode => { kit.set(mode); Object.entries(btns).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === mode))); out.textContent = KIT.pullpushText(mode); };
+  btns.pull.addEventListener('click', () => go('pull'));
+  btns.both.addEventListener('click', () => go('both'));
+  document.getElementById('btn-pullpush-reset').addEventListener('click', () => go(null));
+  go(null);
+
+  ArchFlow.mount({
+    prefix: 'siamflow', grid: { cols: 5, rows: 2 },
+    boxes: {
+      x1: { c: 0, r: 0, lane: 'blue', title: ['input 1'], glyph: 'photo', data: true },
+      x2: { c: 0, r: 1, lane: 'yellow', title: ['input 2'], glyph: 'photo', data: true },
+      g1: { c: 1, r: 0, lane: 'blue', title: ['encoder W'], glyph: 'layers' },
+      g2: { c: 1, r: 1, lane: 'yellow', title: ['encoder W', '(same weights)'], glyph: 'layers' },
+      z1: { c: 2, r: 0, lane: 'blue', title: ['point 1'], glyph: 'unit' },
+      z2: { c: 2, r: 1, lane: 'yellow', title: ['point 2'], glyph: 'unit' },
+      d: { c: 3, r: .5, lane: 'green', title: ['distance D_W'], glyph: 'matrix' },
+      loss: { c: 4, r: .5, lane: 'red', title: ['margin loss'], glyph: 'loss' },
+    },
+    edges: [['x1', 'g1'], ['x2', 'g2'], ['g1', 'z1'], ['g2', 'z2'], ['z1', 'd'], ['z2', 'd'], ['d', 'loss']],
+    stages: [{ key: 'inputs', show: ['x1', 'x2'] }, { key: 'encode', show: ['g1', 'g2', 'z1', 'z2'] }, { key: 'dist', show: ['d'] },
+      { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: { pos: { y: 0 }, neg: { y: 1 } }, variant: 'pos',
+    shape: (id, v) => ({ x1: '4 numbers', x2: '4 numbers', g1: 'W: 2 x 4', g2: 'W: 2 x 4', z1: '2 numbers', z2: '2 numbers', d: '1 number',
+      loss: v.y ? 'Y = 1:|1/2 max(0, m - D)^2' : 'Y = 0:|1/2 D^2' })[id],
+    params: id => id === 'g1' || id === 'g2' ? 'W (8 numbers,|shared)' : null,
+    frozen: () => false,
+    readout: (s, v) => ({
+      overview: 'One pair through a siamese network: two inputs, one shared encoder, one distance, one loss.',
+      inputs: 'Step 1: two views, 4 numbers each, with label Y = ' + v.y + (v.y ? ' (different images).' : ' (same image).'),
+      encode: 'Step 2: the same 2 x 4 matrix W maps each input to a point in the plane.',
+      dist: 'Step 3: the distance D_W between the two points: 1 number.',
+      loss: v.y ? 'Step 4: a negative pair pays 1/2 max(0, m - D)^2: only if it is closer than m = 1.' : 'Step 4: a positive pair pays 1/2 D^2: any distance costs.',
+      backward: v.y ? 'Backward: inside the margin the gradient pushes both points apart through both copies of W; outside it, the gradient is zero.' : 'Backward: the gradient pulls both points together, through both copies of W.',
+      update: 'Update: the gradients from both branches are added and W takes one step.',
+    })[s],
+  });
+})();
+</script>
+</section>

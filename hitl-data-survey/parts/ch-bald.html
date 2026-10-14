@@ -1,0 +1,70 @@
+<section id="ch-bald" class="chapter">
+<h2>Ambiguous or unfamiliar? MC dropout and BALD</h2>
+<p>"Unsure" comes in two kinds. An ambiguous image (a blurred part, a borderline scratch) stays a coin flip however many labels you buy; an unfamiliar image is one the model has not learned yet, and one label fixes it.</p>
+
+<figure class="viz" id="viz-dome" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="dome-canvas" tabindex="0" role="img" aria-label="A three-dimensional dome over a flat triangle of three-class probabilities; the height of the dome is entropy. Blue points on the dome are the predictions of individual dropout passes. A vertical yellow bar at the mean prediction shows the gap between the dome's height at the mean and the average height of the blue points: that gap is BALD."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-dome-ambiguous" aria-pressed="false">An ambiguous image</button>
+    <button type="button" id="btn-dome-unfamiliar" aria-pressed="true">An unfamiliar image</button>
+    <button type="button" id="btn-dome-confident" aria-pressed="false">A confident image</button>
+    <button type="button" id="btn-dome-reset" data-cue-reset>Reset</button>
+  </div>
+  <div class="controls">
+    <label>passes T <input type="range" id="dome-T" min="2" max="40" step="1" value="12"></label>
+    <label>disagreement between passes <input type="range" id="dome-spread" min="0" max="1" step="0.01" value="0.92"></label>
+  </div>
+  <p class="readout" id="dome-readout" aria-live="polite"></p>
+  <figcaption>Toy model with exact math. The triangle holds every three-class probability vector; the dome's height is its entropy. Each blue point is one dropout pass's prediction for the same image. Drag to turn the dome, or focus it and use the arrow keys. Before you press "An ambiguous image", guess: will the yellow gap grow or shrink?</figcaption>
+</figure>
+
+<p>Entropy cannot tell these two apart. Both images get a mean prediction near the center of the triangle, so both sit at the top of the dome. To separate them, the model needs to know how sure it is about <em>itself</em>.</p>
+
+<p>Here is the Bayesian view in one paragraph. Many different weight settings fit the labels you have. If they all predict the same thing for an image, the data has settled the question. If they predict different things, the data has not, and a label for that image would rule some of them out. Gal and Ghahramani (2015 on arXiv, ICML 2016) showed a cheap way to draw such weight settings: keep dropout switched on at test time. Each forward pass drops a different random set of units, so each pass is a slightly different network. Run <span class="tex">T</span> passes and you get <span class="tex">T</span> predictions for one image: the blue points on the dome.</p>
+
+<p>BALD (Bayesian Active Learning by Disagreement, Houlsby et al. 2011) turns that cloud into one score:</p>
+
+<div class="eq" id="eq-bald" data-build data-viz="viz-dome"><div class="tex tex-display">
+\htmlData{step=1, link=gap}{\mathbb{I}[y, \omega \mid x, \mathcal{D}]} = \htmlData{step=2, link=hmean}{\mathbb{H}[\,y \mid x, \mathcal{D}\,]} \; - \; \htmlData{step=3, link=eh}{\mathbb{E}_{p(\omega \mid \mathcal{D})}\, \mathbb{H}[\,y \mid x, \omega\,]}
+</div></div>
+<p class="eqno">Gal, Islam and Ghahramani (2017), Sec. 4; first written for Gaussian processes by Houlsby et al. (2011), Eq. 2. Hover a term to light its part of the dome.</p>
+<ul class="gloss">
+  <li><span class="tex">\mathbb{H}[y \mid x, \mathcal{D}]</span>: the entropy of the <b>average</b> prediction. In the figure, the dome's height above the mean point.</li>
+  <li><span class="tex">\mathbb{E}\,\mathbb{H}[y \mid x, \omega]</span>: the <b>average entropy</b> of the individual passes. In the figure, the average height of the blue points.</li>
+  <li>The difference is the mutual information between the label <span class="tex">y</span> and the weights <span class="tex">\omega</span>: how much the label would tell you about which network is right.</li>
+</ul>
+
+<p>The dome is curved downward, so the average of the heights always sits below the height of the average. The gap is large only when the passes are individually confident but point to different corners: the model disagrees with itself. For the ambiguous image every pass says "a third each", every point sits at the top of the dome, and the gap closes. The label would cost the same, and teach nothing.</p>
+
+<p>Gal, Islam and Ghahramani ran this on MNIST with a small dropout CNN: start from 20 labels, add 10 per round, retrain from scratch each time. The number of acquired labels (after the first 20) each score needed to reach a given test error:</p>
+<table class="data">
+<thead><tr><th>Acquisition score</th><th>to 10% error</th><th>to 5% error</th></tr></thead>
+<tbody>
+<tr><td>BALD</td><td data-claim="dbal-t1-bald-10">145</td><td data-claim="dbal-t1-bald-5">335</td></tr>
+<tr><td>Variation ratios</td><td data-claim="dbal-t1-varratios-10">120</td><td data-claim="dbal-t1-varratios-5">295</td></tr>
+<tr><td>Max entropy</td><td data-claim="dbal-t1-maxent-10">165</td><td data-claim="dbal-t1-maxent-5">355</td></tr>
+<tr><td>Mean STD</td><td data-claim="dbal-t1-meanstd-10">230</td><td data-claim="dbal-t1-meanstd-5">695</td></tr>
+<tr><td>Random</td><td data-claim="dbal-t1-random-10">255</td><td data-claim="dbal-t1-random-5">835</td></tr>
+</tbody></table>
+<p class="note">Gal et al. (2017), Table 1, MNIST. On clean MNIST, BALD is not the winner: variation ratios (one minus the top class's averaged probability) needs fewer labels. BALD's advantage shows where some images are genuinely ambiguous. In the paper's skin-lesion experiment the authors suggest BALD helped because it "avoided selecting noisy points". The paper does not state how many passes <span class="tex">T</span> it used for MNIST.</p>
+
+<p>The cost is <span class="tex">T</span> forward passes per pool image instead of one, and the model must have dropout layers. An ensemble of a few independently trained networks gives the same kind of disagreement signal at a higher training cost.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Do not spend labels on images that are ambiguous to everyone: route them to a guideline decision instead ("where exactly is the class boundary?"). Send the images on which the model's own dropout passes, or ensemble members, disagree.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-dome'), out = document.getElementById('dome-readout');
+  const f = FIG.dome(document.getElementById('dome-canvas'), { say: t => out.textContent = t });
+  const ps = ['ambiguous', 'unfamiliar', 'confident'].map(k => document.getElementById('btn-dome-' + k));
+  const T = document.getElementById('dome-T'), sp = document.getElementById('dome-spread');
+  ps.forEach(b => b.addEventListener('click', () => { KIT.press(ps, b); sp.value = f.preset(b.id.replace('btn-dome-', '')); }));
+  T.addEventListener('input', () => f.T(+T.value)); sp.addEventListener('input', () => f.spread(+sp.value));
+  document.getElementById('btn-dome-reset').addEventListener('click', () => { KIT.press(ps, ps[1]); T.value = 12; sp.value = .92; f.reset(); });
+})();
+</script>
+</section>

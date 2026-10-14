@@ -1,0 +1,14 @@
+  <article data-chapter="continuous">
+    <header class="ch-head"><span class="num">3 of 10</span><h2>Continuous time and discretization</h2><p class="subhead">One memory, read at any step size</p></header>
+    <div class="controls">
+      <button type="button" class="tool" data-mode="signal" aria-pressed="true">Same signal, resampled</button><button type="button" class="tool" data-mode="tokens" aria-pressed="false">Same tokens, new &Delta;</button>
+      <label class="slider">Step size &Delta; <input type="range" id="continuous-atlas-dt" min="0" max="10" step="1" value="7"></label>
+      <button type="button" class="tool" data-dt="1">&Delta; = 1</button><button type="button" class="tool" data-dt="0.1">&Delta; = 1/10</button>
+    </div>
+    <p>Here the <button class="inline-term" data-open="state">state</button> has three numbers, and the yellow curve is how it moves through time. The blue staircase is the input; the green curve is the output. The memory is written as an <button class="inline-term" data-open="ode">ODE</button>, a rule for how fast the state changes: a matrix A turns the state and pulls it back to zero, and the input pushes it away. Nothing in that rule has a step size.</p>
+    <p>A computer sees one token per step, so it needs a recurrence instead. <button class="inline-term" data-open="discretization">Discretization</button> picks a <button class="inline-term" data-open="delta">step size &Delta;</button> and solves the ODE over one step. Mamba does it with the <button class="inline-term" data-open="zoh">zero-order hold</button>, and the yellow points are that recurrence. Drag the slider: the curve stays put, only the number of points changes.</p>
+    <p>Now press <b>Same tokens, new &Delta;</b> and then <b>&Delta; = 1/10</b>. The sixteen inputs are now crammed into a tenth of the time. Each token moves the state less, and the state forgets less per token: its memory reaches ten times more tokens back.</p>
+    <p class="note">A toy, computed exactly: A is chosen by hand (decay rate 0.5 for h1; a pair that turns at 1 radian per time unit and decays at 0.25). The points use the zero-order hold, Abar = exp(&Delta;A), checked against a fine numerical integration. HiPPO, LSSL and S4 use the bilinear rule instead; S4D found little difference between the two.</p>
+    <p class="inscription">The step size &Delta; is the knob between time and tokens: a smaller step means a longer memory, counted in tokens.</p>
+    <button type="button" class="continue" data-go="hippo">Continue with HiPPO</button>
+  </article>

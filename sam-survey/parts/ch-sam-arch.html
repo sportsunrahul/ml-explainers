@@ -1,0 +1,79 @@
+<section id="ch-sam-arch" class="chapter">
+<h2>Heavy once, light many times</h2>
+<p>A person clicks, looks, and clicks again, so each answer must come back in a moment. SAM gets this by splitting the work: a large network reads the image once, and a small one answers each prompt.</p>
+
+<figure class="viz" id="viz-costsplit" data-scene="costsplit" data-toy>
+  <div class="stage" style="height:clamp(250px, 30vw, 300px)"></div>
+  <div class="controls">
+    <button type="button" data-csplit="sam" id="btn-costsplit-sam" aria-pressed="true">SAM: encode once</button>
+    <button type="button" data-csplit="none" id="btn-costsplit-none">No split</button>
+    <button type="button" data-cadd id="btn-costsplit-add">Add a click</button>
+    <button type="button" data-cue-reset id="btn-costsplit-reset">Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model of compute per click. The bar lengths are compute, not time. The decoder bar is drawn at 1% of the encoder bar because the paper bounds it at less than 1%; the paper gives no running time for the image encoder.</figcaption>
+</figure>
+
+<p>SAM has three parts. The <b class="c-blue">image encoder</b> turns the image into a grid of feature vectors, the <dfn>image embedding</dfn>. The <b class="c-yellow">prompt encoder</b> turns clicks, boxes and masks into vectors of the same width. The <b class="c-green">mask decoder</b> mixes the two and draws the masks. Given the image embedding, the mask decoder needs <span data-claim="sam-decoder-compute">less than 1%</span> of the image encoder's compute (the prompt encoder is smaller still), and the two run in about <span data-claim="sam-decoder-runtime">50ms</span> in a web browser on a CPU. So the encoder may be as large as quality demands; it runs once per image, not once per prompt.</p>
+
+<h3>The image encoder</h3>
+<p>The encoder is a <a href="../vlm-survey/explainer.html#ch-patches">Vision Transformer</a> (ViT): the image is cut into square patches, each patch becomes a vector, and transformer layers let every patch exchange information with the others. SAM uses the huge size with 16-pixel patches, <span data-claim="sam-encoder">ViT-H/16</span>, at an input of <span data-claim="sam-input-res">1024x1024</span>. That gives a <span data-claim="sam-embed-grid">64x64</span> grid of patch vectors. At that size, attention between all patch pairs in every layer is expensive, so most layers attend only inside <span data-claim="sam-window">14x14</span> windows, and <span data-claim="sam-global-blocks">four</span> evenly spaced blocks attend globally, a design taken from ViTDet. Two small convolutions (the <dfn>neck</dfn>) then shrink each vector to <span data-claim="sam-embed-ch">256</span> channels.</p>
+<p>The encoder starts from <span data-claim="sam-encoder-init">MAE</span> weights. A masked autoencoder (MAE) is trained without labels: it hides most patches of an image and learns to paint them back, which teaches it general visual features (the <a href="../jepa-survey/explainer.html#ch-ssl">JEPA explainer</a> compares this with other ways to learn without labels). SAM then trains the whole encoder further on its own task.</p>
+
+<h3>The prompt encoder</h3>
+<p>Every sparse prompt becomes a token of <span data-claim="sam-prompt-dim">256</span> numbers. A click is a <span data-claim="f1-sam-pe">positional encoding</span> of its location (a fixed set of sines and cosines at many frequencies, so nearby points get similar codes) plus one of <span data-claim="sam-point-learned">two learned embeddings</span> that say "include" or "exclude". A box is two tokens: one for its top-left corner and one for its bottom-right corner, each with its own learned embedding. In a proof-of-concept variant, text goes through <a href="../clip/How%20CLIP%20works,%20explained%20in%203D.html">CLIP</a>'s text encoder; the released SAM takes no text. A mask prompt is different: it is an image, so small convolutions (with <span data-claim="sam-mask-prompt-ch">4 and 16</span> channels, then <span data-claim="sam-embed-ch">256</span>) shrink it to the <span data-claim="sam-embed-grid">64x64</span> grid, and it is added to the image embedding pixel by pixel.</p>
+
+<h3>The mask decoder</h3>
+<p>The decoder starts from the prompt tokens plus a few learned <dfn>output tokens</dfn>, one per mask slot and one for the scores, like the class token of a ViT. It is a <dfn>two-way transformer</dfn> of <span data-claim="sam-dec-layers">2</span> layers, each in <span data-claim="sam-dec-steps">4 steps</span>: the tokens attend to each other; the tokens attend to the image embedding; an MLP updates each token; and the image embedding attends back to the tokens. The last step is what makes it two-way: the image features also learn about the prompt. All attention layers use <span data-claim="sam-dec-heads">8 heads</span>.</p>
+<p>The image embedding is then upsampled <span data-claim="sam-upscale">4x</span> with two transposed convolutions, the tokens attend to it once more, and each mask token passes through a <span data-claim="sam-hyper-mlp">3-layer MLP</span> to become a vector of <span data-claim="f1-sam-mlp-out">32</span> numbers. Each mask is the dot product of that vector with the upsampled embedding at every location, the same move as <a href="#ch-before">MaskFormer's mask head</a>:</p>
+<div class="eq"><div class="tex tex-display">
+\htmlClass{t-green}{M_k}[h,w] = \htmlClass{t-green}{\mathrm{MLP}_k(t_k)}^{\mathsf T}\, \htmlClass{t-blue}{U[:,h,w]}
+</div></div>
+<p class="eqno">Our notation for SAM v1, App. A ("Lightweight mask decoder"): <span class="tex">t_k</span> is mask token <span class="tex">k</span> after the decoder, <span class="tex">U</span> the upsampled image embedding (32 channels at a quarter of the input resolution).</p>
+<p>The <span class="c-green">score head</span> reads the extra output token and predicts one IoU per mask. That gives the three ranked masks of the <a href="#ch-promptable">last chapter</a>.</p>
+
+<h3>Inside SAM: forward, then backward</h3>
+<p>Step through one forward pass with the shapes computed from the paper's configuration. Before you open the backward stages, guess: which boxes will the gradient reach, and is anything frozen?</p>
+
+<figure class="viz archflow" id="viz-samflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-samflow-image" aria-pressed="false">1 Image</button>
+    <button type="button" id="btn-samflow-encoder" aria-pressed="false">2 Encoder</button>
+    <button type="button" id="btn-samflow-prompts" aria-pressed="false">3 Prompts</button>
+    <button type="button" id="btn-samflow-decoder" aria-pressed="false">4 Decoder</button>
+    <button type="button" id="btn-samflow-masks" aria-pressed="false">5 Masks</button>
+    <button type="button" id="btn-samflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-samflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-samflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Encoder size">
+    <span>encoder</span>
+    <button type="button" id="btn-samflow-b" aria-pressed="false">ViT-B</button>
+    <button type="button" id="btn-samflow-l" aria-pressed="false">ViT-L</button>
+    <button type="button" id="btn-samflow-h" aria-pressed="true">ViT-H</button>
+  </div>
+  <canvas id="samflow-canvas" role="img" aria-label="SAM's forward pass as a diagram: the image goes through the blue image encoder to a 256 by 64 by 64 embedding; clicks and boxes go through the yellow prompt encoder; a previous mask goes through small convolutions; the green two-way transformer mixes them; the embedding is upscaled and token MLPs give vectors whose dot products make three masks and scores; a red loss compares them with the true mask. In the backward stages the red gradient reaches every box, the image encoder included."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-samflow-prev">Previous</button>
+    <button type="button" id="btn-samflow-next">Next</button>
+    <button type="button" id="btn-samflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="samflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Blue is the image side, yellow the prompts, green the decoder and its outputs, red the loss. The <b class="c-blue">image encoder</b> is where almost all the compute sits; everything to its right runs once per prompt. Press <b>1 Image</b>, then <b>Next</b>.</p></div>
+    <div data-stage="image" hidden><h4>1. One image, padded to a square</h4><p>The image is rescaled and its shorter side padded to <span data-claim="sam-input-res">1024x1024</span>. <span data-claim="f1-sam-no-aug">No data augmentation</span> is used in the default recipe. A training batch holds <span data-claim="sam-batch">256</span> images, with up to <span data-claim="sam-masks-per-gpu">64</span> sampled masks per GPU.</p></div>
+    <div data-stage="encoder" hidden><h4>2. The image encoder</h4><p>16-pixel patches give a <span data-claim="sam-embed-grid">64x64</span> grid of tokens. The ViT widths, depths and heads come from the ViT paper's size table: ViT-H is <span data-claim="f1vit-h-width">1280</span> wide, <span data-claim="f1vit-h-layers">32</span> layers deep, with <span data-claim="f1vit-h-heads">16</span> heads. The neck reduces each token to <span data-claim="sam-embed-ch">256</span> channels. The window and global-block layout is stated for ViT-H.</p></div>
+    <div data-stage="prompts" hidden><h4>3. Prompts become tokens</h4><p>Each click is one 256-number token, each box two. The previous round's mask logits, at a quarter of the input resolution (<span data-claim="sam-mask-prompt-res-px">256x256</span>, our reading of "4x lower"), pass through small convolutions and are added to the image embedding. Without a mask prompt, a learned "no mask" vector is added instead.</p></div>
+    <div data-stage="decoder" hidden><h4>4. The two-way transformer</h4><p>The tokens, including <span data-claim="sam-output-tokens">5</span> learned output tokens (our count: three mask slots, the fourth single-mask slot, one score token), go through <span data-claim="sam-dec-layers">2</span> layers with the image embedding treated as a set of <span data-claim="sam-embed-grid">64x64</span> vectors. Width <span data-claim="sam-dec-dim">256</span>, MLP width <span data-claim="sam-dec-mlp">2048</span> on the tokens only, cross-attention reduced to <span data-claim="sam-dec-xattn">128</span> channels to save compute.</p></div>
+    <div data-stage="masks" hidden><h4>5. Masks and scores</h4><p>Two transposed convolutions (<span data-claim="sam-upconv-ch">64 and 32</span> channels) upsample the image embedding to <span data-claim="sam-upscaled-shape">256x256x32</span>. The tokens attend to it once more; each mask token's MLP gives a 32-number vector, and its dot product with every location gives a 256 by 256 grid of mask logits. The score head gives one predicted IoU per mask.</p></div>
+    <div data-stage="loss" hidden><h4>6. One number</h4><p>Focal and dice loss, <span data-claim="sam-focal-dice">20:1</span>, against the true mask; for a single prompt only the best of the three masks counts; plus the score loss. This is <a href="#eq-samloss">the loss equation</a> in the previous chapter. A training example is not one prompt but <a href="#ch-training">eleven rounds of simulated clicking</a>.</p></div>
+    <div data-stage="backward" hidden><h4>7. Where the gradient goes</h4><p>From the loss into the best mask and the score predictions, through the dot product into the token MLPs and the upsampler, through both directions of the two-way transformer into the prompt encoder's learned embeddings and the mask-prompt convolutions, and into the image embedding, then down every layer of the image encoder. Nothing is frozen: the encoder starts from MAE and keeps training. The two masks that lost the minimum get no mask-loss gradient in that round.</p></div>
+    <div data-stage="update" hidden><h4>8. The update</h4><p><span data-claim="sam-optimizer">AdamW</span> (betas <span data-claim="sam-beta1">0.9</span> and <span data-claim="sam-beta2">0.999</span>), <span data-claim="sam-warmup">250</span> warmup iterations, then a learning rate of <span data-claim="sam-lr">8e-4</span> for ViT-H, cut by a factor of <span data-claim="sam-lr-factor">10</span> at <span data-claim="sam-lr-drop1">60k</span> and <span data-claim="sam-lr-drop2">86666</span> iterations, <span data-claim="sam-iters">90k</span> in all (about <span data-claim="sam-epochs">2</span> passes over SA-1B). Layer-wise learning-rate decay of <span data-claim="sam-ld">0.8</span> gives the earliest encoder layers (nearest the input) the smallest steps. ViT-H trained on <span data-claim="sam-compute-gpus">256 A100 GPUs</span> for <span data-claim="sam-compute-hours">68 hours</span>.</p></div>
+  </div>
+  <figcaption>Computed: token counts from the input size and patch size; encoder widths, depths and heads from the ViT paper's Table 1; decoder sizes and the recipe from SAM v1, App. A. Parameter counts are SAM's Fig. 13 values (the paper does not say what they include). For ViT-B and ViT-L the recipe values are the paper's variants; the window layout of those sizes is not stated.</figcaption>
+</figure>
+<p>Every box is trainable, and the cost of that is in the encoder. The next question is where the training masks came from.</p>
+</section>

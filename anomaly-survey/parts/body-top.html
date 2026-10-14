@@ -1,0 +1,70 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="Panels of woven wire mesh slide under a ring of inspection light. Each good panel drops its patch features into a blue cloud on the right. A panel with a scratch arrives; its scratched patch turns yellow, its feature lands far outside the cloud, a red line measures the distance to the nearest normal feature, and the scratch lights up red on the part, which is rejected."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge toy" style="top:.6rem;right:.75rem">Toy model</span>
+  </div>
+  <h1>Defects you have never seen</h1>
+  <p class="hook">A camera on a production line sees thousands of good parts and almost no bad ones. How do you train a detector for defects that are missing from your data? Remember what normal looks like, and measure how far each new patch is from it.</p>
+  <p class="papers-note">The papers read in full, each linked to the version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://openaccess.thecvf.com/content_CVPR_2019/html/Bergmann_MVTec_AD_--_A_Comprehensive_Real-World_Dataset_for_Unsupervised_Anomaly_CVPR_2019_paper.html" title="CVPR 2019">MVTec AD</a></li>
+    <li><a href="https://arxiv.org/abs/2207.14315v1" title="arXiv 2207.14315v1">VisA (SPot-the-Difference)</a></li>
+    <li><a href="https://arxiv.org/abs/2503.21622v1" title="arXiv 2503.21622v1">MVTec AD 2</a></li>
+    <li><a href="https://arxiv.org/abs/2005.02357v3" title="arXiv 2005.02357v3">SPADE</a></li>
+    <li><a href="https://arxiv.org/abs/2011.08785v1" title="arXiv 2011.08785v1">PaDiM</a></li>
+    <li><a href="https://arxiv.org/abs/2106.08265v2" title="arXiv 2106.08265v2">PatchCore</a></li>
+    <li><a href="https://arxiv.org/abs/2111.07677v2" title="arXiv 2111.07677v2">FastFlow</a></li>
+    <li><a href="https://arxiv.org/abs/2104.04015v1" title="arXiv 2104.04015v1">CutPaste</a></li>
+    <li><a href="https://arxiv.org/abs/2108.07610v2" title="arXiv 2108.07610v2">DRAEM</a></li>
+    <li><a href="https://arxiv.org/abs/2303.14535v3" title="arXiv 2303.14535v3">EfficientAD</a></li>
+    <li><a href="https://arxiv.org/abs/2206.03687v3" title="arXiv 2206.03687v3">UniAD</a></li>
+    <li><a href="https://arxiv.org/abs/2406.03262v6" title="arXiv 2406.03262v6">ADer</a></li>
+    <li><a href="https://arxiv.org/abs/2303.14814v1" title="arXiv 2303.14814v1">WinCLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2310.18961v12" title="arXiv 2310.18961v12">AnomalyCLIP</a></li>
+    <li><a href="https://arxiv.org/abs/2405.14529v3" title="arXiv 2405.14529v3">AnomalyDINO</a></li>
+    <li><a href="https://arxiv.org/abs/2405.14325v5" title="arXiv 2405.14325v5">Dinomaly</a></li>
+    <li><a href="https://arxiv.org/abs/2605.24251v2" title="arXiv 2605.24251v2">Continual AD on the edge</a></li>
+    <li><a href="https://arxiv.org/abs/2606.16119v1" title="arXiv 2606.16119v1">EdgeZSAD</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: the problem and the yardstick</li>
+    <li value="1"><a href="#ch-problem" data-rail="Learn normal">Learn normal, measure surprise</a></li>
+    <li><a href="#ch-benchmark" data-rail="Benchmarks">MVTec AD, VisA, and how a detector is graded</a></li>
+    <li><a href="#ch-map" data-rail="Map">Six families on one map</a></li>
+    <li class="act">Act II: remember normal</li>
+    <li value="4"><a href="#ch-spade" data-rail="SPADE">Pretrained features already know what normal looks like</a></li>
+    <li><a href="#ch-padim" data-rail="PaDiM">One Gaussian per patch position</a></li>
+    <li><a href="#ch-patchcore" data-rail="PatchCore">A memory bank, thinned to a coreset</a></li>
+    <li><a href="#ch-patchcore-pipeline" data-rail="Pipeline">PatchCore, end to end</a></li>
+    <li class="act">Act III: model the density, or fake the defect</li>
+    <li value="8"><a href="#ch-fastflow" data-rail="FastFlow">Turn normal into a perfect Gaussian</a></li>
+    <li><a href="#ch-synthetic" data-rail="Fake defects">Make fake defects (CutPaste, DRAEM)</a></li>
+    <li class="act">Act IV: fast, and one model for all</li>
+    <li value="10"><a href="#ch-efficientad" data-rail="EfficientAD">A student that fails only on defects</a></li>
+    <li><a href="#ch-uniad" data-rail="UniAD">One model for every product</a></li>
+    <li class="act">Act V: no training images</li>
+    <li value="12"><a href="#ch-winclip" data-rail="WinCLIP">Ask CLIP whether the part is damaged</a></li>
+    <li><a href="#ch-anomalyclip" data-rail="AnomalyCLIP">Prompts that know "damaged", not "which object"</a></li>
+    <li><a href="#ch-dinov2" data-rail="DINOv2">DINOv2 brings nearest neighbors back</a></li>
+    <li class="act">Act VI: choosing a method</li>
+    <li value="15"><a href="#ch-speed" data-rail="Speed">Speed versus accuracy, desktop and Jetson</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Family tree</a></li><li><a href="#ch-summary">Scoreboard</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p class="note">Colors keep one meaning on the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">normal (good parts, the model of normal)</span>
+  <span class="c-red">anomaly (defects, scores, heat maps)</span>
+  <span class="c-yellow">the sample under inspection</span>
+  <span class="c-green">a learned component</span>
+  <span class="c-brown">frozen or stored</span>
+</div>
+<p class="note">Figures marked "Toy model" use a small simulated world: a woven mesh and a machined cap, with defects you can add. Their feature clouds are computed from those toy images. "Sourced" figures plot numbers from the papers; "Computed" figures run a paper's own algorithm or configuration. Hover or tap an equation term to light up the part of the figure it names.</p>

@@ -1,0 +1,152 @@
+# Audio QA report (voice A)
+
+Model revisions: {'base': 'fd4b254389122332181a7c3db7f27e918eec64e3'}. Median rate 2.84 words/s; speaker-similarity floor 0.69.
+
+- Sentences: 387; retried: 56; still flagged after up to 3 retries: 28.
+- Mean WER of chosen takes: 0.032.
+
+## Still flagged (listen to these)
+
+- **ch-ssl #8**: rate=4.31wps vs median 2.84
+  - script: Look at the guess, though.
+  - heard:  Look at the guess, though.
+  - file: out/A/wav/ch-ssl-8.wav
+- **ch-ebm #31**: short-sentence errors=2
+  - script: That is a joint-embedding predictive architecture.
+  - heard:  That is a joint embedding predictive architecture.
+  - file: out/A/wav/ch-ebm-31.wav
+- **ch-ijepa #4**: rate=5.41wps vs median 2.84
+  - script: Look at the grid.
+  - heard:  Look at the grid.
+  - file: out/A/wav/ch-ijepa-4.wav
+- **ch-ijepa #25**: rate=1.16wps vs median 2.84
+  - script: Multi-block, fifty-four.
+  - heard:  Multiblock 54
+  - file: out/A/wav/ch-ijepa-25.wav
+- **ch-ijepa #27**: rate=4.55wps vs median 2.84
+  - script: What did it buy?
+  - heard:  What did it buy?
+  - file: out/A/wav/ch-ijepa-27.wav
+- **ch-ijepa #28**: wer=0.25
+  - script: A frozen ViT-H reaches seventy-nine point three percent on ImageNet with a linear classifier, and a ViT-H at four forty-eight, eighty-one point one.
+  - heard:  A frozen ViT-H reaches 79.3% on ImageNet with a linear classifier and a ViT-H at 448, 81.1.
+  - file: out/A/wav/ch-ijepa-28.wav
+- **ch-collapse #10**: wer=0.20
+  - script: Now guess, then switch the stop-gradient off and train again.
+  - heard:  Now guess, then switch the stop gradient off and train again.
+  - file: out/A/wav/ch-collapse-10.wav
+- **ch-collapse #15**: wer=0.25
+  - script: In the toy, it behaves like the stop-gradient.
+  - heard:  In the toy, it behaves like the stop gradient.
+  - file: out/A/wav/ch-collapse-15.wav
+- **ch-iwm #1**: wer=0.15
+  - script: Image World Models ask what happens if you also tell it what changed.
+  - heard:  ImageWorld models ask what happens if you also tell it what changed.
+  - file: out/A/wav/ch-iwm-1.wav
+- **ch-vjepa2 #4**: wer=0.20
+  - script: Start from V-JEPA at eighty-four point two, averaged over six tasks.
+  - heard:  Start from V-JEPA at 84.2, averaged over 6 tasks.
+  - file: out/A/wav/ch-vjepa2-4.wav
+- **ch-vjepa2 #5**: wer=0.50
+  - script: Twenty-two million videos instead of two million: eighty-five point two.
+  - heard:  22,000,000 videos instead of 2,000,000. 85.2.
+  - file: out/A/wav/ch-vjepa2-5.wav
+- **ch-vjepa2 #6**: short-sentence errors=4, rate=1.70wps vs median 2.84
+  - script: A billion-parameter encoder: eighty-six point seven.
+  - heard:  A billion parameter encoder, 86.7
+  - file: out/A/wav/ch-vjepa2-6.wav
+- **ch-vjepa2 #36**: wer=0.19
+  - script: In two labs the model had never seen: reaching, every time; grasping a cup, sixty-five percent; pick-and-place of the cup, eighty.
+  - heard:  In two labs the model had never seen, reaching every time, grasping a cup, 65%, pick in place of the cup, 80.
+  - file: out/A/wav/ch-vjepa2-36.wav
+- **ch-vjepa21 #17**: wer=0.50, rate=1.50wps vs median 2.84
+  - script: Something-Something recovers to seventy-two, segmentation climbs to thirty-nine.
+  - heard:  Something Something recovers to 72. Segmentation climbs to 39.
+  - file: out/A/wav/ch-vjepa21-17.wav
+- **ch-vjepa21 #18**: wer=0.31
+  - script: Then data, a separate image tokenizer so pictures and videos share one encoder, a two-billion-parameter model, and the long-clip cooldown: forty-eight on segmentation, seventy-eight on Something-Something.
+  - heard:  Then data, a separate image tokenizer so pictures and videos share one encoder, a 2 billion parameter model, and the long clip cooldown, 48 on segmentation, 78 on something something.
+  - file: out/A/wav/ch-vjepa21-18.wav
+- **ch-lejepa #30**: wer=0.17
+  - script: No target encoder, no moving average, no stop-gradient, no predictor, no prototypes.
+  - heard:  No target encoder, no moving average, no stop gradient, no predictor, no prototypes.
+  - file: out/A/wav/ch-lejepa-30.wav
+- **ch-planning #13**: wer=0.21
+  - script: DINO-WM freezes a pretrained DINOv2 encoder and uses its grid of patch features as the state, training only a nineteen-million-parameter predictor on top.
+  - heard:  DINO World Model freezes a pre-trained DINOv2 encoder and uses its grid of patch features as the state, training only a 19 million parameter predictor on top.
+  - file: out/A/wav/ch-planning-13.wav
+- **ch-planning #19**: wer=0.36
+  - script: On good data it reaches ninety-eight percent where a pixel-reconstruction world model gets twenty-six.
+  - heard:  On good data it reaches 98% where a pixel reconstruction world model gets 26.
+  - file: out/A/wav/ch-planning-19.wav
+- **ch-lewm #0**: wer=0.20
+  - script: DINO-WM needs a pretrained encoder; PLDM needs seven loss terms with six weights to tune.
+  - heard:  DINO World Model needs a pre-trained encoder.  PLDM needs 7 loss terms with 6 weights to tune.
+  - file: out/A/wav/ch-lewm-0.wav
+- **ch-lewm #5**: wer=0.25
+  - script: No stop-gradient, no moving average, no pretrained weights.
+  - heard:  No stop gradient, no moving average, no pre-trained weights.
+  - file: out/A/wav/ch-lewm-5.wav
+- **ch-lewm #8**: wer=0.29
+  - script: With it, the planner reaches ninety-six percent on push-T against DINO-WM's seventy-four, and loses on two of the four tasks.
+  - heard:  With it, the planner reaches 96% on Push-T against DINO World Model 74 and loses on two of the four tasks.
+  - file: out/A/wav/ch-lewm-8.wav
+- **ch-lewm #10**: wer=0.35
+  - script: One state token instead of a hundred and ninety-six patch tokens makes a full plan take under a second where DINO-WM takes forty-seven.
+  - heard:  One state token instead of 196 patch tokens makes a full plan take under a second, where DINO World Model takes 47.
+  - file: out/A/wav/ch-lewm-10.wav
+- **ch-lewm #24**: wer=0.18
+  - script: The numbers: on visual AntMaze with goals seventy-five steps away, a flat model succeeds eighteen percent of the time, a three-level hierarchy seventy-three.
+  - heard:  The numbers on Visual Ant Maze with goals 75 steps away.  A flat model succeeds 18% of the time, a three-level hierarchy 73.
+  - file: out/A/wav/ch-lewm-24.wav
+- **ch-family #3**: rate=1.54wps vs median 2.84
+  - script: Here is the main line: the position paper, I-JEPA, V-JEPA, V-JEPA 2 and 2.1, LeJEPA, LeWorldModel, H-JEPA.
+  - heard:  Here is the main line, the position paper, I-JEPA, V-JEPA, V-JEPA 2 and 2.1, LeJEPA, LeWorldModel, H-JEPA,
+  - file: out/A/wav/ch-family-3.wav
+- **ch-family #15**: wer=0.16
+  - script: And the EB-JEPA library is not a method but a teaching codebase, worth knowing because it ablates every regulariser: remove the inverse-dynamics term and planning success drops from ninety-seven to one.
+  - heard:  And the eBJPA library is not a method, but a teaching codebase, worth knowing because it ablates every regularizer.  Remove the inverse dynamics term and planning success drops from 97 to 1.
+  - file: out/A/wav/ch-family-15.wav
+- **ch-map #1**: wer=0.22
+  - script: On the eighth of October 2026 the arXiv API returned five hundred and sixty-nine papers whose title or abstract names a joint-embedding predictive architecture.
+  - heard:  On the 8th of October 2026, the arXiv API returned 569 papers whose title or abstract names a joint embedding predictive architecture.
+  - file: out/A/wav/ch-map-1.wav
+- **ch-map #2**: wer=0.25
+  - script: Seven in 2023, thirty-eight in 2024, seventy-six in 2025, and four hundred and forty-seven in the first nine months of 2026.
+  - heard:  7 in 2023, 38 in 2024, 76 in 2025, and 447 in the first 9 months of 2026.
+  - file: out/A/wav/ch-map-2.wav
+- **ch-map #15**: short-sentence errors=3, rate=1.48wps vs median 2.84
+  - script: H-JEPA's inverse-dynamics fix says not always.
+  - heard:  H-JEPU's inverse dynamics fix says not always.
+  - file: out/A/wav/ch-map-15.wav
+
+## Retried and fixed
+
+- ch-ssl #27: first take flagged (speaker sim 0.63); fixed on seed 2263.
+- ch-ebm #10: first take flagged (rate=4.46wps vs median 2.84); fixed on seed 3247.
+- ch-ebm #12: first take flagged (speaker sim 0.68); fixed on seed 3247.
+- ch-ebm #15: first take flagged (rate=4.41wps vs median 2.84); fixed on seed 3250.
+- ch-ebm #29: first take flagged (wer=0.27); fixed on seed 3265.
+- ch-ebm #36: first take flagged (speaker sim 0.67); fixed on seed 3271.
+- ch-ijepa #22: first take flagged (speaker sim 0.65); fixed on seed 4257.
+- ch-ijepa #24: first take flagged (rate=1.80wps vs median 2.84); fixed on seed 4259.
+- ch-collapse #4: first take flagged (rate=4.35wps vs median 2.84, speaker sim 0.64); fixed on seed 5240.
+- ch-collapse #19: first take flagged (wer=0.18); fixed on seed 5254.
+- ch-collapse #31: first take flagged (speaker sim 0.64); fixed on seed 5266.
+- ch-vjepa #2: first take flagged (speaker sim 0.56); fixed on seed 6239.
+- ch-vjepa #22: first take flagged (wer=0.18); fixed on seed 6257.
+- ch-vjepa2 #0: first take flagged (short-sentence errors=2, rate=1.72wps vs median 2.84); fixed on seed 8235.
+- ch-vjepa21 #0: first take flagged (speaker sim 0.68); fixed on seed 9235.
+- ch-vjepa21 #1: first take flagged (rate=1.72wps vs median 2.84); fixed on seed 9237.
+- ch-vjepa21 #4: first take flagged (rate=1.67wps vs median 2.84); fixed on seed 9240.
+- ch-vjepa21 #19: first take flagged (internal silence 0.82s); fixed on seed 9254.
+- ch-lejepa #12: first take flagged (speaker sim 0.65); fixed on seed 10247.
+- ch-lejepa #23: first take flagged (wer=0.19); fixed on seed 10259.
+- ch-planning #7: first take flagged (rate=1.79wps vs median 2.84); fixed on seed 11242.
+- ch-planning #9: first take flagged (rate=1.56wps vs median 2.84); fixed on seed 11245.
+- ch-planning #14: first take flagged (wer=0.20); fixed on seed 11251.
+- ch-planning #15: first take flagged (wer=0.22); fixed on seed 11250.
+- ch-lewm #14: first take flagged (wer=0.18); fixed on seed 12250.
+- ch-family #13: first take flagged (speaker sim 0.66); fixed on seed 13248.
+- ch-family #16: first take flagged (speaker sim 0.68); fixed on seed 13251.
+- ch-map #5: first take flagged (rate=4.76wps vs median 2.84); fixed on seed 14240.

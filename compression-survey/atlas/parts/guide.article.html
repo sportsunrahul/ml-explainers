@@ -1,0 +1,12 @@
+  <article data-chapter="guide">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Decision guide</h2><p class="subhead">Cheap and safe first; measure after every step</p></header>
+    <div class="controls">
+      <div class="row"><span>GPU</span><button type="button" class="tool" data-gpu="cc75">CC 7.5</button><button type="button" class="tool" data-gpu="cc80">CC 8.0/8.6</button><button type="button" class="tool" data-gpu="cc89">CC 8.9</button><button type="button" class="tool" data-gpu="cc90">CC 9.0</button></div>
+      <div class="row"><span>Model</span><button type="button" class="tool" data-model="cnn">ResNet-style</button><button type="button" class="tool" data-model="dw">depthwise-heavy</button><button type="button" class="tool" data-model="yolo">YOLO</button><button type="button" class="tool" data-model="vit">transformer</button></div>
+      <div class="row"><span>Budget</span><button type="button" class="tool" data-budget="0.3">0.3 pt</button><button type="button" class="tool" data-budget="1">1 pt</button><button type="button" class="tool" data-budget="2">2 pt</button><button type="button" class="tool" data-train="1">can fine-tune</button><button type="button" class="tool" data-train="0">cannot</button></div>
+    </div>
+    <div id="atlas-guide-text" class="atlas-guide"></div>
+    <p class="note">The step order and the expected loss behind each stop are our reading of the sourced tables in the full explainer's last chapter. CC means the GPU's compute capability.</p>
+    <p class="inscription">For a ResNet-style detector, per-channel INT8 with a good calibrator is the first and often the last step. Losses show up in depthwise-heavy models and below 8 bits.</p>
+    {{CONTINUE}}
+  </article>

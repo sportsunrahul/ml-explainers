@@ -1,0 +1,13 @@
+# ch-simclr viz-ntxent check (build/sim/simclr-ntxent.js). No training: fixed angles (KIT.NTX_DEG), NT-Xent computed exactly.
+N=2 tau=0.1: row1 p(partner)=0.9997 loss=0.0003 mean=0.0638 (shared kit mean 0.0638)
+N=2 tau=0.5: row1 p(partner)=0.7919 loss=0.2333 mean=0.4302 (shared kit mean 0.4302)
+N=2 tau=1: row1 p(partner)=0.5896 loss=0.5282 mean=0.6736 (shared kit mean 0.6736)
+N=4 tau=0.1: row1 p(partner)=0.8926 loss=0.1136 mean=0.1509 (shared kit mean 0.1509)
+N=4 tau=0.5: row1 p(partner)=0.4580 loss=0.7809 mean=0.7776 (shared kit mean 0.7776)
+N=4 tau=1: row1 p(partner)=0.3002 loss=1.2033 mean=1.1949 (shared kit mean 1.1949)
+N=2 cosine matrix:
+  1.000  0.800  0.000 -0.600
+  0.800  1.000  0.600  0.000
+  0.000  0.600  1.000  0.800
+ -0.600  0.000  0.800  1.000
+readout N=2 tau=0.5: N = 2 images give 4 views and a 4 x 4 matrix. Each row has 1 masked cell, 1 positive and 2 negatives. Row 1 at tau = 0.5: the partner gets probability 0.792, so its loss is 0.233. Mean over all rows: 0.430.

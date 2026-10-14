@@ -1,0 +1,148 @@
+<section id="ch-grounding" class="chapter">
+<h2>Say where, not just what</h2>
+<p>Every model so far answers in words: it can say "a dog", but not <em>which</em> pixels are the dog. The fix in this chapter is almost embarrassingly simple: a box is four numbers, numbers can be written as text, and a language model already knows how to write text.</p>
+<style>
+#viz-boxes .fmt { font:.86rem/1.4 system-ui, sans-serif; margin:.35rem 0 0; display:grid; grid-template-columns:6.2rem 1fr; gap:.2rem .6rem; align-items:baseline; }
+#viz-boxes .fmt .who { color:var(--muted); font-weight:600; }
+#viz-boxes .fmt code { color:var(--yellow); overflow-wrap:anywhere; word-break:break-word; font-size:.84rem; }
+#viz-boxes .fmt code.flash, #viz-boxes .fmt [data-link].flash { outline:2px solid var(--yellow); }
+@media (max-width: 520px) { #viz-boxes .fmt { grid-template-columns:1fr; gap:0 .6rem; } #viz-boxes .fmt .who { margin-top:.3rem; } }
+</style>
+
+<figure class="viz" id="viz-boxes" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="boxes-canvas" tabindex="0" role="img" aria-label="A toy scene with a dog, a ball, a sign reading OPEN and a tree with three apples. A yellow box and a yellow point can be dragged; below, the box and point are written out in three model formats. Enter picks a handle, arrow keys move it."></canvas>
+  <div class="fmt">
+    <span class="who">Qwen-VL</span><code id="boxes-qwen" data-link="target"></code>
+    <span class="who">Florence-2</span><code id="boxes-florence" data-link="target"></code>
+    <span class="who">Molmo</span><code id="boxes-molmo" data-link="target"></code>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-boxes-dog">Box the dog</button>
+    <button type="button" id="btn-boxes-sign">Box the sign</button>
+    <button type="button" id="btn-boxes-point">Point at the ball</button>
+    <button type="button" id="btn-boxes-count">Point, then count</button>
+    <button type="button" id="btn-boxes-coarse">Coarse: 8 bins</button>
+    <button type="button" id="btn-boxes-fine">Fine: 1,000 bins</button>
+    <button type="button" id="btn-boxes-verdict">Molmo's answer</button>
+    <button type="button" id="btn-boxes-reset" data-cue-reset>Reset</button>
+    <label for="rng-boxes-bins">bins <input type="range" id="rng-boxes-bins" min="0" max="1000" step="1" value="1000"> <span id="boxes-bins-val">1000</span></label>
+  </div>
+  <p class="readout" id="boxes-readout" aria-live="polite"></p>
+  <figcaption>Drag a yellow corner, the box itself, or the point. The three lines are what each model would literally write, recomputed as you drag: Qwen-VL's digits, Florence-2's location tokens and Molmo's point tag. The red dashed box is what the tokens decode back to, so the gap between yellow and red is the quantisation error. What is computed: the serialisations and the error, from each paper's stated format. What is the toy's choice: the scene, the 640 &times; 400 image, and two conventions none of the papers states (bins are numbered from zero and decoded at their centre; Qwen-VL's digits are rounded down).</figcaption>
+</figure>
+
+<h3>The wall: an answer with no address</h3>
+<p>Ask a LLaVA-style model "where is the ball?" and the best it can do is "at the bottom, next to the dog". That is fine for chat, but useless for a robot arm, a document parser that must say which box on a form holds the date, or a checker that wants to verify an answer against the image. Classic detectors do give coordinates, but through a separate head with its own loss, one head per task. The question this chapter answers: can the language model's ordinary next-token output carry a location?</p>
+
+<h3>A box is four numbers, and numbers are text</h3>
+<p>Qwen-VL's answer (the same model whose resolution work was the previous chapter) is to just write them. Each box coordinate is <span data-claim="qwenvl-box-range">normalised to the range [0, 1000)</span> and written in the string form <span data-claim="qwenvl-box-format"><code>(X_topleft,Y_topleft),(X_bottomright,Y_bottomright)</code></span>, between <code>&lt;box&gt;</code> and <code>&lt;/box&gt;</code>. The phrase the box belongs to goes between <code>&lt;ref&gt;</code> and <code>&lt;/ref&gt;</code>. A real training example from the paper's appendix reads <span data-claim="qwenvl-box-example"><code>&lt;ref&gt;the ear on a giraffe&lt;/ref&gt;&lt;box&gt;(176,106),(232,160)&lt;/box&gt;</code></span>. The digits are tokenised as ordinary text; the coordinates need no new vocabulary (only the markers <code>&lt;box&gt;</code>, <code>&lt;/box&gt;</code>, <code>&lt;ref&gt;</code> and <code>&lt;/ref&gt;</code> are added). Press <b>Box the dog</b> and read the first line: the model's answer is a short sentence of digits and brackets.</p>
+<p>Why normalise? Because images come in every size and the model never sees them at that size (Qwen-VL resizes every image to <span data-claim="page-resolution-qwenvl-res">448 &times; 448</span>), so a box in the original image's pixels would not match what the model sees. Dividing by the width and height turns "pixel 137 of 640" into "<span data-computed>21.4%</span> of the way across" (Qwen-VL writes <span data-computed>214</span>), which means the same thing whatever the resolution; the thousandfold scale just makes it an integer. Trained on grounding data in this form, Qwen-VL reaches <span data-claim="qwenvl-refcoco-val">89.36 / 92.26 / 85.34</span> on RefCOCO val / testA / testB, the task of boxing the object a sentence describes.</p>
+
+<h3>How precise is a token?</h3>
+<p>Writing a coordinate as an integer out of a thousand throws information away: every position inside one thousandth of the image is written the same way. How much does that cost? Drag the <b>bins</b> slider down, or press <b>Coarse: 8 bins</b>. The brown grid is the set of cells the image is now divided into; the yellow box can sit anywhere, but its written form can only name a cell, and the red dashed box, decoded back from the tokens, snaps to cell centres. With <span class="tex">B</span> bins across an image of width <span class="tex">W</span>, the worst error is half a cell:</p>
+<div class="eq"><div class="tex tex-display">k = \Big\lfloor \frac{x}{W}\,B \Big\rfloor, \qquad \hat x = \Big(k + \tfrac12\Big)\frac{W}{B}, \qquad |x - \hat x| \le \frac{W}{2B}.</div></div>
+<p class="eqno">Not from any of the papers: the bin rule written out; numbering bins from zero and decoding at the centre are the toy's conventions.</p>
+<p>At 8 bins on the toy's 640-pixel width that is <span data-computed>40 px</span>, a box that visibly misses the dog. At 1,000 bins it is <span data-computed>0.32 px</span>, and even on a 3840-pixel-wide 4K frame only <span data-computed>1.92 px</span>. None of the papers says why it chose about a thousand levels per axis, but the numbers make it a comfortable choice: fine enough to be invisible and, for Florence-2's one token per level, a small addition to the vocabulary.</p>
+
+<h3>Florence-2: every vision task is a sentence</h3>
+<p>Microsoft's Florence-2 takes the idea to its end. Instead of digits, it <span data-claim="florence2-bins">creates 1,000 bins</span> and adds one new <em>location token</em> per bin to the tokenizer's vocabulary. The main text never spells a token out, but the appendix prompts (Fig. 16) print them as <span data-claim="florence2-token-spelling"><code>&lt;loc_586&gt;</code></span> (angle brackets and an underscore), so that is the form the second line uses. A box is four location tokens (top-left corner, then bottom-right); a text region is a quadrilateral of eight, corners clockwise from the top-left; a segmentation mask is a polygon of <span class="tex">2n</span> tokens for <span class="tex">n</span> vertices, also clockwise. Press <b>Box the sign</b>: with the slider at 1,000 the integers on the first two lines are identical, and only the spelling differs. Qwen-VL writes the number with digit tokens the model already had; Florence-2 gives each bin its own token.</p>
+<p>With coordinates as tokens, every task becomes the same task. Captioning is "image + <code>caption</code> prompt &rarr; text". Detection is "image + prompt &rarr; each object's label with its four location tokens". Grounding, OCR with regions and referring segmentation are the same with quads or polygons. There are no task-specific heads, and one loss trains all of them, the ordinary language-model loss over the target tokens:</p>
+<div class="eq" id="eq-boxes" data-build data-viz="viz-boxes"><div class="tex tex-display">
+\htmlData{step=3}{\htmlClass{t-red}{\mathcal{L}} = -\sum_{i=1}^{|y|}} \log P_\theta\big(\htmlData{step=1, link=target}{\htmlClass{t-yellow}{y_i}} \mid \htmlClass{t-yellow}{y_{<i}},\; \htmlData{step=2, link=input}{\htmlClass{t-blue}{x}}\big)
+</div></div>
+<p class="eqno"><span data-claim="page-boxes-f2-eq">Eq. 1</span> in Florence-2 v1 (Sec. 3, "Optimization objective").</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{y_i}</span>: the <span class="tex">i</span>-th target token. It may be a word, or a location token like <code>&lt;loc_586&gt;</code>: the loss does not care which. These are the three yellow lines under the figure.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{y_{<i}}</span>: the tokens already written; the decoder writes one at a time.</li>
+  <li><span class="tex">\htmlClass{t-blue}{x}</span>: the input, the image's visual tokens joined with the task prompt (the framed scene).</li>
+  <li><span class="tex">|y|</span>: the number of target tokens; <span class="tex">\theta</span>: all the network's weights, trained together.</li>
+</ul>
+<p>The architecture is deliberately plain: a DaViT image encoder turns the image into visual tokens, a linear layer and layer norm map them to the text width, and a standard transformer encoder-decoder reads [visual tokens, prompt] and writes the answer. The models are small, <span data-claim="page-boxes-f2-sizes">0.23B and 0.77B</span> parameters.</p>
+<p>What makes it work is data. A single model doing a dozen tasks needs every image labelled for every task, and no such dataset existed, so the authors built one: FLD-5B, with <span data-claim="page-boxes-fld-total">5.4B</span> annotations on <span data-claim="florence2-fld-images">126M images</span> (<span data-claim="florence2-fld-text">500M</span> text annotations, <span data-claim="florence2-fld-region-text">1.3B</span> region-text pairs and <span data-claim="florence2-fld-tpr">3.6B</span> text-phrase-region triples). Almost none of those labels were drawn by hand for FLD-5B (human boxes that came with a source dataset, such as Objects365, were merged in). A <em>data engine</em> made the rest in three phases: <span data-claim="florence2-engine-phases">(1) initial annotation with specialist models, (2) data filtering, (3) iterative data refinement</span>. In phase 3 a Florence-2-style model trained on the filtered labels re-annotates the same images, its output is merged back in, and the loop repeats: the same "let the model clean its own data" move as BLIP's CapFilt in Act II, now for boxes and masks. Fine-tuned as one generalist, Florence-2-B / -L reach <span data-claim="florence2-ft-refcoco">92.6 / 93.4</span> on RefCOCO val.</p>
+
+<h3>Inside Florence-2: forward, then backward</h3>
+<p>"Every task is a sentence" is a claim about the model's input and output; here is the machinery in between, as one training step, a slide per stage. The line under the drawing gives the tensor shapes for one image, computed from the model table in Florence-2's appendix (pick a size to change them); the paper never states how many visual tokens DaViT makes, so that count stays the symbol <span class="tex">N_v</span>.</p>
+
+<figure class="viz archflow" id="viz-florence2flow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-florence2flow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-florence2flow-davit" aria-pressed="false">2 DaViT</button>
+    <button type="button" id="btn-florence2flow-align" aria-pressed="false">3 Align widths</button>
+    <button type="button" id="btn-florence2flow-concat" aria-pressed="false">4 Concat</button>
+    <button type="button" id="btn-florence2flow-encoder" aria-pressed="false">5 Encoder</button>
+    <button type="button" id="btn-florence2flow-decoder" aria-pressed="false">6 Decoder</button>
+    <button type="button" id="btn-florence2flow-loss" aria-pressed="false">7 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-florence2flow-backward" aria-pressed="false">8 Gradients</button>
+    <button type="button" class="cf-back" id="btn-florence2flow-update" aria-pressed="false">9 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-florence2flow-b" aria-pressed="true">Florence-2-B</button>
+    <button type="button" id="btn-florence2flow-l" aria-pressed="false">Florence-2-L</button>
+  </div>
+  <canvas id="florence2flow-canvas" role="img" aria-label="Florence-2's training step as a diagram: the image (blue) goes through DaViT and a linear layer with layer norm (green); the task prompt (yellow) is embedded; both are concatenated, read by a transformer encoder, and a decoder that also reads the shifted target tokens writes logits that feed the loss (red). In the backward stages red arrows run from the loss back through every box; none is frozen."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-florence2flow-prev">Previous</button>
+    <button type="button" id="btn-florence2flow-next">Next</button>
+    <button type="button" id="btn-florence2flow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="florence2flow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Two inputs, one output. The image lane (<b class="c-blue">blue</b>) is a vision encoder plus a small <b class="c-green">green</b> adapter; the prompt lane (<b class="c-yellow">yellow</b>) is an embedding table. The two meet by simple concatenation, an encoder reads the joined sequence, and a decoder writes the answer one token at a time into the <b class="c-red">red</b> loss. Press <b>1 Inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>1. An image, a prompt, and an answer string</h4>
+      <p>Each training example is a triple from FLD-5B: an image, a task prompt that says which task this is, and the target answer written as tokens (a caption, or a list of labels each followed by its four location tokens). During main training the image is <span data-claim="florence2-arch-res">384</span> &times; 384 pixels; a short final phase uses <span data-claim="florence2-arch-hires">768</span> &times; 768 (stage 9).</p>
+    </div>
+    <div data-stage="davit" hidden>
+      <h4>2. DaViT turns pixels into visual tokens</h4>
+      <p>The vision encoder is <span data-claim="florence2-arch-davit">DaViT</span>, a hierarchical transformer with four stages (per the DaViT paper, each stage is narrower in space and wider in channels than the last). For Florence-2-B the stage widths are <span data-claim="florence2-arch-dims-b">[128, 256, 512, 1024]</span> (for -L, <span data-claim="florence2-arch-dims-l">[256, 512, 1024, 2048]</span>), with <span data-claim="florence2-arch-blocks">[1, 1, 9, 1]</span> blocks per stage at both sizes, and <span data-claim="florence2-arch-vparams-b">90M</span> parameters (-L: <span data-claim="florence2-arch-vparams-l">360M</span>). Its output is <span data-claim="florence2-arch-vtokens">flattened visual token embeddings</span> <span class="tex">V \in \mathbb{R}^{N_v \times D_v}</span>. The paper gives neither <span class="tex">N_v</span> nor <span class="tex">D_v</span> as a number; reading <span class="tex">D_v</span> as the last stage's width is our reading.</p>
+    </div>
+    <div data-stage="align" hidden>
+      <h4>3. Bring both lanes to one width</h4>
+      <p><b class="c-green">Image:</b> <span class="tex">V' = \mathrm{LayerNorm}(\mathrm{Linear}(V))</span>, <span data-claim="florence2-arch-proj">a linear projection and LayerNorm layer</span> whose only stated job is dimensionality alignment. This is the whole connector: no query tokens, no resampler.</p>
+      <p><b class="c-yellow">Prompt:</b> the <span data-claim="florence2-arch-wordemb">extended language tokenizer and word embedding layer</span> turn the prompt into <span class="tex">T_{prompt} \in \mathbb{R}^{N_t \times D}</span>. "Extended" is the <span data-claim="florence2-bins">1,000 bins</span>: the vocabulary gains one entry per location token, so (our reading) the embedding table gains 1,000 rows; the paper does not say how they are initialised.</p>
+    </div>
+    <div data-stage="concat" hidden>
+      <h4>4. Glue them into one sequence</h4>
+      <p>The encoder input is simply <span data-claim="florence2-arch-concat"><code>X = [V', T_prompt]</code></span>: the visual rows, then the prompt rows, in one sequence of <span class="tex">N_v + N_t</span> vectors. Compare Flamingo's gated cross-attention or BLIP-2's Q-Former: Florence-2's whole bridge is the Linear and LayerNorm of stage 3, then this join.</p>
+    </div>
+    <div data-stage="encoder" hidden>
+      <h4>5. The encoder reads image and prompt together</h4>
+      <p>A <span data-claim="florence2-arch-encdec">standard encoder-decoder transformer</span> starts here. For Florence-2-B it has <span data-claim="florence2-arch-ed-b">6 encoder and 6 decoder layers of width 768, 140M</span> parameters; Florence-2-L has <span data-claim="florence2-arch-ed-l">12 encoder and 12 decoder layers of width 1024, 410M</span>. Every encoder position can attend to every other, so prompt tokens see all of the image and every visual token sees the prompt: the same image is encoded differently for "caption" and for "detect".</p>
+    </div>
+    <div data-stage="decoder" hidden>
+      <h4>6. The decoder writes the answer</h4>
+      <p>The loss conditions each target token on the tokens before it (<span class="tex">y_{&lt;i}</span> in Eq. 1), so the decoder reads the target answer shifted one place right and predicts each next token. In a standard encoder-decoder it sees the encoder output through cross-attention (our reading of "standard"; the paper describes no other link). At every target position it produces one logit per vocabulary entry: the text tokens plus one location token per bin (<span data-claim="florence2-bins">1,000 bins</span>), in a single softmax.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>7. Boxes are graded like words</h4>
+      <p>This is <a href="#eq-boxes">Eq. 1 above</a>: <span data-claim="florence2-arch-loss-all">standard language modeling with cross-entropy loss for all the tasks</span>, one term per target token, summed over the <span class="tex">|y|</span> positions. Only the decoder's positions are graded; the visual tokens and the prompt get no loss of their own.</p>
+      <p>Look at what that means for a box. If the target is <code>&lt;loc_586&gt;</code>, the loss at that position is <span class="tex">-\log p(\texttt{loc\_586})</span> and nothing else. Putting the probability on <code>&lt;loc_587&gt;</code>, one bin away, costs exactly as much as putting it on <code>&lt;loc_12&gt;</code> or on the word "dog": cross-entropy has no idea that bins have neighbours (our reading of Eq. 1; the paper does not discuss it). A detector's box loss rewards being close; this loss only rewards being exactly right, and "close" has to be learned from data, as a pattern in which bins tend to be confused.</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>8. The gradient reaches everything</h4>
+      <p>Backpropagation runs from the loss into the decoder, across into the encoder, and then splits: into the prompt's embedding rows, and through the Linear and LayerNorm into every stage of DaViT. In Eq. 1, <span class="tex">\theta</span> is <span data-claim="florence2-arch-theta">the network parameters</span>, all of them, and nothing is <b class="c-brown">brown</b>: unlike CLIP, though, almost nothing starts random. The weights are initialised <span data-claim="florence2-arch-init">from UniCL and BART, respectively</span> (the image encoder, then the encoder-decoder); only the Linear + LayerNorm projection and the new location-token rows are new. (Our reading: in BART one shared table also embeds the decoder's shifted targets, so those rows get gradient from the decoder side too.)</p>
+      <p>Why not freeze the pre-trained image encoder, as BLIP-2 and LLaVA do? The paper tried, in its small ablation run (Table 12, not the headline model): with DaViT frozen, zero-shot COCO detection AP drops <span data-claim="florence2-arch-freeze-ap">from 19.7 to 6.9</span>, while captioning barely moves. The authors conclude <span data-claim="florence2-arch-unfreeze">it is important to unfreeze the vision backbone</span>: an encoder pre-trained on image-level tasks may not hold the region-level detail that location tokens need, so the gradient from those tokens has to reach it.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>9. One optimizer step</h4>
+      <p>All the red-outlined parameters move together: <span data-claim="florence2-arch-optim">AdamW</span> with <span data-claim="florence2-arch-cosine">cosine learning rate decay</span>, a peak learning rate of <span data-claim="florence2-arch-lr">1e-4 for the base model and 1e-5 for the large model</span>, reached by a linear warm-up over the first <span data-claim="florence2-arch-warmup">5,000</span> steps, with <span data-claim="florence2-arch-ds">Deepspeed and mixed precision</span>. The mini-batch is <span data-claim="florence2-arch-batch">2048/3072</span> (base/large) at 384 pixels until <span data-claim="florence2-arch-samples">3 billion effective training samples</span>, <span data-computed>about 1.46 million</span> steps for -B and <span data-computed>about 0.98 million</span> for -L if every sample fills one batch slot (our arithmetic). A final high-resolution phase at 768 pixels runs for <span data-claim="florence2-arch-hires-samples">0.5 billion samples for the base model and 0.1 billion samples for the large model</span>. Four times the pixels per image; how many more visual tokens that gives is not stated.</p>
+    </div>
+  </div>
+  <figcaption>Computed: the widths, depths and parameter counts come from Florence-2's appendix model table and the training numbers from Sec. 6.1; <span class="tex">N_v</span>, <span class="tex">N_t</span>, the target length <span class="tex">L_y</span> (the <span class="tex">|y|</span> of Eq. 1) and BART's vocabulary size <span class="tex">V</span> are not given in the paper and stay symbols. Before you open stage 8, guess: the image encoder arrives pre-trained; does the gradient from a location token reach it, and would it help if it did not?</figcaption>
+</figure>
+
+<h3>Molmo: point, then count</h3>
+<p>A box takes four numbers and a careful annotator. Molmo (from the Allen Institute for AI) asks for less: a single <em>point</em>, which a person can click in a second. Its model writes points as <span data-claim="page-boxes-molmo-scale">plain-text coordinates normalized between 0 and 100</span>, with one decimal, inside an HTML-like tag: <code>&lt;point x="10.0" y="10.0" alt="..."&gt;text&lt;/point&gt;</code>. Drag the yellow dot and watch the third line. One decimal on a 0-100 scale is again a thousand steps per axis, the same precision as the other two.</p>
+<p>Points pay off in an unexpected place: counting. Press <b>Point, then count</b>. Instead of blurting "3", Molmo first writes one numbered point per apple, in a fixed order (top to bottom, then left to right), and the count is just the last index it wrote. It is chain-of-thought, but the "thoughts" are locations you can check against the image. Molmo's ablation shows the order matters: point-then-count scores <span data-claim="page-boxes-cnt-point">89.4/86.3</span> (CountBenchQA / PixMo-Count), against <span data-claim="page-boxes-cnt-count-only">87.9/80.2</span> for answering with the count alone, and <span data-claim="page-boxes-cnt-count-then-point">81.5/77.6</span> for giving the count first and pointing afterwards.</p>
+<p>Now predict before you press. Florence-2 adds special location tokens (an idea it credits to earlier sequence models such as Pix2Seq, Unified-IO and OFA); Qwen-VL and Molmo write plain digits. Molmo tested exactly this, on its own pointing data at equal precision: <span data-claim="page-boxes-molmo-special-n">1000 special point tokens</span> added to the vocabulary, against coordinates written in digits. Which works better? Press <b>Molmo's answer</b>. Plain digits win on both benchmarks, <span data-claim="page-boxes-cnt-point">89.4/86.3</span> against <span data-claim="page-boxes-cnt-special">85.8/80.9</span>. A plausible reading, not one the paper tests: a thousand fresh tokens start with random embeddings and must each be learned from the grounding data alone, while digits arrive already ordered (the model knows 41 is next to 42) from all of its text pretraining. Keep the scope in mind, too: this is one ablation, on points and counting in one model family, not a verdict on Florence-2's boxes.</p>
+
+<p>Look back at what this chapter did: a choice (digits or new tokens), a knob (how many bins), and one small experiment that settled the choice for one setting. Most of the choices in the earlier chapters (which language model, which encoder, which connector, how many image tokens, whose captions) never got even that. Act V is about the two papers that went back and ran the experiments.</p>
+</section>

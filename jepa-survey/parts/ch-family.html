@@ -1,0 +1,37 @@
+<p class="kicker"><span class="act-n">Act V</span>The field</p>
+
+<section id="ch-family" class="chapter">
+<h2>One idea, every modality</h2>
+<p>The recipe never mentions pixels. Define a context and a target, encode both, predict the target's embedding from the context's, stop it collapsing. Every branch below changes only what the blocks are. Select a node to see its delta card: what it sees, what it predicts, and what it changed.</p>
+
+<figure class="viz" id="viz-tree" data-sourced>
+  <span class="badge sourced">Sourced</span>
+  <svg class="chart" id="tree-svg" role="img" aria-label="A family tree of JEPA papers placed by first arXiv date on a horizontal time axis and grouped into lanes: foundations, images, video and world models, theory, and other modalities. Arcs join each paper to the earlier paper it builds on."></svg>
+  <div class="controls">
+    <button type="button" id="btn-tree-spine" data-show="spine" aria-pressed="true">The main line</button>
+    <button type="button" id="btn-tree-all" data-show="all" aria-pressed="false">Every branch</button>
+    <button type="button" id="btn-tree-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="tree-readout" aria-live="polite"></p>
+  <figcaption>Sourced: dates are first arXiv submissions (abs pages); the arcs are this page's reading of which earlier work each paper builds on, usually following the later paper's own introduction. Editorial, not a citation graph.</figcaption>
+</figure>
+
+<h3>The branches, one line each</h3>
+<table class="data">
+  <thead><tr><th>Paper</th><th>Context -> target</th><th>What changed</th><th>One number</th></tr></thead>
+  <tbody>
+    <tr><td>MC-JEPA (<span data-claim="mc-jepa-published">2023-07-24</span>)</td><td>two frames -> optical flow in feature space; two views -> VICReg</td><td>Not a masked JEPA: VICReg multi-tasked with flow through one encoder.</td><td>VOC frozen mIoU <span data-claim="mc-jepa-voc-frozen-miou">67.1</span></td></tr>
+    <tr><td>A-JEPA (<span data-claim="a-jepa-published">2023-11-27</span>)</td><td>visible spectrogram patches -> masked ones</td><td>I-JEPA on audio with a time-frequency curriculum mask.</td><td>AudioSet-20K mAP <span data-claim="a-jepa-as20k-map">38.4</span> vs Audio-MAE <span data-claim="a-jepa-audiomae-as20k-map">37.0</span></td></tr>
+    <tr><td>Graph-JEPA (<span data-claim="graph-jepa-published">2023-09-27</span>)</td><td>a context subgraph -> target subgraphs' coordinates on a hyperbola</td><td>Targets compressed to 2-D hyperbolic points to encode hierarchy.</td><td>REDDIT-B <span data-claim="graph-jepa-redditb-acc">91.99</span></td></tr>
+    <tr><td>Point-JEPA (<span data-claim="point-jepa-published">2024-04-25</span>)</td><td>a run of sorted point patches -> other runs</td><td>A sequencer orders point patches so block masking can be reused.</td><td>ModelNet40 <span data-claim="point-jepa-mn40-linear">93.7</span> in <span data-claim="point-jepa-pretrain-hours">7.5 hours</span></td></tr>
+    <tr><td>3D-JEPA (<span data-claim="3d-jepa-published">2024-09-24</span>)</td><td>one context block of point tokens -> target blocks</td><td>Context re-injected at every predictor layer; cosine loss.</td><td>ScanObjectNN <span data-claim="3d-jepa-pbt50rs-150ep">88.65</span> at <span data-claim="3d-jepa-epochs">150</span> epochs</td></tr>
+    <tr><td>D-JEPA (<span data-claim="d-jepa-published">2024-10-02</span>)</td><td>unmasked tokens -> masked tokens' features and values</td><td>Adds a per-token diffusion loss: the architecture becomes a generator.</td><td>ImageNet FID <span data-claim="d-jepa-h-fid">2.04</span> (<span data-claim="d-jepa-h-params">1.4B</span>)</td></tr>
+    <tr><td>LLM-JEPA (<span data-claim="llm-jepa-published">2025-09-11</span>)</td><td>text description -> embedding of the paired code</td><td>Keeps next-token loss; adds a JEPA term between two views of one sample.</td><td><span data-claim="llm-jepa-synth-pretrain-acc">60.59</span> vs <span data-claim="llm-jepa-synth-ntp-acc">54.38</span> (NL-RX-SYNTH)</td></tr>
+    <tr><td>VL-JEPA (<span data-claim="vl-jepa-published">2025-12-11</span>)</td><td>video + text query -> embedding of the target text</td><td>The target modality is text; decode only when text output is needed.</td><td>zero-shot video classification <span data-claim="vl-jepa-zs-cls-avg">52.5</span> vs <span data-claim="vl-jepa-pecore-zs-cls-avg">44.7</span></td></tr>
+    <tr><td>EB-JEPA library (<span data-claim="eb-jepa-lib-published">2026-02-03</span>)</td><td>images, then video, then actions</td><td>A teaching codebase; each regulariser ablated.</td><td>Two Rooms <span data-claim="eb-jepa-lib-tworooms-success">97</span>% success; <span data-claim="eb-jepa-lib-no-idm-success">1</span>% without the inverse-dynamics term</td></tr>
+    <tr><td>Causal-JEPA (<span data-claim="causal-jepa-published">2026-02-11</span>)</td><td>object slots with some masked across time -> the masked objects</td><td>Masking moves from patches to objects, so interactions must be modelled.</td><td>counterfactual VQA <span data-claim="causal-jepa-cf-vqa">60.19</span> vs <span data-claim="causal-jepa-ocjepa-cf-vqa">41.10</span></td></tr>
+    <tr><td>Var-JEPA (<span data-claim="var-jepa-published">2026-03-20</span>)</td><td>context -> a distribution over the target latent</td><td>Encoder and predictor become probabilistic, trained with one ELBO.</td><td>Covertype <span data-claim="var-jepa-covertype-mlp">0.679</span> vs <span data-claim="var-jepa-tjepa-covertype-mlp">0.408</span></td></tr>
+    <tr><td>MJEPA (<span data-claim="mjepa-published">2026-06-23</span>)</td><td>masked audio, video or both through one encoder</td><td>One shared encoder across modalities plus a cross-modal pooled prediction.</td><td>AudioSet-20K A-V mAP <span data-claim="mjepa-as20k-av-map">45.44</span> vs <span data-claim="mjepa-equiav-as20k-av-map">38.60</span></td></tr>
+  </tbody>
+</table>
+</section>

@@ -1,0 +1,24 @@
+<script>
+/* Exercise blocks: NumPy / PyTorch tabs (arrow keys move between tabs) and a Copy button for the visible code. */
+(() => {
+  const select = (ex, tab) => ex.querySelectorAll('[role=tab]').forEach(t => {
+    const on = t === tab; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.exercise .tabs button'); if (!b) return;
+    const ex = b.closest('.exercise');
+    if (!b.classList.contains('copy')) { select(ex, b); return; }
+    const code = ex.querySelector('[role=tabpanel]:not([hidden]) pre.code').textContent;
+    const say = t => { b.textContent = t; setTimeout(() => { b.textContent = 'Copy code'; }, 1600); };
+    // The clipboard API needs permission; when it is refused, tell the reader to select the code instead.
+    navigator.clipboard.writeText(code).then(() => say('Copied'), () => say('Select the code to copy'));
+  });
+  document.addEventListener('keydown', e => {
+    const t = e.target.closest('.exercise [role=tab]'); if (!t || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    const tabs = [...t.closest('.tabs').querySelectorAll('[role=tab]')];
+    const next = tabs[(tabs.indexOf(t) + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    select(t.closest('.exercise'), next); next.focus(); e.preventDefault();
+  });
+})();
+</script>

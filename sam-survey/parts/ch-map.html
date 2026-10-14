@@ -1,0 +1,19 @@
+<section id="ch-map" class="chapter">
+<h2>The explosion</h2>
+<p>SAM was released with its weights and its dataset, and other researchers built on it at once. A dated search of arXiv shows how fast, and in which directions.</p>
+
+<figure class="viz" id="viz-map" data-scene="map">
+  <div class="controls"><div class="seg" role="tablist" aria-label="View">
+    <button type="button" role="tab" data-step="0" id="btn-map-month">By month</button>
+    <button type="button" role="tab" data-step="1" id="btn-map-topic">By topic</button>
+  </div></div>
+  <div class="stage" style="height:clamp(320px, 42vw, 440px)"></div>
+  <div class="controls"><button type="button" data-cue-reset id="btn-map-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Counts from two arXiv API queries run on 2026-10-09: papers whose title or whose abstract contains the phrase "segment anything". The topic split uses title keywords and counts each paper once; it is a heuristic. Papers that write only "SAM" are missed.</figcaption>
+</figure>
+
+<p>Before you look at the curve, guess: did the field peak in the year SAM appeared, or later? The two queries return <span data-claim="scan-total">1,447</span> unique papers. <span data-claim="scan-pre-sam">4</span> of them have a first version older than SAM: three are earlier papers whose later revisions mention SAM, and one matches only because arXiv search treats "segmenting anything" as the same phrase. We drop them, so the chart starts in April 2023 with <span data-claim="scan-kept">1,443</span> papers. In SAM's own month there were already <span data-claim="scan-2023-04">41</span>.</p>
+<p>The count did not peak in 2023. The year totals are <span data-claim="scan-year-2023">302</span> for April to December 2023, <span data-claim="scan-year-2024">490</span> for 2024, <span data-claim="scan-year-2025">426</span> for 2025, and <span data-claim="scan-year-2026">225</span> for 2026 up to the query date. The busiest month is <span data-claim="scan-peak-month">2024-08</span>, with <span data-claim="scan-peak-count">63</span> papers: the month SAM 2 appeared. Our reading is that part of the fall in 2026 comes from the method: later papers often write "SAM 2" or "SAM 3" without the full phrase, and the last weeks are still being indexed. We did not measure either effect.</p>
+<p>By topic, the largest identifiable group is medical imaging, with <span data-claim="scan-dom-medical">387</span> titles: organs, tumours, polyps, cells. Then come efficient variants (<span data-claim="scan-dom-efficient">98</span>), 3D (<span data-claim="scan-dom-3D">98</span>), video and tracking (<span data-claim="scan-dom-video-and-tracking">95</span>), remote sensing (<span data-claim="scan-dom-remote-sensing">82</span>), and robustness and evaluation studies (<span data-claim="scan-dom-robustness-and-evaluation">57</span>). Industrial inspection is small: <span data-claim="scan-dom-industrial">34</span> titles match its list (defect, anomaly, industrial, inspection, crack, manufacturing, surface), and a few of those are anomaly papers from other fields. The keyword lists are crude: "edge" also matches "knowledge", for example. The largest share (<span data-claim="scan-dom-other">592</span>, about 41%) matches none of the lists. The pattern is the same as in the family chapter: people adapt SAM to a domain where its training images were rare.</p>
+</section>

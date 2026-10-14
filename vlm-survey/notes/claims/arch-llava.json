@@ -1,0 +1,164 @@
+[
+ {
+  "id": "clip-arch-l14-dims",
+  "claim": "CLIP ViT-L/14 vision transformer layers / width (same for the 336px model)",
+  "value": "24 / 1024",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Appendix table \"CLIP-ViT hyperparameters\" (ViT-L/14 and ViT-L/14@336px rows)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-grid-quote",
+  "claim": "Which CLIP features LLaVA considers",
+  "value": "The grid features before and after the last Transformer layer are considered in our experiments",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-before-last",
+  "claim": "Features used for the ScienceQA model",
+  "value": "we use the visual features before the last layer",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 (ScienceQA)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-same-dim",
+  "claim": "Output width of the projection W",
+  "value": "the same dimensionality as the word embedding space in the language model",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-vicuna",
+  "claim": "LLM used by LLaVA, f_phi",
+  "value": "Vicuna",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-13b",
+  "claim": "Main LLaVA model size (7B is an ablation)",
+  "value": "best 13B model",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 5.2 ablation (iv)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-frozen-s1",
+  "claim": "Stage 1 frozen set",
+  "value": "we keep both the visual encoder and LLM weights frozen",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.2 Stage 1",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-theta-s1",
+  "claim": "Stage 1 trainable parameters",
+  "value": "the projection matrix",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.2 Stage 1 (theta = W)",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-frozen-s2",
+  "claim": "Stage 2 frozen set",
+  "value": "We always keep the visual encoder weights frozen",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Sec. 4.2 Stage 2",
+  "uncertain": false
+ },
+ {
+  "id": "llava-arch-optim",
+  "claim": "Optimizer settings (following Vicuna)",
+  "value": "Adam optimizer with no weight decay and a cosine learning rate with a warmup ratio of 3%",
+  "paper": "LLaVA",
+  "version": "v2",
+  "loc": "Appendix \"Training Details\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-encoder",
+  "claim": "LLaVA-1.5 vision encoder",
+  "value": "CLIP-ViT-L-336px",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3 \"Scaling the Data and Model\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-vicuna",
+  "claim": "LLaVA-1.5 base LLM",
+  "value": "Vicuna v1.5",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix \"Hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-sizes",
+  "claim": "LLaVA-1.5 LLM sizes",
+  "value": "7B and 13B",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Sec. 3.3, comparison table (rows Vicuna-7B / Vicuna-13B)",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-same-hp",
+  "claim": "Hyperparameters vs LLaVA",
+  "value": "the same set of hyperparameters as the original LLaVA, except that we halve the learning rate in pretraining",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix \"Hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-adamw",
+  "claim": "LLaVA-1.5 optimizer",
+  "value": "AdamW",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix Table \"Hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-deepspeed",
+  "claim": "DeepSpeed stage, pretrain / finetune",
+  "value": "2 / 3",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix Table \"Hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-sched",
+  "claim": "LR schedule, warmup, weight decay (both stages)",
+  "value": "cosine decay, warmup ratio 0.03, weight decay 0",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "loc": "Appendix Table \"Hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "llava15-arch-roughly",
+  "claim": "LLaVA-1.5 instruction-tuning schedule vs LLaVA",
+  "value": "keep the training iterations and batch size roughly the same for instruction tuning as LLaVA",
+  "loc": "Sec. 3.3 \"Computational cost\"",
+  "paper": "LLaVA-1.5",
+  "version": "v2",
+  "uncertain": false
+ }
+]

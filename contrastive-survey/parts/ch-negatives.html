@@ -1,0 +1,138 @@
+<section id="ch-negatives" class="chapter">
+<h2>Hard negatives and false negatives</h2>
+<p>InfoNCE pushes every negative away. Does it push them all equally, and what if some "negatives" are not negatives? This chapter finds out which negatives get the push, and what goes wrong when the closest ones are not really negatives.</p>
+
+<h3>The setup: one anchor, 24 negatives</h3>
+<p>Take one slice through the sphere of <a href="#ch-sphere">chapter 6</a>: a circle. On it sit an anchor (<b class="c-blue">blue</b>), its positive (<b class="c-yellow">yellow</b>, the other view of the same image) and 24 negatives (<b class="c-red">red</b>). The loss treats all 24 as "not my partner". But four of them secretly show the same kind of object as the anchor, and they carry a yellow ring. The loss cannot see the rings; you can.</p>
+
+<figure class="viz" id="viz-negatives" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="controls fig-top" role="group" aria-label="Loss">
+    <span class="lbl">Loss</span>
+    <button type="button" id="btn-neg-plain" aria-pressed="false">Plain InfoNCE</button>
+    <button type="button" id="btn-neg-hard" aria-pressed="false">Hardness weights (&beta; = 1)</button>
+    <button type="button" id="btn-neg-debias" aria-pressed="false">Debiased (&pi;<sup>+</sup> = 1/6)</button>
+    <button type="button" id="btn-neg-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="negatives-canvas" role="img" aria-label="Left: a circle with a blue anchor at the top, a yellow positive next to it, and 24 red negatives around the circle; four negatives near the anchor have yellow rings because they share the anchor's class. A red bar grows outward from each negative, its length the negative's share of the push. A green arrow shows the pull on the positive. Right: three bars that split the loss denominator into the positive term, false-negative terms and true-negative terms, with the loss value of each."></canvas>
+  <p class="readout" id="negatives-readout" aria-live="polite"></p>
+  <figcaption>Computed on a toy, not trained. Similarity is the cosine of the angle between two points, and the temperature is <span class="tex">\tau = 0.5</span>. Each red bar is the negative's share of the push, Eq. 5 below; with hardness weights each term is multiplied by <span class="tex">e^{\beta s/\tau}</span> over its mean. The second panel adds up the denominator of the loss three ways: with all 24 negatives, with only the 20 true negatives (this needs the hidden labels), and with Chuang et al.'s debiased estimate (it does not). The angles and every printed number are in <code>notes/sim-negatives.txt</code>.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "Plain InfoNCE".</b> Which negatives will get most of the push: the far ones, which the loss could still move a lot, or the near ones? And is that good?</p>
+<p>Press it. The six near negatives get about 70% of it; each far negative gets only a sliver, though the 18 of them still add up to about 30%. And the four negatives nearest the anchor, which take the biggest bars, are the ones with yellow rings.</p>
+
+<h3>Who gets pushed: the gradient</h3>
+<p>Here is why. Write <span class="tex">s_{i,j}</span> for the similarity of anchor <span class="tex">i</span> to candidate <span class="tex">j</span>, with <span class="tex">s_{i,i}</span> for its positive. InfoNCE for anchor <span class="tex">i</span> is <span class="tex">\mathcal L = -s_{i,i}/\tau + \log \sum_k e^{s_{i,k}/\tau}</span>, where the sum runs over the positive and all negatives.</p>
+<p>Take the derivative with respect to one score. The first term only touches the positive. The log-sum touches every score, and its derivative is that candidate's softmax probability <span class="tex">P_{i,j}</span>, divided by <span class="tex">\tau</span> (derived here; this is the usual softmax derivative). Wang and Liu print the result:</p>
+<div class="eq" id="eq-neggrad" data-build data-viz="viz-negatives"><div class="tex tex-display">
+\htmlData{step=1, link=pull}{\htmlClass{t-green}{\frac{\partial \mathcal{L}(x_i)}{\partial s_{i,i}} = - \frac{1}{\tau} \sum_{k \neq i} P_{i,k}}}, \quad \htmlData{step=2, link=push}{\htmlClass{t-red}{\frac{\partial \mathcal{L}(x_i)}{\partial s_{i,j}} = \frac{1}{\tau} P_{i,j}}}
+</div></div>
+<p class="eqno">Eq. 4 in Wang and Liu, "Understanding the behaviour of contrastive loss", <span data-claim="wangliu-venue">CVPR 2021</span>, arXiv 2012.09740v2.</p>
+<p>Divide each negative's push by the total push, and the temperature and the positive cancel out. What is left is each negative's <em>share</em> of the push:</p>
+<div class="eq" id="eq-negshare" data-build data-viz="viz-negatives"><div class="tex tex-display">
+\htmlData{step=2, link=share}{r_{i}(s_{i,j})} = \frac{\htmlData{step=1, link=share}{\htmlClass{t-red}{{\rm exp}(s_{i,j}/\tau)}}}{\htmlData{step=3}{\sum_{k \neq i} {\rm exp} (s_{i,k}/\tau)}}, \quad i \neq j
+</div></div>
+<p class="eqno">Eq. 5 in Wang and Liu, arXiv 2012.09740v2 (the sum runs over the negatives only).</p>
+<ul class="gloss">
+  <li><span class="tex">P_{i,j}</span>: the softmax probability that the loss gives candidate <span class="tex">j</span> of being anchor <span class="tex">i</span>'s partner (their Eq. 2).</li>
+  <li><span class="tex">\htmlClass{t-green}{\partial\mathcal L / \partial s_{i,i}}</span>: the pull on the positive. It is negative, so gradient descent raises the positive's similarity. Its size equals the sum of all the pushes: the loss pulls exactly as hard as it pushes.</li>
+  <li><span class="tex">\htmlClass{t-red}{\partial\mathcal L / \partial s_{i,j}}</span>: the push on negative <span class="tex">j</span>. It is proportional to <span class="tex">e^{s_{i,j}/\tau}</span>, so it grows exponentially with how similar the negative already is.</li>
+  <li><span class="tex">r_i(s_{i,j})</span>: negative <span class="tex">j</span>'s share of the push, a softmax over the negatives alone. The red bars in the figure are these shares.</li>
+</ul>
+<p>Try it with three negatives at similarities 0.9, 0.5 and 0.0.</p>
+<ul>
+  <li>At <span class="tex">\tau = 0.5</span> the terms are <span class="tex">e^{1.8} \approx 6.05</span>, <span class="tex">e^{1.0} \approx 2.72</span> and <span class="tex">e^{0} = 1</span>. The shares are 0.62, 0.28 and 0.10.</li>
+  <li>At <span class="tex">\tau = 0.1</span> the terms are <span class="tex">e^{9} \approx 8103</span>, <span class="tex">e^{5} \approx 148</span> and 1. The shares are 0.982, 0.018 and 0.0001. The nearest negative takes nearly everything.</li>
+</ul>
+<p>This is the soft version of the margin from <a href="#ch-compare">chapter 1</a>. There, a negative outside the bubble got no push at all. Here, a far negative still gets some, but exponentially little. The temperature sets how sharply the push falls off, which is the "narrow bump" of <a href="#ch-sphere">chapter 6</a> seen from the gradient. Wang and Liu call this a <em>hardness-aware</em> loss: a <em>hard negative</em> is one the encoder already finds similar to the anchor, and those get the push.</p>
+
+<h3>Hard negatives: the useful ones</h3>
+<p>That is mostly a good thing. A far negative is already handled; pushing it teaches nothing. A near negative is where the encoder is still confused, so that is where learning happens. It is also one reason big batches and long queues help (<a href="#ch-moco">chapter 4</a>): more negatives give more chances that a few are hard (our reading).</p>
+<p>So why not push the hard ones even harder? Robinson et al. do this with a <em>concentration</em> <span class="tex">\beta \ge 0</span>: they reweight each negative by <span class="tex">e^{\beta s/\tau}</span> (in our notation), divided by the average weight in the batch. Put that weight into Eq. 5, holding the weights fixed, and the share becomes <span class="tex">e^{(1+\beta)s_{i,j}/\tau}</span> over its sum (derived here). That is the same as using a lower temperature, <span class="tex">\tau/(1+\beta)</span>, for the negatives only. Press "Hardness weights" to see <span class="tex">\beta = 1</span>: the bars near the anchor grow and the far ones vanish.</p>
+
+<h3>The twist: false negatives</h3>
+<p>Look again at which bars grew. Most of the extra push went to the ringed points. Without labels, the "negatives" are just other images from the batch, and some of them show the same kind of object as the anchor: another mug, another dog. These are <em>false negatives</em>. The loss pushes them away as hard as any stranger, and harder, because they sit close.</p>
+<p>How many are there? If the data has <span class="tex">C</span> classes of equal size, a random image shares the anchor's class with probability <span class="tex">1/C</span>. So about <span class="tex">1/C</span> of all negatives are false (our arithmetic; the papers call this probability the class prior). We write it <span class="tex">\pi^+</span>, and <span class="tex">\pi^- = 1 - \pi^+</span>. The paper writes this prior as <span class="tex">\tau^+</span>. It is not a temperature; we write <span class="tex">\pi^+</span> to keep <span class="tex">\tau</span> for temperature. With 10 classes and <span data-claim="chuang-n-max">510</span> negatives per anchor, that is about <span data-claim="neg-c10-false-count">51</span> false negatives. The toy has 4 of 24, which is 1/6, as if there were 6 classes, like the sphere of <a href="#ch-sphere">chapter 6</a>.</p>
+<p>A bigger batch does not help with this: the fraction stays at <span class="tex">1/C</span>. And it is worst exactly where hard-negative weighting looks: the nearest images are the most likely to share the anchor's class. Robinson et al. see this in their results: on vision data, raising <span class="tex">\beta</span> does not keep improving the features (their Sec. 6.1).</p>
+
+<details class="check">
+  <summary>Check yourself: a dataset has 5 classes of equal size. About what fraction of the negatives are false?</summary>
+  <p>About one in five, 20%. With few classes, false negatives are a large part of every batch, so the problem matters most on narrow datasets with few kinds of object.</p>
+</details>
+
+<h3>The fix: debiasing</h3>
+<p>Chuang et al. found a way to correct for false negatives without knowing which ones they are. The idea is a piece of bookkeeping. A random image is a true negative with probability <span class="tex">\pi^- = 1 - \pi^+</span> and a same-class image with probability <span class="tex">\pi^+</span>. So the average over all images mixes the two: (mean over all) = <span class="tex">\pi^-</span> (mean over true negatives) + <span class="tex">\pi^+</span> (mean over same-class images).</p>
+<p>Solve for the part you want: subtract <span class="tex">\pi^+</span> times the same-class average, then divide by <span class="tex">\pi^-</span>. You do not have same-class images, but you do have one: the positive. So the positive stands in for them. That gives the estimator that replaces the plain sum of negatives:</p>
+<div class="eq" id="eq-debias" data-build data-viz="viz-negatives"><div class="tex tex-display">
+g = \max \Big\{ \htmlData{step=3}{\frac{1}{\pi^-}} \Big( \htmlData{step=1, link=negsum}{\htmlClass{t-red}{\frac{1}{N}\sum_{i=1}^N e^{f(x)^T f(u_i)}}} - \htmlData{step=2, link=subtract}{\htmlClass{t-green}{\pi^+ \frac{1}{M}\sum_{i=1}^M e^{f(x)^T f(v_i)}}} \Big),\;\; \htmlData{step=4}{e^{-1/\tau}} \Big\}
+</div></div>
+<p class="eqno">Eq. 7 in Chuang et al., "Debiased contrastive learning", <span data-claim="chuang-venue">NeurIPS 2020</span>, arXiv 2007.00224v3, written there as <span class="tex">g(x, \{u_i\}_{i=1}^N, \{v_i\}_{i=1}^M)</span> with temperature <span class="tex">t</span> and prior <span class="tex">\tau^+</span>; we write <span class="tex">\tau</span> and <span class="tex">\pi^+</span> (our notation). The loss (their Eq. 8) puts <span class="tex">N g</span> in the denominator in place of the sum over negatives.</p>
+<ul class="gloss">
+  <li><span class="tex">f(x)^T f(u)</span>: the score of the anchor against <span class="tex">u</span>. These papers fold the temperature into <span class="tex">f</span>, so it plays the role of <span class="tex">s/\tau</span> on this page.</li>
+  <li>Careful: here <span class="tex">N</span> counts negatives and <span class="tex">M</span> counts positives. In <a href="#ch-sphere">chapter 6</a>, <span class="tex">M</span> counted negatives.</li>
+  <li><span class="tex">\htmlClass{t-red}{u_1, \dots, u_N}</span>: the <span class="tex">N</span> negatives from the batch, some of them false. The red term is their average.</li>
+  <li><span class="tex">\htmlClass{t-green}{v_1, \dots, v_M}</span>: positives that stand in for same-class images. Usually <span class="tex">M = 1</span> and <span class="tex">v_1</span> is the anchor's own positive. The green term is the expected share of false negatives, which is subtracted.</li>
+  <li><span class="tex">\pi^+</span>: the class prior, the chance that a random image shares the anchor's class; <span class="tex">\pi^- = 1 - \pi^+</span>. The paper writes it <span class="tex">\tau^+</span>; we write <span class="tex">\pi^+</span> (our notation). It is a hyperparameter: the paper uses <span data-claim="chuang-tauplus-cifar-01">0.1</span> for CIFAR10 and <span data-claim="neg-in100-tauplus-001">0.01</span> for ImageNet-100.</li>
+  <li><span class="tex">e^{-1/\tau}</span>: a floor, the smallest value a single term can take (similarity -1). Without it the estimate could go negative, and the log in the loss would break.</li>
+</ul>
+<p>Try it with <span class="tex">N = 10</span> negatives, <span class="tex">\pi^+ = 0.1</span>, negative terms that add up to 30 and a positive term of 5. The plain average is 3. Subtract <span class="tex">0.1 \times 5 = 0.5</span> and divide by 0.9: <span class="tex">g \approx 2.78</span>, so the denominator counts <span class="tex">N g \approx 27.8</span> for the negatives instead of 30. The loss has removed what it expects the false negatives to add.</p>
+<p>Now press "Debiased". You might expect the ringed bars to shrink. They do not move at all. The estimator has no idea which negatives are false; it only knows how many to expect, so it cannot single them out. What changes is the denominator on the right: the dashed box is the subtracted part, about the size of the false negatives' block. The debiased loss lands close to the loss you would get with true negatives only, and the loss never saw the labels.</p>
+<p>The floor matters in practice. With the low temperature of their ImageNet-100 setup (<span class="tex">\tau</span> = <span data-claim="chuang-in100-temp">0.07</span>), the estimate often fell below it, and the authors then trained on the plain loss for that example instead (App. B).</p>
+
+<h3>Both at once: hard and debiased</h3>
+<p>Robinson et al. (the same group) combine the two ideas. They sample negatives from a distribution <span class="tex">q_\beta</span> that favours similar images, and correct it for false negatives with the same bookkeeping. They need no new sampler: the expectation under <span class="tex">q_\beta</span> becomes a reweighted average over the batch they already have.</p>
+<div class="eq" id="eq-hard" data-build data-viz="viz-negatives"><div class="tex tex-display">
+\mathbb{E}_{x^- \sim q_\beta} [e^{f(x)^T f(x^-)}] = \htmlData{step=1, link=hard}{\mathbb{E}_{x^- \sim p} [\htmlClass{t-red}{e^{(\beta+1) f(x)^T f(x^-)}} / Z_\beta]}, \qquad \htmlData{step=2, link=hard}{\widehat{Z}_\beta = \frac{1}{N} \sum_{i=1}^N e^{\beta f(x)^\top f(x_i^-)}}
+</div></div>
+<p class="eqno">Unnumbered, Sec. 3.1 in Robinson et al., "Contrastive learning with hard negative samples", <span data-claim="robinson-venue">ICLR 2021</span>, arXiv 2010.04592v2. The same reweighting is applied to the positive term, and the result goes into Chuang's formula.</p>
+<ul class="gloss">
+  <li><span class="tex">q_\beta(x^-) \propto e^{\beta f(x)^\top f(x^-)} p(x^-)</span>: the hardness-tilted distribution over negatives; <span class="tex">p</span> is the plain data distribution.</li>
+  <li><span class="tex">\htmlClass{t-red}{e^{(\beta+1) f(x)^T f(x^-)}}</span>: each negative's term, sharpened by <span class="tex">\beta</span>. This is the <span class="tex">(1+\beta)</span> of the share above.</li>
+  <li><span class="tex">\widehat Z_\beta</span>: the average weight in the batch, so the weights average to 1. <span class="tex">\beta = 0</span> gives Chuang's loss back; <span class="tex">\pi^+ = 0</span> gives hardness without debiasing.</li>
+</ul>
+<p>Try it with two negatives whose scores <span class="tex">f(x)^T f(x^-)</span> are 0.9 and 0.1, and <span class="tex">\beta = 1</span>. The plain terms <span class="tex">e^{0.9} \approx 2.46</span> and <span class="tex">e^{0.1} \approx 1.11</span> give shares of 0.69 and 0.31. The weights <span class="tex">e^{\beta s}</span> are the same two numbers; their mean is 1.78, so the normalized weights are 1.38 and 0.62. The weighted terms become <span class="tex">e^{1.8}/1.78 \approx 3.39</span> and <span class="tex">e^{0.2}/1.78 \approx 0.69</span>, and the shares move to 0.83 and 0.17. The near negative gained, the far one lost.</p>
+<p>The paper's own 2 x 2 test on STL10 asks whether each half helps. All four runs are SimCLR with a ResNet-50 for <span data-claim="robinson-epochs">400</span> epochs, scored by a linear readout:</p>
+<table class="data">
+  <thead><tr><th>STL10, linear readout (%)</th><th>Not debiased</th><th>Debiased</th></tr></thead>
+  <tbody>
+    <tr><td>Not hard (<span class="tex">\beta = 0</span>)</td><td><span data-claim="robinson-stl10-none">80.15</span> (plain SimCLR)</td><td><span data-claim="robinson-stl10-d">84.26</span></td></tr>
+    <tr><td>Hard sampling</td><td><span data-claim="robinson-stl10-h">84.41</span></td><td><span data-claim="robinson-stl10-hd">87.44</span></td></tr>
+  </tbody>
+  <caption>Robinson et al., Fig. 4 (right), printed values. Hardness alone and debiasing alone help about equally here; together they help most.</caption>
+</table>
+<p>Each half helps, and the two together help most. The same order holds on other datasets, but the gain shrinks when there are many negatives: on CIFAR10 it disappears at large <span class="tex">N</span> (Sec. 5.1).</p>
+
+<h3>Where this came from</h3>
+<p>Wang and Liu (<span data-claim="wangliu-venue">CVPR 2021</span>) wrote down the gradient and named the hardness-aware property. Chuang et al. (<span data-claim="chuang-venue">NeurIPS 2020</span>) introduced debiasing; in Chuang's own runs it raised ImageNet-100 top-1 from <span data-claim="chuang-in100-biased-top1">73.58</span> to <span data-claim="chuang-in100-debiased01-top1">74.6</span> (CMC's code, <span class="tex">\pi^+</span> = <span data-claim="neg-in100-tauplus-001">0.01</span>, Table 1) and improved SimCLR on STL10 "by <span data-claim="chuang-stl10-gain">4.26%</span>" (Sec. 5.1). Robinson et al. (<span data-claim="robinson-venue">ICLR 2021</span>), from the same group, added the hardness weights. Each paper's numbers compare methods inside that paper only, so do not line them up against each other.</p>
+<p>A related fix targets small batches instead. Decoupled contrastive learning (Yeh et al., <span data-claim="dcl-venue">ECCV 2022</span>, <a href="https://arxiv.org/abs/2110.06848v3">2110.06848</a>) removes the positive from the denominator. In SimCLR with batch <span data-claim="neg-dcl-batch">256</span> and <span data-claim="neg-dcl-epochs">200</span> epochs, it raises ResNet-50 ImageNet-1K linear top-1 from <span data-claim="dcl-simclr-256">61.8%</span> to <span data-claim="dcl-dcl-256">65.9%</span> (Sec. 4.2 text).</p>
+
+<h3>Where we go next: drop the negatives?</h3>
+<p>Negatives cost memory, need big batches, and some of them are false. A natural question follows: can you prevent collapse without any negatives at all? <a href="#ch-beyond">Chapter 8</a> shows two ways.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why each negative's share of the push is a softmax of its similarity, and why far negatives get almost none.</li>
+    <li>What a false negative is, and why about <span class="tex">1/C</span> of the negatives are false when there are <span class="tex">C</span> equal classes.</li>
+    <li>How debiasing corrects the denominator without knowing which negatives are false, and why hardness weighting needs it.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>False negatives matter most when your data has few kinds of object, because then <span class="tex">1/C</span> is large. If you know roughly how many balanced classes there are, <span class="tex">\pi^+ \approx 1/C</span> is a starting point (our reading). If you have labels, use them: <a href="#ch-supcon">chapter 9</a> turns same-class images into positives instead of negatives. Turn hardness up gently: on CIFAR100 the best was <span class="tex">\beta</span> = <span data-claim="robinson-c100-best-beta">0.5</span>, and the paper suggests that much larger values pick many false negatives (Sec. 6.1).</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-negatives'), out = document.getElementById('negatives-readout');
+  const kit = KIT.negatives(document.getElementById('negatives-canvas'), { fig });
+  const btns = { plain: document.getElementById('btn-neg-plain'), hard: document.getElementById('btn-neg-hard'), debias: document.getElementById('btn-neg-debias') };
+  const go = mode => { kit.set(mode); Object.entries(btns).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === mode))); out.textContent = KIT.negText(mode); };
+  Object.entries(btns).forEach(([k, b]) => b.addEventListener('click', () => go(k)));
+  document.getElementById('btn-neg-reset').addEventListener('click', () => go(null));
+  go(null);
+})();
+</script>
+</section>

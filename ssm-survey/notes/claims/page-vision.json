@@ -1,0 +1,70 @@
+[
+ {
+  "id": "page-vision-grid-side",
+  "claim": "Patches per side at 224 px with 16 px patches",
+  "value": "14",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: 224 / 16 from Sec. 3.4 (patch 16) and Sec. 4.1 (224^2)",
+  "our_reading": true
+ },
+ {
+  "id": "page-vision-tau-ti",
+  "claim": "MambaOut's long-sequence threshold 6D applied to the Vim-Ti / DeiT-Ti width D = 192",
+  "value": "1,152",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "our reading: 6 x 192, the rule of MambaOut Eq. 7 with Vim Sec. 3.4's D for Vim-Ti",
+  "our_reading": true
+ },
+ {
+  "id": "page-vision-r-imagenet-s",
+  "claim": "MambaOut ratio L/6D for ImageNet (196 tokens) at ViT-S width (D = 384)",
+  "value": "0.09",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "our reading: 196 / 2304 = 0.085, rounded; MambaOut Sec. 3.2 values",
+  "our_reading": true
+ },
+ {
+  "id": "page-vision-vims-state",
+  "claim": "Vim-S state size per direction per layer, E x N",
+  "value": "12,288",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: 768 x 16 from Sec. 3.4 (E) and Algorithm 1 h_o shape (B, E, N)",
+  "our_reading": true
+ },
+ {
+  "id": "page-vision-coco-size",
+  "claim": "COCO inference image size used by MambaOut's token count",
+  "value": "800 by 1280",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2 ('inference image size of 800 x 1280')"
+ },
+ {
+  "id": "page-vision-ade-size",
+  "claim": "ADE20K inference image size used by MambaOut's token count",
+  "value": "512 by 2048",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2 ('inference image size of 512 x 2048')"
+ },
+ {
+  "id": "page-vision-vits-d",
+  "claim": "ViT-S channels used for MambaOut's tau_small",
+  "value": "384",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2 ('with 384 channels in ViT-S')"
+ },
+ {
+  "id": "page-vision-vitb-d",
+  "claim": "ViT-B channels used for MambaOut's tau_base",
+  "value": "768",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2 ('768 channels in ViT-B')"
+ }
+]

@@ -1,0 +1,11 @@
+[
+ {"id": "sam-first-prompt-equal", "claim": "First prompt: a foreground point or a box, chosen with equal probability", "value": "equal probability", "paper": "SAM", "arxiv": "2304.02643v1", "loc": "App. A 'Training algorithm', segany.tex L658"},
+ {"id": "sam-first-point-uniform", "claim": "First training point sampled uniformly from the ground-truth mask", "value": "sampled uniformly from the ground truth mask", "paper": "SAM", "arxiv": "2304.02643v1", "loc": "App. A 'Training algorithm', segany.tex L658"},
+ {"id": "sam-next-point-uniform", "claim": "Later points selected uniformly from the error region between prediction and ground truth", "value": "selected uniformly from the error region", "paper": "SAM", "arxiv": "2304.02643v1", "loc": "App. A 'Training algorithm', segany.tex L660"},
+ {"id": "sam-feedback-unthresholded", "claim": "The previous prediction is fed back as unthresholded mask logits", "value": "unthresholded mask logits", "paper": "SAM", "arxiv": "2304.02643v1", "loc": "App. A 'Training algorithm', segany.tex L660"},
+ {"id": "sam-feedback-highest-iou", "claim": "With multiple masks, the one passed on (and used to sample the next point) has the highest predicted IoU", "value": "highest predicted IoU", "paper": "SAM", "arxiv": "2304.02643v1", "loc": "App. A 'Training algorithm', segany.tex L660"},
+ {"id": "sam-nopoint-placement", "claim": "One no-point iteration is inserted at random among the 8 sampled points; the other is always at the end", "value": "always at the end", "paper": "SAM", "arxiv": "2304.02643v1", "loc": "App. A 'Training algorithm', segany.tex L662"},
+ {"id": "sam2-iou-l1", "claim": "SAM 2 supervises IoU predictions with an l1 loss (SAM used MSE)", "value": "l1", "paper": "SAM 2", "arxiv": "2408.00714v2", "loc": "App. D.2.1, sam2.1_arxiv.tex L986"},
+ {"id": "sam2-iou-all-masks", "claim": "SAM 2 supervises the IoU predictions of all masks on the first click; mask logits only for the lowest-loss mask", "value": "all", "paper": "SAM 2", "arxiv": "2408.00714v2", "loc": "App. D.2.1, sam2.1_arxiv.tex L986"},
+ {"id": "sam2-no-empty-rounds", "claim": "SAM 2 does not add SAM's no-new-prompt iterations", "value": "we do not add such iterations", "paper": "SAM 2", "arxiv": "2408.00714v2", "loc": "App. D.2.1, sam2.1_arxiv.tex L986"}
+]

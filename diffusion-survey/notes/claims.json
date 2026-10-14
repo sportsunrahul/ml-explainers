@@ -1,0 +1,3755 @@
+[
+ {
+  "id": "beat-gans-fid-in128",
+  "claim": "ADM-G FID on ImageNet 128x128 (250 steps) vs BigGAN-deep",
+  "value": "2.97 vs 6.02",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 128x128 block, rows ADM-G and BigGAN-deep",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-fid-in256",
+  "claim": "ADM-G FID on ImageNet 256x256 (250 steps) vs BigGAN-deep",
+  "value": "4.59 vs 6.95",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 256x256 block, rows ADM-G and BigGAN-deep",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-fid-in512",
+  "claim": "ADM-G FID on ImageNet 512x512 (250 steps) vs BigGAN-deep",
+  "value": "7.72 vs 8.43",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 512x512 block, rows ADM-G and BigGAN-deep",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-recall-in256",
+  "claim": "Recall on ImageNet 256x256, ADM-G vs BigGAN-deep (diffusion covers more modes)",
+  "value": "0.52 vs 0.28",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 256x256 block, Rec column",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-ddim25-fids",
+  "claim": "ADM-G FID with 25 DDIM steps on ImageNet 128/256/512",
+  "value": "5.98 / 5.44 / 8.41",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, rows ADM-G (25 steps)",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-upsample-fids",
+  "claim": "Best FID combining guided base model with upsampling stack (ADM-G + ADM-U, 250+250 steps) on ImageNet 256 and 512",
+  "value": "3.94 (256) / 3.85 (512)",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 6, rows ADM-G, ADM-U 250/250",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-cond-unguided",
+  "claim": "Class-conditional ADM on ImageNet 256 without guidance: FID / IS / precision / recall",
+  "value": "10.94 / 100.98 / 0.69 / 0.63",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, row Conditional=yes, Guidance=no",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-cond-s1",
+  "claim": "Class-conditional ADM on ImageNet 256 with classifier guidance scale 1.0: FID / IS / precision / recall",
+  "value": "4.59 / 186.70 / 0.82 / 0.52",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, row Conditional=yes, Guidance=yes, Scale 1.0",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-cond-s10",
+  "claim": "Class-conditional ADM on ImageNet 256 with classifier guidance scale 10.0: FID / IS / precision / recall (too much guidance hurts FID, raises IS and precision, lowers recall)",
+  "value": "9.11 / 283.92 / 0.88 / 0.32",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, row Conditional=yes, Guidance=yes, Scale 10.0",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-uncond",
+  "claim": "Unconditional ADM on ImageNet 256: FID unguided vs classifier scale 1.0 vs 10.0",
+  "value": "26.21 vs 33.03 vs 12.00",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4, rows Conditional=no",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-tradeoff-statement",
+  "claim": "Scaling classifier gradients beyond 1.0 smoothly trades recall for higher precision and IS; FID and sFID are best at an intermediate scale",
+  "value": "qualitative (Figure 4 sweep, ImageNet 128)",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Sec 4.3 last paragraph; Figure 4",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-guidance-scales-used",
+  "claim": "Classifier gradient scale used for reported results, ImageNet 64/128/256/512",
+  "value": "250 steps: 1.0 / 0.5 / 1.0 / 4.0; 25 DDIM steps: - / 1.25 / 2.5 / 9.0",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 14",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-arch-final",
+  "claim": "Final ADM architecture: attention at 32, 16 and 8 resolutions, 64 channels per head, 2 residual blocks per resolution, BigGAN residual blocks for up/downsampling, adaptive group normalization",
+  "value": "attn 32,16,8; 64 ch/head; BigGAN up/down; AdaGN",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Sec 3.1 last paragraph (Table 11 exceptions: IN64 depth 3; IN128 uses 4 heads)",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-arch-ablation",
+  "claim": "FID change vs baseline (15.33 at 700K iters, ImageNet 128) from all architecture changes combined (160 ch, depth 2, 4 heads, attn 32,16,8, BigGAN up/down)",
+  "value": "-3.14 at 700K, -3.00 at 1200K",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 1, last row",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-adagn",
+  "claim": "FID with AdaGN vs Addition + GroupNorm (DDPM style) for injecting timestep/class embeddings",
+  "value": "13.06 vs 15.08",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-vs-iddpm-in64",
+  "claim": "ImageNet 64 FID: IDDPM (class-conditional) vs ADM vs ADM (dropout), without guidance",
+  "value": "2.92 vs 2.61 vs 2.07",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, ImageNet 64x64 block",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-lsun-bedroom",
+  "claim": "LSUN Bedrooms 256 FID, ADM (dropout) vs StyleGAN",
+  "value": "1.90 vs 2.35",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5, LSUN Bedrooms block",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-sampling-steps",
+  "claim": "ImageNet diffusion models sampled with 250 steps, or 25 steps with DDIM; DDIM used whenever fewer than 50 steps",
+  "value": "250 / 25 (DDIM)",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 5 caption; Sec 2.1 last paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "beat-gans-model-size-in256",
+  "claim": "ImageNet 256 diffusion model size and training iterations (batch 256)",
+  "value": "554M params, 1980K iterations",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 11, ImageNet 256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-guided-eps-formula",
+  "claim": "Classifier-free guided noise prediction: tilde eps(z, c) = (1+w) eps(z, c) - w eps(z)",
+  "value": "(1+w)eps(z,c) - w eps(z)",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Eq. 6, Sec 3.2; Algorithm 2",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-label-dropout",
+  "claim": "Conditional and unconditional models are one network trained jointly by replacing the label with a null token with probability p_uncond",
+  "value": "c <- null w.p. p_uncond",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Algorithm 1; Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-puncond-values",
+  "claim": "p_uncond values tried on ImageNet 64x64 (400K training steps each)",
+  "value": "0.1, 0.2, 0.5",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.2; Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-puncond-finding",
+  "claim": "p_uncond = 0.5 is consistently worse across the IS/FID frontier; 0.1 and 0.2 perform about equally",
+  "value": "0.1 ~ 0.2 > 0.5",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.2; Figure 4",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-implicit-classifier",
+  "claim": "Guidance is inspired by an implicit classifier p^i(c|z) proportional to p(z|c)/p(z), whose gradient for exact scores is -(1/sigma)[eps*(z,c) - eps*(z)]",
+  "value": "grad log p^i = -(1/sigma)(eps*(z,c) - eps*(z))",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 3.2, second paragraph after Eq. 6",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-best-fid",
+  "claim": "Best ImageNet 64x64 FID with classifier-free guidance (w=0.1, p_uncond=0.1), IS at that point",
+  "value": "FID 1.55, IS 66.11",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=0.1, p_uncond=0.1 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-unguided",
+  "claim": "ImageNet 64x64 unguided (w=0) FID / IS for p_uncond = 0.1 / 0.2 / 0.5",
+  "value": "FID 1.8 / 1.8 / 2.21; IS 53.71 / 52.9 / 47.61",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=0.0",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-w1",
+  "claim": "ImageNet 64x64 at w=1.0, p_uncond=0.1: FID / IS",
+  "value": "12.6 / 170.1",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=1.0, p_uncond=0.1 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in64-w4",
+  "claim": "ImageNet 64x64 at w=4.0, p_uncond=0.1: FID / IS (max IS in table)",
+  "value": "26.22 / 260.2",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 1, row w=4.0, p_uncond=0.1 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-best-fid",
+  "claim": "Best ImageNet 128x128 FID (w=0.3, T=256 and T=1024) vs classifier-guided ADM-G",
+  "value": "2.43 vs 2.97",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, row w=0.3; row ADM-G",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-unguided",
+  "claim": "ImageNet 128x128 unguided (w=0) FID / IS at T=256",
+  "value": "7.27 / 82.45",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, row w=0.0, T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-w4-vs-biggan",
+  "claim": "ImageNet 128x128 at w=4.0, T=128 vs BigGAN-deep at max-IS truncation: FID / IS",
+  "value": "21.55 / 422.29 vs 25 / 253",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, row w=4.0 T=128 column; row BigGAN-deep, max IS",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-w-sweep",
+  "claim": "ImageNet 128x128, T=256: FID as w goes 0 / 0.3 / 1.0 / 2.0 / 4.0 (FID falls then rises)",
+  "value": "7.27 / 2.43 / 7.86 / 15.93 / 21.53",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-in128-is-sweep",
+  "claim": "ImageNet 128x128, T=256: IS as w goes 0 / 0.3 / 1.0 / 2.0 / 4.0 (monotone increase)",
+  "value": "82.45 / 158.47 / 297.98 / 377.37 / 421.03",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-tradeoff",
+  "claim": "Best FID at small guidance (w=0.1 or 0.3 depending on dataset), best IS at strong guidance (w>=4), clear trade-off in between; more guidance means less variety and higher per-sample fidelity",
+  "value": "qualitative",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-two-passes",
+  "claim": "Each sampling step needs two network evaluations (conditional and unconditional); at matched cost (T=128) CFG FID underperforms ADM-G",
+  "value": "T=128 best FID 3.02 (w=0.4); 3.04 at w=0.3; vs ADM-G 2.97",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.3; Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-training-setup",
+  "claim": "Training steps and sampler variance coefficient v: 64x64 vs 128x128 models; log-SNR endpoints",
+  "value": "400K steps, v=0.3 (64); 2.7M steps, v=0.2 (128); lambda in [-20, 20]",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-w-range",
+  "claim": "Guidance strengths evaluated, FID/IS with 50000 samples each",
+  "value": "w in {0, 0.1, 0.2, ..., 4}",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "cfg-fig5-legend-typo",
+  "claim": "Figure 5 legend lists T=512 while Table 2 and Sec 4.3 use T=1024",
+  "value": "legend T=512 vs text T=1024",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Figure 5 vs Table 2, Sec 4.3",
+  "uncertain": true
+ },
+ {
+  "id": "consistency-T-eps",
+  "claim": "Time horizon follows EDM: T and stopping time epsilon",
+  "value": "T=80, epsilon=0.002",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Sec. 2, last paragraph before 'Diffusion models are bottlenecked'",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-boundary",
+  "claim": "Boundary condition: f(x_epsilon, epsilon) = x_epsilon, enforced by c_skip(epsilon)=1 and c_out(epsilon)=0",
+  "value": "identity at t=epsilon",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Sec. 3 Parameterization, Eq. 5",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-sigma-data",
+  "claim": "sigma_data in the c_skip/c_out parametrization",
+  "value": "0.5",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Appendix C, Parameterization for Consistency Models",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cd-best-config",
+  "claim": "Best CD configuration on CIFAR-10",
+  "value": "LPIPS metric, Heun solver, N=18",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Sec. 6.1; Fig. 3 caption",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cd-N-imagenet",
+  "claim": "CD discretization steps N on ImageNet-64 and LSUN 256",
+  "value": "40",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 3, row N",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cd-mu-cifar",
+  "claim": "CD target-network EMA rate mu on CIFAR-10 (i.e. no EMA target on the headline run) vs ImageNet-64/LSUN",
+  "value": "0 (CIFAR-10); 0.95 (ImageNet-64, LSUN)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 3, row mu",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-ct-schedule",
+  "claim": "CT discretization schedule grows N from s0 to s1",
+  "value": "s0=2; s1=150 (CIFAR-10, LSUN), 200 (ImageNet-64); mu0=0.9 (CIFAR-10), 0.95 (others)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 3; Appendix C schedule functions",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cifar-cd-1step",
+  "claim": "CIFAR-10 one-step FID with consistency distillation",
+  "value": "3.55 (IS 9.48)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row CD, NFE 1",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cifar-cd-2step",
+  "claim": "CIFAR-10 two-step FID with consistency distillation",
+  "value": "2.93 (IS 9.75)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row CD, NFE 2",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cifar-pd",
+  "claim": "CIFAR-10 progressive distillation FID at 1 and 2 steps (l2 metric, same EDM teacher)",
+  "value": "8.34 (1 step), 5.58 (2 steps)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, rows PD, NFE 1 and 2",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cifar-edm-teacher",
+  "claim": "EDM teacher FID on CIFAR-10 as reported in the CM paper",
+  "value": "2.04 at 35 NFE",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row EDM",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-imagenet-cd",
+  "claim": "ImageNet 64x64 FID with consistency distillation at 1 and 2 steps",
+  "value": "6.20 (1 step), 4.70 (2 steps)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2, ImageNet 64x64, rows CD",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-imagenet-pd",
+  "claim": "ImageNet 64x64 progressive distillation FID at 1 and 2 steps",
+  "value": "15.39 (1 step), 8.95 (2 steps)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2, ImageNet 64x64, rows PD",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-imagenet-edm-teacher",
+  "claim": "EDM teacher FID on ImageNet 64x64 as reported in the CM paper",
+  "value": "2.44 at 79 NFE",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2, ImageNet 64x64, row EDM",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-bedroom-cd",
+  "claim": "LSUN Bedroom 256 FID: CD vs PD at 1 and 2 steps",
+  "value": "CD 7.80 / 5.22; PD 16.92 / 8.47",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2, LSUN Bedroom 256x256",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cifar-ct",
+  "claim": "CIFAR-10 FID with consistency training (no pre-trained diffusion model) at 1 and 2 steps",
+  "value": "8.70 (1 step), 5.83 (2 steps)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, rows CT; appendix figure caption says 8.73 for 1 step",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-imagenet-ct",
+  "claim": "ImageNet 64x64 FID with consistency training at 1 and 2 steps",
+  "value": "13.0 (1 step), 11.1 (2 steps)",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2, ImageNet 64x64, rows CT; appendix figure captions say 12.96 / 11.12",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-cd-beats-pd",
+  "claim": "CD outperforms PD across all datasets, sampling steps and metric functions, except single-step LSUN Bedroom where CD with l2 slightly underperforms PD with l2",
+  "value": "qualitative",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Sec. 6.2 Distillation; Fig. 4",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-zero-shot",
+  "claim": "Zero-shot editing tasks shown with a CD model on LSUN Bedroom 256 without task-specific training",
+  "value": "colorization, super-resolution (32x32 to 256x256), stroke-guided SDEdit, inpainting, interpolation, denoising",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Sec. 6.3; Fig. 6; Appendix D, Algorithm 4",
+  "uncertain": false
+ },
+ {
+  "id": "consistency-sampling-cost",
+  "claim": "Diffusion iterative sampling typically needs this much more compute than single-step generators",
+  "value": "10-2000 times",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Sec. 1, paragraph 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-ddpm-sampling-cost",
+  "claim": "Sampling 50k 32x32 images from a DDPM takes about 20 hours vs under a minute for a GAN on an Nvidia 2080 Ti; 50k 256x256 images take nearly 1000 hours",
+  "value": "~20 h (32x32), ~1000 h (256x256)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 1, paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-loss-depends-on-marginals",
+  "claim": "The DDPM objective L_gamma depends only on the marginals q(x_t|x_0), not on the joint forward process, so non-Markovian forward processes with the same marginals share it",
+  "value": "key observation",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 3, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-theorem1-same-objective",
+  "claim": "For all sigma > 0 the non-Markovian variational objective equals a reweighted DDPM objective up to a constant",
+  "value": "J_sigma = L_gamma + C",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 3.2, Theorem 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-alpha-is-alphabar",
+  "claim": "DDIM's alpha_t denotes DDPM's cumulative alpha-bar_t",
+  "value": "alpha_t (DDIM) = alpha-bar_t (Ho et al.)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "App. C.2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-update-three-terms",
+  "claim": "Generalized sampling step = sqrt(alpha_{t-1}) * predicted x0 + sqrt(1 - alpha_{t-1} - sigma_t^2) * eps_theta + sigma_t * noise",
+  "value": "Eq. 12",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 4.1, Eq. 12",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-eta-interpolates",
+  "claim": "sigma_tau_i(eta) = eta * sqrt((1-alpha_{tau_{i-1}})/(1-alpha_{tau_i})) * sqrt(1 - alpha_{tau_i}/alpha_{tau_{i-1}}); eta = 1 is DDPM, eta = 0 is DDIM",
+  "value": "eta in [0, inf); 0 = deterministic",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5, Eq. 16",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-no-retraining",
+  "claim": "All experiments reuse the same trained model with T = 1000 and gamma = 1; only the sampler (tau, sigma) changes",
+  "value": "T = 1000",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5, paragraph 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-tau-selection",
+  "claim": "Sub-sequence tau chosen quadratic (floor(c i^2)) for CIFAR-10 and linear (floor(c i)) for other datasets",
+  "value": "quadratic CIFAR-10, linear otherwise",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "App. D.2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-cifar10-fid-steps",
+  "claim": "CIFAR-10 FID of DDIM (eta=0) at S = 10, 20, 50, 100, 1000",
+  "value": "13.36, 6.84, 4.67, 4.16, 4.04",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, row eta=0.0, CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-cifar10-ddpm-fid-steps",
+  "claim": "CIFAR-10 FID of DDPM (eta=1) at S = 10, 20, 50, 100, 1000",
+  "value": "41.07, 18.36, 8.01, 5.78, 4.73",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, row eta=1.0, CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-cifar10-sigmahat-fid-steps",
+  "claim": "CIFAR-10 FID of DDPM with larger variance sigma-hat (Ho et al. CIFAR-10 setting) at S = 10, 20, 50, 100, 1000",
+  "value": "367.43, 133.37, 32.72, 9.99, 3.17",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, row sigma-hat, CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-celeba-fid-steps",
+  "claim": "CelebA 64x64 FID of DDIM (eta=0) vs DDPM (eta=1) at S = 10, 20, 50, 100, 1000",
+  "value": "DDIM 17.33, 13.73, 9.17, 6.53, 3.51; DDPM 33.12, 26.03, 18.48, 13.93, 5.98",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, rows eta=0.0 and eta=1.0, CelebA",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-speedup-abstract",
+  "claim": "DDIMs produce high quality samples faster than DDPMs in wall-clock time",
+  "value": "10x to 50x",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-speedup-sec51",
+  "claim": "Quality comparable to 1000-step models within 20 to 100 steps",
+  "value": "10x to 50x speedup",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5.1, paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-speedup-sec5-intro",
+  "claim": "DDIMs outperform DDPMs when fewer iterations are used, with speedups over the original DDPM process (also stated in Sec. 1)",
+  "value": "10x to 100x",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5, first sentence; Sec. 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-lsun-50-step",
+  "claim": "LSUN 256x256 FID at 50 steps DDIM vs 1000-step DDPM",
+  "value": "Bedroom 6.75 vs 6.36; Church 10.84 vs 7.89",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 3 (App. D.1), caption and row DDIM",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-consistency",
+  "claim": "With a fixed x_T, samples from different trajectory lengths share high-level features; 20-step samples are often very similar to 1000-step ones",
+  "value": "qualitative",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 5.2, Figure 5",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-reconstruction-error",
+  "claim": "CIFAR-10 test encode/decode per-dimension MSE with S steps each way",
+  "value": "0.014 (S=10), 0.0065 (20), 0.0023 (50), 0.0009 (100), 0.0001 (1000)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-ode-ve-equivalence",
+  "claim": "The DDIM ODE with the optimal model is equivalent to the probability flow ODE of the Variance-Exploding SDE of Song et al. 2020; Euler steps differ (d sigma vs d t)",
+  "value": "Proposition 1",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 4.3, Eq. 14, Proposition 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddim-code",
+  "claim": "Official code repository",
+  "value": "github.com/ermongroup/ddim (not stated in the LaTeX source)",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "not in source",
+  "uncertain": true
+ },
+ {
+  "id": "ddpm-venue",
+  "claim": "DDPM was published at NeurIPS 2020 (camera-ready neurips_2020 style)",
+  "value": "NeurIPS 2020",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "main.tex line 15, \\usepackage[final]{neurips_2020}",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-T",
+  "claim": "Number of diffusion steps used for all experiments",
+  "value": "T = 1000",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4 (Experiments), first paragraph; App. B",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-beta-schedule",
+  "claim": "Forward variances increase linearly from beta_1 to beta_T",
+  "value": "beta_1 = 1e-4, beta_T = 0.02, linear",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4, first paragraph; App. B bullet 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-LT-bits",
+  "claim": "Prior-matching term L_T with this schedule (signal essentially destroyed at x_T)",
+  "value": "approx 1e-5 bits/dim",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-cifar-fid",
+  "claim": "Unconditional CIFAR-10 FID of the L_simple model (computed vs training set)",
+  "value": "3.17",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L_simple)'",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-cifar-fid-test",
+  "claim": "Same model's FID computed against the CIFAR-10 test set",
+  "value": "5.24",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4.1, paragraph after Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-cifar-is",
+  "claim": "Unconditional CIFAR-10 Inception Score of the L_simple model",
+  "value": "9.46 +/- 0.11",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L_simple)'",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-cifar-nll",
+  "claim": "CIFAR-10 NLL bound of the L_simple model, test (train), bits/dim",
+  "value": "<= 3.75 (3.72)",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L_simple)'",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-cifar-true-bound",
+  "claim": "Model trained on the true variational bound L with fixed isotropic Sigma: IS / FID / NLL test (train)",
+  "value": "IS 7.67 +/- 0.13, FID 13.51, NLL <= 3.70 (3.69)",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L, fixed isotropic Sigma)'",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-ablation-mu-vs-eps",
+  "claim": "Ablation FIDs: mu-prediction with L learned Sigma 23.69, mu with L fixed Sigma 13.22, mu with unweighted MSE unstable; eps with L learned Sigma unstable, eps with L fixed Sigma 13.51, eps with L_simple 3.17",
+  "value": "23.69 / 13.22 / -- / -- / 13.51 / 3.17",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-baseline-fids",
+  "claim": "Comparison FIDs on unconditional CIFAR-10 in the same table: NCSN 25.32, NCSNv2 31.75, SNGAN 21.7, StyleGAN2+ADA 3.26; conditional BigGAN 14.73",
+  "value": "25.32 / 31.75 / 21.7 / 3.26 / 14.73",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-sohl-cited-nll",
+  "claim": "DDPM's Table 1 lists the original diffusion model (Sohl-Dickstein 2015) on CIFAR-10 as NLL <= 5.40 bits/dim; the original paper reports 5.4 as a lower bound K on log-likelihood of variance-1-scaled dequantized data, so the conversion is not shown",
+  "value": "<= 5.40",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Diffusion (original)'",
+  "uncertain": true
+ },
+ {
+  "id": "ddpm-lsun-fid",
+  "claim": "LSUN 256x256 FIDs: Bedroom 6.36 (4.90 with the ~256M-param large model), Church 7.89, Cat 19.75",
+  "value": "6.36 / 4.90 / 7.89 / 19.75",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Appendix, Table 3 'FID scores for LSUN 256x256 datasets'",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-rate-distortion",
+  "claim": "Best-sample CIFAR-10 model: rate 1.78 bits/dim, distortion 1.97 bits/dim (RMSE 0.95 on 0-255); more than half the lossless codelength is imperceptible detail",
+  "value": "rate 1.78, distortion 1.97 bits/dim",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4.3 Progressive coding",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-params",
+  "claim": "Model sizes: CIFAR-10 35.7M parameters; LSUN and CelebA-HQ 114M; large LSUN Bedroom about 256M",
+  "value": "35.7M / 114M / ~256M",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "App. B Experimental details, paragraph 1",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-train-speed",
+  "claim": "CIFAR-10 model trains at 21 steps/s at batch 128 on TPU v3-8, 800k steps in 10.6 hours",
+  "value": "21 steps/s; 800k steps; 10.6 h",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "App. B Experimental details, paragraph 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-sample-speed",
+  "claim": "Sampling time on TPU v3-8: batch of 256 CIFAR-10 images in 17 s; batch of 128 images at 256x256 in 300 s (1000 network evaluations each)",
+  "value": "17 s / 300 s",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "App. B Experimental details, paragraph 2",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-optim",
+  "claim": "Adam lr 2e-4 (2e-5 for 256x256), batch 128 (CIFAR) / 64, EMA decay 0.9999, CIFAR dropout 0.1",
+  "value": "lr 2e-4; EMA 0.9999; dropout 0.1",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "App. B bullet list",
+  "uncertain": false
+ },
+ {
+  "id": "ddpm-code",
+  "claim": "Official implementation repository",
+  "value": "https://github.com/hojonathanho/diffusion",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "dit-latent-shape",
+  "claim": "A 256x256x3 image is encoded by the Stable Diffusion VAE (downsample factor 8) to a latent of shape",
+  "value": "32x32x4",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 3.2 Patchify; Sec. 4 Diffusion paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-token-count",
+  "claim": "Patchify with patch size p on an I x I x C latent gives token count T",
+  "value": "T = (I/p)^2",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Fig. 4 caption",
+  "uncertain": false
+ },
+ {
+  "id": "dit-patch-sizes",
+  "claim": "Patch sizes in the design space",
+  "value": "p = 2, 4, 8",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 3.2 Patchify",
+  "uncertain": false
+ },
+ {
+  "id": "dit-configs",
+  "claim": "Model configs (layers / hidden size / heads / Gflops at I=32, p=4)",
+  "value": "S 12/384/6/1.4; B 12/768/12/5.6; L 24/1024/16/19.7; XL 28/1152/16/29.1",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "dit-xl2-gflops-params",
+  "claim": "DiT-XL/2 at 256x256 forward-pass Gflops and parameters (excluding 84M-param VAE)",
+  "value": "118.64 Gflops, 675M params",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4, row DiT-XL/2 256x256 adaLN-Zero",
+  "uncertain": false
+ },
+ {
+  "id": "dit-block-ablation",
+  "claim": "DiT-XL/2 FID-50K at 400K steps by block design (no guidance)",
+  "value": "adaLN-Zero 19.47; adaLN 25.21; cross-attention 26.14; in-context 35.24",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4, DiT-XL/2 rows at 400K steps; Fig. 5",
+  "uncertain": false
+ },
+ {
+  "id": "dit-block-gflops",
+  "claim": "Gflops of DiT-XL/2 by block design",
+  "value": "in-context 119.4; cross-attention 137.6; adaLN 118.6; adaLN-Zero 118.6",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5, DiT block design paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-crossattn-overhead",
+  "claim": "Cross-attention conditioning adds the most Gflops",
+  "value": "roughly 15% overhead",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 3.2, Cross-attention block bullet",
+  "uncertain": false
+ },
+ {
+  "id": "dit-gflops-not-params",
+  "claim": "Similar Gflops give similar FID despite 4x different params: DiT-S/2 vs DiT-B/4 at 400K steps",
+  "value": "S/2: 6.06 Gflops, 33M, FID 68.40; B/4: 5.56 Gflops, 130M, FID 68.38",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4, rows DiT-S/2 and DiT-B/4; Sec. 5 Gflops paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-fid-256-cfg",
+  "claim": "ImageNet 256x256 class-conditional FID-50K, DiT-XL/2-G, cfg=1.50, 7M steps, 250 DDPM steps",
+  "value": "2.27",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 2, row DiT-XL/2-G (cfg=1.50)",
+  "uncertain": false
+ },
+ {
+  "id": "dit-fid-256-noguide",
+  "claim": "ImageNet 256x256 FID-50K, DiT-XL/2 without guidance",
+  "value": "9.62",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 2, row DiT-XL/2",
+  "uncertain": false
+ },
+ {
+  "id": "dit-prev-best-256",
+  "claim": "Previous best diffusion FID at 256x256 (LDM-4-G cfg=1.50) and previous best overall (StyleGAN-XL)",
+  "value": "3.60 and 2.30",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 2, rows LDM-4-G (cfg=1.50) and StyleGAN-XL",
+  "uncertain": false
+ },
+ {
+  "id": "dit-fid-512-cfg",
+  "claim": "ImageNet 512x512 FID-50K, DiT-XL/2-G cfg=1.50, 3M steps (previous best ADM-G, ADM-U 3.85)",
+  "value": "3.04",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 3, row DiT-XL/2-G (cfg=1.50)",
+  "uncertain": false
+ },
+ {
+  "id": "dit-512-tokens-gflops",
+  "claim": "DiT-XL/2 at 512x512 processes 1024 tokens from a 64x64x4 latent",
+  "value": "1024 tokens, 524.6 Gflops",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5.1, 512x512 ImageNet paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-baseline-gflops",
+  "claim": "U-Net baseline Gflops at 256x256 (DDPM part only)",
+  "value": "ADM 1120; ADM-U 742; LDM-4 104; LDM-8 57",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "dit-baseline-gflops-512",
+  "claim": "U-Net baseline Gflops at 512x512",
+  "value": "ADM 1983; ADM-U 2813 (vs DiT-XL/2 524.6)",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 6; Sec. 5.1",
+  "uncertain": false
+ },
+ {
+  "id": "dit-sampling-vs-model-compute",
+  "claim": "More sampling steps cannot replace model compute: L/2 at 1000 steps vs XL/2 at 128 steps",
+  "value": "L/2 80.7 Tflops/image FID-10K 25.9; XL/2 15.2 Tflops/image FID-10K 23.7",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5.2; Fig. 10",
+  "uncertain": false
+ },
+ {
+  "id": "dit-2p35m-steps",
+  "claim": "DiT-XL/2 FID after only 2.35M training steps (similar to ADM); guidance setting not stated in the sentence, implied guided since the no-guidance FID at 2352K steps is 10.67 (Table 4)",
+  "value": "2.55",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 5.1, 256x256 ImageNet paragraph",
+  "uncertain": true
+ },
+ {
+  "id": "dit-training-recipe",
+  "claim": "Training recipe used for all DiTs",
+  "value": "AdamW, constant lr 1e-4, no weight decay, batch 256, EMA 0.9999, flips only, no warmup",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Sec. 4, Training paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "dit-cfg-three-channels",
+  "claim": "Guidance applied to only the first 3 of 4 latent channels; 4-channel guidance at scale 1.375 gives a similar FID",
+  "value": "3-channel s=1.5: 2.27; 4-channel s=1.375: 2.20",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Appendix A, Classifier-free guidance on a subset of channels",
+  "uncertain": false
+ },
+ {
+  "id": "edm-sigma-min",
+  "claim": "EDM minimum noise level sigma_min",
+  "value": "0.002",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 1, Parameters row, Ours (EDM) column",
+  "uncertain": false
+ },
+ {
+  "id": "edm-sigma-max",
+  "claim": "EDM maximum noise level sigma_max",
+  "value": "80",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 1, Parameters row, Ours (EDM) column",
+  "uncertain": false
+ },
+ {
+  "id": "edm-sigma-data",
+  "claim": "Assumed data standard deviation sigma_data used in preconditioning",
+  "value": "0.5",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 1, Parameters row, Ours (EDM) column",
+  "uncertain": false
+ },
+ {
+  "id": "edm-rho",
+  "claim": "Time-step discretization exponent rho",
+  "value": "7",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3, Eq. 5 and text; Table 1 Parameters row",
+  "uncertain": false
+ },
+ {
+  "id": "edm-rho-3-equalizes",
+  "claim": "rho=3 nearly equalizes per-step truncation error, but rho in 5-10 gives better images",
+  "value": "rho=3 vs 5-10",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3, paragraph after Eq. 5",
+  "uncertain": false
+ },
+ {
+  "id": "edm-pmean-pstd",
+  "claim": "Training noise distribution ln(sigma) ~ N(P_mean, P_std^2)",
+  "value": "P_mean=-1.2, P_std=1.2",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 1, Noise distribution and Parameters rows, Ours (EDM) column",
+  "uncertain": false
+ },
+ {
+  "id": "edm-nfe-heun",
+  "claim": "Heun sampler with N steps costs 2N-1 network evaluations because the last step (to sigma=0) is plain Euler; 35 NFE = 18 steps, 79 NFE = 40 steps",
+  "value": "NFE = 2N-1",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Algorithm 1 (derived from its structure; N=18 not stated in EDM itself, corroborated by CM Table 3)",
+  "uncertain": false
+ },
+ {
+  "id": "edm-cifar10-cond-fid",
+  "claim": "Class-conditional CIFAR-10 FID, deterministic sampler, config F (VP and VE both)",
+  "value": "1.79 at 35 NFE",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 2, config F, CIFAR-10 Conditional VP/VE; NFE row",
+  "uncertain": false
+ },
+ {
+  "id": "edm-cifar10-uncond-fid",
+  "claim": "Unconditional CIFAR-10 FID, deterministic sampler, config F (VP)",
+  "value": "1.97 at 35 NFE (VE: 1.98)",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 2, config F, CIFAR-10 Unconditional VP/VE; NFE row",
+  "uncertain": false
+ },
+ {
+  "id": "edm-prev-cifar-records",
+  "claim": "Previous CIFAR-10 records beaten (conditional, unconditional)",
+  "value": "1.85 (StyleGAN-XL), 2.10 (LSGM)",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 5, Augmentation regularization paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "edm-imagenet64-retrained-fid",
+  "claim": "Retrained class-conditional ImageNet-64 FID (ADM architecture, config E, stochastic sampling), previous record 1.48",
+  "value": "1.36 at 511 NFE",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 5, ImageNet-64 paragraph; NFE from supplemental figure label (supplemental-figures.tex line 274)",
+  "uncertain": false
+ },
+ {
+  "id": "edm-imagenet64-sampler-only-stoch",
+  "claim": "Pre-trained ADM ImageNet-64 improved by sampler alone (stochastic, optimal settings)",
+  "value": "2.07 -> 1.55 at 511 NFE",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 4 Evaluation text; Table 4, row Optimal settings, ImageNet-64",
+  "uncertain": false
+ },
+ {
+  "id": "edm-imagenet64-sampler-only-det",
+  "claim": "Pre-trained ADM ImageNet-64 with deterministic Heun + EDM time steps",
+  "value": "FID 2.64 at 79 NFE (original sampler 2.85 at 250 NFE)",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 3, row + Heun & our t_i, ImageNet-64",
+  "uncertain": false
+ },
+ {
+  "id": "edm-vp-sampler-nfe",
+  "claim": "Pre-trained VP CIFAR-10 model with full EDM deterministic sampler (Heun, t_i, sigma(t)=t, s(t)=1)",
+  "value": "FID 2.93 at 35 NFE (original 2.85 at 256 NFE)",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 3, row + Our sigma(t) & s(t), VP",
+  "uncertain": false
+ },
+ {
+  "id": "edm-ve-sampler-nfe",
+  "claim": "Pre-trained VE CIFAR-10 model with full EDM deterministic sampler",
+  "value": "FID 3.73 at 27 NFE (original 5.45 at 8192 NFE)",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 3, row + Our sigma(t) & s(t), VE",
+  "uncertain": false
+ },
+ {
+  "id": "edm-nfe-reduction",
+  "claim": "NFE reduction factors from deterministic sampler improvements",
+  "value": "7.3x VP, 300x VE, 3.2x DDIM",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3, Discussion paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "edm-throughput",
+  "claim": "High-quality CIFAR-10 images generated per second on a single NVIDIA V100",
+  "value": "26.3",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3, Discussion paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "edm-heun-local-error",
+  "claim": "Euler has O(h^2) local error; Heun correction gives O(h^3) at one extra D evaluation per step",
+  "value": "O(h^2) vs O(h^3)",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3, Discretization and higher-order integrators",
+  "uncertain": false
+ },
+ {
+  "id": "edm-stochastic-hurts-cifar",
+  "claim": "With EDM-trained CIFAR-10 models, deterministic sampling was best and any stochasticity was detrimental; ImageNet-64 still benefited",
+  "value": "qualitative",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 5, Stochastic sampling revisited and ImageNet-64 paragraphs; Fig. 5b,c",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-fm-objective",
+  "claim": "Flow Matching regresses the network vector field onto the vector field that generates a target probability path",
+  "value": "L_FM(theta) = E_{t,p_t(x)} ||v_t(x) - u_t(x)||^2",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (5), Sec 3",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-marginal-vf-theorem",
+  "claim": "The posterior-weighted average of conditional vector fields generates the marginal probability path",
+  "value": "Theorem 1 (marginal VF of Eq. 8 generates marginal path of Eq. 6)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Theorem 1, Sec 3.1",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-cfm-objective",
+  "claim": "Conditional Flow Matching uses per-sample paths and vector fields, so unbiased estimates are cheap",
+  "value": "L_CFM(theta) = E_{t,q(x_1),p_t(x|x_1)} ||v_t(x) - u_t(x|x_1)||^2",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (9), Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-equal-gradients",
+  "claim": "CFM and FM losses are equal up to a theta-independent constant, so their gradients are identical",
+  "value": "grad_theta L_FM = grad_theta L_CFM (assuming p_t(x) > 0)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Theorem 2, Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-gaussian-path",
+  "claim": "Conditional probability paths are Gaussians with time-dependent mean and scalar std, from N(0,I) at t=0 to N(x_1, sigma_min^2 I) at t=1",
+  "value": "p_t(x|x_1) = N(x | mu_t(x_1), sigma_t(x_1)^2 I); mu_0=0, sigma_0=1, mu_1=x_1, sigma_1=sigma_min",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (10), Sec 4",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-conditional-vf",
+  "claim": "The unique vector field of the affine Gaussian flow psi_t(x) = sigma_t x + mu_t has closed form",
+  "value": "u_t(x|x_1) = sigma_t'(x_1)/sigma_t(x_1) (x - mu_t(x_1)) + mu_t'(x_1)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Theorem 3, Eq. (15), Sec 4",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-diffusion-special-case",
+  "claim": "VE and VP diffusion paths are special cases; the resulting VP conditional field coincides with the probability flow ODE field",
+  "value": "VP: mu_t = alpha_{1-t} x_1, sigma_t = sqrt(1 - alpha_{1-t}^2)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 4.1 Example I, Eq. (16)-(19); Appendix D",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-ot-path",
+  "claim": "The optimal transport conditional path moves mean and std linearly in time, giving straight constant-speed trajectories",
+  "value": "mu_t = t x_1, sigma_t = 1 - (1 - sigma_min) t; u_t(x|x_1) = (x_1 - (1 - sigma_min) x) / (1 - (1 - sigma_min) t)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 4.1 Example II, Eq. (20)-(21)",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-ot-cfm-loss",
+  "claim": "With the OT path the CFM regression target is constant in time",
+  "value": "target x_1 - (1 - sigma_min) x_0 at point psi_t(x_0) = (1 - (1 - sigma_min) t) x_0 + t x_1",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Eq. (22)-(23), Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-sigma-min-value",
+  "claim": "Numeric value of sigma_min used in experiments",
+  "value": "not stated in v2 (only 'set sufficiently small')",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 4 (definition); absent from Appendix E",
+  "uncertain": true
+ },
+ {
+  "id": "flow-matching-imagenet32-ot-vs-diffusion",
+  "claim": "ImageNet 32x32: OT path beats diffusion path under Flow Matching and all diffusion baselines",
+  "value": "FM-OT NLL 3.53, FID 5.02, NFE 122; FM-Diffusion 3.54, 6.37, 193; Score Matching 3.56, 5.68, 178",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 32x32 columns",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-imagenet64-ot-vs-diffusion",
+  "claim": "ImageNet 64x64: OT path best on NLL, FID and NFE",
+  "value": "FM-OT NLL 3.31, FID 14.45, NFE 138; FM-Diffusion 3.33, 16.88, 187; DDPM 3.32, 17.36, 264",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 64x64 columns",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-cifar10",
+  "claim": "CIFAR-10 with a non-CIFAR-tuned architecture",
+  "value": "FM-OT NLL 2.99, FID 6.35, NFE 142; DDPM 3.12, 7.48, 274",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, CIFAR-10 columns; Sec 6.1",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-imagenet128",
+  "claim": "Unconditional ImageNet 128x128 FID, best among the compared GANs (IC-GAN excluded)",
+  "value": "NLL 2.90, FID 20.9 (vs PGMGAN 21.7)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 right",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-imagenet128-training-budget",
+  "claim": "FM on ImageNet-128 used far fewer iterations than guided-diffusion",
+  "value": "500k iterations at batch 1.5k vs 4.36m at batch 256 (33% less image throughput)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 6.1 Faster training; Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-low-nfe-60pct",
+  "claim": "FM-OT reaches the same ODE numerical error with fewer function evaluations than diffusion models",
+  "value": "roughly 60% of the NFEs (midpoint solver, ImageNet-32)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 6.2 Low-cost samples; Figure 7 left",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-super-resolution",
+  "claim": "64 to 256 super-resolution on ImageNet validation beats SR3 on FID and IS",
+  "value": "FID 3.4, IS 200.8 (SR3 5.2, 180.1)",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 2, Sec 6.3",
+  "uncertain": false
+ },
+ {
+  "id": "flow-matching-eval-solver",
+  "claim": "Likelihood and samples evaluated with an adaptive solver",
+  "value": "dopri5, atol = rtol = 1e-5",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Sec 6 intro; Appendix E.2",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-venue",
+  "claim": "Improved DDPM was published at ICML 2021",
+  "value": "ICML 2021",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "main.tex line 37, \\usepackage[accepted]{icml2021}",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-T",
+  "claim": "Diffusion steps used for training in the main experiments (raised from DDPM's 1000)",
+  "value": "T = 4000",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3, paragraph 3; Sec. 4, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-cosine-s",
+  "claim": "Cosine schedule offset s, chosen so sqrt(beta_0) is slightly below pixel bin size 1/127.5; beta_t clipped at 0.999",
+  "value": "s = 0.008; clip 0.999",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3.2, Eq. 17 and following paragraphs",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-lambda",
+  "claim": "Weight on L_vlb in L_hybrid = L_simple + lambda L_vlb (with stop-gradient on mu for the L_vlb term)",
+  "value": "lambda = 0.001",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3.1, Eq. 16",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-linear-T4000",
+  "claim": "Linear baseline schedule rescaled for T=4000",
+  "value": "beta_1 = 0.0001/4 to beta_4000 = 0.02/4",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "App. A, last paragraph before FID notes",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-imagenet-baseline",
+  "claim": "ImageNet 64x64, 200K iters: DDPM setup (T=1K, linear, L_simple) NLL / FID; raising T to 4K",
+  "value": "3.99 / 32.5 -> 3.77 / 31.3",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 1, rows 1-2",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-imagenet-hybrid",
+  "claim": "ImageNet 64x64, cosine + L_hybrid, T=4K: NLL / FID at 200K and at 1.5M iterations (FID from 10K samples)",
+  "value": "3.62 / 28.0 (200K); 3.57 / 19.2 (1.5M)",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 1, rows 'cosine L_hybrid'",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-imagenet-vlb",
+  "claim": "ImageNet 64x64, cosine + importance-sampled L_vlb, T=4K: NLL / FID at 200K and 1.5M iterations",
+  "value": "3.57 / 56.7 (200K); 3.53 / 40.1 (1.5M)",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 1, rows 'cosine L_vlb'",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-cifar-ablation",
+  "claim": "CIFAR-10, 500K iters, NLL / FID: T=1K linear L_simple 3.73 / 3.29; T=4K linear L_simple 3.37 / 2.90; cosine L_hybrid 3.17 / 3.19; cosine L_vlb 2.94 / 11.47",
+  "value": "3.73/3.29; 3.37/2.90; 3.17/3.19; 2.94/11.47",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-best-nll",
+  "claim": "Best NLL in bits/dim: ImageNet 64x64 and CIFAR-10 (vs DDPM 3.77 / 3.70 as cited, Sparse Transformer 3.44 / 2.80)",
+  "value": "3.53 (ImageNet 64), 2.94 (CIFAR-10)",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 3, row 'Improved DDPM (ours)'",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-ensemble",
+  "claim": "Ensemble using theta_hybrid for t in [100, T-100) and theta_vlb elsewhere, ImageNet 64x64",
+  "value": "FID 19.9, NLL 3.52 bits/dim",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "App. D Combining L_hybrid and L_vlb Models",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-few-steps-50",
+  "claim": "With learned variances (L_hybrid), good samples with as few as 50 forward passes, vs hundreds for DDPM",
+  "value": "50 steps",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 1, paragraph 4",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-few-steps-100",
+  "claim": "100 sampling steps suffice for near-optimal FID for fully trained L_hybrid models trained with 4000 steps; fixed-sigma L_simple models degrade much more",
+  "value": "100 steps",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 4, paragraph after Fig. 8 (fid_vs_steps)",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-ddim-crossover",
+  "claim": "DDIM gives better samples below 50 sampling steps; L_hybrid ancestral sampling is better at 50 or more (also on LSUN bedroom)",
+  "value": "crossover at ~50 steps",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 4, last paragraph; App. B",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-step-sweep",
+  "claim": "Sampling step counts evaluated in the FID-vs-steps sweep (exact FID per K only in figure PDFs, not verified)",
+  "value": "25, 50, 100, 200, 400, 1000, 4000",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 4, Fig. 8",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-vs-biggan",
+  "claim": "Class-conditional ImageNet 64x64 (50K samples, 250 steps) FID / precision / recall: BigGAN-deep 4.06/0.86/0.59; Improved Diffusion small 6.92/0.77/0.72; large 2.92/0.82/0.71",
+  "value": "2.92 FID, recall 0.71 vs BigGAN-deep 4.06, recall 0.59",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-imagenet256",
+  "claim": "Class-conditional ImageNet 256x256 FID: two-stage 12.3, single-stage 31.5, vs BigGAN-deep 7.0 and VQ-VAE-2 38.1",
+  "value": "12.3 (two-stage)",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "App. C, Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-fid-10k-bias",
+  "claim": "Unconditional ImageNet 64x64 FIDs use 10K samples (other FIDs 50K); 50K vs 10K lowers FID by roughly 2 points",
+  "value": "10K samples; ~2 FID bias",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "App. A last paragraph; Sec. 5 footnote",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-model-size",
+  "claim": "ImageNet 64x64 UNet with C=128: parameters and forward FLOPs",
+  "value": "120M params, ~39 GFLOPs",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "App. A, paragraph 2",
+  "uncertain": false
+ },
+ {
+  "id": "improved-ddpm-code",
+  "claim": "Official implementation repository",
+  "value": "https://github.com/openai/improved-diffusion",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-objective",
+  "claim": "LDM objective is the standard noise-prediction loss applied to noised latents z_t of E(x): L_LDM = E ||eps - eps_theta(z_t, t)||^2",
+  "value": "Eq. 2",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Eq. 2, Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-cross-attention",
+  "claim": "Conditioning via cross-attention: Q = W_Q varphi_i(z_t), K = W_K tau_theta(y), V = W_V tau_theta(y), Attention = softmax(QK^T / sqrt(d)) V",
+  "value": "unnumbered equation",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 3.3, unnumbered equation",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-autoencoder-losses",
+  "claim": "Stage-1 autoencoder trained with a perceptual loss plus a patch-based adversarial objective, regularized by either a small KL penalty (~1e-6 weight) or a vector-quantization layer",
+  "value": "LPIPS + patch GAN; KL-reg or VQ-reg",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 3.1; App. G, Eq. 25",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-f-values",
+  "claim": "Downsampling factors studied (LDM-1 = pixel-space DM)",
+  "value": "f in {1, 2, 4, 8, 16, 32}",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-f-sweet-spot",
+  "claim": "LDM-{1,2} train slowly, overly large f (LDM-32) stagnates; LDM-{4-16} strike a good balance; LDM-4 and LDM-8 offer the best conditions overall",
+  "value": "f = 4-16 (best 4 and 8)",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.1; Figures 6 and 7",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-fid-gap-38",
+  "claim": "FID gap between pixel-based LDM-1 and LDM-8 after 2M training steps on class-conditional ImageNet, same compute budget on one A100",
+  "value": "38",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.1; Figure 6",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-z-shapes",
+  "claim": "Latent shape for 256x256 inputs by downsampling factor f = 1/2/4/8/16/32",
+  "value": "256x256x3 / 128x128x2 / 64x64x3 / 32x32x4 / 16x16x8 / 8x8x32 (printed as 88x8x32)",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 13, row z-shape",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-no-512-64x64x4",
+  "claim": "A 64x64x4 latent for 512x512 images (Stable Diffusion config) is not stated in this paper; text-to-image model uses f=8, z 32x32x4 at 256x256",
+  "value": "not stated; 32x32x4 at 256",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 15, Text-to-Image column",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-recon-rfid-by-f",
+  "claim": "Autoencoder reconstruction R-FID on ImageNet-Val for VQ-reg first stages f=2/4/8/16/32 (|Z| = 2048/8192/16384/16384/16384)",
+  "value": "0.16 / 0.58 / 1.14 / 5.15 / 31.83",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-in256-cfg",
+  "claim": "Class-conditional ImageNet 256: LDM-4-G (CFG s=1.5) vs ADM-G: FID / IS / params",
+  "value": "3.60 / 247.67 / 400M vs 4.59 / 186.7 / 608M",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 3, rows LDM-4-G and ADM-G",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-in256-unguided",
+  "claim": "Class-conditional ImageNet 256 without guidance: LDM-4 vs ADM FID",
+  "value": "10.56 vs 10.94",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 3, rows LDM-4 and ADM",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-compute-v100days",
+  "claim": "Training compute in V100-days: LDM-4 (ImageNet) vs ADM vs ADM-G (incl. classifier); LDM-8",
+  "value": "271 vs 916 vs 962; LDM-8 79",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18, ImageNet 256 block",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-throughput",
+  "claim": "Sampling throughput (samples/sec on one A100): LDM-4-G vs ADM-G (250 steps)",
+  "value": "0.4 vs 0.07",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18, ImageNet 256 block",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-adm-cost-quote",
+  "claim": "Training the most powerful pixel DMs takes 150-1000 V100 days; 50k samples take about 5 days on one A100 (citing ADM)",
+  "value": "150-1000 V100 days; ~5 A100 days per 50k samples",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 1, Democratizing High-Resolution Image Synthesis",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-txt2img-coco",
+  "claim": "Text-to-image on MS-COCO 256 (1.45B KL-reg LDM-8 on LAION-400M, 250 DDIM steps): FID / IS without and with classifier-free guidance s=1.5",
+  "value": "23.31 / 20.03 unguided; 12.63 / 30.29 guided",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 2, rows LDM-KL-8 and LDM-KL-8-G",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-txt2img-baselines",
+  "claim": "MS-COCO FID of text-to-image baselines: GLIDE (6B) and Make-A-Scene (4B)",
+  "value": "12.24 and 11.84",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 2, rows GLIDE and Make-A-Scene",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-celebahq",
+  "claim": "Unconditional CelebA-HQ 256 FID, LDM-4 with 500 DDIM steps (new state of the art at the time)",
+  "value": "5.11",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 1, CelebA-HQ block",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-inpaint-speedup",
+  "claim": "Inpainting: speed-up between pixel- and latent-based diffusion, and FID improvement factor",
+  "value": ">= 2.7x speed-up, >= 1.6x FID improvement",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.5; Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-txt2img-arch",
+  "claim": "Text-to-image LDM config: f=8, z 32x32x4, 1.45B params, 8 heads, cross-attention at 32/16/8, embedding dim 1280, batch 680, 390K iterations",
+  "value": "see claim",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 15, Text-to-Image column",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-score-definition",
+  "claim": "The score of a density p(x) is defined as its gradient of log-density, grad_x log p(x)",
+  "value": "\\nabla_\\bfx \\log p(\\bfx)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 2 (pre.tex), first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-manifold-loss-fluctuates",
+  "claim": "Sliced score matching loss on raw CIFAR-10 fluctuates irregularly but converges once data are perturbed with small Gaussian noise",
+  "value": "noise N(0, 0.0001) (variance; std 0.01)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 3.1, Figure 1",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-toy-mixture",
+  "claim": "Toy mixture used to show inaccurate scores in low-density regions and Langevin mode-weight failure",
+  "value": "1/5 N((-5,-5), I) + 4/5 N((5,5), I)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 3.2.1, Figures 2-3",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-langevin-ignores-mode-weight",
+  "claim": "For modes with disjoint supports the score does not depend on the mixing weight pi, so Langevin samples cannot recover relative mode weights",
+  "value": "score independent of pi",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 3.2.2",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-geometric-sigma",
+  "claim": "Noise levels form a positive geometric sequence with sigma_1 the largest",
+  "value": "sigma_1/sigma_2 = ... = sigma_{L-1}/sigma_L > 1",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-image-num-levels",
+  "claim": "Number of noise levels used for image experiments",
+  "value": "L = 10",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-image-sigma-range",
+  "claim": "Largest and smallest noise std for image experiments (pixels in [0,1])",
+  "value": "sigma_1 = 1, sigma_10 = 0.01",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-toy-sigma-range",
+  "claim": "Noise schedule for the 2D toy annealed Langevin demo",
+  "value": "L = 10; sigma_1 = 10, sigma_10 = 0.1 (Sec. 4.3) vs sigma_1 = 20, sigma_10 = 1 (App. B.1)",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.3 last paragraph vs App. B.1 (inconsistent)",
+  "uncertain": true
+ },
+ {
+  "id": "ncsn-lambda-sigma-squared",
+  "claim": "Loss weighting chosen so every noise level contributes similar magnitude, motivated by ||s_theta(x,sigma)|| proportional to 1/sigma",
+  "value": "lambda(sigma) = sigma^2",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.2, Eq. 6",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-step-size-schedule",
+  "claim": "Annealed Langevin step size per noise level",
+  "value": "alpha_i = epsilon * sigma_i^2 / sigma_L^2",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 4.3, Algorithm 1",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-langevin-steps-per-level",
+  "claim": "Langevin steps per noise level in image generation",
+  "value": "T = 100",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-base-step-size",
+  "claim": "Base Langevin step size for images; values between 5e-6 and 5e-5 generally work",
+  "value": "epsilon = 2e-5",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-init-uniform",
+  "claim": "Annealed Langevin sampling for images is initialized from uniform noise",
+  "value": "uniform noise",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Setup",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-cifar10-is",
+  "claim": "CIFAR-10 unconditional Inception Score, claimed state of the art",
+  "value": "8.87 +/- .12",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Table 1, row NCSN (Ours)",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-cifar10-fid",
+  "claim": "CIFAR-10 unconditional FID (comparable to SNGAN 21.7; MoLM 18.9 is the best unconditional FID in the table; conditional BigGAN 14.73)",
+  "value": "25.32",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Table 1, row NCSN (Ours)",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-fid-50k",
+  "claim": "IS and FID computed on 50000 samples",
+  "value": "50000",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "App. B (app.tex), experiment details",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-single-noise-baseline-fails",
+  "claim": "Baseline with a single noise level sigma = 0.01 and vanilla Langevin fails to generate reasonable images",
+  "value": "fails",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5, Image generation; Figures 7-8",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-ssm-4x-cost",
+  "claim": "Sliced score matching needs around four times more computation than denoising score matching due to forward-mode autodiff",
+  "value": "~4x",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 2.1, Sliced score matching",
+  "uncertain": false
+ },
+ {
+  "id": "ncsn-code",
+  "claim": "Official code and checkpoints",
+  "value": "https://github.com/ermongroup/ncsn",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "App. A (app.tex), first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-sohl-dickstein",
+  "claim": "Sohl-Dickstein et al. first submitted to arXiv (v1)",
+  "value": "12 Mar 2015",
+  "paper": "Sohl-Dickstein et al.",
+  "version": "v8",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-ncsn",
+  "claim": "NCSN first submitted to arXiv (v1)",
+  "value": "12 Jul 2019",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-ddpm",
+  "claim": "DDPM first submitted to arXiv (v1)",
+  "value": "19 Jun 2020",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-ddim",
+  "claim": "DDIM first submitted to arXiv (v1)",
+  "value": "6 Oct 2020",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-score-sde",
+  "claim": "Score SDE first submitted to arXiv (v1)",
+  "value": "26 Nov 2020",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-improved-ddpm",
+  "claim": "Improved DDPM first submitted to arXiv (v1)",
+  "value": "18 Feb 2021",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-beat-gans",
+  "claim": "ADM first submitted to arXiv (v1)",
+  "value": "11 May 2021",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-ldm",
+  "claim": "LDM first submitted to arXiv (v1)",
+  "value": "20 Dec 2021",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-edm",
+  "claim": "EDM first submitted to arXiv (v1)",
+  "value": "1 Jun 2022",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-cfg",
+  "claim": "CFG first submitted to arXiv (v1)",
+  "value": "26 Jul 2022",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-rectified-flow",
+  "claim": "Rectified Flow first submitted to arXiv (v1)",
+  "value": "7 Sep 2022",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-flow-matching",
+  "claim": "Flow Matching first submitted to arXiv (v1)",
+  "value": "6 Oct 2022",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-dit",
+  "claim": "DiT first submitted to arXiv (v1)",
+  "value": "19 Dec 2022",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-consistency",
+  "claim": "CM first submitted to arXiv (v1)",
+  "value": "2 Mar 2023",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-date-sd3",
+  "claim": "SD3 first submitted to arXiv (v1)",
+  "value": "5 Mar 2024",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "arXiv abs page, submission history",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-T",
+  "claim": "DDPM uses T=1000 diffusion steps in all experiments",
+  "value": "1000",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-beta1",
+  "claim": "DDPM linear beta schedule starts at beta_1 = 1e-4",
+  "value": "10^-4",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-betaT",
+  "claim": "DDPM linear beta schedule ends at beta_T = 0.02",
+  "value": "0.02",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Sec. 4 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-sohl-swissroll",
+  "claim": "Sohl-Dickstein et al. demonstrate diffusion probabilistic models on a two-dimensional swiss roll",
+  "value": "two-dimensional swiss roll",
+  "paper": "Sohl-Dickstein et al.",
+  "version": "v8",
+  "loc": "Sec. 1 last para; Fig. 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-sohl-idea",
+  "claim": "Core idea: slowly destroy structure in data through an iterative forward diffusion process, then learn a reverse diffusion process that restores it; inspired by non-equilibrium statistical physics",
+  "value": "destroy structure",
+  "paper": "Sohl-Dickstein et al.",
+  "version": "v8",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "page-iddpm-skip",
+  "claim": "A linear-schedule model barely gets worse (FID) when skipping up to 20% of the reverse process",
+  "value": "20%",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 1 (main.tex line 284); Fig. skipsteps",
+  "uncertain": false
+ },
+ {
+  "id": "page-iddpm-s",
+  "claim": "Cosine schedule offset",
+  "value": "0.008",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3.2, after Eq. 17",
+  "uncertain": false
+ },
+ {
+  "id": "page-iddpm-linear-hires",
+  "claim": "The linear schedule worked well for high-resolution images; sub-optimal at 64x64 and 32x32",
+  "value": "64x64 and 32x32",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-is",
+  "claim": "CIFAR-10 unconditional Inception Score",
+  "value": "9.46",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L_simple)'; abstract",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-bound-fid",
+  "claim": "FID when training on the true variational bound (fixed isotropic Sigma)",
+  "value": "13.51",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L, fixed isotropic Sigma)'",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-bound-nll",
+  "claim": "NLL when training on the true bound",
+  "value": "3.70",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L, fixed isotropic Sigma)'",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-simple-nll",
+  "claim": "NLL (test) of the L_simple model",
+  "value": "3.75",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "Table 1, row 'Ours (L_simple)'",
+  "uncertain": false
+ },
+ {
+  "id": "page-iddpm-nll-cifar",
+  "claim": "Best CIFAR-10 NLL of Improved DDPM (L_vlb, cosine)",
+  "value": "2.94",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "page-iddpm-lambda",
+  "claim": "Weight on L_vlb in L_hybrid",
+  "value": "0.001",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 3.1, after Eq. 16",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-sample-17s",
+  "claim": "Sampling a batch of 256 CIFAR images takes 17 seconds on a TPU v3-8",
+  "value": "17 seconds",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "App. B (main.tex line 651)",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-20h",
+  "claim": "Around 20 hours to sample 50k 32x32 images from a DDPM on an Nvidia 2080 Ti, vs under a minute for a GAN",
+  "value": "20 hours",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 1, paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-1000h",
+  "claim": "Sampling 50k 256x256 images could take nearly 1000 hours on the same GPU",
+  "value": "1000 hours",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Sec. 1, paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "page-iddpm-ddim-50",
+  "claim": "DDIM produces better samples with fewer than 50 steps, worse with 50 or more (vs Improved DDPM's learned-variance sampler)",
+  "value": "fewer than 50",
+  "paper": "Improved DDPM",
+  "version": "v1",
+  "loc": "Sec. 4 (main.tex line 449)",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-progressive",
+  "claim": "Progressive sample quality over the reverse process: IS and FID of x0-hat vs reverse steps (T - t), from the paper's plot data",
+  "value": "cifar10_sample_quality.csv",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "App. figure 'Unconditional CIFAR10 progressive sampling quality over time' (fig:cifar10_progressive_sample_quality); tex/plot_data/cifar10_sample_quality.csv",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-prog-fid500",
+  "claim": "FID of x0-hat after 500 of 1000 reverse steps",
+  "value": "110",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "tex/plot_data/cifar10_sample_quality.csv row 500 (110.27)",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddpm-prog-fid800",
+  "claim": "FID of x0-hat after 800 of 1000 reverse steps",
+  "value": "25.9",
+  "paper": "DDPM",
+  "version": "v2",
+  "loc": "tex/plot_data/cifar10_sample_quality.csv row 800 (25.85)",
+  "uncertain": false
+ },
+ {
+  "id": "page-ncsn-is",
+  "claim": "NCSN CIFAR-10 unconditional Inception Score",
+  "value": "8.87",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Table 1, row NCSN (Ours)",
+  "uncertain": false
+ },
+ {
+  "id": "page-ncsn-sigma-min",
+  "claim": "NCSN image noise levels: 10 levels, geometric from sigma_1=1 to sigma_10=0.01",
+  "value": "0.01",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "page-ncsn-T",
+  "claim": "NCSN annealed Langevin: T=100 steps per noise level",
+  "value": "100",
+  "paper": "NCSN",
+  "version": "v3",
+  "loc": "Sec. 5 Setup",
+  "uncertain": false
+ },
+ {
+  "id": "page-sde-nll",
+  "claim": "Score SDE CIFAR-10 NLL, uniformly dequantized, DDPM++ cont. (deep, sub-VP)",
+  "value": "2.99",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-sde-exact-ddpm",
+  "claim": "Exact likelihood of the same DDPM model via the probability flow ODE",
+  "value": "3.28",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-sde-ode-90",
+  "claim": "Probability flow ODE with adaptive solver cuts score evaluations by over 90% without affecting visual quality",
+  "value": "over 90%",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.3, Figure 3",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddim-10",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=0.0, S=10",
+  "value": "13.36",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=0.0, S=10",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddim-20",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=0.0, S=20",
+  "value": "6.84",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=0.0, S=20",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddim-50",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=0.0, S=50",
+  "value": "4.67",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=0.0, S=50",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddim-100",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=0.0, S=100",
+  "value": "4.16",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=0.0, S=100",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddim-1000",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=0.0, S=1000",
+  "value": "4.04",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=0.0, S=1000",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddpm-10",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=1.0, S=10",
+  "value": "41.07",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=1.0, S=10",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddpm-20",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=1.0, S=20",
+  "value": "18.36",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=1.0, S=20",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddpm-50",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=1.0, S=50",
+  "value": "8.01",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=1.0, S=50",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddpm-100",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=1.0, S=100",
+  "value": "5.78",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=1.0, S=100",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-ddpm-1000",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row eta=1.0, S=1000",
+  "value": "4.73",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row eta=1.0, S=1000",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-sighat-10",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row sigma-hat, S=10",
+  "value": "367.43",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row sigma-hat, S=10",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-sighat-20",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row sigma-hat, S=20",
+  "value": "133.37",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row sigma-hat, S=20",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-sighat-50",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row sigma-hat, S=50",
+  "value": "32.72",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row sigma-hat, S=50",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-sighat-100",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row sigma-hat, S=100",
+  "value": "9.99",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row sigma-hat, S=100",
+  "uncertain": false
+ },
+ {
+  "id": "page-ddim-t1-sighat-1000",
+  "claim": "DDIM Table 1 CIFAR-10 FID, row sigma-hat, S=1000",
+  "value": "3.17",
+  "paper": "DDIM",
+  "version": "v4",
+  "loc": "Table 1, CIFAR10, row sigma-hat, S=1000",
+  "uncertain": false
+ },
+ {
+  "id": "page-edm-nfe-vp",
+  "claim": "EDM sampler alone cuts NFE for near-best FID 7.3x for VP",
+  "value": "7.3x",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3 Discussion",
+  "uncertain": false
+ },
+ {
+  "id": "page-edm-nfe-ve",
+  "claim": "EDM sampler alone cuts NFE 300x for VE",
+  "value": "300x",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3 Discussion",
+  "uncertain": false
+ },
+ {
+  "id": "page-edm-nfe-ddim",
+  "claim": "EDM sampler alone cuts NFE 3.2x for DDIM/ADM",
+  "value": "3.2x",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 3 Discussion",
+  "uncertain": false
+ },
+ {
+  "id": "page-edm-prev-records",
+  "claim": "Previous CIFAR-10 records before EDM (conditional / unconditional)",
+  "value": "1.85 and 2.10",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Sec. 5",
+  "uncertain": false
+ },
+ {
+  "id": "page-edm-uncond",
+  "claim": "EDM CIFAR-10 unconditional FID, config F, deterministic sampler",
+  "value": "1.97 at 35 NFE",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 2, config F, CIFAR-10 unconditional (VP column; VE 1.98)",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-t2",
+  "claim": "CFG ImageNet 128x128, T=256 column: FID and IS for w = 0.0 ... 4.0 (plotted on the page)",
+  "value": "Table 2",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2 (main.tex lines 369-395), T=256 column",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-unguided-fid",
+  "claim": "ImageNet 128, unguided (w=0), T=256 FID",
+  "value": "7.27",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-w4-fid",
+  "claim": "ImageNet 128, w=4.0, T=256 FID",
+  "value": "21.53",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-is-0",
+  "claim": "ImageNet 128, w=0, T=256 IS",
+  "value": "82.45",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-is-4",
+  "claim": "ImageNet 128, w=4.0, T=256 IS",
+  "value": "421.03",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-puncond",
+  "claim": "p_uncond of 0.1 and 0.2 perform about equally; 0.5 is worse",
+  "value": "0.1 and 0.2",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Sec. 4.2",
+  "uncertain": false
+ },
+ {
+  "id": "page-adm-s1-fid",
+  "claim": "ADM class-conditional ImageNet 256 with classifier scale 1.0: FID",
+  "value": "4.59",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "page-adm-s1-is",
+  "claim": "... IS at scale 1.0",
+  "value": "186.70",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "page-adm-s10-fid",
+  "claim": "... FID at scale 10.0",
+  "value": "9.11",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "page-adm-s10-is",
+  "claim": "... IS at scale 10.0",
+  "value": "283.92",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "page-adm-unguided-fid",
+  "claim": "Class-conditional ADM ImageNet 256 without guidance: FID",
+  "value": "10.94",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "page-adm-recall",
+  "claim": "Recall at scale 0 / 1 / 10 (class-conditional, ImageNet 256)",
+  "value": "0.63, 0.52 and 0.32",
+  "paper": "ADM",
+  "version": "v4",
+  "loc": "Table 4",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-rfid-2",
+  "claim": "LDM VQ-reg autoencoder reconstruction R-FID on ImageNet-Val, f=2",
+  "value": "0.16",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-rfid-4",
+  "claim": "LDM VQ-reg autoencoder reconstruction R-FID on ImageNet-Val, f=4",
+  "value": "0.58",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-rfid-8",
+  "claim": "LDM VQ-reg autoencoder reconstruction R-FID on ImageNet-Val, f=8",
+  "value": "1.14",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-rfid-16",
+  "claim": "LDM VQ-reg autoencoder reconstruction R-FID on ImageNet-Val, f=16",
+  "value": "5.15",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-rfid-32",
+  "claim": "LDM VQ-reg autoencoder reconstruction R-FID on ImageNet-Val, f=32",
+  "value": "31.83",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-z-1",
+  "claim": "Latent shape for 256x256 inputs at f=1",
+  "value": "256x256x3",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8, f and channel-count columns (z = 256/f x 256/f x c); Tables 13/14 z-shape rows",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-z-2",
+  "claim": "Latent shape for 256x256 inputs at f=2",
+  "value": "128x128x2",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8, f and channel-count columns (z = 256/f x 256/f x c); Tables 13/14 z-shape rows",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-z-4",
+  "claim": "Latent shape for 256x256 inputs at f=4",
+  "value": "64x64x3",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8, f and channel-count columns (z = 256/f x 256/f x c); Tables 13/14 z-shape rows",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-z-8",
+  "claim": "Latent shape for 256x256 inputs at f=8",
+  "value": "32x32x4",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8, f and channel-count columns (z = 256/f x 256/f x c); Tables 13/14 z-shape rows",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-z-16",
+  "claim": "Latent shape for 256x256 inputs at f=16",
+  "value": "16x16x8",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8, f and channel-count columns (z = 256/f x 256/f x c); Tables 13/14 z-shape rows",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-z-32",
+  "claim": "Latent shape for 256x256 inputs at f=32",
+  "value": "8x8x16",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8, f=32 VQ row (c=16); hyperparameter tables print 8x8x32 (as 88x8x32), inconsistent",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-in256",
+  "claim": "Class-conditional ImageNet 256, LDM-4-G (CFG scale 1.5) FID",
+  "value": "3.60",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-params",
+  "claim": "LDM-4-G parameters vs ADM-G",
+  "value": "400M vs 608M",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 3",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-v100",
+  "claim": "Training compute, LDM-4 vs ADM (V100-days)",
+  "value": "271 vs 916",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-throughput",
+  "claim": "Sampling throughput on one A100 (samples/s), LDM-4-G vs ADM-G",
+  "value": "0.4 vs 0.07",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-coco",
+  "claim": "Text-to-image MS-COCO 256 FID of the 1.45B LDM-KL-8-G with classifier-free guidance",
+  "value": "12.63",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-glide",
+  "claim": "MS-COCO FID of GLIDE (6B)",
+  "value": "12.24",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-t2i-size",
+  "claim": "Text-to-image LDM: 1.45B parameters, trained on LAION-400M",
+  "value": "1.45B",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec. 4.3.1; Table 15",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-table",
+  "claim": "DiT appendix table 'Details of all DiT models': Gflops, params, FID-50K (no guidance) at 400K steps for S/B/L/XL x p=8/4/2",
+  "value": "Details of all DiT models",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Appendix table (main.tex lines 366-398)",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-xl2-noguide-400k",
+  "claim": "DiT-XL/2 FID-50K at 400K steps, no guidance, adaLN-Zero",
+  "value": "19.47",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 4 / appendix table",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-incontext",
+  "claim": "DiT-XL/2 at 400K steps, in-context conditioning",
+  "value": "35.24",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "appendix table",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-crossattn",
+  "claim": "DiT-XL/2 at 400K steps, cross-attention",
+  "value": "26.14",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "appendix table",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-adaln",
+  "claim": "DiT-XL/2 at 400K steps, adaLN (no zero init)",
+  "value": "25.21",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "appendix table",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-s2",
+  "claim": "DiT-S/2: 6.06 Gflops, 33M params, FID 68.40",
+  "value": "68.40",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "appendix table",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-b4",
+  "claim": "DiT-B/4: 5.56 Gflops, 130M params, FID 68.38",
+  "value": "68.38",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "appendix table",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-adm-gflops",
+  "claim": "ADM Gflops at 256x256",
+  "value": "1120",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-ldm4-gflops",
+  "claim": "LDM-4 Gflops at 256x256",
+  "value": "104",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-sweet",
+  "claim": "LDM-{1,2} train slowly, LDM-32 stagnates; LDM-{4-16} strike a good balance",
+  "value": "4-16",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec. 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "page-rf-1rf-onestep",
+  "claim": "CIFAR-10 one-step FID of 1-rectified flow (no reflow, no distillation)",
+  "value": "378",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), one-step block",
+  "uncertain": false
+ },
+ {
+  "id": "page-rf-2rf-onestep",
+  "claim": "CIFAR-10 one-step FID of 2-rectified flow (one reflow, no distillation)",
+  "value": "12.21",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), one-step block",
+  "uncertain": false
+ },
+ {
+  "id": "page-rf-2rf-distill",
+  "claim": "CIFAR-10 one-step FID of 2-rectified flow + distillation (LPIPS)",
+  "value": "4.85",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), one-step block, row 2-Rectified Flow (+Distill)",
+  "uncertain": false
+ },
+ {
+  "id": "page-rf-vpode-onestep",
+  "claim": "CIFAR-10 one-step FID of the VP ODE",
+  "value": "451",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), one-step block",
+  "uncertain": false
+ },
+ {
+  "id": "page-rf-rk45",
+  "claim": "1-rectified flow with adaptive RK45: FID at 127 NFE",
+  "value": "2.58",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), RK45 block",
+  "uncertain": false
+ },
+ {
+  "id": "page-rf-rk45-nfe",
+  "claim": "1-rectified flow RK45 NFE",
+  "value": "127",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), RK45 block",
+  "uncertain": false
+ },
+ {
+  "id": "page-fm-in64-ot",
+  "claim": "Flow Matching OT path ImageNet 64: FID 14.45 at 138 NFE",
+  "value": "14.45",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 64x64",
+  "uncertain": false
+ },
+ {
+  "id": "page-fm-in64-ddpm",
+  "claim": "DDPM baseline in FM Table 1, ImageNet 64: FID 17.36 at 264 NFE",
+  "value": "17.36",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 64x64",
+  "uncertain": false
+ },
+ {
+  "id": "page-fm-in64-diff",
+  "claim": "FM with diffusion path, ImageNet 64: FID 16.88 at 187 NFE",
+  "value": "16.88",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 64x64",
+  "uncertain": false
+ },
+ {
+  "id": "page-fm-nfe",
+  "claim": "NFE of FM-OT vs FM-diffusion vs DDPM on ImageNet 64",
+  "value": "138, 187 and 264",
+  "paper": "Flow Matching",
+  "version": "v2",
+  "loc": "Table 1 left, ImageNet 64x64",
+  "uncertain": false
+ },
+ {
+  "id": "page-cm-cd1",
+  "claim": "Consistency distillation CIFAR-10 one-step FID",
+  "value": "3.55",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row CD, NFE 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-cm-cd2",
+  "claim": "Consistency distillation CIFAR-10 two-step FID",
+  "value": "2.93",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row CD, NFE 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cm-pd1",
+  "claim": "Progressive distillation CIFAR-10 one-step FID",
+  "value": "8.34",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row PD, NFE 1",
+  "uncertain": false
+ },
+ {
+  "id": "page-cm-in64-cd1",
+  "claim": "CD ImageNet 64 one-step FID",
+  "value": "6.20",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cm-in64-pd1",
+  "claim": "PD ImageNet 64 one-step FID",
+  "value": "15.39",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cm-ct1",
+  "claim": "Consistency training (no teacher) CIFAR-10 one-step FID",
+  "value": "8.70",
+  "paper": "CM",
+  "version": "v2",
+  "loc": "Table 1, row CT (appendix caption says 8.73)",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-61",
+  "claim": "Number of flow/diffusion formulations compared",
+  "value": "61",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 5.1.1",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-8b",
+  "claim": "Largest SD3 model: depth 38, 8B parameters",
+  "value": "8B",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Conclusion; Figure 1 caption",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-elo-r",
+  "claim": "Correlation between validation loss and ELO across model scales",
+  "value": "-0.982",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Figure 8 panels",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-geneval",
+  "claim": "GenEval overall score, largest SD3 at 1024^2 with DPO",
+  "value": "0.74",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-dalle3",
+  "claim": "GenEval overall score of DALL-E 3 in the same table",
+  "value": "0.67",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-ae",
+  "claim": "Autoencoder reconstruction rFID for 4 / 8 / 16 latent channels at f=8",
+  "value": "2.41, 1.56 and 1.06",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 3, Sec 5.2.1",
+  "uncertain": false
+ },
+ {
+  "id": "page-sd3-shift3",
+  "claim": "Timestep shift value used at 1024^2",
+  "value": "3.0",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 5.3.2",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-workshop",
+  "claim": "A short version of CFG appeared in the NeurIPS 2021 Workshop on Deep Generative Models and Downstream Applications (LDM cites it as ho2021classifier)",
+  "value": "NeurIPS 2021",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "arXiv abs page comments; LDM v2 ms.tex citations",
+  "uncertain": false
+ },
+ {
+  "id": "page-cfg-t128-best",
+  "claim": "CFG ImageNet 128 best FID at T=128 (matched sampling cost to ADM-G)",
+  "value": "3.02",
+  "paper": "CFG",
+  "version": "v1",
+  "loc": "Table 2, T=128 column, w=0.4 (3.04 at w=0.3)",
+  "uncertain": false
+ },
+ {
+  "id": "page-ldm-v100-g",
+  "claim": "ADM-G training compute including its classifier (V100-days)",
+  "value": "962",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18",
+  "uncertain": false
+ },
+ {
+  "id": "page-edm-uncond-short",
+  "claim": "EDM's own unconditional CIFAR-10 FID",
+  "value": "1.97",
+  "paper": "EDM",
+  "version": "v2",
+  "loc": "Table 2, config F",
+  "uncertain": false
+ },
+ {
+  "id": "page-dit-sd-vae",
+  "claim": "DiT uses off-the-shelf pre-trained VAEs that are fine-tuned versions of the original LDM f8 model (from Stable Diffusion)",
+  "value": "LDM",
+  "paper": "DiT",
+  "version": "v2",
+  "loc": "main.tex line 434 (appendix, VAE)",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-interpolation",
+  "claim": "Training uses the straight-line interpolation between a source sample and a target sample",
+  "value": "X_t = t X_1 + (1-t) X_0, t in [0,1], t ~ Uniform",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Eq. (1), Sec 2.1; Algorithm 1",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-objective",
+  "claim": "The velocity field is fit by least squares regression onto the line direction",
+  "value": "min_v int_0^1 E||(X_1 - X_0) - v(X_t, t)||^2 dt",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Eq. (1), Sec 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-optimal-velocity",
+  "claim": "The exact minimizer of the objective is the average line direction through a point",
+  "value": "v^X(x,t) = E[X_1 - X_0 | X_t = x]",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Eq. (2), Sec 2.2",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-non-crossing",
+  "claim": "Paths of a well-defined ODE cannot cross, so the learned flow rewires crossing straight lines while tracing the same marginals",
+  "value": "Law(Z_t) = Law(X_t) for all t",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Sec 2.1 'Flows avoid crossing'; Theorem 3.3; Figure 2",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cost-nonincreasing",
+  "claim": "Rectification never increases transport cost, simultaneously for every convex cost function",
+  "value": "E[c(Z_1 - Z_0)] <= E[c(X_1 - X_0)] for all convex c",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Theorem 3.5, Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-straightening-rate",
+  "claim": "Recursive reflow drives the straightness measure toward zero at rate 1/K",
+  "value": "min_{k<=K} S(Z^k) <= E||X_1 - X_0||^2 / K",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Theorem 3.7 (informal in Sec 2.2, formal in Sec 3.3)",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-reflow-data",
+  "claim": "Each reflow round generates simulated pairs and fine-tunes the previous flow on them",
+  "value": "4 million (z_0, z_1) pairs, 300,000 fine-tuning steps per round (CIFAR-10)",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Appendix, Experiment Configuration on CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-one-step-distill-lpips",
+  "claim": "One-step distillation replaces the L2 loss with LPIPS",
+  "value": "LPIPS for k=1 distillation",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Appendix, Experiment Configuration on CIFAR10",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-2rf-distill-fid",
+  "claim": "Distilled 2-rectified flow one-step CIFAR-10 FID, claimed SOTA for one-step diffusion/flow models",
+  "value": "FID 4.85 at NFE 1 (IS 9.01, recall 0.50)",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), one-step block, row 2-Rectified Flow (+Distill)",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-tdpm-baseline",
+  "claim": "Best previously known one-step U-Net model that 4.85 beats",
+  "value": "TDPM (T=1) FID 8.91",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(b), GAN with U-Net block; Sec 5.2 text",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-one-step-no-distill",
+  "claim": "One Euler step without distillation: reflow is what makes a single step usable",
+  "value": "1-RF FID 378, 2-RF FID 12.21, 3-RF FID 8.15, VP ODE FID 451",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), one-step block (numbers outside parentheses)",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-3rf-recall",
+  "claim": "Distilled 3-rectified flow one-step recall exceeds the best GAN recall (StyleGAN2+ADA 0.49)",
+  "value": "recall 0.51 (FID 5.21)",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), row 3-Rectified Flow (+Distill); Table 1(b)",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-rk45-1rf",
+  "claim": "1-rectified flow solved with adaptive RK45 gives the best FID and recall among ODE methods with fewer steps",
+  "value": "NFE 127, FID 2.58, IS 9.60, recall 0.57",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), RK45 block, row 1-Rectified Flow",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-rk45-vp-baselines",
+  "claim": "Same-architecture diffusion ODE baselines with RK45 need more steps",
+  "value": "VP ODE NFE 140 FID 3.93; sub-VP ODE NFE 146 FID 3.16",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), RK45 block",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-cifar-rk45-reflow-tradeoff",
+  "claim": "Reflowed models need fewer RK45 steps but have worse full-solve FID due to accumulated estimation error",
+  "value": "2-RF NFE 110 FID 3.36; 3-RF NFE 104 FID 3.96",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), RK45 block; Sec 5.2 Results",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-sde-reference",
+  "claim": "Full 2000-step VP SDE reference quality on CIFAR-10 (same architecture)",
+  "value": "NFE 2000, FID 2.55, recall 0.58",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Table 1(a), SDE block, row VP SDE",
+  "uncertain": false
+ },
+ {
+  "id": "rectified-flow-code",
+  "claim": "Official code repository URL",
+  "value": "not stated in v1; implementation modified from Song et al. 2020 score SDE code",
+  "paper": "Rectified Flow",
+  "version": "v1",
+  "loc": "Sec 5.2 Experiment settings",
+  "uncertain": true
+ },
+ {
+  "id": "score-sde-forward-sde",
+  "claim": "Data are diffused to a prior by an Ito SDE with drift f and scalar diffusion coefficient g",
+  "value": "dx = f(x,t) dt + g(t) dw",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.1, Eq. 5",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-reverse-sde",
+  "claim": "The reverse of a diffusion is a diffusion (Anderson 1982) whose only unknown is the score of the marginals",
+  "value": "dx = [f(x,t) - g(t)^2 grad_x log p_t(x)] dt + g(t) dw-bar",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.2, Eq. 6",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-prob-flow-ode",
+  "claim": "A deterministic ODE shares the same marginal densities p_t as the SDE (probability flow ODE)",
+  "value": "dx = [f(x,t) - 1/2 g(t)^2 grad_x log p_t(x)] dt",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.3, Eq. 13",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-ve-is-smld",
+  "claim": "SMLD (NCSN) noise perturbations are a discretization of the Variance Exploding SDE",
+  "value": "dx = sqrt(d[sigma^2(t)]/dt) dw",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.4, Eqs. 8-9",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-vp-is-ddpm",
+  "claim": "DDPM noise perturbations are a discretization of the Variance Preserving SDE",
+  "value": "dx = -1/2 beta(t) x dt + sqrt(beta(t)) dw",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.4, Eqs. 10-11",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-pc-generalizes",
+  "claim": "SMLD sampling = identity predictor + annealed Langevin corrector; DDPM sampling = ancestral predictor + identity corrector",
+  "value": "special cases of PC sampling",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.2",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-pc-vs-predictor",
+  "claim": "PC1000 improves over P1000 for every predictor; VE reverse-diffusion FID goes 4.79 (P1000) to 3.60 (PC1000)",
+  "value": "4.79 -> 3.60",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 1, row reverse diffusion, VE columns",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-corrector-only-worst",
+  "claim": "Corrector-only sampling with 2000 steps is worst at equal compute",
+  "value": "FID 20.43 (VE), 19.06 (VP)",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 1, column C2000",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar10-fid",
+  "claim": "Best CIFAR-10 unconditional FID, NCSN++ cont. (deep, VE)",
+  "value": "2.20",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 3, row NCSN++ cont. (deep, VE); abstract",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar10-is",
+  "claim": "Best CIFAR-10 unconditional Inception Score, NCSN++ cont. (deep, VE)",
+  "value": "9.89",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 3, row NCSN++ cont. (deep, VE); abstract",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar10-nll",
+  "claim": "Best NLL on uniformly dequantized CIFAR-10, DDPM++ cont. (deep, sub-VP), without maximum likelihood training",
+  "value": "2.99 bits/dim",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 2, row DDPM++ cont. (deep, sub-VP)",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-exact-vs-elbo",
+  "claim": "Exact ODE likelihood of the same DDPM model beats its reported ELBO",
+  "value": "3.28 vs <= 3.70 (L) / <= 3.75 (L_simple) bits/dim",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 2, rows DDPM and DDPM (L)/(L_simple)",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-ode-nfe-reduction",
+  "claim": "Black-box ODE solver with larger error tolerance cuts score function evaluations without affecting visual quality",
+  "value": "over 90% fewer NFE",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.3, Efficient sampling; Figure 3",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-1024-celebahq",
+  "claim": "First high-fidelity 1024x1024 samples from a score-based generative model (CelebA-HQ, VE SDE, modified NCSN++)",
+  "value": "1024x1024",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.4; App. H.3, Figure 12",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-1024-sampler",
+  "claim": "1024x1024 CelebA-HQ sampling settings",
+  "value": "PC, 2000 steps, reverse diffusion predictor, 1 Langevin step, SNR 0.15; trained ~2.4M iters, batch 8",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. H.3",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-vp-beta-range",
+  "claim": "VP SDE beta range, matching Ho et al.",
+  "value": "beta-bar_min = 0.1, beta-bar_max = 20",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. C",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-ve-sigma-min",
+  "claim": "VE SDE smallest noise; sigma_max chosen by Technique 1 of NCSNv2 and not stated numerically in this paper",
+  "value": "sigma_min = 0.01",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. C",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar-pc-settings",
+  "claim": "Architecture-exploration sampler: PC at 1000 steps, reverse diffusion predictor, one corrector step with SNR 0.16 for VE, no corrector for VP (DDPM++ cont. models use Euler-Maruyama predictor per App. H.2)",
+  "value": "N=1000, SNR 0.16 (VE)",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. H.1",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-code",
+  "claim": "Official code and checkpoints",
+  "value": "https://github.com/yang-song/score_sde",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. H, first paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-rf-forward-process",
+  "claim": "Rectified flow forward process used, with data at t=0 and noise at t=1 (reversed vs RF/FM papers); network predicts velocity epsilon - x_0",
+  "value": "z_t = (1-t) x_0 + t epsilon; w_t^RF = t/(1-t)",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 3 Rectified Flow, Eq. (13)",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-num-formulations",
+  "claim": "Number of diffusion/flow formulations compared under controlled settings",
+  "value": "61 formulations, 2 datasets (ImageNet, CC12M), 24 control settings",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 5.1.1",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-best-formulation",
+  "claim": "Best formulation by averaged non-dominated rank is rectified flow with logit-normal timestep sampling, m=0, s=1",
+  "value": "rf/lognorm(0.00, 1.00): rank 1.54 all, 1.25 at 5 steps, 1.50 at 50 steps",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 1, row rf/lognorm(0.00, 1.00)",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-baseline-ranks",
+  "claim": "Ranks of baselines: uniform-t RF, LDM eps/linear, EDM with original parameters",
+  "value": "rf 5.67; eps/linear 2.88; edm(-1.20, 1.20) 15.58",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-logit-normal",
+  "claim": "Logit-normal timestep density with location m and scale s, sampled as logistic of a normal",
+  "value": "pi_ln(t; m, s) = 1/(s sqrt(2 pi)) * 1/(t(1-t)) * exp(-(logit(t) - m)^2 / (2 s^2))",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Eq. (19), Sec 3.1",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-mmdit-separate-weights",
+  "claim": "MM-DiT uses separate weights for text and image token streams, joined in a single attention operation",
+  "value": "two weight sets (three gave only small gain)",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 4; Sec 5.2.3; Figure 2, Figure 4",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-mmdit-sizing",
+  "claim": "Model size parameterized by depth d",
+  "value": "hidden size 64d, MLP 4*64d, d heads; 2x2 patches",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 4",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-largest-model",
+  "claim": "Largest model size and training compute",
+  "value": "depth 38 = 8B parameters; 5e22 training FLOPs",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Conclusion; Figure 1 caption; Figure 14 labels (depth=38 (8B), depth=24 (2B))",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-text-encoders",
+  "claim": "Three frozen text encoders",
+  "value": "CLIP L/14, OpenCLIP bigG/14, T5-v1.1-XXL (4.7B); c_vec 2048-d, c_ctxt 154x4096",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Appendix B.2 Text Representation; Sec 5.3.3 Flexible Text Encoders",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-text-encoder-dropout",
+  "claim": "Each text encoder output independently zeroed during training (classifier-free guidance); source gives two values",
+  "value": "46.3% (Sec 5.3.3) vs 46.4% (Appendix B.3, ~10% fully unconditional)",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 5.3.3 Flexible Text Encoders; Appendix B.3 Optimization",
+  "uncertain": true
+ },
+ {
+  "id": "sd3-no-t5-win-rates",
+  "claim": "Win rates of the model without T5 vs with T5 in human preference",
+  "value": "aesthetics 50%, prompt adherence 46%, typography 38%",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Sec 5.3.3",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-ae-16-channel",
+  "claim": "More latent channels improve autoencoder reconstruction; 16 channels chosen",
+  "value": "rFID 2.41 / 1.56 / 1.06 and PSNR 25.12 / 26.40 / 28.62 for 4 / 8 / 16 channels (f=8)",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 3, Sec 5.2.1",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-ae-capacity-crossover",
+  "claim": "16-channel latents need more model capacity; gap to 8-channel negligible at depth 22",
+  "value": "d = 22",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Figure 10 caption (Appendix)",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-timestep-shift",
+  "claim": "Resolution-dependent timestep shift that preserves uncertainty across resolutions",
+  "value": "t_m = sqrt(m/n) t_n / (1 + (sqrt(m/n) - 1) t_n); alpha = 3.0 at 1024^2; humans prefer shifts > 1.5",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Eq. (23), Sec 5.3.2; Figure 6",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-scaling-trend",
+  "claim": "Validation loss correlates strongly with holistic image metrics across model scales (Fig. 8 panels)",
+  "value": "ELO r=-0.982; GenEval r=-0.920; T2I-CompBench r=-0.898",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Figure 8 panels",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-geneval",
+  "claim": "GenEval overall score of the largest model vs DALL-E 3",
+  "value": "0.74 (depth 38, 1024^2, DPO) vs DALL-E 3 0.67, SDXL 0.55",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 5",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-human-pref-sota",
+  "claim": "8B model preferred over proprietary and open SOTA models on PartiPrompts in aesthetics, prompt following, typography",
+  "value": "approx full-model win rates (aesthetics/prompt/typography %): DALL-E 3 ~53/54/67, Ideogram v1 ~49/57/54, MJ-V6 ~54/60/88, Playground v2.5 ~55/63/98, SDXL ~72/75/93, PixArt-alpha ~70/75/99",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Figure 7, read from bar chart image img/baseline_comp.jpg",
+  "uncertain": true
+ },
+ {
+  "id": "sd3-bigger-fewer-steps",
+  "claim": "Larger models lose less CLIP score when sampled with few steps",
+  "value": "5/50-step relative CLIP drop 4.30% (d15), 3.59% (d30), 2.71% (d38)",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-caption-mix",
+  "claim": "50/50 CogVLM synthetic / original captions improve GenEval",
+  "value": "overall 43.27% -> 49.78% (d=15, 250k steps)",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Table 4, Sec 5.2.2",
+  "uncertain": false
+ },
+ {
+  "id": "sd3-timeshift-elo",
+  "claim": "Human preference Elo for timestep shift values at 1024^2; no-shift is worst",
+  "value": "approx Elo: 3.0 ~1062, 6.0 ~1062, 2.0 ~1038, 4.0 ~1024, 1.5 ~914, 1.0 ~898",
+  "paper": "SD3",
+  "version": "v1",
+  "loc": "Figure 6 top right, read from image img/timeshift_v1.png",
+  "uncertain": true
+ },
+ {
+  "id": "sohl-dickstein-venue",
+  "claim": "Published at ICML 2015; arXiv 1503.03585 first posted March 2015",
+  "value": "ICML 2015",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "tex line 39, \\usepackage[accepted]{icml2015}; arXiv id prefix 1503",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-core-idea",
+  "claim": "Slowly destroy structure in data with an iterative forward diffusion process, then learn a reverse diffusion process that restores it, giving a flexible yet tractable generative model",
+  "value": "forward diffusion + learned reverse diffusion",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Abstract",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-physics",
+  "claim": "The method borrows the idea of a Markov chain that gradually converts one distribution into another from nonequilibrium statistical physics (Jarzynski equality) and annealed importance sampling",
+  "value": "Jarzynski equality / AIS",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 1.1 and Sec. 1.2 last paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-same-form",
+  "claim": "For small step size beta, the reverse of a Gaussian (binomial) diffusion step is also Gaussian (binomial), so only mean and covariance (or bit-flip rate) need be learned",
+  "value": "reverse step has same functional form",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 2.2 Reverse Trajectory",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-bound",
+  "claim": "Training maximizes a lower bound K on log-likelihood made of per-step KL divergences between forward posteriors q(x^(t-1)|x^(t),x^(0)) and reverse steps, plus analytic entropy terms",
+  "value": "L >= K",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 2.4, Eqs. 13-14",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-T-images",
+  "claim": "Number of diffusion steps for image experiments",
+  "value": "T = 1000 (bark: T = 500)",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "App. D.2 Architecture, Temporal Dependence paragraph",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-T-toys",
+  "claim": "Diffusion steps for toy problems: swiss roll (Gaussian) and binary heartbeat (binomial)",
+  "value": "40 and 2000",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "App. D.1 Swiss Roll; App. D.1 Binary Heartbeat",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-beta-learned",
+  "claim": "Gaussian forward schedule beta_2..T is learned by gradient ascent on K (beta_1 fixed small); a footnote says a fixed schedule is just as effective",
+  "value": "learned beta_t",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 2.4.1 Setting the Diffusion Rate, incl. footnote",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-beta-binomial",
+  "claim": "Binomial forward schedule erases a constant 1/T fraction of signal per step",
+  "value": "beta_t = (T - t + 1)^{-1}",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 2.4.1",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-datasets",
+  "claim": "Datasets: 2-D swiss roll, binary heartbeat sequences, MNIST, CIFAR-10, dead leaves, bark textures",
+  "value": "6 datasets",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 1.1 last paragraph; Sec. 3",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-cifar-K",
+  "claim": "CIFAR-10 lower bound K on log-likelihood (data scaled to variance 1, uniform dequantization noise added), and improvement over isotropic Gaussian",
+  "value": "K = 5.4 +/- 0.2 bits/pixel; K - L_null = 11.5 +/- 0.2 bits/pixel",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Table 1, row 'CIFAR-10' and its footnote",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-cifar-K-vs-ddpm",
+  "claim": "This 5.4 is a log-likelihood lower bound in a variance-1 continuous convention; DDPM lists it as NLL <= 5.40 bits/dim. Direct comparison with DDPM's 3.75 bits/dim is not established in either source",
+  "value": "5.4 (convention mismatch)",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Table 1 vs DDPM Table 1 row 'Diffusion (original)'",
+  "uncertain": true
+ },
+ {
+  "id": "sohl-dickstein-earlier-version",
+  "claim": "An earlier arXiv version reported higher CIFAR-10 bounds that came from the model learning 8-bit pixel quantization",
+  "value": "earlier CIFAR-10 numbers withdrawn",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Table 1 footnote",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-heartbeat",
+  "claim": "Binary heartbeat bound K vs true log-likelihood log2(1/5)",
+  "value": "-2.414 vs -2.322 bits/sequence",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Table 1; Sec. 3.1.2",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-dead-leaves",
+  "claim": "Dead leaves log-likelihood: diffusion vs previous state of the art MCGSM",
+  "value": "1.489 vs 1.244 bits/pixel",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Table 2, 'Dead Leaves'",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-mnist",
+  "claim": "MNIST Parzen-window log-likelihood estimate: diffusion vs Deep GSN, DBN, Stacked CAE, adversarial net, and Parzen on training data",
+  "value": "317 +/- 2.7 bits (GSN 309, DBN 199, CAE 174, GAN 325, perfect 349)",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Table 2, 'MNIST'",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-inpainting",
+  "claim": "Inpainting of a central 100x100 region of a bark image by sampling from the model posterior",
+  "value": "100x100 region",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Fig. 5 caption; Sec. 2.5",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-no-sample-metric",
+  "claim": "No sample-quality metric (FID/IS) is reported; DDPM later states there had been no demonstration that diffusion models generate high-quality samples",
+  "value": "no FID/IS",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "whole paper (absence); DDPM Sec. 1 paragraph 3",
+  "uncertain": false
+ },
+ {
+  "id": "sohl-dickstein-code",
+  "claim": "Reference implementation (Blocks/Theano)",
+  "value": "https://github.com/Sohl-Dickstein/Diffusion-Probabilistic-Models",
+  "paper": "Sohl-Dickstein 2015",
+  "version": "v8",
+  "loc": "Sec. 3, first paragraph",
+  "uncertain": false
+ }
+]

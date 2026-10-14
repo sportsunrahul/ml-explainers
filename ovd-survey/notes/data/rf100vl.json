@@ -1,0 +1,1249 @@
+{
+ "paper": "Roboflow100-VL: A Multi-Domain Object Detection Benchmark for Vision-Language Models",
+ "arxiv": "2505.20612v4",
+ "source_note": "Rows parsed from the uncommented LaTeX table rows in src/neurips_2025.tex and src/suppl.tex and checked against paper.pdf (v4). Commented-out rows in the LaTeX (older numbers) are excluded.",
+ "metric": "AP per dataset (pycocotools, maxDets=500; Appendix H calls it 'mAP 50:95'), averaged over the datasets in each category; 'All' averages all datasets of the benchmark (Sec. 4.1, Sec. 3.2, App. B, App. H).",
+ "eval_protocol": "Every method in every data regime is evaluated on the same fully annotated test split per dataset (Sec. 4.1). No per-dataset tuning of parameters or zero-shot prompts (Sec. 3.2). Few-shot splits: K=10 instances per class following Wang et al. 2020 (TFA) protocol, choosing among random candidate splits the one with the largest average box area (Fig. 4 caption, App. E). Semi-supervised split: random 10% of the train set (App. F).",
+ "prompting_asymmetries": {
+  "GroundingDINO": "MM-GroundingDINO-L* weights from mmdetection; all class names concatenated into one prompt; few-shot = full fine-tune 1000 iterations, batch 4, lr 3e-4, images resized to (640, 1333), no extra augmentation (App. A)",
+  "OWLv2": "HuggingFace implementation; each class name prompted independently (App. A)",
+  "Detic": "Swin-L, checkpoint trained on LVIS, COCO and ImageNet-21K; class names as CLIP classifier prompts (App. A); few-shot uses federated loss of Madan et al. (Sec. 3.2)",
+  "MQ-GLIP": "GLIP Swin-L trained on Objects365, FourODs, GoldG, Cap24M; class names as text prompts and few-shot images as visual prompts; frozen (App. A, Sec. 3.2)",
+  "Qwen 2.5 VL (72B)": "API; multi-class prompt in Table 2 (caption), single-class in Table 1 (caption); Table 3 does not say; at most 3 few-shot images; confidence set to 1.0 (App. A)",
+  "Gemini 2.5 Pro": "gemini-2.5-pro-preview-03-25 via API; multi-class prompt in Table 2 (caption), single-class in Table 1 (caption); Table 3 does not say; all few-shot images; confidence set to 1.0 (App. A)",
+  "YOLOv8/YOLOv11": "Ultralytics defaults, 100 epochs, batch 16, evaluated with pycocotools (App. A); few-shot federated variant uses per-image hard negatives instead of Madan et al. frequency prior (Sec. 3.2)"
+ },
+ "categories": [
+  "Aerial",
+  "Document",
+  "Flora & Fauna",
+  "Industrial",
+  "Medical",
+  "Sports",
+  "Other"
+ ],
+ "clustering": "100 datasets clustered into seven categories using per-dataset CLIP embeddings (Fig. 1 caption)",
+ "datasets_per_category": {
+  "values": {
+   "Aerial": 11,
+   "Document": 10,
+   "Flora & Fauna": 23,
+   "Industrial": 22,
+   "Medical": 13,
+   "Sports": 6,
+   "Other": 15
+  },
+  "loc": "Fig. 5 right (pie chart, dataset counts); matches the per-category link tables in Appendix R"
+ },
+ "category_stats_fig5": {
+  "columns": [
+   "classes",
+   "images",
+   "annotations"
+  ],
+  "values": {
+   "Aerial": [
+    29,
+    "11,627",
+    "186,789"
+   ],
+   "Document": [
+    88,
+    "21,418",
+    "127,129"
+   ],
+   "Flora & Fauna": [
+    70,
+    "46,718",
+    "441,677"
+   ],
+   "Industrial": [
+    122,
+    "29,758",
+    "205,627"
+   ],
+   "Medical": [
+    77,
+    "16,369",
+    "125,433"
+   ],
+   "Sports": [
+    36,
+    "8,443",
+    "58,508"
+   ],
+   "Other": [
+    142,
+    "29,816",
+    "210,328"
+   ],
+   "All": [
+    564,
+    "164,149",
+    "1,355,491"
+   ]
+  },
+  "loc": "Fig. 5 left table"
+ },
+ "dataset_names": {
+  "values": {
+   "Flora & Fauna": [
+    "aquarium-combined",
+    "bees",
+    "deepfruits",
+    "exploratorium-daphnia",
+    "grapes-5",
+    "grass-weeds",
+    "gwhd2021",
+    "into-the-vale",
+    "jellyfish",
+    "marine-sharks",
+    "orgharvest",
+    "peixos-fish",
+    "penguin-finder-seg",
+    "pig-detection",
+    "roboflow-trained-dataset",
+    "sea-cucumbers-new-tiles",
+    "thermal-cheetah",
+    "tomatoes-2",
+    "trail-camera",
+    "underwater-objects",
+    "varroa-mites-detection--test-set",
+    "wb-prova",
+    "weeds4"
+   ],
+   "Industrial": [
+    "-grccs",
+    "13-lkc01",
+    "2024-frc",
+    "aircraft-turnaround-dataset",
+    "asphaltdistressdetection",
+    "cable-damage",
+    "conveyor-t-shirts",
+    "dataconvert",
+    "deeppcb",
+    "defect-detection",
+    "fruitjes",
+    "infraredimageofpowerequipment",
+    "ism-band-packet-detection",
+    "l10ul502",
+    "needle-base-tip-min-max",
+    "recode-waste",
+    "screwdetectclassification",
+    "smd-components",
+    "truck-movement",
+    "tube",
+    "water-meter",
+    "wheel-defect-detection"
+   ],
+   "Document": [
+    "activity-diagrams",
+    "all-elements",
+    "circuit-voltages",
+    "invoice-processing",
+    "label-printing-defect-version-2",
+    "macro-segmentation",
+    "paper-parts",
+    "signatures",
+    "speech-bubbles-detection",
+    "wine-labels"
+   ],
+   "Medical": [
+    "canalstenosis",
+    "crystal-clean-brain-tumors-mri-dataset",
+    "dentalai",
+    "inbreast",
+    "liver-disease",
+    "nih-xray",
+    "spinefrxnormalvindr",
+    "stomata-cells",
+    "train",
+    "ufba-425",
+    "urine-analysis1",
+    "x-ray-id",
+    "xray"
+   ],
+   "Aerial": [
+    "aerial-airport",
+    "aerial-cows",
+    "aerial-sheep",
+    "apoce-aerial-photographs-for-object-detection-of-construction-equipment",
+    "electric-pylon-detection-in-rsi",
+    "floating-waste",
+    "human-detection-in-floods",
+    "sssod",
+    "uavdet-small",
+    "wildfire-smoke",
+    "zebrasatasturias"
+   ],
+   "Sports": [
+    "actions",
+    "aerial-pool",
+    "ball",
+    "bibdetection",
+    "football-player-detection",
+    "lacrosse-object-detection"
+   ],
+   "Other": [
+    "buoy-onboarding",
+    "car-logo-detection",
+    "clashroyalechardetector",
+    "cod-mw-warzone",
+    "countingpills",
+    "everdaynew",
+    "flir-camera-objects",
+    "halo-infinite-angel-videogame",
+    "mahjong",
+    "new-defects-in-wood",
+    "orionproducts",
+    "pill",
+    "soda-bottles",
+    "taco-trash-annotations-in-context",
+    "the-dreidel-project"
+   ]
+  },
+  "loc": "Appendix R link tables (one table per category); per-dataset class lists are NOT given in the paper except recode-waste (App. Q sample instructions: Aggregate, Cardboard, Hard Plastic, Metal, Soft Plastic, Timber)"
+ },
+ "tables": [
+  {
+   "id": "table2-rf100vl",
+   "loc": "Table 2 (tab:baseline), p.8",
+   "benchmark": "RF100-VL, all 100 datasets",
+   "notes": "Caption says zero-shot, few-shot, semi-supervised and fully-supervised, but v4 Table 2 contains only zero-shot and 10-shot rows; semi/fully rows live in Table 7. MLLMs use multi-class prompts here.",
+   "rows": [
+    {
+     "method": "Detic",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "12.2",
+     "Document": "4.5",
+     "Flora & Fauna": "17.9",
+     "Industrial": "6.0",
+     "Medical": "0.8",
+     "Sports": "7.6",
+     "Other": "11.2",
+     "All": "9.5",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'Detic' (neurips_2025.tex line 523)"
+    },
+    {
+     "method": "GroundingDINO",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "21.5",
+     "Document": "9.2",
+     "Flora & Fauna": "27.9",
+     "Industrial": "10.3",
+     "Medical": "2.1",
+     "Sports": "13.3",
+     "Other": "17.5",
+     "All": "15.7",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'GroundingDINO' (neurips_2025.tex line 524)"
+    },
+    {
+     "method": "OWLv2 (Class Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "19.8",
+     "Document": "12.2",
+     "Flora & Fauna": "23.3",
+     "Industrial": "7.8",
+     "Medical": "2.1",
+     "Sports": "12.5",
+     "Other": "14.3",
+     "All": "13.6",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'OWLv2 (Class Names Only)' (neurips_2025.tex line 525)"
+    },
+    {
+     "method": "MQ-GLIP-Text (Class-Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "12.1",
+     "Document": "10.0",
+     "Flora & Fauna": "23.2",
+     "Industrial": "7.8",
+     "Medical": "1.4",
+     "Sports": "9.3",
+     "Other": "14.2",
+     "All": "12.2",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'MQ-GLIP-Text (Class-Names Only)' (neurips_2025.tex line 526)"
+    },
+    {
+     "method": "Qwen 2.5 VL (72B) (Class Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "4.6",
+     "Document": "3.9",
+     "Flora & Fauna": "10.4",
+     "Industrial": "4.1",
+     "Medical": "1.6",
+     "Sports": "6.0",
+     "Other": "5.6",
+     "All": "5.6",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'Qwen 2.5 VL (72B) (Class Names Only)' (neurips_2025.tex line 527)"
+    },
+    {
+     "method": "Qwen 2.5 VL (72B) (Instructions Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "5.4",
+     "Document": "5.0",
+     "Flora & Fauna": "14.8",
+     "Industrial": "5.6",
+     "Medical": "1.7",
+     "Sports": "7.6",
+     "Other": "7.6",
+     "All": "7.6",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'Qwen 2.5 VL (72B) (Instructions Only)' (neurips_2025.tex line 528)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Class Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "8.7",
+     "Document": "11.8",
+     "Flora & Fauna": "18.3",
+     "Industrial": "8.6",
+     "Medical": "5.3",
+     "Sports": "6.5",
+     "Other": "15.4",
+     "All": "11.6",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'Gemini 2.5 Pro (Class Names Only)' (neurips_2025.tex line 529)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Instructions Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "1.8",
+     "Document": "6.2",
+     "Flora & Fauna": "7.9",
+     "Industrial": "3.5",
+     "Medical": "0.6",
+     "Sports": "2.1",
+     "Other": "5.9",
+     "All": "4.5",
+     "loc": "Table 2 (tab:baseline), section 'Zero-Shot', row 'Gemini 2.5 Pro (Instructions Only)' (neurips_2025.tex line 530)"
+    },
+    {
+     "method": "Detic w/ Federated Loss",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "19.5",
+     "Document": "19.6",
+     "Flora & Fauna": "28.4",
+     "Industrial": "25.9",
+     "Medical": "8.5",
+     "Sports": "26.6",
+     "Other": "25.7",
+     "All": "22.8",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'Detic w/ Federated Loss' (neurips_2025.tex line 535)"
+    },
+    {
+     "method": "MQ-GLIP-Image (Images Only)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "specialist",
+     "Aerial": "4.4",
+     "Document": "3.2",
+     "Flora & Fauna": "13.3",
+     "Industrial": "3.9",
+     "Medical": "1.4",
+     "Sports": "7.4",
+     "Other": "6.9",
+     "All": "6.4",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'MQ-GLIP-Image (Images Only)' (neurips_2025.tex line 536)"
+    },
+    {
+     "method": "MQ-GLIP (Class Names + Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "specialist",
+     "Aerial": "12.1",
+     "Document": "9.5",
+     "Flora & Fauna": "23.1",
+     "Industrial": "7.8",
+     "Medical": "1.4",
+     "Sports": "9.3",
+     "Other": "14.3",
+     "All": "12.2",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'MQ-GLIP (Class Names + Images)' (neurips_2025.tex line 537)"
+    },
+    {
+     "method": "GroundingDINO",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "32.4",
+     "Document": "30.6",
+     "Flora & Fauna": "41.3",
+     "Industrial": "37.8",
+     "Medical": "18.3",
+     "Sports": "33.2",
+     "Other": "32.0",
+     "All": "33.6",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'GroundingDINO' (neurips_2025.tex line 538)"
+    },
+    {
+     "method": "YOLOv8n",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "12.8",
+     "Document": "22.8",
+     "Flora & Fauna": "20.9",
+     "Industrial": "28.1",
+     "Medical": "13.7",
+     "Sports": "13.6",
+     "Other": "19.9",
+     "All": "20.2",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'YOLOv8n' (neurips_2025.tex line 540)"
+    },
+    {
+     "method": "YOLOv8n w/ Federated Loss",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "13.5",
+     "Document": "25.4",
+     "Flora & Fauna": "22.0",
+     "Industrial": "25.9",
+     "Medical": "14.6",
+     "Sports": "14.6",
+     "Other": "21.3",
+     "All": "21.7",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'YOLOv8n w/ Federated Loss' (neurips_2025.tex line 541)"
+    },
+    {
+     "method": "YOLOv8s",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "15.9",
+     "Document": "22.8",
+     "Flora & Fauna": "22.1",
+     "Industrial": "24.7",
+     "Medical": "13.9",
+     "Sports": "18.0",
+     "Other": "21.7",
+     "All": "20.7",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'YOLOv8s' (neurips_2025.tex line 542)"
+    },
+    {
+     "method": "YOLOv8s w/ Federated Loss",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "17.4",
+     "Document": "24.9",
+     "Flora & Fauna": "25.4",
+     "Industrial": "26.5",
+     "Medical": "16.8",
+     "Sports": "18.5",
+     "Other": "23.3",
+     "All": "23.6",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'YOLOv8s w/ Federated Loss' (neurips_2025.tex line 543)"
+    },
+    {
+     "method": "YOLOv8m",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "14.3",
+     "Document": "24.0",
+     "Flora & Fauna": "19.7",
+     "Industrial": "24.9",
+     "Medical": "13.1",
+     "Sports": "19.7",
+     "Other": "22.9",
+     "All": "20.3",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'YOLOv8m' (neurips_2025.tex line 544)"
+    },
+    {
+     "method": "YOLOv8m w/ Federated Loss",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "16.9",
+     "Document": "23.3",
+     "Flora & Fauna": "20.8",
+     "Industrial": "26.6",
+     "Medical": "16.0",
+     "Sports": "21.4",
+     "Other": "22.6",
+     "All": "22.6",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'YOLOv8m w/ Federated Loss' (neurips_2025.tex line 545)"
+    },
+    {
+     "method": "Qwen 2.5 VL (72B) (Instructions + Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "generalist-MLLM",
+     "Aerial": "5.7",
+     "Document": "6.6",
+     "Flora & Fauna": "14.8",
+     "Industrial": "5.8",
+     "Medical": "1.7",
+     "Sports": "7.3",
+     "Other": "6.8",
+     "All": "7.6",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'Qwen 2.5 VL (72B) (Instructions + Images)' (neurips_2025.tex line 548)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "generalist-MLLM",
+     "Aerial": "6.2",
+     "Document": "9.4",
+     "Flora & Fauna": "17.5",
+     "Industrial": "9.5",
+     "Medical": "2.7",
+     "Sports": "5.0",
+     "Other": "9.7",
+     "All": "9.8",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'Gemini 2.5 Pro (Images)' (neurips_2025.tex line 549)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Instructions + Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "generalist-MLLM",
+     "Aerial": "5.3",
+     "Document": "8.8",
+     "Flora & Fauna": "15.0",
+     "Industrial": "8.8",
+     "Medical": "2.1",
+     "Sports": "4.9",
+     "Other": "9.5",
+     "All": "8.8",
+     "loc": "Table 2 (tab:baseline), section 'Few-Shot (10 shots)', row 'Gemini 2.5 Pro (Instructions + Images)' (neurips_2025.tex line 550)"
+    }
+   ]
+  },
+  {
+   "id": "table7-rf100vl-semi-full",
+   "loc": "Table 7 (tab:supervised_baseline), Appendix F, p.22",
+   "benchmark": "RF100-VL, all 100 datasets",
+   "notes": "Same test splits as Table 2. Semi-supervised = 10% of train labeled, STAC pseudo-labels the rest.",
+   "rows": [
+    {
+     "method": "YOLOv8n",
+     "setting": "semi-supervised-10pct",
+     "adaptation": "trained on 10% labeled split (+STAC pseudo-labels where named)",
+     "model_type": "specialist",
+     "Aerial": "32.8",
+     "Document": "35.1",
+     "Flora & Fauna": "41.5",
+     "Industrial": "50.7",
+     "Medical": "30.2",
+     "Sports": "29.4",
+     "Other": "37.6",
+     "All": "39.3",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Semi-Supervised (10% Labels)', row 'YOLOv8n' (suppl.tex line 247)"
+    },
+    {
+     "method": "YOLOv8n w/ STAC",
+     "setting": "semi-supervised-10pct",
+     "adaptation": "trained on 10% labeled split (+STAC pseudo-labels where named)",
+     "model_type": "specialist",
+     "Aerial": "35.3",
+     "Document": "38.5",
+     "Flora & Fauna": "43.6",
+     "Industrial": "51.5",
+     "Medical": "31.5",
+     "Sports": "32.1",
+     "Other": "40.1",
+     "All": "41.2",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Semi-Supervised (10% Labels)', row 'YOLOv8n w/ STAC' (suppl.tex line 248)"
+    },
+    {
+     "method": "YOLOv8s",
+     "setting": "semi-supervised-10pct",
+     "adaptation": "trained on 10% labeled split (+STAC pseudo-labels where named)",
+     "model_type": "specialist",
+     "Aerial": "37.8",
+     "Document": "40.8",
+     "Flora & Fauna": "42.6",
+     "Industrial": "52.6",
+     "Medical": "32.8",
+     "Sports": "36.8",
+     "Other": "41.3",
+     "All": "42.3",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Semi-Supervised (10% Labels)', row 'YOLOv8s' (suppl.tex line 249)"
+    },
+    {
+     "method": "YOLOv8s w/ STAC",
+     "setting": "semi-supervised-10pct",
+     "adaptation": "trained on 10% labeled split (+STAC pseudo-labels where named)",
+     "model_type": "specialist",
+     "Aerial": "38.2",
+     "Document": "42.7",
+     "Flora & Fauna": "43.4",
+     "Industrial": "52.4",
+     "Medical": "34.0",
+     "Sports": "38.4",
+     "Other": "42.3",
+     "All": "43.1",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Semi-Supervised (10% Labels)', row 'YOLOv8s w/ STAC' (suppl.tex line 250)"
+    },
+    {
+     "method": "YOLOv8m",
+     "setting": "semi-supervised-10pct",
+     "adaptation": "trained on 10% labeled split (+STAC pseudo-labels where named)",
+     "model_type": "specialist",
+     "Aerial": "37.8",
+     "Document": "40.5",
+     "Flora & Fauna": "41.3",
+     "Industrial": "52.9",
+     "Medical": "33.4",
+     "Sports": "41.4",
+     "Other": "42.1",
+     "All": "42.5",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Semi-Supervised (10% Labels)', row 'YOLOv8m' (suppl.tex line 251)"
+    },
+    {
+     "method": "YOLOv8m w/ STAC",
+     "setting": "semi-supervised-10pct",
+     "adaptation": "trained on 10% labeled split (+STAC pseudo-labels where named)",
+     "model_type": "specialist",
+     "Aerial": "37.5",
+     "Document": "42.5",
+     "Flora & Fauna": "43.2",
+     "Industrial": "52.7",
+     "Medical": "34.2",
+     "Sports": "40.2",
+     "Other": "43.5",
+     "All": "43.3",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Semi-Supervised (10% Labels)', row 'YOLOv8m w/ STAC' (suppl.tex line 252)"
+    },
+    {
+     "method": "YOLOv8n",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "50.4",
+     "Document": "56.4",
+     "Flora & Fauna": "53.9",
+     "Industrial": "64.3",
+     "Medical": "50.0",
+     "Sports": "49.2",
+     "Other": "54.6",
+     "All": "55.4",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'YOLOv8n' (suppl.tex line 255)"
+    },
+    {
+     "method": "YOLOv11n",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "51.2",
+     "Document": "58.4",
+     "Flora & Fauna": "54.8",
+     "Industrial": "64.6",
+     "Medical": "50.3",
+     "Sports": "49.2",
+     "Other": "55.5",
+     "All": "56.1",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'YOLOv11n' (suppl.tex line 256)"
+    },
+    {
+     "method": "YOLOv8s",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "51.6",
+     "Document": "58.9",
+     "Flora & Fauna": "54.9",
+     "Industrial": "64.6",
+     "Medical": "50.2",
+     "Sports": "51.2",
+     "Other": "56.7",
+     "All": "56.5",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'YOLOv8s' (suppl.tex line 257)"
+    },
+    {
+     "method": "YOLOv11s",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "53.1",
+     "Document": "58.8",
+     "Flora & Fauna": "55.5",
+     "Industrial": "64.7",
+     "Medical": "50.3",
+     "Sports": "52.0",
+     "Other": "57.4",
+     "All": "57.0",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'YOLOv11s' (suppl.tex line 258)"
+    },
+    {
+     "method": "LW-DETRs",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "54.5",
+     "Document": "57.7",
+     "Flora & Fauna": "54.2",
+     "Industrial": "66.8",
+     "Medical": "51.7",
+     "Sports": "54.7",
+     "Other": "56.3",
+     "All": "57.4",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'LW-DETRs' (suppl.tex line 259)"
+    },
+    {
+     "method": "YOLOv8m",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "52.5",
+     "Document": "59.9",
+     "Flora & Fauna": "55.1",
+     "Industrial": "64.7",
+     "Medical": "49.5",
+     "Sports": "52.6",
+     "Other": "57.5",
+     "All": "56.9",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'YOLOv8m' (suppl.tex line 260)"
+    },
+    {
+     "method": "YOLOv11m",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "53.0",
+     "Document": "60.5",
+     "Flora & Fauna": "54.8",
+     "Industrial": "65.1",
+     "Medical": "49.9",
+     "Sports": "52.4",
+     "Other": "57.3",
+     "All": "57.0",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'YOLOv11m' (suppl.tex line 261)"
+    },
+    {
+     "method": "LW-DETRm",
+     "setting": "fully-supervised",
+     "adaptation": "trained on full train split",
+     "model_type": "specialist",
+     "Aerial": "57.1",
+     "Document": "60.1",
+     "Flora & Fauna": "56.7",
+     "Industrial": "68.2",
+     "Medical": "52.8",
+     "Sports": "57.5",
+     "Other": "61.0",
+     "All": "59.8",
+     "loc": "Table 7 (tab:supervised_baseline), section 'Fully-Supervised', row 'LW-DETRm' (suppl.tex line 262)"
+    }
+   ]
+  },
+  {
+   "id": "table3-rf20vl-challenge",
+   "loc": "Table 3 (tab:challenge), p.9",
+   "benchmark": "RF20-VL: a 20-dataset subset of RF100-VL used for the CVPR 2025 challenge. NOT comparable row-for-row with Table 2.",
+   "rows": [
+    {
+     "method": "Detic",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "4.1",
+     "Document": "1.4",
+     "Flora & Fauna": "22.2",
+     "Industrial": "6.3",
+     "Medical": "0.1",
+     "Sports": "1.0",
+     "Other": "9.7",
+     "All": "8.4",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'Detic' (neurips_2025.tex line 607)"
+    },
+    {
+     "method": "GroundingDINO",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "28.5",
+     "Document": "5.1",
+     "Flora & Fauna": "33.7",
+     "Industrial": "12.8",
+     "Medical": "0.4",
+     "Sports": "5.1",
+     "Other": "16.9",
+     "All": "16.8",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'GroundingDINO' (neurips_2025.tex line 608)"
+    },
+    {
+     "method": "OWLv2 (Class Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "35.5",
+     "Document": "4.9",
+     "Flora & Fauna": "24.4",
+     "Industrial": "12.0",
+     "Medical": "0.1",
+     "Sports": "3.2",
+     "Other": "12.7",
+     "All": "14.2",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'OWLv2 (Class Names Only)' (neurips_2025.tex line 609)"
+    },
+    {
+     "method": "MQ-GLIP-Text (Class-Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "specialist",
+     "Aerial": "30.1",
+     "Document": "2.5",
+     "Flora & Fauna": "32.8",
+     "Industrial": "5.5",
+     "Medical": "0.5",
+     "Sports": "6.4",
+     "Other": "10.8",
+     "All": "14.0",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'MQ-GLIP-Text (Class-Names Only)' (neurips_2025.tex line 610)"
+    },
+    {
+     "method": "Qwen 2.5 VL (72B) (Class Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "3.8",
+     "Document": "3.5",
+     "Flora & Fauna": "10.2",
+     "Industrial": "2.8",
+     "Medical": "0.1",
+     "Sports": "9.6",
+     "Other": "3.9",
+     "All": "5.1",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'Qwen 2.5 VL (72B) (Class Names Only)' (neurips_2025.tex line 611)"
+    },
+    {
+     "method": "Qwen 2.5 VL (72B) (Instructions Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "4.9",
+     "Document": "7.8",
+     "Flora & Fauna": "13.4",
+     "Industrial": "5.1",
+     "Medical": "0.4",
+     "Sports": "11.5",
+     "Other": "5.8",
+     "All": "7.4",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'Qwen 2.5 VL (72B) (Instructions Only)' (neurips_2025.tex line 612)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Class Names Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "3.5",
+     "Document": "9.7",
+     "Flora & Fauna": "21.5",
+     "Industrial": "13.3",
+     "Medical": "0.4",
+     "Sports": "8.9",
+     "Other": "12.2",
+     "All": "11.5",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'Gemini 2.5 Pro (Class Names Only)' (neurips_2025.tex line 615)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Instructions Only)",
+     "setting": "zero-shot",
+     "adaptation": "zero-shot prompt (no training on target)",
+     "model_type": "generalist-MLLM",
+     "Aerial": "1.0",
+     "Document": "8.0",
+     "Flora & Fauna": "9.7",
+     "Industrial": "7.9",
+     "Medical": "0.1",
+     "Sports": "4.1",
+     "Other": "4.8",
+     "All": "5.7",
+     "loc": "Table 3 (tab:challenge), section 'Zero-Shot', row 'Gemini 2.5 Pro (Instructions Only)' (neurips_2025.tex line 616)"
+    },
+    {
+     "method": "Detic w/ Federated Loss",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "11.6",
+     "Document": "14.3",
+     "Flora & Fauna": "30.8",
+     "Industrial": "24.7",
+     "Medical": "8.9",
+     "Sports": "17.4",
+     "Other": "21.0",
+     "All": "20.3",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'Detic w/ Federated Loss' (neurips_2025.tex line 621)"
+    },
+    {
+     "method": "GroundingDINO",
+     "setting": "few-shot-10",
+     "adaptation": "gradient fine-tuning on the 10-shot split",
+     "model_type": "specialist",
+     "Aerial": "39.9",
+     "Document": "34.5",
+     "Flora & Fauna": "45.7",
+     "Industrial": "37.8",
+     "Medical": "23.3",
+     "Sports": "26.3",
+     "Other": "24.7",
+     "All": "33.4",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'GroundingDINO' (neurips_2025.tex line 622)"
+    },
+    {
+     "method": "MQ-GLIP-Image (Images Only)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "specialist",
+     "Aerial": "1.8",
+     "Document": "1.1",
+     "Flora & Fauna": "17.6",
+     "Industrial": "1.8",
+     "Medical": "0.1",
+     "Sports": "6.6",
+     "Other": "6.8",
+     "All": "6.7",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'MQ-GLIP-Image (Images Only)' (neurips_2025.tex line 624)"
+    },
+    {
+     "method": "MQ-GLIP (Class Names + Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "specialist",
+     "Aerial": "29.8",
+     "Document": "2.5",
+     "Flora & Fauna": "32.7",
+     "Industrial": "5.6",
+     "Medical": "0.5",
+     "Sports": "6.5",
+     "Other": "10.9",
+     "All": "14.0",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'MQ-GLIP (Class Names + Images)' (neurips_2025.tex line 625)"
+    },
+    {
+     "method": "Qwen 2.5 VL (72B) (Instructions + Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "generalist-MLLM",
+     "Aerial": "5.1",
+     "Document": "9.3",
+     "Flora & Fauna": "15.2",
+     "Industrial": "2.9",
+     "Medical": "0.2",
+     "Sports": "8.5",
+     "Other": "5.7",
+     "All": "7.2",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'Qwen 2.5 VL (72B) (Instructions + Images)' (neurips_2025.tex line 626)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Images Only)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "generalist-MLLM",
+     "Aerial": "7.7",
+     "Document": "14.2",
+     "Flora & Fauna": "24.3",
+     "Industrial": "4.0",
+     "Medical": "0.2",
+     "Sports": "12.8",
+     "Other": "9.7",
+     "All": "9.7",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'Gemini 2.5 Pro (Images Only)' (neurips_2025.tex line 627)"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Instructions + Images)",
+     "setting": "few-shot-10",
+     "adaptation": "in-context prompting, frozen weights",
+     "model_type": "generalist-MLLM",
+     "Aerial": "8.4",
+     "Document": "12.4",
+     "Flora & Fauna": "12.4",
+     "Industrial": "19.3",
+     "Medical": "0.2",
+     "Sports": "8.6",
+     "Other": "4.9",
+     "All": "8.6",
+     "loc": "Table 3 (tab:challenge), section 'Few-Shot (10 shots)', row 'Gemini 2.5 Pro (Instructions + Images)' (neurips_2025.tex line 628)"
+    },
+    {
+     "method": "BEATON",
+     "setting": "challenge",
+     "adaptation": "challenge entry (fine-tuned, method-specific)",
+     "model_type": "specialist",
+     "Aerial": "52.4",
+     "Document": "46.9",
+     "Flora & Fauna": "56.3",
+     "Industrial": "62.0",
+     "Medical": "42.9",
+     "Sports": "42.0",
+     "Other": "45.8",
+     "All": "50.4",
+     "loc": "Table 3 (tab:challenge), section 'Challenge Submissions', row 'BEATON' (neurips_2025.tex line 634)"
+    },
+    {
+     "method": "FDUROILab",
+     "setting": "challenge",
+     "adaptation": "challenge entry (fine-tuned, method-specific)",
+     "model_type": "specialist",
+     "Aerial": "52.3",
+     "Document": "49.9",
+     "Flora & Fauna": "56.9",
+     "Industrial": "61.6",
+     "Medical": "42.1",
+     "Sports": "41.9",
+     "Other": "42.4",
+     "All": "49.8",
+     "loc": "Table 3 (tab:challenge), section 'Challenge Submissions', row 'FDUROILab' (neurips_2025.tex line 635)"
+    },
+    {
+     "method": "NJUST-KMG",
+     "setting": "challenge",
+     "adaptation": "challenge entry (fine-tuned, method-specific)",
+     "model_type": "specialist",
+     "Aerial": "49.5",
+     "Document": "43.8",
+     "Flora & Fauna": "57.4",
+     "Industrial": "59.1",
+     "Medical": "42.1",
+     "Sports": "42.9",
+     "Other": "43.1",
+     "All": "49.0",
+     "loc": "Table 3 (tab:challenge), section 'Challenge Submissions', row 'NJUST-KMG' (neurips_2025.tex line 636)"
+    }
+   ]
+  },
+  {
+   "id": "table1-benchmark-comparison",
+   "loc": "Table 1 (tab:other_datasets), p.7",
+   "benchmark": "COCO val / ODinW-13 / RF100-VL; MLLMs use single-class prompts here",
+   "notes": "Fully-supervised RF100-VL column (54.9, 55.3, 56.2, 56.2, 56.4, 56.5) does NOT match Table 7 'All' (55.4, 56.1, 56.5, 57.0, 56.9, 57.0) or Table 4 pycocotools column; Table 1 matches commented-out older rows in the LaTeX. Recorded as printed; not reconciled.",
+   "columns": [
+    "COCO Val Reported",
+    "COCO Val Ours",
+    "ODinW-13 Reported",
+    "ODinW-13 Ours",
+    "RF100-VL Ours"
+   ],
+   "rows": [
+    {
+     "method": "Qwen 2.5-VL (72B) (Class Names Only)",
+     "setting": "zero-shot",
+     "values": [
+      "-",
+      "-",
+      "43.1",
+      "30.9",
+      "7.8"
+     ],
+     "loc": "Table 1, row Qwen 2.5-VL"
+    },
+    {
+     "method": "Gemini 2.5 Pro (Class Names Only)",
+     "setting": "zero-shot",
+     "values": [
+      "-",
+      "-",
+      "41.9",
+      "33.7",
+      "8.0"
+     ],
+     "loc": "Table 1, row Gemini 2.5 Pro"
+    },
+    {
+     "method": "YOLOv8n",
+     "setting": "fully-supervised",
+     "values": [
+      "37.3",
+      "37.4",
+      "-",
+      "-",
+      "54.9"
+     ],
+     "loc": "Table 1, row YOLOv8n"
+    },
+    {
+     "method": "YOLOv11n",
+     "setting": "fully-supervised",
+     "values": [
+      "39.5",
+      "39.4",
+      "-",
+      "-",
+      "55.3"
+     ],
+     "loc": "Table 1, row YOLOv11n"
+    },
+    {
+     "method": "YOLOv8s",
+     "setting": "fully-supervised",
+     "values": [
+      "44.9",
+      "45.0",
+      "-",
+      "-",
+      "56.2"
+     ],
+     "loc": "Table 1, row YOLOv8s"
+    },
+    {
+     "method": "YOLOv11s",
+     "setting": "fully-supervised",
+     "values": [
+      "47.0",
+      "46.9",
+      "-",
+      "-",
+      "56.2"
+     ],
+     "loc": "Table 1, row YOLOv11s"
+    },
+    {
+     "method": "YOLOv8m",
+     "setting": "fully-supervised",
+     "values": [
+      "50.2",
+      "50.3",
+      "-",
+      "-",
+      "56.4"
+     ],
+     "loc": "Table 1, row YOLOv8m"
+    },
+    {
+     "method": "YOLOv11m",
+     "setting": "fully-supervised",
+     "values": [
+      "51.5",
+      "51.5",
+      "-",
+      "-",
+      "56.5"
+     ],
+     "loc": "Table 1, row YOLOv11m"
+    }
+   ],
+   "text_only": {
+    "claim": "GroundingDINO achieves 49.2 mAP on ODinW-13 but only 15.7 mAP on RF100-VL",
+    "loc": "Sec. 4.2 first paragraph (not a Table 1 row)"
+   }
+  },
+  {
+   "id": "table4-toolkit",
+   "loc": "Table 4 (tab:mAP_method_comparison), Appendix B",
+   "benchmark": "RF100-VL fully-supervised YOLO",
+   "columns": [
+    "pycocotools mAP (Ours)",
+    "Ultralytics mAP"
+   ],
+   "rows": [
+    {
+     "method": "YOLOv8n",
+     "values": [
+      "55.4",
+      "57.2"
+     ]
+    },
+    {
+     "method": "YOLOv11n",
+     "values": [
+      "56.1",
+      "57.8"
+     ]
+    },
+    {
+     "method": "YOLOv8s",
+     "values": [
+      "56.5",
+      "59.0"
+     ]
+    },
+    {
+     "method": "YOLOv11s",
+     "values": [
+      "57.0",
+      "59.4"
+     ]
+    },
+    {
+     "method": "YOLOv8m",
+     "values": [
+      "56.9",
+      "59.6"
+     ]
+    },
+    {
+     "method": "YOLOv11m",
+     "values": [
+      "57.0",
+      "59.6"
+     ]
+    }
+   ],
+   "text": "Ultralytics trapezoidal integration inflates mAP by as much as 2.7% vs pycocotools (App. B)"
+  },
+  {
+   "id": "table8-variance",
+   "loc": "Table 8 (tab:overall_variance), Appendix I",
+   "benchmark": "RF100-VL, YOLOv8 w/ federated loss, 10 seeds, few-shot",
+   "rows": [
+    {
+     "method": "YOLOv8n w/ Federated Loss (10 runs)",
+     "Aerial": "13.5 +- .778",
+     "Document": "24.9 +- 1.19",
+     "Flora & Fauna": "20.8 +- .246",
+     "Industrial": "30.1 +- .409",
+     "Medical": "15.9 +- .771",
+     "Sports": "14.8 +- 1.270",
+     "Other": "21.8 +- .891",
+     "All": "21.6 +- .230"
+    },
+    {
+     "method": "YOLOv8s w/ Federated Loss (10 runs)",
+     "Aerial": "17.3 +- .791",
+     "Document": "26.4 +- .902",
+     "Flora & Fauna": "23.4 +- .407",
+     "Industrial": "30.0 +- .680",
+     "Medical": "17.8 +- .565",
+     "Sports": "19.2 +- .536",
+     "Other": "25.0 +- .252",
+     "All": "23.7 +- .216"
+    }
+   ],
+   "notes": "Per-dataset std averaged per category (Table 9) is larger: All +- 2.50 (v8n), +- 2.71 (v8s). The 10-run means differ from the single-run Table 2 rows (e.g. YOLOv8n w/ Fed Industrial 25.9 in Table 2 vs 30.1 mean here)."
+  }
+ ],
+ "ladder_industrial": {
+  "note": "Convenience view for viz-ladder (Industrial column only). Every value is copied from the rows above.",
+  "zero_shot_best_specialist": {
+   "method": "GroundingDINO",
+   "value": "10.3",
+   "loc": "Table 2, Zero-Shot, GroundingDINO, Industrial"
+  },
+  "few_shot_10_best": {
+   "method": "GroundingDINO (fine-tuned)",
+   "value": "37.8",
+   "loc": "Table 2, Few-Shot, GroundingDINO, Industrial"
+  },
+  "semi_supervised_10pct_range": {
+   "min": "50.7",
+   "max": "52.9",
+   "loc": "Table 7, Semi-Supervised rows, Industrial (YOLOv8n 50.7 .. YOLOv8m 52.9)"
+  },
+  "fully_supervised_range": {
+   "min": "64.3",
+   "max": "68.2",
+   "loc": "Table 7, Fully-Supervised rows, Industrial (YOLOv8n 64.3 .. LW-DETRm 68.2)"
+  }
+ }
+}

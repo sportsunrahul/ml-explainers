@@ -1,0 +1,2134 @@
+[
+ {
+  "id": "vim-published",
+  "claim": "Vim v1 submission date",
+  "value": "2024-01-17",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "abs.html, submission history [v1]"
+ },
+ {
+  "id": "vim-v2-date",
+  "claim": "Vim v2 date (class token moved to middle, per README news)",
+  "value": "2024-02-10",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "abs.html, submission history [v2]"
+ },
+ {
+  "id": "vim-v3-date",
+  "claim": "Vim v3 (version read) date",
+  "value": "2024-11-14",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "abs.html, submission history [v3]"
+ },
+ {
+  "id": "vim-version",
+  "claim": "Vim arXiv version read",
+  "value": "2401.09417v3",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "abs.html"
+ },
+ {
+  "id": "vim-venue",
+  "claim": "Vim venue",
+  "value": "ICML 2024",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "abs.html comments; PDF p. 1 footer"
+ },
+ {
+  "id": "vim-patch",
+  "claim": "Vim patch size (16x16 projection kernel)",
+  "value": "16",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4 Architecture Details"
+ },
+ {
+  "id": "vim-res",
+  "claim": "Vim ImageNet train/test resolution",
+  "value": "224",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1 image size column; Sec. 4.1"
+ },
+ {
+  "id": "vim-tokens-224",
+  "claim": "Vim patch tokens at 224^2 with patch 16 (14^2)",
+  "value": "196",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: (224/16)^2; same count in MambaOut Sec. 3.2",
+  "our_reading": true
+ },
+ {
+  "id": "vim-seqlen-224",
+  "claim": "Vim sequence length at 224^2 incl. class token",
+  "value": "197",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: 196 patches + 1 class token (Eq. 4, E_pos has J+1 rows)",
+  "our_reading": true
+ },
+ {
+  "id": "vim-patchvec",
+  "claim": "Vim flattened patch length P^2*C",
+  "value": "768",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: 16*16*3 from Sec. 3.2 definitions",
+  "our_reading": true
+ },
+ {
+  "id": "vim-depth",
+  "claim": "Vim number of blocks L (default, all sizes)",
+  "value": "24",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4"
+ },
+ {
+  "id": "vim-n",
+  "claim": "Vim SSM dimension N",
+  "value": "16",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4; Sec. 3.5 Eq. 6 text"
+ },
+ {
+  "id": "vim-ti-d",
+  "claim": "Vim-Ti hidden dimension D",
+  "value": "192",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4"
+ },
+ {
+  "id": "vim-ti-e",
+  "claim": "Vim-Ti expanded dimension E",
+  "value": "384",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4"
+ },
+ {
+  "id": "vim-s-d",
+  "claim": "Vim-S hidden dimension D",
+  "value": "384",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4"
+ },
+ {
+  "id": "vim-s-e",
+  "claim": "Vim-S expanded dimension E",
+  "value": "768",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.4"
+ },
+ {
+  "id": "vim-e-2d",
+  "claim": "Vim default expansion E = 2D",
+  "value": "E=2D",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 3.5 Computation-Efficiency"
+ },
+ {
+  "id": "vim-ti-state",
+  "claim": "Vim-Ti state size per direction per layer, E x N",
+  "value": "6144",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: 384 x 16 from Algorithm 1 h_o shape (B, E, N)",
+  "our_reading": true
+ },
+ {
+  "id": "vim-cls-middle-idx",
+  "claim": "Index of middle class token in 197-token sequence",
+  "value": "98",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: paper says 'middle of the visual sequence' (Sec. 4.4); index not stated",
+  "uncertain": true,
+  "our_reading": true
+ },
+ {
+  "id": "vim-ti-params",
+  "claim": "Vim-Ti params",
+  "value": "7M",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-Ti"
+ },
+ {
+  "id": "vim-s-params",
+  "claim": "Vim-S params",
+  "value": "26M",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-S"
+ },
+ {
+  "id": "vim-b-params",
+  "claim": "Vim-B params",
+  "value": "98M",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-B"
+ },
+ {
+  "id": "vim-in1k-top1-vimti",
+  "claim": "Vim-Ti ImageNet-1k top-1",
+  "value": "76.1",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-Ti"
+ },
+ {
+  "id": "vim-in1k-top1-vimti-ft",
+  "claim": "Vim-Ti dagger (long-sequence fine-tuned) top-1",
+  "value": "78.3",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-Ti dagger"
+ },
+ {
+  "id": "vim-in1k-top1-vims",
+  "claim": "Vim-S ImageNet-1k top-1 (v3 paper)",
+  "value": "80.3",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-S"
+ },
+ {
+  "id": "vim-in1k-top1-vims-ft",
+  "claim": "Vim-S dagger top-1",
+  "value": "81.4",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-S dagger"
+ },
+ {
+  "id": "vim-in1k-top1-vimb",
+  "claim": "Vim-B ImageNet-1k top-1",
+  "value": "81.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-B"
+ },
+ {
+  "id": "vim-in1k-top1-vimb-ft",
+  "claim": "Vim-B dagger top-1",
+  "value": "83.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row Vim-B dagger"
+ },
+ {
+  "id": "vim-in1k-top1-vims-readme",
+  "claim": "Vim-small top-1 in README weights table (differs from v3 Table 1)",
+  "value": "80.5",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "README.md, Model Weights table, row Vim-small",
+  "code_only": true
+ },
+ {
+  "id": "vim-in1k-top1-vims-ft-readme",
+  "claim": "Vim-small+ top-1 in README (differs from v3 Table 1)",
+  "value": "81.6",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "README.md, Model Weights table, row Vim-small+",
+  "code_only": true
+ },
+ {
+  "id": "vim-deitti-top1",
+  "claim": "DeiT-Ti top-1 as listed by Vim",
+  "value": "72.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row DeiT-Ti"
+ },
+ {
+  "id": "vim-deits-top1",
+  "claim": "DeiT-S top-1 as listed by Vim",
+  "value": "79.8",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row DeiT-S"
+ },
+ {
+  "id": "vim-deitb-top1",
+  "claim": "DeiT-B top-1 as listed by Vim",
+  "value": "81.8",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row DeiT-B"
+ },
+ {
+  "id": "vim-deitti-params",
+  "claim": "DeiT-Ti params",
+  "value": "6M",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row DeiT-Ti"
+ },
+ {
+  "id": "vim-deits-params",
+  "claim": "DeiT-S params",
+  "value": "22M",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row DeiT-S"
+ },
+ {
+  "id": "vim-deitb-params",
+  "claim": "DeiT-B params",
+  "value": "86M",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row DeiT-B"
+ },
+ {
+  "id": "vim-s4nd-top1",
+  "claim": "S4ND-ViT-B top-1 as listed by Vim",
+  "value": "80.4",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 1, row S4ND-ViT-B"
+ },
+ {
+  "id": "vim-gain-ti",
+  "claim": "Vim-Ti minus DeiT-Ti top-1 (points)",
+  "value": "3.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Results text"
+ },
+ {
+  "id": "vim-gain-s",
+  "claim": "Vim-S minus DeiT-S top-1 (points)",
+  "value": "0.5",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Results text"
+ },
+ {
+  "id": "vim-gain-b",
+  "claim": "Vim-B minus DeiT-B top-1 (points)",
+  "value": "0.1",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Results text"
+ },
+ {
+  "id": "vim-epochs",
+  "claim": "Vim ImageNet training epochs",
+  "value": "300",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Settings"
+ },
+ {
+  "id": "vim-batch",
+  "claim": "Vim total batch size",
+  "value": "1024",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Settings"
+ },
+ {
+  "id": "vim-lr",
+  "claim": "Vim initial learning rate (cosine, EMA)",
+  "value": "1e-3",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Settings (written 1x10^-3)"
+ },
+ {
+  "id": "vim-wd",
+  "claim": "Vim weight decay",
+  "value": "0.05",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Settings"
+ },
+ {
+  "id": "vim-gpus",
+  "claim": "Vim training hardware",
+  "value": "8 A800 GPUs",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Settings"
+ },
+ {
+  "id": "vim-ft-stride",
+  "claim": "Vim long-sequence fine-tuning patch stride",
+  "value": "8",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Long Sequence Fine-tuning"
+ },
+ {
+  "id": "vim-ft-epochs",
+  "claim": "Vim long-sequence fine-tuning epochs",
+  "value": "30",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Long Sequence Fine-tuning"
+ },
+ {
+  "id": "vim-ft-tokens",
+  "claim": "Patch tokens at 224^2 with stride 8, patch 16",
+  "value": "729",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "our reading: ((224-16)/8+1)^2 = 27^2",
+  "our_reading": true,
+  "uncertain": true
+ },
+ {
+  "id": "vim-hr-speed",
+  "claim": "Vim-Ti vs DeiT-Ti speedup at 1248x1248, backbone batch inference",
+  "value": "2.8x",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Abstract; Fig. 1(b) and caption; Sec. 4.1 text"
+ },
+ {
+  "id": "vim-hr-mem",
+  "claim": "Vim-Ti GPU memory saved vs DeiT-Ti at 1248x1248, backbone",
+  "value": "86.8%",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Abstract; Fig. 1(c) and caption; Sec. 4.1 text"
+ },
+ {
+  "id": "vim-hr-res",
+  "claim": "Resolution of the 2.8x / 86.8% claim",
+  "value": "1248",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1 caption ('1248x1248')"
+ },
+ {
+  "id": "vim-hr-tokens",
+  "claim": "Tokens per image at 1248x1248",
+  "value": "6084",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1 caption"
+ },
+ {
+  "id": "vim-hr-similar-res",
+  "claim": "Resolution where Vim and DeiT have similar FPS and memory",
+  "value": "512",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Sec. 4.1 Results text; Fig. 1(b)(c)"
+ },
+ {
+  "id": "vim-fig1-mem-vim-1248",
+  "claim": "Vim-Ti GPU memory (GB) at 1248, backbone",
+  "value": "11.14",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(c), Vim-Ti point at 1248"
+ },
+ {
+  "id": "vim-fig1-mem-vim-1024",
+  "claim": "Vim-Ti GPU memory (GB) at 1024, backbone",
+  "value": "8.13",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(c), Vim-Ti point at 1024"
+ },
+ {
+  "id": "vim-fig1-mem-deit-1024",
+  "claim": "DeiT-Ti GPU memory (GB) at 1024, backbone",
+  "value": "40.09",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(c), DeiT-Ti point at 1024"
+ },
+ {
+  "id": "vim-fig1-mem-vim-512",
+  "claim": "Vim-Ti GPU memory (GB) at 512, backbone",
+  "value": "3.32",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(c), Vim-Ti point at 512"
+ },
+ {
+  "id": "vim-fig1-mem-deit-512",
+  "claim": "DeiT-Ti GPU memory (GB) at 512, backbone",
+  "value": "4.56",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(c), DeiT-Ti point at 512"
+ },
+ {
+  "id": "vim-fig1-mem-deit-1248",
+  "claim": "DeiT-Ti at 1248 in Fig. 1(c)",
+  "value": "OOM",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(c), label above 1248"
+ },
+ {
+  "id": "vim-fig1-logfps-vim-1248",
+  "claim": "Vim-Ti log-scaled FPS at 1248, backbone",
+  "value": "1.71",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(b), Vim-Ti point at 1248"
+ },
+ {
+  "id": "vim-fig1-logfps-deit-1248",
+  "claim": "DeiT-Ti log-scaled FPS at 1248, backbone",
+  "value": "1.26",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 1(b), DeiT-Ti point at 1248"
+ },
+ {
+  "id": "vim-fpn-speed",
+  "claim": "Vim-Ti vs DeiT-Ti speedup at 1248 with backbone + FPN",
+  "value": "2.8x",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 3 (p. 7), annotation at 1248"
+ },
+ {
+  "id": "vim-fpn-mem",
+  "claim": "Vim-Ti GPU memory saved vs DeiT-Ti at 1248 with backbone + FPN",
+  "value": "73.2%",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 4 (p. 7), annotation '-73.2% memory'"
+ },
+ {
+  "id": "vim-fpn-mem-vim-1248",
+  "claim": "Vim-Ti GPU memory (GB) at 1248 with FPN",
+  "value": "22.59",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Fig. 4, Vim point at 1248"
+ },
+ {
+  "id": "vim-ade-vimti",
+  "claim": "Vim-Ti ADE20K mIoU (UperNet, 512)",
+  "value": "41.0",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 2, row UperNet Vim-Ti"
+ },
+ {
+  "id": "vim-ade-vims",
+  "claim": "Vim-S ADE20K mIoU (UperNet, 512)",
+  "value": "44.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 2, row UperNet Vim-S"
+ },
+ {
+  "id": "vim-ade-deitti",
+  "claim": "DeiT-Ti ADE20K mIoU (UperNet, 512)",
+  "value": "39.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 2, row UperNet DeiT-Ti"
+ },
+ {
+  "id": "vim-ade-deits",
+  "claim": "DeiT-S ADE20K mIoU (UperNet, 512)",
+  "value": "44.0",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 2, row UperNet DeiT-S"
+ },
+ {
+  "id": "vim-ade-r101",
+  "claim": "ResNet-101 ADE20K mIoU (UperNet, 512)",
+  "value": "44.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 2, row UperNet ResNet-101"
+ },
+ {
+  "id": "vim-coco-apbox-vimti",
+  "claim": "Vim-Ti COCO AP^box, Cascade Mask R-CNN",
+  "value": "45.7",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 3, AP^box column, row Vim-Ti"
+ },
+ {
+  "id": "vim-coco-apbox-deitti",
+  "claim": "DeiT-Ti COCO AP^box, Cascade Mask R-CNN",
+  "value": "44.4",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 3, AP^box column, row DeiT-Ti"
+ },
+ {
+  "id": "vim-coco-apmask-vimti",
+  "claim": "Vim-Ti COCO AP^mask, Cascade Mask R-CNN",
+  "value": "39.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 3, AP^mask column, row Vim-Ti"
+ },
+ {
+  "id": "vim-coco-apmask-deitti",
+  "claim": "DeiT-Ti COCO AP^mask, Cascade Mask R-CNN",
+  "value": "38.1",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 3, AP^mask column, row DeiT-Ti"
+ },
+ {
+  "id": "vim-coco-apl-vimti",
+  "claim": "Vim-Ti COCO AP^box_l (large objects)",
+  "value": "63.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 3, AP^box_l column, row Vim-Ti"
+ },
+ {
+  "id": "vim-coco-apl-deitti",
+  "claim": "DeiT-Ti COCO AP^box_l (large objects)",
+  "value": "61.8",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 3, AP^box_l column, row DeiT-Ti"
+ },
+ {
+  "id": "vim-coco-res",
+  "claim": "Vim detection input resolution (LSJ)",
+  "value": "1024",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "App. B; Sec. 4.3 text"
+ },
+ {
+  "id": "vim-abl-none-top1",
+  "claim": "Bidirectional ablation: None (forward only) top-1",
+  "value": "73.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row None"
+ },
+ {
+  "id": "vim-abl-none-miou",
+  "claim": "Bidirectional ablation: None ADE20K mIoU",
+  "value": "32.3",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row None"
+ },
+ {
+  "id": "vim-abl-layer-top1",
+  "claim": "Bidirectional ablation: Bidirectional Layer top-1",
+  "value": "70.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row Bidirectional Layer"
+ },
+ {
+  "id": "vim-abl-layer-miou",
+  "claim": "Bidirectional ablation: Bidirectional Layer mIoU",
+  "value": "33.6",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row Bidirectional Layer"
+ },
+ {
+  "id": "vim-abl-ssm-top1",
+  "claim": "Bidirectional ablation: Bidirectional SSM top-1",
+  "value": "72.8",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row Bidirectional SSM"
+ },
+ {
+  "id": "vim-abl-ssm-miou",
+  "claim": "Bidirectional ablation: Bidirectional SSM mIoU",
+  "value": "33.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row Bidirectional SSM"
+ },
+ {
+  "id": "vim-abl-ssmconv-top1",
+  "claim": "Bidirectional ablation: Bidirectional SSM + Conv1d (default) top-1",
+  "value": "73.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row Bidirectional SSM + Conv1d"
+ },
+ {
+  "id": "vim-abl-ssmconv-miou",
+  "claim": "Bidirectional ablation: Bidirectional SSM + Conv1d (default) mIoU",
+  "value": "35.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 4, row Bidirectional SSM + Conv1d"
+ },
+ {
+  "id": "vim-cls-meanpool",
+  "claim": "Classification design: Mean pool top-1",
+  "value": "73.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 5, row Mean pool"
+ },
+ {
+  "id": "vim-cls-maxpool",
+  "claim": "Classification design: Max pool top-1",
+  "value": "73.4",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 5, row Max pool"
+ },
+ {
+  "id": "vim-cls-head",
+  "claim": "Classification design: Head class token top-1",
+  "value": "75.2",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 5, row Head class token"
+ },
+ {
+  "id": "vim-cls-double",
+  "claim": "Classification design: Double class token top-1",
+  "value": "74.3",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 5, row Double class token"
+ },
+ {
+  "id": "vim-cls-middle",
+  "claim": "Classification design: Middle class token top-1 (default)",
+  "value": "76.1",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "Table 5, row Middle class token"
+ },
+ {
+  "id": "vim-hier-t",
+  "claim": "Hier-Vim-T ImageNet top-1",
+  "value": "82.5",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "App. C Table 7, row Hier-Vim-T"
+ },
+ {
+  "id": "vim-hier-s",
+  "claim": "Hier-Vim-S ImageNet top-1",
+  "value": "83.4",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "App. C Table 7, row Hier-Vim-S"
+ },
+ {
+  "id": "vim-hier-b",
+  "claim": "Hier-Vim-B ImageNet top-1",
+  "value": "83.9",
+  "paper": "Vision Mamba",
+  "arxiv": "2401.09417v3",
+  "loc": "App. C Table 7, row Hier-Vim-B"
+ },
+ {
+  "id": "vmamba-published",
+  "claim": "VMamba v1 submission date",
+  "value": "2024-01-18",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "abs.html, submission history [v1]"
+ },
+ {
+  "id": "vmamba-v3-date",
+  "claim": "VMamba v3 date (updated weights 'VMambav2', per README)",
+  "value": "2024-05-26",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "abs.html, submission history [v3]; README update May 26th 2024"
+ },
+ {
+  "id": "vmamba-v4-date",
+  "claim": "VMamba v4 (version read) date",
+  "value": "2024-12-29",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "abs.html, submission history [v4]"
+ },
+ {
+  "id": "vmamba-version",
+  "claim": "VMamba arXiv version read",
+  "value": "2401.10166v4",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "abs.html"
+ },
+ {
+  "id": "vmamba-venue",
+  "claim": "VMamba venue",
+  "value": "NeurIPS 2024",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "abs.html comments ('NeurIPS 2024 spotlight')"
+ },
+ {
+  "id": "vmamba-routes",
+  "claim": "Number of SS2D scanning routes",
+  "value": "four",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Abstract; Sec. 4.2; Fig. 2"
+ },
+ {
+  "id": "vmamba-stem-stride",
+  "claim": "VMamba stem output resolution relative to input",
+  "value": "H/4",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Sec. 4.1"
+ },
+ {
+  "id": "vmamba-stage-res",
+  "claim": "VMamba-T stage resolutions at 224 input",
+  "value": "56, 28, 14, 7",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, output size column (56x56, 28x28, 14x14, 7x7)"
+ },
+ {
+  "id": "vmamba-t-tokens-s1",
+  "claim": "VMamba-T stage-1 tokens at 224 (56^2)",
+  "value": "3136",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "our reading: 56x56 from Table 4",
+  "our_reading": true
+ },
+ {
+  "id": "vmamba-t-dims",
+  "claim": "VMamba-T channels per stage",
+  "value": "96, 192, 384, 768",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, VMamba-T column"
+ },
+ {
+  "id": "vmamba-t-depths",
+  "claim": "VMamba-T blocks per stage",
+  "value": "[2,2,8,2]",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4; Table 5 row Step(g); Sec. 4.3 Step (g)"
+ },
+ {
+  "id": "vmamba-t-ssmratio",
+  "claim": "VMamba-T ssm-ratio",
+  "value": "1",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4 VSSBlock(ssm-ratio=1); Table 5 row Step(g)"
+ },
+ {
+  "id": "vmamba-mlpratio",
+  "claim": "VMamba mlp-ratio (all sizes)",
+  "value": "4",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4 VSSBlock(..., mlp-ratio=4)"
+ },
+ {
+  "id": "vmamba-t-dstate",
+  "claim": "VMamba-T d_state (SSM state dimension N)",
+  "value": "1",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Step(g), d_state column"
+ },
+ {
+  "id": "vmamba-dstate-default",
+  "claim": "VMamba default d_state ('primarily set')",
+  "value": "1",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. H.3 first sentence"
+ },
+ {
+  "id": "vmamba-s-dims",
+  "claim": "VMamba-S channels per stage",
+  "value": "96, 192, 384, 768",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, VMamba-S column"
+ },
+ {
+  "id": "vmamba-s-depths",
+  "claim": "VMamba-S blocks per stage",
+  "value": "[2,2,15,2]",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, VMamba-S column (s2l15)"
+ },
+ {
+  "id": "vmamba-s-ssmratio",
+  "claim": "VMamba-S ssm-ratio",
+  "value": "2",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4 VSSBlock(ssm-ratio=2)"
+ },
+ {
+  "id": "vmamba-b-dims",
+  "claim": "VMamba-B channels per stage",
+  "value": "128, 256, 512, 1024",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, VMamba-B column"
+ },
+ {
+  "id": "vmamba-b-depths",
+  "claim": "VMamba-B blocks per stage",
+  "value": "[2,2,15,2]",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, VMamba-B column (s2l15)"
+ },
+ {
+  "id": "vmamba-b-ssmratio",
+  "claim": "VMamba-B ssm-ratio",
+  "value": "2",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4 VSSBlock(ssm-ratio=2)"
+ },
+ {
+  "id": "vmamba-t-params",
+  "claim": "VMamba-T params (Table 4)",
+  "value": "30.2M",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, Param. row"
+ },
+ {
+  "id": "vmamba-s-params",
+  "claim": "VMamba-S params (Table 4)",
+  "value": "50.1M",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, Param. row"
+ },
+ {
+  "id": "vmamba-b-params",
+  "claim": "VMamba-B params (Table 4)",
+  "value": "88.6M",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 4, Param. row"
+ },
+ {
+  "id": "vmamba-t-flops",
+  "claim": "VMamba-T FLOPs",
+  "value": "4.9G",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-T"
+ },
+ {
+  "id": "vmamba-s-flops",
+  "claim": "VMamba-S FLOPs",
+  "value": "8.7G",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-S"
+ },
+ {
+  "id": "vmamba-b-flops",
+  "claim": "VMamba-B FLOPs",
+  "value": "15.4G",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-B"
+ },
+ {
+  "id": "vmamba-in1k-top1-t",
+  "claim": "VMamba-T ImageNet-1k top-1",
+  "value": "82.6",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-T"
+ },
+ {
+  "id": "vmamba-in1k-top1-s",
+  "claim": "VMamba-S ImageNet-1k top-1",
+  "value": "83.6",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-S"
+ },
+ {
+  "id": "vmamba-in1k-top1-b",
+  "claim": "VMamba-B ImageNet-1k top-1",
+  "value": "83.9",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-B"
+ },
+ {
+  "id": "vmamba-tp-t",
+  "claim": "VMamba-T inference throughput (img/s, A100, batch 128)",
+  "value": "1686",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-T, TP. column; App. E"
+ },
+ {
+  "id": "vmamba-tp-s",
+  "claim": "VMamba-S inference throughput (img/s)",
+  "value": "877",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-S, TP. column"
+ },
+ {
+  "id": "vmamba-tp-b",
+  "claim": "VMamba-B inference throughput (img/s)",
+  "value": "646",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row VMamba-B, TP. column"
+ },
+ {
+  "id": "vmamba-swint-top1",
+  "claim": "Swin-T top-1 as listed by VMamba",
+  "value": "81.3",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Swin-T"
+ },
+ {
+  "id": "vmamba-swins-top1",
+  "claim": "Swin-S top-1 as listed by VMamba",
+  "value": "83.0",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Swin-S"
+ },
+ {
+  "id": "vmamba-swinb-top1",
+  "claim": "Swin-B top-1 as listed by VMamba",
+  "value": "83.5",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Swin-B"
+ },
+ {
+  "id": "vmamba-swint-tp",
+  "claim": "Swin-T throughput (img/s) as listed by VMamba",
+  "value": "1244",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Swin-T, TP. column"
+ },
+ {
+  "id": "vmamba-swinb-tp",
+  "claim": "Swin-B throughput (img/s) as listed by VMamba",
+  "value": "458",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Swin-B, TP. column"
+ },
+ {
+  "id": "vmamba-deits-tp",
+  "claim": "DeiT-S throughput (img/s) as listed by VMamba",
+  "value": "1761",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row DeiT-S, TP. column"
+ },
+ {
+  "id": "vmamba-convnextt-top1",
+  "claim": "ConvNeXt-T top-1 as listed by VMamba",
+  "value": "82.1",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row ConvNeXt-T"
+ },
+ {
+  "id": "vmamba-vims-top1-cited",
+  "claim": "Vim-S top-1 as cited by VMamba (Vim v3 Table 1 says 80.3)",
+  "value": "80.5",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Vim-S"
+ },
+ {
+  "id": "vmamba-vims-tp",
+  "claim": "Vim-S throughput (img/s) as measured by VMamba",
+  "value": "811",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 1, row Vim-S, TP. column"
+ },
+ {
+  "id": "vmamba-vanilla-t-top1",
+  "claim": "Vanilla VMamba-T top-1 (first design)",
+  "value": "82.17",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Vanilla-VMamba-T"
+ },
+ {
+  "id": "vmamba-vanilla-t-tp",
+  "claim": "Vanilla VMamba-T throughput (img/s)",
+  "value": "426",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Vanilla-VMamba-T; Sec. 4.3"
+ },
+ {
+  "id": "vmamba-vanilla-t-params",
+  "claim": "Vanilla VMamba-T params",
+  "value": "22.9M",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Vanilla-VMamba-T; Sec. 4.3"
+ },
+ {
+  "id": "vmamba-vanilla-t-depths",
+  "claim": "Vanilla VMamba-T blocks per stage",
+  "value": "[2,2,9,2]",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 3; Table 5, row Vanilla-VMamba-T"
+ },
+ {
+  "id": "vmamba-vanilla-dstate",
+  "claim": "Vanilla VMamba-T d_state",
+  "value": "16",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Vanilla-VMamba-T, d_state column"
+ },
+ {
+  "id": "vmamba-vanilla-ssmratio",
+  "claim": "Vanilla VMamba-T ssm-ratio",
+  "value": "2.0",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Vanilla-VMamba-T, ssm-ratio column"
+ },
+ {
+  "id": "vmamba-step-e2-tp",
+  "claim": "Throughput after d_state 16 -> 1 (Step e.2)",
+  "value": "1942",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Step(e.2)"
+ },
+ {
+  "id": "vmamba-step-e2-top1",
+  "claim": "Top-1 after d_state 16 -> 1 (Step e.2)",
+  "value": "81.87",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Step(e.2)"
+ },
+ {
+  "id": "vmamba-step-f-top1",
+  "claim": "Top-1 at Step (f) (d_state 1, ssm-ratio 2, [2,2,5,2])",
+  "value": "82.49",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Step(f)"
+ },
+ {
+  "id": "vmamba-final-t-top1-2dp",
+  "claim": "Final VMamba-T top-1 (two decimals)",
+  "value": "82.60",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 5, row Step(g)"
+ },
+ {
+  "id": "vmamba-epochs",
+  "claim": "VMamba ImageNet epochs",
+  "value": "300",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. E Experiment Setting"
+ },
+ {
+  "id": "vmamba-warmup",
+  "claim": "VMamba warm-up epochs",
+  "value": "20",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. E Experiment Setting"
+ },
+ {
+  "id": "vmamba-batch",
+  "claim": "VMamba batch size",
+  "value": "1024",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. E Experiment Setting"
+ },
+ {
+  "id": "vmamba-lr",
+  "claim": "VMamba initial learning rate",
+  "value": "1e-3",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. E Experiment Setting (written 1x10^-3)"
+ },
+ {
+  "id": "vmamba-wd",
+  "claim": "VMamba weight decay",
+  "value": "0.05",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. E Experiment Setting"
+ },
+ {
+  "id": "vmamba-ema",
+  "claim": "VMamba EMA decay",
+  "value": "0.9999",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. E Experiment Setting"
+ },
+ {
+  "id": "vmamba-gpus",
+  "claim": "VMamba hardware",
+  "value": "8 x NVIDIA Tesla-A100 GPUs",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Sec. 5 intro"
+ },
+ {
+  "id": "vmamba-coco-t-apb",
+  "claim": "VMamba-T COCO AP^b, Mask R-CNN 1x",
+  "value": "47.3",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row VMamba-T"
+ },
+ {
+  "id": "vmamba-coco-t-apm",
+  "claim": "VMamba-T COCO AP^m, Mask R-CNN 1x",
+  "value": "42.7",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row VMamba-T"
+ },
+ {
+  "id": "vmamba-coco-s-apb",
+  "claim": "VMamba-S COCO AP^b, Mask R-CNN 1x",
+  "value": "48.7",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row VMamba-S"
+ },
+ {
+  "id": "vmamba-coco-s-apm",
+  "claim": "VMamba-S COCO AP^m, Mask R-CNN 1x",
+  "value": "43.7",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row VMamba-S"
+ },
+ {
+  "id": "vmamba-coco-b-apb",
+  "claim": "VMamba-B COCO AP^b, Mask R-CNN 1x",
+  "value": "49.2",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row VMamba-B"
+ },
+ {
+  "id": "vmamba-coco-b-apm",
+  "claim": "VMamba-B COCO AP^m, Mask R-CNN 1x",
+  "value": "44.1",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row VMamba-B"
+ },
+ {
+  "id": "vmamba-coco-swint-apb",
+  "claim": "Swin-T COCO AP^b, Mask R-CNN 1x",
+  "value": "42.7",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row Swin-T"
+ },
+ {
+  "id": "vmamba-coco-convnextt-apb",
+  "claim": "ConvNeXt-T COCO AP^b, Mask R-CNN 1x",
+  "value": "44.2",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 1x, row ConvNeXt-T"
+ },
+ {
+  "id": "vmamba-coco3x-t-apb",
+  "claim": "VMamba-T COCO AP^b, Mask R-CNN 3x MS",
+  "value": "48.8",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 3x MS, row VMamba-T"
+ },
+ {
+  "id": "vmamba-coco3x-s-apb",
+  "claim": "VMamba-S COCO AP^b, Mask R-CNN 3x MS",
+  "value": "49.9",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 left, 3x MS, row VMamba-S"
+ },
+ {
+  "id": "vmamba-ade-t-ss",
+  "claim": "VMamba-T ADE20K mIoU single-scale (main table)",
+  "value": "47.9",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 right, row VMamba-T, mIoU (SS)"
+ },
+ {
+  "id": "vmamba-ade-t-ss-app",
+  "claim": "VMamba-T ADE20K mIoU SS in appendix (conflicts with main 47.9)",
+  "value": "48.0",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 8, row VMamba-T, mIoU (SS)"
+ },
+ {
+  "id": "vmamba-ade-t-ms",
+  "claim": "VMamba-T ADE20K mIoU multi-scale",
+  "value": "48.8",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 right, row VMamba-T, mIoU (MS)"
+ },
+ {
+  "id": "vmamba-ade-s-ss",
+  "claim": "VMamba-S ADE20K mIoU SS",
+  "value": "50.6",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 right, row VMamba-S, mIoU (SS)"
+ },
+ {
+  "id": "vmamba-ade-b-ss",
+  "claim": "VMamba-B ADE20K mIoU SS",
+  "value": "51.0",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 right, row VMamba-B, mIoU (SS)"
+ },
+ {
+  "id": "vmamba-ade-swint-ss",
+  "claim": "Swin-T ADE20K mIoU SS as listed by VMamba",
+  "value": "44.5",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 2 right, row Swin-T"
+ },
+ {
+  "id": "vmamba-hr768-top1",
+  "claim": "VMamba-T top-1 at 768x768 without fine-tuning",
+  "value": "74.7",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Sec. 5.2 Discussion; Table 9 gives 74.66"
+ },
+ {
+  "id": "vmamba-hr768-linear",
+  "claim": "VMamba-T top-1 at 768x768 with linear tuning",
+  "value": "79.2",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Sec. 5.2 Discussion; Table 9 gives 79.22"
+ },
+ {
+  "id": "vmamba-hr768-tp",
+  "claim": "VMamba-T throughput at 768x768 (img/s, batch 32)",
+  "value": "149",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 9, VMamba-Tiny 768^2 row; App. G text"
+ },
+ {
+  "id": "vmamba-hr768-swin-top1",
+  "claim": "Swin-T top-1 at 768x768 (scaled windows)",
+  "value": "73.1",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "App. G text; Table 9 gives 73.06"
+ },
+ {
+  "id": "vmamba-hr768-swin-tp",
+  "claim": "Swin-T throughput at 768x768 (img/s)",
+  "value": "53",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 9, Swin-Tiny 768^2 row; App. G text"
+ },
+ {
+  "id": "vmamba-hr768-deits-top1",
+  "claim": "DeiT-S top-1 at 768x768 without fine-tuning",
+  "value": "60.98",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 9, DeiT-Small 768^2 row"
+ },
+ {
+  "id": "vmamba-scan-unidi",
+  "claim": "Scan ablation, VMamba-T w/ DWConv: Unidi-Scan top-1",
+  "value": "82.26",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/ dwconv, row Unidi-Scan"
+ },
+ {
+  "id": "vmamba-scan-bidi",
+  "claim": "Scan ablation, w/ DWConv: Bidi-Scan top-1",
+  "value": "82.49",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/ dwconv, row Bidi-Scan"
+ },
+ {
+  "id": "vmamba-scan-cascade",
+  "claim": "Scan ablation, w/ DWConv: Cascade-Scan top-1",
+  "value": "82.42",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/ dwconv, row Cascade-Scan"
+ },
+ {
+  "id": "vmamba-scan-cross",
+  "claim": "Scan ablation, w/ DWConv: Cross-Scan top-1",
+  "value": "82.60",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/ dwconv, row Cross-Scan"
+ },
+ {
+  "id": "vmamba-scan-unidi-nodw",
+  "claim": "Scan ablation, w/o DWConv: Unidi-Scan top-1",
+  "value": "80.88",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/o dwconv, row Unidi-Scan"
+ },
+ {
+  "id": "vmamba-scan-bidi-nodw",
+  "claim": "Scan ablation, w/o DWConv: Bidi-Scan top-1",
+  "value": "81.80",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/o dwconv, row Bidi-Scan"
+ },
+ {
+  "id": "vmamba-scan-cross-nodw",
+  "claim": "Scan ablation, w/o DWConv: Cross-Scan top-1",
+  "value": "82.25",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/o dwconv, row Cross-Scan"
+ },
+ {
+  "id": "vmamba-scan-cascade-tp",
+  "claim": "Cascade-Scan throughput (img/s) w/ DWConv",
+  "value": "998",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 10, w/ dwconv, row Cascade-Scan"
+ },
+ {
+  "id": "vmamba-dstate4-top1",
+  "claim": "VMamba-T top-1 with d_state 4, ssm-ratio 2 (intermediate [2,2,5,2]-layer config of Table 5 Step (f), baseline 82.49 at d_state 1; not the final VMamba-T)",
+  "value": "82.51",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 12, row d_state 4"
+ },
+ {
+  "id": "vmamba-dstate16-top1",
+  "claim": "VMamba-T top-1 with d_state 16, ssm-ratio 1 (intermediate [2,2,5,2]-layer config, Table 5 Step (e.1); not the final VMamba-T)",
+  "value": "82.31",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 12, row d_state 16"
+ },
+ {
+  "id": "vmamba-init-zero",
+  "claim": "VMamba-T top-1 with zero init",
+  "value": "82.67",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 11, row zero"
+ },
+ {
+  "id": "vmamba-init-rand",
+  "claim": "VMamba-T top-1 with random init",
+  "value": "82.58",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Table 11, row rand"
+ },
+ {
+  "id": "vmamba-erf-global",
+  "claim": "Models with global ERF in VMamba's comparison",
+  "value": "DeiT, HiViT, Vim and VMamba",
+  "paper": "VMamba",
+  "arxiv": "2401.10166v4",
+  "loc": "Sec. 5.3 ERF paragraph; Fig. 7"
+ },
+ {
+  "id": "mambaout-published",
+  "claim": "MambaOut v1 submission date",
+  "value": "2024-05-13",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "abs.html, submission history [v1]"
+ },
+ {
+  "id": "mambaout-v3-date",
+  "claim": "MambaOut v3 (version read) date",
+  "value": "2024-05-20",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "abs.html, submission history [v3]"
+ },
+ {
+  "id": "mambaout-version",
+  "claim": "MambaOut arXiv version read",
+  "value": "2405.07992v3",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "abs.html"
+ },
+ {
+  "id": "mambaout-venue",
+  "claim": "MambaOut venue",
+  "value": "CVPR 2025",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "README.md title line",
+  "code_only": true
+ },
+ {
+  "id": "mambaout-tau-small",
+  "claim": "Long-sequence threshold 6D for ViT-S (D=384)",
+  "value": "2304",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2, after Eq. 7"
+ },
+ {
+  "id": "mambaout-tau-base",
+  "claim": "Long-sequence threshold 6D for ViT-B (D=768)",
+  "value": "4608",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2, after Eq. 7"
+ },
+ {
+  "id": "mambaout-in-tokens",
+  "claim": "ImageNet tokens at 224^2 with 16^2 patches",
+  "value": "196",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2"
+ },
+ {
+  "id": "mambaout-det-tokens",
+  "claim": "Approximate tokens for COCO 800x1280 / ADE20K 512x2048",
+  "value": "4K",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 3.2"
+ },
+ {
+  "id": "mambaout-flops-eq",
+  "claim": "Transformer block FLOPs (MLP ratio 4)",
+  "value": "24D^2L + 4DL^2",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Eq. 6"
+ },
+ {
+  "id": "mambaout-ratio-eq",
+  "claim": "Quadratic-to-linear FLOPs ratio",
+  "value": "L/6D",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Eq. 7"
+ },
+ {
+  "id": "mambaout-causal-vitti-full",
+  "claim": "ViT-Ti top-1, fully-visible attention",
+  "value": "72.2",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Fig. 3(b), ViT-Ti green bar"
+ },
+ {
+  "id": "mambaout-causal-vitti-causal",
+  "claim": "ViT-Ti top-1, causal attention",
+  "value": "70.6",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Fig. 3(b), ViT-Ti grey bar"
+ },
+ {
+  "id": "mambaout-causal-vits-full",
+  "claim": "ViT-S top-1, fully-visible attention",
+  "value": "79.8",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Fig. 3(b), ViT-S green bar"
+ },
+ {
+  "id": "mambaout-causal-vits-causal",
+  "claim": "ViT-S top-1, causal attention",
+  "value": "78.9",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Fig. 3(b), ViT-S grey bar"
+ },
+ {
+  "id": "mambaout-kernel",
+  "claim": "MambaOut token mixer",
+  "value": "7x7 depthwise conv",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.1; Table 4"
+ },
+ {
+  "id": "mambaout-mlpratio",
+  "claim": "MambaOut MLP ratio",
+  "value": "8/3",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 4; Algorithm 1 expension_ratio"
+ },
+ {
+  "id": "mambaout-t-blocks",
+  "claim": "MambaOut-Tiny blocks per stage",
+  "value": "(3, 3, 9, 3)",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 4, Tiny column"
+ },
+ {
+  "id": "mambaout-t-channels",
+  "claim": "MambaOut-Tiny channels per stage",
+  "value": "(96, 192, 384, 576)",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 4, Tiny column"
+ },
+ {
+  "id": "mambaout-batch",
+  "claim": "MambaOut ImageNet batch size",
+  "value": "4096",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.2 Setup"
+ },
+ {
+  "id": "mambaout-lr",
+  "claim": "MambaOut ImageNet learning rate",
+  "value": "0.004",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.2 Setup"
+ },
+ {
+  "id": "mambaout-in-femto",
+  "claim": "MambaOut-Femto ImageNet top-1",
+  "value": "78.9",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row MambaOut-Femto"
+ },
+ {
+  "id": "mambaout-in-tiny",
+  "claim": "MambaOut-Tiny ImageNet top-1",
+  "value": "82.7",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row MambaOut-Tiny"
+ },
+ {
+  "id": "mambaout-in-small",
+  "claim": "MambaOut-Small ImageNet top-1",
+  "value": "84.1",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row MambaOut-Small"
+ },
+ {
+  "id": "mambaout-in-base",
+  "claim": "MambaOut-Base ImageNet top-1",
+  "value": "84.2",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row MambaOut-Base"
+ },
+ {
+  "id": "mambaout-in-tiny-params",
+  "claim": "MambaOut-Tiny params (M)",
+  "value": "27",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row MambaOut-Tiny"
+ },
+ {
+  "id": "mambaout-in-vmambav9t",
+  "claim": "VMambaV9-T top-1 as listed by MambaOut",
+  "value": "82.5",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row VMambaV9-T*"
+ },
+ {
+  "id": "mambaout-in-vmambat-old",
+  "claim": "VMamba-T (vanilla) top-1 as listed by MambaOut",
+  "value": "82.2",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row VMamba-T"
+ },
+ {
+  "id": "mambaout-in-localvmambat",
+  "claim": "LocalVMamba-T top-1 as listed by MambaOut",
+  "value": "82.7",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row LocalVMamba-T"
+ },
+ {
+  "id": "mambaout-in-vmambav9s",
+  "claim": "VMambaV9-S top-1 as listed by MambaOut",
+  "value": "83.6",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row VMambaV9-S"
+ },
+ {
+  "id": "mambaout-in-localvmambas",
+  "claim": "LocalVMamba-S top-1 as listed by MambaOut",
+  "value": "83.7",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row LocalVMamba-S"
+ },
+ {
+  "id": "mambaout-in-vmambav9b",
+  "claim": "VMambaV9-B top-1 as listed by MambaOut",
+  "value": "83.9",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row VMambaV9-B"
+ },
+ {
+  "id": "mambaout-in-vims",
+  "claim": "Vim-S top-1 as listed by MambaOut",
+  "value": "80.5",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 1, row Vim-S"
+ },
+ {
+  "id": "mambaout-in-small-gain",
+  "claim": "MambaOut-Small minus LocalVMamba-S top-1",
+  "value": "0.4",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.2 Results text"
+ },
+ {
+  "id": "mambaout-in-small-macs",
+  "claim": "MambaOut-Small MACs as share of LocalVMamba-S",
+  "value": "79%",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.2 Results text"
+ },
+ {
+  "id": "mambaout-coco-t-apb",
+  "claim": "MambaOut-Tiny COCO AP^b, Mask R-CNN 1x",
+  "value": "45.1",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row MambaOut-Tiny"
+ },
+ {
+  "id": "mambaout-coco-t-apm",
+  "claim": "MambaOut-Tiny COCO AP^m, Mask R-CNN 1x",
+  "value": "41.0",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row MambaOut-Tiny"
+ },
+ {
+  "id": "mambaout-coco-vmambav9t-apb",
+  "claim": "VMambaV9-T COCO AP^b as listed by MambaOut",
+  "value": "47.4",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row VMambaV9-T"
+ },
+ {
+  "id": "mambaout-coco-vmambav9t-apm",
+  "claim": "VMambaV9-T COCO AP^m as listed by MambaOut",
+  "value": "42.7",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row VMambaV9-T"
+ },
+ {
+  "id": "mambaout-coco-vmambat-old-apb",
+  "claim": "VMamba-T (vanilla) COCO AP^b as listed by MambaOut",
+  "value": "46.5",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row VMamba-T"
+ },
+ {
+  "id": "mambaout-coco-gap-apb",
+  "claim": "MambaOut-Tiny AP^b deficit vs VMamba-T (vanilla row)",
+  "value": "1.4",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.3 Results text"
+ },
+ {
+  "id": "mambaout-coco-gap-apm",
+  "claim": "MambaOut-Tiny AP^m deficit vs VMamba-T (vanilla row)",
+  "value": "1.1",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.3 Results text"
+ },
+ {
+  "id": "mambaout-coco-s-apb",
+  "claim": "MambaOut-Small COCO AP^b",
+  "value": "47.4",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row MambaOut-Small"
+ },
+ {
+  "id": "mambaout-coco-vmambav9s-apb",
+  "claim": "VMambaV9-S COCO AP^b as listed by MambaOut",
+  "value": "48.7",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row VMambaV9-S"
+ },
+ {
+  "id": "mambaout-coco-b-apb",
+  "claim": "MambaOut-Base COCO AP^b",
+  "value": "47.4",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row MambaOut-Base"
+ },
+ {
+  "id": "mambaout-coco-vmambav9b-apb",
+  "claim": "VMambaV9-B COCO AP^b as listed by MambaOut",
+  "value": "49.2",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 2, row VMambaV9-B"
+ },
+ {
+  "id": "mambaout-ade-t-ss",
+  "claim": "MambaOut-Tiny ADE20K mIoU SS",
+  "value": "47.4",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row MambaOut-Tiny"
+ },
+ {
+  "id": "mambaout-ade-t-ms",
+  "claim": "MambaOut-Tiny ADE20K mIoU MS",
+  "value": "48.6",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row MambaOut-Tiny"
+ },
+ {
+  "id": "mambaout-ade-vmambav9t-ss",
+  "claim": "VMambaV9-T ADE20K mIoU SS as listed by MambaOut",
+  "value": "48.3",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row VMambaV9-T"
+ },
+ {
+  "id": "mambaout-ade-localvmambat-ss",
+  "claim": "LocalVMamba-T ADE20K mIoU SS as listed by MambaOut",
+  "value": "47.9",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row LocalVMamba-T"
+ },
+ {
+  "id": "mambaout-ade-gap",
+  "claim": "LocalVMamba-T minus MambaOut-Tiny mIoU (SS and MS)",
+  "value": "0.5",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Sec. 4.4 Results text"
+ },
+ {
+  "id": "mambaout-ade-s-ss",
+  "claim": "MambaOut-Small ADE20K mIoU SS",
+  "value": "49.5",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row MambaOut-Small"
+ },
+ {
+  "id": "mambaout-ade-vmambav9s-ss",
+  "claim": "VMambaV9-S ADE20K mIoU SS as listed by MambaOut",
+  "value": "50.6",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row VMambaV9-S"
+ },
+ {
+  "id": "mambaout-ade-b-ss",
+  "claim": "MambaOut-Base ADE20K mIoU SS",
+  "value": "49.6",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row MambaOut-Base"
+ },
+ {
+  "id": "mambaout-ade-vmambav9b-ss",
+  "claim": "VMambaV9-B ADE20K mIoU SS as listed by MambaOut",
+  "value": "51.0",
+  "paper": "MambaOut",
+  "arxiv": "2405.07992v3",
+  "loc": "Table 3, row VMambaV9-B"
+ },
+ {
+  "id": "mlla-published",
+  "claim": "MLLA v1 submission date",
+  "value": "2024-05-26",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "abs.html, submission history [v1]"
+ },
+ {
+  "id": "mlla-v2-date",
+  "claim": "MLLA v2 (version read) date",
+  "value": "2024-12-02",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "abs.html, submission history [v2]"
+ },
+ {
+  "id": "mlla-version",
+  "claim": "MLLA arXiv version read",
+  "value": "2405.16605v2",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "abs.html"
+ },
+ {
+  "id": "mlla-venue",
+  "claim": "MLLA venue",
+  "value": "NeurIPS 2024",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "abs.html comments"
+ },
+ {
+  "id": "mlla-distinctions",
+  "claim": "Number of distinctions between Mamba and linear attention Transformer",
+  "value": "six",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Abstract; Sec. 4.4"
+ },
+ {
+  "id": "mlla-baseline-top1",
+  "claim": "Linear-attention Swin-T baseline top-1",
+  "value": "77.6",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row Baseline"
+ },
+ {
+  "id": "mlla-baseline-tp",
+  "claim": "Baseline throughput (img/s)",
+  "value": "1152",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row Baseline"
+ },
+ {
+  "id": "mlla-inputgate-top1",
+  "claim": "+ Input Gate top-1",
+  "value": "77.8",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row + Input Gate"
+ },
+ {
+  "id": "mlla-forgetgate-top1",
+  "claim": "+ Forget Gate top-1",
+  "value": "78.4",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row + Forget Gate"
+ },
+ {
+  "id": "mlla-forgetgate-tp",
+  "claim": "+ Forget Gate throughput (img/s)",
+  "value": "743",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row + Forget Gate"
+ },
+ {
+  "id": "mlla-shortcut-top1",
+  "claim": "+ Shortcut top-1",
+  "value": "77.8",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row + Shortcut"
+ },
+ {
+  "id": "mlla-nonorm-top1",
+  "claim": "- Normalization top-1",
+  "value": "72.4",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row - Normalization"
+ },
+ {
+  "id": "mlla-nomh-top1",
+  "claim": "- Multi-head Design top-1",
+  "value": "73.5",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row - Multi-head Design"
+ },
+ {
+  "id": "mlla-blockall-top1",
+  "claim": "+ Block Design all top-1",
+  "value": "79.4",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row + Block Design all."
+ },
+ {
+  "id": "mlla-blocksub-top1",
+  "claim": "+ Block Design sub top-1",
+  "value": "80.9",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 1, row + Block Design sub."
+ },
+ {
+  "id": "mlla-lepe-top1",
+  "claim": "Forget gate replaced by LePE, top-1",
+  "value": "81.6",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 2, row + LePE"
+ },
+ {
+  "id": "mlla-cpe-top1",
+  "claim": "Forget gate replaced by CPE, top-1",
+  "value": "81.7",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 2, row + CPE"
+ },
+ {
+  "id": "mlla-rope-top1",
+  "claim": "Forget gate replaced by RoPE, top-1",
+  "value": "80.0",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 2, row + RoPE"
+ },
+ {
+  "id": "mlla-forget-shallow",
+  "claim": "Average forget gate value in shallow layers",
+  "value": "0.2",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Sec. 5.2 Forget Gate text; Fig. 4(b)"
+ },
+ {
+  "id": "mlla-forget-deep",
+  "claim": "Average forget gate value in deep layers",
+  "value": "0.6-0.8",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Sec. 5.2 Forget Gate text; Fig. 4(b)"
+ },
+ {
+  "id": "mlla-milat-top1",
+  "claim": "MILA-T ImageNet top-1",
+  "value": "83.5",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 3, row MILA-T"
+ },
+ {
+  "id": "mlla-milas-top1",
+  "claim": "MILA-S ImageNet top-1 (Table 3, with MESA; App. Table 7 lists 84.3)",
+  "value": "84.4",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 3, row MILA-S"
+ },
+ {
+  "id": "mlla-milab-top1",
+  "claim": "MILA-B ImageNet top-1",
+  "value": "85.3",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 3, row MILA-B"
+ },
+ {
+  "id": "mlla-vmambat-cited",
+  "claim": "VMamba-T top-1 as cited by MLLA",
+  "value": "82.5",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "Table 3, row VMamba-T"
+ },
+ {
+  "id": "mlla-rename",
+  "claim": "Final-manuscript name of the MLLA model",
+  "value": "MILA",
+  "paper": "Demystify Mamba in Vision (MLLA/MILA)",
+  "arxiv": "2405.16605v2",
+  "loc": "README.md line 3; v2 abstract"
+ }
+]

@@ -1,0 +1,40 @@
+  <article data-chapter="vild" data-chip="ViLD">
+    <header class="ch-head"><span class="num"></span><h2>Find boxes first, then borrow CLIP's names</h2><p class="subhead">Two-stage detection and ViLD</p></header>
+    <div class="tools">
+      <div class="seg" role="tablist" aria-label="ViLD">
+        <button type="button" role="tab" data-step="0">Proposals</button>
+        <button type="button" role="tab" data-step="1">Text classifier</button>
+        <button type="button" role="tab" data-step="2">Distillation</button>
+      </div>
+      <button type="button" class="tool" data-replay>Replay</button>
+    </div>
+    <div class="step-text" data-step="0">
+      <h3>The first stage boxes objects it cannot name</h3>
+      <p>A two-stage <button class="inline-term" data-open="detector">detector</button> first turns the image into a grid of features. At every grid cell it places a few fixed boxes, called anchors. A <button class="inline-term" data-open="vild-rpn">region proposal network</button> scores each anchor for "is there an object here?" and nudges it onto the object. The best boxes survive as proposals. Then <button class="inline-term" data-open="vild-roialign">RoIAlign</button> cuts each proposal out of the feature grid, and a small head names it from a fixed list.</p>
+      <div class="controls"><label class="slider"><span>Proposals kept <b id="vild-k-value">5</b></span><input id="vild-k" type="range" min="1" max="12" step="1" value="5"></label></div>
+      <p class="note">The forklift gets a box although no training label said "forklift": the network learned what objects look like, not what they are called. Then the head calls it background. ViLD measured the real effect: a proposal network trained without the rare classes recalls them only about 2 points worse (ViLD Table 1).</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <h3>Swap the fixed list for CLIP text vectors</h3>
+      <p>ViLD keeps the two-stage detector and replaces the head's class rows with CLIP text vectors of the 866 base class names (yellow), plus one learned background vector (brown). Each box becomes a region embedding (blue), scored by cosine against those rows in a <button class="inline-term" data-open="embedding">shared embedding space</button>. Training pulls each labelled box toward its name.</p>
+      <p class="note">A box on an unlabelled forklift matches no labelled box, so this loss calls it background and pulls it toward the brown point. Text alone reaches 10.1 rare-class AP.</p>
+    </div>
+    <div class="step-text" data-step="2">
+      <h3>Copy CLIP's view of every box</h3>
+      <p>The second loss uses no labels. Before training, CLIP embeds a crop of every proposal (small faded blue points). ViLD trains each region embedding to match its crop's CLIP embedding: <button class="inline-term" data-open="vild-distill">knowledge distillation</button>. CLIP's view of a forklift crop sits near the word "forklift", so the forklift boxes land there too.</p>
+      <p class="note">At test time CLIP is gone. The detector names every box in one pass, by cosine with the text vectors of all 1,203 <button class="inline-term" data-open="lvis">LVIS</button> class names.</p>
+    </div>
+    <p class="note">The stage is a toy: a drawn warehouse with made-up scores, then a sphere standing in for an embedding space with hundreds of dimensions; drag it to turn it. The table holds the paper's numbers: rare-class mask AP on LVIS, ResNet-50 (ViLD Table 3).</p>
+    <table class="data">
+      <thead><tr><th>Method</th><th class="n">Rare-class AP</th></tr></thead>
+      <tbody>
+        <tr><td>CLIP on every cropped box (one CLIP pass per box)</td><td class="n">18.9</td></tr>
+        <tr><td>Supervised, with the rare labels</td><td class="n">12.3</td></tr>
+        <tr><td>ViLD-text (text classifier only)</td><td class="n">10.1</td></tr>
+        <tr><td>ViLD-image (distillation only)</td><td class="n">11.2</td></tr>
+        <tr class="ours"><td>ViLD (both losses)</td><td class="n">16.1</td></tr>
+      </tbody>
+    </table>
+    <p class="inscription">The box finder never needed names. ViLD fixes the namer: it trains region embeddings to land where CLIP would put them.</p>
+    <button type="button" class="continue" data-go="overview">Continue</button>
+  </article>

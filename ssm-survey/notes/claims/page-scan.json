@@ -1,0 +1,7 @@
+[
+ {"id": "pscan-len-2048", "claim": "Example sequence length for the scan depth readout (Mamba's training context)", "value": "2,048", "paper": "Mamba", "arxiv": "2312.00752v2", "loc": "Sec 4.2.2 para 1 (context length 2048)"},
+ {"id": "pscan-rounds-2048", "claim": "Rounds of a work-efficient scan (up-sweep, down-sweep, final combine) over 2,048 tokens", "value": "23", "paper": "Martin and Cundy", "arxiv": "1709.04057v2", "loc": "computed: 2 log2(2048) + 1 = 23 (parts/core-scan.js lastRound)", "our_reading": true},
+ {"id": "pscan-io-ratio", "claim": "Forward HBM traffic of an unfused selective scan over the fused kernel, one layer, L=2048, D=5120, N=16", "value": "33", "paper": "Mamba", "arxiv": "2312.00752v2", "loc": "computed from the reads and writes in App. D 'Speed': (6BLDN + 3BLD + 2BLN + DN) / (3BLD + 2BLN + DN) = 32.9 (parts/core-scan.js TRAFFIC)", "our_reading": true},
+ {"id": "pscan-mem-model", "claim": "Model size in the memory benchmark", "value": "125M", "paper": "Mamba", "arxiv": "2312.00752v2", "loc": "App. E.5 'Memory Benchmark'; Table 15 caption"},
+ {"id": "pscan-mem-seqlen", "claim": "Sequence length in the memory benchmark", "value": "2048", "paper": "Mamba", "arxiv": "2312.00752v2", "loc": "App. E.5 'Memory Benchmark' ('sequences of length 2048')"}
+]

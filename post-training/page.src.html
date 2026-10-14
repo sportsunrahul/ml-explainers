@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Post-training and alignment, explained in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@500;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F4F3F0;--panel:#FCFBF9;--ink:#211F1C;--muted:#65605A;--line:#D8D3CB;
+ --pol:#3B5BDB;--ref:#868E96;--rew:#D9480F;--good:#2F9E44;--bad:#E03131;--acc:#D9480F;--pro:#2F9E44;--con:#E03131;
+ --sans:"Onest","Helvetica Neue",Arial,sans-serif;--serif:"Lora",Georgia,serif;--hw:800}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#15140F;--panel:#1D1C17;--ink:#ECE8E1;--muted:#A7A197;--line:#322F28;--pol:#7C95FF;--ref:#A0A7AF;--rew:#FF8A4C;--good:#5CCB6E;--bad:#FF6B6B;--acc:#FF8A4C;--pro:#5CCB6E;--con:#FF6B6B}}
+:root[data-theme="dark"]{--paper:#15140F;--panel:#1D1C17;--ink:#ECE8E1;--muted:#A7A197;--line:#322F28;--pol:#7C95FF;--ref:#A0A7AF;--rew:#FF8A4C;--good:#5CCB6E;--bad:#FF6B6B;--acc:#FF8A4C;--pro:#5CCB6E;--con:#FF6B6B}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18.5px;line-height:1.68;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration-color:var(--muted);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.prose{max-width:700px}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:var(--hw,700)}
+h1{font-size:clamp(46px,8.6vw,108px);line-height:.9;letter-spacing:-.04em;margin:0 0 22px}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.03;letter-spacing:-.025em;margin:0 0 14px}
+h3{font-size:24px;line-height:1.2;margin:40px 0 10px}
+h4{font-size:18px;margin:22px 0 6px}
+p{margin:0 0 16px}
+.lede{font-size:21px;line-height:1.55;color:var(--muted);max-width:640px}
+.part{font-family:var(--sans);font-size:15px;color:var(--muted);display:block;margin-bottom:6px}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav.top .brand{font-family:var(--sans);font-weight:800;margin-right:14px;white-space:nowrap}
+nav.top a{font-family:var(--sans);font-size:15px;text-decoration:none;padding:6px 11px;border-radius:999px;white-space:nowrap;color:var(--muted)}
+nav.top a:hover{color:var(--ink);background:var(--panel)}
+header.hero{padding:54px 0 20px}
+section{padding:52px 0 20px;border-top:1px solid var(--line)}
+figure.fig{margin:26px 0 34px;background:var(--panel);border:1px solid var(--line);border-radius:var(--rad,12px);overflow:hidden}
+.canvas{position:relative;height:clamp(300px,50vw,470px);touch-action:pan-y;cursor:grab;user-select:none}
+.canvas:active{cursor:grabbing}
+.canvas canvas{display:block;width:100%;height:100%}
+.canvas .hint{position:absolute;right:12px;top:10px;font-family:var(--sans);font-size:12px;color:var(--muted);pointer-events:none;background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 8px;border-radius:6px}
+.canvas .nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans);color:var(--muted)}
+.pad{padding:18px}
+figcaption{padding:14px 18px 16px;border-top:1px solid var(--line);font-family:var(--sans);font-size:15px;line-height:1.5}
+figcaption p{margin:8px 0 0;color:var(--muted);max-width:780px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button,.btn{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{border:1px solid var(--line);border-radius:8px}
+.btn:hover,.seg button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--ink) 7%,transparent)}
+label.ctl{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+input[type=range]{accent-color:var(--acc);width:160px}
+input[type=checkbox]{accent-color:var(--acc);width:17px;height:17px}
+.readout{font-variant-numeric:tabular-nums;font-size:14px}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--acc) 11%,transparent);font-size:14.5px}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);margin-right:14px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.eq{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:12px 16px;margin:14px 0 18px;overflow-x:auto;font-size:16.5px;line-height:1.7;white-space:nowrap}
+.eq small{display:block;white-space:normal;color:var(--muted);font-size:14px;margin-top:4px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.84em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:1px 5px;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14.5px;line-height:1.5}
+pre code{background:none;padding:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 8px}
+@media (max-width:720px){.pc{grid-template-columns:1fr}}
+.pc>div{border:1px solid var(--line);border-radius:12px;padding:14px 18px 6px;background:var(--panel)}
+.pc h4{margin-top:0}.pc .pro h4{color:var(--pro)}.pc .con h4{color:var(--con)}
+.pc ul{margin:0;padding-left:20px;font-size:16.5px;line-height:1.55}.pc li{margin-bottom:10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:18px 0 28px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:9px 14px;border-bottom:1px solid var(--line)}
+thead th{font-size:15px;border-bottom:2px solid var(--line)}
+tbody th{font-weight:700}
+td.y{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td,tr:last-child th{border-bottom:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.chips span{padding:3px 6px;border-radius:5px;white-space:pre}
+textarea{width:100%;font:inherit;font-family:var(--sans);font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--paper);color:var(--ink);resize:vertical}
+footer{border-top:1px solid var(--line);padding:32px 0 56px;font-family:var(--sans);font-size:14.5px;color:var(--muted)}
+footer ul{padding-left:18px}
+
+h3,h4{font-weight:700}
+.chat{font-family:var(--sans);font-size:15px;line-height:1.5}
+.chat .turn{display:flex;gap:10px;margin:6px 0;align-items:baseline}
+.chat .role{font-weight:700;min-width:84px;color:var(--muted)}
+.chat .t{padding:2px 6px;border-radius:5px}
+.chat .on{background:color-mix(in srgb,var(--good) 20%,transparent);outline:1px solid color-mix(in srgb,var(--good) 45%,transparent)}
+.chat .off{background:color-mix(in srgb,var(--ref) 14%,transparent);color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+@media (max-width:720px){.compare{grid-template-columns:1fr}}
+.compare>div{border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--panel);font-family:var(--sans);font-size:15px}
+.compare b{display:block;margin-bottom:4px}
+#ov-chart{width:100%;max-width:420px;height:170px;display:block;margin-top:10px}
+:root{--hl:var(--acc)}
+.wrap.prose{max-width:1120px}.wrap.prose>*{max-width:700px}
+/* design-pass chrome: section bar with progress, a menu when the links do not fit, and equation terms that light their figure.
+   Each page sets --hl (its accent) on :root. */
+nav.top a[aria-current="true"]{color:var(--ink);background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.nav-cur,.nav-menu{display:none}
+nav.top.nav-collapsed .wrap>a{display:none}
+nav.top.nav-collapsed .nav-cur{display:block;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--sans);font-size:15px;color:var(--ink)}
+.nav-cur b{color:var(--hl);margin-right:.55em;font-variant-numeric:tabular-nums}
+nav.top.nav-collapsed .nav-menu{display:inline-flex}
+.nav-menu{font:inherit;font-family:var(--sans);font-size:14px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:5px 13px;cursor:pointer;margin-left:auto;white-space:nowrap}
+.nav-menu:hover{background:var(--panel)}
+.nav-menu:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.nav-panel{display:none;position:absolute;left:0;right:0;top:100%;background:var(--paper);border-bottom:1px solid var(--line);max-height:min(72vh,560px);overflow-y:auto}
+nav.top.nav-open .nav-panel{display:block}
+.nav-panel ol{list-style:none;margin:0 auto;padding:10px 24px 16px;max-width:1120px;columns:2 17rem;column-gap:2rem}
+.nav-panel li{break-inside:avoid}
+.nav-panel a{display:flex;gap:.75em;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-family:var(--sans);font-size:15.5px;line-height:1.35}
+.nav-panel a span{min-width:1.4em;font-variant-numeric:tabular-nums}
+.nav-panel a:hover{background:var(--panel);color:var(--ink)}
+.nav-panel a[aria-current="true"]{color:var(--ink)}
+.nav-panel a[aria-current="true"] span{color:var(--hl);font-weight:700}
+.nav-prog{position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--hl);transform-origin:0 50%;transform:scaleX(var(--p,0));pointer-events:none}
+.eq .katex-display{margin:.1em 0;text-align:left}
+.eq .katex-display>.katex{text-align:left}
+.eq .katex{font-size:1.14em}
+.eq[data-viz] [data-link]{cursor:pointer;border-radius:4px;transition:background-color .2s}
+.eq[data-viz] [data-link]:hover,.eq[data-viz] [data-link]:focus-visible{background:color-mix(in srgb,var(--ink) 12%,transparent);outline:none}
+.pe-lit{background:color-mix(in srgb,var(--hl) 24%,transparent)!important;border-radius:4px;transition:background-color .2s}
+.eq-hint{display:block;white-space:normal;font-size:13px;color:var(--muted);margin-top:6px}
+@media (prefers-reduced-motion: reduce){.eq[data-viz] [data-link],.pe-lit{transition:none}}
+
+.t-pol{color:var(--pol)}.t-ref{color:var(--ref)}.t-rew{color:var(--rew)}.t-good{color:var(--good)}.t-bad{color:var(--bad)}
+header.hero .lede{margin-bottom:26px}
+#f-hero .canvas{height:clamp(320px,44vw,420px)}
+@media (max-width:600px){#f-hero .canvas{height:380px}}
+</style>
+<link id="katex-css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.9/katex.min.css" integrity="sha384-lPx0C4zIUZLpveABMwOFcFeGZwsvKBJfhJ85FN1PYOV7xApBcFMhcAEMVKF8loOI" crossorigin="anonymous">
+</head>
+<body>
+<nav class="top" aria-label="Sections"><div class="wrap"><span class="brand">Post-training in 3D</span>
+ <a href="#why">Why</a><a href="#sft">SFT</a><a href="#rm">Reward models</a><a href="#rlhf">RLHF</a><a href="#hack">Overoptimisation</a><a href="#dpo">DPO</a>
+ <a href="#rlaif">AI feedback</a><a href="#reason">Reasoning RL</a><a href="#compare">Compared</a><a href="#open">Open problems</a></div></nav>
+
+<header class="hero"><div class="wrap">
+ <h1>From autocomplete to assistant</h1>
+ <p class="lede">A pretrained language model knows a lot but only continues text. Post-training teaches it to follow instructions, prefer helpful and honest answers, and, most recently, to reason through hard problems. This guide covers supervised fine-tuning, RLHF, DPO and reasoning-focused reinforcement learning.</p>
+ <figure class="fig" id="f-hero" style="margin:0"><div class="canvas" role="img" aria-label="Candidate replies to the prompt What is the capital of France?, each with a blue probability bar inside a grey outline of the frozen reference and a green or red reward dot. In a few pulls the bars of the Paris answers grow and the bars of the other question and of Lyon shrink, while grey springs stretch back toward the reference."><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><button class="btn" type="button" id="hero-replay">Replay</button>
+   <span class="legend"><i style="background:var(--pol)"></i>policy</span><span class="legend"><i style="background:var(--ref)"></i>frozen reference</span><span class="legend"><i style="background:var(--good)"></i>preferred</span><span class="legend"><i style="background:var(--bad)"></i>rejected</span></div>
+   <p>Post-training in one picture. The policy starts as the pretrained model, which most often answers a question with another question. Each update moves probability toward the preferred responses and away from the rejected ones. The frozen reference (grey outlines) is where the policy started; the KL penalty pulls back toward it like a spring, so the policy shifts without putting all its probability on a single answer. The responses, rewards and probabilities in this picture are made up for illustration.</p></figcaption></figure>
+</div></header>
+
+<main>
+<section id="why"><div class="wrap">
+ <div class="prose"><span class="part">1</span><h2>Why pretraining isn't enough</h2>
+ <p>Ask a raw base model a question and it may answer, or it may continue with more questions, because on the web a question is often followed by another question. It has no notion of being an assistant, no preference for truthful over plausible text, and no reason to refuse harmful requests. Post-training reshapes <em>which</em> of its many learned behaviours it expresses. It uses a tiny fraction of pretraining compute but changes how useful the model is enormously.</p></div>
+ <div class="compare"><div><b>Base model, prompt “What is the capital of France?”</b>What is the capital of Germany? What is the capital of Italy? These questions often appear in geography quizzes for…</div>
+  <div><b>After post-training</b>The capital of France is Paris.</div></div>
+ <div class="prose"><p>The standard recipe, popularised by InstructGPT (Ouyang et al., 2022), has three stages: supervised fine-tuning on demonstrations, training a reward model on human preferences, then reinforcement learning against that reward. Labellers preferred the 1.3B InstructGPT model's outputs to those of the 175B GPT-3 it started from. Later work simplified the pipeline (DPO) and extended it to reasoning with automatically checkable rewards.</p></div>
+ <figure class="fig" id="f-pipe"><div class="canvas" role="img" aria-label="3D diagram of post-training pipelines showing which models must be in memory for PPO, DPO and GRPO"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><div class="seg" role="group" aria-label="Method" id="pp-k"><button type="button" data-k="ppo" aria-pressed="true">RLHF with PPO</button><button type="button" data-k="dpo">DPO</button><button type="button" data-k="grpo">GRPO with verifiable rewards</button></div></div>
+   <div class="status" id="pp-read" aria-live="polite"></div>
+   <p>Each box is a model held in memory during training. The <span style="color:var(--pol);font-weight:600">policy</span> is the model being trained; the frozen <span style="color:var(--ref);font-weight:600">reference</span> is its starting point, used to stop it drifting too far. Packets show the data flowing each step.</p></figcaption></figure>
+</div></section>
+
+<section id="sft"><div class="wrap">
+ <div class="prose"><span class="part">2</span><h2>Supervised fine-tuning</h2>
+ <p><strong>SFT</strong> (or instruction tuning) continues training with the same next-token loss, but on curated conversations: prompts paired with ideal responses written by people or by stronger models. Conversations are formatted with a <strong>chat template</strong>, special tokens marking system, user and assistant turns. Crucially, the loss is <strong>masked</strong> so the model only learns to produce the assistant's words, not the user's.</p></div>
+ <figure class="fig" id="f-sft"><div class="pad chat" id="sft-chat" aria-live="polite"></div>
+  <figcaption><div class="controls"><label class="ctl"><input type="checkbox" id="sft-mask" checked> Mask non-assistant tokens</label><span class="readout" id="sft-read"></span></div>
+   <p>Highlighted tokens contribute to the loss. Without masking, the model also learns to imitate users and to generate template markers, wasting capacity and sometimes producing fake user turns.</p></figcaption></figure>
+ <div class="prose"><p>Quality matters more than quantity. FLAN (2021) showed that fine-tuning on many tasks phrased as instructions improves zero-shot generalisation; Self-Instruct (2022) had a model generate its own instruction data; LIMA (2023) got strong results from only 1,000 carefully chosen examples, suggesting SFT mostly teaches <em>format and style</em> for knowledge the model already has. SFT's limit is that it only imitates. It can't learn that one good answer is better than another good answer, or improve beyond its demonstrations. For that we need preferences.</p></div>
+</div></section>
+
+<section id="rm"><div class="wrap">
+ <div class="prose"><span class="part">3</span><h2>Preferences and reward models</h2>
+ <p>Writing a perfect answer is hard; judging which of two answers is better is easy. So people are shown a prompt and two model responses and pick the better one. A <strong>reward model</strong>, usually the SFT model with its output layer replaced by a single number, is trained to give the chosen response a higher score, using the Bradley–Terry model of pairwise preferences:</p>
+ <div class="eq" id="eq-bt" data-viz="f-rm"><div class="tex tex-display">P\big(\htmlData{link=chosen, label=the chosen responses}{\htmlClass{t-good}{y_w}} \succ \htmlData{link=rejected, label=the rejected responses}{\htmlClass{t-bad}{y_l}} \mid x\big) = \sigma\big(\htmlData{link=reward, label=the learned reward}{\htmlClass{t-rew}{r}(x, \htmlClass{t-good}{y_w}) - \htmlClass{t-rew}{r}(x, \htmlClass{t-bad}{y_l})}\big), \qquad \htmlData{link=loss, label=the Bradley-Terry loss}{L_{\mathrm{RM}}} = -\log \sigma\big(\htmlClass{t-rew}{r}(x, \htmlClass{t-good}{y_w}) - \htmlClass{t-rew}{r}(x, \htmlClass{t-bad}{y_l})\big)</div><!-- original: P( y<sub>w</sub> ≻ y<sub>l</sub> | x ) = σ( r(x, y<sub>w</sub>) − r(x, y<sub>l</sub>) ), &nbsp;&nbsp; L<sub>RM</sub> = − log σ( r(x, y<sub>w</sub>) − r(x, y<sub>l</sub>) ) -->
+  <small>y<sub>w</sub> is the preferred (“winning”) response, y<sub>l</sub> the rejected one, σ the logistic function. Only differences in reward matter, so the reward's absolute level is arbitrary.</small><span class="eq-hint">Hover or tap a term to see it in the figure below.</span></div></div>
+ <figure class="fig" id="f-rm"><div class="canvas" role="img" aria-label="A learned reward surface over a two-dimensional space of responses, trained from pairwise comparisons shown as arrows"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><button class="btn" type="button" id="rm-run">Train reward model</button><button class="btn" type="button" id="rm-reset">New comparisons</button><label class="ctl"><input type="checkbox" id="rm-true"> Show true preference surface</label></div>
+   <div class="status" id="rm-read" aria-live="polite" data-link="loss"></div>
+   <p>Each dot pair is one comparison: the arrow points from the rejected response to the chosen one, with labels drawn noisily from a hidden true reward. The coloured surface is a small reward model fitted by gradient descent on the Bradley–Terry loss. It never sees reward values, only which of two was preferred, yet recovers the shape.</p></figcaption></figure>
+</div></section>
+
+<section id="rlhf"><div class="wrap prose">
+ <span class="part">4</span><h2>RLHF with PPO</h2>
+ <p>With a reward model in hand, reinforcement learning from human feedback optimises the policy to earn high reward, with a penalty for moving too far from the reference model:</p>
+ <div class="eq"><div class="tex tex-display">\max_{\htmlClass{t-pol}{\pi}}\; \mathbb{E}_{x,\, y \sim \htmlClass{t-pol}{\pi}}\big[\, \htmlClass{t-rew}{r}(x, y) \,\big] - \beta \cdot \mathrm{KL}\big(\htmlClass{t-pol}{\pi}(\cdot \mid x) \,\big\|\, \htmlClass{t-ref}{\pi_{\mathrm{ref}}}(\cdot \mid x)\big)</div><!-- original: max<sub>π</sub> E<sub>x, y ~ π</sub> [ r(x, y) ] − β · KL( π(·|x) ‖ π<sub>ref</sub>(·|x) ) -->
+  <small>The KL term keeps outputs fluent and stops the policy from exploiting weaknesses of the reward model. β sets the trade-off.</small></div>
+ <p>The standard optimiser is <strong>PPO</strong> (Schulman et al., 2017). The policy generates responses, the reward model scores them, a separate <strong>value model</strong> estimates expected reward to reduce variance, and PPO updates the policy with a clipped objective that prevents too-large steps. This works, and powered the original ChatGPT, but it is complex: four large models in memory, many hyperparameters, and sensitivity to implementation details. Its roots are earlier work on learning from human preferences in games (Christiano et al., 2017) and summarisation (Stiennon et al., 2020).</p>
+</div></section>
+
+<section id="hack"><div class="wrap">
+ <div class="prose"><span class="part">5</span><h2>Reward hacking and overoptimisation</h2>
+ <p>A reward model is only a proxy for what people want. Push hard enough and the policy finds responses the proxy loves but people don't: excessive length, flattery, confident-sounding filler, or telling users what they want to hear (<strong>sycophancy</strong>). Gao et al. (2022) measured this: as the policy moves further from the reference (higher KL), the proxy reward keeps rising while the true reward rises, peaks and then falls, a textbook case of Goodhart's law.</p>
+ <p>The KL-regularised objective has a closed-form optimum, π*(y) ∝ π<sub>ref</sub>(y) · exp(r(y)/β). Below, it is computed exactly over a toy two-dimensional “space of responses”. The proxy reward equals the true reward plus one exploitable bump in a region the reference model rarely visits.</p></div>
+ <figure class="fig" id="f-over"><div class="canvas" role="img" aria-label="3D surface of the optimal KL-regularised policy over a two-dimensional response space, shifting toward a spurious reward peak as the KL penalty weakens"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls">
+    <div class="seg" role="group" aria-label="Surface" id="ov-s"><button type="button" data-s="opt" aria-pressed="true">Optimal policy π*</button><button type="button" data-s="ref">Reference π_ref</button><button type="button" data-s="proxy">Proxy reward</button><button type="button" data-s="gold">True reward</button></div>
+    <label class="ctl">KL weight β <input type="range" id="ov-b" min="0" max="100" value="70"><span class="readout" id="ov-bv"></span></label></div>
+   <div class="status" id="ov-read" aria-live="polite"></div>
+   <canvas id="ov-chart" width="840" height="340" aria-label="Chart of proxy and true reward against KL divergence"></canvas>
+   <p>Lower β lets the policy move further from the reference. At first it climbs the real reward peak; then the spurious bump takes over. The chart traces proxy (orange) and true (green) expected reward against KL, with the dot at the current β.</p></figcaption></figure>
+ <div class="prose"><p>Mitigations include keeping β high enough, ensembles of reward models, regularly collecting fresh preferences on the current policy's outputs, penalising length, and early stopping on held-out human evaluations.</p></div>
+</div></section>
+
+<section id="dpo"><div class="wrap">
+ <div class="prose"><span class="part">6</span><h2>Direct Preference Optimization</h2>
+ <p>Rafailov et al. (<strong>DPO</strong>, 2023) noticed that the closed-form optimum above can be inverted: any policy defines an implicit reward r(x, y) = β log π(y|x)/π<sub>ref</sub>(y|x) + const. Substituting that into the Bradley–Terry loss removes the reward model and the RL loop entirely. What remains is a simple classification-style loss on preference pairs:</p>
+ <div class="eq" id="eq-dpo" data-viz="f-dpo"><div class="tex tex-display">\htmlData{link=loss, label=the DPO loss}{L_{\mathrm{DPO}}} = -\log \sigma\left(\htmlData{link=beta, label=the beta control}{\beta} \left[\htmlData{link=chosen, label=the chosen log-ratio}{\log \frac{\htmlClass{t-pol}{\pi}(\htmlClass{t-good}{y_w} \mid x)}{\htmlClass{t-ref}{\pi_{\mathrm{ref}}}(\htmlClass{t-good}{y_w} \mid x)}} - \htmlData{link=rejected, label=the rejected log-ratio}{\log \frac{\htmlClass{t-pol}{\pi}(\htmlClass{t-bad}{y_l} \mid x)}{\htmlClass{t-ref}{\pi_{\mathrm{ref}}}(\htmlClass{t-bad}{y_l} \mid x)}}\right]\right)</div><!-- original: L<sub>DPO</sub> = − log σ( β [ log π(y<sub>w</sub>|x)/π<sub>ref</sub>(y<sub>w</sub>|x) − log π(y<sub>l</sub>|x)/π<sub>ref</sub>(y<sub>l</sub>|x) ] ) -->
+  <small>Increase the chosen response's likelihood relative to the reference, decrease the rejected one's. The gradient is largest for pairs the model currently gets wrong.</small></div></div>
+ <figure class="fig" id="f-dpo"><div class="canvas" role="img" aria-label="3D DPO loss surface over the chosen and rejected log-probability ratios, with a ball descending the gradient"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><button class="btn" type="button" id="dpo-run">Take gradient steps</button><button class="btn" type="button" id="dpo-reset">Reset</button><label class="ctl" data-link="beta">β <input type="range" id="dpo-b" min="5" max="100" value="30"><span class="readout" id="dpo-bv"></span></label></div>
+   <div class="status" id="dpo-read" aria-live="polite" data-link="loss"></div>
+   <p>Axes are the log-ratios log π/π<sub>ref</sub> for the chosen and rejected responses; height is the DPO loss. The ball starts at the reference (both ratios zero) and slides down the gradient: the chosen ratio rises and the rejected one falls. The loss only depends on the margin between them, so in practice both likelihoods can fall together, a known side effect.</p></figcaption></figure>
+ <div class="prose"><p>DPO needs only the policy and a frozen reference, is stable, and became the default for open models. Variants tune its weaknesses: <strong>IPO</strong> adds regularisation against overfitting to deterministic preferences, <strong>KTO</strong> learns from single thumbs-up or thumbs-down labels instead of pairs, <strong>ORPO</strong> folds preference learning into SFT without a reference model, and <strong>SimPO</strong> uses length-normalised likelihood as the implicit reward. The main trade-off versus PPO is that DPO is usually <em>offline</em>: it learns from fixed pairs rather than the policy's own fresh samples. Online and iterative DPO narrow that gap.</p></div>
+</div></section>
+
+<section id="rlaif"><div class="wrap prose">
+ <span class="part">7</span><h2>AI feedback and constitutions</h2>
+ <p>Human labels are slow, expensive and inconsistent. <strong>RLAIF</strong> uses a model to produce the preference labels instead. Anthropic's <strong>Constitutional AI</strong> (Bai et al., 2022) gives the model a short list of written principles; it critiques and revises its own responses against them (a supervised stage), then judges pairs of responses by the principles to create preference data for RL. This made the model's values explicit and inspectable and reduced the need for people to read harmful content. Today most large-scale preference data is at least partly AI-generated, with humans focusing on hard cases and auditing.</p>
+</div></section>
+
+<section id="reason"><div class="wrap">
+ <div class="prose"><span class="part">8</span><h2>Reasoning-focused reinforcement learning</h2>
+ <p>Chain-of-thought prompting (Wei et al., 2022) showed that models answer harder questions when they write out intermediate steps. STaR (2022) bootstrapped this: generate reasoning, keep the attempts that reach correct answers, fine-tune on them, repeat. The big shift came when labs applied large-scale RL to reasoning itself. OpenAI's <strong>o1</strong> (2024) was trained with RL to think at length before answering, and its accuracy kept improving with more training compute <em>and</em> with more thinking time at inference, a new scaling axis called <strong>test-time compute</strong>.</p>
+ <p>The key ingredient is <strong>verifiable rewards</strong> (RLVR): for maths, code and logic puzzles you can check the final answer or run tests, so no learned reward model is needed and there is little to hack. Rewards can be given for the final outcome (outcome reward models) or for each step (process reward models; Lightman et al., 2023, found step-level supervision more reliable for maths).</p>
+ <p>DeepSeek's <strong>GRPO</strong> (Group Relative Policy Optimization, 2024) made this cheap. For each prompt, sample a group of G answers, score them, and use each answer's reward relative to the group as its advantage. No value model is needed.</p>
+ <div class="eq" id="eq-grpo" data-viz="f-grpo"><div class="tex tex-display">\htmlData{link=adv, label=the advantages}{A_i} = \frac{\htmlData{link=reward, label=the rewards}{r_i} - \htmlData{link=group, label=the group mean}{\mathrm{mean}(r_{1\ldots G})}}{\htmlData{link=group, label=the group spread}{\mathrm{std}(r_{1\ldots G})}}</div><!-- original: A<sub>i</sub> = ( r<sub>i</sub> − mean(r<sub>1..G</sub>) ) / std(r<sub>1..G</sub>) -->
+  <small>The policy is then updated with a PPO-style clipped objective plus a KL penalty to the reference. If every answer in a group is right, or every answer wrong, all advantages are zero and the prompt teaches nothing, so curricula aim for problems the model solves sometimes.</small></div>
+ <p><strong>DeepSeek-R1</strong> (2025) showed how far this goes. R1-Zero applied GRPO directly to a base model with only correctness and format rewards; it learned on its own to write long chains of thought, check its work and backtrack. The released R1 added a small cold-start SFT set for readability, then RL, then SFT on filtered samples, then more RL. Its reasoning traces were also distilled into much smaller open models.</p></div>
+ <figure class="fig" id="f-grpo"><div class="canvas" role="img" aria-label="A live GRPO simulation: policy probabilities over six solution strategies as bars, with a sampled group of answers and their advantages"><span class="hint">Drag to rotate</span></div>
+  <figcaption><div class="controls"><button class="btn" type="button" id="gr-run">Run RL</button><button class="btn" type="button" id="gr-step">One step</button><button class="btn" type="button" id="gr-reset">Reset</button>
+    <label class="ctl" data-link="group">Group size G <input type="range" id="gr-g" min="2" max="16" value="8"><span class="readout" id="gr-gv"></span></label><label class="ctl"><input type="checkbox" id="gr-kl"> KL penalty to reference</label></div>
+   <div class="status" id="gr-read" aria-live="polite"></div>
+   <p>A toy maths problem with six ways of answering, from guessing to careful step-by-step working. Bars are the policy's probability of each strategy; longer strategies are more reliable. Spheres are one group of samples: green correct, red wrong, and the stick under each is its group-relative advantage. The update is the real policy gradient for this softmax policy, so the model learns to “think longer” because it pays off.</p></figcaption></figure>
+</div></section>
+
+<section id="compare"><div class="wrap">
+ <div class="prose"><span class="part">9</span><h2>The methods compared</h2></div>
+ <div class="tbl"><table><thead><tr><th>Method</th><th>Data needed</th><th>Models in memory</th><th>Strengths</th><th>Weaknesses</th></tr></thead><tbody>
+  <tr><th>SFT</th><td>Demonstrations</td><td>Policy</td><td>Simple, stable, teaches format and style fast</td><td>Only imitates; can't exceed its data; can teach hallucination if demos contain facts the model doesn't know</td></tr>
+  <tr><th>RLHF (PPO)</th><td>Preference pairs, then online samples</td><td>Policy, reference, reward, value</td><td>Learns from its own outputs; strong results at scale</td><td>Complex, costly, unstable; reward hacking</td></tr>
+  <tr><th>DPO and variants</th><td>Preference pairs</td><td>Policy, reference</td><td>No reward model or RL loop; easy to run</td><td>Usually offline; can lower likelihood of good answers; overfits small data</td></tr>
+  <tr><th>RLAIF / Constitutional AI</th><td>Principles plus model judgements</td><td>Varies</td><td>Scales cheaply; values are written down</td><td>Inherits the judge model's blind spots</td></tr>
+  <tr><th>GRPO / RLVR</th><td>Problems with checkable answers</td><td>Policy, reference (reward is a program)</td><td>Hard to hack; drives long reasoning; no value model</td><td>Only for verifiable domains; long rollouts are expensive; sparse reward</td></tr>
+ </tbody></table></div>
+</div></section>
+
+<section id="open"><div class="wrap">
+ <div class="prose"><span class="part">10</span><h2>Strengths, limits and open problems</h2></div>
+ <div class="pc"><div class="pro"><h4>What post-training achieves</h4><ul>
+  <li>Turns a text predictor into a helpful, conversational assistant with a small fraction of the pretraining compute.</li>
+  <li>Encodes preferences that are easy to judge but hard to write down.</li>
+  <li>Unlocks reasoning: RL on verifiable tasks produced large gains in maths, coding and science.</li>
+  <li>Makes safety behaviours, such as declining harmful requests, trainable.</li></ul></div>
+  <div class="con"><h4>What remains hard</h4><ul>
+  <li>Reward hacking and sycophancy: optimising a proxy for approval is not optimising for truth.</li>
+  <li>Much of what matters (good writing, honest uncertainty, real-world helpfulness) has no verifier.</li>
+  <li>Alignment can be shallow: models can be fine-tuned or prompted around it.</li>
+  <li>Long reasoning costs inference compute, and reasoning traces may not faithfully reflect how the model reached its answer.</li>
+  <li>Evaluating whether a model is aligned, rather than looking aligned, is an open research problem.</li></ul></div></div>
+</div></section>
+</main>
+
+<footer><div class="wrap prose"><p><strong style="color:var(--ink)">Sources</strong></p><ul>
+ <li>Ouyang et al., 2022. InstructGPT. <a href="https://arxiv.org/abs/2203.02155">arXiv:2203.02155</a></li><li>Christiano et al., 2017. Deep RL from human preferences. <a href="https://arxiv.org/abs/1706.03741">arXiv:1706.03741</a></li><li>Stiennon et al., 2020. Learning to summarize from human feedback. <a href="https://arxiv.org/abs/2009.01325">arXiv:2009.01325</a></li>
+ <li>Schulman et al., 2017. PPO. <a href="https://arxiv.org/abs/1707.06347">arXiv:1707.06347</a></li><li>Gao et al., 2022. Scaling laws for reward model overoptimization. <a href="https://arxiv.org/abs/2210.10760">arXiv:2210.10760</a></li><li>Sharma et al., 2023. Sycophancy. <a href="https://arxiv.org/abs/2310.13548">arXiv:2310.13548</a></li>
+ <li>Wei et al., 2021. FLAN. <a href="https://arxiv.org/abs/2109.01652">arXiv:2109.01652</a></li><li>Wang et al., 2022. Self-Instruct. <a href="https://arxiv.org/abs/2212.10560">arXiv:2212.10560</a></li><li>Zhou et al., 2023. LIMA. <a href="https://arxiv.org/abs/2305.11206">arXiv:2305.11206</a></li>
+ <li>Rafailov et al., 2023. DPO. <a href="https://arxiv.org/abs/2305.18290">arXiv:2305.18290</a></li><li>Azar et al., 2023. IPO. <a href="https://arxiv.org/abs/2310.12036">arXiv:2310.12036</a></li><li>Ethayarajh et al., 2024. KTO. <a href="https://arxiv.org/abs/2402.01306">arXiv:2402.01306</a></li><li>Hong et al., 2024. ORPO. <a href="https://arxiv.org/abs/2403.07691">arXiv:2403.07691</a></li><li>Meng et al., 2024. SimPO. <a href="https://arxiv.org/abs/2405.14734">arXiv:2405.14734</a></li>
+ <li>Bai et al., 2022. Constitutional AI. <a href="https://arxiv.org/abs/2212.08073">arXiv:2212.08073</a></li><li>Wei et al., 2022. Chain-of-thought. <a href="https://arxiv.org/abs/2201.11903">arXiv:2201.11903</a></li><li>Zelikman et al., 2022. STaR. <a href="https://arxiv.org/abs/2203.14465">arXiv:2203.14465</a></li><li>Lightman et al., 2023. Let's Verify Step by Step. <a href="https://arxiv.org/abs/2305.20050">arXiv:2305.20050</a></li>
+ <li>Shao et al., 2024. DeepSeekMath (GRPO). <a href="https://arxiv.org/abs/2402.03300">arXiv:2402.03300</a></li><li>DeepSeek-AI, 2025. DeepSeek-R1. <a href="https://arxiv.org/abs/2501.12948">arXiv:2501.12948</a></li><li>OpenAI o1 was described in a 2024 blog post and system card rather than a paper.</li></ul>
+ <p>The reward model, overoptimisation, DPO and GRPO figures run the real equations on toy problems. The pipeline diagram and chat example are illustrative.</p></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){"use strict";window.LABEL_FONT='"Onest", Arial, sans-serif';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function setPressed(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));}
+const C={};
+function readColors(keys){keys.forEach(k=>{C[k]=new THREE.Color(cssv('--'+k)||'#888888');});}
+function hex(k){return cssv('--'+k);}
+function label(text,size,color){size=size||.42;const c=document.createElement('canvas');const ctx=c.getContext('2d');const fs=64;
+ const font='600 '+fs+'px '+(window.LABEL_FONT||'Arial, sans-serif');ctx.font=font;const w=Math.ceil(ctx.measureText(text).width)+24;c.width=w;c.height=Math.ceil(fs*1.35);
+ ctx.font=font;ctx.fillStyle=color||cssv('--ink');ctx.textBaseline='middle';ctx.fillText(text,12,c.height/2+2);
+ const t=new THREE.CanvasTexture(c);t.minFilter=THREE.LinearFilter;
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size*w/c.height,size,1);sp.renderOrder=10;return sp;}
+function emojiSprite(ch,size){const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');g.font='72px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,48,54);
+ const t=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.scale.set(size||.5,size||.5,1);sp.renderOrder=11;return sp;}
+function dotTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.beginPath();g.arc(32,32,28,0,7);g.fill();return new THREE.CanvasTexture(c);}
+function line(pts,color,opts){opts=opts||{};const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=opts.dashed?new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.12,transparent:true,opacity:opts.opacity||1}):new THREE.LineBasicMaterial({color,transparent:true,opacity:opts.opacity==null?1:opts.opacity});
+ const l=new THREE.Line(g,m);if(opts.dashed)l.computeLineDistances();return l;}
+function std(color,o){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.55,metalness:.05},o||{}));}
+function disposeTree(o){o.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});}
+
+const stages=[];
+function base(camPos,target,hfov){const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(40,1.6,.1,300);camera.position.set(...camPos);camera.lookAt(new THREE.Vector3(...target));
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,.95));const d=new THREE.DirectionalLight(0xffffff,.65);d.position.set(5,10,8);scene.add(d);
+ const root=new THREE.Group();scene.add(root);return {scene,camera,root,hfov:hfov||60};}
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=e.target._stage;s.visible=e.isIntersecting;if(s.visible&&!s.renderer)mk(s);else if(!s.visible&&s.renderer)kill(s);}),{rootMargin:'200px 0px'});
+function mk(s){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio||1,2));r.setClearColor(0,0);s.wrap.insertBefore(r.domElement,s.wrap.firstChild);s.renderer=r;s.w=0;}
+ catch(err){if(!s.wrap.querySelector('.nogl'))s.wrap.insertAdjacentHTML('beforeend','<div class="nogl">3D view unavailable: this browser has WebGL turned off.</div>');}}
+function kill(s){s.renderer.dispose();if(s.renderer.forceContextLoss)s.renderer.forceContextLoss();s.renderer.domElement.remove();s.renderer=null;}
+function drag(s){let down=false,px=0,py=0,sx=0,sy=0;const w=s.wrap;
+ w.addEventListener('pointerdown',e=>{down=true;px=sx=e.clientX;py=sy=e.clientY;});
+ w.addEventListener('pointerup',e=>{if(down&&s.onClick&&Math.hypot(e.clientX-sx,e.clientY-sy)<6){const r=w.getBoundingClientRect();s.onClick(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1));}down=false;});
+ addEventListener('pointerup',()=>down=false);w.addEventListener('pointercancel',()=>down=false);
+ w.addEventListener('pointermove',e=>{if(!down)return;s.tRotY+=(e.clientX-px)*.008;s.tRotX=clamp(s.tRotX+(e.clientY-py)*.005,-.7,.7);px=e.clientX;py=e.clientY;});}
+function stage(id,build){const fig=document.getElementById(id);const wrap=fig.querySelector('.canvas');const s={fig,wrap,rotY:0,rotX:0,tRotY:0,tRotX:0,auto:0};
+ s.glowT={};fig.addEventListener('pe-link',e=>{s.glowT[e.detail]=performance.now();});s.g=k=>{const t0=s.glowT[k];if(!t0)return 0;const u=(performance.now()-t0)/1100;return u>=1?0:reduced?1:Math.sin(Math.PI*u);};
+ Object.assign(s,build(s));s.rotY=s.tRotY;s.rotX=s.tRotX;wrap._stage=s;stages.push(s);io.observe(wrap);drag(s);return s;}
+let lastT=performance.now();
+function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;const t=now/1000;
+ for(const s of stages){if(!s.renderer)continue;const w=s.wrap.clientWidth,h=s.wrap.clientHeight;
+  if(w!==s.w||h!==s.h){s.renderer.setSize(w,h,false);const a=w/h;s.camera.aspect=a;const hf=s.hfov*Math.PI/180;s.camera.fov=clamp(Math.max(2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI,s.vmin||34),24,80);s.camera.updateProjectionMatrix();s.w=w;s.h=h;}
+  if(!reduced)s.tRotY+=s.auto*dt;s.rotY+=(s.tRotY-s.rotY)*.12;s.rotX+=(s.tRotX-s.rotX)*.12;s.root.rotation.set(s.rotX,s.rotY,0);
+  if(s.update)s.update(t,dt);s.renderer.render(s.scene,s.camera);}
+ requestAnimationFrame(loop);}
+function startAll(fn){if(typeof THREE==='undefined'){document.querySelectorAll('.canvas').forEach(c=>c.insertAdjacentHTML('beforeend','<div class="nogl">The 3D library could not load. Check your connection and reload the page.</div>'));return;}
+ const ready=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+ ready.then(()=>{fn();requestAnimationFrame(loop);});}
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);const sig=z=>1/(1+Math.exp(-z));
+
+/* ---------- SFT masking (HTML) ---------- */
+(function(){const turns=[['system','<|system|>',' You are a helpful assistant.'],['user','<|user|>',' How many legs does a spider have?'],['assistant','<|assistant|>',' A spider has eight legs.','<|end|>']];
+ const box=document.getElementById('sft-chat'),mk=document.getElementById('sft-mask'),rd=document.getElementById('sft-read');
+ function draw(){let on=0,all=0;box.innerHTML=turns.map(([r,...parts])=>`<div class="turn"><span class="role">${r}</span><span>${parts.map((p,i)=>{const toks=p.startsWith('<|')?[p]:p.match(/\s?\S+/g);return toks.map(t=>{const isA=r==='assistant'&&!(i===0);const c=(!mk.checked||isA)?'on':'off';all++;if(c==='on')on++;return `<span class="t ${c}">${t.replace(/</g,'&lt;')}</span>`;}).join(' ');}).join(' ')}</span></div>`).join('');
+  rd.textContent=`${on} of ${all} tokens contribute to the loss`;}
+ mk.onchange=draw;draw();})();
+
+
+/* ---------- hero: preference updates pull the policy, the frozen reference holds it back (illustrative numbers) ---------- */
+function buildHero(s){const B=base([0,.45,9.4],[0,0,0],56);s.tRotY=-.14;s.tRotX=.06;s.vmin=27;
+ const RESP=['What is the capital of Germany?','The capital of France is Paris.','Paris.','Lyon.'];
+ // Made-up reference probabilities and rewards. Each pull raises u; the policy is pi_ref * exp(u*K*r), normalised,
+ // so it never leaves the reference's support. U grows by less each time, so the pulls shrink.
+ const P0=[.44,.22,.18,.16],RW=[-1.2,1,.8,-1.6],U=[0,.45,.72,.88,1],K=1.25,SX=6,DX=4;
+ const pol=u=>{const w=P0.map((p,i)=>p*Math.exp(u*K*RW[i]));const z=w.reduce((a,b)=>a+b,0);return w.map(v=>v/z);};
+ const G=new THREE.Group();B.root.add(G);
+ const bg=new THREE.BoxGeometry(1,.3,.3);bg.translate(.5,0,0);const gg=new THREE.BoxGeometry(1,.44,.44);gg.translate(.5,0,0);const eg=new THREE.EdgesGeometry(gg);
+ const zz=[];for(let j=0;j<=14;j++)zz.push(V(j/14,j%14?(j%2?.06:-.06):0,0));const cg=new THREE.ConeGeometry(.09,.24,14);
+ const tag=o=>{o.userData.a=o.scale.x/o.scale.y;G.add(o);return o;};
+ const rows=RESP.map((t,i)=>{const good=RW[i]>0,col=good?C.good:C.bad;
+  const bar=new THREE.Mesh(bg,std(C.pol)),gh=new THREE.Mesh(gg,std(C.ref,{transparent:true,opacity:0,depthWrite:false}));
+  const ed=new THREE.LineSegments(eg,new THREE.LineBasicMaterial({color:C.ref,transparent:true,opacity:0}));
+  const sp=line(zz,C.ref,{opacity:0}),dot=new THREE.Mesh(new THREE.SphereGeometry(.14,18,12),std(col));
+  const cone=new THREE.Mesh(cg,std(col,{transparent:true,opacity:0}));cone.rotation.z=good?-Math.PI/2:Math.PI/2;
+  [bar,gh,ed,sp,dot,cone].forEach(o=>G.add(o));return {bar,gh,ed,sp,dot,cone,l:tag(label(t,.24,hex('ink'))),y:0};});
+ const pr=tag(label('What is the capital of France?',.3,hex('ink'))),hP=tag(label('probability of each response',.2,hex('muted'))),hR=tag(label('reward',.2,hex('rew')));
+ // align: -1 puts the text's left edge at x, 1 its right edge, 0 centers it; .138 is the label canvas padding as a fraction of its height.
+ const lab=(o,z,x,y,al)=>{const w=o.userData.a*z;o.scale.set(w,z,1);o.position.set(al<0?x+w/2-.138*z:al>0?x-w/2+.138*z:x,y,0);};
+ // Wide canvases put each response left of its bar; narrow ones put it above, so the scene is about as tall as it is wide.
+ let narrow=null;
+ function layout(nw){narrow=nw;const gap=nw?1:.75,y0=nw?1:.95,z=nw?.27:.24;
+  rows.forEach((r,i)=>{const y=r.y=y0-i*gap;[r.bar,r.gh,r.ed].forEach(o=>o.position.set(0,y,0));r.dot.position.set(DX,y,0);if(nw)lab(r.l,z,0,y+.42,-1);else lab(r.l,z,-.3,y,1);});
+  if(nw){lab(pr,.28,0,2.45,-1);lab(hP,.2,0,1.85,-1);lab(hR,.2,DX,1.85,0);G.position.set(-2.05,-.36,0);}
+  else{lab(pr,.3,.42,2.3,0);lab(hP,.2,0,1.55,-1);lab(hR,.2,DX,1.55,0);G.position.set(-.42,-.47,0);}
+  B.hfov=s.hfov=nw?30:56;s.vmin=nw?32:27;s.w=0;}
+ const T_END=6,TS=[2.7,3.45,4.2,4.95],MV=.55;let t0=performance.now()/1000;document.getElementById('hero-replay').onclick=()=>{t0=performance.now()/1000;};
+ const fade=(o,u)=>{o.material.opacity=u;o.visible=u>.002;};
+ function set(e){const sg=(a,b)=>smooth(a,b,e);let u=0,pulse=0;
+  TS.forEach((ts,j)=>{if(e>=ts){u=U[j]+(U[j+1]-U[j])*sg(ts,ts+MV);pulse=e<ts+MV?Math.sin(Math.PI*(e-ts)/MV):0;}});
+  const p=pol(u),gr=sg(1.7,2.2);fade(pr,sg(0,.5));fade(hP,sg(.5,1));fade(hR,sg(2,2.4));
+  rows.forEach((r,i)=>{fade(r.l,sg(.15+i*.12,.6+i*.12));const L0=P0[i]*SX,L=p[i]*SX*sg(.5+i*.1,1.4+i*.1),d=L-L0;
+   r.bar.scale.x=Math.max(.001,L);r.bar.visible=L>.01;r.gh.scale.x=r.ed.scale.x=L0;r.gh.material.opacity=.16*gr;r.gh.visible=gr>.002;fade(r.ed,.85*gr);
+   r.sp.position.set(L0,r.y-.3,0);r.sp.scale.x=Math.abs(d)>.001?d:.001;fade(r.sp,Math.abs(d)>.04?.9*gr:0);
+   const pop=sg(2+i*.1,2.4+i*.1);r.dot.scale.setScalar(Math.max(.001,pop));r.dot.visible=pop>0;r.dot.material.emissive.copy(r.dot.material.color);r.dot.material.emissiveIntensity=.5*pulse;
+   r.cone.position.set(L+.22,r.y,0);fade(r.cone,.95*pulse);});}
+ layout(false);set(reduced?T_END:0);
+ return Object.assign(B,{update(t){const nw=s.wrap.clientWidth/Math.max(1,s.wrap.clientHeight)<1.6;if(nw!==narrow)layout(nw);set(reduced?T_END:Math.min(T_END,t-t0));}});}
+
+/* ---------- pipeline ---------- */
+function buildPipe(s){const B=base([0,2.6,10.5],[0,.4,0],60);s.tRotY=-.2;s.vmin=30;const root=B.root;
+ function box(col,w,name,sub){const g=new THREE.Group();const m=new THREE.Mesh(new THREE.BoxGeometry(w,1,1),std(col,{transparent:true,opacity:.9}));g.add(m);const l=label(name,.3,'#'+col.getHexString());l.position.set(0,.85,0);g.add(l);if(sub){const l2=label(sub,.22,hex('muted'));l2.position.set(0,-.75,0);g.add(l2);}root.add(g);return g;}
+ const pol=box(C.pol,1.6,'policy','trained'),ref=box(C.ref,1.6,'reference','frozen'),rm=box(C.rew,1.6,'reward model','frozen'),val=box(C.good,1.6,'value model','trained'),ver=box(C.rew,1.6,'verifier','a program'),data=box(C.muted,1.6,'preference pairs','fixed dataset'),prm=box(C.muted,1.6,'prompts','sample G answers each');
+ const L={ppo:{pol:[-3,0],ref:[-.2,1.8],rm:[2.6,1.8],val:[2.6,-1.6],prm:[-6,0]},dpo:{pol:[-1,0],ref:[2.2,0],data:[-4.4,0]},grpo:{pol:[-2.4,0],ref:[.8,1.8],ver:[3.4,0],prm:[-5.6,0]}};
+ const all={pol,ref,rm,val,ver,data,prm};const msg={ppo:'Four large models in memory: the policy generates, the reward model scores, the value model estimates expected reward, and the reference anchors the KL penalty. Most memory-hungry and most sensitive to hyperparameters.',
+  dpo:'Two models: the policy and a frozen reference, both scoring fixed chosen and rejected responses. No generation during training, no reward model, no RL loop.',
+  grpo:'The policy samples a group of answers per prompt, a program checks them, and advantages come from comparing answers within the group. The value model disappears; the reference remains for the KL penalty.'};
+ const packets=[...Array(6)].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),std(C.acc));root.add(m);return m;});let kind='ppo',paths=[];const rd=document.getElementById('pp-read');
+ const tgt={};Object.keys(all).forEach(k=>tgt[k]=V(0,-6,0));
+ function set(k){kind=k;Object.keys(all).forEach(n=>{const p=L[k][n];all[n].visible=!!p;if(p)tgt[n]=V(p[0],p[1],0);});rd.textContent=msg[k];
+  const P=n=>V(L[k][n][0],L[k][n][1],0);paths=k==='ppo'?[[P('prm'),P('pol')],[P('pol'),P('rm')],[P('pol'),P('ref')],[P('pol'),P('val')],[P('rm'),P('pol')],[P('val'),P('pol')]]:k==='dpo'?[[P('data'),P('pol')],[P('data'),P('ref')],[P('ref'),P('pol')],[P('data'),P('pol')],[P('ref'),P('pol')],[P('data'),P('ref')]]:[[P('prm'),P('pol')],[P('pol'),P('ver')],[P('ver'),P('pol')],[P('pol'),P('ref')],[P('ref'),P('pol')],[P('pol'),P('ver')]];}
+ document.querySelectorAll('#pp-k [data-k]').forEach(b=>b.onclick=()=>{setPressed(b.parentNode,b);set(b.dataset.k);});set('ppo');Object.keys(all).forEach(n=>{if(L.ppo[n])all[n].position.copy(tgt[n]);});
+ return Object.assign(B,{update(t){Object.keys(all).forEach(n=>{if(all[n].visible)all[n].position.lerp(tgt[n],.12);});packets.forEach((p,i)=>{const pa=paths[i];if(!pa){p.visible=false;return;}p.visible=true;const q=reduced?.5:((t*.45+i/6)%1);p.position.lerpVectors(pa[0],pa[1],q).add(V(0,0,.6));});}});}
+
+/* ---------- reward model from comparisons ---------- */
+function buildRM(s){const B=base([0,4.6,6.8],[0,.3,0],54);s.tRotY=-.4;s.vmin=33;const Rg=2,G=30;const trueR=(x,y)=>x+.6*y-.35*x*x-.15*y*y;const feat=(x,y)=>[x,y,x*x,y*y,x*y];
+ const geo=new THREE.PlaneGeometry(2*Rg,2*Rg,G,G);geo.rotateX(-Math.PI/2);const cols=new Float32Array(geo.attributes.position.count*3);geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ const surf=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:.85,roughness:.7}));B.root.add(surf);
+ const tg=new THREE.PlaneGeometry(2*Rg,2*Rg,16,16);tg.rotateX(-Math.PI/2);const tpos=tg.attributes.position;{let a=1e9,b=-1e9;for(let k=0;k<tpos.count;k++){const v=trueR(tpos.getX(k),-tpos.getZ(k));a=Math.min(a,v);b=Math.max(b,v);}for(let k=0;k<tpos.count;k++)tpos.setY(k,(trueR(tpos.getX(k),-tpos.getZ(k))-a)/(b-a)*1.8+.1);}
+ const tw=new THREE.LineSegments(new THREE.WireframeGeometry(tg),new THREE.LineBasicMaterial({color:C.good,transparent:true,opacity:.6}));tw.visible=false;B.root.add(tw);
+ let pairs=[],w=[0,0,0,0,0],grp=new THREE.Group(),running=false,wS=[],lS=[];B.root.add(grp);const rd=document.getElementById('rm-read');
+ function newPairs(){const r=rng(Math.floor(Math.random()*1e6));pairs=[];for(let i=0;i<50;i++){const a=[(r()*2-1)*Rg,(r()*2-1)*Rg],b=[(r()*2-1)*Rg,(r()*2-1)*Rg];const p=sig(2*(trueR(...a)-trueR(...b)));pairs.push(r()<p?[a,b]:[b,a]);}
+  w=[0,0,0,0,0];while(grp.children.length)disposeTree(grp.children.pop());wS=[];lS=[];
+  pairs.forEach(([wn,ls])=>{const a=new THREE.ArrowHelper(V(1,0,0),V(ls[0],.05,-ls[1]),1,C.ink.getHex(),.12,.07);const d=V(wn[0]-ls[0],0,-(wn[1]-ls[1]));const L=d.length();a.setDirection(d.normalize());a.setLength(L,.12,.07);grp.add(a);
+   const m1=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),std(C.good));m1.position.set(wn[0],.05,-wn[1]);grp.add(m1);const m2=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),std(C.bad));m2.position.set(ls[0],.05,-ls[1]);grp.add(m2);wS.push(m1);lS.push(m2);});}
+ const rw=(x,y)=>feat(x,y).reduce((a,f,i)=>a+f*w[i],0);
+ function step(){const g=[0,0,0,0,0];pairs.forEach(([a,b])=>{const d=rw(...a)-rw(...b);const c=1-sig(d);const fa=feat(...a),fb=feat(...b);for(let i=0;i<5;i++)g[i]+=c*(fa[i]-fb[i]);});for(let i=0;i<5;i++)w[i]+=.02*g[i];}
+ function draw(){const pos=geo.attributes.position;const c=new THREE.Color();let mn=1e9,mx=-1e9;const vals=[];for(let k=0;k<pos.count;k++){const v=rw(pos.getX(k),-pos.getZ(k));vals.push(v);mn=Math.min(mn,v);mx=Math.max(mx,v);}
+  vals.forEach((v,k)=>{pos.setY(k,mx>mn?(v-mn)/(mx-mn)*1.8+.1:.8);c.copy(C.bad).lerp(C.good,mx>mn?(v-mn)/(mx-mn):.5);cols.set([c.r,c.g,c.b],k*3);});pos.needsUpdate=true;geo.attributes.color.needsUpdate=true;geo.computeVertexNormals();
+  let acc=0,L=0;pairs.forEach(([a,b])=>{const d=rw(...a)-rw(...b);if(d>0)acc++;L-=Math.log(sig(d)+1e-12);});
+  let cx=0,cy=0,cxx=0,cyy=0,cxy=0,n=0;for(let i=-4;i<=4;i++)for(let j=-4;j<=4;j++){const x=i/2,y=j/2,a=trueR(x,y),b=rw(x,y);cx+=a;cy+=b;cxx+=a*a;cyy+=b*b;cxy+=a*b;n++;}const corr=(cxy/n-cx*cy/n/n)/Math.sqrt(Math.max(1e-12,(cxx/n-(cx/n)**2)*(cyy/n-(cy/n)**2)));
+  rd.innerHTML=`Bradley–Terry loss <b>${(L/pairs.length).toFixed(3)}</b>. Comparisons ranked correctly: <b>${acc} of ${pairs.length}</b>. Correlation with the true reward: <b>${isNaN(corr)?'n/a':corr.toFixed(2)}</b>.`;}
+ newPairs();draw();const run=document.getElementById('rm-run');run.onclick=()=>{running=!running;run.textContent=running?'Pause':'Train reward model';};document.getElementById('rm-reset').onclick=()=>{newPairs();draw();};document.getElementById('rm-true').onchange=e=>tw.visible=e.target.checked;
+ return Object.assign(B,{update(){if(running){for(let k=0;k<3;k++)step();draw();}
+  const gw=s.g('chosen'),gl=s.g('rejected');wS.forEach(m=>m.scale.setScalar(1+1.6*gw));lS.forEach(m=>m.scale.setScalar(1+1.6*gl));
+  surf.material.emissive.copy(C.acc);surf.material.emissiveIntensity=.7*s.g('reward');}});}
+
+/* ---------- overoptimisation ---------- */
+function buildOver(s){const B=base([0,5,6.8],[0,.4,0],54);s.tRotY=-.5;s.vmin=33;const G=48,R=3;const xs=[];for(let j=0;j<=G;j++)for(let i=0;i<=G;i++)xs.push([-R+i*2*R/G,R-j*2*R/G]);
+ const gauss=(x,y,mx,my,s_)=>Math.exp(-((x-mx)**2+(y-my)**2)/(2*s_*s_));
+ const ref=xs.map(([x,y])=>.7*gauss(x,y,-.5,0,1)+.3*gauss(x,y,1,1,.6)),gold=xs.map(([x,y])=>2*gauss(x,y,1.2,-.8,.8)),proxy=xs.map(([x,y],k)=>gold[k]+3.4*gauss(x,y,-2.2,2,.45));
+ const zr=ref.reduce((a,b)=>a+b,0);const pr=ref.map(v=>v/zr);
+ function solve(beta){const lw=proxy.map((r,k)=>Math.log(pr[k]+1e-300)+r/beta);const mx=Math.max(...lw);const e=lw.map(v=>Math.exp(v-mx));const z=e.reduce((a,b)=>a+b,0);const p=e.map(v=>v/z);
+  let kl=0,ep=0,eg=0;p.forEach((q,k)=>{if(q>1e-15)kl+=q*Math.log(q/pr[k]);ep+=q*proxy[k];eg+=q*gold[k];});return {p,kl,ep,eg};}
+ const bOf=v=>.05*Math.pow(10,v/100*2.3);const curve=[];for(let v=100;v>=0;v-=2){const r=solve(bOf(v));curve.push([r.kl,r.ep,r.eg]);}
+ const geo=new THREE.PlaneGeometry(2*R,2*R,G,G);geo.rotateX(-Math.PI/2);const cols=new Float32Array(geo.attributes.position.count*3);geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ B.root.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:.7,transparent:true,opacity:.92})));
+ const base_=new THREE.Mesh(new THREE.PlaneGeometry(2*R,2*R),new THREE.MeshBasicMaterial({color:C.line,transparent:true,opacity:.35,side:THREE.DoubleSide}));base_.rotation.x=-Math.PI/2;base_.position.y=-.01;B.root.add(base_);
+ const m1=label('real peak',.26,hex('good'));m1.position.set(1.2,.3,.8);B.root.add(m1);const m2=label('exploit',.26,hex('rew'));m2.position.set(-2.2,.3,-2);B.root.add(m2);
+ let mode='opt';const bs=document.getElementById('ov-b'),rd=document.getElementById('ov-read'),cv=document.getElementById('ov-chart');const tgt=new Float32Array(xs.length),cur=new Float32Array(xs.length);let tcol=C.pol;
+ function chart(r){const g=cv.getContext('2d');const W=cv.width,H=cv.height;g.clearRect(0,0,W,H);const mk=Math.max(...curve.map(c=>c[0]))*1.05,my=Math.max(...curve.map(c=>c[1]))*1.1;const X=k=>40+k/mk*(W-60),Y=v=>H-30-v/my*(H-50);
+  g.strokeStyle=hex('line');g.lineWidth=2;g.beginPath();g.moveTo(40,10);g.lineTo(40,H-30);g.lineTo(W-10,H-30);g.stroke();g.font='22px '+window.LABEL_FONT;g.fillStyle=hex('muted');g.fillText('KL from reference →',W-250,H-4);g.fillText('expected reward',48,26);
+  [[1,hex('rew')],[2,hex('good')]].forEach(([i,c])=>{g.strokeStyle=c;g.lineWidth=4;g.beginPath();curve.forEach((p,k)=>{k?g.lineTo(X(p[0]),Y(p[i])):g.moveTo(X(p[0]),Y(p[i]));});g.stroke();g.fillStyle=c;g.beginPath();g.arc(X(r.kl),Y(i===1?r.ep:r.eg),8,0,7);g.fill();});}
+ function compute(){const beta=bOf(+bs.value);document.getElementById('ov-bv').textContent=beta.toFixed(2);const r=solve(beta);let arr,col;
+  if(mode==='opt'){arr=r.p;col=C.pol;}else if(mode==='ref'){arr=pr;col=C.ref;}else if(mode==='proxy'){arr=proxy;col=C.rew;}else{arr=gold;col=C.good;}const mx=Math.max(...arr);arr.forEach((v,k)=>tgt[k]=v/mx*2);tcol=col;
+  const best=curve.reduce((a,c)=>c[2]>a[2]?c:a);rd.innerHTML=`KL from reference <b>${r.kl.toFixed(2)}</b> nats. Proxy reward <b>${r.ep.toFixed(2)}</b>, true reward <b>${r.eg.toFixed(2)}</b>. ${r.eg<best[2]-.15&&r.kl>best[0]?'Overoptimised: the policy is exploiting the proxy and true reward has fallen.':r.kl<best[0]*.6?'Conservative: close to the reference, with room to improve.':'Near the sweet spot for true reward.'}`;chart(r);}
+ bs.oninput=compute;document.querySelectorAll('#ov-s [data-s]').forEach(b=>b.onclick=()=>{mode=b.dataset.s;setPressed(b.parentNode,b);compute();});compute();const c=new THREE.Color();
+ return Object.assign(B,{update(){const pos=geo.attributes.position;for(let k=0;k<xs.length;k++){cur[k]+=(tgt[k]-cur[k])*.15;pos.setY(k,cur[k]);c.copy(C.line).lerp(tcol,clamp(cur[k]/2*1.4+.15,0,1));cols.set([c.r,c.g,c.b],k*3);}pos.needsUpdate=true;geo.attributes.color.needsUpdate=true;geo.computeVertexNormals();}});}
+
+/* ---------- DPO surface ---------- */
+function buildDPO(s){const B=base([0,7.5,11.5],[0,.2,0],60);s.tRotY=-.6;s.vmin=33;const R=4,G=36;const geo=new THREE.PlaneGeometry(2*R,2*R,G,G);geo.rotateX(-Math.PI/2);const cols=new Float32Array(geo.attributes.position.count*3);geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+ const surf=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:.7,transparent:true,opacity:.88}));B.root.add(surf);
+ B.root.add(line([V(-R,0,0),V(R,0,0)],C.good));B.root.add(line([V(0,0,-R),V(0,0,R)],C.bad));
+ const lw=label('chosen: log π/π_ref →',.26,hex('good'));lw.position.set(R-.4,.1,.4);B.root.add(lw);const ll=label('rejected: log π/π_ref →',.26,hex('bad'));ll.position.set(.3,.1,-R+.3);B.root.add(ll);
+ const axW=new THREE.Mesh(new THREE.BoxGeometry(2*R,.07,.07),new THREE.MeshBasicMaterial({color:C.good,transparent:true,opacity:0,depthTest:false}));
+ const axL=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,2*R),new THREE.MeshBasicMaterial({color:C.bad,transparent:true,opacity:0,depthTest:false}));
+ [axW,axL].forEach(m=>{m.renderOrder=9;m.visible=false;B.root.add(m);});[lw,ll].forEach(l=>l.userData.s0=l.scale.clone());
+ const grow=(l,g)=>l.scale.set(l.userData.s0.x*(1+.4*g),l.userData.s0.y*(1+.4*g),1);
+ const ball=new THREE.Mesh(new THREE.SphereGeometry(.14,16,10),std(C.pol));B.root.add(ball);let trail=[],tl=null;let p=[0,0],running=false;const bs=document.getElementById('dpo-b'),rd=document.getElementById('dpo-read');
+ const H=(dw,dl,b)=>-Math.log(sig(b*(dw-dl)))*.9;
+ function surfDraw(){const b=+bs.value/100;document.getElementById('dpo-bv').textContent=b.toFixed(2);const pos=geo.attributes.position;const c=new THREE.Color();
+  for(let k=0;k<pos.count;k++){const dw=pos.getX(k),dl=-pos.getZ(k);const h=H(dw,dl,b);pos.setY(k,h);c.copy(C.good).lerp(C.bad,clamp(h/2.5,0,1));cols.set([c.r,c.g,c.b],k*3);}pos.needsUpdate=true;geo.attributes.color.needsUpdate=true;geo.computeVertexNormals();}
+ function place(){const b=+bs.value/100;ball.position.set(p[0],H(p[0],p[1],b)+.14,-p[1]);const L=-Math.log(sig(b*(p[0]-p[1])));
+  rd.innerHTML=`Chosen log-ratio <b>${p[0].toFixed(2)}</b>, rejected log-ratio <b>${p[1].toFixed(2)}</b>. Implicit reward margin β·Δ = <b>${(b*(p[0]-p[1])).toFixed(2)}</b>, loss <b>${L.toFixed(3)}</b>, probability the pair is ranked correctly <b>${(sig(b*(p[0]-p[1]))*100).toFixed(0)}%</b>.`;}
+ function step(){const b=+bs.value/100;if(sig(b*(p[0]-p[1]))>.985)return;const g=b*sig(-b*(p[0]-p[1]));p[0]=clamp(p[0]+.6*g,-R,R);p[1]=clamp(p[1]-.6*g,-R,R);trail.push(ball.position.clone());if(tl){B.root.remove(tl);tl.geometry.dispose();}if(trail.length>1){tl=line(trail,C.pol);B.root.add(tl);}}
+ bs.oninput=()=>{surfDraw();place();};const run=document.getElementById('dpo-run');run.onclick=()=>{running=!running;run.textContent=running?'Pause':'Take gradient steps';};
+ document.getElementById('dpo-reset').onclick=()=>{p=[0,0];trail=[];if(tl){B.root.remove(tl);tl=null;}place();};surfDraw();place();
+ return Object.assign(B,{update(){if(running){step();place();}
+  const gw=s.g('chosen'),gl=s.g('rejected');grow(lw,gw);grow(ll,gl);axW.material.opacity=.9*gw;axW.visible=gw>0;axL.material.opacity=.9*gl;axL.visible=gl>0;
+  surf.material.emissive.copy(C.acc);surf.material.emissiveIntensity=.4*s.g('loss');}});}
+
+/* ---------- GRPO ---------- */
+function buildGRPO(s){const B=base([0,4.2,9.6],[0,1.8,0],58);s.tRotY=-.3;s.vmin=32;const S=6;const names=['guess','recall a fact','one-line sum','short working','step by step','step by step + check'];const pS=[.08,.2,.3,.55,.8,.95],len=[5,12,20,60,180,320];
+ const ref=[2,1.4,1,.3,-.4,-1.2];let th=ref.slice();const rL=[];const g=new THREE.BoxGeometry(.7,1,.7);g.translate(0,.5,0);
+ const bars=names.map((n,i)=>{const m=new THREE.Mesh(g,std(C.pol.clone().lerp(C.good,i/(S-1)*.6)));m.position.set((i-(S-1)/2)*1.1,0,0);m.scale.y=.05;B.root.add(m);const l=label(n,.22,hex('ink'));l.position.set((i-(S-1)/2)*1.1,-.25,.7);B.root.add(l);
+  const l2=label(Math.round(pS[i]*100)+'% right',.2,hex('muted'));l2.position.set((i-(S-1)/2)*1.1,-.55,.7);B.root.add(l2);rL.push(l2);return m;});
+ const grp=new THREE.Group();B.root.add(grp);const sph=[],stk=[];let running=false,it=0,acc=0;const gs=document.getElementById('gr-g'),kl=document.getElementById('gr-kl'),rd=document.getElementById('gr-read');const r=rng(4);
+ const pi=()=>{const m=Math.max(...th);const e=th.map(v=>Math.exp(v-m));const z=e.reduce((a,b)=>a+b,0);return e.map(v=>v/z);};let last={samples:[],adv:[]};
+ function step(){const G=+gs.value;const p=pi();const samples=[];for(let i=0;i<G;i++){let u=r(),k=0;while(k<S-1&&u>p[k]){u-=p[k];k++;}samples.push([k,r()<pS[k]?1:0]);}
+  const rw=samples.map(x=>x[1]);const mean=rw.reduce((a,b)=>a+b,0)/G;const sd=Math.sqrt(rw.reduce((a,b)=>a+(b-mean)**2,0)/G);const adv=rw.map(v=>sd>1e-9?(v-mean)/sd:0);
+  const grad=Array(S).fill(0);samples.forEach(([k],i)=>{for(let j=0;j<S;j++)grad[j]+=adv[i]*((j===k?1:0)-p[j]);});
+  for(let j=0;j<S;j++){th[j]+=.5*grad[j]/G;if(kl.checked)th[j]-=.08*(th[j]-ref[j]);}it++;last={samples,adv,allSame:sd<1e-9};draw();}
+ function draw(){while(grp.children.length){const c=grp.children.pop();c.geometry.dispose();c.material.dispose();}sph.length=0;stk.length=0;const p=pi();p.forEach((v,i)=>bars[i].userData.h=Math.max(.04,v*3));
+  const G=last.samples.length;last.samples.forEach(([k,ok],i)=>{const x=(i-(G-1)/2)*.42;const m=new THREE.Mesh(new THREE.SphereGeometry(.14,12,8),std(ok?C.good:C.bad));m.position.set(x,3.9,-1.6);grp.add(m);sph.push(m);
+   const a=last.adv[i];const st=new THREE.Mesh(new THREE.BoxGeometry(.08,Math.max(.02,Math.abs(a)*.5),.08),std(a>=0?C.good:C.bad));st.position.set(x,3.55+(a>=0?-Math.abs(a)*.25:Math.abs(a)*.25)-.3,-1.6);grp.add(st);stk.push(st);
+   grp.add(line([V(x,3.75,-1.6),V(bars[k].position.x,bars[k].userData.h+.05,0)],ok?C.good:C.bad,{opacity:.35}));});
+  const ea=p.reduce((a,v,i)=>a+v*pS[i],0),el=p.reduce((a,v,i)=>a+v*len[i],0);
+  rd.innerHTML=`Step <b>${it}</b>. Expected accuracy <b>${(ea*100).toFixed(0)}%</b>, expected answer length <b>${el.toFixed(0)} tokens</b>. ${last.allSame?'This group was all right or all wrong, so every advantage is zero and nothing was learned.':G?'Correct answers got positive advantage and were reinforced.':''}`;}
+ document.getElementById('gr-step').onclick=step;const run=document.getElementById('gr-run');run.onclick=()=>{running=!running;run.textContent=running?'Pause':'Run RL';};
+ document.getElementById('gr-reset').onclick=()=>{th=ref.slice();it=0;last={samples:[],adv:[]};draw();};gs.oninput=()=>document.getElementById('gr-gv').textContent=gs.value;gs.oninput();draw();
+ const lg=label('sampled group and advantages',.24,hex('muted'));lg.position.set(0,4.4,-1.6);B.root.add(lg);
+ [...rL,lg].forEach(l=>l.userData.s0=l.scale.clone());const grow=(ls,g)=>ls.forEach(l=>l.scale.set(l.userData.s0.x*(1+.4*g),l.userData.s0.y*(1+.4*g),1));
+ const glow=(m,g)=>{m.material.emissive.copy(m.material.color);m.material.emissiveIntensity=.7*g;};
+ return Object.assign(B,{update(t,dt){if(running){acc+=dt;if(acc>(reduced?.6:.25)){acc=0;step();}}bars.forEach(m=>m.scale.y+=(m.userData.h-m.scale.y)*.15);
+  const ga=s.g('adv'),gr=s.g('reward');stk.forEach(m=>{m.scale.set(1+2*ga,1,1+2*ga);glow(m,ga);});sph.forEach(m=>{m.scale.setScalar(1+.6*gr);glow(m,gr);});
+  grow(rL,gr);grow([lg],Math.max(ga,s.g('group')));}});}
+
+startAll(()=>{readColors(['ink','muted','line','panel','pol','ref','rew','good','bad','acc']);
+ stage('f-hero',buildHero);stage('f-pipe',buildPipe);stage('f-rm',buildRM);stage('f-over',buildOver);stage('f-dpo',buildDPO);stage('f-grpo',buildGRPO);});
+})();
+</script>
+<script>
+(function(){"use strict";
+// Section bar: current-section highlight, reading progress, and a Sections menu whenever the links do not fit.
+const nav=document.querySelector('nav.top');
+if(nav){
+ const wrap=nav.querySelector('.wrap'),links=[...wrap.querySelectorAll(':scope > a[href^="#"]')];
+ const secs=links.map(a=>document.getElementById(a.getAttribute('href').slice(1)));
+ const cur=document.createElement('span');cur.className='nav-cur';
+ const btn=document.createElement('button');btn.type='button';btn.className='nav-menu';btn.textContent='Sections';
+ btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-controls','nav-panel');
+ const brand=wrap.querySelector('.brand');(brand||wrap.firstChild).after(cur);wrap.appendChild(btn);
+ const panel=document.createElement('div');panel.className='nav-panel';panel.id='nav-panel';
+ panel.innerHTML='<ol>'+links.map((a,i)=>'<li><a href="'+a.getAttribute('href')+'"><span>'+(i+1)+'</span>'+a.innerHTML+'</a></li>').join('')+'</ol>';
+ const prog=document.createElement('span');prog.className='nav-prog';nav.append(panel,prog);
+ const plinks=[...panel.querySelectorAll('a')];
+ const setOpen=o=>{nav.classList.toggle('nav-open',o);btn.setAttribute('aria-expanded',String(o));};
+ btn.addEventListener('click',()=>setOpen(!nav.classList.contains('nav-open')));
+ panel.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false);});
+ addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
+ function fit(){nav.classList.remove('nav-collapsed');if(wrap.scrollWidth>wrap.clientWidth+1)nav.classList.add('nav-collapsed');else setOpen(false);}
+ let queued=false;
+ function spy(){queued=false;const line=innerHeight*.3;let k=-1;
+  secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<=line)k=i;});
+  [links,plinks].forEach(set=>set.forEach((a,i)=>{if(i===k)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');}));
+  cur.innerHTML=k>=0?'<b>'+(k+1)+'</b>'+links[k].textContent:'';
+  const max=document.documentElement.scrollHeight-innerHeight;nav.style.setProperty('--p',max>0?(scrollY/max).toFixed(4):0);}
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(spy);}},{passive:true});
+ addEventListener('resize',()=>{fit();spy();});
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+ fit();spy();
+}
+// Equation terms: hover, focus or tap lights the term, the figure elements with the same data-link, and pulses the 3D stage.
+document.querySelectorAll('.eq[data-viz]').forEach(eq=>{
+ const fig=document.getElementById(eq.dataset.viz);if(!fig)return;
+ eq.querySelectorAll('[data-link]').forEach(t=>{
+  t.tabIndex=0;t.setAttribute('role','button');t.setAttribute('aria-label','Show '+(t.dataset.label||t.dataset.link)+' in the figure');
+  let last=0;
+  const fire=()=>{const now=performance.now();if(now-last<600)return;last=now;const lit=[t];
+   t.dataset.link.split(/\s+/).forEach(l=>{fig.querySelectorAll('[data-link~="'+l+'"]').forEach(x=>lit.push(x));fig.dispatchEvent(new CustomEvent('pe-link',{detail:l}));});
+   lit.forEach(x=>x.classList.add('pe-lit'));setTimeout(()=>lit.forEach(x=>x.classList.remove('pe-lit')),1100);};
+  t.addEventListener('mouseenter',fire);t.addEventListener('focus',fire);t.addEventListener('click',fire);
+  t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();last=0;fire();}});
+ });
+});
+})();
+</script>
+</body></html>

@@ -1,0 +1,47 @@
+[
+ {
+  "id": "page-glip-code-strides",
+  "claim": "GLIP anchor strides of the five FPN levels (P3-P7) in the official configs",
+  "value": "8, 16, 32, 64, 128",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "sources/glip/code/glip_Swin_T_O365_GoldG.yaml and glip_Swin_L.yaml, MODEL.RPN.ANCHOR_STRIDE (8, 16, 32, 64, 128); ASPECT_RATIOS (1.0,), SCALES_PER_OCTAVE 1, so one anchor per location",
+  "code_only": true
+ },
+ {
+  "id": "page-glip-code-multiscale",
+  "claim": "GLIP training short side is drawn from a multi-scale set (480, 560, 640, 720, 800)",
+  "value": "480 to 800",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "sources/glip/code/glip_Swin_T_O365_GoldG.yaml, AUGMENT.MULT_MIN_SIZE_TRAIN (480,560,640,720,800)",
+  "code_only": true
+ },
+ {
+  "id": "page-glip-code-pad",
+  "claim": "GLIP pads input images to a multiple of this many pixels",
+  "value": "32",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "sources/glip/code/glip_Swin_T_O365_GoldG.yaml, DATALOADER.SIZE_DIVISIBILITY 32",
+  "code_only": true
+ },
+ {
+  "id": "page-glip-code-optimizer",
+  "claim": "GLIP pre-training optimizer",
+  "value": "AdamW",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "sources/glip/code/glip_Swin_T_O365_GoldG.yaml, SOLVER.OPTIMIZER ADAMW (the paper does not name the optimizer)",
+  "code_only": true
+ },
+ {
+  "id": "page-glip-n-locations",
+  "claim": "number of anchor locations (regions N) for one 800 x 1333 test image in GLIP-T, computed from the official config",
+  "value": "22,400",
+  "paper": "GLIP",
+  "arxiv": "2112.03857v2",
+  "loc": "computed: 800 x 1333 padded to a multiple of 32 = 800 x 1344; strides 8, 16, 32, 64, 128 give 100x168 + 50x84 + 25x42 + 13x21 + 7x11 = 16800 + 4200 + 1050 + 273 + 77 = 22,400 locations, one anchor each (ASPECT_RATIOS (1.0,), SCALES_PER_OCTAVE 1). Test size only; multi-scale training changes it. P6/P7 sizes assume ceil division by 2.",
+  "our_reading": true
+ }
+]

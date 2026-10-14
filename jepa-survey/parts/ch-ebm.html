@@ -1,0 +1,55 @@
+<section id="ch-ebm" class="chapter">
+<h2>The energy view (LeCun, 2022)</h2>
+<p>Before I-JEPA existed, the recipe was written down as a diagram in a <span data-claim="ebm-position-title">A Path Towards Autonomous Machine Intelligence</span> (<span data-claim="ebm-position-version">Version 0.9.2</span>, <span data-claim="ebm-position-date">2022-06-27</span>), and taught in a set of lectures that became an arXiv tutorial (Dawid and LeCun, <span data-claim="ebm-arxiv-version">2306.02572v1</span>), which is the source this chapter quotes. The idea rests on one change of viewpoint: stop thinking of a model as a function that outputs an answer, and think of it as a function that <em>scores</em> how well an answer fits.</p>
+
+<figure class="viz" id="viz-energy" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="energy-canvas" role="img" aria-label="A three-dimensional surface of energy over a plane of inputs x and candidate answers y, with two valleys where the data lives. A red marker shows the energy of the chosen pair. Buttons flatten the surface (collapse), push up chosen points (contrastive) or shrink the valleys (regularised)."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-energy-trained" data-land="trained" aria-pressed="true">Trained landscape</button>
+    <button type="button" id="btn-energy-flat" data-land="flat" aria-pressed="false">Collapsed (flat)</button>
+    <button type="button" id="btn-energy-contrastive" data-land="contrastive" aria-pressed="false">Contrastive: push up the others</button>
+    <button type="button" id="btn-energy-reg" data-land="reg" aria-pressed="false">Regularised: shrink the valleys</button>
+    <label>x <input type="range" id="energy-x" min="-1" max="1" step="0.02" value="-0.4"></label>
+    <label>y <input type="range" id="energy-y" min="-1" max="1" step="0.02" value="0.5"></label>
+    <button type="button" id="btn-energy-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="energy-readout" aria-live="polite"></p>
+  <figcaption>Toy model. The surface is a formula with two valleys standing in for "the data"; the buttons change the formula, not a trained network. Drag to turn it. Before pressing "Collapsed", guess: what does the landscape look like when every answer is equally good?</figcaption>
+</figure>
+
+<h3>Energy: a score, not an answer</h3>
+<p>An <b>energy-based model</b> assigns a number <span class="tex">F(x, y)</span> to every pair of an input <span class="tex">x</span> and a candidate <span class="tex">y</span>. Low means "these go together"; high means "they do not". To answer a question, you do not run the network forward once: you search for the <span class="tex">y</span> with the lowest energy. The tutorial puts it in one line (<span data-claim="ebm-sec-energy-def">Sec. 3</span>):</p>
+<div class="eq" id="eq-energy" data-build data-viz="viz-energy"><div class="tex tex-display">
+\htmlData{step=1, link=surface}{F(x, y)} \;\text{low for compatible pairs},\qquad \htmlData{step=2, link=marker}{\check{y} = \arg\min_y F(x, y)}
+</div></div>
+<p class="eqno">Sec. 3 of the tutorial (Dawid and LeCun, 2023), the highlighted definition; the energy is used for inference only, not as the training loss.</p>
+<ul class="gloss">
+  <li><span class="tex">x</span>: what you are given (the context, the visible patches, the past frames).</li>
+  <li><span class="tex">y</span>: a candidate for what you are asked about (the hidden block, the next frame).</li>
+  <li><span class="tex">F</span>: the scalar score; the surface in the figure. Inference walks downhill on it.</li>
+</ul>
+<p>Why bother? Because a function can only return one answer, but many questions have several good answers: the hidden block could contain any of a hundred arrangements of leaves. An energy surface can have several valleys. The tutorial's second move handles the leftover ambiguity with a <b>latent variable</b> <span class="tex">z</span>: a small extra input that "captures the information in <span class="tex">y</span> that is not readily available in <span class="tex">x</span>" (<span data-claim="ebm-sec-latent">Sec. 3.2</span>). The energy of a pair is then the best energy over all choices of <span class="tex">z</span>:</p>
+<div class="eq" id="eq-latent" data-build data-viz="viz-energy"><div class="tex tex-display">
+\htmlData{step=1, link=surface}{F(x, y)} = \htmlData{step=2, link=valley}{\min_{z} E(x, y, z)}
+</div></div>
+<p class="eqno">Sec. 3.2 of the tutorial (written there with argmin; the minimised form, as in its <span data-claim="ebm-fig-latent">Fig. 4</span>). The tutorial warns that the capacity of <span class="tex">z</span> must be limited, or the model can hide the whole answer inside it.</p>
+
+<h3>Collapse, and the two ways out</h3>
+<p>Here is the trap. If the energy is computed by comparing two <em>embeddings</em>, <span class="tex">F(x, y) = D(s_x, s_y)</span>, nothing stops both encoders from outputting the same constant: every pair then has zero energy, the surface is flat (press the button above), and the model has learned nothing. The tutorial's <span data-claim="ebm-fig-collapse">Fig. 5</span> contrasts this "joint-embedding architecture (can collapse!)" with plain regression, which cannot collapse because it must output actual pixels. The price of predicting in embedding space is that you must <em>pay</em> for the shape of the landscape.</p>
+<p>Two families pay for it (Sec. 4 of the tutorial). <b>Contrastive methods</b> pick specific wrong answers and push their energy up, as in the hinge loss of <span data-claim="ebm-eq-hinge">Eq. (3)</span>; negative log-likelihood turns out to be a contrastive method too, pushing up <em>every</em> other answer at once (<span data-claim="ebm-eq-nll">Eq. (4)</span>). The cost: in a high-dimensional space there are too many wrong answers to push. <b>Regularised methods</b> instead limit the total volume of low-energy space, by architecture (a bottleneck, a small code) or by a term in the loss that measures that volume. VICReg's variance term is the tutorial's worked example. Hold on to this split: every anti-collapse trick on this page, from the EMA teacher to LeJEPA's single regulariser, is one of these two.</p>
+
+<h3>JEPA, as first drawn</h3>
+<p>Now put the pieces together. Two encoders turn <span class="tex">x</span> and <span class="tex">y</span> into embeddings; a predictor, given the embedding of <span class="tex">x</span> and a latent <span class="tex">z</span>, guesses the embedding of <span class="tex">y</span>; the energy is the distance between the guess and the real thing. That is the Joint-Embedding Predictive Architecture of the tutorial's <span data-claim="ebm-fig-jepa">Fig. 9</span>:</p>
+<div class="eq" id="eq-jepa" data-build data-viz="viz-energy"><div class="tex tex-display">
+\htmlData{step=1, link=surface}{F(x, y, z)} = D\big(\htmlData{step=3, link=marker}{\htmlClass{t-green}{\tilde{s}_x}},\ \htmlData{step=2, link=valley}{\htmlClass{t-yellow}{s_y}}\big), \qquad \htmlClass{t-green}{\tilde{s}_x} = \mathrm{Pred}(\htmlClass{t-blue}{s_x}, z),\quad \htmlClass{t-blue}{s_x} = \mathrm{Enc}_x(x),\quad \htmlClass{t-yellow}{s_y} = \mathrm{Enc}_y(y)
+</div></div>
+<p class="eqno">Labels of Fig. 9 in the tutorial (the energy is not a numbered equation there). The two encoders may differ and share no weights; <span class="tex">x</span> and <span class="tex">y</span> may even be different modalities.</p>
+<ul class="gloss">
+  <li><span class="tex t-blue">s_x</span>: the context embedding; blue throughout this page.</li>
+  <li><span class="tex t-yellow">s_y</span>: the target embedding, produced by the <em>other</em> encoder; yellow.</li>
+  <li><span class="tex t-green">\tilde{s}_x</span>: the predictor's guess of <span class="tex">s_y</span>; green.</li>
+  <li><span class="tex">D</span>: a distance; the loss, red, lives here.</li>
+</ul>
+<p>Three things follow from the picture, and each becomes a paper. First, the target encoder may <em>discard</em>: if some detail of <span class="tex">y</span> is unpredictable from <span class="tex">x</span>, the cheapest way to lower the energy is for <span class="tex">\mathrm{Enc}_y</span> to stop representing it. That is a feature when the detail is noise (the leaves) and a bug when the encoder discards everything (collapse). The training loss drawn in the tutorial's <span data-claim="ebm-fig-jepa-reg">Fig. 10</span> therefore has four terms: the prediction error, a cost on the information in <span class="tex">z</span>, and two terms that keep <span class="tex">s_x</span> and <span class="tex">s_y</span> informative about their inputs. Second, with <span class="tex">x</span> = the past and <span class="tex">y</span> = the future, the predictor <em>is</em> a world model (Act IV). Third, JEPAs can be stacked: a <b>hierarchical JEPA</b> (<span data-claim="ebm-fig-hjepa">Fig. 11</span>) runs a second JEPA on top of the first's embeddings, predicting further ahead with fewer details, "since which information is important may be scale-dependent". That diagram waited four years for a working version (chapter 12).</p>
+</section>

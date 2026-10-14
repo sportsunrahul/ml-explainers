@@ -1,0 +1,58 @@
+<p class="kicker"><span class="act-n">Act II</span>Segment Anything (2023)</p>
+<section id="ch-promptable" class="chapter">
+<h2>Any prompt, a valid mask</h2>
+<p>The Segment Anything Model (SAM) knows no class names. It answers one request: given an image and a <dfn>prompt</dfn> that points at something, return a mask for it. Click on the desk scene and see what comes back.</p>
+
+<figure class="viz" id="viz-promptable" data-scene="promptable" data-toy>
+  <div class="stage"></div>
+  <div class="controls" role="group" aria-label="Prompt">
+    <span class="lbl">Prompt:</span>
+    <button type="button" data-pmode="click" id="btn-promptable-click" aria-pressed="true">One click</button>
+    <button type="button" data-pmode="two" id="btn-promptable-two">Two clicks</button>
+    <button type="button" data-pmode="box" id="btn-promptable-box">Box</button>
+  </div>
+  <div class="controls" role="group" aria-label="Outputs">
+    <span class="lbl">Outputs:</span>
+    <button type="button" data-pout="three" id="btn-promptable-three" aria-pressed="true">Three outputs</button>
+    <button type="button" data-pout="one" id="btn-promptable-one">One output</button>
+  </div>
+  <div class="controls" role="group" aria-label="Training view">
+    <span class="lbl">View:</span>
+    <button type="button" data-pview="use" id="btn-promptable-use" aria-pressed="true">Use</button>
+    <button type="button" data-pview="train" id="btn-promptable-train">Train</button>
+    <span class="lbl">The user meant:</span>
+    <button type="button" data-ptarget="0" id="btn-promptable-t0">smallest</button>
+    <button type="button" data-ptarget="1" id="btn-promptable-t1" aria-pressed="true">middle</button>
+    <button type="button" data-ptarget="2" id="btn-promptable-t2">largest</button>
+  </div>
+  <div class="controls"><button type="button" data-cue-reset id="btn-promptable-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model on the drawn desk scene. Click anywhere, or focus the scene and use the arrow keys and Enter. With Box, drag a rectangle. Scores and the averaged mask are illustrations, not SAM outputs; in Train view the loss per mask is a stand-in (1 minus the overlap with the intended mask) for SAM's focal and dice losses.</figcaption>
+</figure>
+
+<p>Before you press <b>One output</b>, predict what it will show. A click on the logo of the mug could mean the logo, the mug, or the mug with its saucer. All three are correct answers. A model with one output slot is trained on all three, one example at a time. What single mask makes the smallest total error against three different right answers?</p>
+<p>The answer is their average: a soft blob that is darkest on the logo and fades over the saucer. It matches no object. This is why SAM's task asks for a <dfn>valid</dfn> mask: "even when a prompt is ambiguous and could refer to multiple objects", the output "should be a reasonable mask for at least one of those objects" (SAM v1, Sec. 2).</p>
+
+<h3>The task is both the training signal and the interface</h3>
+<p>A prompt can be a set of foreground and background clicks, a box, a rough mask, or free text. The same request does two jobs. During training, the model gets a mask and a prompt sampled from it, and must return that mask. After training, other systems talk to SAM through the same request: a detector sends boxes, a person sends clicks, and, in a proof of concept with a modified training procedure, a text model sends words (the released SAM takes no text). SAM's authors call this <dfn>zero-shot transfer</dfn> through prompting, the way a language model is steered by its prompt.</p>
+
+<h3>Three answers, each with a score</h3>
+<p>SAM fixes the ambiguity with extra output slots. For a single prompt it predicts <span data-claim="sam-ambiguity-masks">3</span> masks at once, "since we observe that three layers (<span data-claim="sam-nest-depth">whole, part, and subpart</span>) are often enough to describe nested masks". Each slot also gets a predicted score: an estimate of how well its mask overlaps the object it covers, its <dfn>IoU</dfn> (intersection over union: shared pixels divided by all pixels in either mask). Applications rank the three masks by this score.</p>
+<p>The trick is in the loss. During training, the loss is computed between the true mask and each of the three outputs, but the model "only backpropagate[s] from the lowest loss". Press <b>Train</b> and change which mask the user meant: only the closest output gets a red outline, and only it is pushed toward the target. In our reading, over many ambiguous clicks each slot settles on one level of the nesting; the paper says only that SAM tends to return the subpart, part and whole object.</p>
+
+<div class="eq" id="eq-samloss" data-build data-viz="viz-promptable"><div class="tex tex-display">
+\htmlClass{t-red}{\mathcal{L}} = \htmlData{step=2, link=min}{\min_{k\in\{1,2,3\}}} \Big[\, \htmlData{step=1, link=masks}{20\,\mathrm{Focal}(\htmlClass{t-green}{M_k}, G) + \mathrm{Dice}(\htmlClass{t-green}{M_k}, G)} \,\Big] + \htmlData{step=3, link=iou}{1.0 \cdot \tfrac{1}{3}\textstyle\sum_{k} \big(\htmlClass{t-green}{\hat s_k} - \mathrm{IoU}(\htmlClass{t-green}{M_k}, G)\big)^2}
+</div></div>
+<p class="eqno">Our transcription of SAM v1, App. A ("Losses" and "Making the model ambiguity-aware"). The paper states this loss in words and prints no equation.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-green}{M_k}</span>: the mask predicted by output slot <span class="tex">k</span>; <span class="tex">G</span>: the true mask.</li>
+  <li><span class="tex">\mathrm{Focal}</span> and <span class="tex">\mathrm{Dice}</span>: two per-pixel mask losses, mixed <span data-claim="sam-focal-dice">20:1</span>. Focal loss is cross-entropy that turns down the weight of easy pixels; dice loss scores the overlap of the two masks as a whole.</li>
+  <li><span class="tex">\min_k</span>: only the slot with the lowest mask loss sends gradient back.</li>
+  <li><span class="tex">\htmlClass{t-green}{\hat s_k}</span>: the predicted score for slot <span class="tex">k</span>, trained with a <span data-claim="sam-iou-loss">mean-square-error</span> loss against the real IoU, with weight <span data-claim="sam-iou-weight">1.0</span>. Whether this term covers all three slots or only the best one, the paper does not say; we write all three (our reading).</li>
+</ul>
+<p>Hover a colored term to light it in the figure. Auxiliary losses after each decoder layer were tried and found <span data-claim="f1-sam-no-deep-sup">unhelpful</span>.</p>
+
+<h3>More prompts, less ambiguity</h3>
+<p>Press <b>Two clicks</b> and place a second click on the saucer. Now the only object that contains both clicks is the mug with its saucer. With several prompts, ambiguity is "<span data-claim="f1-sam-rarer">much rarer</span>", so SAM does not return three masks. A <span data-claim="sam-fourth-token">fourth output token</span> predicts a single mask, which "is never returned for a single prompt and is the only mask returned for multiple prompts". This also keeps the training signal clean: the one unambiguous mask always gets a normal gradient.</p>
+<p>All of this has to happen fast enough for a person clicking in a browser. The next chapter shows how the model is split to make that possible.</p>
+</section>

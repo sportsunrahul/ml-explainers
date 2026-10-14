@@ -1,0 +1,77 @@
+<p class="kicker"><span class="act-n">Part one</span>Choosing what to label</p>
+
+<section id="ch-uncertainty" class="chapter">
+<h2>Ask about the coin flips</h2>
+<p>Start with the simplest idea. The model already outputs probabilities, and where it is close to a coin flip, a label should teach it the most.</p>
+
+<figure class="viz" id="viz-pool" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="pool-canvas" role="img" aria-label="Left: 700 unlabeled points in three spiral arms, drawn as brown circles, squares and triangles by their true class, over a blue heatmap of how unsure the model is. Labeled points are drawn larger with yellow rings; dashed yellow rings mark the next five points the uncertainty score would send to a person. Right, top: a triangle of three-class probabilities shaded by the same score. Right, bottom: accuracy against number of labels for the uncertainty run in blue and a random run in brown, over shaded bands from 20 pools."></canvas>
+  <div class="controls">
+    <span style="color:var(--muted)">score</span>
+    <button type="button" id="btn-pool-margin" aria-pressed="true">Margin</button>
+    <button type="button" id="btn-pool-entropy" aria-pressed="false">Entropy</button>
+    <button type="button" id="btn-pool-lc" aria-pressed="false">Least confidence</button>
+  </div>
+  <div class="controls">
+    <button type="button" id="btn-pool-step">Label 5 more</button>
+    <button type="button" id="btn-pool-r0" aria-pressed="true">Start: 3 labels</button>
+    <button type="button" id="btn-pool-r1" aria-pressed="false">After 1 round</button>
+    <button type="button" id="btn-pool-r4" aria-pressed="false">After 4 rounds</button>
+    <button type="button" id="btn-pool-r12" aria-pressed="false">After 12 rounds</button>
+  </div>
+  <div class="controls">
+    <span style="color:var(--muted)">show the picks of</span>
+    <button type="button" id="btn-pool-unc" aria-pressed="true">the uncertainty run</button>
+    <button type="button" id="btn-pool-rand" aria-pressed="false">the random run</button>
+    <button type="button" id="btn-pool-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="pool-readout" aria-live="polite"></p>
+  <figcaption>Toy model, simulated in node before it shipped. The pool has 700 points in three spiral arms; the classifier is softmax regression on 169 radial-basis features, retrained from zero after every round. Both runs start from the same three labels (one per class) and add 5 per round. Hover over a point to drop its probability vector into the triangle. Before you press "After 1 round", guess: will the uncertainty run be ahead or behind?</figcaption>
+</figure>
+
+<p>This is <em>pool-based active learning</em>. You hold a small labeled set and a large pool of unlabeled images. Each round you train, score every image in the pool, send the top few to a person (the papers call that person the <em>oracle</em>), add the new labels, and train again. The number of labels you can afford is the <em>budget</em>.</p>
+
+<p>Everything depends on the score. The model's softmax output for one image is a probability vector, and with three classes that vector is a point in a triangle: a corner means "certainly this class", the center means "no idea". Hover over the pool to see where each image lands. There are three standard ways to squeeze that vector into one "how unsure" number, all collected in Settles' survey of active learning:</p>
+
+<div class="eq" id="eq-unc" data-build data-viz="viz-pool"><div class="tex tex-display">
+\begin{aligned}
+\htmlData{step=1, link=lc}{x^*_{\mathrm{LC}}} &\htmlData{step=1, link=lc}{= \arg\max_x \; 1 - \htmlClass{t-blue}{P_\theta(\hat y \mid x)}} \\
+\htmlData{step=2, link=margin}{x^*_{\mathrm{M}}} &\htmlData{step=2, link=margin}{= \arg\min_x \; \htmlClass{t-blue}{P_\theta(\hat y_1 \mid x)} - \htmlClass{t-blue}{P_\theta(\hat y_2 \mid x)}} \\
+\htmlData{step=3, link=entropy}{x^*_{\mathrm{H}}} &\htmlData{step=3, link=entropy}{= \arg\max_x \; -\textstyle\sum_i \htmlClass{t-blue}{P_\theta(y_i \mid x)} \log \htmlClass{t-blue}{P_\theta(y_i \mid x)}}
+\end{aligned}
+</div></div>
+<p class="eqno">Settles (2009), Sec. 3.1. Hover a line: its "half as unsure as possible" contour lights up in the triangle.</p>
+<ul class="gloss">
+  <li><b>Least confidence</b>: one minus the probability of the top class <span class="tex">\hat y</span>. It ignores how the rest is spread.</li>
+  <li><b>Margin</b>: the gap between the top two classes <span class="tex">\hat y_1, \hat y_2</span>. A small gap means the image sits between two classes.</li>
+  <li><b>Entropy</b>: how spread the whole vector is, small classes included.</li>
+</ul>
+
+<p>With two classes all three pick the same image, the one whose probability is closest to 0.5. That is the original rule of uncertainty sampling, from Lewis and Gale's 1994 text classifier. With more classes they disagree, and the triangle shows how: entropy is highest only at the very center, while margin is high along the whole line between two corners.</p>
+
+<p>Now press the round buttons. Over the 20 pools the uncertainty run is ahead in the middle: margin sampling reaches <span data-toy>98.6%</span> accuracy with <span data-toy>23</span> labels, where random sampling needs <span data-toy>48</span> for the same. The labels pile up along the boundaries between the arms, which is where a classifier's mistakes live. But look at the first round. With <span data-toy>8</span> labels, entropy sampling is behind random (<span data-toy>58%</span> against <span data-toy>73%</span> at the median). With three labels the model's idea of "the boundary" is wrong, and it confidently asks about the wrong place. Chapter 5 comes back to this <em>cold start</em>.</p>
+
+<p>Uncertainty sampling pays most where random sampling is weakest: rare classes. If a defect shows up in one image in a thousand, a random batch of a hundred images usually contains none of them, while a model that is unsure about a defect-like image asks about it. Lewis and Gale reported needing <span data-claim="lewisgale-500">500</span>-fold fewer labels than random sampling for some rare text categories.</p>
+
+<p>Three warnings travel with this method, and each gets a chapter. A softmax probability is often over-confident, so "unsure" is measured with a bent ruler. The score cannot tell an image that is ambiguous to everyone from an image the model has simply not learned yet (chapter 3). And the top five picks of one round often sit next to each other, so the batch wastes labels on near-copies (chapter 4).</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Once the model has seen a handful of labels per class, send the images whose top two classes are closest (the margin score), a few at a time, and retrain between rounds. Use it first where a class is rare: that is where random review wastes the most.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-pool'), out = document.getElementById('pool-readout');
+  const f = FIG.pool(document.getElementById('pool-canvas'), { fig, say: t => out.textContent = t });
+  const id = k => document.getElementById('btn-pool-' + k);
+  const ms = ['margin', 'entropy', 'lc'].map(id), rs = ['r0', 'r1', 'r4', 'r12'].map(id), vs = ['unc', 'rand'].map(id);
+  ms.forEach(b => b.addEventListener('click', () => { KIT.press(ms, b); f.measure(b.id.replace('btn-pool-', '')); }));
+  rs.forEach(b => b.addEventListener('click', () => { KIT.press(rs, b); f.rounds(+b.id.replace('btn-pool-r', '')); }));
+  vs.forEach(b => b.addEventListener('click', () => { KIT.press(vs, b); f.view(b.id === 'btn-pool-unc' ? 'unc' : 'rand'); }));
+  id('step').addEventListener('click', () => { KIT.press(rs, null); f.step(); });
+  id('reset').addEventListener('click', () => { KIT.press(ms, ms[0]); KIT.press(rs, rs[0]); KIT.press(vs, vs[0]); f.reset(); });
+})();
+</script>
+</section>

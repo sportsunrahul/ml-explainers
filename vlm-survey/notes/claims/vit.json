@@ -1,0 +1,263 @@
+[
+ {
+  "id": "vit-eq1",
+  "claim": "Patch embedding equation number and shape of E, E_pos",
+  "value": "E in R^{(P^2 . C) x D}, E_pos in R^{(N + 1) x D}",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Eq. 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-n-formula",
+  "claim": "Number of patches",
+  "value": "N = HW/P^2",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-pos-emb",
+  "claim": "Position embedding type used",
+  "value": "standard learnable 1D",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 3 (\"Position embeddings are added ... standard learnable 1D\")",
+  "uncertain": false
+ },
+ {
+  "id": "vit-seqlen",
+  "claim": "Sequence length vs patch size",
+  "value": "inversely proportional to the square of the patch size",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Model Variants",
+  "uncertain": false
+ },
+ {
+  "id": "vit-base",
+  "claim": "ViT-Base: layers / hidden D / MLP / heads / params",
+  "value": "12 / 768 / 3072 / 12 / 86M",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-large",
+  "claim": "ViT-Large: layers / hidden D / MLP / heads / params",
+  "value": "24 / 1024 / 4096 / 16 / 307M",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-huge",
+  "claim": "ViT-Huge: layers / hidden D / MLP / heads / params",
+  "value": "32 / 1280 / 5120 / 16 / 632M",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "vit-in1k-size",
+  "claim": "ImageNet (ILSVRC-2012): classes and images",
+  "value": "1k classes, 1.3M images",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Datasets",
+  "uncertain": false
+ },
+ {
+  "id": "vit-in21k-size",
+  "claim": "ImageNet-21k: classes and images",
+  "value": "21k classes, 14M images",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Datasets",
+  "uncertain": false
+ },
+ {
+  "id": "vit-jft-size",
+  "claim": "JFT: classes and images",
+  "value": "18k classes, 303M high-resolution images",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Datasets",
+  "uncertain": false
+ },
+ {
+  "id": "vit-trumps",
+  "claim": "Intro claim about scale vs inductive bias",
+  "value": "large scale training trumps inductive bias (14M-300M images)",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 1 para 5 (\"large scale training trumps inductive bias\")",
+  "uncertain": false
+ },
+ {
+  "id": "vit-imagenet-only",
+  "claim": "ViT on ImageNet-only vs comparable ResNets without strong regularization",
+  "value": "a few percentage points below ResNets of comparable size",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 1 para 4 (\"When trained on mid-sized datasets ... few percentage points below ResNets\")",
+  "uncertain": false
+ },
+ {
+  "id": "vit-dsize-large-vs-base",
+  "claim": "When pre-trained on ImageNet, ViT-Large vs ViT-Base",
+  "value": "Large underperforms Base (ImageNet); similar on ImageNet-21k; full benefit only on JFT-300M",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.3 para 2 / Fig. 3",
+  "uncertain": false
+ },
+ {
+  "id": "vit-t6-imagenet-l16",
+  "claim": "Top-1 ImageNet (384 fine-tune) ViT-L/16 pre-trained on ImageNet / ImageNet-21k / JFT-300M",
+  "value": "76.53 / 85.15 / 87.12",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 5 (appendix)",
+  "uncertain": false
+ },
+ {
+  "id": "vit-t6-imagenet-b16",
+  "claim": "Top-1 ImageNet (384 fine-tune) ViT-B/16 pre-trained on ImageNet / ImageNet-21k / JFT-300M",
+  "value": "77.91 / 83.97 / 84.15",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 5 (appendix)",
+  "uncertain": false
+ },
+ {
+  "id": "vit-t6-imagenet-h14",
+  "claim": "Top-1 ImageNet (384 fine-tune) ViT-H/14 pre-trained on ImageNet-21k / JFT-300M",
+  "value": "85.13 / 88.04",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 5 (appendix)",
+  "uncertain": false
+ },
+ {
+  "id": "vit-subsets",
+  "claim": "Random JFT subsets used for the few-shot data study",
+  "value": "9M, 30M, 90M and full 300M",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.3 para 3 / Fig. 4",
+  "uncertain": false
+ },
+ {
+  "id": "vit-b32-vs-r50",
+  "claim": "ViT-B/32 vs ResNet50 on JFT subsets",
+  "value": "much worse on 9M, better on 90M+",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.3 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "vit-h14-in",
+  "claim": "ViT-H/14 (JFT) ImageNet accuracy",
+  "value": "88.55 +- 0.04",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-l16-in",
+  "claim": "ViT-L/16 (JFT) ImageNet accuracy",
+  "value": "87.76 +- 0.03",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-h14-cost",
+  "claim": "ViT-H/14 pre-training cost",
+  "value": "2.5k TPUv3-core-days",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-l16-cost",
+  "claim": "ViT-L/16 (JFT) pre-training cost",
+  "value": "0.68k TPUv3-core-days",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-bit-cost",
+  "claim": "BiT-L (ResNet152x4) pre-training cost",
+  "value": "9.9k TPUv3-core-days",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Table 2",
+  "uncertain": false
+ },
+ {
+  "id": "vit-ft-res",
+  "claim": "Fine-tune resolution for Table 2 ImageNet: L/16 and H/14",
+  "value": "512 and 518",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.1 Training & Fine-tuning",
+  "uncertain": false
+ },
+ {
+  "id": "vit-train-res",
+  "claim": "Pre-training resolution",
+  "value": "224",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "App. B.1 Table 3 caption",
+  "uncertain": false
+ },
+ {
+  "id": "vit-compute-eff",
+  "claim": "ViT compute needed vs ResNets for same performance",
+  "value": "approx. 2-4x less",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 4.4",
+  "uncertain": false
+ },
+ {
+  "id": "vit-tokens-224-16",
+  "claim": "Patches for 224x224 at P=16 (computed from N = HW/P^2; paper mentions 14 x 14 grid)",
+  "value": "196 (+1 class token)",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Eq. 1 / App. D.4",
+  "uncertain": true
+ },
+ {
+  "id": "vit-tokens-518-14",
+  "claim": "Patches for 518x518 at P=14 (computed from N = HW/P^2)",
+  "value": "1369 (+1 class token)",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Eq. 1",
+  "uncertain": true
+ },
+ {
+  "id": "vit-class-token",
+  "claim": "class token readout",
+  "value": "whose state at the output of the Transformer encoder",
+  "paper": "ViT",
+  "version": "v2",
+  "loc": "Sec. 3.1 para 2 (Eq. 4)",
+  "uncertain": false
+ }
+]

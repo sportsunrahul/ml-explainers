@@ -1,0 +1,14 @@
+  <article data-chapter="qat">
+    <header class="ch-head"><span class="num">{{NUM}}</span><h2>Training through the rounding</h2><p class="subhead">The straight-through estimator lets a gradient pass a staircase</p></header>
+    <div class="controls">
+      <div class="row"><span>Gradient</span><button type="button" class="tool" data-mode="true">true</button><button type="button" class="tool" data-mode="ste">straight-through</button><button type="button" class="tool" data-mode="lsq">+ learned step</button></div>
+      <div class="row"><span>Train</span><button type="button" class="tool" data-act="step1">1 step</button><button type="button" class="tool" data-act="step5">5 steps</button><button type="button" class="tool" data-act="reset">Reset</button></div>
+    </div>
+    <p>Quantization-aware training (QAT) rounds the weights in every forward pass, so the network learns weights that still work after rounding. Rounding inside a float tensor like this is called <button type="button" class="inline-term" data-open="fakequant">fake quantization</button>. The network keeps a full-precision copy of each weight, the <button type="button" class="inline-term" data-open="shadow">shadow weight</button> (blue dot), and uses only its rounded value (yellow dot).</p>
+    <p>Training needs a <button type="button" class="inline-term" data-open="qatgrad">gradient</button>: how much the loss changes when a weight moves. The staircase is flat almost everywhere, so its true gradient is zero. Press "true", then "1 step": the weight never moves.</p>
+    <p>The <button type="button" class="inline-term" data-open="ste">straight-through estimator</button> pretends that rounding is the identity, but only inside the grid's range. Press "straight-through", then guess before you press "5 steps": where will the weight stop? It climbs to the top level and stops there, short of the red target. Past the top of the range the estimator passes no gradient.</p>
+    <p>Learned step size quantization (LSQ) also trains the distance between grid levels. Press "+ learned step" and train: the grid stretches until its top level reaches the target.</p>
+    <p class="note">Computed toy: one weight, a 3-bit grid in the form of LSQ (Esser et al.) Eq. 1-2, the loss is the squared distance from the rounded weight to the target, plain gradient descent. The clipped estimator is Esser Eq. 5, Krishnamoorthi Eq. 15 and Wu Eq. 13; Bengio et al. named the estimator.</p>
+    <p class="inscription">Round in the forward pass; in the backward pass, let the gradient through as if nothing were rounded. Learn the range too, or values beyond it get stuck.</p>
+    {{CONTINUE}}
+  </article>

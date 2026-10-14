@@ -1,0 +1,65 @@
+<p class="kicker">Interlude: PatchCore, end to end (fit, then test)</p>
+
+<section id="ch-patchcore-pipeline" class="chapter">
+<h2>PatchCore, end to end</h2>
+<p>This interlude follows one category through PatchCore with every tensor shape written out: first the fit, which only stores features, then the test of one image. Pick a category to see how its training-set size sets the size of the memory bank.</p>
+
+<figure class="viz archflow" id="viz-pcpipe" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Fit stages">
+    <span>fit</span>
+    <button type="button" id="btn-pcpipe-images" aria-pressed="false">1 Images</button>
+    <button type="button" id="btn-pcpipe-backbone" aria-pressed="false">2 Backbone</button>
+    <button type="button" id="btn-pcpipe-aggregate" aria-pressed="false">3 Neighborhoods</button>
+    <button type="button" id="btn-pcpipe-merge" aria-pressed="false">4 Two layers, one vector</button>
+    <button type="button" id="btn-pcpipe-features" aria-pressed="false">5 Patch features</button>
+    <button type="button" id="btn-pcpipe-bank" aria-pressed="false">6 Memory bank</button>
+    <button type="button" id="btn-pcpipe-coreset" aria-pressed="false">7 Coreset</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Test stages">
+    <span>test</span>
+    <button type="button" id="btn-pcpipe-test" aria-pressed="false">8 Test image</button>
+    <button type="button" id="btn-pcpipe-nn" aria-pressed="false">9 Nearest neighbors</button>
+    <button type="button" id="btn-pcpipe-score" aria-pressed="false">10 Image score</button>
+    <button type="button" id="btn-pcpipe-map" aria-pressed="false">11 Anomaly map</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="MVTec AD category">
+    <span>category</span>
+    <button type="button" id="btn-pcpipe-bottle" aria-pressed="true">bottle</button>
+    <button type="button" id="btn-pcpipe-screw" aria-pressed="false">screw</button>
+    <button type="button" id="btn-pcpipe-hazelnut" aria-pressed="false">hazelnut</button>
+    <button type="button" id="btn-pcpipe-toothbrush" aria-pressed="false">toothbrush</button>
+  </div>
+  <canvas id="cv-pcpipe" role="img" aria-label="One stage of PatchCore at a time, drawn with the toy cap: the stack of normal images, the frozen backbone and its two feature grids, the 3 by 3 neighborhood average, the upsampled layer 3 merging with layer 2, the grid of patch vectors, the memory bank, the greedy coreset, then the test image, its grid of nearest-neighbor distances, the maximum as the image score, and the smoothed anomaly map."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-pcpipe-prev">Previous</button>
+    <button type="button" id="btn-pcpipe-next">Next</button>
+    <button type="button" id="btn-pcpipe-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview"><h4>The map</h4><p>Eleven stages. Stages 1 to 7 are the fit: one forward pass over the normal images and one greedy search, with no loss and no gradient. Stages 8 to 11 score one test image. The drawings use the toy cap; the shapes in the readout are PatchCore's real ones for the chosen MVTec AD category. Press <b>1 Images</b>, then <b>Next</b>.</p></div>
+    <div data-stage="images" hidden><h4>1. The normal images</h4><p>All defect-free training images of one category: <span data-claim="patchcore-train-bottle">209</span> for bottle, <span data-claim="patchcore-train-screw">320</span> for screw, <span data-claim="patchcore-train-hazelnut">391</span> for hazelnut and only <span data-claim="patchcore-train-toothbrush">60</span> for toothbrush (MVTec AD paper, Table 1). Each is resized to <span data-claim="patchcore-resize">256</span> and center-cropped to <span data-claim="patchcore-crop">224</span> pixels: a <span data-claim="patchcore-shape-input">3 x 224 x 224</span> tensor (our computation).</p></div>
+    <div data-stage="backbone" hidden><h4>2. A frozen backbone, read in the middle</h4><p>The ImageNet <span data-claim="patchcore-backbone">WideResNet50</span> runs without gradients. PatchCore keeps the outputs of blocks <span data-claim="patchcore-layers">2 and 3</span>: <span data-claim="patchcore-shape-layer2">512 x 28 x 28</span> and <span data-claim="patchcore-shape-layer3">1024 x 14 x 14</span> per image (our computation for the standard network at this crop). Deeper blocks would be coarser and more tuned to ImageNet's classes.</p></div>
+    <div data-stage="aggregate" hidden><h4>3. Local neighborhoods</h4><p>Each grid cell is replaced by the average over its <span data-claim="patchcore-patchsize-p">3</span> by 3 neighborhood, with stride <span data-claim="patchcore-stride-s">1</span> so no cell is skipped (Eq. 1 to 3). In the official code the 3 by 3 block of each layer is unfolded into one long vector first: <span data-claim="patchcore-layer2-unfold-len">4,608</span> numbers for layer 2 and <span data-claim="patchcore-layer3-unfold-len">9,216</span> for layer 3 (our computation, 512 x 9 and 1024 x 9).</p></div>
+    <div data-stage="merge" hidden><h4>4. Two layers become one vector</h4><p>Layer 3's grid is upsampled bilinearly from 14 by 14 to 28 by 28, so each layer-2 cell has a layer-3 partner. Each layer's long vector is average-pooled to <span data-claim="patchcore-pretrain-dim">1024</span> numbers, and the two, laid end to end, are average-pooled again to <span data-claim="patchcore-target-dim">1024</span> (code-only). That pooling averages neighboring numbers within each half, so the result is in effect 512 numbers from each layer, side by side (our reading of the pooling windows). No weights are learned anywhere in this step.</p></div>
+    <div data-stage="features" hidden><h4>5. One vector per patch</h4><p>One image becomes <span data-claim="patchcore-patches-per-image">784</span> locally aware patch features, a <span data-claim="patchcore-patch-grid">28 x 28</span> grid: <span data-claim="patchcore-shape-patch-features">784 x 1024</span> (our computation).</p></div>
+    <div data-stage="bank" hidden><h4>6. The memory bank</h4><p>All patch features of all training images, with no position attached (Eq. 4). Our computation, 784 vectors per image and 4 bytes per number:</p>
+      <table class="data">
+        <thead><tr><th>Category</th><th>Images</th><th>Bank vectors</th><th>Size (MB)</th></tr></thead>
+        <tbody>
+          <tr><td>bottle</td><td><span data-claim="patchcore-train-bottle">209</span></td><td><span data-claim="patchcore-bank-bottle-full">163,856</span></td><td><span data-claim="patchcore-bank-bottle-full-mb">671.2</span></td></tr>
+          <tr><td>screw</td><td><span data-claim="patchcore-train-screw">320</span></td><td><span data-claim="patchcore-bank-screw-full">250,880</span></td><td><span data-claim="patchcore-bank-screw-full-mb">1027.6</span></td></tr>
+          <tr><td>hazelnut</td><td><span data-claim="patchcore-train-hazelnut">391</span></td><td><span data-claim="patchcore-bank-hazelnut-full">306,544</span></td><td><span data-claim="patchcore-bank-hazelnut-full-mb">1255.6</span></td></tr>
+          <tr><td>toothbrush</td><td><span data-claim="patchcore-train-toothbrush">60</span></td><td><span data-claim="patchcore-bank-toothbrush-full">47,040</span></td><td><span data-claim="patchcore-bank-toothbrush-full-mb">192.7</span></td></tr>
+        </tbody>
+      </table></div>
+    <div data-stage="coreset" hidden><h4>7. The greedy coreset</h4><p>Farthest-point selection (Algorithm 1). Distances are measured after a random projection to <span data-claim="patchcore-proj-dim">128</span> dimensions, and the search starts from the mean distance to <span data-claim="patchcore-coreset-start-points">10</span> random points (both code-only). The kept vectors keep all 1024 numbers. The official code's default keeps <span data-claim="patchcore-pct-10">10%</span>; for bottle that is <span data-claim="patchcore-bank-bottle-10pct">16,385</span> vectors, about <span data-claim="patchcore-bank-bottle-10pct-mb">67.1</span> MB (our computation).</p></div>
+    <div data-stage="test" hidden><h4>8. A test image</h4><p>The same crop, the same frozen network and the same aggregation give <span data-claim="patchcore-shape-patch-features">784 x 1024</span> patch features.</p></div>
+    <div data-stage="nn" hidden><h4>9. Nearest neighbors</h4><p>Each of the 784 test patches finds its nearest kept vector; the code uses exact search with the faiss library and <span data-claim="patchcore-knn-k">1</span> neighbor (code-only). The 784 distances are the patch scores. The drawing shows the toy's 15 by 15 grid.</p></div>
+    <div data-stage="score" hidden><h4>10. The image score</h4><p>The official code takes the largest patch score. The paper first reweights it by how isolated the matched normal patch is (Eq. 7), with a neighbor count that it does not state.</p></div>
+    <div data-stage="map" hidden><h4>11. The anomaly map</h4><p>The 28 by 28 score grid is upsampled bilinearly to 224 by 224 and smoothed with a Gaussian of width <span data-claim="patchcore-sigma">4</span> pixels. A threshold on the map gives the defect's outline; a threshold on the image score gives the verdict.</p></div>
+  </div>
+  <figcaption>Computed: shapes from the paper's configuration (crop, layers, neighborhood) and the official code (1024-number width, 128-dimension projection, one neighbor); bank sizes are training images (MVTec AD paper, Table 1) times 784, rounded down as the code does. The drawings are the toy cap, not MVTec images.</figcaption>
+</figure>
+</section>

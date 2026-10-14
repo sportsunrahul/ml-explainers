@@ -1,0 +1,22 @@
+  <article data-chapter="ask">
+    <header class="ch-head"><span class="num">2 of 9</span><h2>Ask about the coin flips</h2><p class="subhead">Uncertainty sampling</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-measure="margin" aria-pressed="true">Margin</button>
+      <button type="button" class="tool" data-measure="entropy" aria-pressed="false">Entropy</button>
+      <button type="button" class="tool" data-measure="lc" aria-pressed="false">Least confidence</button>
+    </div>
+    <div class="tools">
+      <button type="button" class="tool play" data-step-round>Label 5 more</button>
+      <button type="button" class="tool" data-rounds="0" aria-pressed="true">Start</button>
+      <button type="button" class="tool" data-rounds="1" aria-pressed="false">1 round</button>
+      <button type="button" class="tool" data-rounds="4" aria-pressed="false">4 rounds</button>
+      <button type="button" class="tool" data-rounds="12" aria-pressed="false">12 rounds</button>
+      <button type="button" class="tool" data-view="rand" aria-pressed="false">Show the random run</button>
+    </div>
+    <p>In <button class="inline-term" data-open="al">pool-based active learning</button> you train on a few labels, score every unlabeled image, and send the top few to a person. The score is how unsure the model is. Three standard scores turn the model's <button class="inline-term" data-open="softmax">probability vector</button> into one number: least confidence (one minus the top probability), margin (the gap between the top two) and <button class="inline-term" data-open="entropy">entropy</button> (how spread the whole vector is).</p>
+    <p class="note">The stage is a toy: 700 points in three spiral arms, a small classifier retrained after every round. Shape is the true class; brown points are unlabeled; yellow rings are labels a person gave; dashed rings are the next five picks. Right: the probability triangle and the accuracy of the uncertainty run (blue) against a random run (brown), over the middle half of 20 simulated pools.</p>
+    <table class="data"><thead><tr><th>Median of 20 toy pools</th><th>8 labels</th><th>23 labels</th><th>48 labels</th></tr></thead>
+      <tbody><tr><td>Margin</td><td>65%</td><td>98.6%</td><td>100%</td></tr><tr><td>Entropy</td><td>58%</td><td>89%</td><td>100%</td></tr><tr><td>Random</td><td>73%</td><td>93%</td><td>98.6%</td></tr></tbody></table>
+    <p class="inscription">Label where the model is closest to a coin flip, but only after it has seen a few labels per class. With three labels, "unsure" points at the wrong place.</p>
+    <button type="button" class="continue" data-go="disagree">Continue with ambiguous or unfamiliar</button>
+  </article>

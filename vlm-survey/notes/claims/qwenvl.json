@@ -1,0 +1,182 @@
+[
+ {
+  "id": "qwenvl-adapter-queries",
+  "claim": "Adapter compresses visual features to a fixed number of tokens (learnable queries)",
+  "value": "256",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1; Table 8 in Appendix C",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-adapter-layers",
+  "claim": "Adapter is a single-layer cross-attention module, randomly initialized, 2D absolute positional encodings in query-key pairs",
+  "value": "single-layer cross-attention, random init",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-patch-stride",
+  "claim": "ViT patch stride",
+  "value": "14",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-res-stage1",
+  "claim": "Input resolution and ViT sequence length in stage 1",
+  "value": "224x224, ViT sequence length 256",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.1; Appendix C Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-res-stage2",
+  "claim": "Input resolution and ViT sequence length in stage 2 and 3",
+  "value": "448x448, ViT sequence length 1024",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.2; Appendix C Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-params",
+  "claim": "Parameter counts: vision encoder / adapter / LLM / total",
+  "value": "1.9B / 0.08B / 7.7B / 9.6B",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Table model_parameter",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-vit-init",
+  "claim": "Visual encoder init",
+  "value": "OpenCLIP ViT-bigG",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-llm-init",
+  "claim": "LLM init",
+  "value": "Qwen-7B",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-box-range",
+  "claim": "Bounding boxes are normalized to this range",
+  "value": "[0, 1000)",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.2 Inputs and Outputs",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-box-format",
+  "claim": "Box string format, tokenized as plain text, wrapped in <box></box>; phrase wrapped in <ref></ref>",
+  "value": "(X_topleft,Y_topleft),(X_bottomright,Y_bottomright)",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 2.2; Appendix B.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-box-example",
+  "claim": "Referring grounding example target",
+  "value": "<ref>the ear on a giraffe</ref><box>(176,106),(232,160)</box>",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Appendix B.1 (Box B.1, Referring Grounding)",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-stage1-frozen",
+  "claim": "Stage 1: what is frozen and trained",
+  "value": "LLM frozen; vision encoder and VL adapter optimized",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.1",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-stage2-frozen",
+  "claim": "Stage 2: LLM unlocked, whole model trained at 448",
+  "value": "nothing frozen",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-stage3-frozen",
+  "claim": "Stage 3 (SFT): visual encoder frozen; LLM and adapter optimized",
+  "value": "ViT frozen",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.3",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-stage1-data",
+  "claim": "Stage 1 data: raw pairs / after cleaning; language split",
+  "value": "5 billion raw, 1.4 billion kept; 77.3% English, 22.7% Chinese",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.1 (Table 2)",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-sft-size",
+  "claim": "Instruction tuning data amount",
+  "value": "350k",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 3.3",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-docvqa",
+  "claim": "Qwen-VL DocVQA and TextVQA",
+  "value": "DocVQA 65.1, TextVQA 63.8",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Text-oriented VQA table, row Qwen-VL (Qwen-7B)",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-refcoco-val",
+  "claim": "Qwen-VL-7B RefCOCO val / testA / testB",
+  "value": "89.36 / 92.26 / 85.34",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Refer expression comprehension table",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-flickr-cider",
+  "claim": "Zero-shot Flickr30K CIDEr",
+  "value": "85.8",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Sec. 4.1 (Table 4)",
+  "uncertain": false
+ },
+ {
+  "id": "qwenvl-window-speed",
+  "claim": "Training speed 448 global vs 448 window attention; 896 window is ~2.5x slower than 448",
+  "value": "~10s/iter vs ~9s/iter",
+  "paper": "Qwen-VL",
+  "version": "v3",
+  "loc": "Appendix E.3 (Table 10)",
+  "uncertain": false
+ }
+]

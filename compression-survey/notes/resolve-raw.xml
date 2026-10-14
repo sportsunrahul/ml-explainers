@@ -1,0 +1,925 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/DD7dOTvm/mUeuJYnGUAkO3Pk/Qc</id>
+  <title>arXiv Query: search_query=&amp;id_list=1503.02531,1712.05877,2106.08295,2210.17323,2306.00978,1510.00149,1803.03635,2208.07339,2211.10438,2209.05433,1308.3432,1806.08342,2004.09602,1412.6550,1902.08153,2004.10568,2102.05426,1608.08710,1708.06519,2104.08378,2303.17951,2301.00774,1506.02626,1810.05270,2003.03033,1802.04799,1906.03609,2111.12293,1805.06085,2306.07629&amp;start=0&amp;max_results=50</title>
+  <updated>2026-10-10T01:08:14Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=50&amp;id_list=1503.02531,1712.05877,2106.08295,2210.17323,2306.00978,1510.00149,1803.03635,2208.07339,2211.10438,2209.05433,1308.3432,1806.08342,2004.09602,1412.6550,1902.08153,2004.10568,2102.05426,1608.08710,1708.06519,2104.08378,2303.17951,2301.00774,1506.02626,1810.05270,2003.03033,1802.04799,1906.03609,2111.12293,1805.06085,2306.07629" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>50</opensearch:itemsPerPage>
+  <opensearch:totalResults>30</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/1902.08153v3</id>
+    <title>Learned Step Size Quantization</title>
+    <updated>2020-05-07T03:30:49Z</updated>
+    <link href="https://arxiv.org/abs/1902.08153v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1902.08153v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Deep networks run with low precision operations at inference time offer power and space advantages over high precision alternatives, but need to overcome the challenge of maintaining high accuracy as precision decreases. Here, we present a method for training such networks, Learned Step Size Quantization, that achieves the highest accuracy to date on the ImageNet dataset when using models, from a variety of architectures, with weights and activations quantized to 2-, 3- or 4-bits of precision, and that can train 3-bit models that reach full precision baseline accuracy. Our approach builds upon existing methods for learning weights in quantized networks by improving how the quantizer itself is configured. Specifically, we introduce a novel means to estimate and scale the task loss gradient at each weight and activation layer's quantizer step size, such that it can be learned in conjunction with other network parameters. This approach works using different levels of precision as needed for a given system and requires only a simple modification of existing training code.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-02-21T17:31:32Z</published>
+    <arxiv:comment>International Conference on Learning Representations (2020)</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Steven K. Esser</name>
+    </author>
+    <author>
+      <name>Jeffrey L. McKinstry</name>
+    </author>
+    <author>
+      <name>Deepika Bablani</name>
+    </author>
+    <author>
+      <name>Rathinakumar Appuswamy</name>
+    </author>
+    <author>
+      <name>Dharmendra S. Modha</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2210.17323v2</id>
+    <title>GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers</title>
+    <updated>2023-03-22T13:10:47Z</updated>
+    <link href="https://arxiv.org/abs/2210.17323v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.17323v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Generative Pre-trained Transformer models, known as GPT or OPT, set themselves apart through breakthrough performance across complex language modelling tasks, but also by their extremely high computational and storage costs. Specifically, due to their massive size, even inference for large, highly-accurate GPT models may require multiple performant GPUs, which limits the usability of such models. While there is emerging work on relieving this pressure via model compression, the applicability and performance of existing compression techniques is limited by the scale and complexity of GPT models. In this paper, we address this challenge, and propose GPTQ, a new one-shot weight quantization method based on approximate second-order information, that is both highly-accurate and highly-efficient. Specifically, GPTQ can quantize GPT models with 175 billion parameters in approximately four GPU hours, reducing the bitwidth down to 3 or 4 bits per weight, with negligible accuracy degradation relative to the uncompressed baseline. Our method more than doubles the compression gains relative to previously-proposed one-shot quantization methods, preserving accuracy, allowing us for the first time to execute an 175 billion-parameter model inside a single GPU for generative inference. Moreover, we also show that our method can still provide reasonable accuracy in the extreme quantization regime, in which weights are quantized to 2-bit or even ternary quantization levels. We show experimentally that these improvements can be leveraged for end-to-end inference speedups over FP16, of around 3.25x when using high-end GPUs (NVIDIA A100) and 4.5x when using more cost-effective ones (NVIDIA A6000). The implementation is available at https://github.com/IST-DASLab/gptq.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-31T13:42:40Z</published>
+    <arxiv:comment>ICLR 2023</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Elias Frantar</name>
+    </author>
+    <author>
+      <name>Saleh Ashkboos</name>
+    </author>
+    <author>
+      <name>Torsten Hoefler</name>
+    </author>
+    <author>
+      <name>Dan Alistarh</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2003.03033v1</id>
+    <title>What is the State of Neural Network Pruning?</title>
+    <updated>2020-03-06T05:06:12Z</updated>
+    <link href="https://arxiv.org/abs/2003.03033v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2003.03033v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Neural network pruning---the task of reducing the size of a network by removing parameters---has been the subject of a great deal of work in recent years. We provide a meta-analysis of the literature, including an overview of approaches to pruning and consistent findings in the literature. After aggregating results across 81 papers and pruning hundreds of models in controlled conditions, our clearest finding is that the community suffers from a lack of standardized benchmarks and metrics. This deficiency is substantial enough that it is hard to compare pruning techniques to one another or determine how much progress the field has made over the past three decades. To address this situation, we identify issues with current practices, suggest concrete remedies, and introduce ShrinkBench, an open-source framework to facilitate standardized evaluations of pruning methods. We use ShrinkBench to compare various pruning techniques and show that its comprehensive evaluation can prevent common pitfalls when comparing pruning methods.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-03-06T05:06:12Z</published>
+    <arxiv:comment>Published in Proceedings of Machine Learning and Systems 2020 (MLSys 2020)</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Davis Blalock</name>
+    </author>
+    <author>
+      <name>Jose Javier Gonzalez Ortiz</name>
+    </author>
+    <author>
+      <name>Jonathan Frankle</name>
+    </author>
+    <author>
+      <name>John Guttag</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1510.00149v5</id>
+    <title>Deep Compression: Compressing Deep Neural Networks with Pruning, Trained Quantization and Huffman Coding</title>
+    <updated>2016-02-15T06:25:40Z</updated>
+    <link href="https://arxiv.org/abs/1510.00149v5" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1510.00149v5" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Neural networks are both computationally intensive and memory intensive, making them difficult to deploy on embedded systems with limited hardware resources. To address this limitation, we introduce "deep compression", a three stage pipeline: pruning, trained quantization and Huffman coding, that work together to reduce the storage requirement of neural networks by 35x to 49x without affecting their accuracy. Our method first prunes the network by learning only the important connections. Next, we quantize the weights to enforce weight sharing, finally, we apply Huffman coding. After the first two steps we retrain the network to fine tune the remaining connections and the quantized centroids. Pruning, reduces the number of connections by 9x to 13x; Quantization then reduces the number of bits that represent each connection from 32 to 5. On the ImageNet dataset, our method reduced the storage required by AlexNet by 35x, from 240MB to 6.9MB, without loss of accuracy. Our method reduced the size of VGG-16 by 49x from 552MB to 11.3MB, again with no loss of accuracy. This allows fitting the model into on-chip SRAM cache rather than off-chip DRAM memory. Our compression method also facilitates the use of complex neural networks in mobile applications where application size and download bandwidth are constrained. Benchmarked on CPU, GPU and mobile GPU, compressed network has 3x to 4x layerwise speedup and 3x to 7x better energy efficiency.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2015-10-01T09:03:44Z</published>
+    <arxiv:comment>Published as a conference paper at ICLR 2016 (oral)</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Song Han</name>
+    </author>
+    <author>
+      <name>Huizi Mao</name>
+    </author>
+    <author>
+      <name>William J. Dally</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2209.05433v2</id>
+    <title>FP8 Formats for Deep Learning</title>
+    <updated>2022-09-29T20:47:07Z</updated>
+    <link href="https://arxiv.org/abs/2209.05433v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2209.05433v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>FP8 is a natural progression for accelerating deep learning training inference beyond the 16-bit formats common in modern processors. In this paper we propose an 8-bit floating point (FP8) binary interchange format consisting of two encodings - E4M3 (4-bit exponent and 3-bit mantissa) and E5M2 (5-bit exponent and 2-bit mantissa). While E5M2 follows IEEE 754 conventions for representatio of special values, E4M3's dynamic range is extended by not representing infinities and having only one mantissa bit-pattern for NaNs. We demonstrate the efficacy of the FP8 format on a variety of image and language tasks, effectively matching the result quality achieved by 16-bit training sessions. Our study covers the main modern neural network architectures - CNNs, RNNs, and Transformer-based models, leaving all the hyperparameters unchanged from the 16-bit baseline training sessions. Our training experiments include large, up to 175B parameter, language models. We also examine FP8 post-training-quantization of language models trained using 16-bit formats that resisted fixed point int8 quantization.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-09-12T17:39:55Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Paulius Micikevicius</name>
+    </author>
+    <author>
+      <name>Dusan Stosic</name>
+    </author>
+    <author>
+      <name>Neil Burgess</name>
+    </author>
+    <author>
+      <name>Marius Cornea</name>
+    </author>
+    <author>
+      <name>Pradeep Dubey</name>
+    </author>
+    <author>
+      <name>Richard Grisenthwaite</name>
+    </author>
+    <author>
+      <name>Sangwon Ha</name>
+    </author>
+    <author>
+      <name>Alexander Heinecke</name>
+    </author>
+    <author>
+      <name>Patrick Judd</name>
+    </author>
+    <author>
+      <name>John Kamalu</name>
+    </author>
+    <author>
+      <name>Naveen Mellempudi</name>
+    </author>
+    <author>
+      <name>Stuart Oberman</name>
+    </author>
+    <author>
+      <name>Mohammad Shoeybi</name>
+    </author>
+    <author>
+      <name>Michael Siu</name>
+    </author>
+    <author>
+      <name>Hao Wu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2004.10568v2</id>
+    <title>Up or Down? Adaptive Rounding for Post-Training Quantization</title>
+    <updated>2020-06-30T09:51:23Z</updated>
+    <link href="https://arxiv.org/abs/2004.10568v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2004.10568v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>When quantizing neural networks, assigning each floating-point weight to its nearest fixed-point value is the predominant approach. We find that, perhaps surprisingly, this is not the best we can do. In this paper, we propose AdaRound, a better weight-rounding mechanism for post-training quantization that adapts to the data and the task loss. AdaRound is fast, does not require fine-tuning of the network, and only uses a small amount of unlabelled data. We start by theoretically analyzing the rounding problem for a pre-trained neural network. By approximating the task loss with a Taylor series expansion, the rounding task is posed as a quadratic unconstrained binary optimization problem. We simplify this to a layer-wise local loss and propose to optimize this loss with a soft relaxation. AdaRound not only outperforms rounding-to-nearest by a significant margin but also establishes a new state-of-the-art for post-training quantization on several networks and tasks. Without fine-tuning, we can quantize the weights of Resnet18 and Resnet50 to 4 bits while staying within an accuracy loss of 1%.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-04-22T13:44:28Z</published>
+    <arxiv:comment>Published as a conference paper at ICML 2020</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Markus Nagel</name>
+    </author>
+    <author>
+      <name>Rana Ali Amjad</name>
+    </author>
+    <author>
+      <name>Mart van Baalen</name>
+    </author>
+    <author>
+      <name>Christos Louizos</name>
+    </author>
+    <author>
+      <name>Tijmen Blankevoort</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1802.04799v3</id>
+    <title>TVM: An Automated End-to-End Optimizing Compiler for Deep Learning</title>
+    <updated>2018-10-05T18:47:38Z</updated>
+    <link href="https://arxiv.org/abs/1802.04799v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1802.04799v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>There is an increasing need to bring machine learning to a wide diversity of hardware devices. Current frameworks rely on vendor-specific operator libraries and optimize for a narrow range of server-class GPUs. Deploying workloads to new platforms -- such as mobile phones, embedded devices, and accelerators (e.g., FPGAs, ASICs) -- requires significant manual effort. We propose TVM, a compiler that exposes graph-level and operator-level optimizations to provide performance portability to deep learning workloads across diverse hardware back-ends. TVM solves optimization challenges specific to deep learning, such as high-level operator fusion, mapping to arbitrary hardware primitives, and memory latency hiding. It also automates optimization of low-level programs to hardware characteristics by employing a novel, learning-based cost modeling method for rapid exploration of code optimizations. Experimental results show that TVM delivers performance across hardware back-ends that are competitive with state-of-the-art, hand-tuned libraries for low-power CPU, mobile GPU, and server-class GPUs. We also demonstrate TVM's ability to target new accelerator back-ends, such as the FPGA-based generic deep learning accelerator. The system is open sourced and in production use inside several major companies.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.PL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2018-02-12T20:49:34Z</published>
+    <arxiv:comment>Significantly improved version, add automated optimization</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Tianqi Chen</name>
+    </author>
+    <author>
+      <name>Thierry Moreau</name>
+    </author>
+    <author>
+      <name>Ziheng Jiang</name>
+    </author>
+    <author>
+      <name>Lianmin Zheng</name>
+    </author>
+    <author>
+      <name>Eddie Yan</name>
+    </author>
+    <author>
+      <name>Meghan Cowan</name>
+    </author>
+    <author>
+      <name>Haichen Shen</name>
+    </author>
+    <author>
+      <name>Leyuan Wang</name>
+    </author>
+    <author>
+      <name>Yuwei Hu</name>
+    </author>
+    <author>
+      <name>Luis Ceze</name>
+    </author>
+    <author>
+      <name>Carlos Guestrin</name>
+    </author>
+    <author>
+      <name>Arvind Krishnamurthy</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1608.08710v3</id>
+    <title>Pruning Filters for Efficient ConvNets</title>
+    <updated>2017-03-10T17:57:56Z</updated>
+    <link href="https://arxiv.org/abs/1608.08710v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1608.08710v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The success of CNNs in various applications is accompanied by a significant increase in the computation and parameter storage costs. Recent efforts toward reducing these overheads involve pruning and compressing the weights of various layers without hurting original accuracy. However, magnitude-based pruning of weights reduces a significant number of parameters from the fully connected layers and may not adequately reduce the computation costs in the convolutional layers due to irregular sparsity in the pruned networks. We present an acceleration method for CNNs, where we prune filters from CNNs that are identified as having a small effect on the output accuracy. By removing whole filters in the network together with their connecting feature maps, the computation costs are reduced significantly. In contrast to pruning weights, this approach does not result in sparse connectivity patterns. Hence, it does not need the support of sparse convolution libraries and can work with existing efficient BLAS libraries for dense matrix multiplications. We show that even simple filter pruning techniques can reduce inference costs for VGG-16 by up to 34% and ResNet-110 by up to 38% on CIFAR10 while regaining close to the original accuracy by retraining the networks.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2016-08-31T02:29:59Z</published>
+    <arxiv:comment>Published as a conference paper at ICLR 2017</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Hao Li</name>
+    </author>
+    <author>
+      <name>Asim Kadav</name>
+    </author>
+    <author>
+      <name>Igor Durdanovic</name>
+    </author>
+    <author>
+      <name>Hanan Samet</name>
+    </author>
+    <author>
+      <name>Hans Peter Graf</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1805.06085v2</id>
+    <title>PACT: Parameterized Clipping Activation for Quantized Neural Networks</title>
+    <updated>2018-07-17T07:33:19Z</updated>
+    <link href="https://arxiv.org/abs/1805.06085v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1805.06085v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Deep learning algorithms achieve high classification accuracy at the expense of significant computation cost. To address this cost, a number of quantization schemes have been proposed - but most of these techniques focused on quantizing weights, which are relatively smaller in size compared to activations. This paper proposes a novel quantization scheme for activations during training - that enables neural networks to work well with ultra low precision weights and activations without any significant accuracy degradation. This technique, PArameterized Clipping acTivation (PACT), uses an activation clipping parameter $α$ that is optimized during training to find the right quantization scale. PACT allows quantizing activations to arbitrary bit precisions, while achieving much better accuracy relative to published state-of-the-art quantization schemes. We show, for the first time, that both weights and activations can be quantized to 4-bits of precision while still achieving accuracy comparable to full precision networks across a range of popular models and datasets. We also show that exploiting these reduced-precision computational units in hardware can enable a super-linear improvement in inferencing performance due to a significant reduction in the area of accelerator compute engines coupled with the ability to retain the quantized model and activation data in on-chip memories.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2018-05-16T01:19:43Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jungwook Choi</name>
+    </author>
+    <author>
+      <name>Zhuo Wang</name>
+    </author>
+    <author>
+      <name>Swagath Venkataramani</name>
+    </author>
+    <author>
+      <name>Pierce I-Jen Chuang</name>
+    </author>
+    <author>
+      <name>Vijayalakshmi Srinivasan</name>
+    </author>
+    <author>
+      <name>Kailash Gopalakrishnan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1906.03609v1</id>
+    <title>Distilling Object Detectors with Fine-grained Feature Imitation</title>
+    <updated>2019-06-09T09:57:26Z</updated>
+    <link href="https://arxiv.org/abs/1906.03609v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1906.03609v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>State-of-the-art CNN based recognition models are often computationally prohibitive to deploy on low-end devices. A promising high level approach tackling this limitation is knowledge distillation, which let small student model mimic cumbersome teacher model's output to get improved generalization. However, related methods mainly focus on simple task of classification while do not consider complex tasks like object detection. We show applying the vanilla knowledge distillation to detection model gets minor gain. To address the challenge of distilling knowledge in detection model, we propose a fine-grained feature imitation method exploiting the cross-location discrepancy of feature response. Our intuition is that detectors care more about local near object regions. Thus the discrepancy of feature response on the near object anchor locations reveals important information of how teacher model tends to generalize. We design a novel mechanism to estimate those locations and let student model imitate the teacher on them to get enhanced performance. We first validate the idea on a developed lightweight toy detector which carries simplest notion of current state-of-the-art anchor based detection models on challenging KITTI dataset, our method generates up to 15% boost of mAP for the student model compared to the non-imitated counterpart. We then extensively evaluate the method with Faster R-CNN model under various scenarios with common object detection benchmark of Pascal VOC and COCO, imitation alleviates up to 74% performance drop of student model compared to teacher. Codes released at https://github.com/twangnh/Distilling-Object-Detectors</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-06-09T09:57:26Z</published>
+    <arxiv:comment>accepted at CVPR2019 code:https://github.com/twangnh/Distilling-Object-Detectors</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Tao Wang</name>
+    </author>
+    <author>
+      <name>Li Yuan</name>
+    </author>
+    <author>
+      <name>Xiaopeng Zhang</name>
+    </author>
+    <author>
+      <name>Jiashi Feng</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2102.05426v2</id>
+    <title>BRECQ: Pushing the Limit of Post-Training Quantization by Block Reconstruction</title>
+    <updated>2021-07-25T09:34:39Z</updated>
+    <link href="https://arxiv.org/abs/2102.05426v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2102.05426v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We study the challenging task of neural network quantization without end-to-end retraining, called Post-training Quantization (PTQ). PTQ usually requires a small subset of training data but produces less powerful quantized models than Quantization-Aware Training (QAT). In this work, we propose a novel PTQ framework, dubbed BRECQ, which pushes the limits of bitwidth in PTQ down to INT2 for the first time. BRECQ leverages the basic building blocks in neural networks and reconstructs them one-by-one. In a comprehensive theoretical study of the second-order error, we show that BRECQ achieves a good balance between cross-layer dependency and generalization error. To further employ the power of quantization, the mixed precision technique is incorporated in our framework by approximating the inter-layer and intra-layer sensitivity. Extensive experiments on various handcrafted and searched neural architectures are conducted for both image classification and object detection tasks. And for the first time we prove that, without bells and whistles, PTQ can attain 4-bit ResNet and MobileNetV2 comparable with QAT and enjoy 240 times faster production of quantized models. Codes are available at https://github.com/yhhhli/BRECQ.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-02-10T13:46:16Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Yuhang Li</name>
+    </author>
+    <author>
+      <name>Ruihao Gong</name>
+    </author>
+    <author>
+      <name>Xu Tan</name>
+    </author>
+    <author>
+      <name>Yang Yang</name>
+    </author>
+    <author>
+      <name>Peng Hu</name>
+    </author>
+    <author>
+      <name>Qi Zhang</name>
+    </author>
+    <author>
+      <name>Fengwei Yu</name>
+    </author>
+    <author>
+      <name>Wei Wang</name>
+    </author>
+    <author>
+      <name>Shi Gu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2208.07339v2</id>
+    <title>LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale</title>
+    <updated>2022-11-10T18:14:31Z</updated>
+    <link href="https://arxiv.org/abs/2208.07339v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2208.07339v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Large language models have been widely adopted but require significant GPU memory for inference. We develop a procedure for Int8 matrix multiplication for feed-forward and attention projection layers in transformers, which cut the memory needed for inference by half while retaining full precision performance. With our method, a 175B parameter 16/32-bit checkpoint can be loaded, converted to Int8, and used immediately without performance degradation. This is made possible by understanding and working around properties of highly systematic emergent features in transformer language models that dominate attention and transformer predictive performance. To cope with these features, we develop a two-part quantization procedure, LLM.int8(). We first use vector-wise quantization with separate normalization constants for each inner product in the matrix multiplication, to quantize most of the features. However, for the emergent outliers, we also include a new mixed-precision decomposition scheme, which isolates the outlier feature dimensions into a 16-bit matrix multiplication while still more than 99.9% of values are multiplied in 8-bit. Using LLM.int8(), we show empirically it is possible to perform inference in LLMs with up to 175B parameters without any performance degradation. This result makes such models much more accessible, for example making it possible to use OPT-175B/BLOOM on a single server with consumer GPUs. We open-source our software.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-08-15T17:08:50Z</published>
+    <arxiv:comment>Published at NeurIPS 2022. Camera-ready version</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Tim Dettmers</name>
+    </author>
+    <author>
+      <name>Mike Lewis</name>
+    </author>
+    <author>
+      <name>Younes Belkada</name>
+    </author>
+    <author>
+      <name>Luke Zettlemoyer</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1308.3432v1</id>
+    <title>Estimating or Propagating Gradients Through Stochastic Neurons for Conditional Computation</title>
+    <updated>2013-08-15T15:19:34Z</updated>
+    <link href="https://arxiv.org/abs/1308.3432v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1308.3432v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Stochastic neurons and hard non-linearities can be useful for a number of reasons in deep learning models, but in many cases they pose a challenging problem: how to estimate the gradient of a loss function with respect to the input of such stochastic or non-smooth neurons? I.e., can we "back-propagate" through these stochastic neurons? We examine this question, existing approaches, and compare four families of solutions, applicable in different settings. One of them is the minimum variance unbiased gradient estimator for stochatic binary neurons (a special case of the REINFORCE algorithm). A second approach, introduced here, decomposes the operation of a binary stochastic neuron into a stochastic binary part and a smooth differentiable part, which approximates the expected effect of the pure stochatic binary neuron to first order. A third approach involves the injection of additive or multiplicative noise in a computational graph that is otherwise differentiable. A fourth approach heuristically copies the gradient with respect to the stochastic output directly as an estimator of the gradient with respect to the sigmoid argument (we call this the straight-through estimator). To explore a context where these estimators are useful, we consider a small-scale version of {\em conditional computation}, where sparse stochastic units form a distributed representation of gaters that can turn off in combinatorially many ways large chunks of the computation performed in the rest of the neural network. In this case, it is important that the gating units produce an actual 0 most of the time. The resulting sparsity can be potentially be exploited to greatly reduce the computational cost of large deep networks for which conditional computation would be useful.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2013-08-15T15:19:34Z</published>
+    <arxiv:comment>arXiv admin note: substantial text overlap with arXiv:1305.2982</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Yoshua Bengio</name>
+    </author>
+    <author>
+      <name>Nicholas Léonard</name>
+    </author>
+    <author>
+      <name>Aaron Courville</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1503.02531v1</id>
+    <title>Distilling the Knowledge in a Neural Network</title>
+    <updated>2015-03-09T15:44:49Z</updated>
+    <link href="https://arxiv.org/abs/1503.02531v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1503.02531v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>A very simple way to improve the performance of almost any machine learning algorithm is to train many different models on the same data and then to average their predictions. Unfortunately, making predictions using a whole ensemble of models is cumbersome and may be too computationally expensive to allow deployment to a large number of users, especially if the individual models are large neural nets. Caruana and his collaborators have shown that it is possible to compress the knowledge in an ensemble into a single model which is much easier to deploy and we develop this approach further using a different compression technique. We achieve some surprising results on MNIST and we show that we can significantly improve the acoustic model of a heavily used commercial system by distilling the knowledge in an ensemble of models into a single model. We also introduce a new type of ensemble composed of one or more full models and many specialist models which learn to distinguish fine-grained classes that the full models confuse. Unlike a mixture of experts, these specialist models can be trained rapidly and in parallel.</summary>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2015-03-09T15:44:49Z</published>
+    <arxiv:comment>NIPS 2014 Deep Learning Workshop</arxiv:comment>
+    <arxiv:primary_category term="stat.ML"/>
+    <author>
+      <name>Geoffrey Hinton</name>
+    </author>
+    <author>
+      <name>Oriol Vinyals</name>
+    </author>
+    <author>
+      <name>Jeff Dean</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2111.12293v3</id>
+    <title>PTQ4ViT: Post-training quantization for vision transformers with twin uniform quantization</title>
+    <updated>2024-06-23T00:46:20Z</updated>
+    <link href="https://arxiv.org/abs/2111.12293v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2111.12293v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Quantization is one of the most effective methods to compress neural networks, which has achieved great success on convolutional neural networks (CNNs). Recently, vision transformers have demonstrated great potential in computer vision. However, previous post-training quantization methods performed not well on vision transformer, resulting in more than 1% accuracy drop even in 8-bit quantization. Therefore, we analyze the problems of quantization on vision transformers. We observe the distributions of activation values after softmax and GELU functions are quite different from the Gaussian distribution. We also observe that common quantization metrics, such as MSE and cosine distance, are inaccurate to determine the optimal scaling factor. In this paper, we propose the twin uniform quantization method to reduce the quantization error on these activation values. And we propose to use a Hessian guided metric to evaluate different scaling factors, which improves the accuracy of calibration at a small cost. To enable the fast quantization of vision transformers, we develop an efficient framework, PTQ4ViT. Experiments show the quantized vision transformers achieve near-lossless prediction accuracy (less than 0.5% drop at 8-bit quantization) on the ImageNet classification task.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-11-24T06:23:06Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhihang Yuan</name>
+    </author>
+    <author>
+      <name>Chenhao Xue</name>
+    </author>
+    <author>
+      <name>Yiqi Chen</name>
+    </author>
+    <author>
+      <name>Qiang Wu</name>
+    </author>
+    <author>
+      <name>Guangyu Sun</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1712.05877v1</id>
+    <title>Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference</title>
+    <updated>2017-12-15T23:56:52Z</updated>
+    <link href="https://arxiv.org/abs/1712.05877v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1712.05877v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The rising popularity of intelligent mobile devices and the daunting computational cost of deep learning-based models call for efficient and accurate on-device inference schemes. We propose a quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. We also co-design a training procedure to preserve end-to-end model accuracy post quantization. As a result, the proposed quantization scheme improves the tradeoff between accuracy and on-device latency. The improvements are significant even on MobileNets, a model family known for run-time efficiency, and are demonstrated in ImageNet classification and COCO detection on popular CPUs.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2017-12-15T23:56:52Z</published>
+    <arxiv:comment>14 pages, 12 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Benoit Jacob</name>
+    </author>
+    <author>
+      <name>Skirmantas Kligys</name>
+    </author>
+    <author>
+      <name>Bo Chen</name>
+    </author>
+    <author>
+      <name>Menglong Zhu</name>
+    </author>
+    <author>
+      <name>Matthew Tang</name>
+    </author>
+    <author>
+      <name>Andrew Howard</name>
+    </author>
+    <author>
+      <name>Hartwig Adam</name>
+    </author>
+    <author>
+      <name>Dmitry Kalenichenko</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.00978v6</id>
+    <title>AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration</title>
+    <updated>2026-04-25T06:58:16Z</updated>
+    <link href="https://arxiv.org/abs/2306.00978v6" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.00978v6" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Large language models (LLMs) have transformed numerous AI applications. On-device LLM is becoming increasingly important: running LLMs locally on edge devices can reduce the cloud computing cost and protect users' privacy. However, the astronomical model size and the limited hardware resource pose significant deployment challenges. We propose Activation-aware Weight Quantization (AWQ), a hardware-friendly approach for LLM low-bit weight-only quantization. AWQ finds that not all weights in an LLM are equally important. Protecting only 1% salient weights can greatly reduce quantization error. To identify salient weight channels, we should refer to the activation distribution, not weights. To avoid the hardware-inefficient mix-precision quantization, we mathematically derive that scaling up the salient channels can reduce the quantization error. AWQ employs an equivalent transformation to scale the salient weight channels to protect them. The scale is determined by collecting the activation statistics offline. AWQ does not rely on any backpropagation or reconstruction, so it generalizes to different domains and modalities without overfitting the calibration set. AWQ outperforms existing work on various language modeling and domain-specific benchmarks (coding and math). Thanks to better generalization, it achieves excellent quantization performance for instruction-tuned LMs and, for the first time, multi-modal LMs. Alongside AWQ, we implement TinyChat, an efficient and flexible inference framework tailored for 4-bit on-device LLM/VLMs. With kernel fusion and platform-aware weight packing, TinyChat offers more than 3x speedup over the Huggingface FP16 implementation on both desktop and mobile GPUs. It also democratizes the deployment of the 70B Llama-2 model on mobile GPUs.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-01T17:59:10Z</published>
+    <arxiv:comment>MLSys 2024 Best Paper Award. Code available at: https://github.com/mit-han-lab/llm-awq</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Ji Lin</name>
+    </author>
+    <author>
+      <name>Jiaming Tang</name>
+    </author>
+    <author>
+      <name>Haotian Tang</name>
+    </author>
+    <author>
+      <name>Shang Yang</name>
+    </author>
+    <author>
+      <name>Wei-Ming Chen</name>
+    </author>
+    <author>
+      <name>Wei-Chen Wang</name>
+    </author>
+    <author>
+      <name>Guangxuan Xiao</name>
+    </author>
+    <author>
+      <name>Xingyu Dang</name>
+    </author>
+    <author>
+      <name>Chuang Gan</name>
+    </author>
+    <author>
+      <name>Song Han</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1506.02626v3</id>
+    <title>Learning both Weights and Connections for Efficient Neural Networks</title>
+    <updated>2015-10-30T23:29:27Z</updated>
+    <link href="https://arxiv.org/abs/1506.02626v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1506.02626v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Neural networks are both computationally intensive and memory intensive, making them difficult to deploy on embedded systems. Also, conventional networks fix the architecture before training starts; as a result, training cannot improve the architecture. To address these limitations, we describe a method to reduce the storage and computation required by neural networks by an order of magnitude without affecting their accuracy by learning only the important connections. Our method prunes redundant connections using a three-step method. First, we train the network to learn which connections are important. Next, we prune the unimportant connections. Finally, we retrain the network to fine tune the weights of the remaining connections. On the ImageNet dataset, our method reduced the number of parameters of AlexNet by a factor of 9x, from 61 million to 6.7 million, without incurring accuracy loss. Similar experiments with VGG-16 found that the number of parameters can be reduced by 13x, from 138 million to 10.3 million, again with no loss of accuracy.</summary>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2015-06-08T19:28:43Z</published>
+    <arxiv:comment>Published as a conference paper at NIPS 2015</arxiv:comment>
+    <arxiv:primary_category term="cs.NE"/>
+    <author>
+      <name>Song Han</name>
+    </author>
+    <author>
+      <name>Jeff Pool</name>
+    </author>
+    <author>
+      <name>John Tran</name>
+    </author>
+    <author>
+      <name>William J. Dally</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2303.17951v2</id>
+    <title>FP8 versus INT8 for efficient deep learning inference</title>
+    <updated>2023-06-15T08:14:02Z</updated>
+    <link href="https://arxiv.org/abs/2303.17951v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2303.17951v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recently, the idea of using FP8 as a number format for neural network training has been floating around the deep learning world. Given that most training is currently conducted with entire networks in FP32, or sometimes FP16 with mixed-precision, the step to having some parts of a network run in FP8 with 8-bit weights is an appealing potential speed-up for the generally costly and time-intensive training procedures in deep learning. A natural question arises regarding what this development means for efficient inference on edge devices. In the efficient inference device world, workloads are frequently executed in INT8. Sometimes going even as low as INT4 when efficiency calls for it. In this whitepaper, we compare the performance for both the FP8 and INT formats for efficient on-device inference. We theoretically show the difference between the INT and FP formats for neural networks and present a plethora of post-training quantization and quantization-aware-training results to show how this theory translates to practice. We also provide a hardware analysis showing that the FP formats are somewhere between 50-180% less efficient in terms of compute in dedicated hardware than the INT format. Based on our research and a read of the research field, we conclude that although the proposed FP8 format could be good for training, the results for inference do not warrant a dedicated implementation of FP8 in favor of INT8 for efficient inference. We show that our results are mostly consistent with previous findings but that important comparisons between the formats have thus far been lacking. Finally, we discuss what happens when FP8-trained networks are converted to INT8 and conclude with a brief discussion on the most efficient way for on-device deployment and an extensive suite of INT8 results for many models.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-03-31T10:29:17Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Mart van Baalen</name>
+    </author>
+    <author>
+      <name>Andrey Kuzmin</name>
+    </author>
+    <author>
+      <name>Suparna S Nair</name>
+    </author>
+    <author>
+      <name>Yuwei Ren</name>
+    </author>
+    <author>
+      <name>Eric Mahurin</name>
+    </author>
+    <author>
+      <name>Chirag Patel</name>
+    </author>
+    <author>
+      <name>Sundar Subramanian</name>
+    </author>
+    <author>
+      <name>Sanghyuk Lee</name>
+    </author>
+    <author>
+      <name>Markus Nagel</name>
+    </author>
+    <author>
+      <name>Joseph Soriaga</name>
+    </author>
+    <author>
+      <name>Tijmen Blankevoort</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2211.10438v7</id>
+    <title>SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models</title>
+    <updated>2024-03-29T19:21:58Z</updated>
+    <link href="https://arxiv.org/abs/2211.10438v7" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2211.10438v7" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Large language models (LLMs) show excellent performance but are compute- and memory-intensive. Quantization can reduce memory and accelerate inference. However, existing methods cannot maintain accuracy and hardware efficiency at the same time. We propose SmoothQuant, a training-free, accuracy-preserving, and general-purpose post-training quantization (PTQ) solution to enable 8-bit weight, 8-bit activation (W8A8) quantization for LLMs. Based on the fact that weights are easy to quantize while activations are not, SmoothQuant smooths the activation outliers by offline migrating the quantization difficulty from activations to weights with a mathematically equivalent transformation. SmoothQuant enables an INT8 quantization of both weights and activations for all the matrix multiplications in LLMs, including OPT, BLOOM, GLM, MT-NLG, Llama-1/2, Falcon, Mistral, and Mixtral models. We demonstrate up to 1.56x speedup and 2x memory reduction for LLMs with negligible loss in accuracy. SmoothQuant enables serving 530B LLM within a single node. Our work offers a turn-key solution that reduces hardware costs and democratizes LLMs. Code is available at https://github.com/mit-han-lab/smoothquant.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-11-18T18:59:33Z</published>
+    <arxiv:comment>ICML 2023. First two authors contributed equally to this work</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Guangxuan Xiao</name>
+    </author>
+    <author>
+      <name>Ji Lin</name>
+    </author>
+    <author>
+      <name>Mickael Seznec</name>
+    </author>
+    <author>
+      <name>Hao Wu</name>
+    </author>
+    <author>
+      <name>Julien Demouth</name>
+    </author>
+    <author>
+      <name>Song Han</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1810.05270v2</id>
+    <title>Rethinking the Value of Network Pruning</title>
+    <updated>2019-03-05T05:58:11Z</updated>
+    <link href="https://arxiv.org/abs/1810.05270v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1810.05270v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Network pruning is widely used for reducing the heavy inference cost of deep models in low-resource settings. A typical pruning algorithm is a three-stage pipeline, i.e., training (a large model), pruning and fine-tuning. During pruning, according to a certain criterion, redundant weights are pruned and important weights are kept to best preserve the accuracy. In this work, we make several surprising observations which contradict common beliefs. For all state-of-the-art structured pruning algorithms we examined, fine-tuning a pruned model only gives comparable or worse performance than training that model with randomly initialized weights. For pruning algorithms which assume a predefined target network architecture, one can get rid of the full pipeline and directly train the target network from scratch. Our observations are consistent for multiple network architectures, datasets, and tasks, which imply that: 1) training a large, over-parameterized model is often not necessary to obtain an efficient final model, 2) learned "important" weights of the large model are typically not useful for the small pruned model, 3) the pruned architecture itself, rather than a set of inherited "important" weights, is more crucial to the efficiency in the final model, which suggests that in some cases pruning can be useful as an architecture search paradigm. Our results suggest the need for more careful baseline evaluations in future research on structured pruning methods. We also compare with the "Lottery Ticket Hypothesis" (Frankle &amp; Carbin 2019), and find that with optimal learning rate, the "winning ticket" initialization as used in Frankle &amp; Carbin (2019) does not bring improvement over random initialization.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2018-10-11T22:15:28Z</published>
+    <arxiv:comment>ICLR 2019. Significant revisions from the previous version</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Zhuang Liu</name>
+    </author>
+    <author>
+      <name>Mingjie Sun</name>
+    </author>
+    <author>
+      <name>Tinghui Zhou</name>
+    </author>
+    <author>
+      <name>Gao Huang</name>
+    </author>
+    <author>
+      <name>Trevor Darrell</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2104.08378v1</id>
+    <title>Accelerating Sparse Deep Neural Networks</title>
+    <updated>2021-04-16T21:27:32Z</updated>
+    <link href="https://arxiv.org/abs/2104.08378v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2104.08378v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>As neural network model sizes have dramatically increased, so has the interest in various techniques to reduce their parameter counts and accelerate their execution. An active area of research in this field is sparsity - encouraging zero values in parameters that can then be discarded from storage or computations. While most research focuses on high levels of sparsity, there are challenges in universally maintaining model accuracy as well as achieving significant speedups over modern matrix-math hardware. To make sparsity adoption practical, the NVIDIA Ampere GPU architecture introduces sparsity support in its matrix-math units, Tensor Cores. We present the design and behavior of Sparse Tensor Cores, which exploit a 2:4 (50%) sparsity pattern that leads to twice the math throughput of dense matrix units. We also describe a simple workflow for training networks that both satisfy 2:4 sparsity pattern requirements and maintain accuracy, verifying it on a wide range of common tasks and model architectures. This workflow makes it easy to prepare accurate models for efficient deployment on Sparse Tensor Cores.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AR" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-04-16T21:27:32Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Asit Mishra</name>
+    </author>
+    <author>
+      <name>Jorge Albericio Latorre</name>
+    </author>
+    <author>
+      <name>Jeff Pool</name>
+    </author>
+    <author>
+      <name>Darko Stosic</name>
+    </author>
+    <author>
+      <name>Dusan Stosic</name>
+    </author>
+    <author>
+      <name>Ganesh Venkatesh</name>
+    </author>
+    <author>
+      <name>Chong Yu</name>
+    </author>
+    <author>
+      <name>Paulius Micikevicius</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2106.08295v1</id>
+    <title>A White Paper on Neural Network Quantization</title>
+    <updated>2021-06-15T17:12:42Z</updated>
+    <link href="https://arxiv.org/abs/2106.08295v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2106.08295v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>While neural networks have advanced the frontiers in many applications, they often come at a high computational cost. Reducing the power and latency of neural network inference is key if we want to integrate modern networks into edge devices with strict power and compute requirements. Neural network quantization is one of the most effective ways of achieving these savings but the additional noise it induces can lead to accuracy degradation. In this white paper, we introduce state-of-the-art algorithms for mitigating the impact of quantization noise on the network's performance while maintaining low-bit weights and activations. We start with a hardware motivated introduction to quantization and then consider two main classes of algorithms: Post-Training Quantization (PTQ) and Quantization-Aware-Training (QAT). PTQ requires no re-training or labelled data and is thus a lightweight push-button approach to quantization. In most cases, PTQ is sufficient for achieving 8-bit quantization with close to floating-point accuracy. QAT requires fine-tuning and access to labeled training data but enables lower bit quantization with competitive results. For both solutions, we provide tested pipelines based on existing literature and extensive experimentation that lead to state-of-the-art performance for common deep learning models and tasks.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-06-15T17:12:42Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Markus Nagel</name>
+    </author>
+    <author>
+      <name>Marios Fournarakis</name>
+    </author>
+    <author>
+      <name>Rana Ali Amjad</name>
+    </author>
+    <author>
+      <name>Yelysei Bondarenko</name>
+    </author>
+    <author>
+      <name>Mart van Baalen</name>
+    </author>
+    <author>
+      <name>Tijmen Blankevoort</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2306.07629v4</id>
+    <title>SqueezeLLM: Dense-and-Sparse Quantization</title>
+    <updated>2024-06-05T03:57:41Z</updated>
+    <link href="https://arxiv.org/abs/2306.07629v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2306.07629v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Generative Large Language Models (LLMs) have demonstrated remarkable results for a wide range of tasks. However, deploying these models for inference has been a significant challenge due to their unprecedented resource requirements. This has forced existing deployment frameworks to use multi-GPU inference pipelines, which are often complex and costly, or to use smaller and less performant models. In this work, we demonstrate that the main bottleneck for generative inference with LLMs is memory bandwidth, rather than compute, specifically for single batch inference. While quantization has emerged as a promising solution by representing weights with reduced precision, previous efforts have often resulted in notable performance degradation. To address this, we introduce SqueezeLLM, a post-training quantization framework that not only enables lossless compression to ultra-low precisions of up to 3-bit, but also achieves higher quantization performance under the same memory constraint. Our framework incorporates two novel ideas: (i) sensitivity-based non-uniform quantization, which searches for the optimal bit precision assignment based on second-order information; and (ii) the Dense-and-Sparse decomposition that stores outliers and sensitive weight values in an efficient sparse format. When applied to the LLaMA models, our 3-bit quantization significantly reduces the perplexity gap from the FP16 baseline by up to 2.1x as compared to the state-of-the-art methods with the same memory requirement. Furthermore, when deployed on an A6000 GPU, our quantized models achieve up to 2.3x speedup compared to the baseline. Our code is available at https://github.com/SqueezeAILab/SqueezeLLM.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-06-13T08:57:54Z</published>
+    <arxiv:comment>ICML 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Sehoon Kim</name>
+    </author>
+    <author>
+      <name>Coleman Hooper</name>
+    </author>
+    <author>
+      <name>Amir Gholami</name>
+    </author>
+    <author>
+      <name>Zhen Dong</name>
+    </author>
+    <author>
+      <name>Xiuyu Li</name>
+    </author>
+    <author>
+      <name>Sheng Shen</name>
+    </author>
+    <author>
+      <name>Michael W. Mahoney</name>
+    </author>
+    <author>
+      <name>Kurt Keutzer</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1412.6550v4</id>
+    <title>FitNets: Hints for Thin Deep Nets</title>
+    <updated>2015-03-27T11:52:28Z</updated>
+    <link href="https://arxiv.org/abs/1412.6550v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1412.6550v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>While depth tends to improve network performances, it also makes gradient-based training more difficult since deeper networks tend to be more non-linear. The recently proposed knowledge distillation approach is aimed at obtaining small and fast-to-execute models, and it has shown that a student network could imitate the soft output of a larger teacher network or ensemble of networks. In this paper, we extend this idea to allow the training of a student that is deeper and thinner than the teacher, using not only the outputs but also the intermediate representations learned by the teacher as hints to improve the training process and final performance of the student. Because the student intermediate hidden layer will generally be smaller than the teacher's intermediate hidden layer, additional parameters are introduced to map the student hidden layer to the prediction of the teacher hidden layer. This allows one to train deeper students that can generalize better or run faster, a trade-off that is controlled by the chosen student capacity. For example, on CIFAR-10, a deep student network with almost 10.4 times less parameters outperforms a larger, state-of-the-art teacher network.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2014-12-19T22:40:51Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Adriana Romero</name>
+    </author>
+    <author>
+      <name>Nicolas Ballas</name>
+    </author>
+    <author>
+      <name>Samira Ebrahimi Kahou</name>
+    </author>
+    <author>
+      <name>Antoine Chassang</name>
+    </author>
+    <author>
+      <name>Carlo Gatta</name>
+    </author>
+    <author>
+      <name>Yoshua Bengio</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2301.00774v3</id>
+    <title>SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot</title>
+    <updated>2023-03-22T12:33:46Z</updated>
+    <link href="https://arxiv.org/abs/2301.00774v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2301.00774v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We show for the first time that large-scale generative pretrained transformer (GPT) family models can be pruned to at least 50% sparsity in one-shot, without any retraining, at minimal loss of accuracy. This is achieved via a new pruning method called SparseGPT, specifically designed to work efficiently and accurately on massive GPT-family models. We can execute SparseGPT on the largest available open-source models, OPT-175B and BLOOM-176B, in under 4.5 hours, and can reach 60% unstructured sparsity with negligible increase in perplexity: remarkably, more than 100 billion weights from these models can be ignored at inference time. SparseGPT generalizes to semi-structured (2:4 and 4:8) patterns, and is compatible with weight quantization approaches. The code is available at: https://github.com/IST-DASLab/sparsegpt.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-01-02T17:48:56Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Elias Frantar</name>
+    </author>
+    <author>
+      <name>Dan Alistarh</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1806.08342v1</id>
+    <title>Quantizing deep convolutional networks for efficient inference: A whitepaper</title>
+    <updated>2018-06-21T17:32:46Z</updated>
+    <link href="https://arxiv.org/abs/1806.08342v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1806.08342v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We present an overview of techniques for quantizing convolutional neural networks for inference with integer weights and activations. Per-channel quantization of weights and per-layer quantization of activations to 8-bits of precision post-training produces classification accuracies within 2% of floating point networks for a wide variety of CNN architectures. Model sizes can be reduced by a factor of 4 by quantizing weights to 8-bits, even when 8-bit arithmetic is not supported. This can be achieved with simple, post training quantization of weights.We benchmark latencies of quantized networks on CPUs and DSPs and observe a speedup of 2x-3x for quantized implementations compared to floating point on CPUs. Speedups of up to 10x are observed on specialized processors with fixed point SIMD capabilities, like the Qualcomm QDSPs with HVX.
+  Quantization-aware training can provide further improvements, reducing the gap to floating point to 1% at 8-bit precision. Quantization-aware training also allows for reducing the precision of weights to four bits with accuracy losses ranging from 2% to 10%, with higher accuracy drop for smaller networks.We introduce tools in TensorFlow and TensorFlowLite for quantizing convolutional networks and review best practices for quantization-aware training to obtain high accuracy with quantized weights and activations. We recommend that per-channel quantization of weights and per-layer quantization of activations be the preferred quantization scheme for hardware acceleration and kernel optimization. We also propose that future processors and hardware accelerators for optimized inference support precisions of 4, 8 and 16 bits.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2018-06-21T17:32:46Z</published>
+    <arxiv:comment>37 pages</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Raghuraman Krishnamoorthi</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2004.09602v1</id>
+    <title>Integer Quantization for Deep Learning Inference: Principles and Empirical Evaluation</title>
+    <updated>2020-04-20T19:59:22Z</updated>
+    <link href="https://arxiv.org/abs/2004.09602v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2004.09602v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Quantization techniques can reduce the size of Deep Neural Networks and improve inference latency and throughput by taking advantage of high throughput integer instructions. In this paper we review the mathematical aspects of quantization parameters and evaluate their choices on a wide range of neural network models for different application domains, including vision, speech, and language. We focus on quantization techniques that are amenable to acceleration by processors with high-throughput integer math pipelines. We also present a workflow for 8-bit quantization that is able to maintain accuracy within 1% of the floating-point baseline on all networks studied, including models that are more difficult to quantize, such as MobileNets and BERT-large.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-04-20T19:59:22Z</published>
+    <arxiv:comment>20 pages, 7 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Hao Wu</name>
+    </author>
+    <author>
+      <name>Patrick Judd</name>
+    </author>
+    <author>
+      <name>Xiaojie Zhang</name>
+    </author>
+    <author>
+      <name>Mikhail Isaev</name>
+    </author>
+    <author>
+      <name>Paulius Micikevicius</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1803.03635v5</id>
+    <title>The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks</title>
+    <updated>2019-03-04T15:51:11Z</updated>
+    <link href="https://arxiv.org/abs/1803.03635v5" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1803.03635v5" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Neural network pruning techniques can reduce the parameter counts of trained networks by over 90%, decreasing storage requirements and improving computational performance of inference without compromising accuracy. However, contemporary experience is that the sparse architectures produced by pruning are difficult to train from the start, which would similarly improve training performance.
+  We find that a standard pruning technique naturally uncovers subnetworks whose initializations made them capable of training effectively. Based on these results, we articulate the "lottery ticket hypothesis:" dense, randomly-initialized, feed-forward networks contain subnetworks ("winning tickets") that - when trained in isolation - reach test accuracy comparable to the original network in a similar number of iterations. The winning tickets we find have won the initialization lottery: their connections have initial weights that make training particularly effective.
+  We present an algorithm to identify winning tickets and a series of experiments that support the lottery ticket hypothesis and the importance of these fortuitous initializations. We consistently find winning tickets that are less than 10-20% of the size of several fully-connected and convolutional feed-forward architectures for MNIST and CIFAR10. Above this size, the winning tickets that we find learn faster than the original network and reach higher test accuracy.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2018-03-09T18:51:28Z</published>
+    <arxiv:comment>ICLR camera ready</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <arxiv:journal_ref>ICLR 2019</arxiv:journal_ref>
+    <author>
+      <name>Jonathan Frankle</name>
+    </author>
+    <author>
+      <name>Michael Carbin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1708.06519v1</id>
+    <title>Learning Efficient Convolutional Networks through Network Slimming</title>
+    <updated>2017-08-22T07:35:26Z</updated>
+    <link href="https://arxiv.org/abs/1708.06519v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1708.06519v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The deployment of deep convolutional neural networks (CNNs) in many real world applications is largely hindered by their high computational cost. In this paper, we propose a novel learning scheme for CNNs to simultaneously 1) reduce the model size; 2) decrease the run-time memory footprint; and 3) lower the number of computing operations, without compromising accuracy. This is achieved by enforcing channel-level sparsity in the network in a simple but effective way. Different from many existing approaches, the proposed method directly applies to modern CNN architectures, introduces minimum overhead to the training process, and requires no special software/hardware accelerators for the resulting models. We call our approach network slimming, which takes wide and large networks as input models, but during training insignificant channels are automatically identified and pruned afterwards, yielding thin and compact models with comparable accuracy. We empirically demonstrate the effectiveness of our approach with several state-of-the-art CNN models, including VGGNet, ResNet and DenseNet, on various image classification datasets. For VGGNet, a multi-pass version of network slimming gives a 20x reduction in model size and a 5x reduction in computing operations.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2017-08-22T07:35:26Z</published>
+    <arxiv:comment>Accepted by ICCV 2017</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhuang Liu</name>
+    </author>
+    <author>
+      <name>Jianguo Li</name>
+    </author>
+    <author>
+      <name>Zhiqiang Shen</name>
+    </author>
+    <author>
+      <name>Gao Huang</name>
+    </author>
+    <author>
+      <name>Shoumeng Yan</name>
+    </author>
+    <author>
+      <name>Changshui Zhang</name>
+    </author>
+  </entry>
+</feed>

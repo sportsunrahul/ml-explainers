@@ -1,0 +1,173 @@
+[
+ {
+  "id": "score-sde-forward-sde",
+  "claim": "Data are diffused to a prior by an Ito SDE with drift f and scalar diffusion coefficient g",
+  "value": "dx = f(x,t) dt + g(t) dw",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.1, Eq. 5",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-reverse-sde",
+  "claim": "The reverse of a diffusion is a diffusion (Anderson 1982) whose only unknown is the score of the marginals",
+  "value": "dx = [f(x,t) - g(t)^2 grad_x log p_t(x)] dt + g(t) dw-bar",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.2, Eq. 6",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-prob-flow-ode",
+  "claim": "A deterministic ODE shares the same marginal densities p_t as the SDE (probability flow ODE)",
+  "value": "dx = [f(x,t) - 1/2 g(t)^2 grad_x log p_t(x)] dt",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.3, Eq. 13",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-ve-is-smld",
+  "claim": "SMLD (NCSN) noise perturbations are a discretization of the Variance Exploding SDE",
+  "value": "dx = sqrt(d[sigma^2(t)]/dt) dw",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.4, Eqs. 8-9",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-vp-is-ddpm",
+  "claim": "DDPM noise perturbations are a discretization of the Variance Preserving SDE",
+  "value": "dx = -1/2 beta(t) x dt + sqrt(beta(t)) dw",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 3.4, Eqs. 10-11",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-pc-generalizes",
+  "claim": "SMLD sampling = identity predictor + annealed Langevin corrector; DDPM sampling = ancestral predictor + identity corrector",
+  "value": "special cases of PC sampling",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.2",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-pc-vs-predictor",
+  "claim": "PC1000 improves over P1000 for every predictor; VE reverse-diffusion FID goes 4.79 (P1000) to 3.60 (PC1000)",
+  "value": "4.79 -> 3.60",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 1, row reverse diffusion, VE columns",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-corrector-only-worst",
+  "claim": "Corrector-only sampling with 2000 steps is worst at equal compute",
+  "value": "FID 20.43 (VE), 19.06 (VP)",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 1, column C2000",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar10-fid",
+  "claim": "Best CIFAR-10 unconditional FID, NCSN++ cont. (deep, VE)",
+  "value": "2.20",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 3, row NCSN++ cont. (deep, VE); abstract",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar10-is",
+  "claim": "Best CIFAR-10 unconditional Inception Score, NCSN++ cont. (deep, VE)",
+  "value": "9.89",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 3, row NCSN++ cont. (deep, VE); abstract",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar10-nll",
+  "claim": "Best NLL on uniformly dequantized CIFAR-10, DDPM++ cont. (deep, sub-VP), without maximum likelihood training",
+  "value": "2.99 bits/dim",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 2, row DDPM++ cont. (deep, sub-VP)",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-exact-vs-elbo",
+  "claim": "Exact ODE likelihood of the same DDPM model beats its reported ELBO",
+  "value": "3.28 vs <= 3.70 (L) / <= 3.75 (L_simple) bits/dim",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Table 2, rows DDPM and DDPM (L)/(L_simple)",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-ode-nfe-reduction",
+  "claim": "Black-box ODE solver with larger error tolerance cuts score function evaluations without affecting visual quality",
+  "value": "over 90% fewer NFE",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.3, Efficient sampling; Figure 3",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-1024-celebahq",
+  "claim": "First high-fidelity 1024x1024 samples from a score-based generative model (CelebA-HQ, VE SDE, modified NCSN++)",
+  "value": "1024x1024",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "Sec. 4.4; App. H.3, Figure 12",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-1024-sampler",
+  "claim": "1024x1024 CelebA-HQ sampling settings",
+  "value": "PC, 2000 steps, reverse diffusion predictor, 1 Langevin step, SNR 0.15; trained ~2.4M iters, batch 8",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. H.3",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-vp-beta-range",
+  "claim": "VP SDE beta range, matching Ho et al.",
+  "value": "beta-bar_min = 0.1, beta-bar_max = 20",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. C",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-ve-sigma-min",
+  "claim": "VE SDE smallest noise; sigma_max chosen by Technique 1 of NCSNv2 and not stated numerically in this paper",
+  "value": "sigma_min = 0.01",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. C",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-cifar-pc-settings",
+  "claim": "Architecture-exploration sampler: PC at 1000 steps, reverse diffusion predictor, one corrector step with SNR 0.16 for VE, no corrector for VP (DDPM++ cont. models use Euler-Maruyama predictor per App. H.2)",
+  "value": "N=1000, SNR 0.16 (VE)",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. H.1",
+  "uncertain": false
+ },
+ {
+  "id": "score-sde-code",
+  "claim": "Official code and checkpoints",
+  "value": "https://github.com/yang-song/score_sde",
+  "paper": "Score SDE",
+  "version": "v2",
+  "loc": "App. H, first paragraph",
+  "uncertain": false
+ }
+]

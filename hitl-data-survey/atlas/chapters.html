@@ -1,0 +1,131 @@
+  <article data-chapter="loop">
+    <header class="ch-head"><span class="num">1 of 9</span><h2>The loop</h2><p class="subhead">Two decisions in every round</p></header>
+    <div class="tools"><button type="button" class="tool play" data-replay>Replay</button></div>
+    <p>A vision model scores a stream of images. A person can label only a few. Each round, the system decides <span class="c-yellow">which images go to a person</span>, and then <span class="c-green">which returned labels to believe</span>. The stage plays one round with real <button class="inline-term" data-open="cifar">CIFAR-10</button> images.</p>
+    <p class="note">The model draws a blue confidence bar under each image. The three shortest bars get a yellow ring and go to the labeler. One of the three tags is wrong: the image's label was flipped in our noisy copy of CIFAR-10. In the training set its loss stays high, so it gets a red strike and goes back to review.</p>
+    <h3>Main findings of the survey</h3>
+    <ul>
+      <li>Asking about the images the model is least sure of saves labels in the middle of a campaign, but not at the very start, and not when a batch is full of near-copies.</li>
+      <li>Random sampling is a much stronger baseline than its reputation: with strong augmentation and several seeds, most active-learning gains shrink to the size of the seed-to-seed spread.</li>
+      <li>A network learns the consistent pattern before it memorizes wrong labels. That window is what confident learning, Co-teaching and DivideMix all use.</li>
+      <li>Real datasets carry label errors, test sets included, and a noisy test set can rank the wrong model first. Check the evaluation labels first.</li>
+    </ul>
+    <p class="inscription">Labels are the scarce input. Spend them where they teach the most, and doubt the ones that disagree with everything else.</p>
+    <button type="button" class="continue" data-go="ask">Continue with asking about the coin flips</button>
+  </article>
+  <article data-chapter="ask">
+    <header class="ch-head"><span class="num">2 of 9</span><h2>Ask about the coin flips</h2><p class="subhead">Uncertainty sampling</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-measure="margin" aria-pressed="true">Margin</button>
+      <button type="button" class="tool" data-measure="entropy" aria-pressed="false">Entropy</button>
+      <button type="button" class="tool" data-measure="lc" aria-pressed="false">Least confidence</button>
+    </div>
+    <div class="tools">
+      <button type="button" class="tool play" data-step-round>Label 5 more</button>
+      <button type="button" class="tool" data-rounds="0" aria-pressed="true">Start</button>
+      <button type="button" class="tool" data-rounds="1" aria-pressed="false">1 round</button>
+      <button type="button" class="tool" data-rounds="4" aria-pressed="false">4 rounds</button>
+      <button type="button" class="tool" data-rounds="12" aria-pressed="false">12 rounds</button>
+      <button type="button" class="tool" data-view="rand" aria-pressed="false">Show the random run</button>
+    </div>
+    <p>In <button class="inline-term" data-open="al">pool-based active learning</button> you train on a few labels, score every unlabeled image, and send the top few to a person. The score is how unsure the model is. Three standard scores turn the model's <button class="inline-term" data-open="softmax">probability vector</button> into one number: least confidence (one minus the top probability), margin (the gap between the top two) and <button class="inline-term" data-open="entropy">entropy</button> (how spread the whole vector is).</p>
+    <p class="note">The stage is a toy: 700 points in three spiral arms, a small classifier retrained after every round. Shape is the true class; brown points are unlabeled; yellow rings are labels a person gave; dashed rings are the next five picks. Right: the probability triangle and the accuracy of the uncertainty run (blue) against a random run (brown), over the middle half of 20 simulated pools.</p>
+    <table class="data"><thead><tr><th>Median of 20 toy pools</th><th>8 labels</th><th>23 labels</th><th>48 labels</th></tr></thead>
+      <tbody><tr><td>Margin</td><td>65%</td><td>98.6%</td><td>100%</td></tr><tr><td>Entropy</td><td>58%</td><td>89%</td><td>100%</td></tr><tr><td>Random</td><td>73%</td><td>93%</td><td>98.6%</td></tr></tbody></table>
+    <p class="inscription">Label where the model is closest to a coin flip, but only after it has seen a few labels per class. With three labels, "unsure" points at the wrong place.</p>
+    <button type="button" class="continue" data-go="disagree">Continue with ambiguous or unfamiliar</button>
+  </article>
+  <article data-chapter="disagree">
+    <header class="ch-head"><span class="num">3 of 9</span><h2>Ambiguous or unfamiliar?</h2><p class="subhead">MC dropout and BALD</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-preset="ambiguous" aria-pressed="false">Ambiguous image</button>
+      <button type="button" class="tool" data-preset="unfamiliar" aria-pressed="true">Unfamiliar image</button>
+      <button type="button" class="tool" data-preset="confident" aria-pressed="false">Confident image</button>
+    </div>
+    <p>Two images can be equally "unsure". One is ambiguous to everyone: another label will not help. The other is unfamiliar to the model: one label fixes it. Keep <button class="inline-term" data-open="dropout">dropout</button> on at test time and run the image several times: each pass is a slightly different network. <button class="inline-term" data-open="bald">BALD</button> measures how much those passes disagree.</p>
+    <p class="note">The triangle holds all three-class probability vectors; the dome's height is <button class="inline-term" data-open="entropy">entropy</button>. Blue points are the passes. The yellow bar is BALD: the dome's height at their mean minus their average height. Ambiguous: every pass sits at the top, and the gap closes. Drag to turn.</p>
+    <table class="data"><thead><tr><th>MNIST labels to reach</th><th>10% error</th><th>5% error</th></tr></thead><tbody>
+      <tr><td>BALD</td><td>145</td><td>335</td></tr><tr><td>Variation ratios</td><td>120</td><td>295</td></tr><tr><td>Max entropy</td><td>165</td><td>355</td></tr><tr><td>Random</td><td>255</td><td>835</td></tr></tbody></table>
+    <p class="inscription">Do not buy labels for images that are ambiguous to everyone. Ask about the ones on which the model disagrees with itself.</p>
+    <button type="button" class="continue" data-go="cover">Continue with a batch of near-duplicates</button>
+  </article>
+  <article data-chapter="cover">
+    <header class="ch-head"><span class="num">4 of 9</span><h2>A batch of near-duplicates</h2><p class="subhead">Core-sets</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-strategy="topk" aria-pressed="true">Top-10 uncertain</button>
+      <button type="button" class="tool" data-strategy="greedy" aria-pressed="false">Greedy k-Center</button>
+      <button type="button" class="tool" data-strategy="random" aria-pressed="false">Random 10</button>
+    </div>
+    <p>Batches are labeled together, and the ten most uncertain images are often ten frames of one moment. Sener and Savarese pick the batch so that every unlabeled image is close, in the network's feature space, to some labeled one: the <button class="inline-term" data-open="kcenter">k-Center</button> problem, solved greedily by always adding the farthest point.</p>
+    <p class="note">Toy data. Brown points are the pool, with a burst of near-copies on the model's boundary. Yellow discs show how far the worst-covered point is from a label (the covering radius).</p>
+    <p>Diversity alone is not enough either: over 33 settings in the BADGE study, plain core-set and plain entropy both averaged worse than random. Methods that mix uncertainty and spread (BADGE, BatchBALD, stochastic sampling) held up.</p>
+    <p class="inscription">Never send a plain top-k batch from video. Deduplicate, then spread the batch.</p>
+    <button type="button" class="continue" data-go="budget">Continue with why random is hard to beat</button>
+  </article>
+  <article data-chapter="budget">
+    <header class="ch-head"><span class="num">5 of 9</span><h2>Why random is hard to beat</h2><p class="subhead">Budgets, baselines and bias</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-sr="0" aria-pressed="true">Plain training</button>
+      <button type="button" class="tool" data-sr="1" aria-pressed="false">Strong augmentation + SWA</button>
+    </div>
+    <div class="controls"><label class="slider"><span>share of easy, typical data p <b id="budget-pv">0.80</b></span><input id="atlas-budget-p" type="range" min="0.55" max="0.95" step="0.01" value="0.8"></label></div>
+    <p>Three reasons. A well-regularized model gains more than clever selection does: in Munjal et al., augmentation plus weight averaging lifted random sampling from 69.16% to 82.16% at 10% of CIFAR-10, and in a transfer test the active-learning gains over random shrank to under two points. At tiny budgets the right pick is the opposite of uncertain: label <button class="inline-term" data-open="typical">typical</button> images (TypiClust). And an actively chosen set is biased, so it cannot be your test set.</p>
+    <p class="note">Left: TypiClust's two-region model with the paper's toy settings, computed: positive means "label typical images". Right: Munjal et al. Table 4, each method minus random on ResNet-18 (VGG16-selected batches).</p>
+    <p class="inscription">Compare against random with strong augmentation, start cold projects with typical images, and keep a random slice for evaluation.</p>
+    <button type="button" class="continue" data-go="memorize">Continue with memorization</button>
+  </article>
+  <article data-chapter="memorize">
+    <header class="ch-head"><span class="num">6 of 9</span><h2>Clean first, wrong later</h2><p class="subhead">Memorization of noisy labels</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-epoch="5" aria-pressed="false">Epoch 5</button>
+      <button type="button" class="tool" data-epoch="12" aria-pressed="true">Epoch 12</button>
+      <button type="button" class="tool" data-epoch="20" aria-pressed="false">Epoch 20</button>
+      <button type="button" class="tool" data-epoch="200" aria-pressed="false">Epoch 200</button>
+    </div>
+    <p>A network can fit any labels, even random ones. But it learns the consistent pattern first. In our CIFAR-10 run with 39.69% of labels flipped, test accuracy peaked at 77.14% at epoch 12. At epoch 10 the network predicted 75.9% of the mislabeled images as their true class; by epoch 30 it had fit 98.2% of them to the wrong label.</p>
+    <p class="note">Computed from our run: per-image training-loss histograms (log scale) per epoch, green for correct labels and red for flipped ones. Early, the red sits far to the right; later it slides onto the green.</p>
+    <p class="inscription">Per-image loss points at wrong labels only early in training. Training accuracy never does.</p>
+    <button type="button" class="continue" data-go="audit">Continue with noisy benchmarks</button>
+  </article>
+  <article data-chapter="audit">
+    <header class="ch-head"><span class="num">7 of 9</span><h2>How noisy are real datasets?</h2><p class="subhead">Pervasive label errors in test sets</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-corr="0" aria-pressed="true">Original labels</button>
+      <button type="button" class="tool" data-corr="1" aria-pressed="false">Corrected labels</button>
+    </div>
+    <p>Northcutt, Athalye and Mueller had five crowd workers check the flagged test examples (a random sample for the two largest datasets) in ten benchmarks: at least 3.3% of labels are wrong on average, 2,916 in the ImageNet validation set alone. On the 1,428 ImageNet images that could be corrected, the ranking of 34 models flips: ResNet-18 goes from last to first, NASNet-Large from first to 29th.</p>
+    <p class="note">Sourced: Table 1, the ImageNet funnel, and Table S1.</p>
+    <p class="inscription">Check the evaluation labels before you trust a model comparison.</p>
+    <button type="button" class="continue" data-go="find">Continue with confident learning</button>
+  </article>
+  <article data-chapter="find">
+    <header class="ch-head"><span class="num">8 of 9</span><h2>Find the wrong labels</h2><p class="subhead">Confident learning</p></header>
+    <div class="tools">
+      <button type="button" class="tool" data-cell="0" aria-pressed="true">cat, likely dog</button>
+      <button type="button" class="tool" data-cell="1" aria-pressed="false">automobile, likely truck</button>
+      <button type="button" class="tool" data-cell="2" aria-pressed="false">horse, likely deer</button>
+      <button type="button" class="tool" data-cell="3" aria-pressed="false">truck, likely automobile</button>
+      <button type="button" class="tool" data-view="true" aria-pressed="false">Show true counts</button>
+    </div>
+    <p>Train on three quarters of the data, predict the fourth, four times over: now every image has a vote from a model that never saw its label. Count the images labeled <i>i</i> on which the model is at least as confident about class <i>j</i> as it usually is about <i>j</i>. That count matrix, the <button class="inline-term" data-open="joint">confident joint</button>, names the confused pairs and estimates how many labels are wrong.</p>
+    <p class="note">Computed on our run with five flipped class pairs: the matrix finds all five. Click a cell: the automobile-truck and horse-deer cells are 97.5-98.6% real errors, cat-dog 53.2% (both directions were flipped); the reverse truck-to-automobile cell is 0%, because the noise taught the model to doubt correct trucks.</p>
+    <p class="inscription">Flags are candidates for review, not verdicts, and they are only as good as the model that votes.</p>
+    <button type="button" class="continue" data-go="split">Continue with training through the noise</button>
+  </article>
+  <article data-chapter="split">
+    <header class="ch-head"><span class="num">9 of 9</span><h2>Train through the noise</h2><p class="subhead">Co-teaching and DivideMix</p></header>
+    <div class="tools"><div class="seg" role="tablist" aria-label="Two methods">
+      <button type="button" role="tab" data-step="0">Co-teaching</button>
+      <button type="button" role="tab" data-step="1">DivideMix</button>
+    </div></div>
+    <div class="step-text" data-step="0">
+      <p>Train only on the small-loss part of each batch, and let two networks pick for each other so neither trains on its own mistakes. In our run, the kept set was 92.9% clean at epoch 10 and averaged 78.56% test accuracy over the last ten epochs, against 60.58% for plain training.</p>
+      <p class="note">Computed: one real batch of 32 images sorted by each network's loss at epoch 10; the kept images are outlined, flipped labels carry a red strike.</p>
+    </div>
+    <div class="step-text" data-step="1">
+      <p>Fit two bumps to the loss histogram. Images in the low bump keep their label; images in the high bump lose the label but keep the image, and semi-supervised learning guesses a label for them. DivideMix reached 94.6% on CIFAR-10 with 50% symmetric noise (best epoch).</p>
+      <p class="note">Computed: 1,500 losses from our plain run at epoch 10, with a two-component mixture fitted live; the yellow line is the clean-probability threshold.</p>
+    </div>
+    <p class="inscription">Use the early window: keep training while the review queue is open, and send the doubted images to a person.</p>
+    <a class="continue" href="explainer.html">Read the full explainer</a>
+  </article>

@@ -1,0 +1,58 @@
+<section id="ch-timeline">
+<h2>Timeline</h2>
+<p>First arXiv submission dates for the papers this page read in full, from their abstract pages.</p>
+<ul class="timeline">
+  <li><span class="when" data-claim="byol-published">2020-06-13</span> <b>BYOL</b>: slow-average target and a predictor; collapse avoided by asymmetry. <a href="#ch-ssl">Ch. 1</a></li>
+  <li><span class="when" data-claim="vicreg-published">2021-05-11</span> <b>VICReg</b>: variance and covariance terms; collapse avoided by a loss term. <a href="#ch-ssl">Ch. 1</a></li>
+  <li><span class="when" data-claim="mae-published">2021-11-11</span> <b>MAE</b>: masked pixel reconstruction at scale; the foil. <a href="#ch-ssl">Ch. 1</a></li>
+  <li><span class="when" data-claim="data2vec-published">2022-02-07</span> <b>data2vec</b>: regress a teacher's hidden features at masked positions. <a href="#ch-ssl">Ch. 1</a></li>
+  <li><span class="when" data-claim="ebm-position-date">2022-06-27</span> <b>A Path Towards Autonomous Machine Intelligence</b> (position paper; date as cited by the tutorial): JEPA and H-JEPA drawn. <a href="#ch-ebm">Ch. 2</a></li>
+  <li><span class="when" data-claim="uniform-prior-published">2022-10-13</span> <b>Hidden uniform cluster prior</b>: the loss-term route assumes balanced data. <a href="#ch-collapse">Ch. 5</a></li>
+  <li><span class="when" data-claim="slow-features-published">2022-11-20</span> <b>JEPAs focus on slow features</b>: the gift and the trap. <a href="#ch-collapse">Ch. 5</a></li>
+  <li><span class="when" data-claim="ijepa-published">2023-01-19</span> <b>I-JEPA</b>: the recipe works on images. <a href="#ch-ijepa">Ch. 3</a></li>
+  <li><span class="when" data-claim="ebm-tutorial-published">2023-06-05</span> <b>EBM tutorial</b> (Dawid, LeCun): the energy framing written out. <a href="#ch-ebm">Ch. 2</a></li>
+  <li><span class="when" data-claim="vjepa-published">2024-02-15</span> <b>V-JEPA</b>: tube masks through time. <a href="#ch-vjepa">Ch. 6</a></li>
+  <li><span class="when" data-claim="recon-uninformative-published">2024-02-17</span> <b>Learning by reconstruction</b>: why pixel loss misleads. <a href="#ch-ssl">Ch. 1</a></li>
+  <li><span class="when" data-claim="iwm-published">2024-03-01</span> <b>Image World Models</b>: condition the predictor on the action. <a href="#ch-iwm">Ch. 7</a></li>
+  <li><span class="when" data-claim="noisy-features-published">2024-07-03</span> <b>How JEPA avoids noisy features</b>: the deep-linear theory. <a href="#ch-collapse">Ch. 5</a></li>
+  <li><span class="when" data-claim="dino-wm-published">2024-11-07</span> <b>DINO-WM</b>: plan on frozen patch features. <a href="#ch-planning">Ch. 11</a></li>
+  <li><span class="when" data-claim="nwm-published">2024-12-04</span> <b>Navigation World Models</b>: the generative contrast. <a href="#ch-planning">Ch. 11</a></li>
+  <li><span class="when" data-claim="intphys-published">2025-02-17</span> <b>Intuitive physics</b>: prediction error as surprise. <a href="#ch-vjepa2">Ch. 8</a></li>
+  <li><span class="when" data-claim="pldm-published">2025-02-20</span> <b>PLDM</b>: a case for planning with latent dynamics. <a href="#ch-planning">Ch. 11</a></li>
+  <li><span class="when" data-claim="vjepa2-published">2025-06-11</span> <b>V-JEPA 2</b>: scale, then act. <a href="#ch-vjepa2">Ch. 8</a></li>
+  <li><span class="when" data-claim="gaussian-embeddings-published">2025-10-07</span> <b>Gaussian embeddings</b>: JEPAs learn the density. <a href="#ch-lejepa">Ch. 10</a></li>
+  <li><span class="when" data-claim="lejepa-published">2025-11-11</span> <b>LeJEPA</b>: one regulariser. <a href="#ch-lejepa">Ch. 10</a></li>
+  <li><span class="when" data-claim="lewm-published">2026-03-13</span> <b>LeWorldModel</b>: end to end from pixels. <a href="#ch-lewm">Ch. 12</a></li>
+  <li><span class="when" data-claim="vjepa2-1-published">2026-03-15</span> <b>V-JEPA 2.1</b>: dense features. <a href="#ch-vjepa21">Ch. 9</a></li>
+  <li><span class="when" data-claim="lejepa-worldmodel-published">2026-05-25</span> <b>When does LeJEPA learn a world model?</b>: identifiability. <a href="#ch-lejepa">Ch. 10</a></li>
+  <li><span class="when" data-claim="hjepa-published">2026-10-05</span> <b>H-JEPA</b>: the hierarchy, built. <a href="#ch-lewm">Ch. 12</a></li>
+</ul>
+</section>
+
+<section id="ch-summary">
+<h2>Summary</h2>
+<p>A JEPA hides part of its input and predicts the hidden part's <em>embedding</em>, not its pixels, so the encoder is free to drop what cannot be predicted. The 2022 position paper drew it as an energy-based model with two encoders and a predictor and warned that the picture collapses unless something pays for the shape of the energy landscape. I-JEPA paid with asymmetry (a slow-average target encoder, a predictor) and found that the mask is the design: a few large target blocks, one spread-out context. V-JEPA extended the mask through time so that nothing could be copied from the next frame; theory explained why the asymmetry prefers predictive, low-noise features and why that same preference traps the model on static backgrounds. Image World Models showed that telling the predictor what changed turns it into a simulator; V-JEPA 2 scaled the video model, froze it, trained an action-conditioned predictor on sixty-two hours of robot video and planned with it on a real arm; V-JEPA 2.1 made the features dense by grading every token. LeJEPA replaced the asymmetry with one regulariser derived from what a downstream probe needs, an isotropic Gaussian, and LeWorldModel and H-JEPA used it to train planners end to end from pixels, flat and then hierarchical, closing the loop on the 2022 diagram. Around that spine, several hundred papers a year now apply the recipe to audio, graphs, molecules, language and medicine, and argue about what a single deterministic latent predictor can and cannot represent.</p>
+</section>
+
+<section id="ch-deeper">
+<h2>Where to go deeper</h2>
+<ul class="deeper">
+  <li><b>EBM tutorial (2306.02572v1)</b>: Sec. 3 for the energy definition and the latent variable; Sec. 4 for contrastive vs regularised; Sec. 6.1, Figs. 9-10 for JEPA and its four-term loss; Sec. 6.2, Fig. 11 for H-JEPA.</li>
+  <li><b>Learning by reconstruction (2402.11337v1)</b>: Theorem 1 and Eq. (7) for the alignment score; Fig. 1 and Fig. 4 for the top-vs-bottom subspace experiment; Corollary 3.1 for why Gaussian noise cannot help.</li>
+  <li><b>I-JEPA (2301.08243v3)</b>: Sec. 3 for the method and the unnumbered loss; Fig. 4 for the masks; Tables 6-12 for the ablations; Appendix A for every hyperparameter.</li>
+  <li><b>How JEPA avoids noisy features (2407.03475v1)</b>: Sec. 2 for the deep linear model; Theorem 4.2 and Eqs. (7)-(8) for the two dynamics; Corollary 4.3, Eq. (9) for the fixed points; Sec. 5.1 for the temporal model.</li>
+  <li><b>JEPAs focus on slow features (2211.10831v1)</b>: Sec. 2.1 for the trivial solution; Fig. 3 for fixed vs changing noise; Table 1 (appendix) for the three-dot experiment.</li>
+  <li><b>Hidden uniform cluster prior (2210.07277v1)</b>: Propositions 2-4 for the k-means readings; Table 1 for balanced vs imbalanced batches; Eq. (9) for PMSN.</li>
+  <li><b>V-JEPA (2404.08471v1)</b>: Sec. 3.1-3.2 and Eq. (1); Table 1 for pixels vs features; Table 4 for masking; Table 6 for the main results; the appendix masking study.</li>
+  <li><b>Image World Models (2403.00504v1)</b>: Sec. 3 for the conditioning; Table 2 for capacity vs transformation strength; Table 4 for predictor fine-tuning; Sec. 6 for invariance vs equivariance.</li>
+  <li><b>V-JEPA 2 (2506.09985v1)</b>: Sec. 2 and Fig. 3 for the scaling ingredients; Sec. 3.1, Eqs. 2-4 for the action-conditioned losses; Sec. 3.2, Eq. 5 for the planning energy; Tables 2-3 for the robot results; Appendix B for CEM settings.</li>
+  <li><b>Intuitive physics (2502.11831v1)</b>: the surprise protocol in the method section; Fig. 1 for the headline; Fig. 3 for the ablations; Table S4 for the test-set comparison with humans.</li>
+  <li><b>V-JEPA 2.1 (2603.14482v3)</b>: Sec. 2.3.1, Eqs. 1-3 for the dense loss; Sec. 2.3.2 for deep self-supervision; Tables 1-2 for the ablations; Table 8 for dense tasks.</li>
+  <li><b>LeJEPA (2511.08544v3)</b>: Sec. 3 (Lemmas 1-2, Theorem 1) for optimality; Sec. 4 and Definition 2 for SIGReg; Algorithm 1 for the Epps-Pulley loop; Sec. 5.1 for the full loss; Table 4 for what can be removed.</li>
+  <li><b>Gaussian embeddings (2510.05949v1)</b>: Eqs. (4)-(5) for the JEPA-SCORE. <b>When does LeJEPA learn a world model? (2605.26379v1)</b>: Eq. (1) for the latent dynamics; the main theorems for identifiability and uniqueness.</li>
+  <li><b>DINO-WM (2411.04983v2)</b>: Sec. 3.2 for the predictor and loss; Tables 1-2 for results and encoder choice; Table 8 for CEM vs gradient planning. <b>PLDM (2502.14819v4)</b>: Table 1 for the roadmap; Sec. 3.3 for MPPI; Tables 2 and 6.</li>
+  <li><b>Navigation World Models (2412.03572v2)</b>: Sec. 3 for the CDiT; Sec. 3.3 for planning; Table 2.</li>
+  <li><b>LeWorldModel (2603.19312v3)</b>: Sec. 3.1, Eqs. 1-3; Fig. 3 for planning time; Fig. 6 and Table 5 for success rates; Fig. 16 for the lambda sweep.</li>
+  <li><b>H-JEPA (2610.06805v1)</b>: Sec. 2.1, Eqs. 1-3 for the levels; Sec. 2.2, Eqs. 4-6 for top-down planning; Fig. 6 for success vs depth; Fig. 5 for the timescale-gap analysis; Fig. 17 for life without SIGReg.</li>
+</ul>
+</section>

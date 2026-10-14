@@ -1,0 +1,61 @@
+<section id="ch-confident" class="chapter">
+<h2>Confident learning finds the wrong labels</h2>
+<p>Let a model that never saw an image's label vote on it. Where its confident vote disagrees with the label, the label is a suspect; counting those disagreements also tells you how labels got flipped.</p>
+
+<figure class="viz" id="viz-cl" data-computed>
+  <span class="badge computed">Computed</span>
+  <canvas id="cl-canvas" class="tiles" role="img" aria-label="Left: a ten by ten grid of counts for CIFAR-10, rows the given label and columns the class a held-out model confidently predicts; bright red off-diagonal cells mark label pairs that are often confused. Right: blue bars of the per-class threshold, and eight real images from the selected cell, each marked with a red strike if its label really is wrong or a green tick if the flag was false."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-cl-joint" aria-pressed="true">Confident joint (what CL estimates)</button>
+    <button type="button" id="btn-cl-true" aria-pressed="false">True counts (what we flipped)</button>
+  </div>
+  <div class="controls">
+    <span style="color:var(--muted)">cell</span>
+    <button type="button" id="btn-cl-c0" aria-pressed="true">cat, likely dog</button>
+    <button type="button" id="btn-cl-c1" aria-pressed="false">automobile, likely truck</button>
+    <button type="button" id="btn-cl-c2" aria-pressed="false">horse, likely deer</button>
+    <button type="button" id="btn-cl-c3" aria-pressed="false">truck, likely automobile</button>
+    <button type="button" id="btn-cl-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="cl-readout" aria-live="polite"></p>
+  <figcaption>Computed: confident learning (Eqs. 1 to 3 of Northcutt, Jiang and Chuang) run on our run C. We flipped <span data-claim="run-c-noise-frac">20.13%</span> of CIFAR-10's training labels along five pairs (truck to automobile, bird to airplane, deer to horse, cat to dog, dog to cat, each 40% of the class), then trained the 9-layer CNN four times, each time leaving out a quarter of the data and predicting it. Images are real CIFAR-10 training images. Before you click the last cell, guess how many of its eight images are really mislabeled.</figcaption>
+</figure>
+
+<p>Two ideas make this work. First, the probabilities must be <b>out of sample</b>. A model that trained on an image's label has partly memorized it (chapter 7) and will defend it. So split the data into <span data-claim="confident-kfold">k = 4</span> folds, train on three, and predict the fourth, four times over.</p>
+
+<p>Second, each class gets its own <b>threshold</b>, because a model is not equally sure of every class. Ours is confident about ships and frogs and hesitant about cats, so a fixed cut-off would flag every hard class and miss the easy ones:</p>
+
+<div class="eq" id="eq-cl" data-build data-viz="viz-cl"><div class="tex tex-display">
+\begin{aligned}
+\htmlData{step=1, link=threshold}{t_j} &\htmlData{step=1, link=threshold}{= \frac{1}{|\mathbf{X}_{\tilde y = j}|} \sum_{\mathbf{x} \in \mathbf{X}_{\tilde y = j}} \htmlClass{t-blue}{\hat p(\tilde y = j; \mathbf{x})}} \\
+\htmlData{step=2, link=joint}{\mathbf{C}[i][j]} &\htmlData{step=2, link=joint}{= \big|\{\, \mathbf{x} \in \mathbf{X}_{\tilde y = i} : \htmlClass{t-blue}{\hat p(\tilde y = j; \mathbf{x})} \ge t_j \,\}\big|} \\
+\htmlData{step=3, link=count}{\#\,\text{errors}} &\htmlData{step=3, link=count}{\approx n \,\big(1 - \operatorname{tr} \hat{\mathbf{Q}}\big)}
+\end{aligned}
+</div></div>
+<p class="eqno">Northcutt, Jiang and Chuang (2021), Eq. 2 (threshold), Eq. 1 (confident joint, simplified: when several classes pass their thresholds, the image counts once, under the most probable one) and Eq. 3, which calibrates the counts into a joint distribution <span class="tex">\hat{\mathbf{Q}}</span>; the error count follows from it.</p>
+<ul class="gloss">
+  <li><span class="tex">t_j</span>: the average probability the model gives class <span class="tex">j</span> on images labeled <span class="tex">j</span> (the blue bars).</li>
+  <li><span class="tex">\mathbf{C}[i][j]</span>: images labeled <span class="tex">i</span> on which the model is at least as confident about class <span class="tex">j</span> as it usually is about <span class="tex">j</span>. Off-diagonal cells are suspects.</li>
+  <li><span class="tex">\hat{\mathbf{Q}}</span>: <span class="tex">\mathbf{C}</span> rescaled so its rows match the observed (given) label counts; the mass off its diagonal estimates how many labels are wrong.</li>
+</ul>
+
+<p>Compare the two matrices. The confident joint puts its biggest off-diagonal counts in exactly the five pairs we flipped. It estimates <span data-claim="run-c-est-err">12,196</span> errors against the true <span data-claim="run-c-n-err">10,065</span>. Now click the cells. In the automobile-to-truck cell, <span data-claim="run-c-cell-automobile-truck">97.5%</span> of the flagged images really are mislabeled, and in horse-to-deer <span data-claim="run-c-cell-horse-deer">98.6%</span>. In the cat-dog cell it is <span data-claim="run-c-cell-cat-dog">53.2%</span>: we flipped both directions, so the model learned that cats and dogs are interchangeable. And in the reverse cell, truck-to-automobile, it is <span data-claim="run-c-cell-truck-automobile">0.0%</span>: those trucks were labeled correctly, but the noisy labels taught the model to call trucks automobiles. Noise in one direction creates false suspicion in the other.</p>
+
+<p>Overall, our flags were <span data-claim="run-c-cl-prec">55.7%</span> precise and found <span data-claim="run-c-cl-rec">61.0%</span> of the errors; flagging every image where the model's top class differs from the label gave <span data-claim="run-c-am-prec">48.5%</span> precision and <span data-claim="run-c-am-rec">66.4%</span> recall. The paper, with a ResNet-50 at 40% noise, reports <span data-claim="confident-t4-cj-prec-n40-s0">78</span>% precision and <span data-claim="confident-t4-cj-rec-n40-s0">91</span>% recall. Our small CNN is right on only <span data-claim="run-c-oos-acc">77.7%</span> of held-out images, and the flags can only be as good as the model that votes. Trained on the cleaned data, the paper's CIFAR-10 models reach <span data-claim="confident-t2-cj-n40-s0">86.7</span>% test accuracy at 40% noise against <span data-claim="confident-t2-baseline-n40-s0">60.2</span>% for plain training (asymmetric noise from a random transition matrix, sparsity 0). The method assumes noise depends on the class, not on the individual image; the library that implements it is cleanlab.</p>
+
+<div class="decision">
+<h4>The labeling decision</h4>
+<p>Before each training round, run k-fold predictions over the labeled set and send the off-diagonal images of the confident joint back to review, most suspicious first. Treat them as candidates, not verdicts. Read the largest off-diagonal cells as a report on your labeling guide: they name the class pairs your labelers confuse.</p>
+</div>
+
+<script>
+(() => {
+  const out = document.getElementById('cl-readout');
+  const f = FIG.cl(document.getElementById('cl-canvas'), { say: t => out.textContent = t });
+  const vs = ['joint', 'true'].map(k => document.getElementById('btn-cl-' + k)), cs = [0, 1, 2, 3].map(k => document.getElementById('btn-cl-c' + k));
+  vs.forEach(b => b.addEventListener('click', () => { KIT.press(vs, b); f.view(b.id.endsWith('true') ? 'true' : 'joint'); }));
+  cs.forEach((b, k) => b.addEventListener('click', () => { KIT.press(cs, b); f.cell(k); }));
+  document.getElementById('btn-cl-reset').addEventListener('click', () => { KIT.press(vs, vs[0]); KIT.press(cs, cs[0]); f.reset(); });
+})();
+</script>
+</section>

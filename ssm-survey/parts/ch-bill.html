@@ -1,0 +1,44 @@
+
+<p class="kicker"><span class="act-n">Act I</span>The bill, and the old fix</p>
+<section id="ch-bill" class="chapter">
+<h2>The bill attention sends</h2>
+<p>The <a href="../transformers/Transformers%20and%20LLMs,%20explained%20in%203D.html">transformers explainer</a> ended on a cost. To write the next token, attention compares it with every token before it, and the KV cache that makes this fast keeps a key and a value for all of them. Here is that bill in bytes, next to the alternative this survey is about: a model whose memory has a fixed size.</p>
+
+<figure class="viz" id="viz-bill">
+  <span class="badge computed">Computed</span>
+  <canvas id="bill-canvas" role="img" aria-label="Log-log chart of memory held against context length. The Llama 3 8B KV cache rises as a straight brown line; the Mamba 2.8B state is a flat yellow line; a dashed line marks the size of the Llama 3 8B weights."></canvas>
+  <div class="controls">
+    <label for="bill-L">Context length <input type="range" id="bill-L" min="0" max="1000" step="1" value="500"></label>
+    <button type="button" id="btn-bill-1k">1K tokens</button>
+    <button type="button" id="btn-bill-8k">8K</button>
+    <button type="button" id="btn-bill-128k">128K</button>
+    <button type="button" id="btn-bill-1m">1M</button>
+    <button type="button" id="btn-bill-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="bill-readout" aria-live="polite"></p>
+  <figcaption>Both lines are computed from published configurations at 16 bits per value. The cache is Llama 3 8B's: <span data-claim="llama3-8b-layers">32</span> layers, <span data-claim="llama3-8b-kvheads">8</span> key-value heads of dimension <span data-claim="bill-headdim">128</span> (model width <span data-claim="llama3-8b-dim">4,096</span> over <span data-claim="llama3-8b-heads">32</span> heads), keys and values both stored. The state is Mamba 2.8B's: <span data-claim="mamba-cfg-2p8b-layers">64</span> layers of width <span data-claim="mamba-cfg-2p8b-dmodel">2560</span>, expanded <span data-claim="mamba-expand-e">2</span> times, each channel holding a state of size <span data-claim="mamba-state-n">16</span> (the README default, our reading for the released model) plus the last 3 inputs of its width-<span data-claim="mamba-conv-width">4</span> convolution (layer count, width and convolution width are from the official repository's README, not the paper). The two models differ in size; the point is the shape of the lines, not the gap at one length.</figcaption>
+</figure>
+
+<p>Two things in that chart grow with the context length <span class="tex">L</span>. The first is memory: the cache holds two vectors per token per layer, so it grows in a straight line, and every new token must read all of it back from GPU memory before it can be written. The second is work. Reading a prompt of <span class="tex">L</span> tokens, attention scores every pair of tokens, which is about <span class="tex">L^2/2</span> pairs per head in every layer. Double the context and the prompt costs four times as much.</p>
+
+<p>A recurrent model makes the opposite trade. It carries a <b class="c-yellow">state</b> <span class="tex">h</span> of fixed size and folds each new token into it. The cost of the next token does not depend on <span class="tex">L</span> at all. The flat yellow line is the whole memory of a 2.8-billion-parameter Mamba model, at any context length: about the size of the Llama 3 8B cache for <span data-claim="bill-state-tokens">95</span> tokens.</p>
+
+<div class="eq" id="eq-bill" data-build data-viz="viz-bill"><div class="tex tex-display">
+\htmlData{step=1, link=cache}{\htmlClass{t-green}{y_t} = \sum_{s \le t} \operatorname{softmax}_s\!\big(q_t^{\top} \htmlClass{t-brown}{k_s}\big)\, \htmlClass{t-brown}{v_s}}
+\qquad\text{vs.}\qquad
+\htmlData{step=2, link=state}{\htmlClass{t-yellow}{h_t} = f\big(\htmlClass{t-yellow}{h_{t-1}},\, \htmlClass{t-blue}{x_t}\big), \quad \htmlClass{t-green}{y_t} = g\big(\htmlClass{t-yellow}{h_t}\big)}
+</div></div>
+<ul class="gloss">
+  <li>Left, attention: the output at step <span class="tex">t</span> is a weighted sum over <em>every</em> past value <span class="tex">\htmlClass{t-brown}{v_s}</span>, so all past keys and values must be kept. That is the brown line.</li>
+  <li>Right, recurrence: the output depends only on the current state <span class="tex">\htmlClass{t-yellow}{h_t}</span>, which is updated from the previous state and the new token <span class="tex">\htmlClass{t-blue}{x_t}</span>. That is the yellow line.</li>
+</ul>
+
+<p>Before you drag the slider: at what context length does the Llama 3 8B cache outgrow the model's own weights? The dashed line is the answer. With 16-bit values the weights take about <span data-claim="bill-weights-gib">15 GiB</span>, and the cache passes them near <span data-claim="bill-weights-crossover">122,000</span> tokens, for a single sequence. Serve a batch of such sequences and memory, not arithmetic, sets the limit.</p>
+
+<p>So why not simply use a recurrent network? That was the default for sequence models until <span data-claim="transformer-2017">2017</span>. The next chapter shows why it was dropped, and the one change that brings it back.</p>
+
+<div class="aside">
+  <h4>The catch, stated up front</h4>
+  <p>A fixed-size state is a lossy summary. Anything the model will need later has to survive being folded into those numbers. Mamba reports up to <span data-claim="mamba-throughput-5x">5x</span> the generation throughput of a Transformer of similar size (each model at the largest batch it fits; the gap is smaller at equal batch sizes), and the hybrids at the end of this page run long contexts on far less memory. But exact recall of something seen thousands of tokens ago is where a pure SSM still loses. The chapter <a href="#ch-recall">Where SSMs still lose</a> measures how much.</p>
+</div>
+</section>

@@ -1,0 +1,123 @@
+[
+ {
+  "id": "rec-cite-hochreiter",
+  "claim": "Hochreiter's diploma thesis on the vanishing gradient, year as cited by LRU",
+  "value": "1991",
+  "paper": "Resurrecting Recurrent Neural Networks for Long Sequences (LRU)",
+  "arxiv": "2303.06349v1",
+  "loc": "Sec 1 p.1 citation hochreiter1991untersuchungen; main.bbl entry Hochreiter(1991)"
+ },
+ {
+  "id": "rec-cite-bengio",
+  "claim": "Bengio, Simard, Frasconi, 'Learning long-term dependencies with gradient descent is difficult', year as cited by LRU",
+  "value": "1994",
+  "paper": "Resurrecting Recurrent Neural Networks for Long Sequences (LRU)",
+  "arxiv": "2303.06349v1",
+  "loc": "Sec 1 p.1 and Sec 3.2.1 p.6 citation bengio1994learning; main.bbl entry Bengio et al.(1994)"
+ },
+ {
+  "id": "rec-cite-pascanu",
+  "claim": "Pascanu, Mikolov, Bengio, 'On the difficulty of training recurrent neural networks', year as cited by LRU",
+  "value": "2013",
+  "paper": "Resurrecting Recurrent Neural Networks for Long Sequences (LRU)",
+  "arxiv": "2303.06349v1",
+  "loc": "Sec 1 p.1 and Sec 3.2.1 p.6 citation pascanu2013difficulty; main.bbl entry Pascanu et al.(2013)"
+ },
+ {
+  "id": "rec-cite-lstm",
+  "claim": "Hochreiter and Schmidhuber, long short-term memory (LSTM), year as cited by LRU",
+  "value": "1997",
+  "paper": "Resurrecting Recurrent Neural Networks for Long Sequences (LRU)",
+  "arxiv": "2303.06349v1",
+  "loc": "Sec 1 p.1 citation hochreiter1997long; main.bbl entry Hochreiter and Schmidhuber(1997)"
+ },
+ {
+  "id": "rec-cite-gru",
+  "claim": "Cho et al., gated recurrent units (GRU), year as cited by LRU",
+  "value": "2014",
+  "paper": "Resurrecting Recurrent Neural Networks for Long Sequences (LRU)",
+  "arxiv": "2303.06349v1",
+  "loc": "Sec 1 p.1 citation cho2014properties; main.bbl entry Cho et al.(2014a)"
+ },
+ {
+  "id": "rec-r09-k50",
+  "claim": "Share of a token left in a linear cell with |lambda| = 0.9 after 50 steps",
+  "value": "0.52%",
+  "paper": "computed",
+  "arxiv": "",
+  "loc": "computed: 0.9^50 = 0.00515 (CoreRecurrence.linear, parts/core-recurrence.js)",
+  "our_reading": true
+ },
+ {
+  "id": "rec-r09-below1",
+  "claim": "First step at which a linear cell with |lambda| = 0.9 holds less than 1% of a token",
+  "value": "44",
+  "paper": "computed",
+  "arxiv": "",
+  "loc": "computed: ceil(ln 0.01 / ln 0.9) = ceil(43.71) (CoreRecurrence.below1)",
+  "our_reading": true
+ },
+ {
+  "id": "rec-r-16k",
+  "claim": "Smallest |lambda| that keeps 1% of a token after 16k steps (the PathX length LRU states)",
+  "value": "0.9997",
+  "paper": "computed",
+  "arxiv": "2303.06349v1",
+  "loc": "computed: 0.01^(1/16000) = 0.99971; with 16,384 steps 0.99972",
+  "our_reading": true
+ },
+ {
+  "id": "rec-gain-r09",
+  "claim": "Noise gain 1/(1-|lambda|^2) of LRU Eq. 6 at |lambda| = 0.9",
+  "value": "5.3",
+  "paper": "computed",
+  "arxiv": "2303.06349v1",
+  "loc": "computed from LRU Eq. (6): 1/(1-0.81) = 5.26",
+  "our_reading": true
+ },
+ {
+  "id": "rec-gain-r099",
+  "claim": "Noise gain 1/(1-|lambda|^2) of LRU Eq. 6 at |lambda| = 0.99",
+  "value": "50",
+  "paper": "computed",
+  "arxiv": "2303.06349v1",
+  "loc": "computed from LRU Eq. (6): 1/(1-0.9801) = 50.25",
+  "our_reading": true
+ },
+ {
+  "id": "rec-gain-r0999",
+  "claim": "Noise gain 1/(1-|lambda|^2) of LRU Eq. 6 at |lambda| = 0.999",
+  "value": "500",
+  "paper": "computed",
+  "arxiv": "2303.06349v1",
+  "loc": "computed from LRU Eq. (6): 1/(1-0.998001) = 500.25",
+  "our_reading": true
+ },
+ {
+  "id": "rec-r11-x100",
+  "claim": "First step at which a linear cell with |lambda| = 1.1 has grown a token 100 times",
+  "value": "49",
+  "paper": "computed",
+  "arxiv": "",
+  "loc": "computed: ceil(ln 100 / ln 1.1) = ceil(48.32) (CoreRecurrence.grow100)",
+  "our_reading": true
+ },
+ {
+  "id": "rec-tanh-hold",
+  "claim": "Toy tanh cell (r = 1.1, theta = 0, one token of size 1): size of the state it settles at",
+  "value": "0.50",
+  "paper": "computed",
+  "arxiv": "",
+  "loc": "computed: h_k = tanh(1.1 h_(k-1)), h_0 = tanh(1); |h_60| = 0.503 (CoreRecurrence.tanhCell)",
+  "our_reading": true
+ },
+ {
+  "id": "rec-tanh-grad",
+  "claim": "Toy tanh cell (r = 1.1, theta = 0): first step at which |d h_k / d x_0| falls below 1% of its value at k = 0",
+  "value": "17",
+  "paper": "computed",
+  "arxiv": "",
+  "loc": "computed: forward-mode derivative of the toy tanh cell, d h_k / d x_0 = (1 - h_k^2) 1.1 d h_(k-1) / d x_0 (CoreRecurrence.tanhCell)",
+  "our_reading": true
+ }
+]

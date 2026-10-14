@@ -1,0 +1,138 @@
+<section id="ch-lottery" class="chapter">
+<h2>Lottery tickets and structure a GPU can use</h2>
+<p>If a pruned network is as accurate as the dense one, why not train the small network from the start? Frankle and Carbin found that this works, but only if the small network starts from the same initial weights it had inside the big one, and finding those weights takes full training first.</p>
+
+<figure class="viz" id="viz-imp" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Pruning round">
+    <span class="lbl">Round</span>
+    <button type="button" id="btn-imp-r0" aria-pressed="true">dense</button>
+    <button type="button" id="btn-imp-r3" aria-pressed="false">3</button>
+    <button type="button" id="btn-imp-r7" aria-pressed="false">7</button>
+    <button type="button" id="btn-imp-r9" aria-pressed="false">9</button>
+    <button type="button" id="btn-imp-r15" aria-pressed="false">15</button>
+    <button type="button" id="btn-imp-r16" aria-pressed="false">16</button>
+  </div>
+  <canvas id="imp-canvas" role="img" aria-label="Left: a 32 by 32 grid of toy weights; surviving weights are blue, brighter for larger magnitude, and pruned weights are brown. Right: the loop of iterative magnitude pruning as three boxes, train, prune 20% of survivors, and reset to the initial weights, with the current step outlined. Below: a log axis of the share of weights left, with the findings Frankle and Carbin state for LeNet marked in green for winning tickets and in brown for random reinitialization, and a cursor at the toy's current share."></canvas>
+  <div class="controls" role="group" aria-label="Step and initialization">
+    <span class="lbl">Step</span>
+    <button type="button" id="btn-imp-train" aria-pressed="false">1. train</button>
+    <button type="button" id="btn-imp-prune" aria-pressed="false">2. prune 20%</button>
+    <button type="button" id="btn-imp-step3" aria-pressed="true">3. reset</button>
+    <span class="lbl">Initial weights</span>
+    <button type="button" id="btn-imp-ticket" aria-pressed="true">original (ticket)</button>
+    <button type="button" id="btn-imp-reinit" aria-pressed="false">random reinit (control)</button>
+    <button type="button" id="btn-imp-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="imp-readout" aria-live="polite"></p>
+  <figcaption>Toy model. The mask is computed: each round removes the 20% of surviving weights with the smallest magnitude, the rate Frankle and Carbin use for LeNet (their convolutional nets prune conv layers <span data-claim="frankle2019-conv2-conv-rate">10</span>% or <span data-claim="frankle2019-conv6-conv-rate">15</span>% per round). The "training" is not real: it adds a fixed seeded drift to the initial weights. The marks on the axis are only the findings the paper states in its text for LeNet-300-100 on MNIST (Sec. 2); its plotted curves have no tabulated values, so none are drawn.</figcaption>
+</figure>
+
+<p>Each round of <em>iterative magnitude pruning</em> (IMP) has three steps. Train the network. Remove the smallest <span data-claim="frankle2019-lenet-prune-rate">20</span>% of the weights that are still alive. Then set every survivor back to the value it had before any training, its initial value. Repeat. After round 7 about a fifth of the weights are left; after round 16, under 3%.</p>
+<p>The surviving subnetwork with its original starting values is a <em>winning ticket</em>. The paper's hypothesis, verbatim: "A randomly-initialized, dense neural network contains a subnetwork that is initialized such that -- when trained in isolation -- it can match the test accuracy of the original network after training for at most the same number of iterations."</p>
+
+<div class="eq" id="eq-lth" data-build data-viz="viz-imp"><div class="tex tex-display">
+\htmlData{step=1, link=net}{f(x;\,} \htmlData{step=2, link=mask}{\htmlClass{t-green}{m}} \odot \htmlData{step=3, link=init}{\htmlClass{t-blue}{\theta_0}}\htmlData{step=1, link=net}{)}, \qquad \htmlData{step=4, link=pm}{P_m = \frac{\lVert m \rVert_0}{|\theta|}}
+</div></div>
+<p class="eqno">Frankle and Carbin, arXiv 1803.03635v5: the masked network of Sec. 1 and the sparsity notation of Sec. 2 (unnumbered in the paper).</p>
+<ul class="gloss">
+  <li><span class="tex">f(x; \theta)</span>: the network applied to input <span class="tex">x</span> with weights <span class="tex">\theta</span>.</li>
+  <li><span class="tex">m</span>: the mask, one 0 or 1 per weight, found by IMP. <span class="tex">\odot</span> multiplies element by element, so masked weights are zero.</li>
+  <li><span class="tex">\theta_0</span>: the initial weights, drawn at random before the dense network was trained. Resetting to <span class="tex">\theta_0</span> is what makes a ticket; the control draws new random values instead.</li>
+  <li><span class="tex">P_m</span>: the share of weights that remain. <span class="tex">\lVert m \rVert_0</span> counts the ones in the mask and <span class="tex">|\theta|</span> is the total number of weights. <span class="tex">P_m = 25\%</span> means 75% are pruned.</li>
+</ul>
+
+<p><b>Make a guess before you press "random reinit (control)" at round 7.</b> The mask is the same; only the starting values change. Does the structure alone explain the result? In Frankle's LeNet it does not. At about a fifth of the weights, the ticket reaches its best validation loss <span data-claim="frankle2019-reinit-speed">2.51</span>x faster than the same mask started from new random values, and the reinitialized network is already less accurate than the dense one. The pruned structure needs the starting values it grew up with.</p>
+<p>The convolutional results are similar. On CIFAR10, Conv-2 and Conv-4 tickets reached early stopping up to <span data-claim="frankle2019-conv2-speedup">3.5</span>x sooner than the dense network, and Conv-6 up to <span data-claim="frankle2019-conv6-speedup">2.5</span>x. Conv-4 gained up to <span data-claim="frankle2019-conv4-acc-gain">3.5</span> points of test accuracy, at P<sub>m</sub> = <span data-claim="frankle2019-conv4-acc-pm">11.1</span>%. The cost is the search: iterative pruning trains the network <span data-claim="frankle2019-cost-trainings">15</span> or more times. So the result explains why pruning works more than it saves training.</p>
+
+<div class="aside claim">
+  <h4>Claim card: the lottery ticket hypothesis (Frankle and Carbin, <span data-claim="frankle2019-venue">ICLR 2019</span>, arXiv 1803.03635v5)</h4>
+  <dl>
+    <dt>Claim</dt><dd>Dense, randomly initialized networks contain subnetworks, often less than <span data-claim="frankle2019-ticket-size">10-20</span>% of the original size, that train in isolation from their original initial values to at least the dense test accuracy, in at most as many iterations.</dd>
+    <dt>Measured</dt><dd>IMP with reset to the initial weights on LeNet-300-100 (MNIST) and Conv-2, Conv-4 and Conv-6 (CIFAR10). For each mask: the iteration of minimum validation loss and the test accuracy, against the dense network and against the same mask with <span data-claim="frankle2019-reinit-count">15</span> fresh random initializations.</dd>
+    <dt>Falsifier</dt><dd>The same mask with new random values does as well, so the structure alone explains the result; or no sparse mask matches the dense network. The paper hits this itself: for VGG-19 and ResNet-20 (the paper calls it "ResNet-18") on CIFAR10 at learning rate <span data-claim="frankle2019-vgg19-lr-high">0.1</span>, IMP finds no winning tickets. It finds them only with learning-rate warmup or a lower learning rate (Sec. 4).</dd>
+    <dt>At scale</dt><dd>Frankle et al. (<span data-claim="frankle2020lmc-venue">ICML 2020</span>, arXiv 1912.05671v4) pruned ResNet-50 on ImageNet in one shot to <span data-claim="frankle2020lmc-rn50-density">30</span>% of its weights. Reset to the initial weights, it reached <span data-claim="frankle2020lmc-rn50-imp-k0">73.7</span>% top-1 against <span data-claim="frankle2020lmc-rn50-full">76.1</span>% dense, only 0.3 points above random reinitialization at <span data-claim="frankle2020lmc-rn50-reinit-k0">73.4</span>%. <em>Rewinding</em> the survivors to their values at epoch <span data-claim="frankle2020lmc-rn50-imp-stable-epoch">5</span>, <span data-claim="frankle2020lmc-rn50-imp-stable-pct">5.5</span>% into training, instead of to the start, makes the subnetworks stable, and the paper finds that stable and accurate ("matching") subnetworks closely coincide. These are matching subnetworks, not tickets in the original sense.</dd>
+  </dl>
+</div>
+
+<h3>Structure a GPU can use</h3>
+<p>Tickets, like Han's pruning, are unstructured: scattered zeros that a dense kernel still multiplies (<a href="#ch-prune">chapter 8</a>). For speed, remove whole pieces of the computation instead. Then what remains is an ordinary dense network, only thinner, and every kernel and compiler runs it as is.</p>
+<p><b>Filters by L1 norm.</b> Li et al. (<span data-claim="li2017-venue">ICLR 2017</span>) score each convolution filter by the sum of the absolute values of its weights, <span class="tex">s_j = \sum_{l=1}^{n_i} \sum |\mathcal{K}_l|</span> (Sec. 3.1). They remove the filters with the smallest scores, the feature maps those filters produce, and the matching input kernels of the next layer, then retrain. The "Whole channels" button in <a href="#ch-prune">chapter 8's</a> figure uses this rule. On CIFAR-10, VGG-16 lost <span data-claim="li2017-vgg16-flop-pruned">34.2</span>% of its operations and <span data-claim="li2017-vgg16-param-pruned">64.0</span>% of its parameters, with test error <span data-claim="li2017-vgg16-err">6.75</span>% before and <span data-claim="li2017-vgg16-pruned-err">6.60</span>% after. The paper also measured wall-clock time: inference over the test set went from <span data-claim="li2017-vgg16-time">1.23</span> s to <span data-claim="li2017-vgg16-time-pruned">0.73</span> s on a <span data-claim="li2017-time-gpu">Titan X (Pascal)</span> with cuDNN <span data-claim="li2017-time-cudnn">v5.1</span> at batch <span data-claim="li2017-time-batch">128</span>. In the authors' words, "the saved inference time is close to the FLOP reduction".</p>
+<p><b>Channels by batch-norm scale.</b> Network slimming (Liu et al., <span data-claim="liu2017slim-venue">ICCV 2017</span>) reuses a number every batch-norm layer already has. Batch norm multiplies each normalized channel by a learned scale <span class="tex">\gamma</span>, so a channel with a small <span class="tex">\gamma</span> contributes little. Slimming adds a penalty that pushes the scales toward zero during training:</p>
+<div class="eq" id="eq-slim"><div class="tex tex-display">
+L = \sum_{(x, y)} l\big(f(x, W), y\big) + \lambda \sum_{\gamma \in \Gamma} \htmlClass{t-green}{g(\gamma)}, \qquad g(s) = |s|
+</div></div>
+<p class="eqno">Eq. 1 in Liu et al. (network slimming), arXiv 1708.06519v1.</p>
+<ul class="gloss">
+  <li><span class="tex">l(f(x, W), y)</span>: the normal training loss on input <span class="tex">x</span> with target <span class="tex">y</span> and weights <span class="tex">W</span>.</li>
+  <li><span class="tex">\Gamma</span>: all batch-norm scales in the network; <span class="tex">g(\gamma) = |\gamma|</span> is an L1 penalty, which drives many scales to nearly zero.</li>
+  <li><span class="tex">\lambda</span>: balances the two terms. After training, channels whose <span class="tex">\gamma</span> is below one global threshold are removed, and the thinner network is fine-tuned.</li>
+</ul>
+<p>On CIFAR-10, a VGG network with <span data-claim="liu2017slim-vgg70-flop-pruned">51.0</span>% fewer operations and <span data-claim="liu2017slim-vgg70-params">2.30M</span> instead of <span data-claim="liu2017slim-vgg-params">20.04M</span> parameters had <span data-claim="liu2017slim-vgg70-err">6.20</span>% test error against <span data-claim="liu2017slim-vgg-err">6.34</span>% for the original.</p>
+<p><b>Is it the weights or the shape?</b> Liu et al. (<span data-claim="liu2019rethink-venue">ICLR 2019</span>) took the thinner architectures these methods produce and trained them from random initial weights, with a fair training budget. For structured pruning, from scratch was as good as or better than fine-tuning the kept weights. So the value of structured pruning is the architecture it finds. Their detection row:</p>
+<table class="data" aria-label="Pruned and from-scratch Faster R-CNN backbones">
+  <thead><tr><th>Faster R-CNN backbone</th><th>Prune-C</th><th>Prune-D</th><th>Scratch-E</th><th>Scratch-B</th></tr></thead>
+  <tbody>
+    <tr><td>ResNet-34, unpruned</td><td colspan="4" style="text-align:center"><span data-claim="liu2019rethink-t12-unpruned">71.69</span></td></tr>
+    <tr><td>ResNet34-A (pruned)</td><td><span data-claim="liu2019rethink-t12-a-prunec">71.47</span></td><td><span data-claim="liu2019rethink-t12-a-pruned">70.99</span></td><td><span data-claim="liu2019rethink-t12-a-scratche">71.64</span></td><td><span data-claim="liu2019rethink-t12-a-scratchb">71.90</span></td></tr>
+    <tr><td>ResNet34-B (pruned more)</td><td><span data-claim="liu2019rethink-t12-b-prunec">70.84</span></td><td><span data-claim="liu2019rethink-t12-b-pruned">69.62</span></td><td><span data-claim="liu2019rethink-t12-b-scratche">71.68</span></td><td><span data-claim="liu2019rethink-t12-b-scratchb">71.26</span></td></tr>
+  </tbody>
+  <caption>Liu et al., Rethinking the value of network pruning, Table 12, arXiv 1810.05270v2. Faster R-CNN on PASCAL VOC 2007, mAP. Prune-C: prune the backbone on classification, then transfer to detection. Prune-D: prune after transfer. Scratch-E and Scratch-B: train the thin backbone from scratch on classification for the same epochs or the same compute, then transfer.</caption>
+</table>
+<p>The claim has a scope. It holds for structured pruning with the standard learning rate of <span data-claim="liu2019rethink-lr">0.1</span>. For unstructured pruning of ResNet-50 on ImageNet, fine-tuning wins: at 60% pruned, <span data-claim="liu2019rethink-t6-rn50-60-finetuned">76.09</span>% against <span data-claim="liu2019rethink-t6-rn50-60-scratchb">74.91</span>% from scratch (Table 6).</p>
+<p><b>A caution about the whole field.</b> Blalock et al. (<span data-claim="blalock2020-venue">MLSys 2020</span>) read <span data-claim="blalock2020-papers">81</span> pruning papers. They used <span data-claim="blalock2020-datasets">49</span> datasets and <span data-claim="blalock2020-architectures">132</span> architectures in <span data-claim="blalock2020-combos">195</span> combinations; the most common pair, VGG-16 on ImageNet, appears in only <span data-claim="blalock2020-vgg16-imagenet-papers">22</span>. Even the starting point differs: reported operation counts for AlexNet on ImageNet range from <span data-claim="blalock2020-alexnet-flops-low">371</span> to <span data-claim="blalock2020-alexnet-flops-high">1500</span> million. Their conclusion is that operation and parameter counts are a loose proxy for latency, and that results are hard to compare. Blalock et al. measure no hardware, so the lesson for a deployment is simply: time your own network on your own GPU.</p>
+
+<h3>2:4: zeros in a shape the tensor cores skip</h3>
+<p>Mishra et al. (NVIDIA) describe a middle ground. In every group of four consecutive weights along the dimension a matrix multiply sums over, at least two must be zero: the <span data-claim="mishra2021-pattern">2:4</span> pattern, exactly <span data-claim="mishra2021-sparsity">50</span>% sparse. The kept values are packed into half the space, each with a <span data-claim="mishra2021-meta-bits">2</span>-bit index of its position in the group. Because every group has the same shape, the sparse tensor cores of the A100 GPU read memory at full width and pick the matching inputs in hardware. Their peak rate doubles: from <span data-claim="mishra2021-tops-fp16-dense">312</span> to <span data-claim="mishra2021-tops-fp16-sparse">624</span> trillion operations per second for FP16, and from <span data-claim="mishra2021-tops-int8-dense">624</span> to <span data-claim="mishra2021-tops-int8-sparse">1248</span> for INT8 (Table 1). The paper prunes only layers whose summed dimension is a multiple of <span data-claim="mishra2021-dim-multiple-16b">16</span> for FP16 and <span data-claim="mishra2021-dim-multiple-8b">32</span> for INT8, and TensorRT from version <span data-claim="mishra2021-tensorrt-version">8.0</span> runs 2:4 weights automatically.</p>
+<p>The paper measures speed only for one INT8 matrix multiply on the A100, with both outer dimensions <span data-claim="mishra2021-fig3-mn">10240</span>: larger multiplies get "nearly a 2x speedup" (Fig. 3). It reports no speedup for a whole network. So the honest summary is <em>up to <span data-claim="mishra2021-math-speedup">2</span>x faster math</em> on the layers that are bound by arithmetic, and the end-to-end gain of a detector is something to measure.</p>
+<p>The recipe is short (Sec. 4.1). Train the network dense. Prune each group of four to its two largest weights. Retrain with the same optimizer, learning-rate schedule and number of epochs, with the mask held fixed. For detection and segmentation (Sec. 4.3), train the backbone on ImageNet and the detector on COCO as usual, then prune backbone and heads together and repeat only the COCO fine-tuning: "the task-specific heads have to be fine-tuned before they can be pruned". INT8 calibration comes after the sparse retraining (Sec. 4.4).</p>
+<table class="data" aria-label="2:4 sparsity on COCO and Cityscapes">
+  <thead><tr><th>Model (backbone), metric</th><th>dense FP16</th><th>2:4 sparse FP16</th><th>2:4 sparse INT8</th></tr></thead>
+  <tbody>
+    <tr><td>Mask R-CNN (ResNet-50), box AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-bbox-dense-fp16">37.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-bbox-sparse-fp16">37.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-bbox-sparse-int8">37.8</span></td></tr>
+    <tr><td>RetinaNet (ResNet-50), box AP</td><td><span data-claim="mishra2021-t4-retinanet-rn50-bbox-dense-fp16">34.8</span></td><td><span data-claim="mishra2021-t4-retinanet-rn50-bbox-sparse-fp16">35.2</span></td><td><span data-claim="mishra2021-t4-retinanet-rn50-bbox-sparse-int8">35.1</span></td></tr>
+    <tr><td>SSD (ResNet-50), box AP</td><td><span data-claim="mishra2021-t4-ssd-rn50-bbox-dense-fp16">24.8</span></td><td><span data-claim="mishra2021-t4-ssd-rn50-bbox-sparse-fp16">24.8</span></td><td><span data-claim="mishra2021-t4-ssd-rn50-bbox-sparse-int8">24.9</span></td></tr>
+    <tr><td>Faster R-CNN (ResNet-50-FPN, 1x), box AP</td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-1x-bbox-dense-fp16">37.6</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-1x-bbox-sparse-fp16">38.6</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-1x-bbox-sparse-int8">38.4</span></td></tr>
+    <tr><td>Faster R-CNN (ResNet-50-FPN, 3x), box AP</td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-3x-bbox-dense-fp16">39.8</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-3x-bbox-sparse-fp16">39.9</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn50-fpn-3x-bbox-sparse-int8">39.4</span></td></tr>
+    <tr><td>Faster R-CNN (ResNet-101-FPN, 3x), box AP</td><td><span data-claim="mishra2021-t4-fasterrcnn-rn101-fpn-3x-bbox-dense-fp16">41.9</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn101-fpn-3x-bbox-sparse-fp16">42.0</span></td><td><span data-claim="mishra2021-t4-fasterrcnn-rn101-fpn-3x-bbox-sparse-int8">41.8</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50-FPN, 1x), box AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-1x-bbox-dense-fp16">39.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-1x-bbox-sparse-fp16">40.3</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-1x-bbox-sparse-int8">40.0</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50-FPN, 3x), box AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-3x-bbox-dense-fp16">40.6</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-3x-bbox-sparse-fp16">40.7</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-3x-bbox-sparse-int8">40.4</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-101-FPN, 3x), box AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn101-fpn-3x-bbox-dense-fp16">42.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn101-fpn-3x-bbox-sparse-fp16">43.2</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn101-fpn-3x-bbox-sparse-int8">42.8</span></td></tr>
+    <tr><td>RetinaNet (ResNet-50-FPN, 1x), box AP</td><td><span data-claim="mishra2021-t4-retinanet-rn50-fpn-1x-bbox-dense-fp16">36.4</span></td><td><span data-claim="mishra2021-t4-retinanet-rn50-fpn-1x-bbox-sparse-fp16">37.4</span></td><td><span data-claim="mishra2021-t4-retinanet-rn50-fpn-1x-bbox-sparse-int8">37.2</span></td></tr>
+    <tr><td>RPN (ResNet-50-FPN, 1x), "box AP" as printed</td><td><span data-claim="mishra2021-t4-rpn-rn50-fpn-1x-bbox-dense-fp16">45.8</span></td><td><span data-claim="mishra2021-t4-rpn-rn50-fpn-1x-bbox-sparse-fp16">45.6</span></td><td><span data-claim="mishra2021-t4-rpn-rn50-fpn-1x-bbox-sparse-int8">45.5</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50), mask AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-mask-dense-fp16">34.5</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-mask-sparse-fp16">34.6</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-mask-sparse-int8">34.5</span></td></tr>
+    <tr><td>Mask R-CNN (ResNet-50-FPN, 3x), mask AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-3x-mask-dense-fp16">36.9</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn50-fpn-3x-mask-sparse-fp16">37.0</span></td><td>not reported</td></tr>
+    <tr><td>Mask R-CNN (ResNet-101-FPN, 3x), mask AP</td><td><span data-claim="mishra2021-t4-maskrcnn-rn101-fpn-3x-mask-dense-fp16">38.7</span></td><td><span data-claim="mishra2021-t4-maskrcnn-rn101-fpn-3x-mask-sparse-fp16">38.9</span></td><td>not reported</td></tr>
+    <tr><td>Semantic segmentation (ResNeXt-101), Cityscapes IoU</td><td><span data-claim="mishra2021-t4-resnext-101-iou-dense-fp16">81.4</span></td><td><span data-claim="mishra2021-t4-resnext-101-iou-sparse-fp16">81.7</span></td><td><span data-claim="mishra2021-t4-resnext-101-iou-sparse-int8">81.2</span></td></tr>
+  </tbody>
+  <caption>Mishra et al., Table 4, arXiv 2104.08378v1. COCO 2017 box and mask AP; the last row is Cityscapes IoU of a network pre-trained on Mapillary. Models from Torchvision, Detectron2 and NVIDIA's examples; 1x and 3x are Detectron2 schedule lengths. INT8 is calibration (entropy, per-tensor activations; max, per-channel weights) with no INT8 fine-tuning mentioned (our reading). The source has no dense INT8 column. All values are absolute; differences are absolute points.</caption>
+</table>
+<p>Every row stays within about a point of dense FP16, and the paper attributes the differences to run-to-run variation. Networks built for efficiency are harder. With the plain recipe, MobileNet v2 fell from <span data-claim="mishra2021-t3-mobilenet-v2-dense">71.55</span>% to <span data-claim="mishra2021-t3-mobilenet-v2-default">69.56</span>% ImageNet top-1, and EfficientNet B0 from <span data-claim="mishra2021-t3-efficientnet-b0-dense">77.25</span>% to <span data-claim="mishra2021-t3-efficientnet-b0-default">75.98</span>%. Reordering the input channels before pruning, so that large weights do not share a group, recovered both: <span data-claim="mishra2021-t3-mobilenet-v2-permuted">71.56</span>% and <span data-claim="mishra2021-t3-efficientnet-b0-permuted">77.29</span>% (Table 3).</p>
+
+<div class="aside detector">
+  <h4>On a detector</h4>
+  <p>Of the methods in this act, two give a GPU detector speed without a custom kernel: a thinner backbone, from filter or channel pruning or simply trained from scratch at that width, and 2:4 sparsity on an A100-class or newer GPU. For 2:4, prune after the COCO fine-tune and repeat only that phase, calibrate INT8 afterwards, and expect accuracy within about a point on ResNet-style detectors. Plan on channel permutation for EfficientNet-style backbones such as EfficientDet's (our reading of Table 3). Then measure the whole engine: the paper only promises up to twice the math, and memory-bound layers gain less (<a href="#ch-cost">chapter 1</a>). The <a href="#ch-guide">decision guide</a> puts this after INT8.</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-imp'), out = document.getElementById('imp-readout');
+  const kit = KIT.imp(document.getElementById('imp-canvas'), { fig });
+  const rb = KIT.IMP.rounds.map(r => document.getElementById('btn-imp-r' + r));
+  const phases = { train: 'btn-imp-train', prune: 'btn-imp-prune', reset: 'btn-imp-step3' };
+  const pb = Object.keys(phases).map(k => [k, document.getElementById(phases[k])]);
+  const ib = ['ticket', 'reinit'].map(k => [k, document.getElementById('btn-imp-' + k)]);
+  const sync = () => {
+    rb.forEach((b, i) => b.setAttribute('aria-pressed', String(KIT.IMP.rounds[i] === kit.state.round)));
+    pb.forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === kit.state.phase)));
+    ib.forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === kit.state.init)));
+    out.innerHTML = kit.text();
+  };
+  rb.forEach((b, i) => b.addEventListener('click', () => { kit.set({ round: KIT.IMP.rounds[i] }); sync(); }));
+  pb.forEach(([k, b]) => b.addEventListener('click', () => { kit.set({ phase: k }); sync(); }));
+  ib.forEach(([k, b]) => b.addEventListener('click', () => { kit.set({ init: k }); sync(); }));
+  document.getElementById('btn-imp-reset').addEventListener('click', () => { kit.set({ round: 0, phase: 'reset', init: 'ticket' }); sync(); });
+  sync();
+})();
+</script>
+</section>

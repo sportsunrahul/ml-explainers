@@ -1,0 +1,15 @@
+viz-actsurf node simulation (parts/kit/70-actsurf.js loaded in node with PE.rng/PE.gauss stubs; run 2026-10-10).
+Toy: X 24 tokens x 48 channels, seed 13; ridges at channels 7, 21, 42 (1-based) with values -78, 30, -72 (+-6% across tokens), spikes 4.5 and 3.5 at channels 4 and 34 in about 30% of tokens, floor N(0, 0.45^2). W 48 x 24: sign * k_j * (0.1 + 0.005 g), k_j in [0.95, 1.05] (flat, as Fig. 4's original weights).
+Quantizer: symmetric INT8 absmax, D = max|.| / 127 (SmoothQuant Eq. 1), one D per tensor. LLM.int8(): channels with max|X_j| > 6.0 kept FP16; rest per-token-row (X) and per-output-column (W) absmax (Dettmers Eq. 7-8).
+Smoothing: s_j = max|X_j|^alpha / max|W_j|^(1-alpha) (SmoothQuant Eq. 4); X/s, s*W, then per-tensor INT8 on both.
+Metrics: per-channel relative RMS rounding error (median over X channels / W rows); output ||Q(Xh)Q(Wh) - XW||_F / ||XW||_F; levels = 2^8 * (median channel max) / (tensor max).
+Readouts the reader sees:
+One INT8 scale per tensor, no smoothing: one step is max|X| / 127 = 0.7. A typical activation channel spans about 2.9 of the 256 levels, so it is off by 45% of its own size. A typical weight row is off by 0.3%. Output XW is off by 1.41%.
+LLM.int8(): the 3 channels with a value above 6.0 stay in FP16; the rest use one INT8 scale per token row of X and per output column of W. A typical activation channel is off by 1.6% of its own size, a typical weight row by 0.2%. Output XW is off by 0.05%. The price is a second, FP16 matrix multiply.
+SmoothQuant, alpha = 0.00: max|X| is now 9.8 and max|W| is 1. A typical activation channel spans about 2.9 of the 256 levels and is off by 45%; a typical weight row is off by 0.2%. Output XW is off by 1.46%.
+SmoothQuant, alpha = 0.25: max|X| is now 5.5 and max|W| is 1.77. A typical activation channel spans about 9 of the 256 levels and is off by 14%; a typical weight row is off by 0.8%. Output XW is off by 0.59%.
+SmoothQuant, alpha = 0.50: max|X| is now 3.1 and max|W| is 3.13. A typical activation channel spans about 27 of the 256 levels and is off by 4.7%; a typical weight row is off by 2.3%. Output XW is off by 0.40%.
+SmoothQuant, alpha = 0.75: max|X| is now 1.8 and max|W| is 5.55. A typical activation channel spans about 84 of the 256 levels and is off by 1.6%; a typical weight row is off by 6.5%. Output XW is off by 0.48%.
+SmoothQuant, alpha = 1.00: max|X| is now 1 and max|W| is 9.82. A typical activation channel spans about 256 of the 256 levels and is off by 0.5%; a typical weight row is off by 17%. Output XW is off by 0.78%.
+
+Visible effect: typical activation channel error 45% (no smoothing, about 2.9 levels; SmoothQuant reports 2-3) -> 4.7% at alpha 0.5 -> 0.5% at alpha 1, while weight-row error 0.3% -> 2.3% -> 17%. LLM.int8(): 1.6% / 0.2%. Output error stays small in every mode because the three big channels dominate XW in the toy; it falls from 1.41% to 0.40% at alpha 0.5.

@@ -1,0 +1,64 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" class="tiles" role="img" aria-label="A row of real CIFAR-10 images slides past a model that draws a blue confidence bar under each. Three images with the shortest bars get a yellow ring and drop to a labeler, who tags them. One tag is wrong. The tagged images join the training set, where the wrongly tagged one shows a tall red loss bar, gets a red strike and is sent back to the labeler; the others get green ticks."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge toy" style="top:.6rem;right:.75rem">Toy model</span>
+  </div>
+  <h1>Labels in the loop</h1>
+  <p class="hook">A vision model learns from the labels people give it. Every round of that loop makes two decisions: which images get a label, and which labels to believe. This page builds both from scratch.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/1703.02910v1" title="arXiv 1703.02910v1">Deep Bayesian Active Learning</a></li>
+    <li><a href="https://arxiv.org/abs/1708.00489v4" title="arXiv 1708.00489v4">Core-set active learning</a></li>
+    <li><a href="https://arxiv.org/abs/2002.09564v3" title="arXiv 2002.09564v3">Robust and reproducible AL</a></li>
+    <li><a href="https://arxiv.org/abs/2202.02794v4" title="arXiv 2202.02794v4">Active learning on a budget</a></li>
+    <li><a href="https://arxiv.org/abs/1706.05394v2" title="arXiv 1706.05394v2">A closer look at memorization</a></li>
+    <li><a href="https://arxiv.org/abs/2103.14749v4" title="arXiv 2103.14749v4">Pervasive label errors in test sets</a></li>
+    <li><a href="https://arxiv.org/abs/1911.00068v6" title="arXiv 1911.00068v6">Confident learning</a></li>
+    <li><a href="https://arxiv.org/abs/1804.06872v3" title="arXiv 1804.06872v3">Co-teaching</a></li>
+    <li><a href="https://arxiv.org/abs/2002.07394v1" title="arXiv 2002.07394v1">DivideMix</a></li>
+    <li><a href="https://arxiv.org/abs/2109.00574v2" title="arXiv 2109.00574v2">Active label cleaning</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">The loop</li>
+    <li value="1"><a href="#ch-loop" data-rail="Two decisions">Two decisions in every feedback loop</a></li>
+    <li class="act">Part one: choosing what to label</li>
+    <li value="2"><a href="#ch-uncertainty" data-rail="Uncertainty">Ask about the coin flips</a></li>
+    <li><a href="#ch-bald" data-rail="BALD">Ambiguous or unfamiliar? MC dropout and BALD</a></li>
+    <li><a href="#ch-coreset" data-rail="Core-sets">A batch of near-duplicates</a></li>
+    <li><a href="#ch-random" data-rail="Random">Why random is hard to beat</a></li>
+    <li><a href="#ch-round" data-rail="One round">Interlude: one labeling round, end to end</a></li>
+    <li class="act">Part two: training when labels are wrong</li>
+    <li value="7"><a href="#ch-memorize" data-rail="Memorization">Clean first, wrong later</a></li>
+    <li><a href="#ch-benchmarks" data-rail="Noisy benchmarks">How noisy are real datasets?</a></li>
+    <li><a href="#ch-confident" data-rail="Confident learning">Confident learning finds the wrong labels</a></li>
+    <li><a href="#ch-coteach" data-rail="Co-teaching">Two networks check each other</a></li>
+    <li><a href="#ch-dividemix" data-rail="DivideMix">Drop the label, keep the image</a></li>
+    <li class="act">Closing the loop</li>
+    <li value="12"><a href="#ch-cleaning" data-rail="Re-check first">Which labels to re-check first</a></li>
+    <li><a href="#ch-map" data-rail="The field">The field in numbers</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-family">Family tree</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>The page uses one color key throughout. <b class="c-blue">Blue is the model</b>: its predictions, its probabilities, the images it picks. <b class="c-yellow">Yellow is the human</b>: labels, label requests, review. <b class="c-green">Green is a label we keep</b>, <b class="c-red">red is a wrong label or a loss</b>, and <b class="c-brown">brown is the unlabeled pool</b>, including images picked at random from it.</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">the model</span>
+  <span class="c-yellow">the human: labels and requests</span>
+  <span class="c-green">clean, kept</span>
+  <span class="c-red">wrong label, loss</span>
+  <span class="c-brown">the unlabeled pool</span>
+</div>
+<p>Three hand marks also keep one meaning everywhere:</p>
+<div class="mark-key" aria-label="Mark key">
+  <span><canvas data-mark="ring" aria-hidden="true"></canvas>sent to a person for a label</span>
+  <span><canvas data-mark="strike" aria-hidden="true"></canvas>this label is wrong</span>
+  <span><canvas data-mark="tick" aria-hidden="true"></canvas>this label is kept</span>
+</div>
+<p class="note">Each figure carries a badge. <b>Toy model</b> means made-up data with exact math. <b>Computed</b> means our own run or the paper's own algorithm on real data: three CIFAR-10 training runs made for this page with the Co-teaching paper's network and schedule. <b>Sourced numbers</b> means the published numbers of the paper named in the caption. Image tiles are real CIFAR-10 training images, drawn at their true 32 by 32 pixels. In an equation, hover or tap a term that names part of a figure: that part lights up.</p>

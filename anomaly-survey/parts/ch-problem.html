@@ -1,0 +1,68 @@
+<p class="kicker"><span class="act-n">Act I</span>The problem and the yardstick</p>
+
+<section id="ch-problem" class="chapter">
+<h2>Learn normal, measure surprise</h2>
+<p>You cannot train a defect classifier on defects you do not have. So flip the problem: learn only what good parts look like, and flag whatever is far from that.</p>
+
+<figure class="viz" id="viz-normal-cloud" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="cv-normal-cloud" tabindex="0" aria-label="Left: the camera view of the cap under inspection, with a red heat map where its patches are far from normal. Right: a feature space with one dot per image patch. Blue dots are patches of good caps in memory, and the faint blue area is everything within the threshold of them. Yellow dots are the patches of the cap under inspection. Drag in the feature space, or use the arrow keys, to move a probe patch."></canvas>
+  <div class="controls" role="group" aria-label="Good caps in memory">
+    <span>Good caps in memory</span>
+    <button type="button" id="btn-cloud-bank-1" aria-pressed="false">1</button>
+    <button type="button" id="btn-cloud-bank-5" aria-pressed="false">5</button>
+    <button type="button" id="btn-cloud-bank-20" aria-pressed="true">20</button>
+  </div>
+  <div class="controls" role="group" aria-label="Cap under inspection and threshold">
+    <span>Inspect</span>
+    <button type="button" id="btn-cloud-good" aria-pressed="true">A good cap</button>
+    <button type="button" id="btn-cloud-scratch" aria-pressed="false">A scratched cap</button>
+    <label>Threshold <input type="range" id="rng-cloud-tau" min="0.1" max="0.6" step="0.01" value="0.3"> <output id="out-cloud-tau">0.30</output></label>
+    <button type="button" id="btn-cloud-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model. Each 16 by 16 pixel patch of a toy cap becomes a feature vector computed from the image (edge direction and brightness; two of the toy's three features are shown, and distances are measured in this view). The anomaly score of a patch is its distance to the nearest remembered normal patch; the cap's score is its worst patch.</figcaption>
+</figure>
+
+<p>Start with the scratched cap: its worst patch sits far outside the blue cloud, and the scratch lights up on the part. Now inspect a good cap and predict: <em>with only one good cap in memory, will a second good cap pass?</em> Press 1 and see. It fails. Nothing is wrong with the cap; memory simply has gaps, and normal patches that fall into a gap look surprising. Five caps fill most of the gaps, and twenty leave a wide margin. This is the first lesson of the field: a detector is only as good as its picture of normal.</p>
+
+<h3>The setting</h3>
+<p>On a real line almost every part is good, and the bad ones carry defects of kinds you cannot list in advance: a scratch today, a crack or a missing screw next month. A supervised classifier needs many examples of each kind. Anomaly detection instead trains on good parts only. This is called the <em>one-class</em> or <em>unsupervised</em> setting, and it is the main setting of this page.</p>
+<p>The model then answers two questions for each new image. Is this part defective? That is <em>image-level detection</em>, one score per image. Where is the defect? That is <em>pixel-level localization</em>, one score per pixel, shown as a heat map. Most methods compute scores for small patches and get both answers from them: the image score is the worst patch, and the heat map is the patch scores laid back over the image.</p>
+
+<div class="eq" id="eq-patch-score" data-build data-viz="viz-normal-cloud"><div class="tex tex-display">
+\htmlData{step=1, link=test}{s(\htmlClass{t-yellow}{p})} = \htmlData{step=2, link=dist}{\min_{\htmlClass{t-blue}{m} \in \htmlClass{t-blue}{\mathcal{M}}} \big\lVert \phi(\htmlClass{t-yellow}{p}) - \htmlClass{t-blue}{m} \big\rVert}, \qquad \htmlData{step=3, link=max}{S(\text{image}) = \max_{\htmlClass{t-yellow}{p}\,\in\,\text{image}} s(\htmlClass{t-yellow}{p})}
+</div></div>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-yellow}{p}</span> is one patch of the image under inspection, and <span class="tex">\phi(\htmlClass{t-yellow}{p})</span> is its feature vector (here a toy one; from chapter 4 on, a pretrained network's).</li>
+  <li><span class="tex">\htmlClass{t-blue}{\mathcal{M}}</span> is the memory of normal: features of patches from good parts. <span class="tex">\htmlClass{t-blue}{m}</span> is one of them.</li>
+  <li><span class="tex">s(\htmlClass{t-yellow}{p})</span> is the patch's anomaly score: the distance to its nearest normal neighbor. The heat map is these scores, laid over the image.</li>
+  <li><span class="tex">S</span> is the image score: the worst patch. A threshold on <span class="tex">S</span> gives the verdict, pass or reject.</li>
+</ul>
+<p>The threshold trades two errors. Set it low and good parts get rejected (false alarms); set it high and scratched parts pass (missed defects). Drag the slider in the figure and watch both happen. Chapter 2 shows how benchmarks score a detector without picking a threshold at all.</p>
+
+<h3>Every method is a different model of normal</h3>
+<p>The nearest-neighbor score above is the simplest model of normal: keep the examples. The rest of the page swaps in other models, and each swap fixes a weakness of the one before.</p>
+<table class="data regimes">
+  <thead><tr><th>Model of normal</th><th>Anomaly score</th><th>Chapter</th></tr></thead>
+  <tbody>
+    <tr><td>Stored features of good patches</td><td>Distance to the nearest stored feature</td><td><a href="#ch-spade">SPADE</a>, <a href="#ch-patchcore">PatchCore</a></td></tr>
+    <tr><td>One Gaussian per patch position</td><td>Mahalanobis distance</td><td><a href="#ch-padim">PaDiM</a></td></tr>
+    <tr><td>A learned density</td><td>Low likelihood</td><td><a href="#ch-fastflow">FastFlow</a></td></tr>
+    <tr><td>A classifier trained on fake defects</td><td>Predicted defect probability</td><td><a href="#ch-synthetic">CutPaste, DRAEM</a></td></tr>
+    <tr><td>A student network that imitates a teacher on good parts</td><td>Student-teacher disagreement</td><td><a href="#ch-efficientad">EfficientAD</a></td></tr>
+    <tr><td>A network that reconstructs the features of good parts</td><td>Reconstruction error</td><td><a href="#ch-uniad">UniAD</a></td></tr>
+    <tr><td>Words such as "flawless" and "damaged"</td><td>Similarity to "damaged"</td><td><a href="#ch-winclip">WinCLIP</a>, <a href="#ch-anomalyclip">AnomalyCLIP</a></td></tr>
+  </tbody>
+</table>
+<p>The methods also differ in what they need for training. Most need a few hundred good images of the product. Some add synthetic defects. Few-shot methods need only a handful of good images, and zero-shot methods need no image of the product at all.</p>
+<table class="data regimes">
+  <thead><tr><th>Training data for the product</th><th>Name</th><th>Chapters</th></tr></thead>
+  <tbody>
+    <tr><td>Good images only, typically hundreds</td><td>One-class (unsupervised)</td><td>4 to 8, 10, 11</td></tr>
+    <tr><td>Good images plus synthetic defects</td><td>Self-supervised</td><td>9</td></tr>
+    <tr><td>A handful of good images</td><td>Few-shot</td><td>12, 14</td></tr>
+    <tr><td>None (the model was trained on other products)</td><td>Zero-shot</td><td>12, 13</td></tr>
+  </tbody>
+</table>
+</section>

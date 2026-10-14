@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vision-Language Models, Intuition First</title>
+<meta name="description" content="An intuition-first survey of vision-language models, from ViT and CLIP through Flamingo, BLIP-2, LLaVA, Qwen2-VL, Florence-2, Idefics2, Molmo, Chameleon and Qwen3-VL.">
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; background:var(--bg); color:var(--fg);
+  font:1.125rem/1.65 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:75ch; margin:0 auto; padding:0 16px 4rem; }
+header.hero { padding:3.5rem 0 1.5rem; }
+header.hero h1 { font-size:2.3rem; line-height:1.15; margin:0 0 .6rem; }
+header.hero p.hook { font-size:1.2rem; color:var(--muted); margin:0 0 1rem; }
+.papers { font-size:.9rem; color:var(--muted); font-family:system-ui, sans-serif; }
+h2 { font-size:1.6rem; line-height:1.25; margin:3.2rem 0 .8rem; padding-top:.5rem; border-top:1px solid var(--rule); }
+h3 { font-size:1.15rem; margin:1.8rem 0 .4rem; }
+a { color:var(--blue); }
+p { margin:0 0 1rem; }
+.kicker { font:600 .8rem/1 system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:2.2rem 0 -.2rem; }
+nav.toc { font-family:system-ui, sans-serif; font-size:.95rem; background:var(--panel); border-radius:10px; padding:.8rem 1.1rem; margin:1rem 0 2rem; }
+nav.toc ol { margin:.3rem 0; padding-left:1.4rem; }
+nav.toc li { margin:.15rem 0; }
+nav.toc .act { list-style:none; margin:.5rem 0 .1rem -1.4rem; font-weight:600; color:var(--muted); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; }
+.key { display:flex; flex-wrap:wrap; gap:.4rem .9rem; font:.9rem system-ui, sans-serif; margin:.4rem 0 1rem; }
+.key span::before { content:""; display:inline-block; width:.8em; height:.8em; border-radius:2px; margin-right:.35em; vertical-align:-.05em; background:currentColor; }
+.c-blue{color:var(--blue)} .c-yellow{color:var(--yellow)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-brown{color:var(--brown)}
+.t-blue{color:var(--blue)} .t-yellow{color:var(--yellow)} .t-green{color:var(--green)} .t-red{color:var(--red)} .t-brown{color:var(--brown)}
+b.c-blue, b.c-yellow, b.c-green, b.c-red, b.c-brown { font-weight:700; }
+figure.viz { margin:1.4rem -8px; padding:.9rem; background:var(--panel); border-radius:12px; position:relative; }
+figure.viz canvas, figure.viz svg.chart { display:block; width:100%; border-radius:8px; background:var(--bg); touch-action:none; }
+figure.viz canvas:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.7rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:6px; padding:.32rem .7rem; cursor:pointer; }
+.controls button:hover { border-color:var(--blue); }
+.controls button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+.readout { font:.92rem/1.45 system-ui, sans-serif; color:var(--fg); margin:.5rem 0 0; min-height:2.9em; }
+figcaption { font:.86rem/1.45 system-ui, sans-serif; color:var(--muted); margin-top:.5rem; }
+.badge { position:absolute; top:.6rem; right:.7rem; font:600 .72rem/1 system-ui, sans-serif; letter-spacing:.05em; text-transform:uppercase; padding:.28rem .5rem; border-radius:999px; border:1px solid currentColor; background:var(--panel); z-index:2; }
+.badge.toy { color:var(--brown); } .badge.computed { color:var(--blue); } .badge.sourced { color:var(--green); }
+.eq { overflow-x:auto; overflow-y:hidden; margin:.6rem 0 1rem; padding:.2rem 0; }
+.eqno { font:.82rem system-ui, sans-serif; color:var(--muted); text-align:right; margin:-.8rem 0 .8rem; }
+.gloss { font-size:1rem; margin:-.3rem 0 1.2rem; padding-left:1rem; border-left:3px solid var(--rule); }
+.gloss li { margin:.2rem 0; }
+.note { font:.9rem/1.5 system-ui, sans-serif; color:var(--muted); background:var(--panel); border-radius:8px; padding:.6rem .8rem; margin:1rem 0; }
+.aside { font-size:1rem; background:var(--panel); border-left:3px solid var(--blue); border-radius:0 8px 8px 0; padding:.7rem .9rem; margin:1.2rem 0; }
+.aside h4 { font:600 .95rem system-ui, sans-serif; margin:0 0 .3rem; }
+.aside p:last-child { margin-bottom:0; }
+table.data { border-collapse:collapse; font:.88rem system-ui, sans-serif; width:100%; margin:.6rem 0 1rem; }
+table.data th, table.data td { border-bottom:1px solid var(--rule); padding:.3rem .4rem; text-align:right; }
+table.data th:first-child, table.data td:first-child { text-align:left; }
+.katex { font-size:1.05em; }
+.tex-display .katex-display { margin:.4rem 0; }
+@media (max-width: 520px) {
+  header.hero h1 { font-size:1.8rem; }
+  figure.viz { margin:1.2rem -12px; padding:.7rem; border-radius:0; }
+}
+</style>
+<script>
+/* Shared helpers for all interactives. */
+const PE = (() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.cueReplay === '1';
+  const redrawers = [];
+  const onTheme = fn => { redrawers.push(fn); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => redrawers.forEach(f => f()));
+  // Canvas sized to its box, DPR-aware; draw(ctx, w, h) gets CSS-pixel dimensions.
+  function canvas(el, aspect, draw) {
+    const ctx = el.getContext('2d');
+    const state = { w: 0, h: 0 };
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * (typeof aspect === 'function' ? aspect(w) : aspect)), r = devicePixelRatio || 1;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); state.w = w; state.h = h; draw(ctx, w, h);
+    }
+    new ResizeObserver(resize).observe(el);
+    onTheme(() => draw(ctx, state.w, state.h));
+    return { redraw: () => draw(ctx, state.w, state.h), state, ctx };
+  }
+  function animate(ms, step, done) {
+    if (instant()) { step(1); done && done(); return () => {}; }
+    let t0 = null, id = 0, stop = false;
+    const f = t => { if (stop) return; if (t0 === null) t0 = t; const u = Math.min(1, (t - t0) / ms);
+      step(u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2); if (u < 1) id = requestAnimationFrame(f); else done && done(); };
+    id = requestAnimationFrame(f);
+    return () => { stop = true; cancelAnimationFrame(id); };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function gauss(r) { return () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r()); }
+  function label(ctx, text, x, y, color, size = 12, align = 'left') {
+    ctx.save(); ctx.font = `600 ${size}px system-ui, sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.restore(); }
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  // Mix two "#rrggbb" colors.
+  function mix(c1, c2, u) {
+    const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+    const a = p(c1), b = p(c2); return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], u))).join(',')})`;
+  }
+
+  // World-to-canvas mapping centered on the origin; `span` world units fit the canvas height.
+  function view(W, H, span) { const s = H / span; return { s, X: x => W / 2 + x * s, Y: y => H / 2 - y * s, ix: px => (px - W / 2) / s, iy: py => (H / 2 - py) / s }; }
+  function dot(ctx, x, y, r, color, alpha = 1) { ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+  // Pulse a named layer when an equation term with that link word is shown.
+  function linkPulses(fig, redraw) {
+    const glow = {};
+    fig.addEventListener('pe-link', e => { const k = e.detail;
+      animate(1100, u => { glow[k] = Math.sin(Math.PI * u); redraw(); }, () => { glow[k] = 0; redraw(); }); });
+    return k => glow[k] || 0;
+  }
+  function arrow(ctx, x1, y1, x2, y2, color, lw = 2, head = 8, alpha = 1) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = Math.hypot(x2 - x1, y2 - y1), hd = Math.min(head, L * .45);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - hd * .6 * Math.cos(a), y2 - hd * .6 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - hd * Math.cos(a - .42), y2 - hd * Math.sin(a - .42));
+    ctx.lineTo(x2 - hd * Math.cos(a + .42), y2 - hd * Math.sin(a + .42)); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  // Minimal chart frame: returns scale functions for box b = {x, y, w, h} and ranges; log axes when asked.
+  function axes(ctx, b, xr, yr, o = {}) {
+    const lx = o.logx ? Math.log10 : v => v, ly = o.logy ? Math.log10 : v => v;
+    const X = v => b.x + (lx(v) - lx(xr[0])) / (lx(xr[1]) - lx(xr[0])) * b.w, Y = v => b.y + b.h - (ly(v) - ly(yr[0])) / (ly(yr[1]) - ly(yr[0])) * b.h;
+    const M = css('--muted'), R = css('--rule');
+    ctx.save(); ctx.strokeStyle = R; ctx.lineWidth = 1; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = M;
+    (o.xt || []).forEach(v => { ctx.beginPath(); ctx.moveTo(X(v), b.y); ctx.lineTo(X(v), b.y + b.h); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(o.xf ? o.xf(v) : v, X(v), b.y + b.h + 14); });
+    (o.yt || []).forEach(v => { ctx.beginPath(); ctx.moveTo(b.x, Y(v)); ctx.lineTo(b.x + b.w, Y(v)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(o.yf ? o.yf(v) : v, b.x - 5, Y(v) + 4); });
+    ctx.textAlign = 'center'; if (o.xl) ctx.fillText(o.xl, b.x + b.w / 2, b.y + b.h + 29);
+    if (o.yl) { ctx.translate(b.x - (o.ylo || 34), b.y + b.h / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(o.yl, 0, 0); }
+    ctx.restore(); return { X, Y };
+  }
+  function polyline(ctx, pts, color, lw = 2, dash = null, alpha = 1) {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.globalAlpha = alpha; if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); ctx.restore(); }
+    // ---- Contrastive toy kit: N image and N caption embeddings as angles on the unit circle. ----
+  // kind 'softmax' = CLIP's symmetric cross-entropy over cosine/tau; 'sigmoid' = SigLIP's per-pair loss with bias b.
+  // Returns loss, gradients w.r.t. the angles (and b), and the similarity matrix S[i][j] = cos(th_i - ph_j).
+  function contrast(th, ph, tau, kind = 'softmax', b = 0) {
+    const N = th.length, gth = new Array(N).fill(0), gph = new Array(N).fill(0);
+    const S = th.map(t => ph.map(p => Math.cos(t - p))), D = th.map(t => ph.map(p => -Math.sin(t - p)));
+    let L = 0, gb = 0;
+    const add = (i, j, g) => { gth[i] += g * D[i][j]; gph[j] -= g * D[i][j]; };
+    if (kind === 'softmax') {
+      for (const dir of [0, 1]) for (let i = 0; i < N; i++) {
+        const lg = Array.from({ length: N }, (_, j) => (dir ? S[j][i] : S[i][j]) / tau);
+        const m = Math.max(...lg), e = lg.map(x => Math.exp(x - m)), Z = e.reduce((s, x) => s + x, 0);
+        L -= (lg[i] - m - Math.log(Z)) / (2 * N);
+        for (let j = 0; j < N; j++) { const g = (e[j] / Z - (i === j ? 1 : 0)) / tau / (2 * N); dir ? add(j, i, g) : add(i, j, g); }
+      }
+    } else {
+      for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+        const z = i === j ? 1 : -1, x = z * (S[i][j] / tau + b);
+        L += Math.log1p(Math.exp(-x)) / N; const g = -z / (1 + Math.exp(x)) / N; add(i, j, g / tau); gb += g;
+      }
+    }
+    return { L, gth, gph, gb, S };
+  }
+  const softmax = v => { const m = Math.max(...v), e = v.map(x => Math.exp(x - m)), Z = e.reduce((s, x) => s + x, 0); return e.map(x => x / Z); };
+  return { css, instant, onTheme, canvas, animate, rng, gauss, label, clamp, lerp, mix, view, dot, arrow, axes, polyline, linkPulses, contrast, softmax };
+})();
+</script>
+</head>

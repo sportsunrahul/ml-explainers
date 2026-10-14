@@ -1,0 +1,306 @@
+<p class="kicker"><span class="act-n">Act II</span>The recipes</p>
+<section id="ch-moco" class="chapter">
+<h2>Negatives at scale: a memory bank, then a momentum queue</h2>
+<p>The lineup from <a href="#ch-infonce">chapter 3</a> teaches more when it holds more strangers. So where do you find tens of thousands of negatives for every query, when a GPU holds only a few hundred images at once?</p>
+<p>This chapter follows two answers. The first stores old embeddings and finds that they go stale. The second, MoCo, keeps a queue of recent ones and makes them from a slowly moving copy of the encoder.</p>
+
+<h3>The problem: a lineup needs many strangers</h3>
+<p>Recall the game. The network encodes one view of an image; call that vector the <em>query</em>. It also encodes a second view of the same image; call that the <em>positive key</em>. Then a softmax must pick the positive key out of a row of <em>negative keys</em>, the embeddings of other images. The query is <a href="#ch-infonce">chapter 3</a>'s anchor. The keys are its candidates: one positive key and many negative keys.</p>
+<p>Why want many negatives? With five strangers in the lineup, they are probably all easy to tell apart from your partner. With fifty thousand, a few will look a lot like it: another mug, the same table. To pick the right one anyway, the encoder has to notice finer details. A harder lineup trains better features.</p>
+<p>The obvious source of negatives is the rest of the batch: the other images you just encoded. The MoCo paper calls this <em>end-to-end</em>, because the gradient flows through every key. But then the number of negatives is tied to the batch size, and the batch is tied to GPU memory. On the authors' GPUs, the largest batch that fit was <span data-claim="moco-e2e-maxbatch">1024</span> images. The MoCo v2 authors estimate that a batch of 4096 would need <span data-claim="mocov2-mem-e2e4096">93.0G</span> of memory per GPU.</p>
+
+<h3>First fix: a memory bank</h3>
+<p>Wu et al. (2018) asked a different question: why compute negatives at all? Keep one stored embedding for every image in the dataset, in a table they call the <em>memory bank</em>. For ImageNet that is <span data-claim="wu2018-bank-size">1.28M</span> vectors of <span data-claim="wu2018-featdim">128</span> numbers, about <span data-claim="wu2018-bank-storage">600 MB</span>. Each step, draw negatives from the table instead of encoding them; Wu drew <span data-claim="wu2018-nce-m">4,096</span> per image. (Wu's paper calls this count <span class="tex">m</span>; it is unrelated to the momentum <span class="tex">m</span> below.)</p>
+<p>The catch is in how the table is filled. An image's entry is rewritten only when that image comes round in training again, once per epoch. At a batch of <span data-claim="wu2018-batch">256</span>, an epoch is about <span data-claim="moco-derived-steps-epoch">5000</span> steps. So the negatives in one lineup were made by up to that many different versions of the encoder, some fresh and some an epoch old.</p>
+<p>Picture trying to recognise a friend from today's photo by comparing it with a gallery of portraits. Each portrait was painted by the same artist, but years apart, and the artist's style kept changing. Two portraits that look different may differ only in when they were painted. Stale keys are like that: their differences mix up "different image" with "different encoder". The MoCo authors call such keys <em>inconsistent</em>.</p>
+
+<h3>MoCo's fix: a queue of recent keys from a slow copy</h3>
+<p>MoCo (Momentum Contrast) keeps two ideas apart. A <b class="c-brown">queue</b> holds the keys of the last few batches: each step, the new batch's keys go in at one end and the oldest batch falls out at the other. The queue length <span class="tex">K</span> no longer depends on the batch size. Because every key is at most a few hundred steps old, it is far fresher than a bank entry.</p>
+<p>The second idea decides which network makes the keys. You cannot send gradients into the keys in the queue: the computation that made them finished many steps ago. So the keys come from a separate <b class="c-brown">key encoder</b> that gets no gradient at all. It is a slowly moving copy of the trained <b class="c-blue">query encoder</b>. Each step it moves a small fraction of the way toward the query encoder's current weights. The fraction is <span class="tex">1 - m</span>, where <span class="tex">m</span> is the <em>momentum</em> (not the margin <span class="tex">m</span> of <a href="#ch-compare">chapter 1</a>).</p>
+<p>The figure below makes this concrete in a toy. Imagine an encoder's millions of weights squeezed onto a plane. The <b class="c-blue">query encoder</b> (red ring: it is trained) jumps around with each noisy gradient step. The <b class="c-brown">key encoder</b> chases it. Every brown dot is the key encoder as it was when one batch now in the queue was encoded. The queue holds <span data-claim="moco-derived-k4096-batches">16</span> batches, as a <span data-claim="moco-mom-K">4096</span>-key queue does at batch <span data-claim="moco-batch">256</span>.</p>
+
+<figure class="viz" id="viz-queue" data-toy>
+  <span class="badge toy">Toy model</span>
+  <div class="controls fig-top" role="group" aria-label="Momentum m">
+    <span class="lbl">Momentum m</span>
+    <button type="button" id="btn-queue-m0" aria-pressed="false">0</button>
+    <button type="button" id="btn-queue-m09" aria-pressed="false">0.9</button>
+    <button type="button" id="btn-queue-m099" aria-pressed="false">0.99</button>
+    <button type="button" id="btn-queue-m0999" aria-pressed="false">0.999</button>
+    <button type="button" id="btn-queue-m09999" aria-pressed="false">0.9999</button>
+  </div>
+  <canvas id="queue-canvas" role="img" aria-label="Left: a toy weight plane. A blue dot with a red ring is the query encoder, which jumps with every gradient step and leaves a faded blue trail. A brown dot is the key encoder, joined to the query encoder by a dashed line. Small brown dots circled in brown are the key-encoder versions that made the keys now in the queue. Right: a query encoder box with a red outline, a brown key encoder box with an arrow labelled momentum copy, a yellow ring for the new positive key, and a strip of 16 brown slots, the queue, newest on the left and oldest on the right."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-queue-step">One training step</button>
+    <button type="button" id="btn-queue-run">Run 500 steps</button>
+    <button type="button" id="btn-queue-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="queue-readout" aria-live="polite"></p>
+  <table class="data" id="queue-table" style="width:auto;min-width:18rem">
+    <thead><tr><th>momentum m</th><th>ImageNet linear top-1 (%)</th></tr></thead>
+    <tbody>
+      <tr data-m="0"><td>0</td><td><span data-claim="moco-mom-0">fail</span>s to converge</td></tr>
+      <tr data-m="0.9"><td>0.9</td><td><span data-claim="moco-mom-0p9">55.2</span></td></tr>
+      <tr data-m="0.99"><td>0.99</td><td><span data-claim="moco-mom-0p99">57.8</span></td></tr>
+      <tr data-m="0.999"><td>0.999</td><td><span data-claim="moco-mom-0p999">59.0</span></td></tr>
+      <tr data-m="0.9999"><td>0.9999</td><td><span data-claim="moco-mom-0p9999">58.9</span></td></tr>
+    </tbody>
+    <caption>Sourced: MoCo's momentum ablation (Sec. 4.1), ResNet-50, queue K = <span data-claim="moco-mom-K">4096</span>, ImageNet pretraining for <span data-claim="moco-epochs">200</span> epochs, linear probe. The highlighted row is the chip you picked.</caption>
+  </table>
+  <figcaption>Toy: the plane, the step sizes and the drift are made up, so the distances are in toy units. The update rule is MoCo's Eq. 2, run exactly. Each chip restarts from the same random steps, run <span data-toy>60000</span> steps beforehand so the picture is settled. The settings and the printed numbers are in <code>notes/sim-moco.txt</code>. The table below the figure is sourced.</figcaption>
+</figure>
+
+<p><b>Make a guess before you press "0".</b> With <span class="tex">m = 0</span>, the key encoder becomes an exact copy of the query encoder at every step. The keys are then as fresh as they can be. Will training work better or worse?</p>
+<p>Press it. The brown dots scatter as widely as the query encoder's own jumps, because each batch in the queue was encoded by a different network. The paper reports that at <span class="tex">m = 0</span> "the training loss oscillates and fails to converge". Fresh is not enough: the keys must also agree with each other.</p>
+<p>Now step through the chips. At <span class="tex">m = 0.9</span> the cloud shrinks, and the sourced accuracy is <span data-claim="moco-mom-0p9">55.2</span>. At <span class="tex">0.99</span> and <span class="tex">0.999</span> the queue's keys come from almost the same network, and accuracy peaks at <span data-claim="moco-mom-0p999">59.0</span>. At <span class="tex">0.9999</span> the cloud is even tighter, but the key encoder now trails far behind the query encoder, and accuracy dips slightly, to <span data-claim="moco-mom-0p9999">58.9</span>. The paper does not test why; the lag in the toy is one possible reason (our reading).</p>
+
+<h3>The same idea as an equation: the loss</h3>
+<p>The loss is the lineup from <a href="#ch-infonce">chapter 3</a>. Only the source of the strangers changes: they are the keys in the queue.</p>
+<div class="eq" id="eq-moco-loss" data-build data-viz="viz-queue"><div class="tex tex-display">
+\htmlData{step=1, link=query}{\mathcal{L}_q} = -\log \frac{\exp(\htmlData{step=2, link=pos}{\htmlClass{t-blue}{q}{\cdot}\htmlClass{t-yellow}{k_+}} / \tau)}{\htmlData{step=3, link=queue}{\sum_{i=0}^{K}\exp(\htmlClass{t-blue}{q}{\cdot}\htmlClass{t-red}{k_i}  / \tau)}}
+</div></div>
+<p class="eqno">Eq. 1 in He et al., "Momentum contrast for unsupervised visual representation learning", arXiv 1911.05722v3.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{q}</span>: the query, the query encoder's output for one view. A <span data-claim="moco-dim">128</span>-number vector scaled to length 1.</li>
+  <li><span class="tex">\htmlClass{t-yellow}{k_+}</span>: the positive key, the key encoder's output for the other view of the same image.</li>
+  <li><span class="tex">\htmlClass{t-red}{k_i}</span>, <span class="tex">i = 0 \dots K</span>: the <span class="tex">K + 1</span> candidates, the positive key plus <span class="tex">K</span> negatives from the queue. In the first MoCo the negatives are the queue only, never the other images of the current batch.</li>
+  <li><span class="tex">q \cdot k</span>: the dot product, which is the cosine similarity because both vectors have length 1.</li>
+  <li><span class="tex">\tau</span>: the temperature, which sharpens the softmax. MoCo uses <span class="tex">\tau =</span> <span data-claim="moco-tau">0.07</span>.</li>
+  <li><span class="tex">\mathcal{L}_q</span>: the cross-entropy of a <span class="tex">(K+1)</span>-way softmax whose correct answer is the positive key.</li>
+</ul>
+<p>Try it with numbers, at <span class="tex">\tau = 0.07</span> and three negatives. Say <span class="tex">q \cdot k_+ = 0.8</span>. Divide every term by the positive's term, so each negative contributes <span class="tex">\exp((q \cdot k_i - 0.8)/0.07)</span>.</p>
+<ul>
+  <li>Easy negatives at <span class="tex">0.3</span>, <span class="tex">0.1</span> and <span class="tex">-0.2</span> contribute <span class="tex">e^{-7.1} \approx 0.0008</span> and less. The loss is <span class="tex">\log(1 + 0.0008 + \dots) \approx 0.0008</span>: almost nothing to learn.</li>
+  <li>Swap the last one for a look-alike at <span class="tex">0.75</span>. It contributes <span class="tex">e^{-0.05/0.07} = e^{-0.71} \approx 0.49</span>, and the loss jumps to <span class="tex">\log(1.49) \approx 0.40</span>.</li>
+</ul>
+<p>One look-alike carries almost the whole loss. With a small temperature, only near-misses teach. That is why a big lineup helps: the more strangers you draw, the more likely one of them is a near-miss.</p>
+
+<h3>The momentum update, and why it keeps keys consistent</h3>
+<p>Here is the rule that moves the key encoder. Read it as "keep most of where you are, and take a small step toward the query encoder".</p>
+<div class="eq" id="eq-moco-momentum" data-build data-viz="viz-queue"><div class="tex tex-display">
+\htmlData{step=1, link=key}{\htmlClass{t-brown}{\theta_\textrm{k}}} \leftarrow \htmlData{step=2, link=momentum}{m \htmlClass{t-brown}{\theta_\textrm{k}}} + \htmlData{step=3, link=query}{(1 - m) \htmlClass{t-blue}{\theta_\textrm{q}}}.
+</div></div>
+<p class="eqno">Eq. 2 in He et al., arXiv 1911.05722v3.</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-brown}{\theta_\textrm{k}}</span>: all the weights of the key encoder. No gradient ever reaches them.</li>
+  <li><span class="tex">\htmlClass{t-blue}{\theta_\textrm{q}}</span>: all the weights of the query encoder. "Only the parameters <span class="tex">\theta_\textrm{q}</span> are updated by back-propagation."</li>
+  <li><span class="tex">m</span>: the momentum, between 0 and 1. MoCo's default is <span data-claim="moco-m">0.999</span>.</li>
+</ul>
+<p>Try it with one weight. Say the query encoder's weight is <span class="tex">1.0</span> and the key encoder's is <span class="tex">0</span>, with <span class="tex">m = 0.999</span>.</p>
+<ul>
+  <li>After one step, the key weight is <span class="tex">0.999 \cdot 0 + 0.001 \cdot 1.0 = 0.001</span>. It closed <span class="tex">0.1\%</span> of the gap.</li>
+  <li>If the query weight stayed put, the remaining gap would shrink by a factor <span class="tex">0.999</span> per step. It halves after <span class="tex">\ln 2 / 0.001 \approx</span> <span data-claim="moco-derived-halflife">693</span> steps.</li>
+  <li>The oldest key in a queue of <span class="tex">K =</span> <span data-claim="moco-K">65536</span> is <span class="tex">65536 / 256 =</span> <span data-claim="moco-derived-queue-batches">256</span> steps old. Over those steps the key encoder closes at most <span data-claim="moco-derived-move-256">23%</span> of its gap. The queue's keys were made by nearly the same network.</li>
+  <li>Compare the memory bank: an entry can be <span data-claim="moco-derived-steps-epoch">5000</span> steps old. By then a key encoder with <span class="tex">m = 0.999</span> would have only <span data-claim="moco-derived-left-5000">0.7%</span> of its gap left: a different network.</li>
+</ul>
+<p>You might expect an encoder that moves a thousand times slower to learn a thousand times slower. It does not, because it follows the query encoder with a delay, not at a reduced speed. Each gradient step is noisy and jumps around. The key encoder averages roughly the last thousand of those jumps, so the noise cancels and the steady progress remains. Press "Run 500 steps" at <span class="tex">m = 0.999</span>: the key encoder glides along behind the query encoder's trail while the query encoder jitters.</p>
+
+<h3>Does it pay off?</h3>
+<p>The MoCo paper trained the same ResNet-50 three ways and changed only where the negatives come from. The chart below plots the results against the number of negatives <span class="tex">K</span>.</p>
+
+<figure class="viz" id="viz-mechs">
+  <span class="badge sourced">Sourced</span>
+  <div class="controls fig-top" role="group" aria-label="Highlight a mechanism">
+    <span class="lbl">Highlight</span>
+    <button type="button" id="btn-mechs-e2e" aria-pressed="false">End-to-end</button>
+    <button type="button" id="btn-mechs-bank" aria-pressed="false">Memory bank</button>
+    <button type="button" id="btn-mechs-moco" aria-pressed="false">MoCo</button>
+    <button type="button" id="btn-mechs-reset" class="reset" data-cue-reset>Show all</button>
+  </div>
+  <canvas id="mechs-canvas" role="img" aria-label="Line chart of ImageNet linear top-1 accuracy against the number of negatives K on a log scale from 256 to 65536. The end-to-end line (grey, dashed) stops at K equal to 1024. The memory bank line (brown) runs from 50.0 to 58.0, always lowest. The MoCo line rises from 54.7 to 60.6, matching end-to-end where both exist and staying above the memory bank."></canvas>
+  <p class="readout" id="mechs-readout" aria-live="polite"></p>
+  <table class="data">
+    <thead><tr><th>K</th><th>end-to-end</th><th>memory bank</th><th>MoCo</th></tr></thead>
+    <tbody>
+      <tr><td>256</td><td><span data-claim="moco-fig3-e2e-256">54.9</span></td><td><span data-claim="moco-fig3-bank-256">50.0</span></td><td><span data-claim="moco-fig3-moco-256">54.7</span></td></tr>
+      <tr><td>512</td><td><span data-claim="moco-fig3-e2e-512">56.3</span></td><td><span data-claim="moco-fig3-bank-512">52.0</span></td><td><span data-claim="moco-fig3-moco-512">56.4</span></td></tr>
+      <tr><td>1024</td><td><span data-claim="moco-fig3-e2e-1024">57.3</span></td><td><span data-claim="moco-fig3-bank-1024">54.1</span></td><td><span data-claim="moco-fig3-moco-1024">57.5</span></td></tr>
+      <tr><td>4096</td><td>-</td><td><span data-claim="moco-fig3-bank-4096">56.5</span></td><td><span data-claim="moco-fig3-moco-4096">59.0</span></td></tr>
+      <tr><td>16384</td><td>-</td><td><span data-claim="moco-fig3-bank-16384">57.8</span></td><td><span data-claim="moco-fig3-moco-16384">60.4</span></td></tr>
+      <tr><td>65536</td><td>-</td><td><span data-claim="moco-fig3-bank-65536">58.0</span></td><td><span data-claim="moco-fig3-moco-65536">60.6</span></td></tr>
+    </tbody>
+  </table>
+  <figcaption>Sourced: MoCo Fig. 3, redrawn from the figure's own data labels. ResNet-50 pretrained on ImageNet for <span data-claim="moco-epochs">200</span> epochs, then a linear probe (top-1 %). End-to-end has <span class="tex">K - 1</span> negatives (<span data-claim="moco-derived-e2e-neg">1023</span> at its largest point), because its positive key sits in the same batch; its line stops where the batch no longer fit in memory. Memory bank here is the MoCo authors' improved version with the same InfoNCE loss.</figcaption>
+</figure>
+
+<p>Three things to read off. Every curve rises with <span class="tex">K</span>: more strangers, better features. End-to-end and MoCo agree where both exist, so the queue costs nothing in quality at small <span class="tex">K</span>. And the memory bank sits below MoCo all the way, by <span data-claim="moco-bank-gap">2.6</span> points at the largest <span class="tex">K</span>. That gap is the price of stale keys.</p>
+
+<details class="check">
+  <summary>Check yourself: why can't MoCo just backpropagate into the key encoder, like it does into the query encoder?</summary>
+  <p>The loss depends on every key in the queue, so a true gradient for the key encoder would have to flow into all of them. But most of those keys were computed in earlier steps, and their computation is gone. You could only backpropagate into the current batch's keys, which would make the key encoder a second trained network, changing fast, and the queue inconsistent again. MoCo instead gives the key encoder no gradient and moves it with Eq. 2.</p>
+</details>
+<details class="check">
+  <summary>Check yourself: what would <span class="tex">m = 1</span> do?</summary>
+  <p>The key encoder would never move from its starting weights. Its keys would be perfectly consistent, but they would come from a random network forever, and the query encoder would learn to match a random network's outputs. This is our reasoning; the paper's ablation stops at 0.9999.</p>
+</details>
+
+<h3>Inside MoCo: forward, then backward</h3>
+<p>Here is one full training step with the paper's ImageNet setup. <b>Make a guess before you press "6 Gradients": which boxes will the gradient reach?</b></p>
+
+<figure class="viz archflow" id="viz-mocoflow">
+  <span class="badge sourced">Sourced</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-mocoflow-views" aria-pressed="false">1 Two views</button>
+    <button type="button" id="btn-mocoflow-encode" aria-pressed="false">2 Encode</button>
+    <button type="button" id="btn-mocoflow-queue" aria-pressed="false">3 Queue</button>
+    <button type="button" id="btn-mocoflow-logits" aria-pressed="false">4 Logits</button>
+    <button type="button" id="btn-mocoflow-loss" aria-pressed="false">5 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-mocoflow-backward" aria-pressed="false">6 Gradients</button>
+    <button type="button" class="cf-back" id="btn-mocoflow-update" aria-pressed="false">7 Update</button>
+  </div>
+  <canvas id="mocoflow-canvas" role="img" aria-label="One MoCo step as a diagram. A batch of images splits into two views. The blue query view goes through the query encoder to the queries q. The yellow key view goes through the brown, dashed key encoder to the keys k, also brown. A brown queue box sits below the keys. Queries, keys and the queue meet in the logits box, which feeds the InfoNCE loss. In the backward stages red arrows run from the loss to the logits, the queries and the query encoder only; the key encoder, the keys and the queue get none."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-mocoflow-prev">Previous</button>
+    <button type="button" id="btn-mocoflow-next">Next</button>
+    <button type="button" id="btn-mocoflow-reset" class="reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="mocoflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Top lane: the <b class="c-blue">query</b> side, which is trained. Middle lane: the <b class="c-brown">key</b> side, drawn brown and dashed because no gradient reaches it. Bottom: the <b class="c-brown">queue</b>. Right: the logits and the <b class="c-red">loss</b>. Press <b>1 Two views</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="views" hidden>
+      <h4>1. Two views of each image</h4>
+      <p>Load a batch of <span class="tex">N =</span> <span data-claim="moco-batch">256</span> images. Augment each twice: a <span data-claim="moco-crop">224x224</span> crop of a randomly resized image, color jitter, a horizontal flip and random grayscale. One view goes to the query side, the other to the key side.</p>
+    </div>
+    <div data-stage="encode" hidden>
+      <h4>2. Two encoders</h4>
+      <p>Both encoders are a ResNet-50 whose pooled output goes through one fully connected layer to <span data-claim="moco-dim">128</span> numbers, then scaled to length 1. They start identical. The query encoder is trained; the key encoder is the momentum copy, and its keys are computed without tracking gradients.</p>
+    </div>
+    <div data-stage="queue" hidden>
+      <h4>3. The queue</h4>
+      <p>The queue holds <span class="tex">K =</span> <span data-claim="moco-K">65536</span> keys from the last <span data-claim="moco-derived-queue-batches">256</span> batches, stored as a 128 x K matrix. It has no weights and gets no gradient. The keys made in this step are not in it yet.</p>
+    </div>
+    <div data-stage="logits" hidden>
+      <h4>4. One positive and K negatives per query</h4>
+      <p>For each query, the positive logit is its dot product with its own key. The negative logits are its dot products with all <span class="tex">K</span> queue keys. Put the positive in column 0, and you get an <span class="tex">N \times (1 + K)</span> matrix, divided by <span class="tex">\tau =</span> <span data-claim="moco-tau">0.07</span>.</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>5. Cross-entropy with label 0</h4>
+      <p>Eq. 1 is cross-entropy on each row, with the correct class always column 0. The loss grades only that: did each query score its own key above all the queue keys?</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>6. The gradient reaches the query encoder only</h4>
+      <p>The gradient flows from the loss into the logits, then into the queries and the query encoder. It reaches nothing on the key side: the keys were computed without gradients, and the queue is stored data. The diagram's "frozen" label means no gradient within this step; the key encoder still changes between steps, in stage 7.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>7. Three updates</h4>
+      <p>First, SGD updates the query encoder: learning rate <span data-claim="moco-lr">0.03</span>, weight decay <span data-claim="moco-wd">0.0001</span>, SGD momentum <span data-claim="moco-sgd-mom">0.9</span> (an optimizer setting, unrelated to <span class="tex">m</span>). Second, Eq. 2 moves the key encoder with <span class="tex">m =</span> <span data-claim="moco-m">0.999</span>. Third, this batch's <span data-claim="moco-batch">256</span> keys join the queue and the oldest batch leaves. Today's positives become tomorrow's negatives. The run lasts <span data-claim="moco-epochs">200</span> epochs on <span data-claim="moco-gpus">8 GPUs</span>, about <span data-claim="moco-hours">53 hours</span>.</p>
+    </div>
+  </div>
+  <figcaption>Sourced setup: MoCo Sec. 3.3, Sec. 4 and Alg. 1, ImageNet-1M run. The diagram's tool marks a box with no gradient as "frozen"; for the key encoder and queue that holds within a step only.</figcaption>
+</figure>
+
+<p>The answer to the guess: only the query encoder (and the queries and logits on the way). Everything brown is updated without gradients: the key encoder by Eq. 2, the queue by enqueue and dequeue.</p>
+
+<div class="aside">
+  <h4>Why shuffle batch norm?</h4>
+  <p>Batch normalization (BN) rescales each feature using statistics of the samples on the same GPU. Without care, a query and its positive key are normalized with statistics from the same group of samples. That shared statistic is a "signature" the network can use to find its partner without looking at the content. Without the fix, the accuracy on the training game (picking the partner) climbs above <span data-claim="moco-sbn-pretext">99.9%</span> while the features get worse. MoCo shuffles the batch order before it splits the key batch across GPUs, and shuffles back after. Query and positive key then see different statistics.</p>
+</div>
+
+<h3>Where this came from</h3>
+<p>Wu, Xiong, Yu and Lin (<a href="https://arxiv.org/abs/1805.01978v1">1805.01978</a>, 2018) introduced <em>instance discrimination</em>: treat every image as its own class, and keep the memory bank so the softmax over all images is affordable. Their ResNet-50 reached <span data-claim="wu2018-r50-conv5-svm">54.0</span> top-1 on ImageNet, measured with a different linear classifier on an earlier layer.</p>
+<p>He, Fan, Wu, Xie and Girshick (<a href="https://arxiv.org/abs/1911.05722v3">1911.05722</a>, 2019) replaced the bank with the queue and the momentum encoder. MoCo's ResNet-50 reached <span data-claim="moco-linear-r50">60.6</span> linear-probe top-1 after <span data-claim="moco-epochs">200</span> epochs. (A linear probe, as in <a href="#ch-infonce">chapter 3</a>, trains one classifier layer on frozen features.) Because the two papers measured differently, the two numbers are not a controlled comparison; the chart above is.</p>
+
+<h3>What changed next: MoCo v2 and v3</h3>
+<p><b>MoCo v2</b> (<a href="https://arxiv.org/abs/2003.04297v1">2003.04297</a>) kept the queue and the small batch, and took two things from SimCLR: a two-layer MLP head (a projection head, explained in <a href="#ch-simclr">chapter 5</a>) and blur augmentation. It also added a cosine learning-rate schedule and raised the temperature. The table below lists what each change bought.</p>
+<p><b>MoCo v3</b> (<a href="https://arxiv.org/abs/2104.02057v4">2104.02057</a>) moved to Vision Transformers (ViT) and teaches two lessons.</p>
+<p>The first: with a big enough batch, the queue is unnecessary, but the momentum encoder still helps. With a batch of <span data-claim="mocov3-batch">4096</span>, the batch already holds enough negatives, so v3 drops the queue: each query's negatives are the other images' keys in the batch. You might expect <span class="tex">m = 0</span> to fail, as it did in v1. It does not, because all keys now come from the current network and are consistent anyway (our reading; the paper notes that <span class="tex">m = 0</span> is then close to SimCLR). Yet a momentum encoder with <span class="tex">m =</span> <span data-claim="mocov3-m">0.99</span> still adds <span data-claim="mocov3-mom-gain">2.2</span> points. v3 also adds a prediction head on the query side, as BYOL does (<a href="#ch-beyond">chapter 8</a>).</p>
+<p>The second: training ViTs this way is quietly unstable. It does not diverge; it loses a few points, and you may not notice. Gradient spikes appeared first in the patch projection, the ViT's first layer, which turns image patches into vectors. The fix is to freeze that layer at its random initialization, so it never changes.</p>
+<table class="data">
+  <thead><tr><th>Change (ImageNet linear-probe top-1, %)</th><th>before</th><th>after</th></tr></thead>
+  <tbody>
+    <tr><td>v2: MLP head, temperature kept at <span data-claim="moco-tau">0.07</span> (ResNet-50, 200 ep)</td><td><span data-claim="mocov2-t1-v1-acc">60.6</span></td><td><span data-claim="mocov2-tau-0p07-mlp">62.9</span></td></tr>
+    <tr><td>v2: MLP head, temperature raised to <span data-claim="mocov2-tau">0.2</span></td><td><span data-claim="mocov2-t1-v1-acc">60.6</span></td><td><span data-claim="mocov2-t1-a-acc">66.2</span></td></tr>
+    <tr><td>v2: MLP head and blur, then a cosine schedule</td><td><span data-claim="mocov2-t1-c-acc">67.3</span></td><td><span data-claim="mocov2-t1-d-acc">67.5</span></td></tr>
+    <tr><td>v2: all changes, 200 ep then 800 ep</td><td><span data-claim="mocov2-t1-d-acc">67.5</span></td><td><span data-claim="mocov2-t1-e-acc">71.1</span></td></tr>
+    <tr><td>v3: no momentum, then m = 0.99 (ViT-B, 300 ep)</td><td><span data-claim="mocov3-mom-0">74.3</span></td><td><span data-claim="mocov3-mom-0p99">76.5</span></td></tr>
+    <tr><td>v3: batch 2048, then 6144 (ViT-B, 100 ep)</td><td><span data-claim="mocov3-batch-2048">72.6</span></td><td><span data-claim="mocov3-batch-6144">69.7</span></td></tr>
+    <tr><td>v3: learned, then frozen random patch projection (ViT-B, 100 ep, largest learning rate)</td><td><span data-claim="mocov3-learned-1p5">71.7</span></td><td><span data-claim="mocov3-random-1p5">73.4</span></td></tr>
+    <tr><td>v3: ViT-B, 300 ep then 600 ep</td><td><span data-claim="mocov3-vitb-300-linear">76.5</span></td><td><span data-claim="mocov3-vitb-linear">76.7</span></td></tr>
+  </tbody>
+  <caption>Sourced: MoCo v2 Table 1 and Sec. 3; MoCo v3 Sec. 4 and 6.2, Table 1 and 4. Each row is one controlled change within one paper. Rows differ in backbone and schedule, so do not compare across rows.</caption>
+</table>
+
+<h3>Where we go next: no queue, just a huge batch</h3>
+<p>MoCo got many negatives cheaply by keeping old keys. SimCLR (<a href="#ch-simclr">chapter 5</a>) took the opposite route: no queue and no momentum encoder, just a batch of thousands, with everything trained end to end. It also found which augmentations matter, and why a throwaway head helps.</p>
+
+<div class="recap">
+  <h4>You should now be able to explain</h4>
+  <ul>
+    <li>Why more negatives help, and why the batch alone cannot supply them.</li>
+    <li>Why memory-bank keys are inconsistent, and how a queue plus a momentum encoder fixes that.</li>
+    <li>What Eq. 2 does with <span class="tex">m = 0.999</span>: a <span class="tex">0.1\%</span> step per update, about <span data-claim="moco-derived-halflife">693</span> steps to close half a gap.</li>
+    <li>Which parts of MoCo get gradients, and which change by momentum or enqueueing instead.</li>
+  </ul>
+</div>
+
+<div class="aside practice">
+  <h4>In practice</h4>
+  <p>If your GPU memory limits the batch, a momentum queue gives you many negatives cheaply. In the MoCo v2 measurements, MoCo at batch <span data-claim="moco-batch">256</span> used <span data-claim="mocov2-mem-moco">5.0G</span> per GPU against <span data-claim="mocov2-mem-e2e256">7.4G</span> for end-to-end. With very large batches, as in MoCo v3, the queue adds little, but a momentum encoder still helps. Treat <span class="tex">m</span> as a delay in steps, about <span class="tex">1/(1-m)</span>, so about 1000 steps at <span class="tex">m = 0.999</span>, as in the worked example above: a short training run needs a smaller <span class="tex">m</span> (our reading).</p>
+</div>
+
+<script>
+(() => {
+  const fig = document.getElementById('viz-queue'), out = document.getElementById('queue-readout');
+  const kit = KIT.queue(document.getElementById('queue-canvas'), { fig });
+  const MS = [[0, 'm0'], [.9, 'm09'], [.99, 'm099'], [.999, 'm0999'], [.9999, 'm09999']];
+  const btn = Object.fromEntries(MS.map(([m, k]) => [m, document.getElementById('btn-queue-' + k)]));
+  const cells = [...document.querySelectorAll('#queue-table tr[data-m]')];
+  const mark = m => { MS.forEach(([v]) => btn[v].setAttribute('aria-pressed', String(v === m)));
+    cells.forEach(c => { const on = +c.dataset.m === m; c.style.color = on ? 'var(--green)' : ''; c.style.fontWeight = on ? '700' : ''; }); };
+  const say = what => { out.innerHTML = KIT.queueText(kit.state.st, kit.state.m, what); };
+  const pick = m => { kit.set({ m }); mark(m); say('m'); };
+  MS.forEach(([m]) => btn[m].addEventListener('click', () => pick(m)));
+  document.getElementById('btn-queue-step').addEventListener('click', () => { kit.set({ step: true }); say('step'); });
+  document.getElementById('btn-queue-run').addEventListener('click', () => { kit.set({ run: true }); say('run'); });
+  document.getElementById('btn-queue-reset').addEventListener('click', () => pick(.999));
+  mark(.999); say('m');
+
+  const mfig = document.getElementById('viz-mechs'), mout = document.getElementById('mechs-readout');
+  const mk = KIT.mechs(document.getElementById('mechs-canvas'), { fig: mfig });
+  const mb = { e2e: document.getElementById('btn-mechs-e2e'), bank: document.getElementById('btn-mechs-bank'), moco: document.getElementById('btn-mechs-moco') };
+  const focus = f => { mk.set(f); Object.entries(mb).forEach(([k, b]) => b.setAttribute('aria-pressed', String(k === f))); mout.innerHTML = KIT.mechsText(f); };
+  Object.keys(mb).forEach(k => mb[k].addEventListener('click', () => focus(k)));
+  document.getElementById('btn-mechs-reset').addEventListener('click', () => focus(null));
+  mout.innerHTML = KIT.mechsText(null);
+
+  ArchFlow.mount({
+    prefix: 'mocoflow', grid: { cols: 6, rows: 3 },
+    boxes: {
+      x: { c: 0, r: .5, lane: 'mixed', title: ['images'], glyph: 'photos', data: true },
+      xq: { c: 1, r: 0, lane: 'blue', title: ['query view'], glyph: 'photo', data: true },
+      xk: { c: 1, r: 1, lane: 'yellow', title: ['key view'], glyph: 'photo', data: true },
+      fq: { c: 2, r: 0, lane: 'blue', title: ['query encoder'], glyph: 'layers' },
+      fk: { c: 2, r: 1, lane: 'yellow', title: ['key encoder'], glyph: 'layers' },
+      q: { c: 3, r: 0, lane: 'blue', title: ['queries q'], glyph: 'unit' },
+      k: { c: 3, r: 1, lane: 'yellow', title: ['keys k'], glyph: 'unit' },
+      queue: { c: 3, r: 2, lane: 'mixed', title: ['queue'], glyph: 'codebook' },
+      logits: { c: 4, r: 1, lane: 'red', title: ['logits'], glyph: 'matrix' },
+      loss: { c: 5, r: 1, lane: 'red', title: ['InfoNCE loss'], glyph: 'loss' },
+    },
+    edges: [['x', 'xq'], ['x', 'xk'], ['xq', 'fq'], ['xk', 'fk'], ['fq', 'q'], ['fk', 'k'], ['q', 'logits'], ['k', 'logits'], ['queue', 'logits'], ['logits', 'loss']],
+    stages: [{ key: 'views', show: ['x', 'xq', 'xk'] }, { key: 'encode', show: ['fq', 'fk', 'q', 'k'] }, { key: 'queue', show: ['queue'] },
+      { key: 'logits', show: ['logits'] }, { key: 'loss', show: ['loss'] }, { key: 'backward', back: true }, { key: 'update', back: true, done: true }],
+    variants: {}, variant: undefined,
+    shape: id => ({ x: 'N images', xq: 'N x 224 x 224', xk: 'N x 224 x 224', fq: 'ResNet-50 + fc', fk: 'ResNet-50 + fc|momentum copy',
+      q: 'N x 128, unit', k: 'N x 128, unit', queue: '128 x K keys', logits: 'N x (1 + K)', loss: 'cross-entropy,|label = column 0' })[id],
+    params: id => id === 'fq' ? 'theta_q: all|query weights' : null,
+    frozen: id => id === 'fk' || id === 'k' || id === 'queue',
+    readout: s => ({
+      overview: 'One MoCo step: two views, two encoders, a queue of old keys, one loss. Only the query side is trained by gradients.',
+      views: 'Step 1: each image in the batch is augmented twice, giving a query view and a key view.',
+      encode: 'Step 2: the query encoder makes N queries; the key encoder (momentum copy, no gradient) makes N keys. Both are unit vectors.',
+      queue: 'Step 3: the queue supplies K keys from earlier batches as negatives.',
+      logits: 'Step 4: each query is scored against its own key (column 0) and the K queue keys: N x (1 + K) logits, divided by tau.',
+      loss: 'Step 5: cross-entropy per row with the correct answer in column 0 (Eq. 1).',
+      backward: 'Backward: the gradient reaches the logits, the queries and the query encoder. The key encoder, the keys and the queue get none.',
+      update: 'Update: SGD on the query encoder, Eq. 2 on the key encoder, then enqueue this batch\'s keys and dequeue the oldest.',
+    })[s],
+  });
+})();
+</script>
+</section>

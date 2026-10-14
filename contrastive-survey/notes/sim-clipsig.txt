@@ -1,0 +1,49 @@
+viz-clipsig numbers (build/sim/clipsig.js), 2026-10-13. Nothing is trained: the figure shows a fixed table.
+Embeddings: 8 photos and 8 captions, 12-d, each = 0.62 * shared pair direction + 0.78 * own direction + 0.1 * gaussian noise (seed 3), then unit length.
+t = 10 (SigLIP's starting t) for both views; b slider from -10 (SigLIP's start) to 0. Batch counts are our arithmetic: softmax row = N scores, N - N/D off-device; table N^2; sigmoid cell = 1 score; chunked block (N/D)^2.
+settings {"NAMES":["dog","cat","car","truck","pizza","cake","tree","flower"],"D":12,"GROUP":0.62,"OWN":0.78,"NOISE":0.1,"SEED":3,"T":10}
+cosines
+  0.91  0.46 -0.07  0.15 -0.27 -0.03  0.08  0.14
+  0.36  0.85  0.35  0.14 -0.22 -0.16  0.02 -0.08
+  0.02  0.06  0.88  0.28 -0.21  0.12  0.22  0.12
+  0.05  0.28  0.34  0.89 -0.20  0.09  0.09  0.11
+ -0.24 -0.19  0.03  0.04  0.85  0.33  0.02 -0.04
+  0.03  0.16 -0.10  0.07  0.32  0.88  0.03  0.11
+  0.05 -0.09 -0.00 -0.15  0.13 -0.04  0.93  0.35
+ -0.25  0.15 -0.09 -0.19 -0.02 -0.09  0.36  0.96
+row softmax t=10
+  0.99  0.01  0.00  0.00  0.00  0.00  0.00  0.00
+  0.01  0.98  0.01  0.00  0.00  0.00  0.00  0.00
+  0.00  0.00  0.99  0.00  0.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.99  0.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.99  0.01  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.99  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  1.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.00  1.00
+sigmoid t=10 b=-10
+  0.29  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+  0.00  0.18  0.00  0.00  0.00  0.00  0.00  0.00
+  0.00  0.00  0.22  0.00  0.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.26  0.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.18  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.23  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.34  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.40
+sigmoid t=10 b=-5
+  0.98  0.40  0.00  0.03  0.00  0.00  0.01  0.03
+  0.20  0.97  0.18  0.03  0.00  0.00  0.01  0.00
+  0.01  0.01  0.98  0.10  0.00  0.02  0.06  0.02
+  0.01  0.10  0.16  0.98  0.00  0.02  0.02  0.02
+  0.00  0.00  0.01  0.01  0.97  0.15  0.01  0.00
+  0.01  0.03  0.00  0.01  0.14  0.98  0.01  0.02
+  0.01  0.00  0.01  0.00  0.02  0.00  0.99  0.18
+  0.00  0.03  0.00  0.00  0.01  0.00  0.19  0.99
+Raw cosines. Each photo is closest to its own caption (the diagonal, 0.91 for dog) and fairly close to one look-alike (0.46 for "cat").
+Softmax: row dog gives "dog" 0.99 and "cat" 0.01, and every row sums to 1. Change any score in the row and all eight numbers move. At batch 32,768 over 8 devices: one row needs 32,768 scores, 28,672 of them from other devices.
+Sigmoid with b = -10: (dog, "dog") is 0.29, (dog, "cat") is 0.00. 0 of 64 cells say yes (above 0.5); a cell flips at cosine 1.00. At batch 32,768 over 8 devices: each cell needs only its own score.
+Sigmoid with b = -5: (dog, "dog") is 0.98, (dog, "cat") is 0.40. 8 of 64 cells say yes (above 0.5); a cell flips at cosine 0.50. At batch 32,768 over 8 devices: each cell needs only its own score.
+counts N=32768 D=8 {"N":32768,"D":8,"perDev":4096,"rowTerms":32768,"remote":28672,"cells":1073741824,"block":16777216}
+3x3 row softmax 0.9517 0.0474 0.0009 loss 0.0495
+3x3 row sigmoid b=-10 0.1192 0.0067 0.0001 cell losses 2.1269 0.0067 0.0001 sum 2.1338
+3x3 row sigmoid b=-5 0.9526 0.5000 0.0180 cell losses 0.0486 0.6931 0.0181 sum 0.7599
+add 4th caption cos 0.7: softmax 0.7049 0.0351 0.0006 0.2593

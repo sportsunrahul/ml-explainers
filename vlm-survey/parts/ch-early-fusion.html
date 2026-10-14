@@ -1,0 +1,163 @@
+
+<!-- ============================ ACT VI ============================ -->
+<p class="kicker"><span class="act-n">Act VI</span>Other paths, and where it lands</p>
+<section id="ch-early-fusion" class="chapter">
+<h2>Why not make images words?</h2>
+<p>Every model so far treats the picture as a guest: an encoder turns it into vectors, a connector hands them to the language model, and only text ever comes out. Chameleon asks the opposite question: what if an image were cut into a short sentence of discrete codes, written in the same alphabet as text, so that one transformer could read <em>and write</em> both?</p>
+
+<figure class="viz" id="viz-fusion" data-toy>
+  <span class="badge toy">Toy model</span>
+  <canvas id="fusion-canvas" role="img" aria-label="Two data paths. Late fusion: image, vision encoder, connector, language model, text out. Early fusion: image, image tokenizer, one sequence of text tokens and image ids, one transformer that can output either."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-fusion-late">Late fusion</button>
+    <button type="button" id="btn-fusion-early">Early fusion</button>
+    <button type="button" id="btn-fusion-reset" data-cue-reset>Reset</button>
+  </div>
+  <canvas id="fusion-vq-canvas" role="img" aria-label="Toy tokenizer: a small drawn image cut into 64 patches, the id of the nearest codebook tile for each patch, the image rebuilt from those ids, the error, and the codebook tiles."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-fusion-k2">Tiny codebook (K = 2)</button>
+    <button type="button" id="btn-fusion-k32">Big codebook (K = 32)</button>
+    <label for="rng-fusion-k">codebook size K <input type="range" id="rng-fusion-k" min="2" max="32" step="1" value="8"> <span id="fusion-k-val">8</span></label>
+  </div>
+  <p class="readout" id="fusion-readout" aria-live="polite"></p>
+  <figcaption>Top: the two data paths, drawn from the papers' descriptions. Before you press Early fusion, guess: which of the two paths has a way to produce a picture? Bottom, a toy model of the tokenizer: a 32 x 32 drawing is cut into 64 patches of 4 x 4 pixels, and each patch is replaced by the id of its nearest tile in a codebook of K tiles. The codebook here is k-means run on this one drawing, matched on raw pixels. Chameleon's real tokenizer is a learned quantiser (based on Make-A-Scene) with one codebook of <span data-claim="page-fusion-codebook">8192</span> entries shared by every image; it writes a <span data-claim="page-fusion-img-res">512x512</span> image as <span data-claim="page-fusion-img-tokens">1024 discrete tokens</span>, so each token covers about a <span data-computed>16 x 16</span> pixel region (this page's arithmetic, assuming the tokens tile the image in a square).</figcaption>
+</figure>
+
+<h3>The wall: the image is always a guest</h3>
+<p>Look at the <b>Late fusion</b> path. Flamingo, BLIP-2 and LLaVA are all variations on this shape (Flamingo feeds the vision vectors in through cross-attention layers rather than the input sequence, but the division of labour is the same): a <b class="c-blue">vision encoder</b> makes continuous vectors, a <b class="c-green">connector</b> reshapes them, and the <b class="c-yellow">language model</b> reads them as if they were soft words. The Chameleon paper calls this late fusion, because the two modalities are encoded separately and only meet inside the language model. It has two limits built in. The language model's vocabulary contains only text, so it can describe an image but never draw one; and the image never lives in the same space as the words, it is translated into it by a bridge that has to be trained on its own.</p>
+<p>Now press <b>Early fusion</b>. The encoder and connector are gone. In their place is an <b class="c-blue">image tokenizer</b> that turns the picture into a row of integers, and those integers sit in the same sequence as the text tokens. The paper's own summary of the idea: <span data-claim="page-fusion-words">by quantizing images into discrete tokens, analogous to words in text, we can apply the same transformer architecture to sequences of both image and text tokens</span>. The answer to the prediction: only the early path has an arrow that ends in pixels, because the transformer's next token can be an image id, and the tokenizer's decoder turns ids back into a picture.</p>
+
+<h3>A picture as a sentence of codes</h3>
+<p>Chameleon's tokenizer takes a <span data-claim="page-fusion-img-res">512x512</span> image and writes it as <span data-claim="page-fusion-img-tokens">1024 discrete tokens</span>, each chosen from a codebook of <span data-claim="page-fusion-codebook">8192</span> entries. The paper does not say how the tokens are laid out; if they tile the image as a square, that is a <span data-computed>32 &times; 32</span> grid, so each token stands for about a <span data-computed>16 &times; 16</span> pixel region (this page's arithmetic), and each token carries <span data-computed>log<sub>2</sub> 8192 = 13 bits</span>: the whole picture is squeezed into <span data-computed>1024 &times; 13 = 13,312 bits</span>.</p>
+<p>How can <span data-computed>13 bits</span> describe a patch? The codebook is a dictionary of typical patches. To tokenize, the tokenizer compares each region of the picture with the codebook, finds the closest entry, and writes down that entry's number; to draw, it looks each number up and turns the entries back into pixels. (A learned tokenizer makes that comparison on vectors from a learned encoder and draws with a learned decoder; the toy below compares raw pixels and pastes tiles.) The bottom half of the figure does the same thing in its simplest form, at toy scale: the second panel is the image as the model would read it, <span data-toy>64 numbers</span> and nothing else; the third panel is everything that can be rebuilt from those numbers.</p>
+<p>Predict before you press: with a codebook of only two tiles, which parts of the drawing survive? Press <b>Tiny codebook</b>. <span data-toy>With K = 2</span> every patch must be either "dark" or "bright", so the sky and the door fall into the dark tile, the sun, the wall and the ground into the lighter one, and each roof patch, half roof and half sky, goes to whichever is closer. The red error map lights up everywhere the drawing had a shade in between. Drag K upward and the error drains away; at <b>Big codebook</b> the drawing is nearly back. The real tokenizer sits between these extremes: <span data-claim="page-fusion-codebook">8192</span> tiles, but one set shared by every image it will ever see, so fine detail that is rare across images is exactly what gets rounded off. The paper names the casualty: <span data-claim="page-fusion-ocr-weak">a core weakness of our tokenizer is in reconstructing images with a large amount of text</span>, which caps how well Chameleon can read documents.</p>
+
+<div class="eq" id="eq-fusion-vq" data-build data-viz="viz-fusion"><div class="tex tex-display">
+\htmlData{step=3, link=id}{\htmlClass{t-blue}{z_i}} = \arg\min_{k}\; \big\lVert \htmlData{step=1, link=patch}{\htmlClass{t-blue}{x_i}} - \htmlData{step=2, link=code}{\htmlClass{t-blue}{e_k}} \big\rVert^2 \qquad \htmlData{step=4, link=code}{\hat{x}_i = e_{z_i}}
+</div></div>
+<p class="eqno">The standard vector-quantisation step (in a learned tokenizer it acts on encoder outputs; the toy applies it to raw pixels), written out for this page. Chameleon v2 does not give an equation for its tokenizer (Sec. 2.1 describes it in words and credits Make-A-Scene).</p>
+<ul class="gloss">
+  <li><span class="tex">\htmlClass{t-blue}{x_i}</span>: patch <span class="tex">i</span> of the image, as a vector of its pixel values (one square of the grid in the first panel). In a learned tokenizer, <span class="tex">x_i</span> is the encoder's vector for that region rather than raw pixels.</li>
+  <li><span class="tex">\htmlClass{t-blue}{e_k}</span>: codebook entry <span class="tex">k</span>, one of the tiles in the bottom row.</li>
+  <li><span class="tex">\htmlClass{t-blue}{z_i}</span>: the id of the closest tile, the integer printed in the second panel. This is the "word" the transformer reads.</li>
+  <li><span class="tex">\hat{x}_i</span>: the patch rebuilt from its id. The gap between <span class="tex">\hat{x}_i</span> and <span class="tex">x_i</span> is the red error map.</li>
+</ul>
+
+<h3>One vocabulary, one transformer</h3>
+<p>Text goes through an ordinary byte-pair tokenizer, and the two are merged: the shared BPE vocabulary has <span data-claim="page-fusion-vocab">65,536</span> entries, a number that <span data-claim="page-fusion-vocab-incl">includes the 8192 image codebook tokens</span>. So <span data-computed>1/8</span> of the vocabulary is image codes: the blue slice of the bar in the early-fusion path. From here on there is nothing special about images. The model is a LLaMa-2-style decoder, trained from scratch at <span data-claim="chameleon-sizes">7B and 34B</span> parameters, with the plainest objective there is: predict the next token, whatever kind it is.</p>
+
+<div class="eq" id="eq-fusion" data-build data-viz="viz-fusion"><div class="tex tex-display">
+\htmlClass{t-red}{\mathcal{L}} = \sum_{t} \Big[ \htmlData{step=1, link=seq}{-\log \frac{e^{o_t[x_t]}}{Z_t}} \;+\; \htmlData{step=3, link=zloss}{\htmlClass{t-red}{10^{-5} \log^2 Z_t}} \Big] \qquad \htmlData{step=2, link=vocab}{Z_t = \sum_{i=1}^{65{,}536} e^{o_t[i]}}
+</div></div>
+<p class="eqno">Next-token loss (described in words in Chameleon v2) plus the z-loss term written out in Sec. 2.3, Optimization (unnumbered).</p>
+<ul class="gloss">
+  <li><span class="tex">x_t</span>: token <span class="tex">t</span> of the mixed sequence, either a text token or an image id. Nothing in the loss tells them apart.</li>
+  <li><span class="tex">o_t</span>: the logits the transformer computes for position <span class="tex">t</span> from the tokens before it (<span class="tex">x_{&lt;t}</span>), one per vocabulary entry.</li>
+  <li><span class="tex">Z_t</span>: the softmax's normaliser, summed over the whole shared vocabulary, text and image codes together.</li>
+  <li><span class="tex">\htmlClass{t-red}{10^{-5}\log^2 Z_t}</span>: the z-loss, a small penalty that keeps <span class="tex">\log Z_t</span> near zero (below).</li>
+</ul>
+
+<h3>The price: training blows up late</h3>
+<p>This simplicity has a cost that took most of the paper's engineering. The authors write: <span data-claim="page-fusion-unstable">It was challenging to maintain stable training when scaling the Chameleon models above 8B parameters and 1T tokens</span>. And the trouble arrives late: <span data-claim="chameleon-divergence-late">divergences can manifest after as much as even 20-30% of training progress</span>, which is the worst possible time, with weeks of compute already spent.</p>
+<p>The diagnosis is about the softmax. A softmax does not care if every score is shifted by the same constant: <span class="tex">\mathrm{softmax}(z) = \mathrm{softmax}(z + c)</span>. So nothing in the loss stops the scores from drifting upward together. Because every weight is shared between two modalities that behave very differently, the paper argues that each modality <span data-claim="page-fusion-compete">will try to compete with the other by increasing its norms slightly</span>; harmless at first, fatal once the numbers leave the range that bf16, the 16-bit number format used for training, can represent. Two pieces of evidence: an ablation without image generation <span data-claim="chameleon-no-imagegen">did not diverge</span>, and the warning sign came early, as <span data-claim="chameleon-norm-growth">uncontrolled growth of output norms is strongly correlated with predicting future loss divergence</span>. If you watch one number during such a run, watch the size of the last layer's outputs.</p>
+<p>The fixes, each aimed at a place where a norm can grow:</p>
+<ul>
+  <li><b>QK-Norm</b>: layer-normalise the query and key vectors inside attention, so the scores entering the attention softmax cannot grow without bound. Without it, Chameleon-7B <span data-claim="chameleon-qknorm-fail">diverges after approximately 20% of a training epoch</span>. Both sizes use it.</li>
+  <li><b>z-loss</b>: QK-Norm only protects the softmaxes inside attention, not the final one over the vocabulary. The extra term in the equation above penalises <span class="tex">\log Z</span> drifting away from zero, which pins down exactly the constant shift the softmax cannot see. It is the red term in the equation above, acting on the output softmax drawn at the right of the early-fusion path.</li>
+  <li><b>Dropout</b> after attention and feed-forward layers, for the 7B model only.</li>
+  <li><b>Norm reordering</b>, for the 34B model only: normalise each sublayer's <em>output</em> before adding it back to the residual stream, instead of its input. The paper's reason: it bounds the growth of the feed-forward block, whose SwiGLU activation multiplies two signals together.</li>
+</ul>
+<div class="eq"><div class="tex tex-display">
+\text{Llama-2: } h = x + \mathrm{attn}(\mathrm{norm}(x)) \qquad \text{Chameleon-34B: } h = x + \mathrm{norm}(\mathrm{attn}(x))
+</div></div>
+<p class="eqno">Sec. 2.3 of Chameleon v2 (unnumbered); the feed-forward sublayer is reordered the same way.</p>
+<p>Put together from Sec. 2.3, the recipe is: <span data-claim="chameleon-stability-need">7B: dropout and z-loss (plus QK-Norm); 34B: z-loss only, plus QK-Norm and norm reordering</span>. With the recipe in place, both models trained for <span data-claim="chameleon-tokens-seen">9.2 trillion (2.1 epochs)</span> tokens.</p>
+
+<h3>Inside Chameleon: forward, then backward</h3>
+<p>With the fixes in hand, here is one training step of the real model, a slide per stage, with the stabilisers in the boxes where they act. The line under the drawing gives the shapes for one sequence, computed from the paper's tokenizer and model tables (pick a size); Chameleon never prints its hidden width or depth, so those stay the symbols <span class="tex">d</span> and "all layers".</p>
+
+<figure class="viz archflow" id="viz-chameleonflow" data-computed>
+  <span class="badge computed">Computed</span>
+  <div class="cf-row" role="group" aria-label="Pipeline stage">
+    <span>forward</span>
+    <button type="button" id="btn-chameleonflow-inputs" aria-pressed="false">1 Inputs</button>
+    <button type="button" id="btn-chameleonflow-tokenize" aria-pressed="false">2 Tokenize</button>
+    <button type="button" id="btn-chameleonflow-sequence" aria-pressed="false">3 One sequence</button>
+    <button type="button" id="btn-chameleonflow-transformer" aria-pressed="false">4 Transformer</button>
+    <button type="button" id="btn-chameleonflow-logits" aria-pressed="false">5 Logits</button>
+    <button type="button" id="btn-chameleonflow-loss" aria-pressed="false">6 Loss</button>
+    <span>backward</span>
+    <button type="button" class="cf-back" id="btn-chameleonflow-backward" aria-pressed="false">7 Gradients</button>
+    <button type="button" class="cf-back" id="btn-chameleonflow-update" aria-pressed="false">8 Update</button>
+  </div>
+  <div class="cf-row" role="group" aria-label="Model size">
+    <span>model</span>
+    <button type="button" id="btn-chameleonflow-7b" aria-pressed="true">Chameleon-7B</button>
+    <button type="button" id="btn-chameleonflow-34b" aria-pressed="false">Chameleon-34B</button>
+  </div>
+  <canvas id="chameleonflow-canvas" role="img" aria-label="Chameleon's training step as a diagram: an image (blue) goes through a brown, frozen (our reading) image tokenizer into 1024 ids; text (yellow) goes through BPE into ids; both join one sequence with one embedding table, one transformer, logits over 65,536 entries and a loss (red). In the backward stages red arrows run from the loss back to the embedding table and stop before the tokenizer."></canvas>
+  <div class="controls">
+    <button type="button" id="btn-chameleonflow-prev">Previous</button>
+    <button type="button" id="btn-chameleonflow-next">Next</button>
+    <button type="button" id="btn-chameleonflow-reset" data-cue-reset>Reset</button>
+  </div>
+  <p class="readout" id="chameleonflow-readout" aria-live="polite"></p>
+  <div class="cf-text">
+    <div data-stage="overview">
+      <h4>The map</h4>
+      <p>Two short lanes and one long one. The image lane (<b class="c-blue">blue</b>) and the text lane (<b class="c-yellow">yellow</b>) each end in integers, and from the sequence box on there is only one path: one embedding table, one transformer, one softmax, one <b class="c-red">red</b> loss. There is no <b class="c-green">green</b> connector anywhere. Press <b>1 Inputs</b>, then <b>Next</b>.</p>
+    </div>
+    <div data-stage="inputs" hidden>
+      <h4>1. A document of text and images</h4>
+      <p>Training examples are text-only documents, image-caption pairs, or interleaved web documents. Every image is <span data-claim="chameleon-arch-crop">resized and center cropped into 512x512 images for tokenization</span>. For caption pairs the order is rotated so that <span data-claim="chameleon-arch-flip">50% of the time the image comes before the text</span>, so the model practises both "image, then its caption" and "caption, then its image".</p>
+    </div>
+    <div data-stage="tokenize" hidden>
+      <h4>2. Both inputs become integers</h4>
+      <p><b class="c-blue">Image:</b> the tokenizer, <span data-claim="chameleon-arch-makeascene">based on Make-A-Scene</span>, turns the <span data-claim="page-fusion-img-res">512x512</span> image into <span data-claim="page-fusion-img-tokens">1024 discrete tokens</span>, each an index into its codebook of <span data-claim="page-fusion-codebook">8192</span> entries: the <span class="tex">z_i = \arg\min_k \lVert x_i - e_k \rVert^2</span> step of <a href="#eq-fusion-vq">the equation above</a>, presumably on learned encoder vectors (the paper describes the tokenizer only in words). It is a separate network with its own training data (<span data-claim="chameleon-arch-licensed">we use only licensed images</span>). It is drawn <b class="c-brown">brown</b>: the paper never says "frozen", but the transformer only ever sees its output ids (our reading).</p>
+      <p><b class="c-yellow">Text:</b> an ordinary BPE tokenizer, whose vocabulary of <span data-claim="page-fusion-vocab">65,536</span> <span data-claim="page-fusion-vocab-incl">includes the 8192 image codebook tokens</span>. The paper does <em>train a new BPE tokenizer</em>, but its merges are fitted beforehand; it has no weights the gradient can reach.</p>
+    </div>
+    <div data-stage="sequence" hidden>
+      <h4>3. One sequence, one embedding table</h4>
+      <p>The ids are laid out in document order and each looks up a row of a single <span class="tex">65{,}536 \times d</span> embedding table. An image id and a word id are rows of the same table; the only thing that makes the <span data-claim="page-fusion-codebook">8192</span> image rows "visual" is which positions trained them. The context is <span data-claim="chameleon-arch-ctx">4k</span> tokens for both sizes, so one training sequence holds fewer than <span data-computed>four</span> images' worth of ids once any text or image delimiter tokens are counted (our arithmetic, 1024 ids each).</p>
+    </div>
+    <div data-stage="transformer" hidden>
+      <h4>4. One transformer, with the stabilisers inside</h4>
+      <p>The model <span data-claim="chameleon-arch-llama2">largely follows LLaMa-2</span>: <span data-claim="chameleon-arch-blocks">RMSNorm, SwiGLU, RoPE</span>, causal attention, <span data-claim="chameleon-arch-scratch">trained from scratch in an end-to-end fashion</span>. Three of the four fixes from the section above live in this box. QK-Norm, <span data-claim="chameleon-arch-qknorm">applying layer norm to the query and key vectors within the attention</span>, is in every layer of both sizes (<span data-claim="chameleon-arch-qk-essential">QK-norm is essential in both cases</span>). Then the sizes split, as the line under the box shows. Chameleon-7B adds <span data-claim="chameleon-arch-dropout">dropout after the attention and feed-forward layers</span>, <span data-claim="chameleon-arch-dropout-7b">a dropout of 0.1</span>. Chameleon-34B <span data-claim="chameleon-arch-reorder">required an additional re-ordering of the norms</span> (the norm moves to each sublayer's output) and uses no dropout; it also uses grouped-query attention, <span data-claim="chameleon-arch-gqa">34B only</span>.</p>
+    </div>
+    <div data-stage="logits" hidden>
+      <h4>5. One softmax over both alphabets</h4>
+      <p>At every position the transformer's last hidden vector is mapped to <span data-claim="page-fusion-vocab">65,536</span> logits, one per vocabulary entry, and a single softmax turns them into a distribution over "which id comes next". Text words and image codes compete in that one softmax. This is the final softmax the z-loss protects: QK-Norm <span data-claim="chameleon-arch-final-softmax">does not solve the problem of logit shift in the final softmax</span>. (Whether this output layer shares weights with the embedding table is not stated.)</p>
+    </div>
+    <div data-stage="loss" hidden>
+      <h4>6. Every next id is graded, text or image</h4>
+      <p>This is <a href="#eq-fusion">the loss equation above</a>: next-token cross-entropy at every position, plus the z-loss <span class="tex">10^{-5}\log^2 Z_t</span> (coefficient <span data-claim="chameleon-arch-zcoef">10^-5</span>, the same at both sizes). An image id is graded exactly like a word: predicting the wrong one of <span data-claim="page-fusion-codebook">8192</span> codes costs the same kind of term as predicting the wrong word. That is what trains the model to <em>draw</em>: to continue a caption with 1024 image ids, it must have learned to predict each one from the ones before.</p>
+      <p>Which positions? In pre-training, all of them (our reading: the paper describes loss masking, <span data-claim="chameleon-arch-sft-mask">selectively masking the loss for the prompt tokens</span>, only as a change it makes for supervised fine-tuning).</p>
+    </div>
+    <div data-stage="backward" hidden>
+      <h4>7. The gradient stops at the integers</h4>
+      <p>From the loss, the gradient flows into the logits (<span class="tex">\partial\,\mathrm{CE}/\partial o_i = p_i - \delta_{i x}</span>), through the output layer, down every transformer layer, and into the embedding table: but only into the rows of the ids that actually appeared, text rows and image rows alike. Our reading: the embedding row for image code 517 is a transformer weight and learns; the tokenizer's own codebook vector number 517 is a different object, in the tokenizer's space, and does not.</p>
+      <p>Why can it go no further? Again our reading, since the paper does not discuss it: what the transformer received is an integer. The lookup "row <span class="tex">z_i</span> of the table" has a derivative with respect to the row, but not with respect to <span class="tex">z_i</span>; and the <span class="tex">\arg\min</span> that chose <span class="tex">z_i</span> is a step function of the pixels, flat almost everywhere, so a small change to the image either leaves the id unchanged (gradient zero) or jumps it to another id (no derivative). So the tokenizer box says <b class="c-brown">gradient stops here</b>, not "passes, no update": no gradient enters it at all. Whatever the tokenizer rounds away (<a href="#eq-fusion-vq">small text, fine detail</a>), the transformer can never ask for back.</p>
+      <p>A derived aside on the z-loss (ours, checked numerically): the cross-entropy gradients over the vocabulary sum to <span class="tex">\sum_i (p_i - \delta_{ix}) = 0</span>, so cross-entropy cannot push all logits up or down together; the z-loss gradients sum to <span class="tex">\sum_i 2\cdot 10^{-5} \log Z\, p_i = 2\cdot 10^{-5}\log Z</span>, which is not zero. The z-loss is the only term that pulls the shared offset back toward <span class="tex">\log Z = 0</span>.</p>
+    </div>
+    <div data-stage="update" hidden>
+      <h4>8. One optimizer step</h4>
+      <p>All the red-outlined weights move together: <span data-claim="chameleon-arch-optim">AdamW</span> with betas <span data-claim="chameleon-arch-betas">0.9 and 0.95</span>, epsilon <span data-claim="chameleon-arch-eps">10^-5</span>, a peak learning rate of <span data-claim="chameleon-arch-lr">1.0 x 10^-4</span> after <span data-claim="chameleon-arch-warmup">4000</span> warm-up steps, then an <span data-claim="chameleon-arch-decay">exponential decay schedule of the learning rate to 0</span>, weight decay <span data-claim="chameleon-arch-wd">0.1</span> and <span data-claim="chameleon-arch-clip">global gradient clipping at a threshold of 1.0</span>. A batch is <span data-claim="chameleon-arch-batch-7b">2^23</span> tokens for 7B and <span data-claim="chameleon-arch-batch-34b">3 x 2^22</span> for 34B, over <span data-claim="chameleon-tokens-seen">9.2 trillion (2.1 epochs)</span> tokens: <span data-computed>about 1.10 million</span> and <span data-computed>about 0.73 million</span> steps (our arithmetic). The paper's loss curves cover the first <span data-claim="chameleon-arch-600k">600k steps of training (55% for 7B and 80% for 34B)</span>, which gives <span data-computed>about 1.09 million</span> and <span data-computed>0.75 million</span>: consistent. The runs used <span data-claim="chameleon-arch-gpus">1024 / 3072</span> concurrent <span data-claim="chameleon-arch-a100">NVIDIA A100 80 GB</span> GPUs and <span data-claim="chameleon-arch-gpuh">856,481 / 4,282,407</span> GPU hours.</p>
+    </div>
+  </div>
+  <figcaption>Computed: the image and vocabulary sizes come from Sec. 2.1, the per-size settings from the paper's model and resource tables and Sec. 2.3; the hidden width <span class="tex">d</span>, the layer count and the sequence length <span class="tex">T</span> are symbols because the paper does not give them. Before you open stage 7, guess: the transformer learns to predict image codes; does its gradient ever reach the tokenizer that made them?</figcaption>
+</figure>
+
+<h3>What it bought</h3>
+<p>The payoff shows up where late fusion cannot go: answers that mix text and generated images. The authors wrote a new human evaluation of <span data-claim="page-fusion-he-prompts">1,048</span> crowdsourced prompts that ask for mixed text-and-image answers, and compared Chameleon-34B against Gemini Pro and GPT-4V. Those models only write text, so the comparison also uses stronger versions, marked with a plus, that are allowed to write image captions which DALL-E 3 then renders into pictures. Annotators saw two answers and picked the better one; the win rate gives <span data-claim="chameleon-he-metric">1 point for a win and 0.5 points for a tie</span>.</p>
+<table class="data">
+  <thead><tr><th>Chameleon-34B vs</th><th>win rate</th></tr></thead>
+  <tbody>
+    <tr><td>Gemini Pro + DALL-E 3 images (all prompts)</td><td><span data-claim="page-fusion-he-gemini">58.8%</span></td></tr>
+    <tr><td>GPT-4V + DALL-E 3 images (all prompts)</td><td><span data-claim="page-fusion-he-gpt4v">51.6%</span></td></tr>
+    <tr><td>Gemini Pro and GPT-4V, text only</td><td><span data-claim="chameleon-he-raw">69.1% and 61.7%</span></td></tr>
+  </tbody>
+</table>
+<p>One number needs a warning. The paper's text quotes a <span data-claim="page-fusion-he-mixed">60.4%</span> preference against Gemini Pro; in its own table that figure is the win rate on the mixed-modal-prompt subset, and the overall row is the <span data-claim="page-fusion-he-gemini">58.8%</span> above. Against GPT-4V with images the result is close to a coin flip. The paper also lists its own caveats: the prompts came from crowdworkers rather than real users, and reading-heavy tasks such as OCR are absent from the set.</p>
+
+<p>Early fusion is the most elegant answer on this page to "how should a model hold an image": no encoder, no bridge, one alphabet. But it pays twice, in training stability and in a tokenizer that rounds away the fine print. The next chapter looks at where the mainstream actually landed in 2025, and it is the late-fusion shape again, now with every fix from the earlier chapters bolted on.</p>
+</section>

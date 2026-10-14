@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PE3 test page</title>
+<style>
+:root { color-scheme: dark light;
+  --bg:#16181d; --fg:#e8e6e3; --muted:#9aa0a6; --rule:#2a2d34; --panel:#1d2026; --panel2:#23272e;
+  --blue:#58c4dd; --yellow:#f4d35e; --green:#83c167; --red:#fc6255; --brown:#c8906d; }
+@media (prefers-color-scheme: light) { :root {
+  --bg:#fbfaf7; --fg:#1d1f23; --muted:#5f6368; --rule:#e2dfd8; --panel:#f2f0ea; --panel2:#e9e6de;
+  --blue:#1f6f9a; --yellow:#8a6700; --green:#3f7d20; --red:#c0392b; --brown:#8b5a2b; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:1.125rem/1.7 Charter, "Bitstream Charter", Georgia, serif; }
+main { max-width:60rem; margin:0 auto; padding:1rem 16px 4rem; }
+h2 { font-size:1.6rem; margin:2rem 0 .6rem; }
+figure.viz { margin:1.8rem 0; padding:1rem; background:var(--panel); border-radius:14px; position:relative; }
+figure.viz canvas { display:block; width:100%; border-radius:9px; background:var(--bg); touch-action:none; }
+.controls { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; margin:.8rem 0 .2rem; font:.92rem system-ui, sans-serif; }
+.controls button { font:inherit; color:var(--fg); background:var(--panel2); border:1px solid var(--rule); border-radius:999px; padding:.34rem .85rem; cursor:pointer; }
+.controls button:hover { border-color:var(--muted); }
+.controls button[aria-pressed="true"] { border-color:var(--green); color:var(--green); }
+.controls button:focus-visible, .controls input:focus-visible { outline:2px solid var(--yellow); outline-offset:2px; }
+.controls label { display:flex; align-items:center; gap:.4rem; color:var(--muted); }
+.controls input[type=range] { accent-color:var(--blue); width:10rem; max-width:40vw; }
+.readout { font:.92rem/1.5 system-ui, sans-serif; color:var(--fg); margin:.6rem 0 0; min-height:1.5em; }
+figcaption { font:.86rem/1.5 system-ui, sans-serif; color:var(--muted); margin-top:.6rem; }
+@media (max-width:520px) { figure.viz { margin:1.4rem -16px; padding:.7rem; border-radius:0; } }
+</style>
+<style>
+canvas.pe3 { display:block; width:100%; touch-action:pan-y; cursor:grab; }
+canvas.pe3.pe3-drag { cursor:grabbing; }
+canvas.pe3.pe3-static { cursor:default; }
+canvas.pe3:focus-visible { outline:2px solid var(--yellow, #f4d35e); outline-offset:2px; }
+</style>
+<script>
+/* PE3: a small 3D renderer on canvas 2D for point clouds, surfaces, trajectories and stacked planes. Standalone (no PE).
+   const s = PE3.scene(canvasEl, {
+     aspect: .62,            // height / width; number or function(w)
+     fov: 40, dist: 6,       // perspective camera looking at the origin; fov in degrees (vertical)
+     yaw: .6, pitch: .35,    // radians; yaw turns around y, pitch > 0 looks down from above
+     autoRotate: 0,          // rad/s; forced to 0 under prefers-reduced-motion
+     draggable: true,        // pointer drag rotates; arrow keys rotate by .15 rad when the canvas is focused
+     depthCue: true,         // farther items a little smaller and fainter
+     items: [],              // replace any time: s.items = [...]; s.redraw()
+     onFrame(s, t, dt) {} }) // optional; keeps the rAF loop running while the canvas is on screen
+   s.project([x,y,z]) -> { x, y, depth, k }   // CSS px; depth = 1 at the origin, > 1 farther away; k = px per world unit there
+   s.setView({ yaw, pitch, dist }, ms)        // eased; jumps when PE3.instant()
+   s.tween(ms, step(u), done) -> cancel       // eased u in 0..1 (ends on exactly 1); step(1) at once when PE3.instant()
+   s.pulse(word)                              // ~1.1 s highlight of items whose link === word; a 'pe-link' CustomEvent on the enclosing <figure> does the same
+   s.redraw(); s.destroy()
+   PE3.instant()                              // prefers-reduced-motion or <html data-cue-replay="1">
+   PE3.surface(f, { x0, x1, z0, z1, nx, nz, fill(y) -> color, stroke }) -> quad items, y = f(x, z)
+   PE3.gaussian(n, { mean: [x,y,z], scale: [sx,sy,sz], seed }) -> [[x,y,z], ...]  (mulberry32, deterministic)
+   PE3.rng(seed) -> () => uniform [0,1);  PE3.mix(c1, c2, u) -> 'rgb(...)'
+   Items (plain objects; all take link and alpha; any color may be '#hex', 'rgb()', a CSS variable name like '--blue', or a function returning one):
+     { type:'points', pts, color, colors, size }     size in px at depth 1
+     { type:'line',   pts, color, width, dash, arrow }
+     { type:'quad',   pts:[p0,p1,p2,p3], fill, stroke }  depth-sorted by centroid; stroke defaults to the fill (hides seams)
+     { type:'label',  at, text, color, dx, dy, font, align }  screen-space, never scaled, drawn last
+     { type:'axes',   len, color, labels:['x','y','z'] }
+     { type:'grid',   y, size, step, color }
+   The loop runs only while something moves (view easing, autoRotate, a pulse, a tween, onFrame) and the canvas is on screen. */
+const PE3 = (() => {
+  const instant = () => matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.cueReplay === '1';
+  const ease = u => u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const PULSE_MS = 1100;
+
+  function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function gaussian(n, o = {}) {
+    const r = rng(o.seed == null ? 1 : o.seed), m = o.mean || [0, 0, 0], sc = o.scale || [1, 1, 1], out = [];
+    const g = () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());
+    for (let i = 0; i < n; i++) out.push([m[0] + sc[0] * g(), m[1] + sc[1] * g(), m[2] + sc[2] * g()]);
+    return out;
+  }
+  function surface(f, o) {
+    const nx = o.nx || 24, nz = o.nz || 24, items = [];
+    const P = (i, j) => { const x = o.x0 + (o.x1 - o.x0) * i / nx, z = o.z0 + (o.z1 - o.z0) * j / nz; return [x, f(x, z), z]; };
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const pts = [P(i, j), P(i + 1, j), P(i + 1, j + 1), P(i, j + 1)], y = (pts[0][1] + pts[1][1] + pts[2][1] + pts[3][1]) / 4;
+      items.push({ type: 'quad', pts, fill: typeof o.fill === 'function' ? () => o.fill(y) : o.fill, stroke: o.stroke, link: o.link, alpha: o.alpha });
+    }
+    return items;
+  }
+
+  // Color parsing: '#rgb', '#rrggbb', 'rgb(a)(...)' -> [r,g,b]; anything else is left to the canvas untouched.
+  function parse(c) {
+    if (!c) return null;
+    if (c[0] === '#') { const h = c.length === 4 ? c.slice(1).split('').map(x => x + x).join('') : c.slice(1, 7); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+    const m = /rgba?\(([^)]+)\)/.exec(c); if (m) return m[1].split(/[\s,\/]+/).slice(0, 3).map(Number);
+    return null;
+  }
+  function mix(c1, c2, u) {
+    const a = parse(c1), b = parse(c2); if (!a || !b) return u < .5 ? c1 : c2;
+    return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * u)).join(',')})`;
+  }
+
+  function scene(el, o = {}) {
+    const ctx = el.getContext('2d');
+    const S = {
+      items: o.items || [], yaw: o.yaw ?? .6, pitch: o.pitch ?? .35, dist: o.dist ?? 6, fov: o.fov ?? 40,
+      autoRotate: o.autoRotate || 0, depthCue: o.depthCue !== false, onFrame: o.onFrame || null, w: 0, h: 0, el,
+    };
+    const aspect = o.aspect ?? .62;
+    const tweens = [], glow = {};   // glow[word] = start time of the pulse
+    let viewTween = null, raf = 0, running = false, visible = true, dirty = false, last = 0, dead = false;
+    let cssCache = {}, F = 1, cam = null;
+
+    const css = n => cssCache[n] || (cssCache[n] = getComputedStyle(document.documentElement).getPropertyValue(n).trim());
+    const col = c => { if (typeof c === 'function') c = c(); return c && c[0] === '-' && c[1] === '-' ? (css(c) || '#888') : c; };
+    const fg = () => css('--fg') || '#e8e6e3';
+
+    function camera() {
+      const cy = Math.cos(S.yaw), sy = Math.sin(S.yaw), cp = Math.cos(S.pitch), sp = Math.sin(S.pitch);
+      F = (S.h / 2) / Math.tan(S.fov * Math.PI / 360);
+      cam = { cy, sy, cp, sp };
+    }
+    function project(p) {
+      if (!cam) camera();
+      const { cy, sy, cp, sp } = cam;
+      const x1 = p[0] * cy - p[2] * sy, z1 = p[0] * sy + p[2] * cy;
+      const y2 = p[1] * cp - z1 * sp, z2 = p[1] * sp + z1 * cp;
+      const cz = Math.max(.05, S.dist - z2), k = F / cz;
+      return { x: S.w / 2 + x1 * k, y: S.h / 2 - y2 * k, depth: cz / S.dist, k };
+    }
+    const cue = d => S.depthCue ? clamp(1 - (d - 1) * 1.4, .3, 1) : 1;
+    const sizeCue = d => S.depthCue ? 1 / d : 1;
+
+    function glowOf(link, now) {
+      if (!link || !(link in glow)) return 0;
+      return instant() ? 1 : Math.sin(Math.PI * (now - glow[link]) / PULSE_MS);
+    }
+    const lit = (c, g) => g > 0 ? mix(c, fg(), .55 * g) : c;
+
+    // Expand axes and grid into lines and labels, so the sorter sees one kind of thing.
+    function expand(items) {
+      const out = [];
+      for (const it of items) {
+        if (it.type === 'axes') {
+          const L = it.len || 1.5, c = it.color || '--muted', lab = it.labels || ['x', 'y', 'z'];
+          [[L, 0, 0], [0, L, 0], [0, 0, L]].forEach((e, i) => {
+            out.push({ type: 'line', pts: [[0, 0, 0], e], color: c, width: it.width || 1, alpha: it.alpha, link: it.link, arrow: true });
+            if (lab[i]) out.push({ type: 'label', at: e.map(v => v * 1.08), text: lab[i], color: c, alpha: it.alpha, link: it.link, font: it.font });
+          });
+        } else if (it.type === 'grid') {
+          const y = it.y || 0, sz = it.size || 2, st = it.step || .5, c = it.color || '--rule', n = Math.round(sz / st);
+          for (let i = -n; i <= n; i++) {
+            const v = i * st;
+            out.push({ type: 'line', pts: [[v, y, -sz], [v, y, sz]], color: c, width: it.width || 1, alpha: it.alpha, link: it.link });
+            out.push({ type: 'line', pts: [[-sz, y, v], [sz, y, v]], color: c, width: it.width || 1, alpha: it.alpha, link: it.link });
+          }
+        } else out.push(it);
+      }
+      return out;
+    }
+
+    function draw(now) {
+      cssCache = {}; camera();
+      // Expire by time here, not in glowOf: a pulse for a word no item carries must still end, or the loop never idles.
+      for (const k in glow) if (now - glow[k] >= PULSE_MS) delete glow[k];
+      const W = S.w, H = S.h; if (!W || !H) return;
+      ctx.clearRect(0, 0, W, H);
+      const draws = [], labels = [];
+      for (const it of expand(S.items)) {
+        const g = glowOf(it.link, now), a = it.alpha ?? 1;
+        if (it.type === 'points') {
+          const c = col(it.color || '--blue');
+          it.pts.forEach((p, i) => { const q = project(p); draws.push({ d: q.depth, t: 0, q, c: it.colors ? col(it.colors[i]) : c, size: it.size || 3, g, a }); });
+        } else if (it.type === 'line') {
+          const q = it.pts.map(project); if (!q.length) continue;
+          draws.push({ d: q.reduce((s, p) => s + p.depth, 0) / q.length, t: 1, q, it, g, a });
+        } else if (it.type === 'quad') {
+          const q = it.pts.map(project);
+          draws.push({ d: (q[0].depth + q[1].depth + q[2].depth + q[3].depth) / 4, t: 2, q, it, g, a });
+        } else if (it.type === 'label') labels.push({ it, q: project(it.at), g, a });
+      }
+      draws.sort((a, b) => b.d - a.d);
+      for (const d of draws) {
+        const ga = d.a * cue(d.d);
+        if (d.t === 0) {
+          const r = d.size * sizeCue(d.d) * (1 + .6 * d.g);
+          ctx.globalAlpha = clamp(ga + .4 * d.g, 0, 1); ctx.fillStyle = lit(d.c, d.g);
+          ctx.beginPath(); ctx.arc(d.q.x, d.q.y, r, 0, 7); ctx.fill();
+        } else if (d.t === 1) {
+          const it = d.it, q = d.q;
+          ctx.save(); ctx.globalAlpha = clamp(ga + .4 * d.g, 0, 1); ctx.strokeStyle = lit(col(it.color || '--fg'), d.g);
+          ctx.lineWidth = (it.width || 1.5) * sizeCue(d.d) * (1 + .6 * d.g); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+          if (it.dash) ctx.setLineDash(it.dash);
+          ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke();
+          if (it.arrow && q.length > 1) {
+            const a = q[q.length - 2], b = q[q.length - 1], an = Math.atan2(b.y - a.y, b.x - a.x), hd = Math.min(9, Math.hypot(b.x - a.x, b.y - a.y) * .5);
+            ctx.setLineDash([]); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.moveTo(b.x, b.y);
+            ctx.lineTo(b.x - hd * Math.cos(an - .42), b.y - hd * Math.sin(an - .42)); ctx.lineTo(b.x - hd * Math.cos(an + .42), b.y - hd * Math.sin(an + .42)); ctx.closePath(); ctx.fill();
+          }
+          ctx.restore();
+        } else {
+          const it = d.it, q = d.q, f = lit(col(it.fill || '--panel2'), d.g);
+          ctx.save(); ctx.globalAlpha = clamp(ga + .3 * d.g, 0, 1);
+          ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
+          if (it.fill !== null) { ctx.fillStyle = f; ctx.fill(); }
+          if (it.stroke !== null) { ctx.strokeStyle = it.stroke ? lit(col(it.stroke), d.g) : f; ctx.lineWidth = it.stroke ? (it.width || 1) : .75; ctx.lineJoin = 'round'; ctx.stroke(); }
+          ctx.restore();
+        }
+      }
+      ctx.globalAlpha = 1;
+      for (const { it, q, g, a } of labels) {
+        ctx.save(); ctx.globalAlpha = clamp(a * cue(q.depth) + .5 * g, 0, 1);
+        ctx.font = it.font || '600 12px system-ui, sans-serif'; ctx.textAlign = it.align || 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = lit(col(it.color || '--fg'), g); ctx.fillText(it.text, q.x + (it.dx || 0), q.y + (it.dy || 0)); ctx.restore();
+      }
+    }
+
+    const spin = () => S.autoRotate && !instant() ? S.autoRotate : 0;
+    const active = () => viewTween || tweens.length || spin() || Object.keys(glow).length || S.onFrame;
+    function frame(t) {
+      raf = 0; if (dead) return;
+      const dt = last ? (t - last) / 1000 : 0; last = t;
+      if (spin()) S.yaw += spin() * dt;
+      if (viewTween) {
+        const u = clamp((t - viewTween.t0) / viewTween.ms, 0, 1), e = ease(u);
+        for (const k in viewTween.to) S[k] = viewTween.from[k] + (viewTween.to[k] - viewTween.from[k]) * e;
+        if (u >= 1) { Object.assign(S, viewTween.to); viewTween = null; }
+      }
+      for (const tw of tweens.slice()) {
+        const u = clamp((t - tw.t0) / tw.ms, 0, 1); tw.step(u >= 1 ? 1 : ease(u));
+        if (u >= 1) { tweens.splice(tweens.indexOf(tw), 1); tw.done && tw.done(); }
+      }
+      if (S.onFrame) S.onFrame(S, t, dt);
+      draw(t); dirty = false;
+      if (active() && visible) raf = requestAnimationFrame(frame); else { running = false; last = 0; }
+    }
+    function kick() { if (dead || running || !visible) return; running = true; last = 0; raf = requestAnimationFrame(frame); }
+    function redraw() { if (running) { dirty = true; return; } if (!visible) { dirty = true; return; } kick(); }
+
+    function tween(ms, step, done) {
+      if (instant()) { step(1); done && done(); redraw(); return () => {}; }
+      const tw = { t0: performance.now(), ms, step, done }; tweens.push(tw); kick();
+      return () => { const i = tweens.indexOf(tw); if (i >= 0) tweens.splice(i, 1); };
+    }
+    function setView(v, ms) {
+      const to = {}; for (const k of ['yaw', 'pitch', 'dist']) if (v[k] != null) to[k] = v[k];
+      if (!ms || instant()) { viewTween = null; Object.assign(S, to); redraw(); return; }
+      viewTween = { t0: performance.now(), ms, from: { yaw: S.yaw, pitch: S.pitch, dist: S.dist }, to }; kick();
+    }
+    function pulse(word) { glow[word] = performance.now(); kick(); }
+
+    // Sizing, visibility and theme.
+    function resize() {
+      const w = el.clientWidth, h = Math.round(w * (typeof aspect === 'function' ? aspect(w) : aspect)), r = devicePixelRatio || 1;
+      el.style.height = h + 'px'; el.width = Math.round(w * r); el.height = Math.round(h * r);
+      ctx.setTransform(r, 0, 0, r, 0, 0); S.w = w; S.h = h; draw(performance.now());
+    }
+    const ro = new ResizeObserver(resize); ro.observe(el);
+    const io = new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible && (dirty || active())) kick(); else if (!visible && raf) { cancelAnimationFrame(raf); raf = 0; running = false; last = 0; } });
+    io.observe(el);
+    const mq = matchMedia('(prefers-color-scheme: dark)'), onTheme = () => redraw(); mq.addEventListener('change', onTheme);
+    const fig = el.closest('figure'), onLink = e => pulse(e.detail); if (fig) fig.addEventListener('pe-link', onLink);
+
+    // Interaction.
+    const canTurn = o.draggable !== false;
+    el.classList.add('pe3'); el.classList.toggle('pe3-static', !canTurn); el.style.touchAction = 'pan-y';
+    if (canTurn && !el.hasAttribute('tabindex')) el.tabIndex = 0;
+    const PMAX = Math.PI / 2 - .05;
+    const turn = (dy, dp) => { viewTween = null; S.yaw += dy; S.pitch = clamp(S.pitch + dp, -PMAX, PMAX); redraw(); };
+    let drag = null;
+    const onDown = e => { if (!canTurn) return; drag = { x: e.clientX, y: e.clientY }; el.setPointerCapture(e.pointerId); el.classList.add('pe3-drag'); };
+    const onMove = e => { if (!drag) return; turn(-(e.clientX - drag.x) * .01, (e.clientY - drag.y) * .01); drag = { x: e.clientX, y: e.clientY }; };
+    const onUp = () => { drag = null; el.classList.remove('pe3-drag'); };
+    const onKey = e => {
+      if (!canTurn) return;
+      const d = { ArrowLeft: [-.15, 0], ArrowRight: [.15, 0], ArrowUp: [0, .15], ArrowDown: [0, -.15] }[e.key];
+      if (d) { e.preventDefault(); turn(d[0], d[1]); }
+    };
+    el.addEventListener('pointerdown', onDown); el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp); el.addEventListener('pointercancel', onUp); el.addEventListener('keydown', onKey);
+
+    function destroy() {
+      dead = true; if (raf) cancelAnimationFrame(raf); tweens.length = 0; viewTween = null; for (const k in glow) delete glow[k]; ro.disconnect(); io.disconnect(); mq.removeEventListener('change', onTheme);
+      if (fig) fig.removeEventListener('pe-link', onLink);
+      el.removeEventListener('pointerdown', onDown); el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp); el.removeEventListener('pointercancel', onUp); el.removeEventListener('keydown', onKey);
+    }
+    return Object.assign(S, { project, setView, tween, redraw, destroy, pulse });
+  }
+  return { scene, surface, gaussian, rng, mix, instant };
+})();
+</script>
+
+</head>
+<body>
+<main>
+<h2>1. Embedding cloud</h2>
+<figure class="viz" id="viz-emb">
+  <canvas id="emb-canvas" aria-label="400 embedding points in 3D"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-collapse">collapse</button>
+    <button type="button" id="btn-isotropic">isotropic</button>
+    <button type="button" id="btn-reset" data-cue-reset>reset</button>
+    <button type="button" id="btn-pulse-emb">pulse emb</button>
+  </div>
+  <p class="readout" id="emb-readout" aria-live="polite"></p>
+  <figcaption>Drag to rotate; arrow keys when focused.</figcaption>
+</figure>
+
+<h2>2. Energy surface</h2>
+<figure class="viz" id="viz-energy">
+  <canvas id="energy-canvas" aria-label="Energy surface with two valleys"></canvas>
+  <div class="controls">
+    <label>position <input type="range" id="energy-t" min="0" max="1" step=".01" value=".15"></label>
+  </div>
+  <p class="readout" id="energy-readout" aria-live="polite"></p>
+</figure>
+
+<h2>3. Plan in latent space</h2>
+<figure class="viz" id="viz-plan">
+  <canvas id="plan-canvas" aria-label="Start, goal, one plan and candidate trajectories"></canvas>
+  <div class="controls">
+    <button type="button" id="btn-replan">replan</button>
+  </div>
+  <p class="readout" id="plan-readout" aria-live="polite"></p>
+</figure>
+</main>
+<script>
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const lerp = (a, b, u) => a + (b - a) * u;
+window.pe3scenes = {};
+
+// 1. Embedding cloud: u = 0 isotropic, u = 1 collapsed; positions derive from the fixed base each frame.
+{
+  const base = PE3.gaussian(400, { scale: [1, 1, 1], seed: 7 });
+  const st = { u: 0 };
+  let cancel = () => {};
+  const pts = { type: 'points', pts: base, color: '--blue', size: 3, link: 'emb' };
+  const s = PE3.scene(document.getElementById('emb-canvas'), { aspect: w => w < 520 ? .8 : .58, dist: 6, yaw: .6, pitch: .35,
+    items: [{ type: 'grid', y: -1.6, size: 2, step: .5 }, { type: 'axes', len: 1.8 }, pts, { type: 'label', at: [1.2, 1.7, 1.2], text: 'embeddings', color: '--blue', link: 'emb' }] });
+  window.pe3scenes.emb = s;
+  const out = document.getElementById('emb-readout');
+  const apply = () => { pts.pts = base.map(p => [p[0] * (1 - st.u), p[1] * (1 - st.u), p[2] * (1 - st.u)]); };
+  const go = (target, ms) => { cancel(); const from = st.u; cancel = s.tween(ms, u => { st.u = lerp(from, target, u); apply(); s.redraw(); }); };
+  document.getElementById('btn-collapse').addEventListener('click', () => { go(1, 800); out.textContent = 'Collapsed: every embedding at the origin.'; });
+  document.getElementById('btn-isotropic').addEventListener('click', () => { go(0, 800); out.textContent = 'Isotropic: an isotropic Gaussian cloud.'; });
+  document.getElementById('btn-reset').addEventListener('click', () => { cancel(); st.u = 0; apply(); s.redraw(); s.setView({ yaw: .6, pitch: .35, dist: 6 }, 500); out.textContent = 'Reset.'; });
+  document.getElementById('btn-pulse-emb').addEventListener('click', () => document.getElementById('viz-emb').dispatchEvent(new CustomEvent('pe-link', { detail: 'emb' })));
+  out.textContent = 'Isotropic: an isotropic Gaussian cloud.';
+}
+
+// 2. Energy surface: two valleys, a marker that slides along a path between them.
+{
+  const f = (x, z) => .16 * (x * x + z * z) - .75 * Math.exp(-((x - .9) ** 2 + (z - .6) ** 2) / .5) - .6 * Math.exp(-((x + .9) ** 2 + (z + .5) ** 2) / .6) - .1;
+  let ymin = 1e9, ymax = -1e9;
+  for (let x = -1.8; x <= 1.8; x += .05) for (let z = -1.8; z <= 1.8; z += .05) { const y = f(x, z); ymin = Math.min(ymin, y); ymax = Math.max(ymax, y); }
+  const dark = matchMedia('(prefers-color-scheme: dark)'); let tk = null, B, Y;
+  const ramp = y => { if (dark.matches !== tk) { tk = dark.matches; B = css('--blue'); Y = css('--yellow'); } return PE3.mix(B, Y, (y - ymin) / (ymax - ymin)); };
+  const surf = PE3.surface(f, { x0: -1.8, x1: 1.8, z0: -1.8, z1: 1.8, nx: 28, nz: 28, fill: ramp, alpha: .92, link: 'energy' });
+  const marker = { type: 'points', pts: [[0, 0, 0]], color: '--red', size: 7, link: 'x' };
+  const mlabel = { type: 'label', at: [0, 0, 0], text: 'x', color: '--red', dy: -16, link: 'x' };
+  const path = t => [lerp(-.9, .9, t), 0, lerp(-.5, .6, t)];
+  const pathPts = []; for (let i = 0; i <= 40; i++) { const p = path(i / 40); p[1] = f(p[0], p[2]) + .02; pathPts.push(p); }
+  const narrow = document.getElementById('energy-canvas').clientWidth < 520;
+  const s = PE3.scene(document.getElementById('energy-canvas'), { aspect: w => w < 520 ? .8 : .58, dist: narrow ? 8 : 6.7, yaw: -.5, pitch: .7, fov: 36,
+    items: [...surf, { type: 'line', pts: pathPts, color: '--fg', width: 1, dash: [3, 4], alpha: .6 }, marker, mlabel,
+      narrow ? { type: 'label', at: [1.8, f(1.8, -1.8) + .2, -1.8], text: 'E(x)', color: '--muted', dy: -8 } : { type: 'label', at: [1.8, f(1.8, 1.8), 1.8], text: 'E(x)', color: '--muted', dx: 12, align: 'left' }] });
+  window.pe3scenes.energy = s;
+  const inp = document.getElementById('energy-t'), out = document.getElementById('energy-readout');
+  const set = () => { const t = +inp.value, p = path(t); p[1] = f(p[0], p[2]) + .04; marker.pts = [p]; mlabel.at = p; s.redraw(); out.textContent = `E = ${f(p[0], p[2]).toFixed(2)} at t = ${t.toFixed(2)}`; };
+  inp.addEventListener('input', set); set();
+}
+
+// 3. Plan: one solid plan and 12 faint candidates; replan draws a new seed and eases the plan to the new best.
+{
+  const start = [-1.6, 0, -1], goal = [1.6, 0, 1.1];
+  const st = { seed: 11, plan: null, from: null, to: null, u: 1 };
+  const cands = { type: 'line', pts: [], color: '--muted', width: 1, dash: [3, 5], alpha: .5 };
+  const items = [{ type: 'grid', y: 0, size: 2, step: .5 }];
+  const candItems = Array.from({ length: 12 }, () => ({ ...cands, pts: [] }));
+  const plan = { type: 'line', pts: [], color: '--green', width: 2.5, arrow: true, link: 'plan' };
+  const gen = seed => {
+    const r = PE3.rng(seed), out = [];
+    for (let c = 0; c < 12; c++) {
+      const pts = [start], n = 4;
+      for (let i = 1; i < n; i++) { const t = i / n; pts.push([lerp(start[0], goal[0], t) + (r() - .5) * 1.4, .2 + r() * 1.2, lerp(start[2], goal[2], t) + (r() - .5) * 1.4]); }
+      pts.push(goal); out.push(pts);
+    }
+    return out;
+  };
+  const cost = pts => pts.reduce((s, p, i) => i ? s + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1], p[2] - pts[i - 1][2]) : 0, 0);
+  const curve = pts => { const o = []; for (let k = 0; k <= 32; k++) { const t = k / 32 * (pts.length - 1), i = Math.min(pts.length - 2, Math.floor(t)), u = t - i;
+    const a = pts[Math.max(0, i - 1)], b = pts[i], c = pts[i + 1], d = pts[Math.min(pts.length - 1, i + 2)];
+    o.push([0, 1, 2].map(j => .5 * (2 * b[j] + (-a[j] + c[j]) * u + (2 * a[j] - 5 * b[j] + 4 * c[j] - d[j]) * u * u + (-a[j] + 3 * b[j] - 3 * c[j] + d[j]) * u * u * u))); } return o; };
+  const s = PE3.scene(document.getElementById('plan-canvas'), { aspect: w => w < 520 ? .8 : .55, dist: 6.5, yaw: .35, pitch: .45,
+    items: [...items, ...candItems, plan,
+      { type: 'points', pts: [start], color: '--yellow', size: 6, link: 'start' }, { type: 'points', pts: [goal], color: '--red', size: 6, link: 'goal' },
+      { type: 'label', at: start, text: 'start', color: '--yellow', dy: -14, link: 'start' }, { type: 'label', at: goal, text: 'goal', color: '--red', dy: -14, link: 'goal' }] });
+  window.pe3scenes.plan = s;
+  const out = document.getElementById('plan-readout');
+  const build = seed => { const c = gen(seed); c.forEach((pts, i) => { candItems[i].pts = curve(pts); }); const best = c.map(cost).reduce((b, v, i, a) => v < a[b] ? i : b, 0); return candItems[best].pts; };
+  st.plan = build(st.seed); plan.pts = st.plan;
+  let busy = -1e9;
+  // A second press within the ease is ignored, so a replayed cue never advances the seed twice.
+  document.getElementById('btn-replan').addEventListener('click', () => {
+    if (performance.now() - busy < 800) return; busy = performance.now();
+    st.seed += 1; const from = st.plan, to = build(st.seed); st.plan = to;
+    s.tween(700, u => { plan.pts = from.map((p, i) => [0, 1, 2].map(j => lerp(p[j], to[i][j], u))); s.redraw(); });
+    out.textContent = `Plan from seed ${st.seed}: ${cost(to).toFixed(2)} latent units.`;
+  });
+  out.textContent = `Plan from seed ${st.seed}.`;
+}
+</script>
+</body>
+</html>

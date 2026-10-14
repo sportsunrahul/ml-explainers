@@ -1,0 +1,18 @@
+viz-queue simulation (build/sim/moco.js), 2026-10-13
+settings {"SLOTS":16,"S":1,"V":0.0003,"DIR":[0.94,0.34],"SEED":5,"BURN":60000,"TRAIL":32,"RUN":500,"MS":[0,0.9,0.99,0.999,0.9999]}
+Readout after a chip click (steady state after BURN steps), then after 1 step, then after RUN more steps:
+m=0  half-life 0.0 steps | init spread 4.62 lag 0.78 | +1 spread 4.62 lag 1.31 | +500 spread 4.31 lag 0.54
+m=0.9  half-life 6.6 steps | init spread 0.79 lag 0.19 | +1 spread 0.62 lag 0.12 | +500 spread 0.60 lag 0.12
+m=0.99  half-life 69.0 steps | init spread 0.09 lag 0.55 | +1 spread 0.08 lag 0.52 | +500 spread 0.06 lag 0.20
+m=0.999  half-life 692.8 steps | init spread 0.01 lag 0.58 | +1 spread 0.01 lag 0.53 | +500 spread 0.01 lag 0.28
+m=0.9999  half-life 6931.1 steps | init spread 0.00 lag 3.00 | +1 spread 0.00 lag 2.94 | +500 spread 0.00 lag 2.89
+Averages over 2000 later steps (spread, lag):
+m=0  mean spread 4.302  mean lag 1.225
+m=0.9  mean spread 0.601  mean lag 0.147
+m=0.99  mean spread 0.066  mean lag 0.278
+m=0.999  mean spread 0.007  mean lag 0.386
+m=0.9999  mean spread 0.004  mean lag 2.928
+Notes: spread = largest distance between two key-encoder versions in the queue; lag = distance from the key
+encoder to the mean of the query encoder's last 16 positions (this mean carries query noise, about S/4, so lag
+never reaches 0). Half-life = ln 2 / -ln m. The toy has no loss and no accuracy; accuracies on the page come from
+MoCo's ablation table (claims moco-mom-*).

@@ -1,0 +1,50 @@
+<section id="ch-sam3d" class="chapter">
+<h2>SAM 3D: from a mask to an object</h2>
+<p>A mask tells you which pixels belong to an object. SAM 3D (submitted <span data-claim="sam3d-published-v1">2025-11-20</span>, revised <span data-claim="sam3d-published-v2">2026-06-02</span>) takes one image and one such mask and generates the whole object in 3D: its shape, including the hidden back, its texture, and where it sits in the scene.</p>
+
+<figure class="viz" id="viz-sam3d" data-scene="sam3d" data-toy>
+  <div class="controls"><div class="seg" role="tablist" aria-label="Stage">
+    <button type="button" role="tab" data-step="0" id="btn-sam3d-input">Image and mask</button>
+    <button type="button" role="tab" data-step="1" id="btn-sam3d-shape">Shape</button>
+    <button type="button" role="tab" data-step="2" id="btn-sam3d-layout">Layout</button>
+    <button type="button" role="tab" data-step="3" id="btn-sam3d-texture">Texture</button>
+  </div></div>
+  <div class="stage tall"></div>
+  <div class="controls"><button type="button" data-cue-reset id="btn-sam3d-reset">Reset</button></div>
+  <p class="readout" aria-live="polite"></p>
+  <figcaption>Toy model in 3D: drag to turn it. The mug from the desk scene, voxelised on a 12 x 12 x 12 grid; SAM 3D's grid is <span data-claim="sam3d-shape-res">64^3</span>. The placement values are ours.</figcaption>
+</figure>
+
+<p>SAM 3D is not part of SAM. It does not make masks; it assumes one, and its authors point to the SAM series as a fast way to get it. It belongs on this page for a different reason: it copies SAM's recipe for a field that had no data.</p>
+<p><b>The model.</b> A DINOv2 encoder turns the object crop, its mask, the full image and the full mask into <span data-claim="sam3d-dinov2-token-sets">4</span> sets of conditioning tokens. A <span data-claim="sam3d-geom-params">1.2B</span>-parameter geometry model, a flow-matching transformer, generates the coarse shape as <span data-claim="sam3d-shape-tokens">4096</span> latent tokens (a <span data-claim="sam3d-shape-res">64^3</span> voxel grid) and the layout as <span data-claim="sam3d-layout-tokens">1</span> more token: a rotation in <span data-claim="sam3d-rot-6d">6D</span> form, a translation and a scale per axis. A <span data-claim="sam3d-tex-params">600M</span>-parameter model then refines the shape and adds texture, and decoders output a mesh or Gaussian splats. Predict before you switch tabs: which of the three outputs (shape, rotation, placement) is hardest to learn from one photo?</p>
+<p>The geometry model learns all its outputs with one flow-matching loss: start from noise, and learn the velocity that moves it in a straight line to the true shape and layout.</p>
+
+<div class="eq" id="eq-sam3d-fm" data-build data-viz="viz-sam3d"><div class="tex tex-display">
+\mathcal{L}_{\text{CFM}} = \htmlData{step=1, link=shape}{\sum_{m \in \mathcal{M}} \lambda_m} \, \mathbb{E}_{\tau, \mathbf{x}_0^m}\Big[ \big\| \htmlData{step=2, link=layout}{\mathbf{v}^m} - \htmlData{step=3, link=mask}{\mathbf{v}_\theta^m(\mathbf{x}_\tau^m, \htmlClass{t-green}{c}, \tau)} \big\|^2 \Big]
+</div></div>
+<p class="eqno">SAM 3D v2, Eq. 1 (App. C.2), with <span class="tex">\mathbf{x}_\tau^m = \tau\mathbf{x}_1^m + (1-\tau)\mathbf{x}_0^m</span> and <span class="tex">\mathbf{v}^m = \mathbf{x}_1^m - \mathbf{x}_0^m</span>.</p>
+<ul class="gloss">
+  <li><span class="tex">m \in \mathcal{M}</span>: the outputs, shape, rotation, translation and scale, each with a weight <span class="tex">\lambda_m</span> (rotation and scale get <span data-claim="sam3d-lambda-r">0.1</span>).</li>
+  <li><span class="tex">\mathbf{x}_0^m</span>: noise; <span class="tex">\mathbf{x}_1^m</span>: the true value; <span class="tex">\mathbf{x}_\tau^m</span>: a point on the straight line between them at time <span class="tex">\tau</span>.</li>
+  <li><span class="tex">\mathbf{v}^m</span>: the velocity along that line, the target; <span class="tex">\mathbf{v}_\theta^m</span>: the network's guess, conditioned on <span class="tex">\htmlClass{t-green}{c}</span>, the image and the mask.</li>
+</ul>
+<p>If flow matching is new to you, the <a href="../diffusion-survey/explainer.html#ch-flow">diffusion explainer's rectified-flow chapter</a> builds it from scratch.</p>
+
+<h3>The data engine, again</h3>
+<p>Nobody has millions of photos paired with true 3D models, and most people cannot build a 3D mesh. They can, however, pick the best of several candidates. SAM 3D's engine asks for exactly that. Annotators choose target objects (<span data-claim="sam3d-stage1-sec">10 seconds</span> per object, with SAM helping to segment), pick the best of several candidate shapes (<span data-claim="sam3d-stage2-n">N=8</span> in the method section, 6 to 10 in the annotation statistics; <span data-claim="sam3d-stage2-sec">80 seconds</span>), and align the winner to a point cloud of the scene (<span data-claim="sam3d-stage3-sec">150 seconds</span>). Professional artists model the hardest failures. The losing candidates become negative examples for preference training.</p>
+<p>As in SAM's engine, the model takes over the work: the best SAM 3D model eventually produced about <span data-claim="sam3d-model-share">80%</span> of the annotated data. The engine annotated <span data-claim="sam3d-annot-images">almost 1 million</span> images with <span data-claim="sam3d-annot-untextured">3.14 million</span> untextured meshes and collected <span data-claim="sam3d-annot-prefs">7 million</span> pairwise preferences.</p>
+<p>The training follows a language-model recipe: pretraining on <span data-claim="sam3d-iso3do-meshes">2.7 million</span> rendered synthetic meshes, mid-training on <span data-claim="sam3d-rp3do-samples">61 million</span> semi-synthetic samples (rendered objects pasted or swapped into real images, plus synthetic indoor scenes), then supervised fine-tuning and preference optimisation (DPO) on the engine's real data. Each step helps, measured as shape F1 on the new SA-3DAO benchmark of <span data-claim="sam3d-sa3dao-size">1,000</span> artist-made meshes paired with natural images:</p>
+<table class="data">
+  <thead><tr><th>Training stage added</th><th>Shape F1@0.01</th></tr></thead>
+  <tbody>
+    <tr><td>Pretraining (synthetic)</td><td><span data-claim="sam3d-t4-pre">0.1349</span></td></tr>
+    <tr><td>+ mid-training (render and paste)</td><td><span data-claim="sam3d-t4-mid">0.1705</span></td></tr>
+    <tr><td>+ fine-tuning on engine data</td><td><span data-claim="sam3d-t4-sft-mitl">0.2027</span></td></tr>
+    <tr><td>+ preference training on engine data</td><td><span data-claim="sam3d-t4-dpo-mitl">0.2156</span></td></tr>
+    <tr><td>+ fine-tuning on artist meshes</td><td><span data-claim="sam3d-t4-sft-art">0.2331</span></td></tr>
+    <tr><td>+ preference training on artist meshes</td><td><span data-claim="sam3d-t4-dpo-art">0.2344</span></td></tr>
+  </tbody>
+</table>
+<p class="note">SAM 3D v2, Table 4. The best earlier method on the same benchmark, Hi3DGen, scores <span data-claim="sam3d-t2-hi3dgen-f1">0.1629</span> (Table 2). In human preference tests, people preferred SAM 3D's objects at least <span data-claim="sam3d-winrate-5to1">5:1</span> and its scenes <span data-claim="sam3d-winrate-scene-6to1">6:1</span> over prior methods; the paper prints no per-benchmark percentages.</p>
+<p><b>Limits</b> (App. F): the <span data-claim="sam3d-shape-res">64^3</span> grid distorts thin structures; objects are predicted one at a time, with no reasoning about contact or stability; and texture is predicted without knowing the pose, so symmetric objects can get a rotated texture. Mask errors from the segmenter carry through, though the paper reports fair robustness to over- and under-segmentation.</p>
+</section>

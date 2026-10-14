@@ -1,0 +1,497 @@
+[
+ {
+  "id": "clip-dataset-size",
+  "claim": "WIT training set size",
+  "value": "400 million (image, text) pairs",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-queries",
+  "claim": "Number of search queries used to build WIT",
+  "value": "500,000",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-per-query-cap",
+  "claim": "Max pairs per query (approx class balance)",
+  "value": "up to 20,000 (image, text) pairs per query",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-batch-size",
+  "claim": "Pre-training minibatch size",
+  "value": "32,768",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-temp-init",
+  "claim": "Learnable temperature init",
+  "value": "equivalent of 0.07",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-temp-clip",
+  "claim": "Temperature clipping",
+  "value": "clipped to prevent scaling the logits by more than 100",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-temp-param",
+  "claim": "Temperature parameterisation",
+  "value": "directly optimized during training as a log-parameterized multiplicative scalar",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.3",
+  "uncertain": false
+ },
+ {
+  "id": "clip-logits-line",
+  "claim": "Pseudocode logits line",
+  "value": "logits = np.dot(I_e, T_e.T) * np.exp(t)",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Fig. 3 pseudocode",
+  "uncertain": false
+ },
+ {
+  "id": "clip-loss-line",
+  "claim": "Pseudocode loss line",
+  "value": "loss   = (loss_i + loss_t)/2",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Fig. 3 pseudocode",
+  "uncertain": false
+ },
+ {
+  "id": "clip-epochs",
+  "claim": "Training epochs",
+  "value": "32 epochs",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-zs-imagenet",
+  "claim": "Zero-shot ImageNet top-1 of best CLIP (ViT-L/14@336px, the default 'CLIP')",
+  "value": "76.2",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Table 1; Sec. 3.1.3 \"Initial Comparison to Visual N-Grams\" (3.1.2 is \"Using CLIP for Zero-Shot Transfer\")",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vngrams-imagenet",
+  "claim": "Visual N-Grams zero-shot ImageNet",
+  "value": "11.5",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Table 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-zs-top5",
+  "claim": "Zero-shot ImageNet top-5",
+  "value": "95% top-5 accuracy, matching Inception-V4",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.3 (\"95% top-5 accuracy, matching Inception-V4\")",
+  "uncertain": false
+ },
+ {
+  "id": "clip-matches-rn50",
+  "claim": "Zero-shot CLIP vs original ResNet-50 on ImageNet",
+  "value": "matches the performance of the original ResNet-50 despite using none of the 1.28 million crowd-labeled training examples",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.3; abstract",
+  "uncertain": false
+ },
+ {
+  "id": "clip-rn50-sup-number",
+  "claim": "Numeric supervised ResNet-50 ImageNet top-1: NOT stated in the paper text; do not display as a CLIP claim",
+  "value": "not stated",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.3 (value \"not stated\" is right; still uncertain=true)",
+  "uncertain": true
+ },
+ {
+  "id": "clip-prompt-template",
+  "claim": "Default prompt template",
+  "value": "A photo of a {label}.",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.4 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "clip-prompt-gain",
+  "claim": "ImageNet gain from the default prompt alone",
+  "value": "improves accuracy on ImageNet by 1.3%",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.4 para 3",
+  "uncertain": false
+ },
+ {
+  "id": "clip-ensemble-gain",
+  "claim": "ImageNet gain from ensembling 80 prompts over the single default prompt",
+  "value": "3.5%",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.4 para 5 (para 4 is the task-specific \"a type of pet\" paragraph)",
+  "uncertain": false
+ },
+ {
+  "id": "clip-prompt-total",
+  "claim": "Prompt engineering + ensembling total on ImageNet",
+  "value": "almost 5%",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.4 para 5",
+  "uncertain": false
+ },
+ {
+  "id": "clip-prompt-avg36",
+  "claim": "Prompt engineering + ensembling average gain across datasets",
+  "value": "almost 5 points on average across 36 datasets",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Fig. 4 caption",
+  "uncertain": false
+ },
+ {
+  "id": "clip-l14-336",
+  "claim": "ViT-L/14 higher-resolution pre-training",
+  "value": "pre-train at a higher 336 pixel resolution for one additional epoch",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-l14-res",
+  "claim": "ViT-L/14 input resolution vs ViT-L/14-336px",
+  "value": "224 vs 336",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Table 20 \"CLIP-ViT hyperparameters\" (Table 19 is CLIP-ResNet). Row: ViT-L/14 224, ViT-L/14-336px 336.",
+  "uncertain": false
+ },
+ {
+  "id": "clip-proxy-classes",
+  "claim": "Pre-training as a proxy dataset",
+  "value": "1 example per class and 32,768 total classes",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.2 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-wins-16-27",
+  "claim": "Zero-shot CLIP vs linear classifier on ResNet-50 features",
+  "value": "wins on 16 of the 27 datasets",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 3.1.5 \"Analysis of Zero-Shot CLIP Performance\"; Fig. 5 caption and text \"wins on 16 of the 27 datasets\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-linprobe-imagenet",
+  "claim": "Linear-probe CLIP ImageNet top-1",
+  "value": "85.4",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Table 'Detailed ImageNet robustness performance'",
+  "uncertain": false
+ },
+ {
+  "id": "clip-from-scratch",
+  "claim": "CLIP initialisation",
+  "value": "We train CLIP from scratch without initializing the image encoder with ImageNet weights or the text encoder with pre-trained weights",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.3 para 5",
+  "uncertain": false
+ },
+ {
+  "id": "clip-linear-proj",
+  "claim": "projection head",
+  "value": "only a linear projection to map from each encoder's representation to the multi-modal embedding space",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.3 para 5",
+  "uncertain": false
+ },
+ {
+  "id": "clip-aug",
+  "claim": "augmentation",
+  "value": "A random square crop from resized images is the only data augmentation used during training",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.3 para 5",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vit-extra-ln",
+  "claim": "ViT modification",
+  "value": "adding an additional layer normalization to the combined patch and position embeddings before the transformer",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-text-base",
+  "claim": "text encoder base size",
+  "value": "63M-parameter 12-layer 512-wide model with 8 attention heads",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-bpe-vocab",
+  "claim": "BPE vocab (prose)",
+  "value": "49,152",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vocab-table",
+  "claim": "vocabulary size (appendix table)",
+  "value": "49408",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"Common CLIP hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-ctx-len",
+  "claim": "max text length",
+  "value": "capped at 76",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-sos-eos",
+  "claim": "text bracketing",
+  "value": "[SOS] and [EOS]",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-eos-feature",
+  "claim": "text feature",
+  "value": "activations of the highest layer of the transformer at the [EOS] token are treated as the feature representation of the text which is layer normalized and then linearly projected",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-masked-attn",
+  "claim": "text attention",
+  "value": "Masked self-attention was used in the text encoder",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-lowercase",
+  "claim": "text preprocessing",
+  "value": "lower-cased byte pair encoding",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vitb32-row",
+  "claim": "ViT-B/32 row: lr / embed / res / vision L W H / text L W H",
+  "value": "5e-4 / 512 / 224 / 12 768 12 / 12 512 8",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"CLIP-ViT hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vitb16-row",
+  "claim": "ViT-B/16 row",
+  "value": "5e-4 / 512 / 224 / 12 768 12 / 12 512 8",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"CLIP-ViT hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vitl14-row",
+  "claim": "ViT-L/14 row",
+  "value": "4e-4 / 768 / 224 / 24 1024 16 / 12 768 12",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"CLIP-ViT hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vitl14-336-row",
+  "claim": "ViT-L/14-336px row",
+  "value": "2e-5 / 768 / 336 / 24 1024 16 / 12 768 12",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"CLIP-ViT hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-wd",
+  "claim": "weight decay",
+  "value": "0.2",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"Common CLIP hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-warmup",
+  "claim": "warm-up iterations",
+  "value": "2000",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"Common CLIP hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-adam-vit",
+  "claim": "Adam beta2 / eps for ViT",
+  "value": "0.98 / 10^-6",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"Common CLIP hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-max-temp",
+  "claim": "maximum temperature",
+  "value": "100.0",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"Common CLIP hyperparameters\"",
+  "uncertain": false
+ },
+ {
+  "id": "clip-optimizer",
+  "claim": "optimizer",
+  "value": "Adam optimizer with decoupled weight decay regularization applied to all weights that are not gains or biases",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-cosine",
+  "claim": "LR schedule",
+  "value": "cosine schedule",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-memory-tricks",
+  "claim": "memory tricks",
+  "value": "gradient checkpointing, half-precision Adam statistics, and half-precision stochastically rounded text encoder weights",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-sharded-sim",
+  "claim": "sharded similarity",
+  "value": "individual GPUs computing only the subset of the pairwise similarities necessary for their local batch of embeddings",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vit-compute",
+  "claim": "largest ViT training time",
+  "value": "12 days on 256 V100 GPUs",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-mixed-precision",
+  "claim": "precision",
+  "value": "Mixed-precision",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.5 para 1",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vitl14-lr",
+  "claim": "ViT-L/14 learning rate",
+  "value": "4 x 10^-4",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"CLIP-ViT hyperparameters\" (written $4 \\times 10^{-4}$)",
+  "uncertain": false
+ },
+ {
+  "id": "clip-masked-why",
+  "claim": "reason for masked attention",
+  "value": "preserve the ability to initialize with a pre-trained language model or add language modeling as an auxiliary objective",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 2",
+  "uncertain": false
+ },
+ {
+  "id": "clip-l336-lr",
+  "claim": "ViT-L/14-336px learning rate",
+  "value": "2 x 10^-5",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "App. \"Model Hyperparameters\", table \"CLIP-ViT hyperparameters\" (written $2 \\times 10^{-5}$)",
+  "uncertain": false
+ },
+ {
+  "id": "clip-vit-init",
+  "claim": "ViT init change",
+  "value": "use a slightly different initialization scheme",
+  "paper": "CLIP",
+  "version": "v1",
+  "loc": "Sec. 2.4 para 1",
+  "uncertain": false
+ }
+]

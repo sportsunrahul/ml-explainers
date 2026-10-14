@@ -1,0 +1,173 @@
+[
+ {
+  "id": "ldm-objective",
+  "claim": "LDM objective is the standard noise-prediction loss applied to noised latents z_t of E(x): L_LDM = E ||eps - eps_theta(z_t, t)||^2",
+  "value": "Eq. 2",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Eq. 2, Sec 3.2",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-cross-attention",
+  "claim": "Conditioning via cross-attention: Q = W_Q varphi_i(z_t), K = W_K tau_theta(y), V = W_V tau_theta(y), Attention = softmax(QK^T / sqrt(d)) V",
+  "value": "unnumbered equation",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 3.3, unnumbered equation",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-autoencoder-losses",
+  "claim": "Stage-1 autoencoder trained with a perceptual loss plus a patch-based adversarial objective, regularized by either a small KL penalty (~1e-6 weight) or a vector-quantization layer",
+  "value": "LPIPS + patch GAN; KL-reg or VQ-reg",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 3.1; App. G, Eq. 25",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-f-values",
+  "claim": "Downsampling factors studied (LDM-1 = pixel-space DM)",
+  "value": "f in {1, 2, 4, 8, 16, 32}",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.1",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-f-sweet-spot",
+  "claim": "LDM-{1,2} train slowly, overly large f (LDM-32) stagnates; LDM-{4-16} strike a good balance; LDM-4 and LDM-8 offer the best conditions overall",
+  "value": "f = 4-16 (best 4 and 8)",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.1; Figures 6 and 7",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-fid-gap-38",
+  "claim": "FID gap between pixel-based LDM-1 and LDM-8 after 2M training steps on class-conditional ImageNet, same compute budget on one A100",
+  "value": "38",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.1; Figure 6",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-z-shapes",
+  "claim": "Latent shape for 256x256 inputs by downsampling factor f = 1/2/4/8/16/32",
+  "value": "256x256x3 / 128x128x2 / 64x64x3 / 32x32x4 / 16x16x8 / 8x8x32 (printed as 88x8x32)",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 13, row z-shape",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-no-512-64x64x4",
+  "claim": "A 64x64x4 latent for 512x512 images (Stable Diffusion config) is not stated in this paper; text-to-image model uses f=8, z 32x32x4 at 256x256",
+  "value": "not stated; 32x32x4 at 256",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 15, Text-to-Image column",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-recon-rfid-by-f",
+  "claim": "Autoencoder reconstruction R-FID on ImageNet-Val for VQ-reg first stages f=2/4/8/16/32 (|Z| = 2048/8192/16384/16384/16384)",
+  "value": "0.16 / 0.58 / 1.14 / 5.15 / 31.83",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 8",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-in256-cfg",
+  "claim": "Class-conditional ImageNet 256: LDM-4-G (CFG s=1.5) vs ADM-G: FID / IS / params",
+  "value": "3.60 / 247.67 / 400M vs 4.59 / 186.7 / 608M",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 3, rows LDM-4-G and ADM-G",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-in256-unguided",
+  "claim": "Class-conditional ImageNet 256 without guidance: LDM-4 vs ADM FID",
+  "value": "10.56 vs 10.94",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 3, rows LDM-4 and ADM",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-compute-v100days",
+  "claim": "Training compute in V100-days: LDM-4 (ImageNet) vs ADM vs ADM-G (incl. classifier); LDM-8",
+  "value": "271 vs 916 vs 962; LDM-8 79",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18, ImageNet 256 block",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-throughput",
+  "claim": "Sampling throughput (samples/sec on one A100): LDM-4-G vs ADM-G (250 steps)",
+  "value": "0.4 vs 0.07",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 18, ImageNet 256 block",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-adm-cost-quote",
+  "claim": "Training the most powerful pixel DMs takes 150-1000 V100 days; 50k samples take about 5 days on one A100 (citing ADM)",
+  "value": "150-1000 V100 days; ~5 A100 days per 50k samples",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 1, Democratizing High-Resolution Image Synthesis",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-txt2img-coco",
+  "claim": "Text-to-image on MS-COCO 256 (1.45B KL-reg LDM-8 on LAION-400M, 250 DDIM steps): FID / IS without and with classifier-free guidance s=1.5",
+  "value": "23.31 / 20.03 unguided; 12.63 / 30.29 guided",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 2, rows LDM-KL-8 and LDM-KL-8-G",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-txt2img-baselines",
+  "claim": "MS-COCO FID of text-to-image baselines: GLIDE (6B) and Make-A-Scene (4B)",
+  "value": "12.24 and 11.84",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 2, rows GLIDE and Make-A-Scene",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-celebahq",
+  "claim": "Unconditional CelebA-HQ 256 FID, LDM-4 with 500 DDIM steps (new state of the art at the time)",
+  "value": "5.11",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 1, CelebA-HQ block",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-inpaint-speedup",
+  "claim": "Inpainting: speed-up between pixel- and latent-based diffusion, and FID improvement factor",
+  "value": ">= 2.7x speed-up, >= 1.6x FID improvement",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Sec 4.5; Table 6",
+  "uncertain": false
+ },
+ {
+  "id": "ldm-txt2img-arch",
+  "claim": "Text-to-image LDM config: f=8, z 32x32x4, 1.45B params, 8 heads, cross-attention at 32/16/8, embedding dim 1280, batch 680, 390K iterations",
+  "value": "see claim",
+  "paper": "LDM",
+  "version": "v2",
+  "loc": "Table 15, Text-to-Image column",
+  "uncertain": false
+ }
+]

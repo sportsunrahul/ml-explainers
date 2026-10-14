@@ -1,0 +1,69 @@
+<body>
+<main>
+<header class="hero">
+  <div class="hero-stage">
+    <canvas id="hero-canvas" role="img" aria-label="An image's patches rise as blue points in a three-dimensional embedding space; a few turn yellow and drop out as the hidden targets; a green arrow from the visible points lands near where the yellow points were, and a red segment measuring the miss shrinks until the guess sits on the target."></canvas>
+    <button type="button" id="btn-hero-replay">Replay</button>
+    <span class="badge toy" style="top:.6rem;right:.75rem">Toy model</span>
+  </div>
+  <h1>JEPA, intuition first</h1>
+  <p class="hook">See part of the world, hide the rest, and guess what is missing: not in pixels, but in a space of meaning. One idea, from a 2022 position paper to hundreds of papers a year.</p>
+  <p class="papers-note">The papers read in full, each linked to the arXiv version this page was checked against:</p>
+  <ul class="papers" aria-label="Papers covered">
+    <li><a href="https://arxiv.org/abs/2306.02572v1" title="arXiv 2306.02572v1">EBM tutorial (Dawid, LeCun)</a></li>
+    <li><a href="https://arxiv.org/abs/2402.11337v1" title="arXiv 2402.11337v1">Learning by reconstruction</a></li>
+    <li><a href="https://arxiv.org/abs/2301.08243v3" title="arXiv 2301.08243v3">I-JEPA</a></li>
+    <li><a href="https://arxiv.org/abs/2211.10831v1" title="arXiv 2211.10831v1">Slow features</a></li>
+    <li><a href="https://arxiv.org/abs/2407.03475v1" title="arXiv 2407.03475v1">How JEPA avoids noisy features</a></li>
+    <li><a href="https://arxiv.org/abs/2210.07277v1" title="arXiv 2210.07277v1">Hidden uniform cluster prior</a></li>
+    <li><a href="https://arxiv.org/abs/2404.08471v1" title="arXiv 2404.08471v1">V-JEPA</a></li>
+    <li><a href="https://arxiv.org/abs/2403.00504v1" title="arXiv 2403.00504v1">Image World Models</a></li>
+    <li><a href="https://arxiv.org/abs/2506.09985v1" title="arXiv 2506.09985v1">V-JEPA 2</a></li>
+    <li><a href="https://arxiv.org/abs/2502.11831v1" title="arXiv 2502.11831v1">Intuitive physics</a></li>
+    <li><a href="https://arxiv.org/abs/2603.14482v3" title="arXiv 2603.14482v3">V-JEPA 2.1</a></li>
+    <li><a href="https://arxiv.org/abs/2511.08544v3" title="arXiv 2511.08544v3">LeJEPA</a></li>
+    <li><a href="https://arxiv.org/abs/2510.05949v1" title="arXiv 2510.05949v1">Gaussian embeddings</a></li>
+    <li><a href="https://arxiv.org/abs/2605.26379v1" title="arXiv 2605.26379v1">When does LeJEPA learn a world model?</a></li>
+    <li><a href="https://arxiv.org/abs/2411.04983v2" title="arXiv 2411.04983v2">DINO-WM</a></li>
+    <li><a href="https://arxiv.org/abs/2502.14819v4" title="arXiv 2502.14819v4">PLDM</a></li>
+    <li><a href="https://arxiv.org/abs/2412.03572v2" title="arXiv 2412.03572v2">Navigation World Models</a></li>
+    <li><a href="https://arxiv.org/abs/2603.19312v3" title="arXiv 2603.19312v3">LeWorldModel</a></li>
+    <li><a href="https://arxiv.org/abs/2610.06805v1" title="arXiv 2610.06805v1">H-JEPA</a></li>
+  </ul>
+</header>
+
+<nav class="toc" aria-label="Chapters">
+  <strong>Chapters</strong>
+  <ol>
+    <li class="act">Act I: learning without labels</li>
+    <li value="1"><a href="#ch-ssl" data-rail="Fill in a blank">Three ways to fill in a blank</a></li>
+    <li><a href="#ch-ebm" data-rail="Energy view">The energy view (LeCun, 2022)</a></li>
+    <li class="act">Act II: JEPA made real</li>
+    <li value="3"><a href="#ch-ijepa" data-rail="I-JEPA">I-JEPA: predicting the missing block</a></li>
+    <li><a href="#ch-training" data-rail="Training step">One training step, end to end</a></li>
+    <li><a href="#ch-collapse" data-rail="Collapse">Why doesn't it collapse?</a></li>
+    <li><a href="#ch-vjepa" data-rail="V-JEPA">V-JEPA: adding time</a></li>
+    <li><a href="#ch-iwm" data-rail="World model">The predictor is a world model (IWM)</a></li>
+    <li><a href="#ch-vjepa2" data-rail="V-JEPA 2">V-JEPA 2: scale, then act</a></li>
+    <li><a href="#ch-vjepa21" data-rail="V-JEPA 2.1">V-JEPA 2.1: dense features</a></li>
+    <li class="act">Act III: cleaning up the recipe</li>
+    <li value="10"><a href="#ch-lejepa" data-rail="LeJEPA">LeJEPA: one regulariser instead of the heuristics</a></li>
+    <li class="act">Act IV: world models you can plan in</li>
+    <li value="11"><a href="#ch-planning" data-rail="Planning">Planning in latent space</a></li>
+    <li><a href="#ch-lewm" data-rail="LeWM, H-JEPA">End to end from pixels, and up the hierarchy</a></li>
+    <li class="act">Act V: the field</li>
+    <li value="13"><a href="#ch-family" data-rail="Family">One idea, every modality</a></li>
+    <li><a href="#ch-map" data-rail="2026 map">The 2026 explosion</a></li>
+  </ol>
+  <ul class="toc-more"><li><a href="#ch-timeline">Timeline</a></li><li><a href="#ch-summary">Summary</a></li><li><a href="#ch-deeper">Where to go deeper</a></li></ul>
+</nav>
+
+<p>Every model on this page plays the same game. It gets to <b class="c-blue">see part of something</b>, it must <b class="c-yellow">guess the hidden part</b>, and it makes that guess with a <b class="c-green">predictor</b> that works in a space of meaning rather than in pixels. The <b class="c-red">miss</b> is what it learns from. One color key holds for the whole page:</p>
+<div class="key" aria-label="Color key">
+  <span class="c-blue">context: what the model sees</span>
+  <span class="c-yellow">target: what it must predict</span>
+  <span class="c-green">the predictor and its guess</span>
+  <span class="c-red">loss, energy, gradient</span>
+  <span class="c-brown">frozen or discarded: the target encoder, pixels thrown away</span>
+</div>
+<p class="note">Each interactive carries a badge. <b>Computed</b> means a real formula or configuration from a paper, run directly or on a small toy. <b>Toy model</b> means an illustration of the mechanism, not the paper's numbers. <b>Sourced</b> means what is drawn comes from the papers or from a dated arXiv query. The three-dimensional figures can be turned by dragging (or with the arrow keys once focused). In an equation, hover or tap a term that names part of a figure: that part lights up.</p>
